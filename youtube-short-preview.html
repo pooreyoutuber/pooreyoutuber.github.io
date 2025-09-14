@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>YouTube Short Preview</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>body{font-family:Arial;text-align:center;padding:18px} iframe{width:100%;max-width:480px;height:800px;border:0}</style>
+</head>
+<body>
+  <h2>YouTube Short Preview</h2>
+  <p>Paste a YouTube Shorts URL or video URL (example: https://youtu.be/VIDEO_ID or https://www.youtube.com/shorts/VIDEO_ID)</p>
+  <input id="u" style="width:90%;max-width:480px;padding:8px" placeholder="Paste Shorts URL here"><br><br>
+  <button onclick="show()">Preview Short</button>
+  <div id="out" style="margin-top:12px"></div>
+  <p style="margin-top:12px"><a href="index.html">← Back to Tools</a></p>
+  <script>
+    function show(){
+      const v = document.getElementById('u').value.trim();
+      if(!v){ alert('Paste a URL'); return; }
+      let id = null;
+      const m1 = v.match(/shorts\/([^\/?&]+)/);
+      const m2 = v.match(/youtu\.be\/([^\/?&]+)/);
+      const m3 = v.match(/[?&]v=([^&]+)/);
+      if(m1) id = m1[1];
+      else if(m2) id = m2[1];
+      else if(m3) id = m3[1];
+      if(!id){ alert('Could not extract video id'); return; }
+      const src = 'https://www.youtube.com/embed/' + id + '?autoplay=0&playsinline=1';
+      document.getElementById('out').innerHTML = '<iframe src="'+src+'" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+    }
+  </script>
+</body>
+</html>
