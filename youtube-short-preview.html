@@ -36,7 +36,8 @@ function addShort() {
 
     // Extract Shorts ID
     let shortId = '';
-    let match = link.match(/shorts\/([a-zA-Z0-9_-]{11})/);
+    // Match /shorts/VIDEO_ID
+    const match = link.match(/shorts\/([a-zA-Z0-9_-]{11})/);
     if (match) shortId = match[1];
     else { alert('Invalid YouTube Shorts link'); return; }
 
@@ -46,6 +47,7 @@ function addShort() {
     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
     iframe.allowFullscreen = true;
 
+    // Append to container
     const container = document.getElementById('video-container');
     container.appendChild(iframe);
 
