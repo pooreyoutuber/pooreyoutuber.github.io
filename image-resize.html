@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Image Resize</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>body{font-family:Arial;text-align:center;padding:20px} img{max-width:100%}</style>
+</head>
+<body>
+  <h2>Image Resize (client-side)</h2>
+  <input type="file" id="file" accept="image/*"><br><br>
+  Width: <input id="w" type="number" value="800" style="width:100px"> px
+  Height: <input id="h" type="number" value="600" style="width:100px"><br><br>
+  <button onclick="resize()">Resize & Download</button>
+  <p id="msg"></p>
+  <p style="margin-top:12px"><a href="index.html">← Back to Tools</a></p>
+  <script>
+    function resize(){
+      const f = document.getElementById('file').files[0];
+      if(!f){ alert('Please choose an image'); return; }
+      const img = new Image();
+      const url = URL.createObjectURL(f);
+      img.onload = ()=>{
+        const w = parseInt(document.getElementById('w').value) || img.width;
+        const h = parseInt(document.getElementById('h').value) || img.height;
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        canvas.toBlob(function(blob){
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'resized.png';
+          a.click();
+        }, 'image/png');
+      };
+      img.src = url;
+    }
+  </script>
+</body>
+</html>
