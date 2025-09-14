@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Multi Browser Viewer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{font-family:Arial;padding:18px;background:#f7f7f7}
+    .card{max-width:980px;margin:18px auto;background:#fff;padding:16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+    input,select{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:6px}
+    button{padding:10px 14px;border:none;background:#0066cc;color:#fff;border-radius:6px;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:12px}
+    iframe{width:100%;height:360px;border:1px solid #ccc;border-radius:6px}
+    .note{font-size:13px;color:#666}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Multi Browser Viewer</h2>
+    <p class="note">Enter any URL (YouTube, webpage) and open it simultaneously in multiple frames/windows for preview/testing. This does NOT increase views.</p>
+    <label>URL</label>
+    <input id="url" placeholder="https://example.com or https://youtu.be/VIDEO_ID">
+    <label>Open as</label>
+    <select id="mode">
+      <option value="iframes">Multiple iframes on page</option>
+      <option value="windows">Open multiple browser windows/tabs</option>
+    </select>
+    <label>Count</label>
+    <select id="count">
+      <option>2</option><option>3</option><option>4</option><option selected>5</option><option>10</option>
+    </select>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="openAll()">Open</button>
+      <button onclick="clearAll()" style="background:#666">Clear</button>
+    </div>
+
+    <div id="out" class="grid" style="margin-top:12px"></div>
+
+    <p style="margin-top:12px" class="note">Tip: For YouTube use embed URL like https://www.youtube.com/embed/VIDEO_ID for best results in iframes.</p>
+    <p style="margin-top:12px"><a href="index.html">← Back to Tools</a></p>
+  </div>
+
+<script>
+function isValidUrl(s){
+  try{ new URL(s); return true; }catch(e){ return false; }
+}
+
+function openAll(){
+  const url = document.getElementById('url').value.trim();
+  const mode = document.getElementById('mode').value;
+  const count = parseInt(document.getElementById('count').value,10) || 5;
+  const out = document.getElementById('out');
+  out.innerHTML='';
+  if(!url){ alert('Enter a URL'); return; }
+
+  // If not a valid URL, try to convert YouTube short/shorts/yt format to embed
+  let finalUrl = url;
+  if(!isValidUrl(url)){
+    // try simple id patterns
+    const m = url.match(/^[A-Za-z0-9_-]{10,}$/);
+    if(m) finalUrl = 'https://www.youtube.com/embed/' + url;
+    else { alert('Enter a valid URL or video id'); return; }
+  }
+
+  if(mode === 'windows'){
+    for(let i=0;i<count;i++){
+      window.open(finalUrl, '_blank');
+    }
+    alert(count + ' windows/tabs opened (check your browser popup settings).');
+    return;
+  }
+
+  // mode = iframes
+  for(let i=0;i<count;i++){
+    const div = document.createElement('div');
+    const iframe = document.createElement('iframe');
+    iframe.src = finalUrl;
+    div.appendChild(iframe);
+    out.appendChild(div);
+  }
+}
+
+function clearAll(){
+  document.getElementById('out').innerHTML = '';
+}
+</script>
+</body>
+</html>
