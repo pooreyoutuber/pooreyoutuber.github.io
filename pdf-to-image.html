@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PDF to Image (preview)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+  <style>body{font-family:Arial;text-align:center;padding:20px} canvas{max-width:100%}</style>
+</head>
+<body>
+  <h2>PDF to Image (First Page Preview)</h2>
+  <input type="file" id="file" accept="application/pdf"><br><br>
+  <canvas id="c"></canvas>
+  <p style="margin-top:12px"><a href="index.html">← Back to Tools</a></p>
+  <script>
+    const pdfjsLib = window['pdfjsLib'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.worker.min.js';
+    document.getElementById('file').addEventListener('change', function(e){
+      const f = e.target.files[0]; if(!f) return;
+      const reader = new FileReader();
+      reader.onload = function(){ 
+        const uint8 = new Uint8Array(this.result);
+        pdfjsLib.getDocument(uint8).promise.then(function(pdf){
+          pdf.getPage(1).then(function(page){
+            const viewport = page.getViewport({scale:1.5});
+            const canvas = document.getElementById('c');
+            canvas.height = viewport.height; canvas.width = viewport.width;
+            const ctx = canvas.getContext('2d');
+            const renderContext = { canvasContext: ctx, viewport: viewport };
+            page.render(renderContext);
+          });
+        });
+      };
+      reader.readAsArrayBuffer(f);
+    });
+  </script>
+</body>
+</html>
