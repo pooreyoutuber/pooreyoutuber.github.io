@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QR Code Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>body{font-family:Arial;text-align:center;padding:20px}</style>
+</head>
+<body>
+  <h2>QR Code Generator</h2>
+  <input id="text" placeholder="Enter text or URL" style="width:80%;max-width:600px;padding:8px"><br><br>
+  <button onclick="generate()">Generate QR</button>
+  <div id="qrcode" style="margin-top:12px"></div>
+  <p style="margin-top:12px"><a href="index.html">← Back to Tools</a></p>
+  <script>
+    function generate(){
+      document.getElementById('qrcode').innerHTML='';
+      var text = document.getElementById('text').value || 'https://pooreyoutuber.github.io';
+      new QRCode(document.getElementById('qrcode'), {text: text, width: 200, height:200});
+    }
+  </script>
+</body>
+</html>
