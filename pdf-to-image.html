@@ -1,38 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>PDF to Image (preview)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
-  <style>body{font-family:Arial;text-align:center;padding:20px} canvas{max-width:100%}</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to PDF Converter</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        h1 { text-align: center; color: #333; }
+        input, button { padding: 10px; margin: 10px 0; }
+        #preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        #preview img { border: 1px solid #ccc; max-width: 200px; }
+    </style>
 </head>
 <body>
-  <h2>PDF to Image (First Page Preview)</h2>
-  <input type="file" id="file" accept="application/pdf"><br><br>
-  <canvas id="c"></canvas>
-  <p style="margin-top:12px"><a href="index.html">← Back to Tools</a></p>
-  <script>
-    const pdfjsLib = window['pdfjsLib'];
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.worker.min.js';
-    document.getElementById('file').addEventListener('change', function(e){
-      const f = e.target.files[0]; if(!f) return;
-      const reader = new FileReader();
-      reader.onload = function(){ 
-        const uint8 = new Uint8Array(this.result);
-        pdfjsLib.getDocument(uint8).promise.then(function(pdf){
-          pdf.getPage(1).then(function(page){
-            const viewport = page.getViewport({scale:1.5});
-            const canvas = document.getElementById('c');
-            canvas.height = viewport.height; canvas.width = viewport.width;
-            const ctx = canvas.getContext('2d');
-            const renderContext = { canvasContext: ctx, viewport: viewport };
-            page.render(renderContext);
-          });
+    <h1>Image to PDF Converter</h1>
+    <input type="file" id="images" accept="image/*" multiple>
+    <button id="convert-btn">Convert to PDF</button>
+
+    <div id="preview"></div>
+
+    <!-- jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        const { jsPDF } = window.jspdf;
+        const imagesInput = document.getElementById('images');
+        const convertBtn = document.getElementById('convert-btn');
+        const previewDiv = document.getElementById('preview');
+
+        imagesInput.addEventListener('change', () => {
+            previewDiv.innerHTML = '';
+            const files = imagesInput.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    previewDiv.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
         });
-      };
-      reader.readAsArrayBuffer(f);
-    });
-  </script>
+
+        convertBtn.addEventListener('click', () => {
+            const files = imagesInput.files;
+            if (files.length === 0) {
+                alert('Please select at least one image!');
+                return;
+            }
+
+            const pdf = new jsPDF();
+            let processed = 0;
+
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgData = e.target.result;
+
+                    const img = new Image();
+                    img.src = imgData;
+                    img.onload = function() {
+                        const imgWidth = 190; // mm
+                        const pageHeight = 297; // A4 height in mm
+                        const imgHeight = (img.height * imgWidth) / img.width;
+
+                        if (index > 0) pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+
+                        processed++;
+                        if (processed === files.length) {
+                            pdf.save('converted.pdf');
+                        }
+                    };
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
 </body>
 </html>
+  
+      
+    
