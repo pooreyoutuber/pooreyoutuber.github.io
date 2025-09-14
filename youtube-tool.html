@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Multi-Video Viewer</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+h1 { text-align: center; color: #333; }
+input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 400px; display: block; margin-left: auto; margin-right: auto; }
+#video-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+iframe { border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<h1>YouTube Multi-Video Viewer (Max 20)</h1>
+<input type="text" id="yt-link" placeholder="Paste YouTube video link here">
+<button onclick="addVideo()">Add Video</button>
+
+<div id="video-container"></div>
+
+<script>
+let videoCount = 0;
+const MAX_VIDEOS = 20;
+
+function addVideo() {
+    const linkInput = document.getElementById('yt-link');
+    const link = linkInput.value.trim();
+    if (!link) { alert('Please enter a YouTube link'); return; }
+
+    if (videoCount >= MAX_VIDEOS) {
+        alert(`Maximum ${MAX_VIDEOS} videos allowed per page.`);
+        return;
+    }
+
+    // Extract Video ID
+    let videoId = '';
+    let match = link.match(/v=([a-zA-Z0-9_-]{11})/);
+    if (match) videoId = match[1];
+    else {
+        match = link.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+        if (match) videoId = match[1];
+        else { alert('Invalid YouTube link'); return; }
+    }
+
+    // Create iframe
+    const iframe = document.createElement('iframe');
+    iframe.width = "360";
+    iframe.height = "215";
+    iframe.src = `https://www.youtube.com/embed/${videoId}`;
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+
+    const container = document.getElementById('video-container');
+    container.appendChild(iframe);
+
+    videoCount++;
+    linkInput.value = '';
+}
+</script>
+
+</body>
+</html>
