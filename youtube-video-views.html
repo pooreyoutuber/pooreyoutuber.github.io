@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Multi Views</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+    input { width: 60%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+    button { padding: 10px 20px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #1e7e34; }
+  </style>
+</head>
+<body>
+  <h2>YouTube Multi Viewer</h2>
+  <input type="text" id="videoURL" placeholder="Enter YouTube Video URL"><br>
+  <input type="number" id="count" placeholder="How many times to open?" min="1" max="20"><br>
+  <button onclick="openMulti()">Open</button>
+
+  <script>
+    function openMulti() {
+      const url = document.getElementById("videoURL").value;
+      const count = parseInt(document.getElementById("count").value);
+      if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
+        alert("Please enter a valid YouTube URL!");
+        return;
+      }
+      if (!count || count < 1) {
+        alert("Please enter how many times to open!");
+        return;
+      }
+      for (let i = 0; i < count; i++) {
+        window.open(url, "_blank");
+      }
+    }
+  </script>
+</body>
+</html>
