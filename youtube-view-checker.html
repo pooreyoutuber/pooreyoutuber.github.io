@@ -1,75 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Multi Browser Video Viewer</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-    input, button { padding: 10px; margin: 8px 5px; border-radius: 6px; border: 1px solid #ccc; }
-    button { background: green; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: darkgreen; }
-    .video-container { 
-      display: flex; 
-      flex-wrap: wrap; 
-      justify-content: center; 
-      margin-top: 20px; 
-      gap: 10px;
-    }
-    iframe {
-      width: 300px;
-      height: 180px;
-      border: none;
-      border-radius: 6px;
-    }
-  </style>
+  <title>YouTube View Checker</title>
 </head>
 <body>
-  <h2>Multi Browser Video Viewer</h2>
-
-  <input type="text" id="videoURL" placeholder="Paste YouTube link here" style="width:70%"><br>
-  <input type="number" id="count" placeholder="Enter number of views" min="1" max="50" value="4"><br>
-  <button onclick="showVideos()">Play</button>
-
-  <div class="video-container" id="videoContainer"></div>
+  <h1>YouTube View Checker</h1>
+  <input type="text" id="videoId" placeholder="Enter YouTube Video ID">
+  <button onclick="getViews()">Check Views</button>
+  <p id="result"></p>
 
   <script>
-    function extractVideoId(url) {
-      url = url.trim();
+    // 🔹 Aapko Google Cloud Console se YouTube Data API v3 ka API key lena hoga
+    const API_KEY = 'YOUR_API_KEY_HERE';
 
-      // shorts link
-      let match = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
-      if (match) return match[1];
-
-      // normal watch link
-      match = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
-      if (match) return match[1];
-
-      // youtu.be short link
-      match = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
-      if (match) return match[1];
-
-      // sirf video ID
-      if (/^[0-9A-Za-z_-]{11}$/.test(url)) return url;
-
-      return null;
-    }
-
-    function showVideos() {
-      const raw = document.getElementById("videoURL").value;
-      const count = parseInt(document.getElementById("count").value);
-      const container = document.getElementById("videoContainer");
-      container.innerHTML = "";
-
-      const videoId = extractVideoId(raw);
+    async function getViews() {
+      const videoId = document.getElementById('videoId').value.trim();
       if (!videoId) {
-        alert("❌ Invalid YouTube URL or ID");
+        document.getElementById('result').innerText = 'Please enter a video ID.';
         return;
       }
+      const url = `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${API_KEY}`;
 
-      for (let i = 0; i < count; i++) {
-        const iframe = document.createElement("iframe");
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
-        container.appendChild(iframe);
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.items.length === 0) {
+          document.getElementById('result').innerText = 'Video not found.';
+          return;
+        }
+        const views = data.items[0].statistics.viewCount;
+        document.getElementById('result').innerText = `View count: ${views}`;
+      } catch (err) {
+        document.getElementById('result').innerText = 'Error fetching data.';
+        console.error(err);
       }
     }
   </script>
