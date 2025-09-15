@@ -1,77 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>YouTube Shorts Multi-Opener</title>
+  <meta charset="UTF-8">
+  <title>YouTube Shorts Multi-Open</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
     input, button { padding: 10px; margin: 8px 5px; border-radius: 6px; border: 1px solid #ccc; }
-    button { background: #007bff; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    small { color: #666; display:block; margin-top:8px; }
+    button { background: #ff0000; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #cc0000; }
   </style>
 </head>
 <body>
-  <h2>YouTube Shorts — Open Multiple Tabs</h2>
+  <h2>YouTube Shorts Multi-Open</h2>
 
-  <input type="text" id="shortURL" placeholder="Paste YouTube Shorts URL (example: https://youtube.com/shorts/VIDEOID)" style="width:70%"><br>
-  <input type="number" id="count" placeholder="How many tabs?" min="1" max="30" style="width:200px">
-  <input type="number" id="delay" placeholder="Delay ms between opens (optional)" min="0" max="5000" style="width:200px"><br>
-  <button onclick="openShortsMultiple()">Open Shorts Multiple Times</button>
-  <small>Tip: If tabs don't open, allow popups for this page. Keep count moderate to avoid browser blocking.</small>
+  <input type="text" id="shortURL" placeholder="Paste YouTube Shorts or Video link" style="width:70%"><br>
+  <input type="number" id="count" placeholder="How many tabs?" min="1" max="50" value="5"><br>
+  <input type="number" id="delay" placeholder="Delay (ms)" min="0" max="2000" value="200"><br>
+  <button onclick="openShortsMultiple()">Open Multiple Tabs</button>
 
   <script>
-    function normalizeShortsURL(url) {
-      // Try to extract VIDEO ID from several possible formats
-      // formats: https://youtube.com/shorts/VIDEOID, https://www.youtube.com/watch?v=VIDEOID, https://youtu.be/VIDEOID
-      try {
-        url = url.trim();
-        if (!url) return null;
+    function extractVideoId(url) {
+      url = url.trim();
 
-        // If it's already a shorts URL with id, return as shorts URL
-        const shortsMatch = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
-        if (shortsMatch) return 'https://www.youtube.com/shorts/' + shortsMatch[1];
+      // shorts format
+      const shortsMatch = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
+      if (shortsMatch) return shortsMatch[1];
 
-        const vMatch = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
-        if (vMatch) return 'https://www.youtube.com/shorts/' + vMatch[1];
+      // normal YouTube watch?v=
+      const vMatch = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
+      if (vMatch) return vMatch[1];
 
-        const youtuBeMatch = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
-        if (youtuBeMatch) return 'https://www.youtube.com/shorts/' + youtuBeMatch[1];
+      // youtu.be short link
+      const youtuMatch = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
+      if (youtuMatch) return youtuMatch[1];
 
-        // If user pasted a plain ID
-        if (/^[0-9A-Za-z_-]{11}$/.test(url)) return 'https://www.youtube.com/shorts/' + url;
+      // if user pasted only 11-char id
+      if (/^[0-9A-Za-z_-]{11}$/.test(url)) return url;
 
-        return null;
-      } catch (e) {
-        return null;
-      }
+      return null;
     }
 
     function openShortsMultiple() {
-      const raw = document.getElementById('shortURL').value;
-      const count = parseInt(document.getElementById('count').value, 10);
-      const delay = parseInt(document.getElementById('delay').value, 10) || 150; // default small delay
+      const raw = document.getElementById("shortURL").value;
+      const count = parseInt(document.getElementById("count").value);
+      const delay = parseInt(document.getElementById("delay").value) || 150;
 
-      const base = normalizeShortsURL(raw);
-      if (!base) {
-        alert('Please enter a valid YouTube Shorts URL or 11-character video ID.');
+      const videoId = extractVideoId(raw);
+      if (!videoId) {
+        alert("Please enter a valid YouTube Shorts/Video URL or ID.");
         return;
       }
-      if (!count || count < 1) {
-        alert('Enter a valid number of tabs to open (1 - 30).');
-        return;
-      }
-      if (count > 30) {
-        if (!confirm('You asked to open more than 30 tabs. This may be blocked by the browser. Continue?')) return;
-      }
+
+      const base = `https://www.youtube.com/shorts/${videoId}`;
 
       for (let i = 0; i < count; i++) {
-        // spacing out opens with setTimeout reduces popup blocking
         setTimeout(() => {
-          // append small unique param so URL looks different to browser/server
-          const uniq = Date.now().toString(36) + Math.floor(Math.random() * 1000);
-          const url = base + (base.includes('?') ? '&' : '?') + 'r=' + uniq + '&i=' + i;
-          window.open(url, '_blank');
+          const uniq = Date.now().toString(36) + i;
+          const url = base + `?view=${uniq}`;
+          window.open(url, "_blank");
         }, i * delay);
       }
     }
