@@ -36,19 +36,19 @@
     function extractVideoId(url) {
       url = url.trim();
 
-      // shorts link
+      // Shorts format
       let match = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
       if (match) return match[1];
 
-      // watch?v= format
+      // Normal YouTube link ?v=VIDEO_ID
       match = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
       if (match) return match[1];
 
-      // youtu.be link
+      // youtu.be/VIDEO_ID
       match = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
       if (match) return match[1];
 
-      // direct ID
+      // If user directly enters video ID
       if (/^[0-9A-Za-z_-]{11}$/.test(url)) return url;
 
       return null;
