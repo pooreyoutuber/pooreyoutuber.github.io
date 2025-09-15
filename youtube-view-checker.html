@@ -2,40 +2,69 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>YouTube View Checker</title>
+  <title>YouTube Video Checker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {font-family: Arial, sans-serif; margin: 20px;}
+    input, button {padding: 8px; margin: 5px;}
+    .stats {margin-top: 20px;}
+    canvas {max-width: 400px;}
+  </style>
 </head>
 <body>
-  <h1>YouTube View Checker</h1>
-  <input type="text" id="videoId" placeholder="Enter YouTube Video ID">
-  <button onclick="getViews()">Check Views</button>
-  <p id="result"></p>
+  <h2>YouTube Video Checker</h2>
+  <input type="text" id="videoUrl" placeholder="Enter YouTube Video URL">
+  <button onclick="checkVideo()">Check</button>
 
-  <script>
-    // 🔹 Aapko Google Cloud Console se YouTube Data API v3 ka API key lena hoga
-    const API_KEY = 'YOUR_API_KEY_HERE';
+  <div class="stats" id="stats"></div>
+  <canvas id="myChart"></canvas>
 
-    async function getViews() {
-      const videoId = document.getElementById('videoId').value.trim();
-      if (!videoId) {
-        document.getElementById('result').innerText = 'Please enter a video ID.';
-        return;
-      }
-      const url = `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${API_KEY}`;
+<script>
+const API_KEY = "YOUR_API_KEY"; // ← yahan apni API key daalein
 
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.items.length === 0) {
-          document.getElementById('result').innerText = 'Video not found.';
-          return;
-        }
-        const views = data.items[0].statistics.viewCount;
-        document.getElementById('result').innerText = `View count: ${views}`;
-      } catch (err) {
-        document.getElementById('result').innerText = 'Error fetching data.';
-        console.error(err);
-      }
+function extractVideoId(url){
+  const regex = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&\n?#]+)/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
+
+async function checkVideo(){
+  const url = document.getElementById('videoUrl').value;
+  const videoId = extractVideoId(url);
+  if(!videoId){alert("Invalid URL"); return;}
+
+  const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoId}&key=${API_KEY}`;
+  const res = await fetch(apiUrl);
+  const data = await res.json();
+  if(!data.items.length){alert("No data found"); return;}
+  const stats = data.items[0].statistics;
+  const snippet = data.items[0].snippet;
+
+  const views = parseInt(stats.viewCount);
+  const likes = parseInt(stats.likeCount || 0);
+  const comments = parseInt(stats.commentCount || 0);
+
+  document.getElementById('stats').innerHTML = `
+    <h3>${snippet.title}</h3>
+    <p><b>Views:</b> ${views.toLocaleString()}</p>
+    <p><b>Likes:</b> ${likes.toLocaleString()}</p>
+    <p><b>Comments:</b> ${comments.toLocaleString()}</p>
+  `;
+
+  // Graph
+  const ctx = document.getElementById('myChart');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Views','Likes','Comments'],
+      datasets: [{
+        label: 'Counts',
+        data: [views, likes, comments],
+        backgroundColor: ['#36A2EB','#4BC0C0','#9966FF']
+      }]
     }
-  </script>
+  });
+}
+</script>
 </body>
 </html>
