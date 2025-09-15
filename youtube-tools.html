@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Tools - Title to Description Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+    input { width: 70%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+    button { padding: 10px 20px; background: #ff0000; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #cc0000; }
+    ul { text-align: left; width: 80%; margin: 20px auto; padding: 0; list-style: decimal; }
+    li { background: #f9f9f9; margin: 8px 0; padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h2>YouTube Description Generator</h2>
+  <input type="text" id="videoTitle" placeholder="Enter YouTube video title here"><br>
+  <button onclick="generateDescriptions()">Generate 10 Descriptions</button>
+  
+  <ul id="descriptionList"></ul>
+
+  <script>
+    function generateDescriptions() {
+      const title = document.getElementById("videoTitle").value.trim();
+      const list = document.getElementById("descriptionList");
+      list.innerHTML = "";
+
+      if (!title) {
+        alert("Please enter a video title first!");
+        return;
+      }
+
+      // Some patterns for description generation
+      const templates = [
+        `🔥 ${title} | Full guide with tips & tricks. Don't miss it!`,
+        `📌 Watch ${title} till the end – best info inside.`,
+        `💡 In this video: ${title}. Perfect for beginners.`,
+        `✅ ${title} explained step by step. Easy & clear.`,
+        `🚀 Learn everything about ${title} in just a few minutes.`,
+        `📖 Complete tutorial: ${title} with examples.`,
+        `🎯 ${title} – secrets revealed! Must watch.`,
+        `⚡ Fast & simple guide: ${title}.`,
+        `💎 ${title} | Pro tips you need to know.`,
+        `🌟 Discover ${title} and boost your knowledge today!`
+      ];
+
+      for (let i = 0; i < 10; i++) {
+        const li = document.createElement("li");
+        li.textContent = templates[i].replace("${title}", title);
+        list.appendChild(li);
+      }
+    }
+  </script>
+</body>
+</html>
