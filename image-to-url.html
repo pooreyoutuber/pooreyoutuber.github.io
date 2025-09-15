@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image to URL Converter</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+    input { margin: 10px; }
+    button { padding: 10px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #0056b3; }
+    img { margin-top: 20px; max-width: 90%; border: 1px solid #ccc; padding: 5px; }
+    textarea { width: 80%; margin-top: 20px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Image to URL Converter</h2>
+  <input type="file" id="upload" accept="image/*"><br>
+  <button onclick="convertToURL()">Convert</button>
+  <div>
+    <img id="preview" src="">
+    <textarea id="urlBox" readonly placeholder="Image URL will appear here..."></textarea>
+  </div>
+
+  <script>
+    function convertToURL() {
+      const file = document.getElementById("upload").files[0];
+      if (!file) {
+        alert("Please upload an image first!");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageURL = e.target.result;
+        document.getElementById("preview").src = imageURL;
+        document.getElementById("urlBox").value = imageURL;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
