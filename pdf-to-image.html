@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF to Image Converter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+    input { margin: 10px; }
+    button { padding: 10px 20px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #1e7e34; }
+    canvas { margin-top: 20px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>PDF to Image Converter</h2>
+  <input type="file" id="upload" accept="application/pdf"><br>
+  <button onclick="convertPDF()">Convert</button>
+  <div>
+    <canvas id="pdf-canvas"></canvas>
+  </div>
+
+  <script>
+    function convertPDF() {
+      const file = document.getElementById("upload").files[0];
+      if (!file) {
+        alert("Please upload a PDF file!");
+        return;
+      }
+
+      const fileReader = new FileReader();
+      fileReader.onload = function() {
+        const typedarray = new Uint8Array(this.result);
+
+        pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+          pdf.getPage(1).then(function(page) {
+            const scale = 1.5;
+            const viewport = page.getViewport({ scale: scale });
+            const canvas = document.getElementById("pdf-canvas");
+            const context = canvas.getContext("2d");
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            page.render({
+              canvasContext: context,
+              viewport: viewport
+            });
+          });
+        });
+      };
+      fileReader.readAsArrayBuffer(file);
+    }
+  </script>
+</body>
+</html>
