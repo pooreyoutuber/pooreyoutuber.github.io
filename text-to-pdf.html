@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Text to PDF</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+    textarea { width: 80%; height: 200px; margin: 20px 0; }
+    button { padding: 10px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h2>Text to PDF Converter</h2>
+  <textarea id="textInput" placeholder="Enter your text here..."></textarea><br>
+  <button onclick="downloadPDF()">Download PDF</button>
+
+  <script>
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const text = document.getElementById("textInput").value;
+      doc.text(text, 10, 10);
+      doc.save("document.pdf");
+    }
+  </script>
+</body>
+</html>
