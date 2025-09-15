@@ -36,19 +36,19 @@
     function extractVideoId(url) {
       url = url.trim();
 
-      // Shorts format
+      // Shorts link format
       let match = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
       if (match) return match[1];
 
-      // Normal YouTube link ?v=VIDEO_ID
+      // Normal YouTube watch link
       match = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
       if (match) return match[1];
 
-      // youtu.be/VIDEO_ID
+      // youtu.be short link
       match = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
       if (match) return match[1];
 
-      // If user directly enters video ID
+      // Agar sirf video ID diya ho
       if (/^[0-9A-Za-z_-]{11}$/.test(url)) return url;
 
       return null;
@@ -66,9 +66,12 @@
         return;
       }
 
+      // Embed link banayenge
+      const embedURL = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+
       for (let i = 0; i < count; i++) {
         const iframe = document.createElement("iframe");
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        iframe.src = embedURL;
         container.appendChild(iframe);
       }
     }
