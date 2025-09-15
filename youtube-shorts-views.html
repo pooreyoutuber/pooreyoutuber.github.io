@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>YouTube Shorts Multi-Open</title>
+  <title>YouTube Shorts Multi Viewer</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
     input, button { padding: 10px; margin: 8px 5px; border-radius: 6px; border: 1px solid #ccc; }
@@ -11,9 +11,9 @@
   </style>
 </head>
 <body>
-  <h2>YouTube Shorts Multi-Open</h2>
+  <h2>YouTube Shorts Multi Viewer</h2>
 
-  <input type="text" id="shortURL" placeholder="Paste YouTube Shorts or Video link" style="width:70%"><br>
+  <input type="text" id="shortURL" placeholder="Paste Shorts/Video link or ID" style="width:70%"><br>
   <input type="number" id="count" placeholder="How many tabs?" min="1" max="50" value="5"><br>
   <input type="number" id="delay" placeholder="Delay (ms)" min="0" max="2000" value="200"><br>
   <button onclick="openShortsMultiple()">Open Multiple Tabs</button>
@@ -23,18 +23,18 @@
       url = url.trim();
 
       // shorts format
-      const shortsMatch = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
-      if (shortsMatch) return shortsMatch[1];
+      let match = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
+      if (match) return match[1];
 
-      // normal YouTube watch?v=
-      const vMatch = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
-      if (vMatch) return vMatch[1];
+      // watch?v= format
+      match = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
+      if (match) return match[1];
 
       // youtu.be short link
-      const youtuMatch = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
-      if (youtuMatch) return youtuMatch[1];
+      match = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
+      if (match) return match[1];
 
-      // if user pasted only 11-char id
+      // agar sirf 11 character ka videoId diya ho
       if (/^[0-9A-Za-z_-]{11}$/.test(url)) return url;
 
       return null;
@@ -43,21 +43,21 @@
     function openShortsMultiple() {
       const raw = document.getElementById("shortURL").value;
       const count = parseInt(document.getElementById("count").value);
-      const delay = parseInt(document.getElementById("delay").value) || 150;
+      const delay = parseInt(document.getElementById("delay").value) || 200;
 
       const videoId = extractVideoId(raw);
       if (!videoId) {
-        alert("Please enter a valid YouTube Shorts/Video URL or ID.");
+        alert("❌ Invalid link or video ID");
         return;
       }
 
-      const base = `https://www.youtube.com/shorts/${videoId}`;
+      // hamesha valid YouTube shorts link banao
+      const baseUrl = `https://www.youtube.com/shorts/${videoId}`;
 
       for (let i = 0; i < count; i++) {
         setTimeout(() => {
-          const uniq = Date.now().toString(36) + i;
-          const url = base + `?view=${uniq}`;
-          window.open(url, "_blank");
+          const tabName = "ytShort_" + i; // ek hi browser me tabs banenge
+          window.open(baseUrl, tabName);
         }, i * delay);
       }
     }
