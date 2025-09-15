@@ -73,6 +73,34 @@ async function checkVideo(){
     alert("Error fetching data. Check console.");
   }
 }
+  
+<script>
+const API_KEY = "YAHAN_APNI_KEY"; 
+
+function extractVideoId(url){
+  const regex = /(?:youtube\.com\/(?:.*v=|shorts\/)|youtu\.be\/)([^&\n?#]+)/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
+
+async function checkVideo(){
+  const url = document.getElementById('videoUrl').value.trim();
+  const videoId = extractVideoId(url);
+  if(!videoId){alert("Invalid or unsupported URL"); return;}
+
+  try {
+    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoId}&key=${API_KEY}`;
+    console.log("Fetching:", apiUrl);
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    console.log("Response:", data);
+    if(!data.items || !data.items.length){alert("No data found"); return;}
+    // ...rest of code
+  } catch (err) {
+    console.error("Fetch error:", err);
+    alert("Error fetching data. See console.");
+  }
+
 </script>
 </body>
 </html>
