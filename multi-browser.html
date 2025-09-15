@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Multi Browser Opener</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; max-width:900px; margin:30px auto; padding:20px; }
+    h2 { text-align:center; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:12px; }
+    input[type="text"], input[type="number"] { padding:10px; border:1px solid #ccc; border-radius:6px; width:320px; }
+    button { padding:10px 18px; border-radius:6px; border:none; background:#007bff; color:white; cursor:pointer; }
+    button:hover { background:#0056b3; }
+    label { display:block; text-align:center; margin-bottom:6px; color:#444; }
+    small { display:block; text-align:center; color:#666; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <h2>Multi Browser / Multi Tab Opener</h2>
+
+  <div class="row">
+    <input type="text" id="urlInput" placeholder="Paste any URL here (https://...)" />
+  </div>
+
+  <div class="row">
+    <input type="number" id="countInput" placeholder="How many times? (max 50)" min="1" max="50" value="10" />
+    <input type="number" id="delayInput" placeholder="Delay between opens (ms)" min="0" max="5000" value="150" />
+  </div>
+
+  <div class="row">
+    <button onclick="openMulti()">Open Now</button>
+    <button onclick="openAndClose()">Open & (auto) Close After 10s</button>
+  </div>
+
+  <small>Tip: If tabs do not open, allow popups for this page. Keep count moderate to avoid slowing your system.</small>
+
+  <script>
+    function sanitizeUrl(raw) {
+      if (!raw) return null;
+      raw = raw.trim();
+      // If user entered without protocol, add https
+      if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+      try {
+        const u = new URL(raw);
+        return u.toString();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function openMulti() {
+      const raw = document.getElementById('urlInput').value;
+      const count = Math.min(50, Math.max(1, parseInt(document.getElementById('countInput').value || 0)));
+      const delay = Math.max(0, parseInt(document.getElementById('delayInput').value || 0));
+      const base = sanitizeUrl(raw);
+      if (!base) { alert('Please enter a valid URL (with or without https).'); return; }
+
+      if (count > 30 && !confirm('You are opening ' + count + ' tabs. This may slow or block. Continue?')) return;
+
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          // append small unique query so URLs look different
+          const uniq = Date.now().toString(36) + Math.floor(Math.random() * 10000);
+          const sep = base.includes('?') ? '&' : '?';
+          const url = base + sep + 'mbr=' + uniq + '&i=' + i;
+          // Use a unique target name to force new tab/window each time
+          const target = 'mbr_win_' + uniq + '_' + i;
+          window.open(url, target);
+        }, i * delay);
+      }
+    }
+
+    // optional helper: open then close after 10s (only works if same-origin or browser allows)
+    function openAndClose() {
+      const raw = document.getElementById('urlInput').value;
+      const count = Math.min(50, Math.max(1, parseInt(document.getElementById('countInput').value || 0)));
+      const delay = Math.max(0, parseInt(document.getElementById('delayInput').value || 0));
+      const base = sanitizeUrl(raw);
+      if (!base) { alert('Please enter a valid URL (with or without https).'); return; }
+
+      if (count > 30 && !confirm('You are opening ' + count + ' tabs. This may slow or block. Continue?')) return;
+
+      const opened = [];
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const uniq = Date.now().toString(36) + Math.floor(Math.random() * 10000);
+          const sep = base.includes('?') ? '&' : '?';
+          const url = base + sep + 'mbr=' + uniq + '&i=' + i;
+          const target = 'mbr_win_' + uniq + '_' + i;
+          const w = window.open(url, target);
+          opened.push(w);
+        }, i * delay);
+      }
+
+      // try to close after 10 seconds (may be blocked by browser for cross-origin)
+      setTimeout(() => {
+        for (const w of opened) {
+          try { if (w && !w.closed) w.close(); } catch (e) { /* ignore */ }
+        }
+      }, 10000 + (count * delay));
+    }
+  </script>
+</body>
+</html>
