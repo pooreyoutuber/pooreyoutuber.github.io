@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>YouTube Shorts Viewer</title>
+  <style>
+    :root { --bg:#f7f7f8; --card:#fff; --accent:#ff0000; --muted:#666; }
+    body {
+      margin:0; font-family:Inter, system-ui, Arial, sans-serif;
+      background:var(--bg); color:#111; display:flex; align-items:center; justify-content:center;
+      min-height:100vh; padding:20px;
+    }
+    .wrap {
+      width:100%; max-width:820px; background:var(--card); border-radius:12px; box-shadow:0 6px 22px rgba(0,0,0,0.08);
+      padding:20px;
+    }
+    h1 { margin:0 0 8px; font-size:20px; }
+    p { margin:0 0 14px; color:var(--muted); }
+    .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    input[type="text"] {
+      flex:1; min-width:200px; padding:10px 12px; border:1px solid #ddd; border-radius:8px;
+      font-size:15px;
+    }
+    button {
+      background:var(--accent); color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer;
+      font-weight:600;
+    }
+    button.secondary { background:#444; }
+    #player {
+      margin-top:18px; display:flex; justify-content:center;
+    }
+    .iframe-wrap {
+      width:360px; height:640px; border-radius:12px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.08);
+      background:#000;
+    }
+    .iframe-wrap iframe { width:100%; height:100%; border:0; display:block; }
+    .note { margin-top:12px; font-size:13px; color:var(--muted); }
+    .error { color:#b00020; margin-top:10px; font-weight:600; }
+    @media (max-width:480px){
+      .iframe-wrap { width:320px; height:570px; }
+      input[type="text"]{ width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main">
+    <h1>YouTube Shorts Viewer</h1>
+    <p>Paste a YouTube Shorts / watch / youtu.be link below and press <strong>Open</strong>.</p>
+
+    <div class="row">
+      <input id="shortLink" type="text" placeholder="e.g. https://www.youtube.com/shorts/abc123 or https://youtu.be/abc123" aria-label="YouTube link">
+      <button id="openBtn" type="button">Open</button>
+      <button id="sampleBtn" class="secondary" type="button">Open Sample</button>
+    </div>
+
+    <div id="msg" class="error" aria-live="polite" style="display:none"></div>
+
+    <div id="player"></div>
+
+    <div class="note">
+      Note: This page <strong>only embeds</strong> the video for viewing. It does not manipulate views or use any backend.
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const input = document.getElementById('shortLink');
+      const openBtn = document.getElementById('openBtn');
+      const sampleBtn = document.getElementById('sampleBtn');
+      const player = document.getElementById('player');
+      const msg = document.getElementById('msg');
+
+      // Sample shorts (public) — will work as demo
+      const SAMPLE = 'https://www.youtube.com/shorts/3HjQv4F1nCk';
+
+      function clearMsg(){ msg.style.display='none'; msg.textContent=''; }
+      function showError(text){ msg.style.display='block'; msg.textContent = text; }
+
+      function extractVideoId(url){
+        if(!url || typeof url !== 'string') return null;
+        url = url.trim();
+
+        // If user pasted only an id
+        if (/^[a-zA-Z0-9_-]{6,}$/.test(url)) return url;
+
+        try {
+          // Normalize by creating URL object (may throw on plain text)
+          if (!/^https?:\/\//i.test(url)) {
+            // Add protocol to allow URL parsing when user omits it
+            url = 'https://' + url;
+          }
+          const u = new URL(url);
+
+          // formats:
+          // https://www.youtube.com/shorts/VIDEOID
+          // https://youtube.com/watch?v=VIDEOID
+          // https://youtu.be/VIDEOID
+          // also may contain query params and extra slashes
+
+          // 1) shorts path
+          const shortsMatch = u.pathname.match(/\/shorts\/([a-zA-Z0-9_-]{6,})/);
+          if (shortsMatch) return shortsMatch[1];
+
+          // 2) watch?v=
+          const v = u.searchParams.get('v');
+          if (v && /^[a-zA-Z0-9_-]{6,}$/.test(v)) return v;
+
+          // 3) youtu.be short link
+          const yb = u.hostname.includes('youtu.be') ? u.pathname.replace(/^\/+/,'') : null;
+          if (yb && /^[a-zA-Z0-9_-]{6,}$/.test(yb)) return yb;
+
+          // 4) fallback: last path segment if it looks like id
+          const seg = u.pathname.split('/').filter(Boolean).pop();
+          if (seg && /^[a-zA-Z0-9_-]{6,}$/.test(seg)) return seg;
+
+          return null;
+        } catch(e){
+          // If URL() parsing failed, try simple regex fallback
+          const fallbackShorts = url.match(/shorts\/([a-zA-Z0-9_-]{6,})/);
+          if (fallbackShorts) return fallbackShorts[1];
+          const fallbackWatch = url.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
+          if (fallbackWatch) return fallbackWatch[1];
+          const fallbackYb = url.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/);
+          if (fallbackYb) return fallbackYb[1];
+          return null;
+        }
+      }
+
+      function embedVideoById(id){
+        clearMsg();
+        // Clean previous
+        player.innerHTML = '';
+        if(!id){
+          showError('Invalid YouTube link or ID. Please paste a correct Shorts/watch/youtu.be link.');
+          return;
+        }
+
+        const embedUrl = 'https://www.youtube.com/embed/' + encodeURIComponent(id) + '?autoplay=0&modestbranding=1';
+
+        // create container + iframe
+        const wrap = document.createElement('div');
+        wrap.className = 'iframe-wrap';
+        const ifr = document.createElement('iframe');
+        ifr.setAttribute('src', embedUrl);
+        ifr.setAttribute('title', 'YouTube video player');
+        ifr.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        ifr.setAttribute('allowfullscreen', ''); // allowfullscreen attribute
+        wrap.appendChild(ifr);
+        player.appendChild(wrap);
+        // Scroll to player on small screens
+        setTimeout(()=> wrap.scrollIntoView({behavior:'smooth', block:'center'}), 120);
+      }
+
+      openBtn.addEventListener('click', ()=>{
+        clearMsg();
+        const url = input.value.trim();
+        const id = extractVideoId(url);
+        if(!id) {
+          showError('Invalid link. Examples that work: https://www.youtube.com/shorts/ID , https://youtu.be/ID , https://www.youtube.com/watch?v=ID');
+          return;
+        }
+        embedVideoById(id);
+      });
+
+      sampleBtn.addEventListener('click', ()=>{
+        input.value = SAMPLE;
+        const id = extractVideoId(SAMPLE);
+        embedVideoById(id);
+      });
+
+      // allow Enter key to open
+      input.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter') { e.preventDefault(); openBtn.click(); }
+      });
+
+      // If page opened directly with ?v=ID or ?url=..., auto-load
+      (function autoLoadFromQuery(){
+        try {
+          const q = new URLSearchParams(location.search);
+          const u = q.get('url') || q.get('v') || q.get('video');
+          if (u) {
+            input.value = u;
+            const id = extractVideoId(u);
+            if (id) embedVideoById(id);
+          }
+        } catch(e){}
+      })();
+
+    })();
+  </script>
+</body>
+</html>
