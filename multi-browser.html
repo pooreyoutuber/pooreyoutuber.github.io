@@ -2,39 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Multi Browser Tabs Opener</title>
+  <title>Multi Browser Video Viewer</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
     input, button { padding: 10px; margin: 8px 5px; border-radius: 6px; border: 1px solid #ccc; }
-    button { background: #28a745; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: #1e7e34; }
+    button { background: green; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: darkgreen; }
+    .video-container { 
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      margin-top: 20px; 
+      gap: 10px;
+    }
+    iframe {
+      width: 300px;
+      height: 180px;
+      border: none;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
-  <h2>Multi Browser Tabs Opener</h2>
+  <h2>Multi Browser Video Viewer</h2>
 
-  <input type="text" id="linkInput" placeholder="Enter link (open in multiple tabs)" style="width:70%"><br>
-  <input type="number" id="count" placeholder="How many tabs?" min="1" max="50" value="10"><br>
-  <input type="number" id="delay" placeholder="Delay (ms)" min="0" max="2000" value="200"><br>
-  <button onclick="openMultiple()">Open Tabs</button>
+  <input type="text" id="videoURL" placeholder="Paste YouTube link here" style="width:70%"><br>
+  <input type="number" id="count" placeholder="Enter number of views" min="1" max="50" value="4"><br>
+  <button onclick="showVideos()">Play</button>
+
+  <div class="video-container" id="videoContainer"></div>
 
   <script>
-    function openMultiple() {
-      const link = document.getElementById("linkInput").value.trim();
-      const count = parseInt(document.getElementById("count").value);
-      const delay = parseInt(document.getElementById("delay").value) || 150;
+    function extractVideoId(url) {
+      url = url.trim();
 
-      if (!link) {
-        alert("Please enter a valid link.");
+      // shorts link
+      let match = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
+      if (match) return match[1];
+
+      // normal watch link
+      match = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
+      if (match) return match[1];
+
+      // youtu.be short link
+      match = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
+      if (match) return match[1];
+
+      // sirf video ID
+      if (/^[0-9A-Za-z_-]{11}$/.test(url)) return url;
+
+      return null;
+    }
+
+    function showVideos() {
+      const raw = document.getElementById("videoURL").value;
+      const count = parseInt(document.getElementById("count").value);
+      const container = document.getElementById("videoContainer");
+      container.innerHTML = "";
+
+      const videoId = extractVideoId(raw);
+      if (!videoId) {
+        alert("❌ Invalid YouTube URL or ID");
         return;
       }
 
       for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-          // har tab ko unique naam do (browser ke andar hi open hoga)
-          const tabName = "multiTab_" + i;
-          window.open(link, tabName);
-        }, i * delay);
+        const iframe = document.createElement("iframe");
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        container.appendChild(iframe);
       }
     }
   </script>
