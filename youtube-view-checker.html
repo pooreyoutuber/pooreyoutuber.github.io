@@ -20,50 +20,58 @@
   <canvas id="myChart"></canvas>
 
 <script>
-const API_KEY = "YOUR_API_KEY"; // ← yahan apni API key daalein
+// 🔑 Yahan apni YouTube Data API v3 key daaliye:
+const API_KEY = "PASTE_YOUR_API_KEY_HERE";
 
+// Long video + shorts dono ka ID extract karne wala regex
 function extractVideoId(url){
-  const regex = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&\n?#]+)/;
+  const regex = /(?:youtube\.com\/(?:.*v=|shorts\/)|youtu\.be\/)([^&\n?#]+)/;
   const match = url.match(regex);
   return match ? match[1] : null;
 }
 
 async function checkVideo(){
-  const url = document.getElementById('videoUrl').value;
+  const url = document.getElementById('videoUrl').value.trim();
   const videoId = extractVideoId(url);
-  if(!videoId){alert("Invalid URL"); return;}
+  if(!videoId){alert("Invalid or unsupported URL"); return;}
 
-  const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoId}&key=${API_KEY}`;
-  const res = await fetch(apiUrl);
-  const data = await res.json();
-  if(!data.items.length){alert("No data found"); return;}
-  const stats = data.items[0].statistics;
-  const snippet = data.items[0].snippet;
+  try {
+    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoId}&key=${API_KEY}`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    if(!data.items.length){alert("No data found"); return;}
+    const stats = data.items[0].statistics;
+    const snippet = data.items[0].snippet;
 
-  const views = parseInt(stats.viewCount);
-  const likes = parseInt(stats.likeCount || 0);
-  const comments = parseInt(stats.commentCount || 0);
+    const views = parseInt(stats.viewCount || 0);
+    const likes = parseInt(stats.likeCount || 0);
+    const comments = parseInt(stats.commentCount || 0);
 
-  document.getElementById('stats').innerHTML = `
-    <h3>${snippet.title}</h3>
-    <p><b>Views:</b> ${views.toLocaleString()}</p>
-    <p><b>Likes:</b> ${likes.toLocaleString()}</p>
-    <p><b>Comments:</b> ${comments.toLocaleString()}</p>
-  `;
+    document.getElementById('stats').innerHTML = `
+      <h3>${snippet.title}</h3>
+      <p><b>Views:</b> ${views.toLocaleString()}</p>
+      <p><b>Likes:</b> ${likes.toLocaleString()}</p>
+      <p><b>Comments:</b> ${comments.toLocaleString()}</p>
+    `;
 
-  // Graph
-  const ctx = document.getElementById('myChart');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Views','Likes','Comments'],
-      datasets: [{
-        label: 'Counts',
-        data: [views, likes, comments],
-        backgroundColor: ['#36A2EB','#4BC0C0','#9966FF']
-      }]
-    }
-  });
+    // Graph (overwrite previous if already present)
+    const ctx = document.getElementById('myChart').getContext('2d');
+    if(window.myChart) window.myChart.destroy();
+    window.myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Views','Likes','Comments'],
+        datasets: [{
+          label: 'Counts',
+          data: [views, likes, comments],
+          backgroundColor: ['#36A2EB','#4BC0C0','#9966FF']
+        }]
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    alert("Error fetching data. Check console.");
+  }
 }
 </script>
 </body>
