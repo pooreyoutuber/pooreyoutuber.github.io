@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Thumbnail Downloader</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+    input { width: 70%; padding: 10px; margin: 20px 0; border: 1px solid #ccc; border-radius: 5px; }
+    button { padding: 10px 20px; background: #dc3545; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #a71d2a; }
+    img { margin-top: 20px; max-width: 90%; border: 1px solid #ccc; padding: 5px; }
+    a { display: block; margin-top: 10px; color: #007bff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h2>YouTube Thumbnail Downloader</h2>
+  <input type="text" id="videoURL" placeholder="Enter YouTube Video URL"><br>
+  <button onclick="getThumbnail()">Get Thumbnail</button>
+  <div>
+    <img id="thumbnail" src="">
+    <a id="downloadLink" href="#" download="thumbnail.jpg" style="display:none;">Download Thumbnail</a>
+  </div>
+
+  <script>
+    function getThumbnail() {
+      const url = document.getElementById("videoURL").value;
+      const videoIdMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+      if (!videoIdMatch) {
+        alert("Please enter a valid YouTube URL!");
+        return;
+      }
+      const videoId = videoIdMatch[1];
+      const thumbnailURL = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+      document.getElementById("thumbnail").src = thumbnailURL;
+      const downloadLink = document.getElementById("downloadLink");
+      downloadLink.href = thumbnailURL;
+      downloadLink.style.display = "block";
+    }
+  </script>
+</body>
+</html>
