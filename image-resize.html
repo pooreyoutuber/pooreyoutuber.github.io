@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Resizer</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+    input { margin: 10px; }
+    button { padding: 10px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #0056b3; }
+    img { margin-top: 20px; max-width: 90%; border: 1px solid #ccc; padding: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Image Resizer</h2>
+  <input type="file" id="upload" accept="image/*"><br>
+  <input type="number" id="width" placeholder="Width (px)">
+  <input type="number" id="height" placeholder="Height (px)"><br>
+  <button onclick="resizeImage()">Resize & Download</button>
+  <div>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <img id="preview" src="">
+  </div>
+
+  <script>
+    let uploadedImage;
+
+    document.getElementById("upload").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImage = new Image();
+          uploadedImage.src = e.target.result;
+          uploadedImage.onload = function() {
+            document.getElementById("preview").src = uploadedImage.src;
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function resizeImage() {
+      if (!uploadedImage) {
+        alert("Please upload an image first!");
+        return;
+      }
+      const width = parseInt(document.getElementById("width").value);
+      const height = parseInt(document.getElementById("height").value);
+      if (!width || !height) {
+        alert("Please enter valid width and height!");
+        return;
+      }
+
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(uploadedImage, 0, 0, width, height);
+
+      const resizedImage = canvas.toDataURL("image/png");
+      document.getElementById("preview").src = resizedImage;
+
+      // download image
+      const link = document.createElement("a");
+      link.href = resizedImage;
+      link.download = "resized-image.png";
+      link.click();
+    }
+  </script>
+</body>
+</html>
