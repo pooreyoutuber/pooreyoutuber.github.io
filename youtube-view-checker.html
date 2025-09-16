@@ -1,106 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>YouTube Video Checker</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>YouTube Video Info</title>
   <style>
-    body {font-family: Arial, sans-serif; margin: 20px;}
-    input, button {padding: 8px; margin: 5px;}
-    .stats {margin-top: 20px;}
-    canvas {max-width: 400px;}
+    body { font-family: Arial; padding: 20px; }
+    iframe { margin-top: 20px; }
+    #info { margin-top: 20px; }
+    .label { font-weight: bold; }
   </style>
 </head>
 <body>
-  <h2>YouTube Video Checker</h2>
-  <input type="text" id="videoUrl" placeholder="Enter YouTube Video URL">
-  <button onclick="checkVideo()">Check</button>
 
-  <div class="stats" id="stats"></div>
-  <canvas id="myChart"></canvas>
+  <h2>YouTube Video Details</h2>
 
-<script>
-// 🔑 Yahan apni YouTube Data API v3 key daaliye:
-const API_KEY = "PASTE_YOUR_API_KEY_HERE";
+  <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL" size="50">
+  <button onclick="loadVideo()">Load Video</button>
 
-// Long video + shorts dono ka ID extract karne wala regex
-function extractVideoId(url){
-  const regex = /(?:youtube\.com\/(?:.*v=|shorts\/)|youtu\.be\/)([^&\n?#]+)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
-}
+  <div id="player"></div>
 
-async function checkVideo(){
-  const url = document.getElementById('videoUrl').value.trim();
-  const videoId = extractVideoId(url);
-  if(!videoId){alert("Invalid or unsupported URL"); return;}
+  <div id="info"></div>
 
-  try {
-    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoId}&key=${API_KEY}`;
-    const res = await fetch(apiUrl);
-    const data = await res.json();
-    if(!data.items.length){alert("No data found"); return;}
-    const stats = data.items[0].statistics;
-    const snippet = data.items[0].snippet;
+  <script>
+    const apiKey = 'YOUR_YOUTUBE_API_KEY'; // <-- Replace with your API key
 
-    const views = parseInt(stats.viewCount || 0);
-    const likes = parseInt(stats.likeCount || 0);
-    const comments = parseInt(stats.commentCount || 0);
+    function extractVideoId(url) {
+      const regex = /(?:https?:\/\/)?(?:www\.)?youtu(?:\.be\/|be\.com\/watch\?v=)([^\&\?\/]+)/;
+      const match = url.match(regex);
+      return match ? match[1] : null;
+    }
 
-    document.getElementById('stats').innerHTML = `
-      <h3>${snippet.title}</h3>
-      <p><b>Views:</b> ${views.toLocaleString()}</p>
-      <p><b>Likes:</b> ${likes.toLocaleString()}</p>
-      <p><b>Comments:</b> ${comments.toLocaleString()}</p>
-    `;
+    async function loadVideo() {
+      const url = document.getElementById('videoUrl').value;
+      const videoId = extractVideoId(url);
 
-    // Graph (overwrite previous if already present)
-    const ctx = document.getElementById('myChart').getContext('2d');
-    if(window.myChart) window.myChart.destroy();
-    window.myChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Views','Likes','Comments'],
-        datasets: [{
-          label: 'Counts',
-          data: [views, likes, comments],
-          backgroundColor: ['#36A2EB','#4BC0C0','#9966FF']
-        }]
+      if (!videoId) {
+        alert("Invalid YouTube URL");
+        return;
       }
-    });
-  } catch (err) {
-    console.error(err);
-    alert("Error fetching data. Check console.");
-  }
-}
-  
-<script>
-const API_KEY = "YAHAN_APNI_KEY"; 
 
-function extractVideoId(url){
-  const regex = /(?:youtube\.com\/(?:.*v=|shorts\/)|youtu\.be\/)([^&\n?#]+)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
-}
+      // Embed video
+      document.getElementById('player').innerHTML = `
+        <iframe width="560" height="315" 
+          src="https://www.youtube.com/embed/${videoId}" 
+          frameborder="0" allowfullscreen>
+        </iframe>
+      `;
 
-async function checkVideo(){
-  const url = document.getElementById('videoUrl').value.trim();
-  const videoId = extractVideoId(url);
-  if(!videoId){alert("Invalid or unsupported URL"); return;}
+      // Fetch video details
+      const apiURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${apiKey}`;
+      const response = await fetch(apiURL);
+      const data = await response.json();
 
-  try {
-    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoId}&key=${API_KEY}`;
-    console.log("Fetching:", apiUrl);
-    const res = await fetch(apiUrl);
-    const data = await res.json();
-    console.log("Response:", data);
-    if(!data.items || !data.items.length){alert("No data found"); return;}
-    // ...rest of code
-  } catch (err) {
-    console.error("Fetch error:", err);
-    alert("Error fetching data. See console.");
-  }
+      if (data.items.length === 0) {
+        alert("Video not found or API limit reached.");
+        return;
+      }
 
-</script>
+      const video = data.items[0];
+      const snippet = video.snippet;
+      const stats = video.statistics;
+
+      document.getElementById('info').innerHTML = `
+        <p><span class="label">Title:</span> ${snippet.title}</p>
+        <p><span class="label">Description:</span> ${snippet.description}</p>
+        <p><span class="label">Views:</span> ${stats.viewCount}</p>
+        <p><span class="label">Likes:</span> ${stats.likeCount || 'Hidden'}</p>
+        <p><span class="label">Comments:</span> ${stats.commentCount || 'Disabled'}</p>
+        <p><span class="label">Tags:</span> ${snippet.tags ? snippet.tags.join(', ') : 'No Tags'}</p>
+      `;
+    }
+  </script>
+
 </body>
 </html>
