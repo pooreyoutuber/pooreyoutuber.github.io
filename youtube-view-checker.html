@@ -4,71 +4,104 @@
   <meta charset="UTF-8">
   <title>YouTube Video Info</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    iframe { margin-top: 20px; }
-    #info { margin-top: 20px; }
-    .label { font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    iframe {
+      margin-top: 20px;
+      width: 100%;
+      height: 400px;
+    }
+    #info {
+      margin-top: 20px;
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .label {
+      font-weight: bold;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
 
-  <h2>YouTube Video Details</h2>
+  <h2>YouTube Video Details Viewer</h2>
 
-  <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL" size="50">
-  <button onclick="loadVideo()">Load Video</button>
+  <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL here (e.g. https://youtu.be/xyz)" />
+  <button onclick="loadVideo()">Load Video Info</button>
 
   <div id="player"></div>
-
   <div id="info"></div>
 
   <script>
-    const apiKey = 'AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU'; // <-- Replace with your API key
+    // ✅ Your real API key
+    const apiKey = 'AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU';
 
+    // Function to extract video ID from YouTube URL
     function extractVideoId(url) {
-      const regex = /(?:https?:\/\/)?(?:www\.)?youtu(?:\.be\/|be\.com\/watch\?v=)([^\&\?\/]+)/;
+      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/;
       const match = url.match(regex);
       return match ? match[1] : null;
     }
 
+    // Main function to load video and fetch data
     async function loadVideo() {
-      const url = document.getElementById('videoUrl').value;
+      const url = document.getElementById('videoUrl').value.trim();
       const videoId = extractVideoId(url);
 
       if (!videoId) {
-        alert("Invalid YouTube URL");
+        alert("❌ Invalid YouTube URL. Please paste a correct one.");
         return;
       }
 
-      // Embed video
+      // Embed YouTube video
       document.getElementById('player').innerHTML = `
-        <iframe width="560" height="315" 
+        <iframe 
           src="https://www.youtube.com/embed/${videoId}" 
           frameborder="0" allowfullscreen>
         </iframe>
       `;
 
-      // Fetch video details
+      // Fetch video details from YouTube Data API
       const apiURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${apiKey}`;
-      const response = await fetch(apiURL);
-      const data = await response.json();
+      
+      try {
+        const response = await fetch(apiURL);
+        const data = await response.json();
 
-      if (data.items.length === 0) {
-        alert("Video not found or API limit reached.");
-        return;
+        if (!data.items || data.items.length === 0) {
+          document.getElementById('info').innerHTML = `<p>❌ Video not found or quota exceeded.</p>`;
+          return;
+        }
+
+        const video = data.items[0];
+        const snippet = video.snippet;
+        const stats = video.statistics;
+
+        document.getElementById('info').innerHTML = `
+          <p><span class="label">📌 Title:</span> ${snippet.title}</p>
+          <p><span class="label">📝 Description:</span> <pre>${snippet.description}</pre></p>
+          <p><span class="label">👁️ Views:</span> ${stats.viewCount}</p>
+          <p><span class="label">👍 Likes:</span> ${stats.likeCount || 'Hidden'}</p>
+          <p><span class="label">💬 Comments:</span> ${stats.commentCount || 'Disabled'}</p>
+          <p><span class="label">🏷️ Tags:</span> ${snippet.tags ? snippet.tags.join(', ') : 'No tags available'}</p>
+        `;
+      } catch (error) {
+        console.error('Fetch error:', error);
+        document.getElementById('info').innerHTML = `<p>❌ Error fetching data. See console for details.</p>`;
       }
-
-      const video = data.items[0];
-      const snippet = video.snippet;
-      const stats = video.statistics;
-
-      document.getElementById('info').innerHTML = `
-        <p><span class="label">Title:</span> ${snippet.title}</p>
-        <p><span class="label">Description:</span> ${snippet.description}</p>
-        <p><span class="label">Views:</span> ${stats.viewCount}</p>
-        <p><span class="label">Likes:</span> ${stats.likeCount || 'Hidden'}</p>
-        <p><span class="label">Comments:</span> ${stats.commentCount || 'Disabled'}</p>
-        <p><span class="label">Tags:</span> ${snippet.tags ? snippet.tags.join(', ') : 'No Tags'}</p>
-      `;
     }
   </script>
 
