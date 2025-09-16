@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Profile Checker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { padding: 8px; margin: 5px; }
+    .info { margin-top: 20px; }
+    img { border-radius: 50%; width: 100px; }
+  </style>
+</head>
+<body>
+  <h2>Instagram Profile Checker</h2>
+  <input type="text" id="username" placeholder="Enter Instagram username">
+  <button onclick="getProfile()">Check Profile</button>
+  <div class="info" id="profileInfo"></div>
+
+  <script>
+    async function getProfile() {
+      const username = document.getElementById('username').value;
+      const accessToken = "Yahan_Apna_Access_Token_Dalo"; // FB Dev Console se lo
+      const profileInfoDiv = document.getElementById('profileInfo');
+      profileInfoDiv.innerHTML = "Loading...";
+
+      try {
+        // Step 1: Username se user-id lo
+        let res = await fetch(`https://graph.instagram.com/v17.0/${username}?fields=id,username&access_token=${accessToken}`);
+        let data = await res.json();
+        if (data.error) {
+          profileInfoDiv.innerHTML = "Error: " + data.error.message;
+          return;
+        }
+
+        // Step 2: ID se profile details lo
+        let userId = data.id;
+        let detailsRes = await fetch(`https://graph.instagram.com/${userId}?fields=id,username,media_count,account_type&access_token=${accessToken}`);
+        let details = await detailsRes.json();
+
+        // Step 3: Media (posts) fetch karo
+        let mediaRes = await fetch(`https://graph.instagram.com/${userId}/media?fields=id,caption,media_url,permalink&access_token=${accessToken}`);
+        let media = await mediaRes.json();
+
+        profileInfoDiv.innerHTML = `
+          <p><strong>Username:</strong> ${details.username}</p>
+          <p><strong>Account Type:</strong> ${details.account_type}</p>
+          <p><strong>Posts Count:</strong> ${details.media_count}</p>
+          <h4>Recent Posts:</h4>
+        `;
+        media.data.slice(0, 3).forEach(post => {
+          profileInfoDiv.innerHTML += `
+            <div>
+              <a href="${post.permalink}" target="_blank">${post.caption || 'View Post'}</a><br>
+              <img src="${post.media_url}" width="150">
+            </div>
+          `;
+        });
+
+      } catch (err) {
+        profileInfoDiv.innerHTML = "Error fetching profile.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
