@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,63 +6,125 @@
   <title>Multi Browser Video Viewer</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      color: #fff;
+    }
+    .container {
+      text-align: center;
+      width: 90%;
+      max-width: 1000px;
+      margin-top: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0px 8px 25px rgba(0,0,0,0.25);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 25px;
+      color: #f8f8f8;
+    }
+    .input-box {
+      margin: 15px 0;
+    }
+    input[type="text"], input[type="number"] {
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      width: 70%;
+      max-width: 600px;
+      margin-bottom: 10px;
+      box-shadow: 0px 3px 8px rgba(0,0,0,0.2);
+    }
+    input[type="number"] {
+      width: 80px;
       text-align: center;
     }
-    input, button {
-      margin: 10px;
-      padding: 8px;
+    button {
+      padding: 12px 28px;
+      background: #00c853;
+      border: none;
+      color: #fff;
       font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
     }
-    .video-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
+    button:hover {
+      background: #009624;
+      transform: scale(1.05);
+    }
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
     }
     iframe {
-      width: 300px;
-      height: 180px;
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 15px;
       border: none;
-      border-radius: 8px;
-      box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.4);
+      transition: transform 0.3s;
+    }
+    iframe:hover {
+      transform: scale(1.03);
     }
   </style>
 </head>
 <body>
-  <h2>Multi Browser Video Viewer</h2>
-  <input type="text" id="videoUrl" placeholder="Enter YouTube Link" size="60">
-  <br>
-  <input type="number" id="videoCount" value="4" min="1" max="20">
-  <br>
-  <button onclick="loadVideos()" style="background:green; color:white; border:none; border-radius:5px; padding:10px 20px; cursor:pointer;">Play</button>
-
-  <div class="video-container" id="videoContainer"></div>
+  <div class="container">
+    <h1>🎥 Multi Browser Video Viewer</h1>
+    
+    <div class="input-box">
+      <input type="text" id="videoUrl" placeholder="Paste YouTube link here">
+    </div>
+    
+    <div class="input-box">
+      <input type="number" id="count" value="4" min="1" max="12">
+    </div>
+    
+    <button onclick="loadVideos()">Play</button>
+    
+    <div id="videoContainer" class="video-grid"></div>
+  </div>
 
   <script>
     function loadVideos() {
-      const url = document.getElementById("videoUrl").value;
-      const count = parseInt(document.getElementById("videoCount").value);
+      const url = document.getElementById("videoUrl").value.trim();
+      const count = parseInt(document.getElementById("count").value);
       const container = document.getElementById("videoContainer");
+      
       container.innerHTML = "";
 
-      // Convert normal YouTube URL to embed URL
-      let videoId;
-      if (url.includes("youtu.be/")) {
-        videoId = url.split("youtu.be/")[1].split("?")[0];
-      } else if (url.includes("watch?v=")) {
-        videoId = url.split("watch?v=")[1].split("&")[0];
-      } else {
-        alert("Please enter a valid YouTube link");
+      if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
+        alert("⚠️ Please enter a valid YouTube link!");
         return;
       }
 
-      const embedUrl = "https://www.youtube.com/embed/" + videoId;
+      // Convert to embed link
+      let embedUrl = url;
+      if (url.includes("watch?v=")) {
+        embedUrl = url.replace("watch?v=", "embed/");
+      } else if (url.includes("youtu.be/")) {
+        embedUrl = url.replace("youtu.be/", "youtube.com/embed/");
+      }
 
       for (let i = 0; i < count; i++) {
         const iframe = document.createElement("iframe");
-        iframe.src = embedUrl;
+        iframe.src = embedUrl + "?autoplay=1&mute=1"; 
         container.appendChild(iframe);
       }
     }
