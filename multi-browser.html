@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Multi Viewer (Muted)</title>
+  <title>YouTube Multi Viewer (Autoplay + Muted)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -47,7 +47,7 @@
   </style>
 </head>
 <body>
-  <h1>🚀 YouTube Multi Viewer (Muted)</h1>
+  <h1>🚀 YouTube Multi Viewer (Autoplay + Muted)</h1>
   <p>Paste YouTube / Shorts URL and how many players you want</p>
   
   <input type="text" id="shortUrl" placeholder="Paste YouTube URL">
@@ -79,8 +79,9 @@
 
       for (let i = 0; i < count; i++) {
         const iframe = document.createElement('iframe');
-        // muted videos
-        iframe.src = `https://www.youtube.com/embed/${videoId}?rel=0&mute=1`;
+        // autoplay + mute + loop
+        iframe.src = `https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        iframe.allow = "autoplay; encrypted-media"; // important for autoplay
         iframe.allowFullscreen = true;
         playersDiv.appendChild(iframe);
       }
