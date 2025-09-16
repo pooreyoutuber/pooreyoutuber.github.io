@@ -4,71 +4,64 @@
   <meta charset="UTF-8">
   <title>Multi Browser Video Viewer</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-    input, button { padding: 10px; margin: 8px 5px; border-radius: 6px; border: 1px solid #ccc; }
-    button { background: green; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: darkgreen; }
-    .video-container { 
-      display: flex; 
-      flex-wrap: wrap; 
-      justify-content: center; 
-      margin-top: 20px; 
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    input, button {
+      margin: 10px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    .video-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 10px;
+      margin-top: 20px;
     }
     iframe {
       width: 300px;
       height: 180px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
     }
   </style>
 </head>
 <body>
   <h2>Multi Browser Video Viewer</h2>
-
-  <input type="text" id="videoURL" placeholder="Paste YouTube link here" style="width:70%"><br>
-  <input type="number" id="count" placeholder="Enter number of views" min="1" max="50" value="4"><br>
-  <button onclick="showVideos()">Play</button>
+  <input type="text" id="videoUrl" placeholder="Enter YouTube Link" size="60">
+  <br>
+  <input type="number" id="videoCount" value="4" min="1" max="20">
+  <br>
+  <button onclick="loadVideos()" style="background:green; color:white; border:none; border-radius:5px; padding:10px 20px; cursor:pointer;">Play</button>
 
   <div class="video-container" id="videoContainer"></div>
 
   <script>
-    function extractVideoId(url) {
-      url = url.trim();
-
-      // shorts link
-      let match = url.match(/shorts\/([0-9A-Za-z_-]{11})/);
-      if (match) return match[1];
-
-      // normal watch link
-      match = url.match(/[?&]v=([0-9A-Za-z_-]{11})/);
-      if (match) return match[1];
-
-      // youtu.be short link
-      match = url.match(/youtu\.be\/([0-9A-Za-z_-]{11})/);
-      if (match) return match[1];
-
-      // sirf video ID
-      if (/^[0-9A-Za-z_-]{11}$/.test(url)) return url;
-
-      return null;
-    }
-
-    function showVideos() {
-      const raw = document.getElementById("videoURL").value;
-      const count = parseInt(document.getElementById("count").value);
+    function loadVideos() {
+      const url = document.getElementById("videoUrl").value;
+      const count = parseInt(document.getElementById("videoCount").value);
       const container = document.getElementById("videoContainer");
       container.innerHTML = "";
 
-      const videoId = extractVideoId(raw);
-      if (!videoId) {
-        alert("❌ Invalid YouTube URL or ID");
+      // Convert normal YouTube URL to embed URL
+      let videoId;
+      if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1].split("?")[0];
+      } else if (url.includes("watch?v=")) {
+        videoId = url.split("watch?v=")[1].split("&")[0];
+      } else {
+        alert("Please enter a valid YouTube link");
         return;
       }
 
+      const embedUrl = "https://www.youtube.com/embed/" + videoId;
+
       for (let i = 0; i < count; i++) {
         const iframe = document.createElement("iframe");
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        iframe.src = embedUrl;
         container.appendChild(iframe);
       }
     }
