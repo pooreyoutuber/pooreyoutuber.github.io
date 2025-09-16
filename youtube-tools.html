@@ -3,31 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YouTube Search + Description</title>
+  <title>YouTube Search + Descriptions</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input, button { padding: 10px; margin: 5px; width: 300px; max-width: 90%; }
-    .video-item { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 6px; }
-    .video-title { font-weight: bold; }
-    .video-description { margin-top: 5px; }
+    body { font-family: Arial, sans-serif; margin: 20px; background:#f4f6f9;}
+    h1 {color:#222;}
+    input, button {
+      padding:10px;
+      margin:5px;
+      width:300px;
+      max-width:90%;
+      border-radius:6px;
+      border:1px solid #ccc;
+    }
+    button {
+      background:#007bff;
+      color:#fff;
+      cursor:pointer;
+    }
+    button:hover {background:#0056b3;}
+    .video-item { border: 1px solid #ccc; background:#fff; padding: 10px; margin: 10px 0; border-radius: 6px; text-align:left;}
+    .video-title { font-weight: bold; margin-bottom:5px;}
+    .video-description { font-size:14px; white-space:pre-wrap;}
   </style>
 </head>
 <body>
-  <h1>YouTube Title → Related Videos + Descriptions</h1>
+  <h1>🔎 YouTube Title → Related Videos + Long Descriptions</h1>
   <input type="text" id="searchTitle" placeholder="Enter video title or keywords">
   <button onclick="fetchRelated()">Get Related Videos</button>
 
   <div id="results"></div>
 
   <script>
-    const API_KEY = 'YOUR_YOUTUBE_API_KEY_HERE'; // <-- apni API key yahan daalo
+    // 👇 Your API key here
+    const API_KEY = 'AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU';
 
     async function fetchRelated() {
       const query = document.getElementById('searchTitle').value.trim();
       const resultsDiv = document.getElementById('results');
       resultsDiv.innerHTML = '';
       if (!query) {
-        alert('Title daalo pehle');
+        alert('Please enter a title or keyword');
         return;
       }
 
@@ -37,38 +52,40 @@
           `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${API_KEY}`
         );
         const searchData = await searchResponse.json();
-        if (!searchData.items) {
-          resultsDiv.innerHTML = 'Kuch nahi mila';
+
+        if (!searchData.items || searchData.items.length === 0) {
+          resultsDiv.innerHTML = 'No videos found';
           return;
         }
 
         // Get video IDs from search
         const videoIds = searchData.items.map(item => item.id.videoId).join(',');
 
-        // 2. Get full video details (for description etc.)
+        // 2. Get full video details (description etc.)
         const videosResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoIds}&key=${API_KEY}`
+          `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoIds}&key=${API_KEY}`
         );
         const videosData = await videosResponse.json();
-        if (!videosData.items) {
-          resultsDiv.innerHTML = 'Details nahi mil paayi';
+
+        if (!videosData.items || videosData.items.length === 0) {
+          resultsDiv.innerHTML = 'No details found';
           return;
         }
 
-        // 3. Display
+        // 3. Display results
         videosData.items.forEach(video => {
           const div = document.createElement('div');
           div.className = 'video-item';
           
           const titleEl = document.createElement('div');
           titleEl.className = 'video-title';
-          titleEl.textContent = video.snippet.title;
+          // clickable title
+          titleEl.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.snippet.title}</a>`;
           div.appendChild(titleEl);
 
           const descEl = document.createElement('div');
           descEl.className = 'video-description';
-          // Long description
-          descEl.textContent = video.snippet.description || 'Description nahi hai';
+          descEl.textContent = video.snippet.description || 'No description';
           div.appendChild(descEl);
 
           resultsDiv.appendChild(div);
@@ -76,7 +93,7 @@
 
       } catch (err) {
         console.error(err);
-        resultsDiv.innerHTML = 'Error aayi: ' + err.message;
+        resultsDiv.innerHTML = 'Error: ' + err.message;
       }
     }
   </script>
