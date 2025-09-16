@@ -3,10 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Shorts Multi Viewer</title>
+  <title>YouTube Multi Viewer (Muted)</title>
   <style>
-    body {font-family: Arial, sans-serif; background:#f4f6f9; text-align:center; margin:0; padding:0;}
-    h1 {color:#222; margin-top:20px;}
+    body {
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      text-align:center;
+      margin:0;
+      padding:0;
+    }
+    h1 {
+      color:#222;
+      margin-top:20px;
+    }
     input, button {
       padding:10px;
       margin:5px;
@@ -20,9 +29,7 @@
       color:#fff;
       cursor:pointer;
     }
-    button:hover {
-      background:#0056b3;
-    }
+    button:hover {background:#0056b3;}
     .container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -40,38 +47,40 @@
   </style>
 </head>
 <body>
-  <h1>🚀 YouTube video Multi Viewer</h1>
-  <p>Enter video URL and how many players you want</p>
+  <h1>🚀 YouTube Multi Viewer (Muted)</h1>
+  <p>Paste YouTube / Shorts URL and how many players you want</p>
   
-  <input type="text" id="shortUrl" placeholder="Paste YouTube Shorts URL">
+  <input type="text" id="shortUrl" placeholder="Paste YouTube URL">
   <input type="number" id="count" placeholder="Number of players">
   <button onclick="generatePlayers()">Play</button>
 
   <div class="container" id="players"></div>
 
   <script>
+    function getVideoId(url) {
+      if (url.includes('youtu.be/')) {
+        return url.split('youtu.be/')[1].split(/[?&]/)[0];
+      } else if (url.includes('/shorts/')) {
+        return url.split('/shorts/')[1].split(/[?&]/)[0];
+      } else if (url.includes('watch?v=')) {
+        return url.split('watch?v=')[1].split(/[?&]/)[0];
+      }
+      return '';
+    }
+
     function generatePlayers() {
       const url = document.getElementById('shortUrl').value.trim();
       const count = parseInt(document.getElementById('count').value);
       const playersDiv = document.getElementById('players');
       playersDiv.innerHTML = '';
 
-      if (!url || !count) return;
+      const videoId = getVideoId(url);
+      if (!videoId || !count) return;
 
-      // get video ID from shorts url
-      let videoId = '';
-      // e.g. https://youtu.be/ID or https://youtube.com/shorts/ID
-      if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1].split(/[?&]/)[0];
-      } else if (url.includes('/shorts/')) {
-        videoId = url.split('/shorts/')[1].split(/[?&]/)[0];
-      } else if (url.includes('watch?v=')) {
-        videoId = url.split('watch?v=')[1].split(/[?&]/)[0];
-      }
-
-      for (let i=0; i<count; i++) {
+      for (let i = 0; i < count; i++) {
         const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0`;
+        // muted videos
+        iframe.src = `https://www.youtube.com/embed/${videoId}?rel=0&mute=1`;
         iframe.allowFullscreen = true;
         playersDiv.appendChild(iframe);
       }
