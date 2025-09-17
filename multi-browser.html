@@ -11,7 +11,12 @@
     input[type="number"] { width:90px; padding:8px; border:2px solid #ccc; border-radius:4px; }
     button { padding:10px 18px; border:none; background:#e74c3c; color:white; border-radius:4px; cursor:pointer; font-weight:600; }
     label { font-size:14px; }
-    .grid { display:grid; gap:18px; margin-top:18px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .grid { 
+      display: grid; 
+      gap: 18px; 
+      margin-top: 18px; 
+      grid-template-columns: repeat(5, 1fr); /* fixed 5 columns */
+    }
     .video-wrap { background:#000; position:relative; padding-top:56.25%; overflow:hidden; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.12); }
     .video-wrap iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:0; }
     .settings { display:flex; gap:12px; align-items:center; }
@@ -19,10 +24,10 @@
   </style>
 </head>
 <body>
-  <h2>Multi YouTube Embed</h2>
+  <h2>Multi YouTube Embed (5 side by side)</h2>
 
   <div class="controls">
-    <input id="url" type="text" placeholder="Paste YouTube link (https://youtu.be/ID or https://www.youtube.com/watch?v=ID)" value="" />
+    <input id="url" type="text" placeholder="Paste YouTube link (https://youtu.be/ID or https://www.youtube.com/watch?v=ID)" />
     <input id="count" type="number" min="1" max="20" value="5" />
     <div class="settings">
       <label><input id="autoplay" type="checkbox" /> Autoplay (muted)</label>
@@ -47,9 +52,7 @@
 
   function extractYouTubeID(url) {
     if (!url) return null;
-    // remove surrounding spaces
     url = url.trim();
-    // common patterns
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/,
       /(?:youtu\.be\/)([A-Za-z0-9_-]{11})/,
@@ -59,17 +62,15 @@
       const m = url.match(p);
       if (m && m[1]) return m[1];
     }
-    // if the user only pasted an ID
     if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
     return null;
   }
 
   function buildEmbedUrl(id, opts){
-    // opts: { autoplay: bool, controls: bool }
     let params = new URLSearchParams();
     if (opts.autoplay) { params.set('autoplay', '1'); params.set('mute', '1'); }
     if (!opts.controls) params.set('controls','0');
-    params.set('rel','0'); // don't show related from other channels
+    params.set('rel','0');
     return `https://www.youtube.com/embed/${id}?${params.toString()}`;
   }
 
@@ -83,7 +84,7 @@
       return;
     }
     let count = parseInt(countInput.value) || 1;
-    count = Math.min(Math.max(count,1), 20); // limit 1..20
+    count = Math.min(Math.max(count,1), 20);
     const opts = { autoplay: autoplayCheckbox.checked, controls: controlsToggle.checked };
 
     for (let i=0; i<count; i++) {
@@ -97,7 +98,7 @@
       wrap.appendChild(iframe);
       grid.appendChild(wrap);
     }
-    msg.textContent = `Created ${count} embeds for video id: ${id}. Browser autoplay rules may block autoplay unless muted.`;
+    msg.textContent = `Created ${count} embeds for video id: ${id}.`;
   });
 
   clearBtn.addEventListener('click', () => {
@@ -105,7 +106,6 @@
     msg.textContent = '';
   });
 
-  // Optional: hit Enter to create
   urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') makeBtn.click(); });
   countInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') makeBtn.click(); });
 </script>
