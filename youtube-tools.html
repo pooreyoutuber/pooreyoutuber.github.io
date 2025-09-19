@@ -3,17 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YouTube Search + Descriptions</title>
+  <title>YouTube Search Tool | Find Related Videos & Long Descriptions</title>
+
+  <!-- ✅ SEO Meta Tags -->
+  <meta name="description" content="Free YouTube search tool to find related videos and their long descriptions. Enter any title or keyword and get instant results.">
+  <meta name="keywords" content="YouTube related videos, YouTube search tool, YouTube long descriptions, YouTube SEO tool, YouTube video finder, YouTube description viewer">
+  <meta name="robots" content="index, follow">
+
+  <!-- ✅ Open Graph (for social share) -->
+  <meta property="og:title" content="YouTube Search Tool | Find Related Videos & Long Descriptions">
+  <meta property="og:description" content="Enter any video title or keyword and find related YouTube videos with their full descriptions instantly.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourwebsite.com/youtube-search-tool">
+  <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
+
+  <!-- ✅ Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
+     crossorigin="anonymous"></script>
+
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background:#f4f6f9;}
-    h1 {color:#222;}
+    h1 {color:#222; text-align:center;}
     input, button {
       padding:10px;
-      margin:5px;
-      width:300px;
-      max-width:90%;
+      margin:5px auto;
+      display:block;
+      width:320px;
+      max-width:95%;
       border-radius:6px;
       border:1px solid #ccc;
+      font-size:16px;
     }
     button {
       background:#007bff;
@@ -22,16 +41,54 @@
     }
     button:hover {background:#0056b3;}
     .video-item { border: 1px solid #ccc; background:#fff; padding: 10px; margin: 10px 0; border-radius: 6px; text-align:left;}
-    .video-title { font-weight: bold; margin-bottom:5px;}
+    .video-title { font-weight: bold; margin-bottom:5px; }
     .video-description { font-size:14px; white-space:pre-wrap;}
+    .ads-box { margin:20px 0; text-align:center; }
   </style>
 </head>
 <body>
+
   <h1>🔎 YouTube Title → Related Videos + Long Descriptions</h1>
+  <p style="text-align:center;">Paste a YouTube video title or keyword and discover related videos with full descriptions instantly.</p>
+
+  <!-- ✅ Ad (Top Banner) -->
+  <div class="ads-box">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-9877532310172541"
+         data-ad-slot="1234567890"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- ✅ Search Box -->
   <input type="text" id="searchTitle" placeholder="Enter video title or keywords">
   <button onclick="fetchRelated()">Get Related Videos</button>
 
+  <!-- ✅ Ad (Middle) -->
+  <div class="ads-box">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-9877532310172541"
+         data-ad-slot="9698905664"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
   <div id="results"></div>
+
+  <!-- ✅ Ad (Bottom) -->
+  <div class="ads-box">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-9877532310172541"
+         data-ad-slot="2468024680"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
 
   <script>
     // 👇 Your API key here
@@ -54,7 +111,7 @@
         const searchData = await searchResponse.json();
 
         if (!searchData.items || searchData.items.length === 0) {
-          resultsDiv.innerHTML = 'No videos found';
+          resultsDiv.innerHTML = '❌ No videos found';
           return;
         }
 
@@ -68,7 +125,7 @@
         const videosData = await videosResponse.json();
 
         if (!videosData.items || videosData.items.length === 0) {
-          resultsDiv.innerHTML = 'No details found';
+          resultsDiv.innerHTML = '❌ No details found';
           return;
         }
 
@@ -79,7 +136,6 @@
           
           const titleEl = document.createElement('div');
           titleEl.className = 'video-title';
-          // clickable title
           titleEl.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.snippet.title}</a>`;
           div.appendChild(titleEl);
 
@@ -93,7 +149,7 @@
 
       } catch (err) {
         console.error(err);
-        resultsDiv.innerHTML = 'Error: ' + err.message;
+        resultsDiv.innerHTML = '❌ Error: ' + err.message;
       }
     }
   </script>
