@@ -1,74 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Multi YouTube Live Viewer</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
+      font-family: Arial, Helvetica, sans-serif;
       background: #f4f6f9;
+      color: #222;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    h1 { color: #222; }
-    input {
-      width: 80%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      border: none;
-      background: #007bff;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover { background: #0056b3; }
-    .videos {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-    iframe {
-      width: 100%;
-      height: 300px;
-      border-radius: 10px;
-      border: none;
-    }
+    .container { max-width: 1000px; width: 100%; }
+    h1 { margin: 8px 0 4px; }
+    p { margin: 6px 0 14px; }
+    input { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ccc; border-radius: 6px; margin-top: 6px; }
+    .controls { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    button { background: #007bff; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; }
+    button.secondary { background: #6c757d; }
+    .videos { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; margin-top: 20px; width: 100%; }
+    iframe { width: 100%; height: 300px; border-radius: 10px; border: none; }
+    .msg { margin-top: 10px; color: #d00; font-size: 14px; }
   </style>
 </head>
 <body>
-  <h1>🎥 Multi YouTube Live Viewer</h1>
-  <p>Paste YouTube Live links (one by one) and watch them together 👇</p>
-  
-  <input type="text" id="videoUrl" placeholder="Paste YouTube live link here">
-  <button onclick="addVideo()">Add Live Stream</button>
-  
-  <div class="videos" id="videosContainer"></div>
-  
+  <div class="container">
+    <h1>🎥 Multi YouTube Live Viewer</h1>
+    <p>Paste any YouTube Live or video link 👇</p>
+
+    <input type="text" id="videoUrl" placeholder="Paste YouTube live/video link here">
+    <div class="controls">
+      <button onclick="addVideo()">Add Live Stream</button>
+      <button class="secondary" onclick="clearVideos()">Clear All</button>
+    </div>
+    <div id="msg" class="msg"></div>
+
+    <div class="videos" id="videosContainer"></div>
+  </div>
+
   <script>
-    function addVideo() {
-      let url = document.getElementById('videoUrl').value;
-      if(url.includes("youtube.com/watch?v=") || url.includes("youtu.be/")){
-        let videoId = "";
-        if(url.includes("watch?v=")){
-          videoId = url.split("watch?v=")[1].split("&")[0];
-        } else if(url.includes("youtu.be/")){
-          videoId = url.split("youtu.be/")[1].split("?")[0];
+    function extractVideoId(url) {
+      try {
+        // Handle youtube.com/watch?v=
+        if (url.includes("watch?v=")) {
+          return url.split("watch?v=")[1].split("&")[0];
         }
+        // Handle youtu.be/
+        if (url.includes("youtu.be/")) {
+          return url.split("youtu.be/")[1].split("?")[0];
+        }
+        // Handle youtube.com/live/
+        if (url.includes("/live/")) {
+          return url.split("/live/")[1].split("?")[0];
+        }
+      } catch (e) {
+        return "";
+      }
+      return "";
+    }
+
+    function addVideo() {
+      let url = document.getElementById('videoUrl').value.trim();
+      let videoId = extractVideoId(url);
+
+      if (videoId) {
         let iframe = document.createElement("iframe");
         iframe.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=0";
         document.getElementById("videosContainer").appendChild(iframe);
+        document.getElementById("msg").innerText = "✅ Added video: " + videoId;
         document.getElementById('videoUrl').value = "";
       } else {
-        alert("❌ Please enter a valid YouTube live link.");
+        document.getElementById("msg").innerText = "❌ Invalid YouTube link: " + url;
       }
+    }
+
+    function clearVideos() {
+      document.getElementById("videosContainer").innerHTML = "";
+      document.getElementById("msg").innerText = "";
     }
   </script>
 </body>
