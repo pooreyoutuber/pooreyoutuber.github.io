@@ -6,14 +6,10 @@
   <title>YouTube Video Info & View Checker | Free Online Tool</title>
   <meta name="description" content="Check YouTube video details like title, description, views, likes, comments and tags instantly. Paste any YouTube video URL and get all info quickly.">
   <meta name="keywords" content="YouTube view checker, YouTube video info, YouTube video details, YouTube title fetcher, YouTube description viewer, YouTube tags extractor, YouTube API tool">
-  
+
   <!-- ✅ Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
      crossorigin="anonymous"></script>
-
-  <!-- ✅ Monetag (Popunder + Vignette Global Scripts) -->
-  <script>(function(s){s.dataset.zone='9914657',s.src='https://forfrogadiertor.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  <script>(function(s){s.dataset.zone='9914741',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 
   <style>
     body {
@@ -65,7 +61,11 @@
   <h2>📊 YouTube Video Details & View Checker</h2>
   <p style="text-align:center;">Paste a YouTube video link to get title, description, views, likes, comments and tags.</p>
 
-  <!-- ✅ In-Article AdSense Ad -->
+  <!-- 🔝 Top Ads -->
+  <div class="ad-container" id="ad-top-1"></div>
+  <div class="ad-container" id="ad-top-2"></div>
+
+  <!-- ✅ In-Article AdSense -->
   <div class="ad-container">
     <ins class="adsbygoogle"
          style="display:block; text-align:center;"
@@ -73,9 +73,7 @@
          data-ad-format="fluid"
          data-ad-client="ca-pub-9877532310172541"
          data-ad-slot="9698905664"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
   <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL here (e.g. https://youtu.be/xyz)" />
@@ -84,25 +82,43 @@
   <div id="player"></div>
   <div id="info"></div>
 
-  <!-- ✅ Monetag Banner Ad -->
-  <div class="ad-container">
-    <script async data-cfasync="false" src="//groleegni.net/400/9914701"></script>
-  </div>
+  <!-- 🔻 Bottom Ads -->
+  <div class="ad-container" id="ad-bottom-1"></div>
+  <div class="ad-container" id="ad-bottom-2"></div>
 
   <script>
-    // ✅ Your YouTube Data API Key
-    const apiKey = 'AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU';
+    // ✅ Function to load Monetag Ads
+    function loadAd(zoneId, containerId, src) {
+      let script = document.createElement("script");
+      script.dataset.zone = zoneId;
+      script.src = src;
+      document.getElementById(containerId).appendChild(script);
+    }
 
-    // Function to extract video ID from YouTube URL
+    if (window.innerWidth <= 768) {
+      // 📱 Mobile → 4 Banner Ads
+      loadAd("9914849", "ad-top-1", "https://groleegni.net/banner.min.js");   // Mobile Banner 1
+      loadAd("9914765", "ad-top-2", "https://groleegni.net/banner.min.js");   // Mobile Banner 2
+      loadAd("9914701", "ad-bottom-1", "https://groleegni.net/banner.min.js");// Mobile Banner 3
+      loadAd("9914700", "ad-bottom-2", "https://groleegni.net/banner.min.js");// Mobile Banner 4
+    } else {
+      // 💻 Desktop → 4 Ads (Popunder + Vignette)
+      loadAd("9914657", "ad-top-1", "https://forfrogadiertor.com/tag.min.js");   // Desktop Popunder
+      loadAd("9914741", "ad-top-2", "https://groleegni.net/vignette.min.js");    // Desktop Vignette
+      loadAd("9914702", "ad-bottom-1", "https://groleegni.net/vignette.min.js"); // Desktop Vignette 2
+      loadAd("9914764", "ad-bottom-2", "https://groleegni.net/vignette.min.js"); // Desktop Vignette 3
+    }
+
+    // ✅ YouTube API Code
+    const apiKey = "AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU";
     function extractVideoId(url) {
       const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/;
       const match = url.match(regex);
       return match ? match[1] : null;
     }
 
-    // Main function to load video and fetch data
     async function loadVideo() {
-      const url = document.getElementById('videoUrl').value.trim();
+      const url = document.getElementById("videoUrl").value.trim();
       const videoId = extractVideoId(url);
 
       if (!videoId) {
@@ -110,23 +126,17 @@
         return;
       }
 
-      // Embed YouTube video
-      document.getElementById('player').innerHTML = `
-        <iframe 
-          src="https://www.youtube.com/embed/${videoId}" 
-          frameborder="0" allowfullscreen>
-        </iframe>
+      document.getElementById("player").innerHTML = `
+        <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
       `;
 
-      // Fetch video details from YouTube Data API
       const apiURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${apiKey}`;
-      
       try {
         const response = await fetch(apiURL);
         const data = await response.json();
 
         if (!data.items || data.items.length === 0) {
-          document.getElementById('info').innerHTML = `<p>❌ Video not found or quota exceeded.</p>`;
+          document.getElementById("info").innerHTML = `<p>❌ Video not found or quota exceeded.</p>`;
           return;
         }
 
@@ -134,7 +144,7 @@
         const snippet = video.snippet;
         const stats = video.statistics;
 
-        document.getElementById('info').innerHTML = `
+        document.getElementById("info").innerHTML = `
           <p><span class="label">📌 Title:</span> ${snippet.title}</p>
           <p><span class="label">📝 Description:</span> <pre>${snippet.description}</pre></p>
           <p><span class="label">👁️ Views:</span> ${stats.viewCount}</p>
@@ -143,11 +153,10 @@
           <p><span class="label">🏷️ Tags:</span> ${snippet.tags ? snippet.tags.join(', ') : 'No tags available'}</p>
         `;
       } catch (error) {
-        console.error('Fetch error:', error);
-        document.getElementById('info').innerHTML = `<p>❌ Error fetching data. See console for details.</p>`;
+        console.error("Fetch error:", error);
+        document.getElementById("info").innerHTML = `<p>❌ Error fetching data. See console for details.</p>`;
       }
     }
   </script>
-
 </body>
 </html>
