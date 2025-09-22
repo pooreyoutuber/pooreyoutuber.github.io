@@ -4,22 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YouTube Video Info & View Checker | Free Online Tool</title>
-  <meta name="description" content="Check YouTube video details like title, description, views, likes, comments and tags instantly. Paste any YouTube video URL and get all info quickly.">
-  <meta name="keywords" content="YouTube view checker, YouTube video info, YouTube video details, YouTube title fetcher, YouTube description viewer, YouTube tags extractor, YouTube API tool">
+  <meta name="description" content="Check YouTube video details like title, description, views, likes, comments and tags instantly.">
+  <meta name="keywords" content="YouTube view checker, YouTube video info, YouTube tags extractor, YouTube API tool">
 
-  <!-- ✅ Google AdSense -->
+  <!-- ✅ AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
      crossorigin="anonymous"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
       padding: 20px;
       background: #f4f6f9;
     }
-    h2 { color:#222; text-align:center; }
+    h2 { text-align:center; }
     input, button {
       padding: 10px;
       font-size: 16px;
@@ -28,31 +28,25 @@
       border:1px solid #ccc;
       border-radius:6px;
     }
-    button {
-      background:#007bff;
-      color:#fff;
-      cursor:pointer;
-    }
+    button { background:#007bff; color:#fff; cursor:pointer; }
     button:hover { background:#0056b3; }
-    iframe {
-      margin-top: 20px;
-      width: 100%;
-      height: 400px;
-      border-radius: 12px;
-      border:none;
-    }
-    #info {
-      margin-top: 20px;
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .label { font-weight: bold; }
+    iframe { width:100%; height:400px; border-radius:12px; border:none; margin-top:20px; }
+    #info { background:#fff; margin-top:20px; padding:15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    .label { font-weight:bold; }
     pre { white-space: pre-wrap; }
-    .ad-container {
-      margin: 20px 0;
-      text-align: center;
+    .ad-container { margin:20px 0; text-align:center; }
+    /* ✅ Desktop Sticky Right Ad */
+    @media (min-width: 992px) {
+      .sticky-ad {
+        position: fixed;
+        right: 20px;
+        top: 120px;
+        width: 160px;
+        height: 600px;
+        background: #fff;
+        border: 1px solid #ccc;
+        z-index: 999;
+      }
     }
   </style>
 </head>
@@ -62,32 +56,25 @@
   <p style="text-align:center;">Paste a YouTube video link to get title, description, views, likes, comments and tags.</p>
 
   <!-- 🔝 Top Ads -->
-  <div class="ad-container" id="ad-top-1"></div>
-  <div class="ad-container" id="ad-top-2"></div>
-
-  <!-- ✅ In-Article AdSense -->
-  <div class="ad-container">
-    <ins class="adsbygoogle"
-         style="display:block; text-align:center;"
-         data-ad-layout="in-article"
-         data-ad-format="fluid"
-         data-ad-client="ca-pub-9877532310172541"
-         data-ad-slot="9698905664"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  </div>
+  <div class="ad-container" id="ad-top"></div>
 
   <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL here (e.g. https://youtu.be/xyz)" />
   <button onclick="loadVideo()">Load Video Info</button>
+
+  <!-- 📰 Mid Ads -->
+  <div class="ad-container" id="ad-mid"></div>
 
   <div id="player"></div>
   <div id="info"></div>
 
   <!-- 🔻 Bottom Ads -->
-  <div class="ad-container" id="ad-bottom-1"></div>
-  <div class="ad-container" id="ad-bottom-2"></div>
+  <div class="ad-container" id="ad-bottom"></div>
+
+  <!-- 💻 Desktop Sticky Right Ad -->
+  <div class="sticky-ad" id="ad-sticky"></div>
 
   <script>
-    // ✅ Function to load Monetag Ads
+    // ✅ Monetag Ad Loader
     function loadAd(zoneId, containerId, src) {
       let script = document.createElement("script");
       script.dataset.zone = zoneId;
@@ -96,65 +83,53 @@
     }
 
     if (window.innerWidth <= 768) {
-      // 📱 Mobile → 4 Banner Ads
-      loadAd("9914849", "ad-top-1", "https://groleegni.net/banner.min.js");   // Mobile Banner 1
-      loadAd("9914765", "ad-top-2", "https://groleegni.net/banner.min.js");   // Mobile Banner 2
-      loadAd("9914701", "ad-bottom-1", "https://groleegni.net/banner.min.js");// Mobile Banner 3
-      loadAd("9914700", "ad-bottom-2", "https://groleegni.net/banner.min.js");// Mobile Banner 4
+      // 📱 Mobile: 4 Banners
+      loadAd("9914849", "ad-top", "https://groleegni.net/banner.min.js");
+      loadAd("9914765", "ad-mid", "https://groleegni.net/banner.min.js");
+      loadAd("9914701", "ad-bottom", "https://groleegni.net/banner.min.js");
+      loadAd("9914700", "ad-bottom", "https://groleegni.net/banner.min.js");
     } else {
-      // 💻 Desktop → 4 Ads (Popunder + Vignette)
-      loadAd("9914657", "ad-top-1", "https://forfrogadiertor.com/tag.min.js");   // Desktop Popunder
-      loadAd("9914741", "ad-top-2", "https://groleegni.net/vignette.min.js");    // Desktop Vignette
-      loadAd("9914702", "ad-bottom-1", "https://groleegni.net/vignette.min.js"); // Desktop Vignette 2
-      loadAd("9914764", "ad-bottom-2", "https://groleegni.net/vignette.min.js"); // Desktop Vignette 3
+      // 💻 Desktop: Banner + Vignette + Popunder + Sticky
+      loadAd("9914657", "ad-top", "https://forfrogadiertor.com/tag.min.js");   // Popunder
+      loadAd("9914741", "ad-mid", "https://groleegni.net/vignette.min.js");    // Vignette
+      loadAd("9914702", "ad-bottom", "https://groleegni.net/banner.min.js");   // Bottom Banner
+      loadAd("9914764", "ad-sticky", "https://groleegni.net/banner.min.js");   // Sticky Right
     }
 
-    // ✅ YouTube API Code
+    // ✅ YouTube API
     const apiKey = "AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU";
     function extractVideoId(url) {
       const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/;
       const match = url.match(regex);
       return match ? match[1] : null;
     }
-
     async function loadVideo() {
       const url = document.getElementById("videoUrl").value.trim();
       const videoId = extractVideoId(url);
+      if (!videoId) { alert("❌ Invalid YouTube URL"); return; }
 
-      if (!videoId) {
-        alert("❌ Invalid YouTube URL. Please paste a correct one.");
-        return;
-      }
-
-      document.getElementById("player").innerHTML = `
-        <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-      `;
+      document.getElementById("player").innerHTML =
+        `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>`;
 
       const apiURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${apiKey}`;
       try {
-        const response = await fetch(apiURL);
-        const data = await response.json();
-
-        if (!data.items || data.items.length === 0) {
-          document.getElementById("info").innerHTML = `<p>❌ Video not found or quota exceeded.</p>`;
+        const res = await fetch(apiURL);
+        const data = await res.json();
+        if (!data.items?.length) {
+          document.getElementById("info").innerHTML = "<p>❌ Video not found.</p>";
           return;
         }
-
-        const video = data.items[0];
-        const snippet = video.snippet;
-        const stats = video.statistics;
-
+        const v = data.items[0];
         document.getElementById("info").innerHTML = `
-          <p><span class="label">📌 Title:</span> ${snippet.title}</p>
-          <p><span class="label">📝 Description:</span> <pre>${snippet.description}</pre></p>
-          <p><span class="label">👁️ Views:</span> ${stats.viewCount}</p>
-          <p><span class="label">👍 Likes:</span> ${stats.likeCount || 'Hidden'}</p>
-          <p><span class="label">💬 Comments:</span> ${stats.commentCount || 'Disabled'}</p>
-          <p><span class="label">🏷️ Tags:</span> ${snippet.tags ? snippet.tags.join(', ') : 'No tags available'}</p>
+          <p><span class="label">📌 Title:</span> ${v.snippet.title}</p>
+          <p><span class="label">📝 Description:</span> <pre>${v.snippet.description}</pre></p>
+          <p><span class="label">👁️ Views:</span> ${v.statistics.viewCount}</p>
+          <p><span class="label">👍 Likes:</span> ${v.statistics.likeCount || "Hidden"}</p>
+          <p><span class="label">💬 Comments:</span> ${v.statistics.commentCount || "Disabled"}</p>
+          <p><span class="label">🏷️ Tags:</span> ${v.snippet.tags ? v.snippet.tags.join(", ") : "No tags"}</p>
         `;
-      } catch (error) {
-        console.error("Fetch error:", error);
-        document.getElementById("info").innerHTML = `<p>❌ Error fetching data. See console for details.</p>`;
+      } catch(e) {
+        document.getElementById("info").innerHTML = "<p>❌ Error loading data.</p>";
       }
     }
   </script>
