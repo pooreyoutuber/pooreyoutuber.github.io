@@ -17,10 +17,6 @@
   <meta property="og:url" content="https://yourwebsite.com/shorts-multi-viewer">
   <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
 
-  <!-- ✅ Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
-     crossorigin="anonymous"></script>
-
   <style>
     body {font-family: Arial, sans-serif; background:#f4f6f9; text-align:center; margin:0; padding:0;}
     h1 {color:#222; margin-top:20px;}
@@ -38,9 +34,7 @@
       color:#fff;
       cursor:pointer;
     }
-    button:hover {
-      background:#0056b3;
-    }
+    button:hover { background:#0056b3; }
     .container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -62,46 +56,36 @@
   <h1>🚀 YouTube Shorts Multi Viewer</h1>
   <p>Paste a Shorts URL and choose how many players you want</p>
 
-  <!-- ✅ Top Ad -->
-  <div class="ads-box">
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-9877532310172541"
-         data-ad-slot="1234567890"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  <!-- ✅ Mobile Ads -->
+  <div class="mobile-ads" style="display:none;">
+    <div class="ads-box"><script src="https://alwingulla.com/88/tag.min.js" data-zone="9914849" async></script></div>
+    <div class="ads-box"><script src="https://alwingulla.com/88/tag.min.js" data-zone="9914765" async></script></div>
+    <div class="ads-box"><script src="https://alwingulla.com/88/tag.min.js" data-zone="9914741" async></script></div>
+    <div class="ads-box"><script src="https://alwingulla.com/88/tag.min.js" data-zone="9914702" async></script></div>
+  </div>
+
+  <!-- ✅ Desktop Ads -->
+  <div class="desktop-ads" style="display:none;">
+    <div class="ads-box"><script src="https://alwingulla.com/88/tag.min.js" data-zone="9914701" async></script></div>
+    <div class="ads-box"><script src="https://alwingulla.com/88/tag.min.js" data-zone="9914699" async></script></div>
+    <div class="ads-box"><script src="https://alwingulla.com/88/tag.min.js" data-zone="9914658" async></script></div>
+    <div class="ads-box"><script src="https://alwingulla.com/88/tag.min.js" data-zone="9914657" async></script></div>
   </div>
 
   <input type="text" id="shortUrl" placeholder="Paste YouTube Shorts URL">
   <input type="number" id="count" placeholder="Number of players">
   <button onclick="generatePlayers()">Play</button>
 
-  <!-- ✅ Middle Ad -->
-  <div class="ads-box">
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-9877532310172541"
-         data-ad-slot="9698905664"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  </div>
-
   <div class="container" id="players"></div>
 
-  <!-- ✅ Bottom Ad -->
-  <div class="ads-box">
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-9877532310172541"
-         data-ad-slot="2468024680"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  </div>
-
   <script>
+    // ✅ Device check
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+      document.querySelector(".mobile-ads").style.display = "block";
+    } else {
+      document.querySelector(".desktop-ads").style.display = "block";
+    }
+
     function generatePlayers() {
       const url = document.getElementById('shortUrl').value.trim();
       const count = parseInt(document.getElementById('count').value);
@@ -110,7 +94,6 @@
 
       if (!url || !count) return;
 
-      // get video ID from shorts url
       let videoId = '';
       if (url.includes('youtu.be/')) {
         videoId = url.split('youtu.be/')[1].split(/[?&]/)[0];
