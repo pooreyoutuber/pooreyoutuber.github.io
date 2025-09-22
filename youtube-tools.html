@@ -10,7 +10,7 @@
   <meta name="keywords" content="YouTube related videos, YouTube search tool, YouTube long descriptions, YouTube SEO tool, YouTube video finder, YouTube description viewer">
   <meta name="robots" content="index, follow">
 
-  <!-- ✅ Open Graph (for social share) -->
+  <!-- ✅ Open Graph -->
   <meta property="og:title" content="YouTube Search Tool | Find Related Videos & Long Descriptions">
   <meta property="og:description" content="Enter any video title or keyword and find related YouTube videos with their full descriptions instantly.">
   <meta property="og:type" content="website">
@@ -47,89 +47,49 @@
   <h1>🔎 YouTube Title → Related Videos + Long Descriptions</h1>
   <p style="text-align:center;">Paste a YouTube video title or keyword and discover related videos with full descriptions instantly.</p>
 
-  <!-- ✅ Monetag Ad (Top Banner) -->
-  <div class="ads-box">
-    <script>(function(s){s.dataset.zone='9914741',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  </div>
+  <!-- 🔝 Top Ads -->
+  <div class="ads-box" id="ad-top-1"></div>
+  <div class="ads-box" id="ad-top-2"></div>
 
   <!-- ✅ Search Box -->
   <input type="text" id="searchTitle" placeholder="Enter video title or keywords">
   <button onclick="fetchRelated()">Get Related Videos</button>
 
-  <!-- ✅ Monetag Ad (Middle) -->
-  <div class="ads-box">
-    <script>(function(s){s.dataset.zone='9914764',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  </div>
+  <!-- 📰 Mid Ads -->
+  <div class="ads-box" id="ad-mid-1"></div>
+  <div class="ads-box" id="ad-mid-2"></div>
 
   <div id="results"></div>
 
-  <!-- ✅ Monetag Ad (Bottom) -->
-  <div class="ads-box">
-    <script>(function(s){s.dataset.zone='9914849',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  </div>
+  <!-- 🔻 Bottom Ads -->
+  <div class="ads-box" id="ad-bottom-1"></div>
+  <div class="ads-box" id="ad-bottom-2"></div>
 
   <script>
-    // 👇 Your API key here
-    const API_KEY = 'AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU';
+    // ✅ Load Monetag Ads
+    function loadAd(zoneId, containerId, src) {
+      let script = document.createElement("script");
+      script.dataset.zone = zoneId;
+      script.src = src;
+      document.getElementById(containerId).appendChild(script);
+    }
+
+    if (window.innerWidth <= 768) {
+      // 📱 Mobile → 4 Banner Ads
+      loadAd("9914849", "ad-top-1", "https://groleegni.net/banner.min.js");
+      loadAd("9914765", "ad-top-2", "https://groleegni.net/banner.min.js");
+      loadAd("9914701", "ad-mid-1", "https://groleegni.net/banner.min.js");
+      loadAd("9914700", "ad-mid-2", "https://groleegni.net/banner.min.js");
+    } else {
+      // 💻 Desktop → 4 Ads (Popunder + Vignette)
+      loadAd("9914657", "ad-top-1", "https://forfrogadiertor.com/tag.min.js");
+      loadAd("9914741", "ad-top-2", "https://groleegni.net/vignette.min.js");
+      loadAd("9914702", "ad-mid-1", "https://groleegni.net/vignette.min.js");
+      loadAd("9914764", "ad-mid-2", "https://groleegni.net/vignette.min.js");
+    }
+
+    // ✅ YouTube API Code
+    const API_KEY = "AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU";
 
     async function fetchRelated() {
-      const query = document.getElementById('searchTitle').value.trim();
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '';
-      if (!query) {
-        alert('Please enter a title or keyword');
-        return;
-      }
-
-      try {
-        // 1. Search for related videos
-        const searchResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${API_KEY}`
-        );
-        const searchData = await searchResponse.json();
-
-        if (!searchData.items || searchData.items.length === 0) {
-          resultsDiv.innerHTML = '❌ No videos found';
-          return;
-        }
-
-        // Get video IDs from search
-        const videoIds = searchData.items.map(item => item.id.videoId).join(',');
-
-        // 2. Get full video details (description etc.)
-        const videosResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoIds}&key=${API_KEY}`
-        );
-        const videosData = await videosResponse.json();
-
-        if (!videosData.items || videosData.items.length === 0) {
-          resultsDiv.innerHTML = '❌ No details found';
-          return;
-        }
-
-        // 3. Display results
-        videosData.items.forEach(video => {
-          const div = document.createElement('div');
-          div.className = 'video-item';
-          
-          const titleEl = document.createElement('div');
-          titleEl.className = 'video-title';
-          titleEl.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.snippet.title}</a>`;
-          div.appendChild(titleEl);
-
-          const descEl = document.createElement('div');
-          descEl.className = 'video-description';
-          descEl.textContent = video.snippet.description || 'No description';
-          div.appendChild(descEl);
-
-          resultsDiv.appendChild(div);
-        });
-
-      } catch (err) {
-        console.error(err);
-        resultsDiv.innerHTML = '❌ Error: ' + err.message;
-      }
-    }
-  </script>
-</body>
-</html>
+      const query = document.getElementById('
