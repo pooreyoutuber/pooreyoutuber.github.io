@@ -5,77 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PooreYouTuber Tools | Free Online Tools</title>
 
-  <meta name="description" content="PooreYouTuber offers free tools like YouTube multi-screen player, QR code generator, PDF tools, thumbnail downloader and more." />
-  <meta name="keywords" content="YouTube tools, online tools, QR generator, PDF converter, thumbnail downloader, free SEO tools, pooreyoutuber" />
-  <meta name="author" content="PooreYouTuber" />
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 0;
-      color: #333;
-      line-height: 1.6;
-      max-width: 100%;
-    }
-    header {
-      background: #007bff;
-      padding: 15px;
-      text-align: center;
-    }
-    header a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
+    header { background: #007bff; padding: 15px; text-align: center; }
+    header a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
     header a:hover { text-decoration: underline; }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 30px;
-      text-align: center;
-    }
+    .container { max-width: 900px; margin: auto; padding: 30px; text-align: center; }
     h1 { color: #222; }
-    .tools {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 40px;
-    }
-    .tool {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease;
-    }
-    .tool:hover { transform: translateY(-5px); }
-    .tool a {
-      text-decoration: none;
-      color: #fff;
-      background: #007bff;
-      padding: 10px 20px;
-      border-radius: 8px;
-      display: inline-block;
-      margin-top: 10px;
-    }
+    .tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 40px; }
+    .tool { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .tool a { text-decoration: none; color: #fff; background: #007bff; padding: 10px 20px; border-radius: 8px; display: inline-block; margin-top: 10px; }
     .tool a:hover { background: #0056b3; }
-    footer {
-      margin-top: 40px;
-      padding: 20px;
-      background: #fff;
-      text-align: center;
-      border-top: 1px solid #ddd;
-    }
-    footer a {
-      color: #007bff;
-      margin: 0 10px;
-      text-decoration: underline;
-    }
-    footer a:hover { color: #0056b3; }
-    .ad-box { margin:20px 0; text-align:center; }
+    .ad-box { margin: 20px 0; text-align: center; }
+    footer { margin-top: 40px; padding: 20px; background: #fff; text-align: center; border-top: 1px solid #ddd; }
+    footer a { color: #007bff; margin: 0 10px; text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -93,8 +36,9 @@
     <h1>🚀 PooreYouTuber All Tools</h1>
     <p>Choose any tool below 👇</p>
 
-    <!-- ✅ Ads (Device Wise) -->
-    <div class="ad-box" id="ad-container"></div>
+    <!-- ✅ Ads (Top Section 2 slots) -->
+    <div class="ad-box" id="ad-top-1"></div>
+    <div class="ad-box" id="ad-top-2"></div>
 
     <div class="tools">
       <div class="tool"><h3>Location Finder</h3><a href="location-finder.html">Open Tool</a></div>
@@ -111,8 +55,9 @@
       <div class="tool"><h3>Multi Browser</h3><a href="multi-browser.html">Open Tool</a></div>
     </div>
 
-    <!-- ✅ Ads (Bottom Section) -->
-    <div class="ad-box" id="ad-bottom"></div>
+    <!-- ✅ Ads (Bottom Section 2 slots) -->
+    <div class="ad-box" id="ad-bottom-1"></div>
+    <div class="ad-box" id="ad-bottom-2"></div>
   </div>
 
   <!-- ✅ Footer -->
@@ -126,24 +71,27 @@
     <p>&copy; 2025 PooreYouTuber. All Rights Reserved.</p>
   </footer>
 
-  <!-- ✅ Device-wise Ad Loader -->
+  <!-- ✅ Device-wise Ad Loader (4 ads each) -->
   <script>
+    function loadAd(zoneId, containerId) {
+      let script = document.createElement("script");
+      script.dataset.zone = zoneId;
+      script.src = "https://jsc.monetag.com/tag.min.js";
+      document.getElementById(containerId).appendChild(script);
+    }
+
     if (window.innerWidth <= 768) {
-      // 📱 Mobile → Banner Ads
-      document.getElementById("ad-container").innerHTML = `
-        <script>(function(s){s.dataset.zone='MOBILE_BANNER_ZONE',s.src='https://monetag-script.com/banner.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))<\/script>
-      `;
-      document.getElementById("ad-bottom").innerHTML = `
-        <script>(function(s){s.dataset.zone='MOBILE_BANNER_ZONE2',s.src='https://monetag-script.com/banner.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))<\/script>
-      `;
+      // 📱 Mobile → 4 ads
+      loadAd("9914849", "ad-top-1");   // Mobile Top Banner 1
+      loadAd("9914746", "ad-top-2");   // Mobile Top Banner 2
+      loadAd("9914701", "ad-bottom-1"); // Mobile Bottom Banner 1
+      loadAd("9914702", "ad-bottom-2"); // Mobile Bottom Banner 2
     } else {
-      // 💻 Desktop → Popunder + Vignette
-      document.getElementById("ad-container").innerHTML = `
-        <script>(function(s){s.dataset.zone='9914657',s.src='https://forfrogadiertor.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))<\/script>
-      `;
-      document.getElementById("ad-bottom").innerHTML = `
-        <script>(function(s){s.dataset.zone='9914741',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))<\/script>
-      `;
+      // 💻 Desktop → 4 ads
+      loadAd("9914700", "ad-top-1");   // Desktop Popunder 1
+      loadAd("9914741", "ad-top-2");   // Desktop Vignette 1
+      loadAd("9914765", "ad-bottom-1"); // Desktop Vignette 2
+      loadAd("9914657", "ad-bottom-2"); // Desktop Inline Ad
     }
   </script>
 
