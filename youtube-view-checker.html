@@ -54,12 +54,17 @@
 </head>
 <body>
 
+  <script async src="//www.monetag.com/js/monetag.js"></script>
+
   <h2>📊 YouTube Video Details & View Checker</h2>
   <p style="text-align:center;">Paste a YouTube video link to get title, description, views, likes, comments and tags.</p>
 
-  <!-- 🔝 Top Ads -->
-  <div class="ad-container" id="ad-top-1"></div>
-  <div class="ad-container" id="ad-top-2"></div>
+  <div class="ad-container" id="ad-top-1">
+    <script data-cfasync="false" type="text/javascript" src="https://groleegni.net/native-banner.min.js" data-zone="9914849"></script>
+  </div>
+  <div class="ad-container" id="ad-top-2">
+    <script>(function(s){s.dataset.zone='9914765',s.src='https://d133.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  </div>
 
   <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL here (e.g. https://youtu.be/xyz)" />
   <button onclick="loadVideo()">Load Video Info</button>
@@ -67,35 +72,27 @@
   <div id="player"></div>
   <div id="info"></div>
 
-  <!-- 🔻 Bottom Ads -->
-  <div class="ad-container" id="ad-bottom-1"></div>
-  <div class="ad-container" id="ad-bottom-2"></div>
+  <div class="ad-container" id="ad-bottom-1">
+    <script>(function(s){s.dataset.zone='9914741',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  </div>
+  <div class="ad-container" id="ad-bottom-2">
+    <script>(function(s){s.dataset.zone='9914702',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  </div>
+
+  <script data-cfasync="false" type="text/javascript" src="https://forfrogadiertor.com/tag.min.js" data-zone="9914657"></script>
+
+  <script data-cfasync="false" type="text/javascript" src="https://fpyf8.com/88/tag.min.js" data-zone="172906" async></script>
+
+  <script>(function(s){s.dataset.zone='9914764',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
+  <script data-cfasync="false" type="text/javascript" src="https://www.monetag.com/tag.min.js" data-zone="9914658"></script>
+  
+  <script data-cfasync="false" type="text/javascript" src="https://www.monetag.com/tag.min.js" data-zone="9914699" data-popunder-type="onclick"></script>
 
   <script>
-    // ✅ Function to load Monetag Ads
-    function loadAd(zoneId, containerId, src) {
-      let script = document.createElement("script");
-      script.dataset.zone = zoneId;
-      script.src = src;
-      document.getElementById(containerId).appendChild(script);
-    }
-
-    if (window.innerWidth <= 768) {
-      // 📱 Mobile → 4 Banner Ads
-      loadAd("9914849", "ad-top-1", "https://groleegni.net/banner.min.js");   // Mobile Banner 1
-      loadAd("9914765", "ad-top-2", "https://groleegni.net/banner.min.js");   // Mobile Banner 2
-      loadAd("9914701", "ad-bottom-1", "https://groleegni.net/banner.min.js");// Mobile Banner 3
-      loadAd("9914700", "ad-bottom-2", "https://groleegni.net/banner.min.js");// Mobile Banner 4
-    } else {
-      // 💻 Desktop → 4 Ads (Popunder + Vignette)
-      loadAd("9914657", "ad-top-1", "https://forfrogadiertor.com/tag.min.js");   // Desktop Popunder
-      loadAd("9914741", "ad-top-2", "https://groleegni.net/vignette.min.js");    // Desktop Vignette
-      loadAd("9914702", "ad-bottom-1", "https://groleegni.net/vignette.min.js"); // Desktop Vignette 2
-      loadAd("9914764", "ad-bottom-2", "https://groleegni.net/vignette.min.js"); // Desktop Vignette 3
-    }
-
     // ✅ YouTube API Code
-    const apiKey = "AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU";
+    const apiKey = "AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU"; // Note: This API key is publicly visible, consider server-side fetching for security.
+
     function extractVideoId(url) {
       const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/;
       const match = url.match(regex);
