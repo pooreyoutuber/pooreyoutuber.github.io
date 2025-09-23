@@ -5,23 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YouTube Shorts Multi Viewer | Watch Multiple Shorts Together</title>
 
-  <!-- ✅ SEO Meta Tags -->
   <meta name="description" content="Free YouTube Shorts Multi Viewer tool. Paste any Shorts URL and watch multiple Shorts videos simultaneously.">
   <meta name="keywords" content="YouTube Shorts viewer, multi Shorts player, watch multiple Shorts, YouTube multi viewer, free Shorts tool, Shorts autoplay">
   <meta name="robots" content="index, follow">
 
-  <!-- ✅ Open Graph Tags -->
   <meta property="og:title" content="YouTube Shorts Multi Viewer">
   <meta property="og:description" content="Paste a YouTube Shorts link and watch multiple Shorts videos at the same time with this free tool.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://yourwebsite.com/shorts-multi-viewer">
   <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
 
-  <!-- ✅ Monetag Global Ads (Vignette + Popunder + Push) -->
-  <script>(function(s){s.dataset.zone='9914657';s.src='https://forfrogadiertor.com/tag.min.js';})(document.body.appendChild(document.createElement('script')))</script>
-  <script>(function(s){s.dataset.zone='9914741';s.src='https://groleegni.net/vignette.min.js';})(document.body.appendChild(document.createElement('script')))</script>
-  <script>(function(s){s.dataset.zone='9914764';s.src='https://gizokraijaw.net/vignette.min.js';})(document.body.appendChild(document.createElement('script')))</script>
-  <script>(function(s){s.dataset.zone='9914849';s.src='https://groleegni.net/vignette.min.js';})(document.body.appendChild(document.createElement('script')))</script>
+  <script async src="//www.monetag.com/js/monetag.js"></script>
 
   <style>
     body {font-family: Arial, sans-serif; background:#f4f6f9; text-align:center; margin:0; padding:0;}
@@ -62,20 +56,34 @@
   <h1>🚀 YouTube Shorts Multi Viewer</h1>
   <p>Paste a Shorts URL and choose how many players you want</p>
 
-  <!-- ✅ Mobile Ads -->
   <div class="mobile-ads" style="display:none;">
-    <div class="ads-box"><script async src="https://alwingulla.com/88/tag.min.js" data-zone="9914849"></script></div>
-    <div class="ads-box"><script async src="https://alwingulla.com/88/tag.min.js" data-zone="9914764"></script></div>
-    <div class="ads-box"><script async src="https://alwingulla.com/88/tag.min.js" data-zone="9914741"></script></div>
-    <div class="ads-box"><script async src="https://alwingulla.com/88/tag.min.js" data-zone="9914702"></script></div>
+    <div class="ads-box">
+      <script data-cfasync="false" type="text/javascript" src="https://groleegni.net/native-banner.min.js" data-zone="9914849"></script>
+    </div>
+    <div class="ads-box">
+      <script>(function(s){s.dataset.zone='9914764',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    </div>
+    <div class="ads-box">
+      <script>(function(s){s.dataset.zone='9914741',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    </div>
+    <div class="ads-box">
+      <script>(function(s){s.dataset.zone='9914702',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    </div>
   </div>
 
-  <!-- ✅ Desktop Ads -->
   <div class="desktop-ads" style="display:none;">
-    <div class="ads-box"><script async src="https://alwingulla.com/88/tag.min.js" data-zone="9914701"></script></div>
-    <div class="ads-box"><script async src="https://alwingulla.com/88/tag.min.js" data-zone="9914699"></script></div>
-    <div class="ads-box"><script async src="https://alwingulla.com/88/tag.min.js" data-zone="9914658"></script></div>
-    <div class="ads-box"><script async src="https://alwingulla.com/88/tag.min.js" data-zone="9914657"></script></div>
+    <div class="ads-box">
+      <script data-cfasync="false" type="text/javascript" src="https://www.monetag.com/tag.min.js" data-zone="9914701"></script>
+    </div>
+    <div class="ads-box">
+      <script data-cfasync="false" type="text/javascript" src="https://www.monetag.com/tag.min.js" data-zone="9914699" data-popunder-type="onclick"></script>
+    </div>
+    <div class="ads-box">
+      <script data-cfasync="false" type="text/javascript" src="https://www.monetag.com/tag.min.js" data-zone="9914658"></script>
+    </div>
+    <div class="ads-box">
+      <script data-cfasync="false" type="text/javascript" src="https://forfrogadiertor.com/tag.min.js" data-zone="9914657"></script>
+    </div>
   </div>
 
   <input type="text" id="shortUrl" placeholder="Paste YouTube Shorts URL">
@@ -85,7 +93,7 @@
   <div class="container" id="players"></div>
 
   <script>
-    // ✅ Device check
+    // ✅ Device check and ad display logic
     if (/Mobi|Android/i.test(navigator.userAgent)) {
       document.querySelector(".mobile-ads").style.display = "block";
     } else {
@@ -98,7 +106,10 @@
       const playersDiv = document.getElementById('players');
       playersDiv.innerHTML = '';
 
-      if (!url || !count) return;
+      if (!url || isNaN(count) || count <= 0) {
+        alert("Please enter a valid YouTube Shorts URL and a number greater than 0.");
+        return;
+      }
 
       let videoId = '';
       if (url.includes('youtu.be/')) {
@@ -107,6 +118,9 @@
         videoId = url.split('/shorts/')[1].split(/[?&]/)[0];
       } else if (url.includes('watch?v=')) {
         videoId = url.split('watch?v=')[1].split(/[?&]/)[0];
+      } else {
+        alert("Invalid YouTube Shorts URL format.");
+        return;
       }
 
       for (let i=0; i<count; i++) {
