@@ -179,7 +179,7 @@ function videosToCsv(videos){
 }
 
 searchBtn.addEventListener('click', async ()=>{
-  // const apiKey = apiKeyEl.value.trim(); // API key ab client-side par nahi chahiye
+  // API key ab client-side par nahi chahiye
   const q = queryEl.value.trim();
   if(!q){ alert('Please enter a channel name or ID'); return; }
 
@@ -196,11 +196,8 @@ searchBtn.addEventListener('click', async ()=>{
     
     // Server se data aane ke baad, client-side analysis aur rendering hogi
     const channel = data.channel;
-    const videos = data.videos || []; // Agar server mein videos nahi hain, to empty array lein
+    const videos = data.videos || []; 
     const stats = channel.statistics || {};
-    
-    // Yahan humein videos data ki zaroorat hai jo humne server par abhi poora implement nahi kiya.
-    // Puraani logic ko follow karne ke liye, hum maan rahe hain ki server ne channel aur videos ka data de diya hai.
     
     log(`Got ${videos.length} video details — Analyzing...`);
     const analysis = analyzeVideos(channel, videos);
