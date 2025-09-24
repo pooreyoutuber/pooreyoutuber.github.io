@@ -53,7 +53,6 @@
 // YouTube Channel Audit - client-side logic (now fetches data from your secure Replit server)
 
 const searchBtn = document.getElementById('searchBtn');
-// const apiKeyEl = document.getElementById('apiKey'); // Removed
 const queryEl = document.getElementById('query');
 const statusEl = document.getElementById('status');
 const summaryEl = document.getElementById('summary');
@@ -70,11 +69,8 @@ async function fetchJson(url){
   return res.json();
 }
 
-// Client-side API functions are removed as the server now handles the fetching logic.
-
 function analyzeVideos(channel, videos){
-  // compute totals and basic SEO heuristics
-  const totals = { videos: videos.length, views:0, likes:0 }; // likes may not be available for all
+  const totals = { videos: videos.length, views:0, likes:0 };
   let top = null;
   videos.forEach(v=>{
     const s = v.statistics || {};
@@ -83,13 +79,10 @@ function analyzeVideos(channel, videos){
     if(!top || viewCount> (top.statistics?.viewCount||0)) top = v;
   });
 
-  // Compute heuristics: missing tags, short descriptions, long titles, low engagement
   const issues = [];
   const missingTags = videos.filter(v => !v.snippet.tags || v.snippet.tags.length===0).length;
   const shortDesc = videos.filter(v => (v.snippet.description||'').length < 50).length;
   const longTitles = videos.filter(v => (v.snippet.title||'').length > 80).length;
-
-  // Engagement estimate: likes/view (best-effort — likes may be hidden)
   const engagementRatios = videos.map(v=>{
     const s=v.statistics||{}; const views=Number(s.viewCount||0); const likes=Number(s.likeCount||0)||0; return {id:v.id,views,likes,ratio: views? (likes/views):0};
   });
@@ -100,15 +93,12 @@ function analyzeVideos(channel, videos){
   if(longTitles>0) issues.push({k:'Long titles',desc:`${longTitles} videos have titles longer than 80 characters — shorter titles perform better on many devices.`});
   if(avgEng < 0.01) issues.push({k:'Low likes-to-views',desc:`Average likes/views ratio is ${(avgEng*100).toFixed(2)}%. Consider stronger CTAs and higher watch-time content.`});
 
-  // Upload cadence: need dates
   const dates = videos.map(v=> new Date(v.snippet.publishedAt));
   dates.sort((a,b)=>a-b);
-  let cadence='N/A';
   if(dates.length>=2){
     const diffs = [];
     for(let i=1;i<dates.length;i++) diffs.push( (dates[i]-dates[i-1]) / (1000*60*60*24) );
     const avg = diffs.reduce((a,b)=>a+b,0)/diffs.length;
-    cadence = avg.toFixed(1) + ' days (avg)';
     if(avg>30) issues.push({k:'Low upload frequency',desc:`Average upload gap is ${avg.toFixed(1)} days. More consistent uploads (weekly or biweekly) help channel growth.`});
   }
 
@@ -152,7 +142,6 @@ function renderAudit(issues, analysis){
   else{
     auditEl.innerHTML = '<ul>' + issues.map(it=>`<li><strong>${it.k}:</strong> ${it.desc}</li>`).join('') + '</ul>';
   }
-  // Generic manual suggestions
   auditEl.innerHTML += `
     <h4>Actionable fixes (common)</h4>
     <ol>
@@ -179,14 +168,13 @@ function videosToCsv(videos){
 }
 
 searchBtn.addEventListener('click', async ()=>{
-  // API key ab client-side par nahi chahiye
   const q = queryEl.value.trim();
   if(!q){ alert('Please enter a channel name or ID'); return; }
 
   try{
     log('Fetching channel data securely...');
     
-    // **SERVER CALL: AB YAHAN SE AAPKA SECURE REPLIT SERVER CALL HOGA**
+    // YAHAN AAPKA SECURE REPLIT URL AAYEGA
     const res = await fetch('https://nodejs-sutharmanish404.replit.app/data?query=' + encodeURIComponent(q));
     const data = await res.json();
 
@@ -194,7 +182,6 @@ searchBtn.addEventListener('click', async ()=>{
         throw new Error(data.error);
     }
     
-    // Server se data aane ke baad, client-side analysis aur rendering hogi
     const channel = data.channel;
     const videos = data.videos || []; 
     const stats = channel.statistics || {};
