@@ -51,7 +51,7 @@
       resultsDiv.innerHTML = "⏳ Fetching results securely...";
 
       try {
-        // 1. Search for related videos
+        // 1. Search for related videos (using /api/search endpoint)
         const searchRes = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
         const searchData = await searchRes.json();
 
@@ -67,23 +67,19 @@
 
         resultsDiv.innerHTML = "";
         
-        // 2. Fetch full details (description + tags) for each video
+        // 2. Fetch full details (using /api/details endpoint)
         for (let item of searchData.items) {
-          if (!item.id.videoId) continue; // Skip non-video results
+          if (!item.id.videoId) continue;
 
           const videoId = item.id.videoId;
           const title = item.snippet.title;
 
-          // Fetch full description and tags securely
           const detailsRes = await fetch(`${API_BASE}/details?id=${videoId}`);
           const detailsData = await detailsRes.json();
           
-          // Extract Description and Tags
           const videoDetails = detailsData.items?.[0]?.snippet;
           const desc = videoDetails?.description || "No description available";
-          
-          // Format tags for display
-          const tags = videoDetails?.tags ? videoDetails.tags.map(tag => `#${tag}`).replace(/,/g, ' ') : 'No tags available';
+          const tags = videoDetails?.tags ? videoDetails.tags.map(tag => `#${tag}`).join(' ') : 'No tags available';
 
           const div = document.createElement("div");
           div.className = "video-item";
@@ -103,7 +99,6 @@
 
     function escapeHtml(str) {
       if (!str) return '';
-      // Simple HTML escaping to prevent XSS
       return String(str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
