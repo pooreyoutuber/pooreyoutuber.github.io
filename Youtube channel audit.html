@@ -1,0 +1,261 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>YouTube Channel SEO & Audit Tool — Demo</title>
+  <style>
+    :root{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#f7fafc;color:#111}
+    body{margin:16px}
+    .card{background:#fff;padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,.06);max-width:1100px}
+    label{display:block;margin:8px 0}
+    input,select,button,textarea{padding:8px;border-radius:6px;border:1px solid #ddd;font-size:14px}
+    button{cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    .muted{color:#666;font-size:13px}
+    .small{font-size:13px}
+    .bad{color:#b91c1c}
+    .good{color:#065f46}
+    .kpi{display:inline-block;padding:6px 10px;border-radius:8px;margin-right:8px;background:#f1f5f9}
+  </style>
+</head>
+<body>
+  <h1>YouTube Channel SEO & Audit Tool</h1>
+  <div class="card">
+    <p class="muted">Enter a YouTube <strong>channel name</strong> or <strong>channel ID</strong>. You'll need a YouTube Data API v3 key (read-only). This demo runs entirely in your browser — for large channels use a server-side proxy because API keys on client-side are visible.</p><label>API Key (YouTube Data API v3): <input id="apiKey" value="AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU" style="width:100%" /></label>
+
+<label>Channel name or channel ID: <input id="query" placeholder="e.g. PewDiePie or UC-lHJZR3Gqxm24_Vd_AJ5Yw" style="width:100%" /></label>
+
+<div style="margin-top:10px">
+  <button id="searchBtn">Search & Audit</button>
+  <button id="downloadCsv" disabled>Download CSV (videos)</button>
+</div>
+
+<div id="status" class="muted" style="margin-top:10px">Ready.</div>
+
+<hr />
+
+<div id="summary"></div>
+
+<h3>Top videos (by views)</h3>
+<div id="topVideos"></div>
+
+<h3>Video list</h3>
+<div id="videoTable"></div>
+
+<h3>Audit / Suggestions</h3>
+<div id="audit"></div>
+
+  </div><script>
+// YouTube Channel Audit - client-side demo
+// NOTE: For production keep API key on server-side. This demo fetches only basic public data.
+
+const searchBtn = document.getElementById('searchBtn');
+const apiKeyEl = document.getElementById('apiKey');
+const queryEl = document.getElementById('query');
+const statusEl = document.getElementById('status');
+const summaryEl = document.getElementById('summary');
+const topVideosEl = document.getElementById('topVideos');
+const videoTableEl = document.getElementById('videoTable');
+const auditEl = document.getElementById('audit');
+const downloadCsvBtn = document.getElementById('downloadCsv');
+
+function log(s){ statusEl.textContent = s; }
+
+async function fetchJson(url){
+  const res = await fetch(url);
+  if(!res.ok) throw new Error(res.status + ' ' + res.statusText);
+  return res.json();
+}
+
+async function resolveChannelId(apiKey, q){
+  // If q looks like UC... assume channelId.
+  if(q.startsWith('UC') && q.length>20) return q;
+  // Use search.list to find a channel by name
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=5&q=${encodeURIComponent(q)}&key=${apiKey}`;
+  const j = await fetchJson(url);
+  if(!j.items || j.items.length===0) throw new Error('Channel not found');
+  // choose first match (could improve by showing options)
+  return j.items[0].snippet.channelId;
+}
+
+async function getChannelData(apiKey, channelId){
+  const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelId}&key=${apiKey}`;
+  const j = await fetchJson(url);
+  if(!j.items || j.items.length===0) throw new Error('Channel data not available');
+  return j.items[0];
+}
+
+async function getAllUploadsVideoIds(apiKey, uploadsPlaylistId, maxVideos=500){
+  // paginate playlistItems.list (max 50 per page)
+  let ids = [];
+  let pageToken = '';
+  while(true){
+    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50${pageToken?`&pageToken=${pageToken}`:''}&key=${apiKey}`;
+    const j = await fetchJson(url);
+    j.items.forEach(it=>ids.push(it.contentDetails.videoId));
+    if(!j.nextPageToken) break;
+    pageToken = j.nextPageToken;
+    if(ids.length>=maxVideos) break; // safety limit
+  }
+  return ids.slice(0, maxVideos);
+}
+
+async function getVideosBulk(apiKey, ids){
+  // videos.list accepts up to 50 ids at once
+  const batches = [];
+  for(let i=0;i<ids.length;i+=50) batches.push(ids.slice(i,i+50));
+  const results = [];
+  for(const b of batches){
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${b.join(',')}&maxResults=50&key=${apiKey}`;
+    const j = await fetchJson(url);
+    if(j.items) results.push(...j.items);
+  }
+  return results;
+}
+
+function analyzeVideos(channel, videos){
+  // compute totals and basic SEO heuristics
+  const totals = { videos: videos.length, views:0, likes:0 }; // likes may not be available for all
+  let top = null;
+  videos.forEach(v=>{
+    const s = v.statistics || {};
+    const viewCount = Number(s.viewCount || 0);
+    totals.views += viewCount;
+    if(!top || viewCount> (top.statistics?.viewCount||0)) top = v;
+  });
+
+  // Compute heuristics: missing tags, short descriptions, long titles, low engagement
+  const issues = [];
+  const missingTags = videos.filter(v => !v.snippet.tags || v.snippet.tags.length===0).length;
+  const shortDesc = videos.filter(v => (v.snippet.description||'').length < 50).length;
+  const longTitles = videos.filter(v => (v.snippet.title||'').length > 80).length;
+
+  // Engagement estimate: likes/view (best-effort — likes may be hidden)
+  const engagementRatios = videos.map(v=>{
+    const s=v.statistics||{}; const views=Number(s.viewCount||0); const likes=Number(s.likeCount||0)||0; return {id:v.id,views,likes,ratio: views? (likes/views):0};
+  });
+  const avgEng = engagementRatios.reduce((a,b)=>a+b.ratio,0)/Math.max(1,engagementRatios.length);
+
+  if(missingTags > videos.length*0.3) issues.push({k:'Missing tags',desc:`${missingTags} of ${videos.length} videos have no tags. Tags help discovery and related video matching.`});
+  if(shortDesc > videos.length*0.2) issues.push({k:'Short descriptions',desc:`${shortDesc} videos have very short descriptions. Use 200+ characters with keywords and links.`});
+  if(longTitles>0) issues.push({k:'Long titles',desc:`${longTitles} videos have titles longer than 80 characters — shorter titles perform better on many devices.`});
+  if(avgEng < 0.01) issues.push({k:'Low likes-to-views',desc:`Average likes/views ratio is ${(avgEng*100).toFixed(2)}%. Consider stronger CTAs and higher watch-time content.`});
+
+  // Upload cadence: need dates
+  const dates = videos.map(v=> new Date(v.snippet.publishedAt));
+  dates.sort((a,b)=>a-b);
+  let cadence='N/A';
+  if(dates.length>=2){
+    const diffs = [];
+    for(let i=1;i<dates.length;i++) diffs.push( (dates[i]-dates[i-1]) / (1000*60*60*24) );
+    const avg = diffs.reduce((a,b)=>a+b,0)/diffs.length;
+    cadence = avg.toFixed(1) + ' days (avg)';
+    if(avg>30) issues.push({k:'Low upload frequency',desc:`Average upload gap is ${avg.toFixed(1)} days. More consistent uploads (weekly or biweekly) help channel growth.`});
+  }
+
+  return {totals, top, issues, avgEng};
+}
+
+function renderSummary(channel, channelStats, analysis){
+  summaryEl.innerHTML = `
+    <strong>Channel:</strong> ${channel.snippet.title} <div class="muted">${channel.snippet.customUrl?`@${channel.snippet.customUrl}`:''}</div>
+    <div style="margin-top:8px">
+      <span class="kpi">Subscribers: ${channelStats.subscriberCount||'hidden'}</span>
+      <span class="kpi">Total views (channel): ${channelStats.viewCount||0}</span>
+      <span class="kpi">Videos fetched: ${analysis.totals.videos}</span>
+    </div>
+  `;
+}
+
+function renderTopVideos(videos){
+  const top = videos.slice().sort((a,b)=> (Number(b.statistics.viewCount||0) - Number(a.statistics.viewCount||0))).slice(0,10);
+  let html = '<ol>' + top.map(v=>`<li><a target="_blank" href="https://youtu.be/${v.id}">${v.snippet.title}</a> — ${v.statistics.viewCount||0} views</li>`).join('') + '</ol>';
+  topVideosEl.innerHTML = html;
+}
+
+function renderVideoTable(videos){
+  const rows = videos.map(v=>{
+    const s=v.statistics||{}; const snippet=v.snippet||{};
+    return `<tr>
+      <td><a target=_blank href="https://youtu.be/${v.id}">${escapeHtml(snippet.title||'')}</a></td>
+      <td>${snippet.publishedAt? new Date(snippet.publishedAt).toLocaleDateString():''}</td>
+      <td>${s.viewCount||0}</td>
+      <td>${s.likeCount||'—'}</td>
+      <td>${(snippet.tags && snippet.tags.length)?snippet.tags.length:0}</td>
+      <td class="small">${escapeHtml( (snippet.description||'').slice(0,120) )}${(snippet.description||'').length>120?'...':''}</td>
+    </tr>`;
+  }).join('');
+  videoTableEl.innerHTML = `<table><thead><tr><th>Title</th><th>Date</th><th>Views</th><th>Likes</th><th>Tags</th><th>Description (preview)</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderAudit(issues, analysis){
+  if(issues.length===0) auditEl.innerHTML = '<div class="good">No major automated issues found. Manual review recommended for thumbnails and watch-time metrics.</div>';
+  else{
+    auditEl.innerHTML = '<ul>' + issues.map(it=>`<li><strong>${it.k}:</strong> ${it.desc}</li>`).join('') + '</ul>';
+  }
+  // Generic manual suggestions
+  auditEl.innerHTML += `
+    <h4>Actionable fixes (common)</h4>
+    <ol>
+      <li>Optimize top videos' titles and thumbnails — A/B test thumbnails and tweak titles for CTR.</li>
+      <li>Improve descriptions: first 100–150 chars should contain main keywords + link; full description 200+ chars with chapters and timestamps.</li>
+      <li>Add consistent tags across related videos; use 5–12 relevant tags per video (avoid keyword stuffing).</li>
+      <li>Create playlists to increase session watch time and improve discovery.</li>
+      <li>Use end screens and pinned comments to drive to other videos/playlists.</li>
+      <li>Add captions/subtitles for accessibility and search reach.</li>
+    </ol>
+  `;
+}
+
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function videosToCsv(videos){
+  const hdr = ['id','title','publishedAt','views','likes','comments','tags','description'];
+  const rows = videos.map(v=>{
+    const s=v.statistics||{}; const sn=v.snippet||{};
+    const tags = (sn.tags||[]).join('|');
+    return [v.id, `"${(sn.title||'').replace(/"/g,'""') }"`, sn.publishedAt||'', s.viewCount||0, s.likeCount||0, s.commentCount||0, `"${tags}"`, `"${(sn.description||'').replace(/"/g,'""')}"`].join(',');
+  });
+  return [hdr.join(','), ...rows].join('\n');
+}
+
+searchBtn.addEventListener('click', async ()=>{
+  const apiKey = apiKeyEl.value.trim();
+  const q = queryEl.value.trim();
+  if(!apiKey){ alert('Please enter API key'); return; }
+  if(!q){ alert('Please enter a channel name or ID'); return; }
+
+  try{
+    log('Resolving channel...');
+    const channelId = await resolveChannelId(apiKey, q);
+    log('Fetching channel info...');
+    const channel = await getChannelData(apiKey, channelId);
+    const stats = channel.statistics || {};
+    log('Fetching uploads list (first 300 videos max)...');
+    const uploadsPlaylist = channel.contentDetails.relatedPlaylists.uploads;
+    const videoIds = await getAllUploadsVideoIds(apiKey, uploadsPlaylist, 300);
+    log(`Got ${videoIds.length} video ids — fetching details...`);
+    const videos = await getVideosBulk(apiKey, videoIds);
+    log('Analyzing...');
+    const analysis = analyzeVideos(channel, videos);
+    renderSummary(channel, stats, analysis);
+    renderTopVideos(videos);
+    renderVideoTable(videos);
+    renderAudit(analysis.issues, analysis);
+    downloadCsvBtn.disabled = false;
+    downloadCsvBtn.onclick = ()=>{
+      const csv = videosToCsv(videos);
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${channel.snippet.title.replace(/\W+/g,'_')}_videos.csv`; a.click();
+    }
+    log('Done. Review the audit and suggestions.');
+  }catch(e){
+    console.error(e); log('Error: ' + e.message); alert('Error: ' + e.message);
+  }
+});
+
+</script></body>
+</html>
