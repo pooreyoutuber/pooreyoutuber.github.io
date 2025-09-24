@@ -37,8 +37,14 @@
   <div id="results"></div>
 
   <script>
-    // **Final Secure Replit URL**
-    const API_BASE = "https://nodejs-sutharmanish404.replit.app/api"; 
+    // *******************************************************************
+    // ** FINAL CORRECTED SECURE REPLIT URL (Based on Replit Assistant's fix) **
+    // *******************************************************************
+    const TEMP_DOMAIN = "https://3ba947fe-ebdb-424b-8fa6-20b5a674d382-00-3knb1boao5qhl.pike.replit.dev";
+    const API_BASE = `${TEMP_DOMAIN}/api`; 
+    
+    // Note: If you are using an older Replit session, you may need to use:
+    // const API_BASE = "https://nodejs-sutharmanish404.replit.app/api";
 
     async function fetchRelated() {
       const query = document.getElementById('searchTitle').value.trim();
@@ -53,6 +59,13 @@
       try {
         // 1. Search for related videos (using /api/search endpoint)
         const searchRes = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
+        
+        // Error handling for 403 Forbidden (Google API issue)
+        if (!searchRes.ok) {
+            const errorText = await searchRes.text();
+            throw new Error(`Failed to fetch data: ${searchRes.status} ${searchRes.statusText} | Response: ${errorText}`);
+        }
+        
         const searchData = await searchRes.json();
 
         if (searchData.error) {
@@ -92,7 +105,8 @@
           resultsDiv.appendChild(div);
         }
       } catch (err) {
-        resultsDiv.innerHTML = "❌ Error fetching results. (Please ensure your Replit server is running and accessible)";
+        // Updated error message to guide the user based on our previous discussions
+        resultsDiv.innerHTML = `❌ Error: ${err.message}. Please ensure: 1. Replit server is RUNNING. 2. Google API Key has 'Don't restrict key' saved.`;
         console.error(err);
       }
     }
