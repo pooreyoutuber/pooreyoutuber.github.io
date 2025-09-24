@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>YouTube Channel SEO & Audit Tool — Secure</title>
+  <title>YouTube Channel SEO & Audit Tool — Dual View</title>
   <style>
     /* Global Styling for Clean UI */
     :root{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#f7fafc;color:#111}
@@ -14,7 +14,7 @@
     /* Input/Button Styling */
     label{display:block;margin:8px 0}
     input,select,button,textarea{padding:8px;border-radius:6px;border:1px solid #ddd;font-size:14px}
-    button{cursor:pointer; background:#007bff; color:#fff; }
+    button{cursor:pointer; background:#007bff; color:#fff; transition: background 0.2s; border: none;}
     button:hover { background:#0056b3; }
     
     /* Data Display Styling */
@@ -26,25 +26,42 @@
     .good{color:#065f46}
     .kpi{display:inline-block;padding:6px 10px;border-radius:8px;margin-right:8px;background:#f1f5f9; font-weight: bold;}
     
-    /* Audit Summary Grid (for Profile/Content/Engagement sections) */
+    /* Audit Summary Grid (UI 1) */
     .audit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px;}
     .audit-item { padding: 10px; border: 1px solid #eee; border-radius: 6px; }
     .status-icon { font-size: 20px; float: right; }
     .check { color: #065f46; }
     .cross { color: #b91c1c; }
     
-    /* Overall Score Circle (like your screenshot) */
+    /* Overall Score Circle (UI 1) */
     .score-circle { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; position: relative; margin: 0 auto;}
     .score-container { text-align: center; margin: 20px auto; max-width: 300px;}
     
+    /* Dual View Buttons Styling */
+    .view-buttons button { background: #eee; color: #333; border: 1px solid #ddd; margin-right: 5px; }
+    .view-buttons button.active { background: #007bff; color: #fff; border-color: #007bff; }
+    
+    /* Hide/Show Views */
+    .report-view { display: none; }
+    .report-view.active { display: block; }
+
+    /* UI 2 (KPIs/Social Blade Style) */
+    .kpi-large { font-size: 24px; font-weight: bold; color: #333; margin-top: 5px;}
+    .kpi-label { font-size: 14px; color: #666; }
+    .kpi-box { text-align: center; padding: 15px; border: 1px solid #ddd; border-radius: 8px;}
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+    .daily-table th, .daily-table td { font-size: 13px; padding: 6px 8px; }
+    .daily-table .change-good { color: #065f46; font-weight: bold; }
+    .daily-table .change-bad { color: #b91c1c; font-weight: bold; }
+
   </style>
 </head>
 <body>
   <h1>YouTube Channel SEO & Audit Tool</h1>
   <div class="card">
     
-    <p class="muted">Enter a YouTube <strong>channel name</strong> or <strong>channel ID</strong> </p>
-
+    <p class="muted">Enter a YouTube <strong>channel name</strong> or <strong>channel ID</strong>. This tool is safe.</p>
+    
 <label>Channel name or channel ID: <input id="query" placeholder="e.g. PewDiePie or UC-lHJZR3Gqxm24_Vd_AJ5Yw" style="width:100%" /></label>
 
 <div style="margin-top:10px; display: flex; justify-content: flex-start; gap: 10px;">
@@ -56,51 +73,130 @@
 
 <hr />
 
-<div id="fullReport">
-    <div class="score-container">
-        <div id="scoreCircle" class="score-circle">—%</div>
-        <div id="scoreMessage" style="margin-top: 10px; font-weight: bold;">Enter channel to run audit</div>
-        <div id="recommendations" style="margin-top: 5px; color: #dc3545;">— Recommendations</div>
-        <div class="muted small">Report Generated: <span id="reportDate">N/A</span></div>
+<div class="view-buttons" style="margin-bottom: 20px;">
+    <button id="btnAuditView" class="active">Audit Score & Suggestions</button>
+    <button id="btnStatusView">Channel Status & Performance</button>
+</div>
+
+<div id="reportContainer">
+    
+    <div id="auditView" class="report-view active">
+        <div id="auditReportHeader">
+            <div class="score-container">
+                <div id="scoreCircle" class="score-circle">—%</div>
+                <div id="scoreMessage" style="margin-top: 10px; font-weight: bold;">Enter channel to run audit</div>
+                <div id="recommendations" style="margin-top: 5px; color: #dc3545;">— Recommendations</div>
+                <div class="muted small">Report Generated: <span id="reportDate">N/A</span></div>
+            </div>
+            
+            <h2>Profile</h2>
+            <div class="audit-grid" id="profileAudit"></div>
+
+            <h2>Content</h2>
+            <div class="audit-grid" id="contentAudit"></div>
+
+            <h2>Engagement</h2>
+            <div class="audit-grid" id="engagementAudit"></div>
+        </div>
+        
+        <hr/>
+        <h3>Audit / Suggestions & Tips (Problems aur Sujaav)</h3>
+        <div id="audit"></div>
+        
+        <hr/>
+        <h3>Top videos (by views)</h3>
+        <div id="topVideos"></div>
+
+        <h3>Video list</h3>
+        <div id="videoTable"></div>
     </div>
     
-    <h2>Profile</h2>
-    <div class="audit-grid" id="profileAudit"></div>
+    <div id="statusView" class="report-view">
+        <h2 id="statusTitle">Channel Status Overview</h2>
+        
+        <div class="kpi-row" id="kpiOverview">
+            <div class="kpi-box">
+                <div class="kpi-label">Subscribers</div>
+                <div class="kpi-large" id="statusSubscribers">—</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">Total Video Views</div>
+                <div class="kpi-large" id="statusViews">—</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">Videos Count</div>
+                <div class="kpi-large" id="statusVideos">—</div>
+            </div>
+        </div>
+        
+        <h3>Estimated Earnings (Tips Rupees)</h3>
+        <p class="muted">Based on average views and typical CPM ranges (Data is placeholder/estimated for demonstration).</p>
+        <div class="kpi-row" style="grid-template-columns: repeat(2, 1fr);">
+             <div class="kpi-box">
+                <div class="kpi-label">Monthly Est. Earnings (Low)</div>
+                <div class="kpi-large bad" id="estMonthlyLow">—</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-label">Monthly Est. Earnings (High)</div>
+                <div class="kpi-large good" id="estMonthlyHigh">—</div>
+            </div>
+        </div>
 
-    <h2>Content</h2>
-    <div class="audit-grid" id="contentAudit"></div>
-
-    <h2>Engagement</h2>
-    <div class="audit-grid" id="engagementAudit"></div>
-
-    <hr/>
-    <h3>Top videos (by views)</h3>
-    <div id="topVideos"></div>
-
-    <h3>Video list</h3>
-    <div id="videoTable"></div>
+        <h3>Daily Performance (Placeholder Data)</h3>
+        <table class="daily-table">
+            <thead><tr><th>Date</th><th>Views</th><th>Subs Change</th><th>Est. Earnings</th></tr></thead>
+            <tbody id="dailyPerformanceTable">
+                <tr><td>Today</td><td id="dView">0</td><td id="dSubs" class="change-bad">0</td><td id="dEarnings">N/A</td></tr>
+            </tbody>
+        </table>
+        
+    </div>
     
-    <h3>Audit / Suggestions</h3>
-    <div id="audit"></div>
-</div>
-  </div><script>
+</div> </div><script>
 
+// UI Elements
 const searchBtn = document.getElementById('searchBtn');
 const queryEl = document.getElementById('query');
 const statusEl = document.getElementById('status');
-const topVideosEl = document.getElementById('topVideos');
-const videoTableEl = document.getElementById('videoTable');
-const auditEl = document.getElementById('audit');
 const downloadCsvBtn = document.getElementById('downloadCsv');
+const auditView = document.getElementById('auditView');
+const statusView = document.getElementById('statusView');
+const btnAuditView = document.getElementById('btnAuditView');
+const btnStatusView = document.getElementById('btnStatusView');
 
 // *******************************************************************
 // ** FINAL, VERIFIED CORRECT SECURE REPLIT URL **
 // *******************************************************************
-// Replit Assistant ne is URL ko verify kiya hai (Screenshot_2025-09-24-23-19-59-32.jpg)
 const API_BASE_URL = "https://3ba947fe-ebdb-424b-8fa6-20b5a674d382-00-3knb1boao5qhl.pike.replit.dev";
 
+let lastChannelData = null; // To store data for view switching
 
+// --- UTILITY FUNCTIONS ---
 function log(s){ statusEl.textContent = s; }
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+// --- VIEW SWITCHING LOGIC ---
+function switchView(viewId) {
+    const views = [auditView, statusView];
+    const buttons = [btnAuditView, btnStatusView];
+    
+    views.forEach(v => v.classList.remove('active'));
+    buttons.forEach(b => b.classList.remove('active'));
+    
+    if (viewId === 'audit') {
+        auditView.classList.add('active');
+        btnAuditView.classList.add('active');
+    } else {
+        statusView.classList.add('active');
+        btnStatusView.classList.add('active');
+    }
+}
+
+btnAuditView.addEventListener('click', () => switchView('audit'));
+btnStatusView.addEventListener('click', () => switchView('status'));
+
+// --- ANALYSIS AND RENDERING (UI 1: Audit Score/Suggestions) ---
 
 function createAuditItem(title, value, status, detail) {
     const icon = status === 'good' ? '&#10004;' : '&#10006;'; 
@@ -118,41 +214,102 @@ function createAuditItem(title, value, status, detail) {
 function renderAuditGrid(channel, videos, analysis) {
     const stats = channel.statistics || {};
     const snippet = channel.snippet || {};
-
+    
+    // --- Profile ---
     const profileHTML = [
         createAuditItem("Channel Title", snippet.title || "Missing", snippet.title ? 'good' : 'bad', "Your page has description title."),
-        createAuditItem("Description Text", snippet.description ? 'Your page has description.' : "No description", snippet.description ? 'good' : 'bad', "A compelling description helps SEO."),
+        createAuditItem("Description Text", (snippet.description||'').length > 50 ? 'Long Description' : "Too Short", (snippet.description||'').length > 50 ? 'good' : 'bad', "A compelling description (200+ chars) helps SEO."),
         createAuditItem("Channel Country", snippet.country || "No country", snippet.country ? 'good' : 'bad', "Setting a country helps with regional targeting."),
     ].join('');
     document.getElementById('profileAudit').innerHTML = profileHTML;
 
+    // --- Content ---
     const contentHTML = [
-        createAuditItem("Number of Videos", `Videos: ${analysis.totals.videos}`, analysis.totals.videos > 50 ? 'good' : 'bad', `Your page has good number of videos. ${analysis.totals.videos}`),
-        createAuditItem("Posting Frequency", `Avg Gap: ${analysis.avgUploadGap.toFixed(1)} days`, analysis.avgUploadGap < 30 ? 'good' : 'bad', `More consistent uploads (weekly or biweekly) help channel growth.`), 
-        createAuditItem("Video Completeness", `Missing Tags: ${analysis.missingTagsCount} videos`, analysis.missingTagsCount === 0 ? 'good' : 'bad', `Ensure all videos have 5-10 relevant tags. <span style="cursor:pointer; color: blue;" onclick="document.getElementById('audit').scrollIntoView();">Show details</span>`),
+        createAuditItem("Number of Videos", `Videos: ${analysis.totals.videos}`, analysis.totals.videos > 50 ? 'good' : 'bad', `Good video count: ${analysis.totals.videos}`),
+        createAuditItem("Posting Frequency", `Avg Gap: ${analysis.avgUploadGap.toFixed(1)} days`, analysis.avgUploadGap < 30 ? 'good' : 'bad', `Consistent uploads help channel growth.`), 
+        createAuditItem("Video Completeness", `Missing Tags: ${analysis.missingTagsCount} videos`, analysis.missingTagsCount === 0 ? 'good' : 'bad', `Ensure all videos have relevant tags.`),
     ].join('');
     document.getElementById('contentAudit').innerHTML = contentHTML;
     
+    // --- Engagement ---
     const engagementHTML = [
-        createAuditItem("Channel Subscribers", `${stats.subscriberCount||'Hidden'}`, (stats.subscriberCount||0) > 100 ? 'good' : 'bad', "Your page has good number of followers."),
-        createAuditItem("Average Video Views", `${analysis.avgViews.toFixed(0)}`, analysis.avgViews > 500 ? 'good' : 'bad', "Views are a key indicator of reach."),
-        createAuditItem("Average Video Likes", `${analysis.avgLikes.toFixed(0)}`, analysis.avgLikes > 10 ? 'good' : 'bad', "Low likes can indicate low engagement."),
-        createAuditItem("Average Video Comments", `${analysis.avgComments.toFixed(0)}`, analysis.avgComments > 0 ? 'good' : 'bad', "Comments drive community interaction."),
+        createAuditItem("Channel Subscribers", `${formatNumber(stats.subscriberCount||0)}`, (stats.subscriberCount||0) > 100 ? 'good' : 'bad', "Subscribers count is a key growth metric."),
+        createAuditItem("Average Video Views", `${formatNumber(analysis.avgViews.toFixed(0))}`, analysis.avgViews > 500 ? 'good' : 'bad', "Average views show content reach."),
+        createAuditItem("Average Video Likes", `${formatNumber(analysis.avgLikes.toFixed(0))}`, analysis.avgLikes > 10 ? 'good' : 'bad', "Low likes can indicate low engagement."),
+        createAuditItem("Average Video Comments", `${formatNumber(analysis.avgComments.toFixed(0))}`, analysis.avgComments > 0 ? 'good' : 'bad', "Comments drive community interaction."),
     ].join('');
     document.getElementById('engagementAudit').innerHTML = engagementHTML;
 
-    // Render Score
+    // --- Score ---
     const score = 100 - (analysis.issues.length * 10); 
     document.getElementById('scoreCircle').textContent = `${Math.max(50, score)}%`;
     document.getElementById('recommendations').textContent = `You have ${analysis.issues.length} Recommendations`;
     document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-US', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'});
     document.getElementById('scoreMessage').textContent = score > 80 ? 'Your page is performing well!' : 'Your page could be better.';
+    
+    // Channel name for the header
+    document.getElementById('auditReportHeader').querySelector('h2').previousElementSibling.innerHTML = `
+        <strong>Channel: ${channel.snippet.title}</strong>
+        <div class="muted">@${channel.snippet.customUrl || 'N/A'}</div>
+        <div style="margin-top:8px">
+            <span class="kpi">Subscribers: ${formatNumber(channel.statistics.subscriberCount||0)}</span>
+            <span class="kpi">Total views (channel): ${formatNumber(channel.statistics.viewCount||0)}</span>
+            <span class="kpi">Videos fetched: ${videos.length}</span>
+        </div>
+    `;
 }
 
+function renderAudit(issues){
+  if(issues.length===0) auditEl.innerHTML = '<div class="good">No major automated issues found. Manual review recommended for thumbnails and watch-time metrics.</div>';
+  else{
+    // Provide Sujaav/Tips
+    auditEl.innerHTML = '<ul>' + issues.map(it=>`<li><strong>${it.k} (Problem):</strong> ${it.desc} <strong>(Sujaav/Tip)</strong></li>`).join('') + '</ul>';
+  }
+}
+
+// --- RENDERING (UI 2: Channel Status/Performance) ---
+
+function renderStatusView(channel, videos, analysis) {
+    const stats = channel.statistics || {};
+    
+    document.getElementById('statusTitle').textContent = `Channel Status Overview for ${channel.snippet.title}`;
+    
+    // Main KPIs
+    document.getElementById('statusSubscribers').textContent = formatNumber(stats.subscriberCount||0);
+    document.getElementById('statusViews').textContent = formatNumber(stats.viewCount||0);
+    document.getElementById('statusVideos').textContent = formatNumber(videos.length);
+    
+    // Estimated Earnings (Dummy Calculation for demo)
+    // Assuming low CPM is $2 (₹160) and high CPM is $6 (₹480) per 1000 views
+    const monthlyViews = (analysis.avgViews * videos.length) / analysis.avgUploadGap * 30; // Rough monthly views
+    const estLow = (monthlyViews / 1000) * 2 * 80; // USD to INR conversion (80 approx)
+    const estHigh = (monthlyViews / 1000) * 6 * 80;
+    
+    document.getElementById('estMonthlyLow').textContent = `₹${formatNumber(estLow.toFixed(0))} / $${formatNumber((estLow/80).toFixed(0))}`;
+    document.getElementById('estMonthlyHigh').textContent = `₹${formatNumber(estHigh.toFixed(0))} / $${formatNumber((estHigh/80).toFixed(0))}`;
+    
+    // Daily Performance (Placeholder data to mimic screenshot)
+    const todayViews = analysis.avgViews * 0.8; // Today's views (simulated)
+    const subsChange = Math.random() > 0.5 ? Math.floor(Math.random() * 500) : -Math.floor(Math.random() * 100);
+    
+    document.getElementById('dView').textContent = formatNumber(todayViews.toFixed(0));
+    document.getElementById('dSubs').textContent = (subsChange > 0 ? '+' : '') + formatNumber(subsChange);
+    document.getElementById('dSubs').className = subsChange > 0 ? 'change-good' : 'change-bad';
+    document.getElementById('dEarnings').textContent = `$${((todayViews / 1000) * (2 + Math.random() * 4)).toFixed(2)}`;
+    
+    // Clear/Reset daily table for simplicity
+    document.getElementById('dailyPerformanceTable').innerHTML = `
+        <tr><td>Today</td><td id="dView">${document.getElementById('dView').textContent}</td><td id="dSubs" class="${document.getElementById('dSubs').className}">${document.getElementById('dSubs').textContent}</td><td id="dEarnings">${document.getElementById('dEarnings').textContent}</td></tr>
+        <tr><td>Yesterday</td><td>${formatNumber((todayViews * 1.1).toFixed(0))}</td><td class="change-good">+550</td><td>$15.20</td></tr>
+        <tr><td>2 days ago</td><td>${formatNumber((todayViews * 0.9).toFixed(0))}</td><td class="change-bad">-20</td><td>$12.90</td></tr>
+    `;
+}
+
+
 function analyzeVideos(channel, videos){
+  // (Analysis logic remains the same)
   const totals = { videos: videos.length, views:0, likes:0, comments: 0 };
   let top = null;
-  // (Analysis logic remains the same)
   videos.forEach(v=>{
     const s = v.statistics || {};
     const viewCount = Number(s.viewCount || 0);
@@ -176,11 +333,11 @@ function analyzeVideos(channel, videos){
   const shortDesc = videos.filter(v => (v.snippet.description||'').length < 50).length;
   const longTitles = videos.filter(v => (v.snippet.title||'').length > 80).length;
   
-  if(missingTags > videos.length*0.3) issues.push({k:'Missing tags',desc:`${missingTags} of ${videos.length} videos have no tags. Tags help discovery and related video matching.`});
-  if(shortDesc > videos.length*0.2) issues.push({k:'Short descriptions',desc:`${shortDesc} videos have very short descriptions. Use 200+ characters with keywords and links.`});
-  if(longTitles>0) issues.push({k:'Long titles',desc:`${longTitles} videos have titles longer than 80 characters — shorter titles perform better on many devices.`});
-  if(avgViews < 50) issues.push({k:'Low Average Views', desc: `Average video views are very low (${avgViews.toFixed(0)}). Focus on quality content and promotion.`});
-  if(channel.snippet.country === undefined) issues.push({k:'Missing Channel Country', desc: `Channel country is not set. Set it for regional targeting.`});
+  if(missingTags > videos.length*0.3) issues.push({k:'Missing tags',desc:`${missingTags} of ${videos.length} videos have no tags. Tags help discovery and related video matching. **Tip:** Use 5-10 specific, relevant tags for every video.`});
+  if(shortDesc > videos.length*0.2) issues.push({k:'Short descriptions',desc:`${shortDesc} videos have very short descriptions. **Tip:** Use 200+ characters with keywords, timestamps, and links to increase watch time.`});
+  if(longTitles>0) issues.push({k:'Long titles',desc:`${longTitles} videos have titles longer than 80 characters. **Tip:** Keep titles concise and front-load keywords (under 60 characters is ideal).`});
+  if(avgViews < 50) issues.push({k:'Low Average Views', desc: `Average video views are very low (${avgViews.toFixed(0)}). **Tip:** Focus on better thumbnails (CTR) and stronger content quality (Watch Time).`});
+  if(channel.snippet.country === undefined) issues.push({k:'Missing Channel Country', desc: `Channel country is not set. **Tip:** Set your channel country for regional discoverability and better ad matching.`});
 
   const dates = videos.map(v=> new Date(v.snippet.publishedAt));
   dates.sort((a,b)=>a-b);
@@ -189,34 +346,22 @@ function analyzeVideos(channel, videos){
     const diffs = [];
     for(let i=1;i<dates.length;i++) diffs.push( (dates[i]-dates[i-1]) / (1000*60*60*24) );
     avgUploadGap = diffs.reduce((a,b)=>a+b,0)/diffs.length;
-    if(avgUploadGap>30) issues.push({k:'Low upload frequency',desc:`Average upload gap is ${avgUploadGap.toFixed(1)} days. More consistent uploads (weekly or biweekly) help channel growth.`});
+    if(avgUploadGap>30) issues.push({k:'Low upload frequency',desc:`Average upload gap is ${avgUploadGap.toFixed(1)} days. **Tip:** Target a consistent schedule, like one video every 7 or 14 days, for better algorithm support.`});
   }
 
   return {totals, top, issues, avgViews, avgLikes, avgComments, missingTagsCount: missingTags, avgUploadGap};
 }
 
-function renderTopVideos(channel, videos){
-    // Update KPI area with channel info
-    document.getElementById('fullReport').querySelector('h2').previousElementSibling.innerHTML = `
-        <strong>Channel: ${channel.snippet.title}</strong>
-        <div class="muted">@${channel.snippet.customUrl || 'N/A'}</div>
-        <div style="margin-top:8px">
-            <span class="kpi">Subscribers: ${channel.statistics.subscriberCount||'—'}</span>
-            <span class="kpi">Total views (channel): ${channel.statistics.viewCount||0}</span>
-            <span class="kpi">Videos fetched: ${videos.length}</span>
-        </div>
-    `;
-
-    // Render Top 10 videos
+function renderTopVideos(videos){
     const top = videos.slice().sort((a,b)=> (Number(b.statistics.viewCount||0) - Number(a.statistics.viewCount||0))).slice(0,10);
     let html = '<ol style="padding-left: 20px;">' + top.map(v=>{
         const tags = (v.snippet.tags || []).map(tag => `#${tag}`).join(' ');
         return `<li>
             <a target="_blank" href="https://youtu.be/${v.id}">${v.snippet.title}</a> 
-            <span class="muted small">${tags}</span> — ${v.statistics.viewCount||0} views
+            <span class="muted small">${tags}</span> — ${formatNumber(v.statistics.viewCount||0)} views
         </li>`;
     }).join('') + '</ol>';
-    topVideosEl.innerHTML = html;
+    document.getElementById('topVideos').innerHTML = html;
 }
 
 function renderVideoTable(videos){
@@ -225,82 +370,10 @@ function renderVideoTable(videos){
     return `<tr>
       <td><a target=_blank href="https://youtu.be/${v.id}">${escapeHtml(snippet.title||'')}</a></td>
       <td>${snippet.publishedAt? new Date(snippet.publishedAt).toLocaleDateString():''}</td>
-      <td>${s.viewCount||0}</td>
-      <td>${s.likeCount||'—'}</td>
+      <td>${formatNumber(s.viewCount||0)}</td>
+      <td>${formatNumber(s.likeCount||'—')}</td>
       <td>${(snippet.tags && snippet.tags.length)?snippet.tags.length:0}</td>
-      <td class="small">${escapeHtml( (snippet.description||'').slice(0,120) )}${(snippet.description||'').length>120?'...':''}</td>
+      <td class="small">${escapeHtml( (snippet.description||'').slice(0,100) )}${(snippet.description||'').length>100?'...':''}</td>
     </tr>`;
   }).join('');
-  videoTableEl.innerHTML = `<table><thead><tr><th>Title</th><th>Date</th><th>Views</th><th>Likes</th><th>Tags</th><th>Description (preview)</th></tr></thead><tbody>${rows}</tbody></table>`;
-}
-
-function renderAudit(issues){
-  if(issues.length===0) auditEl.innerHTML = '<div class="good">No major automated issues found. Manual review recommended for thumbnails and watch-time metrics.</div>';
-  else{
-    auditEl.innerHTML = '<ul>' + issues.map(it=>`<li><strong>${it.k}:</strong> ${it.desc}</li>`).join('') + '</ul>';
-  }
-}
-
-function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function videosToCsv(videos){
-  const hdr = ['id','title','publishedAt','views','likes','comments','tags','description'];
-  const rows = videos.map(v=>{
-    const s=v.statistics||{}; const sn=v.snippet||{};
-    const tags = (sn.tags||[]).join('|');
-    return [v.id, `"${(sn.title||'').replace(/"/g,'""') }"`, sn.publishedAt||'', s.viewCount||0, s.likeCount||0, s.commentCount||0, `"${tags}"`, `"${(sn.description||'').replace(/"/g,'""')}"`].join(',');
-  });
-  return [hdr.join(','), ...rows].join('\n');
-}
-
-searchBtn.addEventListener('click', async ()=>{
-  const q = queryEl.value.trim();
-  if(!q){ alert('Please enter a channel name or ID'); return; }
-
-  try{
-    log('Fetching channel data securely...');
-    
-    // **SERVER CALL: SEO Audit tool ka endpoint**
-    const res = await fetch(`${API_BASE_URL}/data?query=` + encodeURIComponent(q));
-    
-    if (!res.ok) {
-        const errorText = await res.text();
-        if(res.status === 403) {
-            throw new Error(`403 Forbidden: Google API is blocking access. Ensure key has "Don't restrict key" selected.`);
-        }
-        throw new Error(`Failed to fetch data: ${res.status} ${res.statusText} | Check Replit server is running.`);
-    }
-    
-    const data = await res.json();
-
-    if (data.error) {
-        throw new Error(data.error);
-    }
-    
-    const channel = data.channel;
-    const videos = data.videos || []; 
-    
-    log(`Got ${videos.length} video details — Analyzing...`);
-    const analysis = analyzeVideos(channel, videos);
-    
-    renderAuditGrid(channel, videos, analysis);
-    renderTopVideos(channel, videos);
-    renderVideoTable(videos);
-    renderAudit(analysis.issues);
-    
-    downloadCsvBtn.disabled = false;
-    downloadCsvBtn.onclick = ()=>{
-      const csv = videosToCsv(videos);
-      const blob = new Blob([csv], {type:'text/csv'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${channel.snippet.title.replace(/\W+/g,'_')}_videos.csv`; a.click();
-    }
-    log('Done. Review the audit and suggestions.');
-  }catch(e){
-    console.error(e); 
-    log('Error: ' + e.message); 
-    alert('Error: ' + e.message); 
-  }
-});
-
-</script></body>
-</html>
+  document.getElementById('videoTable').innerHTML = `<table><thead><tr><th>Title</th><th>Date</th><th>Views</th><th>L
