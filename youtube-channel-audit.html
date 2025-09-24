@@ -176,6 +176,17 @@ searchBtn.addEventListener('click', async ()=>{
     
     // **SERVER CALL: SEO Audit tool ka endpoint using the new temporary URL**
     const res = await fetch(`${API_BASE_URL}/data?query=` + encodeURIComponent(q));
+    
+    // Error handling for 403 Forbidden (Google API issue)
+    if (!res.ok) {
+        const errorText = await res.text();
+        // Check if the error is 403 Forbidden and guide the user
+        if(res.status === 403) {
+            throw new Error(`403 Forbidden: Google API is blocking access. Please ensure your API key has "Don't restrict key" selected in Google Cloud Console.`);
+        }
+        throw new Error(`Failed to fetch data: ${res.status} ${res.statusText} | Response: ${errorText}`);
+    }
+    
     const data = await res.json();
 
     if (data.error) {
@@ -202,7 +213,9 @@ searchBtn.addEventListener('click', async ()=>{
     }
     log('Done. Review the audit and suggestions.');
   }catch(e){
-    console.error(e); log('Error: ' + e.message); alert('Error: ' + e.message);
+    console.error(e); 
+    log('Error: ' + e.message); 
+    alert('Error: ' + e.message); // Alert user with the detailed error
   }
 });
 
