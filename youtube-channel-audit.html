@@ -6,15 +6,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>YouTube Channel SEO & Audit Tool — Secure</title>
   <style>
+    /* Global Styling for Clean UI */
     :root{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#f7fafc;color:#111}
     body{margin:16px}
-    /* Main Card Styling */
     .card{background:#fff;padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,.06);max-width:1100px; margin: 0 auto;}
+    
     /* Input/Button Styling */
     label{display:block;margin:8px 0}
     input,select,button,textarea{padding:8px;border-radius:6px;border:1px solid #ddd;font-size:14px}
     button{cursor:pointer; background:#007bff; color:#fff; }
     button:hover { background:#0056b3; }
+    
     /* Data Display Styling */
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
@@ -24,16 +26,16 @@
     .good{color:#065f46}
     .kpi{display:inline-block;padding:6px 10px;border-radius:8px;margin-right:8px;background:#f1f5f9; font-weight: bold;}
     
-    /* Audit Summary Grid (to mimic your screenshot's layout) */
+    /* Audit Summary Grid (for Profile/Content/Engagement sections) */
     .audit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px;}
     .audit-item { padding: 10px; border: 1px solid #eee; border-radius: 6px; }
     .status-icon { font-size: 20px; float: right; }
     .check { color: #065f46; }
     .cross { color: #b91c1c; }
     
-    /* Overall Score Circle */
-    .score-circle { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; position: relative;}
-    .score-container { text-align: center; margin: 20px auto; width: 300px;}
+    /* Overall Score Circle (like your screenshot) */
+    .score-circle { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; position: relative; margin: 0 auto;}
+    .score-container { text-align: center; margin: 20px auto; max-width: 300px;}
     
   </style>
 </head>
@@ -56,10 +58,10 @@
 
 <div id="fullReport">
     <div class="score-container">
-        <div id="scoreCircle" class="score-circle">50%</div>
-        <div id="scoreMessage" style="margin-top: 10px; font-weight: bold;">Your page could be better</div>
-        <div id="recommendations" style="margin-top: 5px; color: #dc3545;">You have 5 Recommendations</div>
-        <div class="muted small">Report Generated: <span id="reportDate"></span></div>
+        <div id="scoreCircle" class="score-circle">—%</div>
+        <div id="scoreMessage" style="margin-top: 10px; font-weight: bold;">Enter channel to run audit</div>
+        <div id="recommendations" style="margin-top: 5px; color: #dc3545;">— Recommendations</div>
+        <div class="muted small">Report Generated: <span id="reportDate">N/A</span></div>
     </div>
     
     <h2>Profile</h2>
@@ -92,15 +94,16 @@ const auditEl = document.getElementById('audit');
 const downloadCsvBtn = document.getElementById('downloadCsv');
 
 // *******************************************************************
-// ** FINAL CORRECTED SECURE REPLIT URL (Based on Replit Assistant's fix) **
+// ** FINAL, VERIFIED CORRECT SECURE REPLIT URL **
 // *******************************************************************
+// Replit Assistant ne is URL ko verify kiya hai (Screenshot_2025-09-24-23-19-59-32.jpg)
 const API_BASE_URL = "https://3ba947fe-ebdb-424b-8fa6-20b5a674d382-00-3knb1boao5qhl.pike.replit.dev";
 
 
 function log(s){ statusEl.textContent = s; }
 
 function createAuditItem(title, value, status, detail) {
-    const icon = status === 'good' ? '&#10004;' : '&#10006;'; // Checkmark or Cross
+    const icon = status === 'good' ? '&#10004;' : '&#10006;'; 
     const colorClass = status === 'good' ? 'good' : 'bad';
     return `
         <div class="audit-item">
@@ -120,37 +123,36 @@ function renderAuditGrid(channel, videos, analysis) {
         createAuditItem("Channel Title", snippet.title || "Missing", snippet.title ? 'good' : 'bad', "Your page has description title."),
         createAuditItem("Description Text", snippet.description ? 'Your page has description.' : "No description", snippet.description ? 'good' : 'bad', "A compelling description helps SEO."),
         createAuditItem("Channel Country", snippet.country || "No country", snippet.country ? 'good' : 'bad', "Setting a country helps with regional targeting."),
-        // Add more profile checks if needed
     ].join('');
     document.getElementById('profileAudit').innerHTML = profileHTML;
 
     const contentHTML = [
         createAuditItem("Number of Videos", `Videos: ${analysis.totals.videos}`, analysis.totals.videos > 50 ? 'good' : 'bad', `Your page has good number of videos. ${analysis.totals.videos}`),
-        createAuditItem("Posting Frequency", `Low frequency: 0.1 videos a day`, analysis.avgUploadGap < 30 ? 'good' : 'bad', `For performance reasons, this assessment was only performed on your 50 most recent posts.`), // Placeholder data for frequency
-        createAuditItem("Video Completeness", `Has one or more uncompleted videos`, analysis.missingTagsCount === 0 ? 'good' : 'bad', `For performance reasons, this assessment was only performed on your 50 most recent posts. <span style="cursor:pointer; color: blue;" onclick="document.getElementById('audit').scrollIntoView();">Show details</span>`),
-        // Add more content checks if needed
+        createAuditItem("Posting Frequency", `Avg Gap: ${analysis.avgUploadGap.toFixed(1)} days`, analysis.avgUploadGap < 30 ? 'good' : 'bad', `More consistent uploads (weekly or biweekly) help channel growth.`), 
+        createAuditItem("Video Completeness", `Missing Tags: ${analysis.missingTagsCount} videos`, analysis.missingTagsCount === 0 ? 'good' : 'bad', `Ensure all videos have 5-10 relevant tags. <span style="cursor:pointer; color: blue;" onclick="document.getElementById('audit').scrollIntoView();">Show details</span>`),
     ].join('');
     document.getElementById('contentAudit').innerHTML = contentHTML;
     
-    // Engagement is simplified for this demo, usually requires more complex calculation
     const engagementHTML = [
-        createAuditItem("Channel Subscribers", `${stats.subscriberCount||'295'}`, (stats.subscriberCount||0) > 100 ? 'good' : 'bad', "Your page has good number of followers."),
-        createAuditItem("Average Video Views", `${analysis.avgViews.toFixed(0)}`, analysis.avgViews > 200 ? 'good' : 'bad', "Your page has good videos views."),
-        createAuditItem("Average Video Likes", `${analysis.avgLikes.toFixed(0)}`, analysis.avgLikes > 10 ? 'good' : 'bad', "Low videos likes."),
-        createAuditItem("Average Video Comments", `${analysis.avgComments.toFixed(0)}`, analysis.avgComments > 0 ? 'good' : 'bad', "Low videos comments."),
+        createAuditItem("Channel Subscribers", `${stats.subscriberCount||'Hidden'}`, (stats.subscriberCount||0) > 100 ? 'good' : 'bad', "Your page has good number of followers."),
+        createAuditItem("Average Video Views", `${analysis.avgViews.toFixed(0)}`, analysis.avgViews > 500 ? 'good' : 'bad', "Views are a key indicator of reach."),
+        createAuditItem("Average Video Likes", `${analysis.avgLikes.toFixed(0)}`, analysis.avgLikes > 10 ? 'good' : 'bad', "Low likes can indicate low engagement."),
+        createAuditItem("Average Video Comments", `${analysis.avgComments.toFixed(0)}`, analysis.avgComments > 0 ? 'good' : 'bad', "Comments drive community interaction."),
     ].join('');
     document.getElementById('engagementAudit').innerHTML = engagementHTML;
 
     // Render Score
-    const score = 100 - (analysis.issues.length * 10); // Simple scoring based on issues
+    const score = 100 - (analysis.issues.length * 10); 
     document.getElementById('scoreCircle').textContent = `${Math.max(50, score)}%`;
     document.getElementById('recommendations').textContent = `You have ${analysis.issues.length} Recommendations`;
     document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-US', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+    document.getElementById('scoreMessage').textContent = score > 80 ? 'Your page is performing well!' : 'Your page could be better.';
 }
 
 function analyzeVideos(channel, videos){
   const totals = { videos: videos.length, views:0, likes:0, comments: 0 };
   let top = null;
+  // (Analysis logic remains the same)
   videos.forEach(v=>{
     const s = v.statistics || {};
     const viewCount = Number(s.viewCount || 0);
@@ -194,7 +196,7 @@ function analyzeVideos(channel, videos){
 }
 
 function renderTopVideos(channel, videos){
-    // Channel name/handle for the top of the video list (like your screenshot)
+    // Update KPI area with channel info
     document.getElementById('fullReport').querySelector('h2').previousElementSibling.innerHTML = `
         <strong>Channel: ${channel.snippet.title}</strong>
         <div class="muted">@${channel.snippet.customUrl || 'N/A'}</div>
@@ -205,7 +207,7 @@ function renderTopVideos(channel, videos){
         </div>
     `;
 
-    // Top 10 videos (like your screenshot)
+    // Render Top 10 videos
     const top = videos.slice().sort((a,b)=> (Number(b.statistics.viewCount||0) - Number(a.statistics.viewCount||0))).slice(0,10);
     let html = '<ol style="padding-left: 20px;">' + top.map(v=>{
         const tags = (v.snippet.tags || []).map(tag => `#${tag}`).join(' ');
@@ -258,16 +260,15 @@ searchBtn.addEventListener('click', async ()=>{
   try{
     log('Fetching channel data securely...');
     
-    // **SERVER CALL: SEO Audit tool ka endpoint using the new temporary URL**
+    // **SERVER CALL: SEO Audit tool ka endpoint**
     const res = await fetch(`${API_BASE_URL}/data?query=` + encodeURIComponent(q));
     
     if (!res.ok) {
         const errorText = await res.text();
-        // Check if the error is 403 Forbidden
         if(res.status === 403) {
-            throw new Error(`403 Forbidden: Google API is blocking access. Please ensure your API key has "Don't restrict key" selected in Google Cloud Console.`);
+            throw new Error(`403 Forbidden: Google API is blocking access. Ensure key has "Don't restrict key" selected.`);
         }
-        throw new Error(`Failed to fetch data: ${res.status} ${res.statusText} | Response: ${errorText}`);
+        throw new Error(`Failed to fetch data: ${res.status} ${res.statusText} | Check Replit server is running.`);
     }
     
     const data = await res.json();
@@ -297,7 +298,7 @@ searchBtn.addEventListener('click', async ()=>{
   }catch(e){
     console.error(e); 
     log('Error: ' + e.message); 
-    alert('Error: ' + e.message); // Alert user with the detailed error
+    alert('Error: ' + e.message); 
   }
 });
 
