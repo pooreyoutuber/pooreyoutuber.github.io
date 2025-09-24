@@ -3,18 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YouTube Search Tool | Find Related Videos & Long Descriptions</title>
-
-  <meta name="description" content="Free YouTube search tool to find related videos and their long descriptions. Enter any title or keyword and get instant results.">
-  <meta name="keywords" content="YouTube related videos, YouTube search tool, YouTube long descriptions, YouTube SEO tool, YouTube video finder, YouTube description viewer">
-  <meta name="robots" content="index, follow">
-
-  <meta property="og:title" content="YouTube Search Tool | Find Related Videos & Long Descriptions">
-  <meta property="og:description" content="Enter any video title or keyword and find related YouTube videos with their full descriptions instantly.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yourwebsite.com/youtube-search-tool">
-  <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
-
+  <title>YouTube Search Tool (Secure)</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background:#f4f6f9;}
     h1 {color:#222; text-align:center;}
@@ -28,22 +17,17 @@
       border:1px solid #ccc;
       font-size:16px;
     }
-    button {
-      background:#007bff;
-      color:#fff;
-      cursor:pointer;
-    }
+    button { background:#007bff; color:#fff; cursor:pointer; }
     button:hover {background:#0056b3;}
     .video-item { border: 1px solid #ccc; background:#fff; padding: 10px; margin: 10px 0; border-radius: 6px; text-align:left;}
     .video-title { font-weight: bold; margin-bottom:5px; }
     .video-description { font-size:14px; white-space:pre-wrap;}
-    .ads-box { margin:20px 0; text-align:center; }
   </style>
 </head>
 <body>
 
   <h1>🔎 YouTube Title → Related Videos + Long Descriptions</h1>
-  <p style="text-align:center;">Paste a YouTube video title or keyword and discover related videos with full descriptions instantly.</p>
+  <p style="text-align:center;">Enter any video title or keyword to discover related YouTube videos with full descriptions.</p>
 
   <input type="text" id="searchTitle" placeholder="Enter video title or keywords">
   <button onclick="fetchRelated()">Get Related Videos</button>
@@ -51,8 +35,7 @@
   <div id="results"></div>
 
   <script>
-    // ✅ YouTube API Code
-    const API_KEY = "YOUR_API_KEY"; // <-- apna YouTube API key yahan daalo
+    const API_BASE = "http://localhost:3000/api"; // ✅ your backend URL
 
     async function fetchRelated() {
       const query = document.getElementById('searchTitle').value.trim();
@@ -62,33 +45,49 @@
       resultsDiv.innerHTML = "⏳ Fetching results...";
 
       try {
-        const searchRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=5`);
+        // 🔐 Call backend instead of YouTube directly
+        const searchRes = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
         const searchData = await searchRes.json();
+
+        if (!searchData.items || searchData.items.length === 0) {
+          resultsDiv.innerHTML = "No results found.";
+          return;
+        }
 
         resultsDiv.innerHTML = "";
 
         for (let item of searchData.items) {
           const videoId = item.id.videoId;
+          const title = item.snippet.title;
 
-          // Fetch full description
-          const detailsRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${API_KEY}`);
+          // Fetch full description securely
+          const detailsRes = await fetch(`${API_BASE}/details?id=${videoId}`);
           const detailsData = await detailsRes.json();
-          const desc = detailsData.items[0]?.snippet?.description || "No description available";
+          const desc = detailsData.items?.[0]?.snippet?.description || "No description available";
 
           const div = document.createElement("div");
           div.className = "video-item";
           div.innerHTML = `
-            <div class="video-title">📺 ${item.snippet.title}</div>
+            <div class="video-title">📺 ${escapeHtml(title)}</div>
             <iframe width="100%" height="250" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-            <div class="video-description">${desc}</div>
+            <div class="video-description">${escapeHtml(desc)}</div>
           `;
           resultsDiv.appendChild(div);
         }
-
       } catch (err) {
         resultsDiv.innerHTML = "❌ Error fetching results.";
         console.error(err);
       }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
   </script>
 </body>
