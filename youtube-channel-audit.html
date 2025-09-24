@@ -50,7 +50,6 @@
 <div id="audit"></div>
 
   </div><script>
-// YouTube Channel Audit - client-side logic (now fetches data from your secure Replit server)
 
 const searchBtn = document.getElementById('searchBtn');
 const queryEl = document.getElementById('query');
@@ -62,12 +61,6 @@ const auditEl = document.getElementById('audit');
 const downloadCsvBtn = document.getElementById('downloadCsv');
 
 function log(s){ statusEl.textContent = s; }
-
-async function fetchJson(url){
-  const res = await fetch(url);
-  if(!res.ok) throw new Error(res.status + ' ' + res.statusText);
-  return res.json();
-}
 
 function analyzeVideos(channel, videos){
   const totals = { videos: videos.length, views:0, likes:0 };
@@ -174,7 +167,7 @@ searchBtn.addEventListener('click', async ()=>{
   try{
     log('Fetching channel data securely...');
     
-    // YAHAN AAPKA SECURE REPLIT URL AAYEGA
+    // **SERVER CALL: SEO Audit tool ka endpoint**
     const res = await fetch('https://nodejs-sutharmanish404.replit.app/data?query=' + encodeURIComponent(q));
     const data = await res.json();
 
