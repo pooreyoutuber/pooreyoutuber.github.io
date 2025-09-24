@@ -11,7 +11,8 @@
     .card{background:#fff;padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,.06);max-width:1100px}
     label{display:block;margin:8px 0}
     input,select,button,textarea{padding:8px;border-radius:6px;border:1px solid #ddd;font-size:14px}
-    button{cursor:pointer}
+    button{cursor:pointer; background:#007bff; color:#fff; }
+    button:hover { background:#0056b3; }
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
     .muted{color:#666;font-size:13px}
@@ -25,7 +26,7 @@
   <h1>YouTube Channel SEO & Audit Tool</h1>
   <div class="card">
     
-    <p class="muted">Enter a YouTube <strong>channel name</strong> or <strong>channel ID</strong>. This tool now uses a **secure server-side proxy** (via your Replit deployment) to keep the YouTube Data API v3 key hidden and safe.</p>
+    <p class="muted">Enter a YouTube <strong>channel name</strong> or <strong>channel ID</strong>. This tool uses a **secure server-side proxy** (via your Replit deployment) to keep the API key hidden and safe.</p>
 
 <label>Channel name or channel ID: <input id="query" placeholder="e.g. PewDiePie or UC-lHJZR3Gqxm24_Vd_AJ5Yw" style="width:100%" /></label>
 
@@ -59,6 +60,12 @@ const topVideosEl = document.getElementById('topVideos');
 const videoTableEl = document.getElementById('videoTable');
 const auditEl = document.getElementById('audit');
 const downloadCsvBtn = document.getElementById('downloadCsv');
+
+// *******************************************************************
+// ** FINAL CORRECTED SECURE REPLIT URL (Based on Replit Assistant's fix) **
+// *******************************************************************
+const API_BASE_URL = "https://3ba947fe-ebdb-424b-8fa6-20b5a674d382-00-3knb1boao5qhl.pike.replit.dev";
+
 
 function log(s){ statusEl.textContent = s; }
 
@@ -167,8 +174,8 @@ searchBtn.addEventListener('click', async ()=>{
   try{
     log('Fetching channel data securely...');
     
-    // **SERVER CALL: SEO Audit tool ka endpoint**
-    const res = await fetch('https://nodejs-sutharmanish404.replit.app/data?query=' + encodeURIComponent(q));
+    // **SERVER CALL: SEO Audit tool ka endpoint using the new temporary URL**
+    const res = await fetch(`${API_BASE_URL}/data?query=` + encodeURIComponent(q));
     const data = await res.json();
 
     if (data.error) {
