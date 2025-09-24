@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Video Info & View Checker | Free Online Tool</title>
+  <title>YouTube Video Info & View Checker | Secure Online Tool</title>
   <meta name="description" content="Check YouTube video details like title, description, views, likes, comments and tags instantly. Paste any YouTube video URL and get all info quickly.">
   <meta name="keywords" content="YouTube view checker, YouTube video info, YouTube video details, YouTube title fetcher, YouTube description viewer, YouTube tags extractor, YouTube API tool">
 
@@ -46,7 +46,7 @@
     }
     .label { font-weight: bold; }
     pre { white-space: pre-wrap; }
-    /* Removed .ad-container styling as there are no ad containers */
+    .error { color: #b91c1c; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -61,8 +61,8 @@
   <div id="info"></div>
 
   <script>
-    // ✅ YouTube API Code
-    const apiKey = "AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU"; // Note: This API key is publicly visible, consider server-side fetching for security.
+    // **SERVER PROXY** - Key ko chhupane ke liye Replit server ka istemaal
+    const API_BASE = "https://nodejs-sutharmanish404.replit.app/api"; 
 
     function extractVideoId(url) {
       const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/;
@@ -75,21 +75,30 @@
       const videoId = extractVideoId(url);
 
       if (!videoId) {
-        alert("❌ Invalid YouTube URL. Please paste a correct one.");
+        document.getElementById("info").innerHTML = `<p class="error">❌ Invalid YouTube URL. Please paste a correct one.</p>`;
         return;
       }
+      
+      document.getElementById("info").innerHTML = `⏳ Fetching video details securely...`;
 
       document.getElementById("player").innerHTML = `
         <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
       `;
 
-      const apiURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${apiKey}`;
+      // **SECURE API CALL** - Key ko Replit server mein chhipa kar use kar rahe hain
+      const secureApiURL = `${API_BASE}/details?id=${videoId}`;
+      
       try {
-        const response = await fetch(apiURL);
+        const response = await fetch(secureApiURL);
         const data = await response.json();
 
+        if (data.error) {
+           document.getElementById("info").innerHTML = `<p class="error">❌ Server Error: ${data.error}. (Check Replit Logs for Quota/API Key issue)</p>`;
+           return;
+        }
+
         if (!data.items || data.items.length === 0) {
-          document.getElementById("info").innerHTML = `<p>❌ Video not found or quota exceeded.</p>`;
+          document.getElementById("info").innerHTML = `<p class="error">❌ Video not found or quota exceeded.</p>`;
           return;
         }
 
@@ -100,14 +109,14 @@
         document.getElementById("info").innerHTML = `
           <p><span class="label">📌 Title:</span> ${snippet.title}</p>
           <p><span class="label">📝 Description:</span> <pre>${snippet.description}</pre></p>
-          <p><span class="label">👁️ Views:</span> ${stats.viewCount}</p>
+          <p><span class="label">👁️ Views:</span> ${stats.viewCount || 'N/A'}</p>
           <p><span class="label">👍 Likes:</span> ${stats.likeCount || 'Hidden'}</p>
           <p><span class="label">💬 Comments:</span> ${stats.commentCount || 'Disabled'}</p>
           <p><span class="label">🏷️ Tags:</span> ${snippet.tags ? snippet.tags.join(', ') : 'No tags available'}</p>
         `;
       } catch (error) {
         console.error("Fetch error:", error);
-        document.getElementById("info").innerHTML = `<p>❌ Error fetching data. See console for details.</p>`;
+        document.getElementById("info").innerHTML = `<p class="error">❌ Error fetching data. Please ensure your Replit server is running.</p>`;
       }
     }
   </script>
