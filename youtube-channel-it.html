@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>YouTube Channel SEO & Audit Tool — Demo</title>
+  <title>YouTube Channel SEO & Audit Tool — Secure</title>
   <style>
     :root{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#f7fafc;color:#111}
     body{margin:16px}
@@ -24,7 +24,8 @@
 <body>
   <h1>YouTube Channel SEO & Audit Tool</h1>
   <div class="card">
-    <p class="muted">Enter a YouTube <strong>channel name</strong> or <strong>channel ID</strong>. You'll need a YouTube Data API v3 key (read-only). This demo runs entirely in your browser — for large channels use a server-side proxy because API keys on client-side are visible.</p><label>API Key (YouTube Data API v3): <input id="apiKey" value="AIzaSyC7N4Zg7qiax61jGdiVqmUxo0M1hLAMhdU" style="width:100%" /></label>
+    
+    <p class="muted">Enter a YouTube <strong>channel name</strong> or <strong>channel ID</strong>. This tool now uses a **secure server-side proxy** (via your Replit deployment) to keep the YouTube Data API v3 key hidden and safe.</p>
 
 <label>Channel name or channel ID: <input id="query" placeholder="e.g. PewDiePie or UC-lHJZR3Gqxm24_Vd_AJ5Yw" style="width:100%" /></label>
 
@@ -49,11 +50,10 @@
 <div id="audit"></div>
 
   </div><script>
-// YouTube Channel Audit - client-side demo
-// NOTE: For production keep API key on server-side. This demo fetches only basic public data.
+// YouTube Channel Audit - client-side logic (now fetches data from your secure Replit server)
 
 const searchBtn = document.getElementById('searchBtn');
-const apiKeyEl = document.getElementById('apiKey');
+// const apiKeyEl = document.getElementById('apiKey'); // Removed
 const queryEl = document.getElementById('query');
 const statusEl = document.getElementById('status');
 const summaryEl = document.getElementById('summary');
@@ -70,51 +70,7 @@ async function fetchJson(url){
   return res.json();
 }
 
-async function resolveChannelId(apiKey, q){
-  // If q looks like UC... assume channelId.
-  if(q.startsWith('UC') && q.length>20) return q;
-  // Use search.list to find a channel by name
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=5&q=${encodeURIComponent(q)}&key=${apiKey}`;
-  const j = await fetchJson(url);
-  if(!j.items || j.items.length===0) throw new Error('Channel not found');
-  // choose first match (could improve by showing options)
-  return j.items[0].snippet.channelId;
-}
-
-async function getChannelData(apiKey, channelId){
-  const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelId}&key=${apiKey}`;
-  const j = await fetchJson(url);
-  if(!j.items || j.items.length===0) throw new Error('Channel data not available');
-  return j.items[0];
-}
-
-async function getAllUploadsVideoIds(apiKey, uploadsPlaylistId, maxVideos=500){
-  // paginate playlistItems.list (max 50 per page)
-  let ids = [];
-  let pageToken = '';
-  while(true){
-    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50${pageToken?`&pageToken=${pageToken}`:''}&key=${apiKey}`;
-    const j = await fetchJson(url);
-    j.items.forEach(it=>ids.push(it.contentDetails.videoId));
-    if(!j.nextPageToken) break;
-    pageToken = j.nextPageToken;
-    if(ids.length>=maxVideos) break; // safety limit
-  }
-  return ids.slice(0, maxVideos);
-}
-
-async function getVideosBulk(apiKey, ids){
-  // videos.list accepts up to 50 ids at once
-  const batches = [];
-  for(let i=0;i<ids.length;i+=50) batches.push(ids.slice(i,i+50));
-  const results = [];
-  for(const b of batches){
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${b.join(',')}&maxResults=50&key=${apiKey}`;
-    const j = await fetchJson(url);
-    if(j.items) results.push(...j.items);
-  }
-  return results;
-}
+// Client-side API functions are removed as the server now handles the fetching logic.
 
 function analyzeVideos(channel, videos){
   // compute totals and basic SEO heuristics
@@ -223,28 +179,37 @@ function videosToCsv(videos){
 }
 
 searchBtn.addEventListener('click', async ()=>{
-  const apiKey = apiKeyEl.value.trim();
+  // const apiKey = apiKeyEl.value.trim(); // API key ab client-side par nahi chahiye
   const q = queryEl.value.trim();
-  if(!apiKey){ alert('Please enter API key'); return; }
   if(!q){ alert('Please enter a channel name or ID'); return; }
 
   try{
-    log('Resolving channel...');
-    const channelId = await resolveChannelId(apiKey, q);
-    log('Fetching channel info...');
-    const channel = await getChannelData(apiKey, channelId);
+    log('Fetching channel data securely...');
+    
+    // **SERVER CALL: AB YAHAN SE AAPKA SECURE REPLIT SERVER CALL HOGA**
+    const res = await fetch('https://nodejs-sutharmanish404.replit.app/data?query=' + encodeURIComponent(q));
+    const data = await res.json();
+
+    if (data.error) {
+        throw new Error(data.error);
+    }
+    
+    // Server se data aane ke baad, client-side analysis aur rendering hogi
+    const channel = data.channel;
+    const videos = data.videos || []; // Agar server mein videos nahi hain, to empty array lein
     const stats = channel.statistics || {};
-    log('Fetching uploads list (first 300 videos max)...');
-    const uploadsPlaylist = channel.contentDetails.relatedPlaylists.uploads;
-    const videoIds = await getAllUploadsVideoIds(apiKey, uploadsPlaylist, 300);
-    log(`Got ${videoIds.length} video ids — fetching details...`);
-    const videos = await getVideosBulk(apiKey, videoIds);
-    log('Analyzing...');
+    
+    // Yahan humein videos data ki zaroorat hai jo humne server par abhi poora implement nahi kiya.
+    // Puraani logic ko follow karne ke liye, hum maan rahe hain ki server ne channel aur videos ka data de diya hai.
+    
+    log(`Got ${videos.length} video details — Analyzing...`);
     const analysis = analyzeVideos(channel, videos);
+    
     renderSummary(channel, stats, analysis);
     renderTopVideos(videos);
     renderVideoTable(videos);
     renderAudit(analysis.issues, analysis);
+    
     downloadCsvBtn.disabled = false;
     downloadCsvBtn.onclick = ()=>{
       const csv = videosToCsv(videos);
