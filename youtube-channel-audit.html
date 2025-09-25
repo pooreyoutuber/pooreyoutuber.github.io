@@ -6,6 +6,7 @@
     <title>YouTube Channel SEO & Audit Tool</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <style>
+        /* Basic Styling for Clean Look */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -101,7 +102,7 @@
 
 <div class="container">
     <h1>YouTube Channel SEO & Audit Tool</h1>
-    <p>Enter a YouTube Channel ID, URL, or Name to run a full audit and get improvement tips.</p>
+    <p>Enter a YouTube Channel ID, URL (including @handle like the example: https://youtube.com/@roarnoylegcommentary), or Name to run a full audit and get improvement tips.</p>
 
     <div id="search-box">
         <input type="text" id="query" placeholder="Channel ID (UC...), URL, or Name">
@@ -134,7 +135,7 @@
                 </div>
             </div>
             
-            <h3>Best Performing Video</h3>
+            <h3>Best Performing Video (Latest 50 Videos)</h3>
             <p id="best-video-title">Loading...</p>
             <p id="best-video-stats"></p>
         </div>
@@ -150,6 +151,7 @@
 
         <div class="data-section">
             <h2>Performance Metrics (Views vs. Likes)</h2>
+            <p>Compares the views and likes of the latest 50 videos.</p>
             <div class="graph-area">
                 <canvas id="performanceChart"></canvas>
             </div>
@@ -218,15 +220,43 @@
         return `${months} months`;
     };
     
+    // **FIXED FUNCTION:** Handles all types of YouTube URLs, IDs, and Names
     const parseQuery = (input) => {
         let query = input.trim();
-        // 1. Remove YouTube URL junk
-        query = query.replace(/(https?:\/\/)?(www\.)?youtu(be\.com\/|b\.be\/)(channel\/|user\/|c\/)?/i, '');
-        // 2. Remove extra URL parameters
-        query = query.split(/[?&]/)[0];
-        // 3. Remove @ symbol or spaces/special chars from Channel Name
-        query = query.replace(/[^\w\s-]/g, '');
-        return query;
+        
+        // 1. Full URL Check and Cleanup
+        if (query.startsWith('http')) {
+            try {
+                const url = new URL(query);
+                
+                // If it's a channel URL with /channel/UC...
+                if (url.pathname.startsWith('/channel/')) {
+                    return url.pathname.split('/channel/')[1].split('/')[0];
+                }
+                
+                // If it's a custom URL or @handle (e.g., youtube.com/@name or youtube.com/c/name)
+                if (url.pathname.length > 1) {
+                    // Removes leading / and splits by query parameters
+                    let path = url.pathname.substring(1).split(/[?&]/)[0];
+                    // Clean up known prefixes like 'c/' or 'user/' or '@'
+                    path = path.replace(/^(c\/|user\/|@)/i, '');
+                    return path;
+                }
+
+                // If it's just a video URL, return empty string (as we need channel data)
+                if (url.pathname.startsWith('/watch')) {
+                    return '';
+                }
+                
+            } catch (e) {
+                // Not a valid URL, treat as name/ID
+                // Continue below
+            }
+        }
+        
+        // 2. Handle simple Channel ID (UC...) or Name
+        // Remove special characters except spaces/hyphens for clean search query
+        return query; 
     };
 
     // --- Main Logic ---
@@ -240,7 +270,7 @@
 
         let query = parseQuery(input);
         if (!query) {
-             displayError("Invalid input. Please try again.");
+             displayError("Invalid URL or not a channel URL. Please try again with a valid Channel ID, Name, or URL.");
              return;
         }
         
@@ -344,7 +374,7 @@
             videosWithStats.forEach(video => {
                 const views = parseInt(video.statistics.viewCount || 0);
                 const likes = parseInt(video.statistics.likeCount || 0);
-                // Simple score: Views + (Likes * 5)
+                // Simple score: Views + (Likes * 5) to prioritize engagement
                 const score = views + (likes * 5); 
                 
                 if (score > maxScore) {
@@ -368,7 +398,83 @@
             const viewCount = parseInt(stats.viewCount || 0);
             const videoCount = parseInt(stats.videoCount || 0);
             const totalLikes = videosWithStats.reduce((sum, v) => sum + parseInt(v.statistics.likeCount || 0), 0);
-            const avgLikes = videoCount > 0 ? totalLikes / videoCount : 0;
+            const avgLikes = videoCount > 0 ? totalLikes / videosWithStats.length : 0;
             
-            // Check 1: Description Length
+            // --- Audit Checks ---
 
+            // Check 1: Description Length
+            if (snippet.description.length < 150) {
+                recommendations.push("Channel Description is too short. Use at least 200 words with relevant keywords for better SEO and clarity.");
+                score -= 10;
+            } else { score += 5; }
+            
+            // Check 2: Consistency (Video Count)
+            if (videoCount < 20) {
+                recommendations.push("Channel lacks video volume. Consistency is key; aim for a minimum of 20-30 quality videos to build an audience.");
+                score -= 15;
+            } else { score += 5; }
+
+            // Check 3: Engagement (Likes per Video)
+            if (avgLikes > 0 && avgLikes < 5) {
+                recommendations.push("Average likes are low for recent videos. Improve video quality and use a clear Call-to-Action (CTA) in your videos.");
+                score -= 10;
+            } else if (avgLikes === 0 && videosWithStats.length > 0) {
+                 recommendations.push("No likes found on recent videos. Check if likes are disabled or focus heavily on audience engagement.");
+                 score -= 20;
+            } else { score += 10; }
+            
+            // Check 4: Subscriber Count Hidden
+            if (stats.hiddenSubscriberCount) {
+                recommendations.push("Subscriber Count is hidden. While possible, displaying it often helps build trust and social proof, especially once you have a decent following.");
+                score -= 5;
+            } else { score += 5; }
+            
+            // Final Score & Tips
+            const finalScore = Math.max(0, 50 + score); // Base score of 50
+            document.getElementById('audit-score').textContent = `Audit Score: ${finalScore}/100`;
+
+            const ul = document.getElementById('recommendation-list');
+            ul.innerHTML = recommendations.map(tip => `<li>${tip}</li>`).join('');
+            
+            if (recommendations.length === 0) {
+                ul.innerHTML = '<li>🎉 Great job! The channel seems to be highly optimized across all tracked metrics. Keep focusing on content quality and consistency.</li>';
+            }
+            
+            // 4. Graph Generation
+            // Prepare data for the latest videos
+            const labels = videosWithStats.slice(0, 10).reverse().map(v => v.snippet.title.substring(0, 20) + '...');
+            const viewData = videosWithStats.slice(0, 10).reverse().map(v => parseInt(v.statistics.viewCount || 0));
+            const likeData = videosWithStats.slice(0, 10).reverse().map(v => parseInt(v.statistics.likeCount || 0));
+
+            chartInstance = new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Views',
+                        data: viewData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Likes',
+                        data: likeData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Views' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+            
