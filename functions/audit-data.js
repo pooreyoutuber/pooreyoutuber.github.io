@@ -12,6 +12,7 @@ const CORS_HEADERS = {
 exports.handler = async (event, context) => {
     
     // API Key Netlify Environment Variables se aayegi
+    // Make sure YOUTUBE_API_KEY is set in Netlify settings!
     const API_KEY = process.env.YOUTUBE_API_KEY; 
     const query = event.queryStringParameters.query; 
 
@@ -32,6 +33,7 @@ exports.handler = async (event, context) => {
         // A. Channel ID Find Karna (Agar input naam hai)
         // ------------------------------------------
         let channelId = query;
+        // Agar query UC se shuru nahi hota, toh search API use karein
         if (!query.startsWith('UC') || query.length !== 24) { 
             const searchRes = await youtube.search.list({
                 q: query,
@@ -40,7 +42,7 @@ exports.handler = async (event, context) => {
                 maxResults: 1,
             });
             if (searchRes.data.items.length === 0) {
-                return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Channel not found. Try entering the Channel ID (starts with UC).' }) };
+                return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Channel not found. Try entering the exact Channel ID (starts with UC).' }) };
             }
             channelId = searchRes.data.items[0].id.channelId;
         }
@@ -54,7 +56,7 @@ exports.handler = async (event, context) => {
         });
         
         if (!channelRes.data.items || channelRes.data.items.length === 0) {
-            return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Channel details could not be retrieved.' }) };
+            return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Channel details could not be retrieved. Channel may be private or deleted.' }) };
         }
 
         // ------------------------------------------
@@ -65,7 +67,7 @@ exports.handler = async (event, context) => {
         const videosRes = await youtube.playlistItems.list({
             playlistId: uploadsPlaylistId,
             part: 'contentDetails',
-            maxResults: 50, 
+            maxResults: 50, // Pehli 50 videos
         });
         
         const videoIds = videosRes.data.items.map(item => item.contentDetails.videoId).join(',');
@@ -89,7 +91,7 @@ exports.handler = async (event, context) => {
         // ------------------------------------------
         return {
             statusCode: 200,
-            headers: CORS_HEADERS,
+            headers: CORS_HEADERS, // ✅ CORS headers
             body: JSON.stringify(finalData),
         };
 
@@ -97,12 +99,23 @@ exports.handler = async (event, context) => {
         console.error('YouTube API Error:', error.message);
         
         // ------------------------------------------
-        // E. Error Response (CORS ok)
+        // E. Error Response (CORS ok, even for API errors)
         // ------------------------------------------
+        let errorMessage = 'An internal server error occurred, check API quota or Netlify logs.';
+
+        // YouTube API error messages ko user tak pahunchana
+        if (error.response?.data?.error?.message) {
+            errorMessage = error.response.data.error.message;
+        } else if (error.message.includes('API key')) {
+             errorMessage = 'API Key issue. Check Netlify environment variable YOUTUBE_API_KEY.';
+        } else if (error.message.includes('quota')) {
+             errorMessage = 'YouTube API Quota Limit Reached. Try again later.';
+        }
+        
         return {
             statusCode: 500,
-            headers: CORS_HEADERS, // Error mein bhi CORS headers zaroori hain
-            body: JSON.stringify({ error: 'An internal server error occurred. Check API quota or Netlify logs.' }),
+            headers: CORS_HEADERS, // ✅ CORS headers
+            body: JSON.stringify({ error: errorMessage }),
         };
     }
 };
