@@ -165,10 +165,9 @@ const btnAuditView = document.getElementById('btnAuditView');
 const btnStatusView = document.getElementById('btnStatusView');
 
 // *******************************************************************
-// ** ACTION REQUIRED: REPLACE THIS PLACEHOLDER WITH YOUR NETLIFY URL **
-// Example: "https://your-site-name-12345.netlify.app"
+// ** FIX: REPLACE THE PLACEHOLDER WITH YOUR NETLIFY URL **
 // *******************************************************************
-const API_BASE_URL = "https://YOUR-NETLIFY-APP-DOMAIN-HERE.netlify.app";
+const API_BASE_URL = "https://pooreyoutuber.netlify.app"; // ✅ CORRECTION APPLIED
 
 let lastChannelData = null; // To store data for view switching
 
@@ -261,7 +260,7 @@ function renderAuditGrid(channel, videos, analysis) {
 }
 
 function renderAudit(issues){
-    const auditEl = document.getElementById('audit');
+    const auditEl = document.getElementById('audit');
   if(issues.length===0) auditEl.innerHTML = '<div class="good">No major automated issues found. Manual review recommended for thumbnails and watch-time metrics.</div>';
   else{
     // Provide Sujaav/Tips
@@ -401,7 +400,8 @@ searchBtn.addEventListener('click', async () => {
             try {
                 errorData = await res.json();
             } catch {
-                errorData = { error: `Server returned status ${res.status}. Check Netlify logs.` };
+                // This block handles the "Failed to fetch" (CORS/Network error)
+                errorData = { error: `Failed to connect or server error (${res.status}). Check API_BASE_URL and CORS settings.` };
             }
             throw new Error(JSON.stringify(errorData));
         }
@@ -432,7 +432,14 @@ searchBtn.addEventListener('click', async () => {
         
     } catch (error) {
         console.error("Fetch error:", error);
-        log(`Error: Failed to fetch. Response: ${error.message}`);
+        let errorMessage = error.message;
+        // Agar error JSON format mein hai, toh use parse karke clean message dikhayein
+        try {
+            const parsedError = JSON.parse(error.message);
+            errorMessage = parsedError.error || "Unknown server error.";
+        } catch {}
+        
+        log(`🔴 Error: ${errorMessage}`);
     }
 });
 
