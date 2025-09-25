@@ -1,34 +1,33 @@
 // functions/audit-data.js
-// ----------------------------------------------------
+// Netlify Serverless function to proxy YouTube Data API calls
 
 // 1. Dependencies import karein
-// (Aapko yeh dependency apne package.json mein bhi daalni hogi: "googleapis")
+// (Zaroori: Yeh "googleapis" dependency package.json mein honi chahiye)
 const { google } = require('googleapis');
 
 // 2. Netlify ke liye function handler define karein
-// Yeh function client-side (GitHub Pages) se aane waali request ko handle karega
 exports.handler = async (event, context) => {
-    // ------------------------------------------
-    // A. API Key aur Query nikalna
-    // ------------------------------------------
     
-    // API Key Netlify Environment Variables (Secrets) se automatically aayegi
+    // API Key Netlify Environment Variables (Secrets) se aayegi
     const API_KEY = process.env.YOUTUBE_API_KEY; 
     
     // GitHub Pages se aayi hui query (channel name ya ID) nikalna
     const query = event.queryStringParameters.query; 
 
-    // Error check
-    if (!API_KEY) {
-        return { statusCode: 500, body: JSON.stringify({ error: 'API key is not configured.' }) };
-    }
-    if (!query) {
-        return { statusCode: 400, body: JSON.stringify({ error: 'Query parameter is missing.' }) };
-    }
+    // CORS Headers define karein (Zaroori! Yeh "Failed to fetch" error ko theek karta hai)
+    const corsHeaders = {
+        "Access-Control-Allow-Origin": "*", // Sabhi domains se access allow karein
+        "Content-Type": "application/json"
+    };
 
-    // ------------------------------------------
-    // B. Google API Call Logic
-    // ------------------------------------------
+    // Error check: API Key
+    if (!API_KEY) {
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'API key is not configured on Netlify environment variables.' }) };
+    }
+    // Error check: Query
+    if (!query) {
+        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Query parameter (channel name/ID) is missing.' }) };
+    }
 
     try {
         const youtube = google.youtube({
@@ -36,9 +35,11 @@ exports.handler = async (event, context) => {
             auth: API_KEY, // Yahan Netlify secret use ho raha hai
         });
 
-        // 1. Pehle Channel ID find karna (agar query channel name hai)
+        // ------------------------------------------
+        // A. Channel ID Find Karna (Agar input naam hai)
+        // ------------------------------------------
         let channelId = query;
-        if (!query.startsWith('UC')) { // Agar 'UC' se shuru nahi hota, toh search karein
+        if (!query.startsWith('UC') || query.length !== 24) { // Agar 'UC' se shuru nahi hota, toh search karein
             const searchRes = await youtube.search.list({
                 q: query,
                 type: 'channel',
@@ -46,61 +47,79 @@ exports.handler = async (event, context) => {
                 maxResults: 1,
             });
             if (searchRes.data.items.length === 0) {
-                return { statusCode: 404, body: JSON.stringify({ error: 'Channel not found.' }) };
+                return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Channel not found. Try entering the Channel ID (starts with UC).' }) };
             }
             channelId = searchRes.data.items[0].id.channelId;
         }
 
-        // 2. Channel Details fetch karna
+        // ------------------------------------------
+        // B. Channel Details Fetch Karna
+        // ------------------------------------------
         const channelRes = await youtube.channels.list({
             part: 'snippet,statistics,contentDetails',
             id: channelId,
         });
+        
+        if (!channelRes.data.items || channelRes.data.items.length === 0) {
+            return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Channel details could not be retrieved.' }) };
+        }
 
-        // 3. Channel ke Top Videos fetch karna (Jaise aapke Replit code mein tha)
+        // ------------------------------------------
+        // C. Videos Fetch Karna (Playlist)
+        // ------------------------------------------
         const uploadsPlaylistId = channelRes.data.items[0].contentDetails.relatedPlaylists.uploads;
         
         const videosRes = await youtube.playlistItems.list({
             playlistId: uploadsPlaylistId,
             part: 'snippet,contentDetails',
-            maxResults: 50, // 50 videos tak
+            maxResults: 50, // Pehle 50 videos fetch karein
         });
+        
+        // Videos ki statistics fetch karein (Views, Likes, Comments)
+        // YouTube API playlistItems list call mein statistics nahi deta, isliye video list call zaroori hai.
+        const videoIds = videosRes.data.items.map(item => item.contentDetails.videoId).join(',');
+        
+        let videosWithStats = [];
+        if (videoIds) {
+            const videoStatsRes = await youtube.videos.list({
+                part: 'snippet,statistics',
+                id: videoIds,
+            });
+            videosWithStats = videoStatsRes.data.items;
+        }
 
-        // Data ko clean karke final result tyaar karna (Yeh aapke Replit logic par depend karta hai)
+        // Data ko clean karke final result tyaar karna
         const finalData = {
-            channel: channelRes.data.items[0].snippet,
-            statistics: channelRes.data.items[0].statistics,
-            videos: videosRes.data.items,
+            channel: channelRes.data.items[0],
+            videos: videosWithStats, // Videos with full stats
         };
 
         // ------------------------------------------
-        // C. Result Client ko wapas bhejna
+        // D. Success Response Wapas Bhejna
         // ------------------------------------------
-        
-        // CORSMISSUE se bachne ke liye headers add karein
         return {
             statusCode: 200,
-            headers: {
-                "Access-Control-Allow-Origin": "*", // Sabhi domains se access allow karein
-                "Content-Type": "application/json"
-            },
+            headers: corsHeaders,
             body: JSON.stringify(finalData),
         };
 
     } catch (error) {
         console.error('YouTube API Error:', error.message);
-        // Agar Google API key invalid ho ya quota khatam ho jaye, toh 403 error aayega
+        
+        // API Quota/Invalid Key error handling
         if (error.code === 403) {
             return {
                 statusCode: 403,
-                body: JSON.stringify({ error: 'Google API Quota Limit Reached or Key Restriction.' }),
+                headers: corsHeaders,
+                body: JSON.stringify({ error: 'Google API Quota Limit Reached or Invalid Key. Check Netlify Environment Variables.' }),
             };
         }
+        
+        // General error handling
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'An internal server error occurred.' }),
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'An internal server error occurred during data fetching.' }),
         };
     }
 };
-
-// ----------------------------------------------------
