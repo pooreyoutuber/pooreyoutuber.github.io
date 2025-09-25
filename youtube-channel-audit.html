@@ -1,4 +1,4 @@
-<!doctype html>
+     <!doctype html>
 
 <html lang="en">
 <head>
@@ -60,9 +60,9 @@
   <h1>YouTube Channel SEO & Audit Tool</h1>
   <div class="card">
     
-    <p class="muted">Enter a YouTube <strong>channel name</strong> or <strong>channel ID</strong>. This tool is safe.</p>
+    <p class="muted">Enter a YouTube <strong>channel name</strong>, <strong>channel ID</strong>, or <strong>full YouTube URL</strong>. This tool is safe.</p>
     
-<label>Channel name or channel ID: <input id="query" placeholder="e.g. PewDiePie or UC-lHJZR3Gqxm24_Vd_AJ5Yw" style="width:100%" /></label>
+<label>Channel input: <input id="query" placeholder="e.g. PewDiePie or UC-lHJZR3Gqxm24_Vd_AJ5Yw or youtube.com/@handle" style="width:100%" /></label>
 
 <div style="margin-top:10px; display: flex; justify-content: flex-start; gap: 10px;">
   <button id="searchBtn">Search & Audit</button>
@@ -167,7 +167,7 @@ const btnStatusView = document.getElementById('btnStatusView');
 // *******************************************************************
 // ** FIX: REPLACE THE PLACEHOLDER WITH YOUR NETLIFY URL **
 // *******************************************************************
-const API_BASE_URL = "https://pooreyoutuber.netlify.app"; // ✅ CORRECTION APPLIED
+const API_BASE_URL = "https://pooreyoutuber.netlify.app"; 
 
 let lastChannelData = null; // To store data for view switching
 
@@ -195,6 +195,88 @@ function switchView(viewId) {
 
 btnAuditView.addEventListener('click', () => switchView('audit'));
 btnStatusView.addEventListener('click', () => switchView('status'));
+
+// --- MAIN SEARCH LOGIC (Updated to handle URLs) ---
+searchBtn.addEventListener('click', async () => {
+    let query = queryEl.value.trim(); // User ka raw input
+    
+    if (!query) return;
+
+    // --- SMART INPUT PARSING CODE ---
+    
+    // 1. Agar input ek poora YouTube URL hai, toh usmein se ID/Handle nikal lo
+    if (query.includes('youtube.com/') || query.includes('youtu.be/') || query.includes('youtube.com/c/')) {
+        try {
+            // URL object use karke path ko theek se parse karein
+            const urlObj = new URL(query.startsWith('http') ? query : 'https://' + query);
+            
+            // Path segments ko array mein lo (e.g., ['', '@PewDiePie'])
+            let path = urlObj.pathname.trim().split('/').filter(p => p.length > 0); 
+
+            if (path.length > 0) {
+                // Last part mein Channel Handle/ID hoti hai
+                let extracted = path.pop(); 
+                
+                // @ symbol aur URL ke saare unwanted characters hata do
+                query = extracted.replace('@', '').replace(/\+/g, ' '); 
+                
+                // Extra check: agar path 'c' ya 'channel' hai, toh last part hi channel name/ID hai.
+            }
+        } catch (e) {
+            // Agar URL parsing mein error aaye, toh raw query ko hi use karein
+            console.warn("Invalid URL format, proceeding with raw query.");
+        }
+    }
+    
+    // Final check for cleaning any remaining + symbols from URL encoding or excess spaces
+    query = query.replace(/\+/g, ' ').trim(); 
+
+    // --- SMART INPUT PARSING CODE END ---
+    
+    // Agar parsing ke baad bhi query khaali ho ya sirf space ho
+    if (!query) {
+        log("Error: Please enter a valid channel name or ID.");
+        return;
+    }
+
+    log(`Searching for: ${query}...`);
+
+    try {
+        log(`Fetching data for: ${query}...`);
+        
+        // EncodeURIComponent ensures special characters in names (like spaces or &) are sent correctly
+        const response = await fetch(`${API_BASE_URL}/.netlify/functions/audit-data?query=${encodeURIComponent(query)}`);
+        
+        const data = await response.json();
+
+        if (!response.ok) {
+            log(`Error: ${data.error || 'Server error occurred.'}`);
+            // Netlify function mein agar "Channel not found" ka error hai to user ko dikhao
+            throw new Error(data.error || 'Server error');
+        }
+
+        lastChannelData = data;
+        const analysis = analyzeVideos(data.channel, data.videos);
+
+        // Render UI 1 (Audit View)
+        renderAuditGrid(data.channel, data.videos, analysis);
+        renderAudit(analysis.issues);
+        renderTopVideos(data.videos);
+        renderVideoTable(data.videos);
+
+        // Render UI 2 (Status View)
+        renderStatusView(data.channel, data.videos, analysis);
+
+        log(`Successfully loaded data for ${data.channel.snippet.title}.`);
+        downloadCsvBtn.disabled = false;
+
+    } catch (e) {
+        log(`Error: ${e.message}`);
+        console.error(e);
+        downloadCsvBtn.disabled = true;
+    }
+});
+
 
 // --- ANALYSIS AND RENDERING (UI 1: Audit Score/Suggestions) ---
 
@@ -334,149 +416,4 @@ function analyzeVideos(channel, videos){
   const shortDesc = videos.filter(v => (v.snippet.description||'').length < 50).length;
   const longTitles = videos.filter(v => (v.snippet.title||'').length > 80).length;
   
-  if(missingTags > videos.length*0.3) issues.push({k:'Missing tags',desc:`${missingTags} of ${videos.length} videos have no tags. Tags help discovery and related video matching. **Tip:** Use 5-10 specific, relevant tags for every video.`});
-  if(shortDesc > videos.length*0.2) issues.push({k:'Short descriptions',desc:`${shortDesc} videos have very short descriptions. **Tip:** Use 200+ characters with keywords, timestamps, and links to increase watch time.`});
-  if(longTitles>0) issues.push({k:'Long titles',desc:`${longTitles} videos have titles longer than 80 characters. **Tip:** Keep titles concise and front-load keywords (under 60 characters is ideal).`});
-  if(avgViews < 50) issues.push({k:'Low Average Views', desc: `Average video views are very low (${avgViews.toFixed(0)}). **Tip:** Focus on better thumbnails (CTR) and stronger content quality (Watch Time).`});
-  if(channel.snippet.country === undefined) issues.push({k:'Missing Channel Country', desc: `Channel country is not set. **Tip:** Set your channel country for regional discoverability and better ad matching.`});
-
-  const dates = videos.map(v=> new Date(v.snippet.publishedAt));
-  dates.sort((a,b)=>a-b);
-  let avgUploadGap = 0;
-  if(dates.length>=2){
-    const diffs = [];
-    for(let i=1;i<dates.length;i++) diffs.push( (dates[i]-dates[i-1]) / (1000*60*60*24) );
-    avgUploadGap = diffs.reduce((a,b)=>a+b,0)/diffs.length;
-    if(avgUploadGap>30) issues.push({k:'Low upload frequency',desc:`Average upload gap is ${avgUploadGap.toFixed(1)} days. **Tip:** Target a consistent schedule, like one video every 7 or 14 days, for better algorithm support.`});
-  }
-
-  return {totals, top, issues, avgViews, avgLikes, avgComments, missingTagsCount: missingTags, avgUploadGap};
-}
-
-function renderTopVideos(videos){
-    const top = videos.slice().sort((a,b)=> (Number(b.statistics.viewCount||0) - Number(a.statistics.viewCount||0))).slice(0,10);
-    let html = '<ol style="padding-left: 20px;">' + top.map(v=>{
-        const tags = (v.snippet.tags || []).map(tag => `#${tag}`).join(' ');
-        return `<li>
-            <a target="_blank" href="https://youtu.be/${v.id}">${v.snippet.title}</a> 
-            <span class="muted small">${tags}</span> — ${formatNumber(v.statistics.viewCount||0)} views
-        </li>`;
-    }).join('') + '</ol>';
-    document.getElementById('topVideos').innerHTML = html;
-}
-
-function renderVideoTable(videos){
-  const rows = videos.map(v=>{
-    const s=v.statistics||{}; const snippet=v.snippet||{};
-    return `<tr>
-      <td><a target=_blank href="https://youtu.be/${v.id.videoId || v.id}">${escapeHtml(snippet.title||'')}</a></td>
-      <td>${snippet.publishedAt? new Date(snippet.publishedAt).toLocaleDateString():''}</td>
-      <td>${formatNumber(s.viewCount||0)}</td>
-      <td>${formatNumber(s.likeCount||'—')}</td>
-      <td>${(snippet.tags && snippet.tags.length)?snippet.tags.length:0}</td>
-      <td class="small">${escapeHtml( (snippet.description||'').slice(0,100) )}${(snippet.description||'').length>100?'...':''}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('videoTable').innerHTML = `<table><thead><tr><th>Title</th><th>Date</th><th>Views</th><th>Likes</th><th>Tags</th><th>Description Snippet</th></tr></thead><tbody>${rows}</tbody></table>`;
-}
-
-// --- MAIN FETCH LOGIC ---
-searchBtn.addEventListener('click', async () => {
-    const q = queryEl.value.trim();
-    if (!q) {
-        log('Please enter a channel name or ID.');
-        return;
-    }
-
-    log('Fetching channel data securely...');
-    downloadCsvBtn.disabled = true;
-
-    try {
-        // Fetch call uses the secure Netlify function endpoint
-        const res = await fetch(`${API_BASE_URL}/.netlify/functions/audit-data?query=` + encodeURIComponent(q));
-        
-        if (!res.ok) {
-            let errorData;
-            try {
-                errorData = await res.json();
-            } catch {
-                // This block handles the "Failed to fetch" (CORS/Network error)
-                errorData = { error: `Failed to connect or server error (${res.status}). Check API_BASE_URL and CORS settings.` };
-            }
-            throw new Error(JSON.stringify(errorData));
-        }
-
-        const data = await res.json();
-        
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
-        if (!data.channel || !data.videos) {
-            throw new Error("Could not parse YouTube data. Channel not found or API error.");
-        }
-
-        lastChannelData = data;
-        log(`Done. Channel: ${data.channel.snippet.title}. Videos fetched: ${data.videos.length}`);
-        downloadCsvBtn.disabled = false;
-
-        // Process and Render Data
-        const analysis = analyzeVideos(data.channel, data.videos);
-        renderAuditGrid(data.channel, data.videos, analysis);
-        renderAudit(analysis.issues);
-        renderTopVideos(data.videos);
-        renderVideoTable(data.videos);
-        renderStatusView(data.channel, data.videos, analysis); // UI 2
-
-        switchView('audit'); // Show audit view by default
-        
-    } catch (error) {
-        console.error("Fetch error:", error);
-        let errorMessage = error.message;
-        // Agar error JSON format mein hai, toh use parse karke clean message dikhayein
-        try {
-            const parsedError = JSON.parse(error.message);
-            errorMessage = parsedError.error || "Unknown server error.";
-        } catch {}
-        
-        log(`🔴 Error: ${errorMessage}`);
-    }
-});
-
-// --- CSV Download Logic ---
-downloadCsvBtn.addEventListener('click', () => {
-    if (!lastChannelData || lastChannelData.videos.length === 0) {
-        alert("No data available to download.");
-        return;
-    }
-
-    const header = ["Title", "Published At", "Views", "Likes", "Comment Count", "Tags", "Description"].join(',');
-    const csvRows = lastChannelData.videos.map(v => {
-        const snippet = v.snippet;
-        const stats = v.statistics || {};
-        
-        // Enclose strings in quotes and escape internal quotes
-        const clean = (s) => `"${String(s).replace(/"/g, '""')}"`;
-        
-        const title = clean(snippet.title || '');
-        const published = snippet.publishedAt ? new Date(snippet.publishedAt).toLocaleDateString() : '';
-        const views = stats.viewCount || 0;
-        const likes = stats.likeCount || 0;
-        const comments = stats.commentCount || 0;
-        const tags = clean((snippet.tags || []).join('|')); // Use | as internal separator
-        const description = clean(snippet.description || '');
-        
-        return [title, published, views, likes, comments, tags, description].join(',');
-    });
-
-    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(header + "\n" + csvRows.join('\n'));
-    
-    const link = document.createElement('a');
-    link.setAttribute('href', csvContent);
-    link.setAttribute('download', `youtube_audit_data_${lastChannelData.channel.snippet.title.replace(/\s/g, '_')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-});
-</script></body>
-</html>
+  if(missingTags > videos.length*0.3) issues.push({k:'Missing tags',desc:`${missingTags} of ${videos.length}
