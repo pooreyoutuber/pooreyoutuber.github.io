@@ -1,125 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YouTube Title Analyzer (Secure)</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background:#f4f6f9;}
-    h1 {color:#222; text-align:center;}
-    input, button {
-      padding:10px;
-      margin:5px auto;
-      display:block;
-      width:320px;
-      max-width:95%;
-      border-radius:6px;
-      border:1px solid #ccc;
-      font-size:16px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Description & Tags Generator</title>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background: #f4f7f8;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
     }
-    button { background:#007bff; color:#fff; cursor:pointer; }
-    button:hover {background:#0056b3;}
-    .video-item { border: 1px solid #ccc; background:#fff; padding: 15px; margin: 15px 0; border-radius: 8px; text-align:left; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
-    .video-title { font-weight: bold; margin-bottom:5px; font-size: 18px; }
-    .video-tags { font-size:13px; color:#065f46; margin-bottom:10px; word-break: break-word;}
-    .video-description { font-size:14px; white-space:pre-wrap; margin-top:10px; border-top: 1px solid #eee; padding-top: 10px;}
-    .video-description strong { display: block; margin-bottom: 5px; color: #555;}
-  </style>
+    header {
+        background: #ff0000;
+        width: 100%;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    .container {
+        margin-top: 30px;
+        width: 90%;
+        max-width: 700px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    input[type="text"] {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+    button {
+        background: #ff0000;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    button:hover {
+        background: #cc0000;
+    }
+    .result {
+        margin-top: 20px;
+    }
+    .video-card {
+        background: #f9f9f9;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .video-card h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+    }
+    .video-card p {
+        margin: 0 0 5px 0;
+        color: #555;
+    }
+    .tags {
+        font-size: 14px;
+        color: #777;
+    }
+</style>
 </head>
 <body>
 
-  <h1>🔎 YouTube Title → Related Videos + Tags & Descriptions</h1>
-  <p style="text-align:center;">Enter any video title or keyword to discover related YouTube videos with full descriptions and tags.</p>
+<header>YouTube Description & Tags Generator</header>
 
-  <input type="text" id="searchTitle" placeholder="Enter video title or keywords">
-  <button onclick="fetchRelated()">Get Related Videos</button>
+<div class="container">
+    <input type="text" id="videoTitle" placeholder="Enter Video Title">
+    <button onclick="generate()">Generate</button>
+    <div class="result" id="output"></div>
+</div>
 
-  <div id="results"></div>
+<script>
+async function generate() {
+    const title = document.getElementById("videoTitle").value.trim();
+    const output = document.getElementById("output");
+    output.innerHTML = "<p>Loading...</p>";
 
-  <script>
-    // *******************************************************************
-    // ** FINAL CORRECTED SECURE REPLIT URL (Based on Replit Assistant's fix) **
-    // *******************************************************************
-    const TEMP_DOMAIN = "https://3ba947fe-ebdb-424b-8fa6-20b5a674d382-00-3knb1boao5qhl.pike.replit.dev";
-    const API_BASE = `${TEMP_DOMAIN}/api`; 
-    
-    // Note: If you are using an older Replit session, you may need to use:
-    // const API_BASE = "https://nodejs-sutharmanish404.replit.app/api";
+    if (!title) {
+        output.innerHTML = "<p>Please enter a video title!</p>";
+        return;
+    }
 
-    async function fetchRelated() {
-      const query = document.getElementById('searchTitle').value.trim();
-      if (!query) {
-          document.getElementById('results').innerHTML = "Please enter a search query.";
-          return;
-      }
+    try {
+        const res = await fetch("/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title })
+        });
 
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = "⏳ Fetching results securely...";
+        const data = await res.json();
 
-      try {
-        // 1. Search for related videos (using /api/search endpoint)
-        const searchRes = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
-        
-        // Error handling for 403 Forbidden (Google API issue)
-        if (!searchRes.ok) {
-            const errorText = await searchRes.text();
-            throw new Error(`Failed to fetch data: ${searchRes.status} ${searchRes.statusText} | Response: ${errorText}`);
-        }
-        
-        const searchData = await searchRes.json();
-
-        if (searchData.error) {
-            resultsDiv.innerHTML = `❌ Server Error: ${searchData.error} (Check your Replit server and API key)`;
+        if (data.error) {
+            output.innerHTML = `<p>Error: ${data.error}</p>`;
             return;
         }
 
-        if (!searchData.items || searchData.items.length === 0) {
-          resultsDiv.innerHTML = "No results found. Try a different query.";
-          return;
-        }
+        let html = "";
+        data.forEach((video, index) => {
+            html += `
+            <div class="video-card">
+                <h3>${index + 1}. ${video.title}</h3>
+                <p><strong>Description:</strong> ${video.description}</p>
+                <p class="tags"><strong>Tags:</strong> ${video.tags.join(', ')}</p>
+            </div>`;
+        });
 
-        resultsDiv.innerHTML = "";
-        
-        // 2. Fetch full details (using /api/details endpoint)
-        for (let item of searchData.items) {
-          if (!item.id.videoId) continue;
+        output.innerHTML = html;
 
-          const videoId = item.id.videoId;
-          const title = item.snippet.title;
-
-          const detailsRes = await fetch(`${API_BASE}/details?id=${videoId}`);
-          const detailsData = await detailsRes.json();
-          
-          const videoDetails = detailsData.items?.[0]?.snippet;
-          const desc = videoDetails?.description || "No description available";
-          const tags = videoDetails?.tags ? videoDetails.tags.map(tag => `#${tag}`).join(' ') : 'No tags available';
-
-          const div = document.createElement("div");
-          div.className = "video-item";
-          div.innerHTML = `
-            <div class="video-title">📺 <a target="_blank" href="https://youtu.be/${videoId}">${escapeHtml(title)}</a></div>
-            <div class="video-tags">🔑 **Tags:** ${escapeHtml(tags)}</div>
-            <iframe width="100%" height="250" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            <div class="video-description"><strong>Full Description:</strong>${escapeHtml(desc)}</div>
-          `;
-          resultsDiv.appendChild(div);
-        }
-      } catch (err) {
-        // Updated error message to guide the user based on our previous discussions
-        resultsDiv.innerHTML = `❌ Error: ${err.message}. Please ensure: 1. Replit server is RUNNING. 2. Google API Key has 'Don't restrict key' saved.`;
+    } catch (err) {
+        output.innerHTML = `<p>Something went wrong. Try again!</p>`;
         console.error(err);
-      }
     }
+}
+</script>
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-  </script>
 </body>
 </html>
