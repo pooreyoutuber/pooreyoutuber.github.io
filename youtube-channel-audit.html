@@ -1,52 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Channel Audit Tool</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; color: #333; }
-    header { background: #c4302b; color: white; padding: 15px; text-align: center; }
-    .container { max-width: 1100px; margin: auto; padding: 20px; }
-    #search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-    #query { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; }
-    #search-btn { background: #c4302b; color: white; border: none; padding: 12px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    #search-btn:hover { background: #a3221e; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.1); text-align: center; }
-    .card h3 { margin: 0; font-size: 16px; color: #c4302b; }
-    .card p { font-size: 20px; margin: 10px 0 0; font-weight: bold; }
-    .section { margin-top: 30px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
-    .tips li { background: #e6f7ff; margin: 8px 0; padding: 10px; border-left: 5px solid #1890ff; border-radius: 6px; list-style: none; }
-    .progress-circle { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(#c4302b var(--percent), #eee 0); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #333; margin: auto; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Channel Audit Tool</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; color: #333; }
+  header { background: #FF0000; color: white; padding: 15px; text-align: center; font-size: 1.5em; }
+  .container { max-width: 1100px; margin: auto; padding: 20px; }
+  #search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+  #query { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+  #search-btn { background: #FF0000; color: white; border: none; padding: 12px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+  #search-btn:hover { background: #cc0000; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
+  .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; transition: 0.2s; }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+  .card h3 { margin: 0; font-size: 16px; color: #FF0000; }
+  .card p { font-size: 20px; margin: 10px 0 0; font-weight: bold; }
+  .section { margin-top: 30px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .tips li { background: #e0f7fa; margin: 8px 0; padding: 10px; border-left: 5px solid #00acc1; border-radius: 6px; list-style: none; }
+  .progress-circle { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(#FF0000 var(--percent), #eee 0); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #333; margin: auto; transition: 0.5s; }
+  #status { font-style: italic; margin-top: 10px; }
+  #error { color: red; margin-top: 10px; }
+</style>
 </head>
 <body>
-  <header><h1>YouTube Channel Audit Tool</h1></header>
-
-  <div class="container">
-    <div id="search-box">
-      <input type="text" id="query" placeholder="Enter Channel Name, ID, or URL">
-      <button id="search-btn">Audit</button>
-    </div>
-    <p id="status"></p>
-    <p id="error" style="color:red; display:none;"></p>
-
-    <div id="results" style="display:none;">
-      <div class="cards">
-        <div class="card"><h3>Subscribers</h3><p id="subs">-</p></div>
-        <div class="card"><h3>Total Views</h3><p id="views">-</p></div>
-        <div class="card"><h3>Videos</h3><p id="videos">-</p></div>
-        <div class="card"><h3>Channel Age</h3><p id="age">-</p></div>
-      </div>
-
-      <div class="section"><h2>Audit Score</h2><div class="progress-circle" id="audit-score" style="--percent:0deg;">0%</div></div>
-      <div class="section"><h2>SEO Tips</h2><ul class="tips" id="tips-list"></ul></div>
-      <div class="section"><h2>Performance (Last 10 Videos)</h2><canvas id="perfChart"></canvas></div>
-      <div class="section"><h2>Subscriber Growth Trend</h2><canvas id="growthChart"></canvas></div>
-    </div>
+<header>YouTube Channel Audit Tool</header>
+<div class="container">
+  <div id="search-box">
+    <input type="text" id="query" placeholder="Enter Channel Name, ID, or URL">
+    <button id="search-btn">Audit</button>
   </div>
+  <p id="status"></p>
+  <p id="error" style="display:none;"></p>
+
+  <div id="results" style="display:none;">
+    <div class="cards">
+      <div class="card"><h3>Subscribers</h3><p id="subs">-</p></div>
+      <div class="card"><h3>Total Views</h3><p id="views">-</p></div>
+      <div class="card"><h3>Videos</h3><p id="videos">-</p></div>
+      <div class="card"><h3>Channel Age</h3><p id="age">-</p></div>
+    </div>
+
+    <div class="section"><h2>Audit Score</h2><div class="progress-circle" id="audit-score" style="--percent:0deg;">0%</div></div>
+
+    <div class="section"><h2>SEO & Engagement Tips</h2><ul class="tips" id="tips-list"></ul></div>
+
+    <div class="section"><h2>Performance (Last 10 Videos)</h2><canvas id="perfChart"></canvas></div>
+
+    <div class="section"><h2>Subscriber Growth Trend</h2><canvas id="growthChart"></canvas></div>
+  </div>
+</div>
 
 <script>
 const API_KEY = "AIzaSyBClzQfmys2LBR-u3QLZvt_JH0oiDIcBQo";
@@ -67,9 +72,9 @@ function cleanUrl(input){
   try {
     if(input.startsWith("http")){
       let url=new URL(input);
-      let path=url.pathname.replace(/\/+$/,''); // remove trailing slash
+      let path=url.pathname.replace(/\/+$/,''); 
       if(path.startsWith("/channel/")) return path.split("/channel/")[1];
-      if(path.startsWith("/@")) return path.split("/@")[1]; // handle
+      if(path.startsWith("/@")) return path.split("/@")[1];
     }
   } catch(e){}
   return input;
@@ -78,8 +83,6 @@ function cleanUrl(input){
 async function resolveChannelId(query){
   query=cleanUrl(query);
   if(query.startsWith("UC") && query.length===24) return query;
-
-  // handle style
   if(!query.includes(" ")){
     let search=await fetch(`${BASE}/search?part=id&type=channel&q=${encodeURIComponent(query)}&maxResults=1&key=${API_KEY}`);
     let d=await search.json();
@@ -90,6 +93,7 @@ async function resolveChannelId(query){
 
 async function auditChannel(query){
   hideError();
+  results.style.display="none";
   log("Resolving channel...");
   let channelId=await resolveChannelId(query);
 
@@ -99,15 +103,15 @@ async function auditChannel(query){
   if(!data.items || !data.items.length) return showError("Channel not found!");
 
   let info=data.items[0];
-  document.getElementById("subs").textContent=format(info.statistics.subscriberCount)||"Hidden";
-  document.getElementById("views").textContent=format(info.statistics.viewCount);
-  document.getElementById("videos").textContent=format(info.statistics.videoCount);
+  document.getElementById("subs").textContent = format(info.statistics.subscriberCount) || "Hidden";
+  document.getElementById("views").textContent = format(info.statistics.viewCount);
+  document.getElementById("videos").textContent = format(info.statistics.videoCount);
 
   let created=new Date(info.snippet.publishedAt);
   let age=Math.floor((new Date()-created)/(1000*60*60*24*365));
   document.getElementById("age").textContent=age+" years";
 
-  // videos
+  log("Fetching last 10 videos...");
   let uploads=info.contentDetails.relatedPlaylists.uploads;
   let vres=await fetch(`${BASE}/playlistItems?part=contentDetails&maxResults=10&playlistId=${uploads}&key=${API_KEY}`);
   let vdata=await vres.json();
@@ -115,7 +119,7 @@ async function auditChannel(query){
   let statsRes=await fetch(`${BASE}/videos?part=statistics,snippet&id=${ids}&key=${API_KEY}`);
   let statsData=await statsRes.json();
 
-  // chart: performance
+  // Performance chart
   new Chart(document.getElementById("perfChart"),{
     type:'bar',
     data:{
@@ -125,26 +129,29 @@ async function auditChannel(query){
         {label:"Likes", data:statsData.items.map(v=>parseInt(v.statistics.likeCount||0)), backgroundColor:"rgba(255,99,132,0.7)"}
       ]
     },
-    options:{responsive:true}
+    options:{responsive:true, plugins:{legend:{position:'top'}}}
   });
 
-  // chart: growth (fake trend from stats)
+  // Subscriber growth chart
   let subsNow=parseInt(info.statistics.subscriberCount||100);
   let growthData=statsData.items.map((v,i)=>Math.max(0,subsNow-(statsData.items.length-i)*Math.floor(subsNow/20)));
   new Chart(document.getElementById("growthChart"),{
     type:"line",
     data:{
       labels:statsData.items.map(v=>v.snippet.title.substring(0,15)+"..."),
-      datasets:[{label:"Estimated Subs", data:growthData, borderColor:"#c4302b", fill:false, tension:0.3}]
+      datasets:[{label:"Estimated Subs", data:growthData, borderColor:"#FF0000", fill:false, tension:0.3}]
     }
   });
 
-  // audit tips
-  let tips=[]; let score=50;
-  if(info.snippet.description.length<100){ tips.push("Channel description is too short."); score-=10; }
-  if(parseInt(info.statistics.videoCount)<20){ tips.push("Upload more videos consistently."); score-=10; }
+  // Audit tips
+  let tips=[], score=100;
+  if(info.snippet.description.length<100){ tips.push("Channel description is very short."); score-=15; }
+  if(parseInt(info.statistics.videoCount)<20){ tips.push("Upload more videos consistently."); score-=15; }
   let avgLikes=statsData.items.reduce((s,v)=>s+parseInt(v.statistics.likeCount||0),0)/(statsData.items.length||1);
-  if(avgLikes<5){ tips.push("Engagement is low. Encourage likes & comments."); score-=10; }
+  if(avgLikes<5){ tips.push("Engagement is low. Encourage likes & comments."); score-=15; }
+  let avgViews=statsData.items.reduce((s,v)=>s+parseInt(v.statistics.viewCount||0),0)/(statsData.items.length||1);
+  if(avgViews<100){ tips.push("Video views are low. Optimize titles and thumbnails."); score-=10; }
+  if(age>0 && parseInt(info.statistics.videoCount)/age<2){ tips.push("Channel uploads are infrequent. Maintain regular schedule."); score-=10; }
 
   let final=Math.max(0,Math.min(100,score));
   let circle=document.getElementById("audit-score");
@@ -152,16 +159,15 @@ async function auditChannel(query){
   circle.textContent=final+"%";
 
   let ul=document.getElementById("tips-list");
-  ul.innerHTML=tips.length? tips.map(t=>"<li>"+t+"</li>").join("") : "<li>Great work! Channel looks optimized 🎉</li>";
+  ul.innerHTML = tips.length? tips.map(t=>"<li>"+t+"</li>").join("") : "<li>Excellent! Channel is well optimized 🎉</li>";
 
   results.style.display="block";
   log("Audit complete ✅");
 }
 
 searchBtn.addEventListener("click",()=>{
-  results.style.display="none";
   let input=queryInput.value.trim();
-  if(!input) return showError("Enter a channel name, ID or URL");
+  if(!input) return showError("Enter a channel name, ID, or URL");
   auditChannel(input);
 });
 </script>
