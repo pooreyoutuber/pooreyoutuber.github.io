@@ -63,6 +63,7 @@
         margin-bottom: 15px;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        position: relative;
     }
     .video-card h3 {
         margin: 0 0 10px 0;
@@ -75,6 +76,21 @@
     .tags {
         font-size: 14px;
         color: #777;
+    }
+    .copy-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 5px 10px;
+        font-size: 12px;
+        border: none;
+        border-radius: 5px;
+        background: #00aaff;
+        color: white;
+        cursor: pointer;
+    }
+    .copy-btn:hover {
+        background: #0077aa;
     }
 </style>
 </head>
@@ -89,46 +105,47 @@
 </div>
 
 <script>
-async function generate() {
+function generate() {
     const title = document.getElementById("videoTitle").value.trim();
     const output = document.getElementById("output");
-    output.innerHTML = "<p>Loading...</p>";
+    output.innerHTML = "<p>Generating descriptions...</p>";
 
     if (!title) {
         output.innerHTML = "<p>Please enter a video title!</p>";
         return;
     }
 
-    try {
-        const res = await fetch("/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title })
-        });
-
-        const data = await res.json();
-
-        if (data.error) {
-            output.innerHTML = `<p>Error: ${data.error}</p>`;
-            return;
-        }
-
-        let html = "";
-        data.forEach((video, index) => {
-            html += `
-            <div class="video-card">
-                <h3>${index + 1}. ${video.title}</h3>
-                <p><strong>Description:</strong> ${video.description}</p>
-                <p class="tags"><strong>Tags:</strong> ${video.tags.join(', ')}</p>
-            </div>`;
-        });
-
-        output.innerHTML = html;
-
-    } catch (err) {
-        output.innerHTML = `<p>Something went wrong. Try again!</p>`;
-        console.error(err);
+    // Simple AI-like generation (mock, no external API)
+    const results = [];
+    for (let i = 1; i <= 10; i++) {
+        const description = `Description ${i} for "${title}": Watch this amazing gameplay and enjoy epic moments. Learn tips, tricks and strategies for better performance in the game. Don't forget to like, share, and subscribe!`;
+        const tags = [`${title}`, "Gameplay", "Tips", "Tricks", "Epic Moments", "Mobile Game"];
+        results.push({ description, tags });
     }
+
+    // Display results
+    let html = "";
+    results.forEach((video, index) => {
+        html += `
+        <div class="video-card">
+            <h3>${index + 1}</h3>
+            <p><strong>Description:</strong> ${video.description}</p>
+            <p class="tags"><strong>Tags:</strong> ${video.tags.join(', ')}</p>
+            <button class="copy-btn" onclick="copyText('${video.description}', '${video.tags.join(', ')}')">Copy</button>
+        </div>`;
+    });
+    output.innerHTML = html;
+}
+
+// Copy function
+function copyText(desc, tags) {
+    const temp = document.createElement('textarea');
+    temp.value = `Description:\n${desc}\n\nTags:\n${tags}`;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+    alert("Copied to clipboard!");
 }
 </script>
 
