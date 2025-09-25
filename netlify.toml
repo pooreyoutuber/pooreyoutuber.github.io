@@ -1,3 +1,7 @@
 # netlify.toml
-[functions]
-  directory = "functions"  # Netlify ko batao ki serverless functions 'functions' folder mein hain
+# Functions ke liye CORS headers apply karna
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    
