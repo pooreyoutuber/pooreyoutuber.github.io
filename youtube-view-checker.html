@@ -2,122 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Video Info & View Checker | Secure Online Tool</title>
-  <meta name="description" content="Check YouTube video details like title, description, views, likes, comments and tags instantly. Paste any YouTube video URL and get all info quickly.">
-  <meta name="keywords" content="YouTube view checker, YouTube video info, YouTube video details, YouTube title fetcher, YouTube description viewer, YouTube tags extractor, YouTube API tool">
-
+  <title>YouTube Video Info Checker</title>
+  <script src="https://apis.google.com/js/api.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-      background: #f4f6f9;
-    }
-    h2 { color:#222; text-align:center; }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-      width: 100%;
-      border:1px solid #ccc;
-      border-radius:6px;
-    }
-    button {
-      background:#007bff;
-      color:#fff;
-      cursor:pointer;
-    }
-    button:hover { background:#0056b3; }
-    iframe {
-      margin-top: 20px;
-      width: 100%;
-      height: 400px;
-      border-radius: 12px;
-      border:none;
-    }
-    #info {
-      margin-top: 20px;
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .label { font-weight: bold; }
-    pre { white-space: pre-wrap; }
-    .error { color: #b91c1c; font-weight: bold; }
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f9f9f9; }
+    input[type="text"] { width: 500px; padding: 10px; margin-top: 10px; }
+    button { padding: 10px 20px; margin-top: 10px; }
+    #output { margin-top: 30px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .section { margin-bottom: 15px; }
+    .comment { border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px; }
   </style>
 </head>
 <body>
+  <h2>YouTube Video Info Checker</h2>
 
-  <h2>📊 YouTube Video Details & View Checker</h2>
-  <p style="text-align:center;">Paste a YouTube video link to get title, description, views, likes, comments and tags.</p>
+  <label for="videoUrl">Enter YouTube Video URL:</label><br>
+  <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=VIDEO_ID">
+  <br>
+  <button id="btnFetch">Fetch Video Info</button>
 
-  <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL here (e.g. https://youtu.be/xyz)" />
-  <button onclick="loadVideo()">Load Video Info</button>
-
-  <div id="player"></div>
-  <div id="info"></div>
+  <div id="output"></div>
 
   <script>
-    // **SERVER PROXY** - Key ko chhupane ke liye Replit server ka istemaal
-    const API_BASE = "https://nodejs-sutharmanish404.replit.app/api"; 
+    const API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo";  // ← आपकी API Key
+
+    document.getElementById("btnFetch").addEventListener("click", () => {
+      const url = document.getElementById("videoUrl").value.trim();
+      const videoId = extractVideoId(url);
+      if (!videoId) {
+        alert("Invalid YouTube video URL.");
+        return;
+      }
+      fetchVideoInfo(videoId);
+    });
 
     function extractVideoId(url) {
-      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/;
-      const match = url.match(regex);
+      const match = url.match(/(?:v=|\.be\/)([a-zA-Z0-9_-]{11})/);
       return match ? match[1] : null;
     }
 
-    async function loadVideo() {
-      const url = document.getElementById("videoUrl").value.trim();
-      const videoId = extractVideoId(url);
+    function fetchVideoInfo(videoId) {
+      gapi.load("client", () => {
+        gapi.client.init({ apiKey: API_KEY }).then(() => {
+          return gapi.client.youtube.videos.list({
+            part: "snippet,statistics",
+            id: videoId
+          });
+        }).then(response => {
+          const video = response.result.items[0];
+          if (!video) {
+            showOutput("Video not found.");
+            return;
+          }
+          displayVideoInfo(video);
+          fetchComments(videoId);
+        }).catch(err => {
+          console.error("Error:", err);
+          showOutput("Failed to fetch video data.");
+        });
+      });
+    }
 
-      if (!videoId) {
-        document.getElementById("info").innerHTML = `<p class="error">❌ Invalid YouTube URL. Please paste a correct one.</p>`;
-        return;
-      }
-      
-      document.getElementById("info").innerHTML = `⏳ Fetching video details securely...`;
+    function displayVideoInfo(video) {
+      const snippet = video.snippet;
+      const stats = video.statistics;
 
-      document.getElementById("player").innerHTML = `
-        <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-      `;
+      let html = "";
+      html += `<div class="section"><strong>Title:</strong> ${snippet.title}</div>`;
+      html += `<div class="section"><strong>Description:</strong><br> ${snippet.description.replace(/\n/g, "<br>")}</div>`;
+      html += `<div class="section"><strong>Channel:</strong> ${snippet.channelTitle}</div>`;
+      html += `<div class="section"><strong>Published On:</strong> ${new Date(snippet.publishedAt).toLocaleString()}</div>`;
+      html += `<div class="section"><strong>Tags:</strong> ${snippet.tags ? snippet.tags.join(", ") : "None"}</div>`;
+      html += `<div class="section"><strong>Views:</strong> ${stats.viewCount}</div>`;
+      html += `<div class="section"><strong>Likes:</strong> ${stats.likeCount || "Hidden"}</div>`;
+      html += `<div class="section"><strong>Comments:</strong> ${stats.commentCount || "Unavailable"}</div>`;
 
-      // **SECURE API CALL** - Key ko Replit server mein chhipa kar use kar rahe hain
-      const secureApiURL = `${API_BASE}/details?id=${videoId}`;
-      
-      try {
-        const response = await fetch(secureApiURL);
-        const data = await response.json();
+      document.getElementById("output").innerHTML = html;
+    }
 
-        if (data.error) {
-           document.getElementById("info").innerHTML = `<p class="error">❌ Server Error: ${data.error}. (Check Replit Logs for Quota/API Key issue)</p>`;
-           return;
-        }
-
-        if (!data.items || data.items.length === 0) {
-          document.getElementById("info").innerHTML = `<p class="error">❌ Video not found or quota exceeded.</p>`;
+    function fetchComments(videoId) {
+      gapi.client.youtube.commentThreads.list({
+        part: "snippet",
+        videoId: videoId,
+        maxResults: 5,
+        textFormat: "plainText"
+      }).then(response => {
+        const items = response.result.items;
+        if (!items || items.length === 0) {
+          document.getElementById("output").innerHTML += "<div>No comments found or comments are disabled.</div>";
           return;
         }
 
-        const video = data.items[0];
-        const snippet = video.snippet;
-        const stats = video.statistics;
+        let html = "<div class='section'><strong>Top 5 Comments:</strong></div>";
+        items.forEach(item => {
+          const c = item.snippet.topLevelComment.snippet;
+          html += `
+            <div class="comment">
+              <strong>${c.authorDisplayName}</strong>:<br>
+              ${c.textDisplay}<br>
+              <small>👍 ${c.likeCount} | 🕒 ${new Date(c.publishedAt).toLocaleString()}</small>
+            </div>`;
+        });
+        document.getElementById("output").innerHTML += html;
+      }).catch(err => {
+        console.warn("Comments fetch error:", err);
+      });
+    }
 
-        document.getElementById("info").innerHTML = `
-          <p><span class="label">📌 Title:</span> ${snippet.title}</p>
-          <p><span class="label">📝 Description:</span> <pre>${snippet.description}</pre></p>
-          <p><span class="label">👁️ Views:</span> ${stats.viewCount || 'N/A'}</p>
-          <p><span class="label">👍 Likes:</span> ${stats.likeCount || 'Hidden'}</p>
-          <p><span class="label">💬 Comments:</span> ${stats.commentCount || 'Disabled'}</p>
-          <p><span class="label">🏷️ Tags:</span> ${snippet.tags ? snippet.tags.join(', ') : 'No tags available'}</p>
-        `;
-      } catch (error) {
-        console.error("Fetch error:", error);
-        document.getElementById("info").innerHTML = `<p class="error">❌ Error fetching data. Please ensure your Replit server is running.</p>`;
-      }
+    function showOutput(html) {
+      document.getElementById("output").innerHTML = html;
     }
   </script>
 </body>
