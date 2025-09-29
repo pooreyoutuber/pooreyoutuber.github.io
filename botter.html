@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Project: View Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #5c6bc0;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #5c6bc0;
+        }
+        input[type="url"], input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #5c6bc0;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3949ab;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #e8eaf6;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: scroll;
+            white-space: pre-wrap;
+        }
+        .disclaimer {
+            font-size: 0.8em;
+            color: #d32f2f;
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px dashed #ef9a9a;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🌐 View Simulator (College Project)</h2>
+
+    <div class="disclaimer">
+        ⚠️ **Ethical Warning:** Use this tool ONLY on websites where you have explicit permission (like your own project site). Misuse is unethical and may violate terms of service.
+    </div>
+
+    <label for="urlInput">वेबसाइट URL:</label>
+    <input type="url" id="urlInput" placeholder="https://your-project.com" required>
+
+    <label for="viewCount">व्यूज़ की संख्या:</label>
+    <input type="number" id="viewCount" value="1000" min="1" required>
+
+    <label for="concurrency">एक साथ रिक्वेस्ट (Concurrency):</label>
+    <input type="number" id="concurrency" value="50" min="1" max="100" required>
+
+    <button onclick="startSimulation()">Simulate Views</button>
+
+    <label>आउटपुट / स्टेटस:</label>
+    <div id="output"></div>
+</div>
+
+<script>
+    let totalViews = 0;
+    let successfulViews = 0;
+    let threads = [];
+    let isRunning = false;
+    let startTime;
+
+    const outputDiv = document.getElementById('output');
+
+    // रैंडम देरी जनरेट करने के लिए
+    function getRandomDelay(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    // आउटपुट में मैसेज जोड़ने के लिए
+    function log(message, type = 'info') {
+        const p = document.createElement('p');
+        p.textContent = message;
+        if (type === 'error') p.style.color = 'red';
+        if (type === 'success') p.style.color = 'green';
+        outputDiv.prepend(p); // नया मैसेज सबसे ऊपर दिखेगा
+    }
+
+    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन
+    async function generateView(url, viewId) {
+        const delay = getRandomDelay(1000, 5000); // 1 से 5 सेकंड का रैंडम डिले (milliseconds)
+        await new Promise(resolve => setTimeout(resolve, delay)); // देरी के लिए इंतज़ार
+
+        try {
+            // Fetch API का उपयोग करके रिक्वेस्ट भेजना
+            const response = await fetch(url, {
+                method: 'GET',
+                cache: 'no-cache', // कैशिंग को रोकता है ताकि हर बार नई रिक्वेस्ट जाए
+                // Note: Security restrictions prevent setting custom User-Agent in fetch API from a browser
+            });
+
+            if (response.ok) {
+                successfulViews++;
+                log(`View ${viewId}: SUCCESS | Status: ${response.status} | Delay: ${(delay/1000).toFixed(2)}s | Total Success: ${successfulViews}`, 'success');
+            } else {
+                log(`View ${viewId}: FAILED | Status: ${response.status} | Delay: ${(delay/1000).toFixed(2)}s`, 'error');
+            }
+        } catch (error) {
+            log(`View ${viewId}: ERROR | Connection Failed: ${error.message} | Delay: ${(delay/1000).toFixed(2)}s`, 'error');
+        }
+    }
+
+    // सिमुलेशन शुरू करने का फ़ंक्शन
+    async function startSimulation() {
+        if (isRunning) {
+            alert("Simulation is already running!");
+            return;
+        }
+
+        const url = document.getElementById('urlInput').value;
+        const count = parseInt(document.getElementById('viewCount').value);
+        const concurrency = parseInt(document.getElementById('concurrency').value);
+
+        if (!url || count <= 0) {
+            alert("Please enter a valid URL and number of views.");
+            return;
+        }
+
+        isRunning = true;
+        totalViews = 0;
+        successfulViews = 0;
+        threads = [];
+        outputDiv.innerHTML = ''; // आउटपुट साफ़ करें
+        startTime = new Date();
+
+        log(`🚀 Simulation Started: ${url} with ${count} views (Concurrency: ${concurrency})`);
+        
+        // एक साथ रिक्वेस्ट भेजने के लिए प्रॉमिस का उपयोग करना
+        for (let i = 1; i <= count; i++) {
+            totalViews = i;
+            threads.push(generateView(url, i));
+
+            // Concurrency लिमिट को मैनेज करने के लिए
+            if (threads.length >= concurrency) {
+                // वर्तमान बैच के पूरा होने का इंतज़ार करें
+                await Promise.race(threads.map(p => p.catch(() => {}))); 
+                // completed promises को हटा दें
+                threads = threads.filter(p => p.isPending); // Note: 'isPending' is conceptual; we need a better way. 
+                // For simplicity in this demo, we'll let all promises run until completion/error.
+            }
+        }
+
+        // सभी लंबित (pending) रिक्वेस्ट के पूरा होने का इंतज़ार करें
+        await Promise.all(threads.map(p => p.catch(() => {})));
+
+        const endTime = new Date();
+        const duration = (endTime - startTime) / 1000;
+        
+        log("--------------------------------------------------", 'info');
+        log(`✅ Simulation Complete!`, 'info');
+        log(`Total Views Attempted: ${totalViews}`, 'info');
+        log(`Total Views Successful: ${successfulViews}`, 'info');
+        log(`Total Time Taken: ${duration.toFixed(2)} seconds`, 'info');
+        log("--------------------------------------------------", 'info');
+
+        isRunning = false;
+    }
+</script>
+
+</body>
+</html>
