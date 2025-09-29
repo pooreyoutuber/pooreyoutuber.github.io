@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Reliable Traffic Booster</title>
+    <title>GA4 Traffic Injector (100 Views Goal)</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #e6f7ff; }
         .container { max-width: 650px; margin: 30px auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
@@ -20,10 +20,10 @@
 <body>
 
 <div class="container">
-    <h2>🎯 विश्वसनीय GA4 ट्रैफिक बूस्टर (वेब)</h2>
+    <h2>🎯 GA4 ट्रैफिक इंजेक्टर (100 व्यू लक्ष्य)</h2>
 
     <div class="disclaimer">
-        ⚠️ **आवश्यक कदम:** इस टूल के काम करने के लिए, आपको अपनी **GA4 Measurement ID** और **API Secret** सही ढंग से दर्ज करना होगा।
+        ⚠️ **प्रमाण:** आपका प्रोजेक्ट केवल **Google Analytics Real-Time/DebugView** में काम करने का प्रमाण दे सकता है। Search Console पर इसका कोई असर नहीं पड़ेगा।
     </div>
 
     <label for="measurementIdInput">GA4 Measurement ID (जैसे: G-XXXXXXXXXX):</label>
@@ -35,7 +35,7 @@
     <label for="urlInput">वेबसाइट URL (https:// के साथ):</label>
     <input type="url" id="urlInput" placeholder="https://your-project.com" required>
     
-    <div id="status">Status: Ready | Target: 60 Views</div>
+    <div id="status">Status: Ready | Target: 100 Views</div>
 
     <button id="startButton" onclick="startSimulation()">Start Simulation</button>
     
@@ -44,14 +44,14 @@
 </div>
 
 <script>
-    let totalViews = 60; 
+    let totalViews = 100; // 100 व्यू का लक्ष्य
     let successfulViews = 0;
     let viewCount = 0;
     let isRunning = false;
     let simulationTimeout;
     let startTime;
-    const MIN_DELAY = 4000; 
-    const MAX_DELAY = 8000; 
+    const MIN_DELAY = 1000; // 1 सेकंड
+    const MAX_DELAY = 3000; // 3 सेकंड (तेज़ रिक्वेस्ट के लिए)
 
     const outputDiv = document.getElementById('output');
     const statusDiv = document.getElementById('status');
@@ -69,7 +69,6 @@
         outputDiv.prepend(p);
     }
 
-    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (CORS fix लागू किया गया)
     function generateView(url, measurementId, apiSecret) {
         if (!isRunning || viewCount >= totalViews) {
             finishSimulation();
@@ -79,10 +78,8 @@
         viewCount++;
         const currentViewId = viewCount;
         
-        // प्रत्येक 'उपयोगकर्ता' के लिए एक रैंडम क्लाइंट ID जनरेट करें 
         const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
 
-        // GA4 Measurement Protocol एंडपॉइंट
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
 
         const payload = {
@@ -91,43 +88,35 @@
                 name: 'page_view', 
                 params: {
                     page_location: url,
-                    page_title: `Simulated View ${currentViewId}`,
-                    debug_mode: true, // DebugView में तुरंत डेटा दिखेगा
+                    page_title: `PROJECT_VIEW_${currentViewId}_${Math.floor(Math.random() * 999)}`, 
+                    debug_mode: true, 
                     session_id: Date.now(),
                     engagement_time_msec: 5000 + Math.floor(Math.random() * 5000) 
                 }
             }]
         };
 
-        // Fetch API का उपयोग करके सीधे GA सर्वर पर डेटा भेजें
         fetch(gaEndpoint, {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: {
-                // 'mode: no-cors' के कारण Content-Type हेडर अक्सर अनदेखा हो जाता है, 
-                // लेकिन इसे रखना सबसे अच्छा है।
                 'Content-Type': 'application/json' 
             },
-            mode: 'no-cors' // <-- CORS एरर को हल करने के लिए महत्वपूर्ण
+            mode: 'no-cors' 
         })
         .then(response => {
             successfulViews++;
-            // no-cors मोड में, स्टेटस हमेशा 0 होता है, इसलिए हम केवल नेटवर्क एरर को छोड़कर SUCCESS मानते हैं।
             log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent (Check GA DebugView)`, 'success');
         })
         .catch(error => {
-            // यह केवल नेटवर्क कनेक्शन विफल होने पर चलता है
             log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed. ${error.message}`, 'error');
         })
         .finally(() => {
-            // अगली रिक्वेस्ट शेड्यूल करें
             scheduleNextView(url, measurementId, apiSecret);
-            // स्टेटस अपडेट करें
             statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
         });
     }
 
-    // अगली रिक्वेस्ट को रैंडम डिले के साथ शेड्यूल करें
     function scheduleNextView(url, measurementId, apiSecret) {
         if (viewCount < totalViews && isRunning) {
             const delay = getRandomDelay();
@@ -142,7 +131,6 @@
         const measurementId = document.getElementById('measurementIdInput').value.trim();
         const apiSecret = document.getElementById('apiSecretInput').value.trim();
 
-        // इनपुट सत्यापन 
         if (!url.startsWith('http')) {
             alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
             return;
@@ -169,7 +157,6 @@
         log(`🚀 Simulation Started for ${url}. Target: ${totalViews} Views.`, 'info');
         statusDiv.innerHTML = "Starting requests...";
 
-        // पहली रिक्वेस्ट तुरंत शुरू करें
         generateView(url, measurementId, apiSecret);
     }
 
