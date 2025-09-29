@@ -4,12 +4,11 @@ import time
 import threading
 from urllib.parse import urlparse
 
-# Configuration
-TARGET_URL = ""
+# Configurable settings
 REQUEST_COUNT = 900
 DURATION_MINUTES = 5
 results = {"success": 0, "fail": 0}
-lock = threading.Lock()  # Protect shared data
+lock = threading.Lock()
 
 def validate_url(url):
     try:
@@ -18,10 +17,10 @@ def validate_url(url):
     except:
         return False
 
-def send_request():
+def send_request(url):
     global results
     try:
-        response = requests.get(TARGET_URL, timeout=5)
+        response = requests.get(url, timeout=5)
         with lock:
             if response.status_code == 200:
                 results["success"] += 1
@@ -31,16 +30,13 @@ def send_request():
         with lock:
             results["fail"] += 1
 
-def simulate():
+def simulate(url):
     delay = (DURATION_MINUTES * 60) / REQUEST_COUNT
     threads = []
 
-    print(f"[+] Starting traffic test on: {TARGET_URL}")
-    print(f"[+] Total Requests: {REQUEST_COUNT} | Duration: {DURATION_MINUTES} mins")
     start_time = time.time()
-
     for i in range(REQUEST_COUNT):
-        thread = threading.Thread(target=send_request)
+        thread = threading.Thread(target=lambda: send_request(url))
         threads.append(thread)
         thread.start()
         time.sleep(delay)
@@ -49,14 +45,13 @@ def simulate():
         t.join()
 
     elapsed = time.time() - start_time
-    print("\n[+] Test completed.")
-    print(f"[✓] Success: {results['success']}, [✗] Fail: {results['fail']}")
-    print(f"[⏱] Time taken: {elapsed:.2f} seconds")
+    print(f"[+] Sent {REQUEST_COUNT} requests to {url}")
+    print(f"[✓] Success: {results['success']} | [✗] Fail: {results['fail']} | Duration: {elapsed:.2f}s")
 
 if __name__ == "__main__":
-    TARGET_URL = input("🎯 Enter the authorized target URL (include http:// or https://): ").strip()
+    target_url = input("Enter target URL (e.g., http://example.com): ").strip()
     
-    if not validate_url(TARGET_URL):
-        print("[!] Invalid URL. Please include protocol (http:// or https://). Exit.")
+    if validate_url(target_url):
+        simulate(target_url)
     else:
-        simulate()
+        print("[!] Invalid URL. Include protocol (http:// or https://).")
