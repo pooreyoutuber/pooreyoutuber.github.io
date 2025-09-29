@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Traffic Injector (Multi-Browser Simulation)</title>
+    <title>GA4 Traffic Injector (FINAL CLOUD FIX)</title>
     <style>
         /* Compact UI */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { width: 90%; max-width: 420px; background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
-        h2 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 6px; margin-top: 0; text-align: center; font-size: 1.4em; }
+        h2 { color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 6px; margin-top: 0; text-align: center; font-size: 1.4em; }
         label { display: block; margin-top: 10px; font-weight: 600; color: #333; font-size: 0.85em; }
         input[type="url"], input[type="text"] { width: 100%; padding: 8px; margin-top: 3px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 0.85em; }
         button { background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 0.95em; font-weight: bold; transition: background-color 0.3s; }
         button:disabled { background-color: #90ee90; cursor: not-allowed; }
         #output { margin-top: 12px; padding: 8px; border: 1px solid #ffe8cc; background-color: #fff8e1; border-radius: 4px; max-height: 120px; overflow-y: scroll; font-size: 0.75em; }
-        #status { padding: 6px; background-color: #ff9800; border-radius: 4px; font-weight: bold; color: white; margin-top: 10px; text-align: center; font-size: 0.85em; }
+        #status { padding: 6px; background-color: #dc3545; border-radius: 4px; font-weight: bold; color: white; margin-top: 10px; text-align: center; font-size: 0.85em; }
         .disclaimer { font-size: 0.75em; color: #333; margin-top: 8px; padding: 8px; border: 1px solid #d4edda; background-color: #f0fdf2; border-radius: 4px; }
         .input-group { margin-bottom: 12px; }
     </style>
@@ -22,10 +22,10 @@
 <body>
 
 <div class="container">
-    <h2>💻 GA4 ट्रैफिक (मल्टी-ब्राउज़र सिमुलेशन)</h2>
+    <h2>🚨 GA4 ट्रैफिक (अंतिम क्लाउड फिक्स)</h2>
 
     <div class="disclaimer">
-        **कॉलेज प्रोजेक्ट के लिए:** यह टूल हर व्यू को एक अलग डिवाइस (User Agent) के रूप में भेजता है, जिससे GA में ट्रैफिक अधिक वास्तविक लगता है। परिणाम देखने के लिए **Admin -> DebugView** खोलें।
+        **अंतिम प्रयास:** इस कोड में एक नए पब्लिक प्रॉक्सी का उपयोग किया गया है। यदि यह भी विफल होता है, तो यह पुष्टि हो जाएगी कि ब्राउज़र में यह काम नहीं करेगा। परिणाम देखने के लिए **Admin -> DebugView** खोलें।
     </div>
 
     <div class="input-group">
@@ -57,16 +57,18 @@
     let viewCount = 0;
     let isRunning = false;
     let simulationTimeout;
-    const MIN_DELAY = 1500; // बढ़ी हुई देरी
-    const MAX_DELAY = 4000; 
+    const MIN_DELAY = 1500;
+    const MAX_DELAY = 4000;
+    
+    // FIX: एक अलग, और अधिक भरोसेमंद (उम्मीद है) प्रॉक्सी URL
+    const PROXY_URL = 'https://cors-anywhere.herokuapp.com/'; 
+    // नोट: यह प्रॉक्सी भी कभी भी काम करना बंद कर सकता है।
 
-    // अलग-अलग User Agents की सूची (कॉलेज प्रोजेक्ट के लिए उपयोगी)
+    // User Agents की सूची (मल्टी-ब्राउज़र सिमुलेशन के लिए)
     const userAgents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", // Windows Chrome
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", // macOS Safari
-        "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36", // Android Chrome
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", // iOS Safari
-        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/120.0" // Linux Firefox
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+        "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
     ];
 
     function getRandomDelay() {
@@ -89,38 +91,44 @@
         outputDiv.prepend(p);
     }
     
-    // G/Collect एंडपॉइंट के माध्यम से डेटा भेजने के लिए फ़ंक्शन
+    // POST Request के साथ प्रॉक्सी का उपयोग
     async function sendData(gaEndpointUrl, payload, currentViewId, userAgent) {
         
-        // Peloaad को GET पैरामीटर में बदलना
-        const params = new URLSearchParams({
-            v: 2, 
-            tid: gaEndpointUrl.split('?')[0].split('=').pop(), 
-            cid: payload.client_id, 
-            en: payload.events[0].name, 
-            ua: userAgent, // FIX: User Agent पैरामीटर जोड़ा गया
-            ...payload.events[0].params, 
-        });
+        // FIX: प्रॉक्सी URL को GA4 एंडपॉइंट के साथ जोड़ें
+        const proxiedUrl = PROXY_URL + gaEndpointUrl;
 
-        const finalUrl = `https://www.google-analytics.com/g/collect?${params.toString()}&${gaEndpointUrl.split('?')[1]}`;
-        
         try {
-            const response = await fetch(finalUrl, {
-                method: 'GET',
-                mode: 'no-cors' 
+            const response = await fetch(proxiedUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // User Agent को हेडर के रूप में भेजें (POST के लिए आवश्यक)
+                    'User-Agent': userAgent, 
+                    // CORS-Anywhere के लिए आवश्यक हेडर
+                    'X-Requested-With': 'XMLHttpRequest' 
+                }
             });
-            
-            successfulViews++;
-            log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Device: ${userAgent.split('(')[1].split(')')[0]}`, 'success');
+
+            // GA4 204 No Content लौटाता है यदि सफल हो
+            if (response.status === 204) { 
+                successfulViews++;
+                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Device: ${userAgent.split('(')[1].split(')')[0]}`, 'success');
+            } else {
+                 // अगर प्रॉक्सी या GA4 ने एरर दी
+                const errorText = await response.text();
+                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILURE</span> | Status: ${response.status}. GA4 did not accept data.`, 'error');
+                log(`DEBUG: Response Text (First 100 chars): ${errorText.substring(0, 100)}...`, 'error');
+            }
             
         } catch (error) {
-            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Failed to fetch. ${error.message}`, 'error');
+            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection/Proxy Failed. ${error.message}`, 'error');
         } finally {
             statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
         }
     }
 
-    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन
+    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (पुराने पैरामीटर्स के साथ)
     function generateView(url, measurementId, apiSecret) {
         if (!isRunning || viewCount >= totalViews) {
             finishSimulation();
@@ -132,7 +140,7 @@
         
         const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
         const SESSION_ID = Date.now(); 
-        const USER_AGENT = getRandomUserAgent(); // FIX: हर बार नया User Agent
+        const USER_AGENT = getRandomUserAgent(); 
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
 
         // 1. Session Start Event
@@ -147,9 +155,7 @@
                 }
             }]
         };
-        // User Agent के साथ डेटा भेजें
         sendData(gaEndpoint, sessionStartPayload, currentViewId, USER_AGENT);
-
 
         // 2. Page View Event
         const engagementTime = 10000 + Math.floor(Math.random() * 10000); 
@@ -159,17 +165,16 @@
             events: [{
                 name: 'page_view', 
                 params: {
-                    dl: url, 
-                    dt: `PROJECT_VIEW_${currentViewId}`, 
+                    page_location: url, // Standard MP parameter
+                    page_title: `PROJECT_VIEW_${currentViewId}`, // Standard MP parameter
                     debug_mode: true, 
-                    sid: SESSION_ID, 
-                    en_msec: engagementTime, 
+                    session_id: SESSION_ID, 
+                    engagement_time_msec: engagementTime, 
                 }
             }]
         };
         
         setTimeout(() => {
-            // User Agent के साथ पेज व्यू डेटा भेजें
             sendData(gaEndpoint, pageViewPayload, currentViewId, USER_AGENT);
             scheduleNextView(url, measurementId, apiSecret);
         }, 500); 
