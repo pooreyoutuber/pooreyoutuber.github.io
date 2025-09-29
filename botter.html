@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Traffic Injector (Single File)</title>
+    <title>GA4 Traffic Injector (Single File - FIX)</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #e6f7ff; }
         .container { max-width: 650px; margin: 30px auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
@@ -20,7 +20,7 @@
 <body>
 
 <div class="container">
-    <h2>🎯 GA4 ट्रैफिक इंजेक्टर (सिंगल कोड)</h2>
+    <h2>🎯 GA4 ट्रैफिक इंजेक्टर (सिंगल कोड - FIX)</h2>
 
     <div class="disclaimer">
         ✅ **प्रमाण:** परिणाम देखने के लिए, Google Analytics में **Admin -> DebugView** खोलें। यह टूल 100 व्यू भेजने के लिए डिज़ाइन किया गया है।
@@ -51,6 +51,8 @@
     let simulationTimeout;
     const MIN_DELAY = 1000; 
     const MAX_DELAY = 3000; 
+    // FIX: CORS को बायपास करने के लिए एक पब्लिक प्रॉक्सी का उपयोग
+    const PROXY_URL = 'https://corsproxy.io/?'; 
 
     const outputDiv = document.getElementById('output');
     const statusDiv = document.getElementById('status');
@@ -69,20 +71,35 @@
     }
     
     // Measurement Protocol एंडपॉइंट पर डेटा भेजने के लिए मुख्य फ़ंक्शन
-    async function sendData(endpoint, payload, currentViewId) {
+    async function sendData(gaEndpointUrl, payload, currentViewId) {
+        // FIX: GA4 एंडपॉइंट को प्रॉक्सी URL में एन्कोड करें
+        const proxiedEndpoint = PROXY_URL + encodeURIComponent(gaEndpointUrl);
+
         try {
-            // CORS की समस्या को बायपास करने के लिए no-cors मोड का उपयोग
-            const response = await fetch(endpoint, {
+            const response = await fetch(proxiedEndpoint, {
                 method: 'POST',
                 body: JSON.stringify(payload),
-                headers: { 'Content-Type': 'application/json' },
-                mode: 'no-cors' 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // CORS प्रॉक्सी के लिए अतिरिक्त हेडर
+                    'X-Requested-With': 'XMLHttpRequest' 
+                }
             });
-            successfulViews++;
-            log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent (Check GA DebugView)`, 'success');
+
+            // प्रॉक्सी का उपयोग करने पर, हम HTTP स्थिति की जांच कर सकते हैं। 
+            // 204 No Content GA4 से एक सफल प्रतिक्रिया है।
+            if (response.status === 204 || response.ok) { 
+                successfulViews++;
+                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent (Check GA DebugView)`, 'success');
+            } else {
+                // अगर GA4 ने Bad Request (400) जैसी कोई एरर दी
+                const errorText = await response.text();
+                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILURE</span> | Status: ${response.status}. GA4 Did Not Accept Data.`, 'error');
+                log(`DEBUG: ${errorText.substring(0, 100)}...`, 'error'); 
+            }
         } catch (error) {
-            // यह केवल नेटवर्क कनेक्शन विफल होने पर चलता है
-            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed. ${error.message}`, 'error');
+            // यह केवल नेटवर्क कनेक्शन विफल होने पर चलता है (जैसे प्रॉक्सी डाउन)
+            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection/Proxy Failed. ${error.message}`, 'error');
         } finally {
             // स्टेटस अपडेट करें
             statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
@@ -99,8 +116,10 @@
         viewCount++;
         const currentViewId = viewCount;
         
+        // प्रत्येक व्यू एक नया क्लाइंट ID (नए यूजर) हो सकता है
         const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-        const SESSION_ID = Date.now();
+        // प्रत्येक क्लाइंट के लिए एक नया सेशन
+        const SESSION_ID = Date.now(); 
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
 
         // 1. Session Start Event (नए सेशन की शुरुआत)
@@ -111,7 +130,7 @@
                 params: {
                     debug_mode: true, 
                     session_id: SESSION_ID,
-                    _ss: 1 // session_start flag
+                    _ss: 1 
                 }
             }]
         };
