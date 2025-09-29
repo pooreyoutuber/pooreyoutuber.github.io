@@ -1,0 +1,62 @@
+# pentest_traffic_sender.py
+import requests
+import time
+import threading
+from urllib.parse import urlparse
+
+# Configuration
+TARGET_URL = ""
+REQUEST_COUNT = 900
+DURATION_MINUTES = 5
+results = {"success": 0, "fail": 0}
+lock = threading.Lock()  # Protect shared data
+
+def validate_url(url):
+    try:
+        result = urlparse(url)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
+
+def send_request():
+    global results
+    try:
+        response = requests.get(TARGET_URL, timeout=5)
+        with lock:
+            if response.status_code == 200:
+                results["success"] += 1
+            else:
+                results["fail"] += 1
+    except:
+        with lock:
+            results["fail"] += 1
+
+def simulate():
+    delay = (DURATION_MINUTES * 60) / REQUEST_COUNT
+    threads = []
+
+    print(f"[+] Starting traffic test on: {TARGET_URL}")
+    print(f"[+] Total Requests: {REQUEST_COUNT} | Duration: {DURATION_MINUTES} mins")
+    start_time = time.time()
+
+    for i in range(REQUEST_COUNT):
+        thread = threading.Thread(target=send_request)
+        threads.append(thread)
+        thread.start()
+        time.sleep(delay)
+
+    for t in threads:
+        t.join()
+
+    elapsed = time.time() - start_time
+    print("\n[+] Test completed.")
+    print(f"[✓] Success: {results['success']}, [✗] Fail: {results['fail']}")
+    print(f"[⏱] Time taken: {elapsed:.2f} seconds")
+
+if __name__ == "__main__":
+    TARGET_URL = input("🎯 Enter the authorized target URL (include http:// or https://): ").strip()
+    
+    if not validate_url(TARGET_URL):
+        print("[!] Invalid URL. Please include protocol (http:// or https://). Exit.")
+    else:
+        simulate()
