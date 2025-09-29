@@ -3,43 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Traffic Injector (Final Fix)</title>
+    <title>GA4 Traffic Injector (Super Compact)</title>
     <style>
-        /* Compact and Clean UI */
+        /* Super Compact UI */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 95%; max-width: 450px; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
-        h2 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; text-align: center; font-size: 1.5em; }
-        label { display: block; margin-top: 10px; font-weight: 600; color: #333; font-size: 0.9em; }
-        input[type="url"], input[type="text"] { width: 100%; padding: 10px; margin-top: 3px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 0.9em; }
-        button { background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 20px; font-size: 1em; font-weight: bold; transition: background-color 0.3s; }
+        .container { width: 90%; max-width: 400px; background: #ffffff; padding: 18px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+        h2 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 6px; margin-top: 0; text-align: center; font-size: 1.4em; }
+        label { display: block; margin-top: 8px; font-weight: 600; color: #333; font-size: 0.85em; }
+        input[type="url"], input[type="text"] { width: 100%; padding: 8px; margin-top: 3px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 0.85em; }
+        button { background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 0.95em; font-weight: bold; transition: background-color 0.3s; }
         button:disabled { background-color: #90ee90; cursor: not-allowed; }
-        #output { margin-top: 15px; padding: 10px; border: 1px solid #cfe2ff; background-color: #e9f0ff; border-radius: 5px; max-height: 150px; overflow-y: scroll; font-size: 0.8em; }
-        #status { padding: 8px; background-color: #007bff; border-radius: 5px; font-weight: bold; color: white; margin-top: 10px; text-align: center; font-size: 0.9em; }
-        .disclaimer { font-size: 0.75em; color: #dc3545; margin-top: 10px; padding: 10px; border: 1px solid #f8d7da; background-color: #f8f0f0; border-radius: 5px; }
-        .input-group { margin-bottom: 15px; }
+        #output { margin-top: 12px; padding: 8px; border: 1px solid #cfe2ff; background-color: #e9f0ff; border-radius: 4px; max-height: 120px; overflow-y: scroll; font-size: 0.75em; }
+        #status { padding: 6px; background-color: #007bff; border-radius: 4px; font-weight: bold; color: white; margin-top: 10px; text-align: center; font-size: 0.85em; }
+        .disclaimer { font-size: 0.7em; color: #dc3545; margin-top: 8px; padding: 8px; border: 1px solid #f8d7da; background-color: #f8f0f0; border-radius: 4px; }
+        .input-group { margin-bottom: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🚀 GA4 ट्रैफिक इंजेक्टर (फाइनल फिक्स)</h2>
+    <h2>🚀 GA4 ट्रैफिक (सुपर कॉम्पैक्ट)</h2>
 
     <div class="disclaimer">
-        ⚠️ **ज़रूरी:** कनेक्शन एरर से बचने के लिए, हमने एक वैकल्पिक एंडपॉइंट का उपयोग किया है। परिणाम देखने के लिए हमेशा **GA4 Admin -> DebugView** खोलें।
+        **ज़रूरी:** GA4 के लिए **Measurement ID** और **API Secret** अनिवार्य हैं। परिणाम देखने के लिए **Admin -> DebugView** खोलें।
     </div>
 
     <div class="input-group">
-        <label for="measurementIdInput">GA4 Measurement ID (G-XXXXXXX):</label>
+        <label for="measurementIdInput">GA4 ID (G-XXXXXXX):</label>
         <input type="text" id="measurementIdInput" placeholder="G-XXXXXXXXXX" required>
     </div>
     
     <div class="input-group">
-        <label for="apiSecretInput">GA4 API Secret:</label>
+        <label for="apiSecretInput">API Secret:</label>
         <input type="text" id="apiSecretInput" placeholder="आपका_API_सीक्रेट" required>
     </div>
 
     <div class="input-group">
-        <label for="urlInput">वेबसाइट URL (https:// के साथ):</label>
+        <label for="urlInput">वेबसाइट URL (https://):</label>
         <input type="url" id="urlInput" placeholder="https://your-project.com" required>
     </div>
     
@@ -76,30 +76,30 @@
         outputDiv.prepend(p);
     }
     
-    // FIX: Measurement Protocol के लिए वैकल्पिक एंडपॉइंट और GET का उपयोग 
+    // GA4 G/Collect एंडपॉइंट के माध्यम से डेटा भेजने के लिए फ़ंक्शन
     async function sendData(gaEndpointUrl, payload, currentViewId) {
-        // GET रिक्वेस्ट के लिए पेलोड को URL पैरामीटर में बदलना
+        
+        // Peloaad को GET पैरामीटर में बदलना
         const params = new URLSearchParams({
-            ...payload.events[0].params,
             v: 2, // Protocol version
-            tid: gaEndpointUrl.split('?')[0].split('=').pop(), // measurement_id
-            cid: payload.client_id, // client_id
-            en: payload.events[0].name, // event_name
+            tid: gaEndpointUrl.split('?')[0].split('=').pop(), // measurement_id (tid)
+            cid: payload.client_id, // client_id (cid)
+            en: payload.events[0].name, // event_name (en)
+            ...payload.events[0].params, // बाकी पैरामीटर्स
         });
 
-        // URL को GA4 G/collect एंडपॉइंट में बदलें
+        // Measurement Protocol URL के बजाय G/collect URL का उपयोग
         const finalUrl = `https://www.google-analytics.com/g/collect?${params.toString()}&${gaEndpointUrl.split('?')[1]}`;
         
         try {
-            // GET रिक्वेस्ट का उपयोग, जो POST से कम CORS Error देता है
+            // GET रिक्वेस्ट का उपयोग, जो CORS के प्रति अधिक सहिष्णु है
             const response = await fetch(finalUrl, {
                 method: 'GET',
-                mode: 'no-cors' // no-cors का उपयोग यहाँ सुरक्षित है क्योंकि हम प्रतिक्रिया नहीं पढ़ रहे हैं
+                mode: 'no-cors' 
             });
             
-            // no-cors मोड में प्रतिक्रिया की जाँच नहीं की जा सकती, लेकिन यदि fetch सफल हुआ, तो हम सफल मानते हैं।
             successfulViews++;
-            log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent via GET (Check DebugView)`, 'success');
+            log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent via GET`, 'success');
             
         } catch (error) {
             log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Failed to fetch. ${error.message}`, 'error');
@@ -118,9 +118,9 @@
         viewCount++;
         const currentViewId = viewCount;
         
+        // प्रत्येक व्यू के लिए नया Client ID और Session ID
         const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-        const SESSION_ID = Date.now();
-        // हमने यहाँ URL में बदलाव नहीं किया है, लेकिन sendData फ़ंक्शन इसे G/collect के लिए parse कर लेगा
+        const SESSION_ID = Date.now(); 
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
 
         // 1. Session Start Event
@@ -146,13 +146,11 @@
             events: [{
                 name: 'page_view', 
                 params: {
-                    // पेज व्यू इवेंट के लिए विशिष्ट पैरामीटर
-                    dl: url, // page_location के बजाय dl
-                    dt: `PROJECT_VIEW_${currentViewId}`, // page_title के बजाय dt 
+                    dl: url, // page_location
+                    dt: `PROJECT_VIEW_${currentViewId}`, // page_title
                     debug_mode: true, 
-                    session_id: SESSION_ID,
-                    en_msec: engagementTime, // engagement_time_msec के बजाय en_msec
-                    sid: SESSION_ID // session_id के बजाय sid
+                    sid: SESSION_ID, // session_id
+                    en_msec: engagementTime, // engagement_time_msec
                 }
             }]
         };
@@ -175,7 +173,6 @@
     }
 
     function startSimulation() {
-        // ... (Validation code remains the same)
         const url = document.getElementById('urlInput').value.trim();
         const measurementId = document.getElementById('measurementIdInput').value.trim();
         const apiSecret = document.getElementById('apiSecretInput').value.trim();
@@ -185,7 +182,7 @@
             return;
         }
         if (!measurementId.startsWith('G-')) {
-            alert("कृपया सही GA4 Measurement ID (G- से शुरू होने वाली) दर्ज करें।");
+            alert("कृपया सही GA4 ID (G- से शुरू होने वाली) दर्ज करें।");
             return;
         }
         if (apiSecret.length < 5) {
