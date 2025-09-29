@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Traffic Injector (100 Views Goal)</title>
+    <title>GA4 Traffic Injector (Realism Focus)</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #e6f7ff; }
         .container { max-width: 650px; margin: 30px auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
@@ -20,10 +20,10 @@
 <body>
 
 <div class="container">
-    <h2>🎯 GA4 ट्रैफिक इंजेक्टर (100 व्यू लक्ष्य)</h2>
+    <h2>🚀 GA4 ट्रैफिक इंजेक्टर (उच्च यथार्थवाद)</h2>
 
     <div class="disclaimer">
-        ⚠️ **प्रमाण:** आपका प्रोजेक्ट केवल **Google Analytics Real-Time/DebugView** में काम करने का प्रमाण दे सकता है। Search Console पर इसका कोई असर नहीं पड़ेगा।
+        ✅ **बेहतर परिणाम:** यह टूल प्रत्येक "यूजर" के लिए अलग सेशन और एंगेजमेंट टाइम भेजेगा, जिससे GA4 रिपोर्टिंग अधिक वास्तविक लगेगी।
     </div>
 
     <label for="measurementIdInput">GA4 Measurement ID (जैसे: G-XXXXXXXXXX):</label>
@@ -44,14 +44,14 @@
 </div>
 
 <script>
-    let totalViews = 100; // 100 व्यू का लक्ष्य
+    let totalViews = 100; 
     let successfulViews = 0;
     let viewCount = 0;
     let isRunning = false;
     let simulationTimeout;
     let startTime;
-    const MIN_DELAY = 1000; // 1 सेकंड
-    const MAX_DELAY = 3000; // 3 सेकंड (तेज़ रिक्वेस्ट के लिए)
+    const MIN_DELAY = 1000; 
+    const MAX_DELAY = 3000; 
 
     const outputDiv = document.getElementById('output');
     const statusDiv = document.getElementById('status');
@@ -69,6 +69,26 @@
         outputDiv.prepend(p);
     }
 
+    // Measurement Protocol एंडपॉइंट पर डेटा भेजने के लिए मुख्य फ़ंक्शन
+    async function sendData(endpoint, payload, currentViewId) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'application/json' },
+                mode: 'no-cors' 
+            });
+            successfulViews++;
+            log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent (Check GA DebugView)`, 'success');
+        } catch (error) {
+            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed. ${error.message}`, 'error');
+        } finally {
+            // स्टेटस अपडेट करें
+            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+        }
+    }
+
+    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन
     function generateView(url, measurementId, apiSecret) {
         if (!isRunning || viewCount >= totalViews) {
             finishSimulation();
@@ -79,42 +99,49 @@
         const currentViewId = viewCount;
         
         const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-
+        const SESSION_ID = Date.now();
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
 
-        const payload = {
+        // 1. Session Start Event (नए सेशन की शुरुआत)
+        const sessionStartPayload = {
+            client_id: CLIENT_ID,
+            events: [{
+                name: 'session_start', 
+                params: {
+                    debug_mode: true, 
+                    session_id: SESSION_ID,
+                    _ss: 1 // session_start flag
+                }
+            }]
+        };
+        // सेशन की शुरुआत के लिए डेटा भेजें
+        sendData(gaEndpoint, sessionStartPayload, currentViewId);
+
+
+        // 2. Page View Event (मुख्य व्यू)
+        // 10 से 20 सेकंड का वास्तविक एंगेजमेंट टाइम
+        const engagementTime = 10000 + Math.floor(Math.random() * 10000); 
+
+        const pageViewPayload = {
             client_id: CLIENT_ID,
             events: [{
                 name: 'page_view', 
                 params: {
                     page_location: url,
-                    page_title: `PROJECT_VIEW_${currentViewId}_${Math.floor(Math.random() * 999)}`, 
+                    page_title: `PROJECT_VIEW_${currentViewId}`, 
                     debug_mode: true, 
-                    session_id: Date.now(),
-                    engagement_time_msec: 5000 + Math.floor(Math.random() * 5000) 
+                    session_id: SESSION_ID,
+                    // लंबे एंगेजमेंट टाइम के लिए
+                    engagement_time_msec: engagementTime 
                 }
             }]
         };
-
-        fetch(gaEndpoint, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: {
-                'Content-Type': 'application/json' 
-            },
-            mode: 'no-cors' 
-        })
-        .then(response => {
-            successfulViews++;
-            log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent (Check GA DebugView)`, 'success');
-        })
-        .catch(error => {
-            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed. ${error.message}`, 'error');
-        })
-        .finally(() => {
+        // 500 मिलीसेकेंड की देरी के बाद पेज व्यू इवेंट भेजें
+        setTimeout(() => {
+            sendData(gaEndpoint, pageViewPayload, currentViewId);
             scheduleNextView(url, measurementId, apiSecret);
-            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
-        });
+        }, 500); 
+
     }
 
     function scheduleNextView(url, measurementId, apiSecret) {
