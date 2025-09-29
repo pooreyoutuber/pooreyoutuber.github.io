@@ -3,129 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA-Friendly View Simulator (No Python)</title>
+    <title>Final Reliable Traffic Booster (5-7 Min)</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #e8f5e9; }
-        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); }
-        h2 { color: #388e3c; border-bottom: 2px solid #388e3c; padding-bottom: 10px; text-align: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #e6f7ff; }
+        .container { max-width: 650px; margin: 30px auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
+        h2 { color: #1e88e5; border-bottom: 3px solid #1e88e5; padding-bottom: 10px; text-align: center; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
-        input[type="url"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: #66bb6a; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; }
-        button:disabled { background-color: #a5d6a7; cursor: not-allowed; }
-        #output { margin-top: 20px; padding: 15px; border: 1px solid #c8e6c9; background-color: #f1f8e9; border-radius: 5px; max-height: 250px; overflow-y: scroll; font-size: 0.9em; }
-        .disclaimer { font-size: 0.85em; color: #d32f2f; margin-top: 15px; padding: 10px; border: 1px solid #ffcdd2; background-color: #ffebee; border-radius: 5px; }
+        input[type="url"] { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { background-color: #43a047; color: white; padding: 14px 25px; border: none; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 25px; font-size: 17px; font-weight: bold; transition: background-color 0.3s; }
+        button:disabled { background-color: #b3e5bc; cursor: not-allowed; }
+        #output { margin-top: 20px; padding: 15px; border: 1px solid #c8e6c9; background-color: #f1f8e9; border-radius: 6px; max-height: 250px; overflow-y: scroll; font-size: 0.95em; }
+        #status { padding: 10px; background-color: #e3f2fd; border-radius: 6px; font-weight: bold; color: #1565c0; margin-top: 15px; text-align: center; }
+        .disclaimer { font-size: 0.85em; color: #d32f2f; margin-top: 15px; padding: 15px; border: 1px solid #ffcdd2; background-color: #ffebee; border-radius: 6px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🎯 Reliable Traffic Simulator (Web Only)</h2>
+    <h2>🎯 विश्वसनीय ट्रैफिक बूस्टर (वेब)</h2>
 
     <div class="disclaimer">
-        ⚠️ **ध्यान दें:** यह टूल लगभग **50-60 व्यूज़** 5-7 मिनट में भेजने के लिए धीमी गति से चलता है ताकि यह बॉट न लगे। सफलता के लिए कृपया ब्राउज़र को खुला रखें।
+        ⚠️ **सफलता की कुंजी:** यह टूल धीरे-धीरे, मानवीय व्यवहार को दोहराते हुए अनुरोध भेजता है। **Google Analytics के 'Real-Time' व्यू को खोलें** और देखें कि ट्रैफ़िक वहाँ दिख रहा है या नहीं।
     </div>
 
-    <label for="urlInput">वेबसाइट URL:</label>
+    <label for="urlInput">वेबसाइट URL (https:// के साथ):</label>
     <input type="url" id="urlInput" placeholder="https://your-project.com" required>
     
-    <label for="status">स्थिति:</label>
-    <div id="status" style="font-size:1.1em; color:#007bff;">Ready</div>
+    <div id="status">Status: Ready | Target: 60 Views</div>
 
-    <button id="startButton" onclick="startSimulation()">Start 5-Minute Simulation (60 Views)</button>
+    <button id="startButton" onclick="startSimulation()">Start Simulation</button>
     
     <label>आउटपुट लॉग:</label>
     <div id="output"></div>
 </div>
 
 <script>
-    let totalViews = 60; // 5 मिनट में 60 व्यूज़ का लक्ष्य
+    let totalViews = 60; // 5 मिनट के लक्ष्य के लिए फिक्स्ड
     let successfulViews = 0;
     let viewCount = 0;
     let isRunning = false;
-    let simulationInterval;
+    let simulationTimeout;
+    let startTime;
+    const MIN_DELAY = 4000; // 4 सेकंड
+    const MAX_DELAY = 8000; // 8 सेकंड
 
     const outputDiv = document.getElementById('output');
     const statusDiv = document.getElementById('status');
     const startButton = document.getElementById('startButton');
 
-    // **महत्वपूर्ण: लंबा रैंडम डिले (4 से 8 सेकंड)**
-    // 5 मिनट (300 सेकंड) में 60 व्यूज़ के लिए, प्रति व्यू 5 सेकंड आवश्यक है (300/60)।
+    // रैंडम देरी (4 से 8 सेकंड)
     function getRandomDelay() {
-        return Math.random() * (8000 - 4000) + 4000; // 4000ms से 8000ms (4 से 8 सेकंड)
+        return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
     }
 
     function log(message, type = 'info') {
         const p = document.createElement('p');
         p.innerHTML = message;
-        if (type === 'error') p.style.color = 'red';
-        if (type === 'success') p.style.color = 'green';
+        if (type === 'error') p.style.color = '#dc3545';
+        if (type === 'success') p.style.color = '#28a745';
         outputDiv.prepend(p);
     }
 
-    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन
-    async function generateView(url) {
+    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (AJAX का उपयोग)
+    function generateView(url) {
+        if (!isRunning || viewCount >= totalViews) {
+            finishSimulation();
+            return;
+        }
+
         viewCount++;
         const currentViewId = viewCount;
         
         try {
-            // Fetch API का उपयोग करके रिक्वेस्ट भेजना
-            const response = await fetch(url, {
-                method: 'GET',
-                cache: 'no-cache', 
-            });
+            const xhr = new XMLHttpRequest();
+            // हम इसे synchronous नहीं कर रहे हैं, लेकिन यह fetch से अधिक विश्वसनीय है
+            xhr.open('GET', url, true); 
+            
+            // यह GA को बताता है कि यह AJAX रिक्वेस्ट है (जो JavaScript इंटरैक्शन को दर्शाता है)
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); 
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) { // रिक्वेस्ट पूरी हो गई
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        successfulViews++;
+                        log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Status: ${xhr.status}`, 'success');
+                    } else {
+                        log(`View ${currentViewId}: <span style="font-weight:bold;">FAILED</span> | Status: ${xhr.status}`, 'error');
+                    }
+                    
+                    // अगली रिक्वेस्ट शेड्यूल करें
+                    scheduleNextView(url);
+                }
+            };
+            
+            // रिक्वेस्ट भेजें
+            xhr.send();
 
-            if (response.ok) {
-                successfulViews++;
-                log(`View ${currentViewId}: <span style="color:green;">SUCCESS</span> | Status: ${response.status}`, 'success');
-            } else {
-                log(`View ${currentViewId}: <span style="color:red;">FAILED</span> | Status: ${response.status}`, 'error');
-            }
         } catch (error) {
-            log(`View ${currentViewId}: <span style="color:red;">ERROR</span> | Connection Failed.`, 'error');
+            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed.`, 'error');
+            // एरर के बाद भी अगली रिक्वेस्ट शेड्यूल करें
+            scheduleNextView(url);
         }
         
         // स्टेटस अपडेट करें
-        statusDiv.innerHTML = `Running... View Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+        statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+    }
 
-        // सिमुलेशन समाप्त करें
-        if (currentViewId >= totalViews) {
-            clearInterval(simulationInterval);
+    // अगली रिक्वेस्ट को रैंडम डिले के साथ शेड्यूल करें
+    function scheduleNextView(url) {
+        if (viewCount < totalViews && isRunning) {
+            const delay = getRandomDelay();
+            simulationTimeout = setTimeout(() => generateView(url), delay);
+        } else {
             finishSimulation();
         }
     }
 
     function startSimulation() {
         const url = document.getElementById('urlInput').value;
-        if (!url || isRunning) {
-            alert("कृपया एक वैध URL दर्ज करें या सिमुलेशन पहले ही चल रहा है!");
+        if (!url.startsWith('http')) {
+            alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
             return;
         }
+        if (isRunning) return;
 
         isRunning = true;
         startButton.disabled = true;
-        startButton.textContent = "Simulation Running... (Please keep this tab open)";
+        startButton.textContent = "Simulation Running... (DO NOT CLOSE TAB)";
         
         successfulViews = 0;
         viewCount = 0;
         outputDiv.innerHTML = ''; 
         startTime = new Date();
         
-        log(`🚀 Simulation Started for ${url}. Target: ${totalViews} views.`, 'info');
-        statusDiv.textContent = "Starting requests...";
+        log(`🚀 Simulation Started for ${url}. Target: 60 Views.`, 'info');
+        statusDiv.innerHTML = "Starting requests...";
 
-        // रैंडम डिले के साथ रिक्वेस्ट को शुरू करने के लिए setInterval का उपयोग
-        simulationInterval = setInterval(() => {
-            const delay = getRandomDelay(); // 4 से 8 सेकंड का डिले
-            
-            // यह सुनिश्चित करने के लिए कि अगली रिक्वेस्ट पिछली रिक्वेस्ट पूरी होने से पहले शुरू हो
-            if (viewCount < totalViews) {
-                // एक छोटे टाइमआउट के बाद रिक्वेस्ट भेजें
-                setTimeout(() => generateView(url), delay); 
-            }
-        }, 500); // हर 0.5 सेकंड में एक नई रिक्वेस्ट शेड्यूल करें
+        // पहली रिक्वेस्ट तुरंत शुरू करें
+        generateView(url);
     }
 
     function finishSimulation() {
+        clearTimeout(simulationTimeout);
+        if (!isRunning) return;
+
         const endTime = new Date();
         const duration = (endTime - startTime) / 1000;
         
@@ -136,8 +157,9 @@
         log("<hr>", 'info');
         
         startButton.disabled = false;
-        startButton.textContent = "Start 5-Minute Simulation (60 Views)";
+        startButton.textContent = "Start Simulation";
         isRunning = false;
+        statusDiv.innerHTML = `Finished. Time: ${(duration/60).toFixed(2)} minutes | Successful: ${successfulViews}`;
     }
 </script>
 
