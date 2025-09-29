@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Reliable Traffic Booster (5-7 Min)</title>
+    <title>GA4 Reliable Traffic Booster</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #e6f7ff; }
         .container { max-width: 650px; margin: 30px auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
         h2 { color: #1e88e5; border-bottom: 3px solid #1e88e5; padding-bottom: 10px; text-align: center; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
-        input[type="url"] { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        input[type="url"], input[type="text"] { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         button { background-color: #43a047; color: white; padding: 14px 25px; border: none; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 25px; font-size: 17px; font-weight: bold; transition: background-color 0.3s; }
         button:disabled { background-color: #b3e5bc; cursor: not-allowed; }
         #output { margin-top: 20px; padding: 15px; border: 1px solid #c8e6c9; background-color: #f1f8e9; border-radius: 6px; max-height: 250px; overflow-y: scroll; font-size: 0.95em; }
@@ -20,11 +20,17 @@
 <body>
 
 <div class="container">
-    <h2>🎯 विश्वसनीय ट्रैफिक बूस्टर (वेब)</h2>
+    <h2>🎯 विश्वसनीय GA4 ट्रैफिक बूस्टर (वेब)</h2>
 
     <div class="disclaimer">
-        ⚠️ **सफलता की कुंजी:** यह टूल धीरे-धीरे, मानवीय व्यवहार को दोहराते हुए अनुरोध भेजता है। **Google Analytics के 'Real-Time' व्यू को खोलें** और देखें कि ट्रैफ़िक वहाँ दिख रहा है या नहीं।
+        ⚠️ **आवश्यक कदम:** इस टूल के काम करने के लिए, आपको अपनी **GA4 Measurement ID** और **API Secret** सही ढंग से दर्ज करना होगा।
     </div>
+
+    <label for="measurementIdInput">GA4 Measurement ID (जैसे: G-XXXXXXXXXX):</label>
+    <input type="text" id="measurementIdInput" placeholder="G-XXXXXXXXXX" required>
+    
+    <label for="apiSecretInput">GA4 API Secret (Google Analytics Admin में बनाएँ):</label>
+    <input type="text" id="apiSecretInput" placeholder="आपका_API_सीक्रेट" required>
 
     <label for="urlInput">वेबसाइट URL (https:// के साथ):</label>
     <input type="url" id="urlInput" placeholder="https://your-project.com" required>
@@ -38,7 +44,7 @@
 </div>
 
 <script>
-    let totalViews = 60; // 5 मिनट के लक्ष्य के लिए फिक्स्ड
+    let totalViews = 60; // 60 व्यू का लक्ष्य
     let successfulViews = 0;
     let viewCount = 0;
     let isRunning = false;
@@ -64,8 +70,8 @@
         outputDiv.prepend(p);
     }
 
-    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (AJAX का उपयोग)
-    function generateView(url) {
+    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (Measurement Protocol का उपयोग)
+    function generateView(url, measurementId, apiSecret) {
         if (!isRunning || viewCount >= totalViews) {
             finishSimulation();
             return;
@@ -74,55 +80,83 @@
         viewCount++;
         const currentViewId = viewCount;
         
-        try {
-            const xhr = new XMLHttpRequest();
-            // हम इसे synchronous नहीं कर रहे हैं, लेकिन यह fetch से अधिक विश्वसनीय है
-            xhr.open('GET', url, true); 
-            
-            // यह GA को बताता है कि यह AJAX रिक्वेस्ट है (जो JavaScript इंटरैक्शन को दर्शाता है)
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); 
-            
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) { // रिक्वेस्ट पूरी हो गई
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        successfulViews++;
-                        log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Status: ${xhr.status}`, 'success');
-                    } else {
-                        log(`View ${currentViewId}: <span style="font-weight:bold;">FAILED</span> | Status: ${xhr.status}`, 'error');
-                    }
-                    
-                    // अगली रिक्वेस्ट शेड्यूल करें
-                    scheduleNextView(url);
-                }
-            };
-            
-            // रिक्वेस्ट भेजें
-            xhr.send();
+        // प्रत्येक 'उपयोगकर्ता' के लिए एक रैंडम क्लाइंट ID जनरेट करें (मानवीय व्यवहार का अनुकरण)
+        const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
 
-        } catch (error) {
+        // GA4 Measurement Protocol एंडपॉइंट
+        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
+
+        const payload = {
+            client_id: CLIENT_ID,
+            // एक 'page_view' इवेंट भेजें ताकि यह एक वास्तविक विज़िट जैसा दिखे
+            events: [{
+                name: 'page_view', 
+                params: {
+                    page_location: url,
+                    page_title: `Simulated View ${currentViewId}`,
+                    // Real-Time में IP एड्रेस दिखाने के लिए 'Debug' मोड का उपयोग करें
+                    debug_mode: true, // इससे GA के DebugView में तुरंत डेटा दिखेगा
+                    session_id: Date.now(), // प्रत्येक रन के लिए एक नई सत्र ID
+                    engagement_time_msec: 5000 + Math.floor(Math.random() * 5000) // 5 से 10 सेकंड का नकली एंगेजमेंट टाइम
+                }
+            }]
+        };
+
+        // Fetch API का उपयोग करके सीधे GA सर्वर पर डेटा भेजें
+        fetch(gaEndpoint, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            // सफल Measurement Protocol रिक्वेस्ट आमतौर पर 204 या 200 स्टेटस देती है।
+            if (response.status === 204 || response.status === 200) {
+                successfulViews++;
+                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Status: ${response.status}`, 'success');
+            } else {
+                // GA अक्सर गलत ID/सीक्रेट पर 400 या 404 देता है
+                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILED</span> | Status: ${response.status} (Check ID/Secret)`, 'error');
+            }
+        })
+        .catch(error => {
             log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed.`, 'error');
-            // एरर के बाद भी अगली रिक्वेस्ट शेड्यूल करें
-            scheduleNextView(url);
-        }
-        
-        // स्टेटस अपडेट करें
-        statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+        })
+        .finally(() => {
+            // अगली रिक्वेस्ट शेड्यूल करें
+            scheduleNextView(url, measurementId, apiSecret);
+            // स्टेटस अपडेट करें
+            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+        });
     }
 
     // अगली रिक्वेस्ट को रैंडम डिले के साथ शेड्यूल करें
-    function scheduleNextView(url) {
+    function scheduleNextView(url, measurementId, apiSecret) {
         if (viewCount < totalViews && isRunning) {
             const delay = getRandomDelay();
-            simulationTimeout = setTimeout(() => generateView(url), delay);
+            simulationTimeout = setTimeout(() => generateView(url, measurementId, apiSecret), delay);
         } else {
             finishSimulation();
         }
     }
 
     function startSimulation() {
-        const url = document.getElementById('urlInput').value;
+        const url = document.getElementById('urlInput').value.trim();
+        const measurementId = document.getElementById('measurementIdInput').value.trim();
+        const apiSecret = document.getElementById('apiSecretInput').value.trim();
+
+        // इनपुट सत्यापन (Input Validation)
         if (!url.startsWith('http')) {
             alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
+            return;
+        }
+        if (!measurementId.startsWith('G-')) {
+            alert("कृपया सही GA4 Measurement ID (G- से शुरू होने वाली) दर्ज करें।");
+            return;
+        }
+        if (apiSecret.length < 5) {
+            alert("कृपया सही API Secret दर्ज करें।");
             return;
         }
         if (isRunning) return;
@@ -136,11 +170,11 @@
         outputDiv.innerHTML = ''; 
         startTime = new Date();
         
-        log(`🚀 Simulation Started for ${url}. Target: 60 Views.`, 'info');
+        log(`🚀 Simulation Started for ${url}. Target: ${totalViews} Views.`, 'info');
         statusDiv.innerHTML = "Starting requests...";
 
         // पहली रिक्वेस्ट तुरंत शुरू करें
-        generateView(url);
+        generateView(url, measurementId, apiSecret);
     }
 
     function finishSimulation() {
