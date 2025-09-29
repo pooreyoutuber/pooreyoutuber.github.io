@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Traffic Injector (Realism Focus)</title>
+    <title>GA4 Traffic Injector (Single File)</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #e6f7ff; }
         .container { max-width: 650px; margin: 30px auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
@@ -20,16 +20,16 @@
 <body>
 
 <div class="container">
-    <h2>🚀 GA4 ट्रैफिक इंजेक्टर (उच्च यथार्थवाद)</h2>
+    <h2>🎯 GA4 ट्रैफिक इंजेक्टर (सिंगल कोड)</h2>
 
     <div class="disclaimer">
-        ✅ **बेहतर परिणाम:** यह टूल प्रत्येक "यूजर" के लिए अलग सेशन और एंगेजमेंट टाइम भेजेगा, जिससे GA4 रिपोर्टिंग अधिक वास्तविक लगेगी।
+        ✅ **प्रमाण:** परिणाम देखने के लिए, Google Analytics में **Admin -> DebugView** खोलें। यह टूल 100 व्यू भेजने के लिए डिज़ाइन किया गया है।
     </div>
 
     <label for="measurementIdInput">GA4 Measurement ID (जैसे: G-XXXXXXXXXX):</label>
     <input type="text" id="measurementIdInput" placeholder="G-XXXXXXXXXX" required>
     
-    <label for="apiSecretInput">GA4 API Secret (Google Analytics Admin में बनाएँ):</label>
+    <label for="apiSecretInput">GA4 API Secret:</label>
     <input type="text" id="apiSecretInput" placeholder="आपका_API_सीक्रेट" required>
 
     <label for="urlInput">वेबसाइट URL (https:// के साथ):</label>
@@ -44,12 +44,11 @@
 </div>
 
 <script>
-    let totalViews = 100; 
+    let totalViews = 100; // 100 व्यू का लक्ष्य
     let successfulViews = 0;
     let viewCount = 0;
     let isRunning = false;
     let simulationTimeout;
-    let startTime;
     const MIN_DELAY = 1000; 
     const MAX_DELAY = 3000; 
 
@@ -68,10 +67,11 @@
         if (type === 'success') p.style.color = '#28a745';
         outputDiv.prepend(p);
     }
-
+    
     // Measurement Protocol एंडपॉइंट पर डेटा भेजने के लिए मुख्य फ़ंक्शन
     async function sendData(endpoint, payload, currentViewId) {
         try {
+            // CORS की समस्या को बायपास करने के लिए no-cors मोड का उपयोग
             const response = await fetch(endpoint, {
                 method: 'POST',
                 body: JSON.stringify(payload),
@@ -81,6 +81,7 @@
             successfulViews++;
             log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent (Check GA DebugView)`, 'success');
         } catch (error) {
+            // यह केवल नेटवर्क कनेक्शन विफल होने पर चलता है
             log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed. ${error.message}`, 'error');
         } finally {
             // स्टेटस अपडेट करें
@@ -119,7 +120,6 @@
 
 
         // 2. Page View Event (मुख्य व्यू)
-        // 10 से 20 सेकंड का वास्तविक एंगेजमेंट टाइम
         const engagementTime = 10000 + Math.floor(Math.random() * 10000); 
 
         const pageViewPayload = {
@@ -131,7 +131,6 @@
                     page_title: `PROJECT_VIEW_${currentViewId}`, 
                     debug_mode: true, 
                     session_id: SESSION_ID,
-                    // लंबे एंगेजमेंट टाइम के लिए
                     engagement_time_msec: engagementTime 
                 }
             }]
@@ -143,6 +142,7 @@
         }, 500); 
 
     }
+
 
     function scheduleNextView(url, measurementId, apiSecret) {
         if (viewCount < totalViews && isRunning) {
@@ -179,9 +179,8 @@
         successfulViews = 0;
         viewCount = 0;
         outputDiv.innerHTML = ''; 
-        startTime = new Date();
         
-        log(`🚀 Simulation Started for ${url}. Target: ${totalViews} Views.`, 'info');
+        log(`🚀 Simulation Started. Target: ${totalViews} Views.`, 'info');
         statusDiv.innerHTML = "Starting requests...";
 
         generateView(url, measurementId, apiSecret);
@@ -190,20 +189,16 @@
     function finishSimulation() {
         clearTimeout(simulationTimeout);
         if (!isRunning) return;
-
-        const endTime = new Date();
-        const duration = (endTime - startTime) / 1000;
         
         log("<hr>", 'info');
         log(`✅ **Simulation Complete!**`, 'info');
-        log(`Total Time Taken: <b>${duration.toFixed(2)} seconds</b> (${(duration/60).toFixed(2)} minutes)`, 'info');
         log(`Final Successful Views: <b>${successfulViews}</b>`, 'info');
         log("<hr>", 'info');
         
         startButton.disabled = false;
         startButton.textContent = "Start Simulation";
         isRunning = false;
-        statusDiv.innerHTML = `Finished. Time: ${(duration/60).toFixed(2)} minutes | Successful: ${successfulViews}`;
+        statusDiv.innerHTML = `Finished. Total Views: ${successfulViews}`;
     }
 </script>
 
