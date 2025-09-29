@@ -1,48 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Generator</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <style>
-    body {font-family: Arial, sans-serif; text-align: center; padding: 30px; background:#f4f6f9;}
-    h1 {color:#222;}
-    input, button {
-      padding:10px;
-      margin:5px;
-      width:300px;
-      max-width:90%;
-      border-radius:6px;
-      border:1px solid #ccc;
-    }
-    button {
-      background:#007bff;
-      color:#fff;
-      cursor:pointer;
-    }
-    button:hover {background:#0056b3;}
-    #qrcode {margin-top:20px;}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA4 Traffic Injector (Multi-Browser Simulation)</title>
+    <style>
+        /* Compact UI */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 90%; max-width: 420px; background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+        h2 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 6px; margin-top: 0; text-align: center; font-size: 1.4em; }
+        label { display: block; margin-top: 10px; font-weight: 600; color: #333; font-size: 0.85em; }
+        input[type="url"], input[type="text"] { width: 100%; padding: 8px; margin-top: 3px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 0.85em; }
+        button { background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 0.95em; font-weight: bold; transition: background-color 0.3s; }
+        button:disabled { background-color: #90ee90; cursor: not-allowed; }
+        #output { margin-top: 12px; padding: 8px; border: 1px solid #ffe8cc; background-color: #fff8e1; border-radius: 4px; max-height: 120px; overflow-y: scroll; font-size: 0.75em; }
+        #status { padding: 6px; background-color: #ff9800; border-radius: 4px; font-weight: bold; color: white; margin-top: 10px; text-align: center; font-size: 0.85em; }
+        .disclaimer { font-size: 0.75em; color: #333; margin-top: 8px; padding: 8px; border: 1px solid #d4edda; background-color: #f0fdf2; border-radius: 4px; }
+        .input-group { margin-bottom: 12px; }
+    </style>
 </head>
 <body>
-  <h1>🚀 QR Code Generator</h1>
-  <p>Enter text or URL to generate QR Code</p>
-  <input type="text" id="text" placeholder="Enter text or URL">
-  <button onclick="generateQR()">Generate QR Code</button>
-  <div id="qrcode"></div>
 
-  <script>
-    function generateQR() {
-      const text = document.getElementById('text').value;
-      const qrcodeDiv = document.getElementById('qrcode');
-      qrcodeDiv.innerHTML = '';
-      if (!text) return;
-      QRCode.toCanvas(text, { width: 200 }, function (err, canvas) {
-        if (err) console.error(err);
-        qrcodeDiv.appendChild(canvas);
-      });
+<div class="container">
+    <h2>💻 GA4 ट्रैफिक (मल्टी-ब्राउज़र सिमुलेशन)</h2>
+
+    <div class="disclaimer">
+        **कॉलेज प्रोजेक्ट के लिए:** यह टूल हर व्यू को एक अलग डिवाइस (User Agent) के रूप में भेजता है, जिससे GA में ट्रैफिक अधिक वास्तविक लगता है। परिणाम देखने के लिए **Admin -> DebugView** खोलें।
+    </div>
+
+    <div class="input-group">
+        <label for="measurementIdInput">GA4 ID (G-XXXXXXX):</label>
+        <input type="text" id="measurementIdInput" placeholder="G-XXXXXXXXXX" required>
+    </div>
+    
+    <div class="input-group">
+        <label for="apiSecretInput">API Secret:</label>
+        <input type="text" id="apiSecretInput" placeholder="आपका_API_सीक्रेट" required>
+    </div>
+
+    <div class="input-group">
+        <label for="urlInput">वेबसाइट URL (https://):</label>
+        <input type="url" id="urlInput" placeholder="https://your-project.com" required>
+    </div>
+    
+    <div id="status">Status: Ready | Target: 100 Views</div>
+
+    <button id="startButton" onclick="startSimulation()">Start Simulation</button>
+    
+    <label>आउटपुट लॉग:</label>
+    <div id="output"></div>
+</div>
+
+<script>
+    let totalViews = 100;
+    let successfulViews = 0;
+    let viewCount = 0;
+    let isRunning = false;
+    let simulationTimeout;
+    const MIN_DELAY = 1500; // बढ़ी हुई देरी
+    const MAX_DELAY = 4000; 
+
+    // अलग-अलग User Agents की सूची (कॉलेज प्रोजेक्ट के लिए उपयोगी)
+    const userAgents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", // Windows Chrome
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", // macOS Safari
+        "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36", // Android Chrome
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", // iOS Safari
+        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/120.0" // Linux Firefox
+    ];
+
+    function getRandomDelay() {
+        return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
     }
-  </script>
+    
+    function getRandomUserAgent() {
+        return userAgents[Math.floor(Math.random() * userAgents.length)];
+    }
+
+    const outputDiv = document.getElementById('output');
+    const statusDiv = document.getElementById('status');
+    const startButton = document.getElementById('startButton');
+
+    function log(message, type = 'info') {
+        const p = document.createElement('p');
+        p.innerHTML = message;
+        if (type === 'error') p.style.color = '#dc3545';
+        if (type === 'success') p.style.color = '#28a745';
+        outputDiv.prepend(p);
+    }
+    
+    // G/Collect एंडपॉइंट के माध्यम से डेटा भेजने के लिए फ़ंक्शन
+    async function sendData(gaEndpointUrl, payload, currentViewId, userAgent) {
+        
+        // Peloaad को GET पैरामीटर में बदलना
+        const params = new URLSearchParams({
+            v: 2, 
+            tid: gaEndpointUrl.split('?')[0].split('=').pop(), 
+            cid: payload.client_id, 
+            en: payload.events[0].name, 
+            ua: userAgent, // FIX: User Agent पैरामीटर जोड़ा गया
+            ...payload.events[0].params, 
+        });
+
+        const finalUrl = `https://www.google-analytics.com/g/collect?${params.toString()}&${gaEndpointUrl.split('?')[1]}`;
+        
+        try {
+            const response = await fetch(finalUrl, {
+                method: 'GET',
+                mode: 'no-cors' 
+            });
+            
+            successfulViews++;
+            log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Device: ${userAgent.split('(')[1].split(')')[0]}`, 'success');
+            
+        } catch (error) {
+            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Failed to fetch. ${error.message}`, 'error');
+        } finally {
+            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+        }
+    }
+
+    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन
+    function generateView(url, measurementId, apiSecret) {
+        if (!isRunning || viewCount >= totalViews) {
+            finishSimulation();
+            return;
+        }
+
+        viewCount++;
+        const currentViewId = viewCount;
+        
+        const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+        const SESSION_ID = Date.now(); 
+        const USER_AGENT = getRandomUserAgent(); // FIX: हर बार नया User Agent
+        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
+
+        // 1. Session Start Event
+        const sessionStartPayload = {
+            client_id: CLIENT_ID,
+            events: [{
+                name: 'session_start', 
+                params: {
+                    debug_mode: true, 
+                    session_id: SESSION_ID,
+                    _ss: 1 
+                }
+            }]
+        };
+        // User Agent के साथ डेटा भेजें
+        sendData(gaEndpoint, sessionStartPayload, currentViewId, USER_AGENT);
+
+
+        // 2. Page View Event
+        const engagementTime = 10000 + Math.floor(Math.random() * 10000); 
+
+        const pageViewPayload = {
+            client_id: CLIENT_ID,
+            events: [{
+                name: 'page_view', 
+                params: {
+                    dl: url, 
+                    dt: `PROJECT_VIEW_${currentViewId}`, 
+                    debug_mode: true, 
+                    sid: SESSION_ID, 
+                    en_msec: engagementTime, 
+                }
+            }]
+        };
+        
+        setTimeout(() => {
+            // User Agent के साथ पेज व्यू डेटा भेजें
+            sendData(gaEndpoint, pageViewPayload, currentViewId, USER_AGENT);
+            scheduleNextView(url, measurementId, apiSecret);
+        }, 500); 
+
+    }
+
+
+    function scheduleNextView(url, measurementId, apiSecret) {
+        if (viewCount < totalViews && isRunning) {
+            const delay = getRandomDelay();
+            simulationTimeout = setTimeout(() => generateView(url, measurementId, apiSecret), delay);
+        } else {
+            finishSimulation();
+        }
+    }
+
+    function startSimulation() {
+        const url = document.getElementById('urlInput').value.trim();
+        const measurementId = document.getElementById('measurementIdInput').value.trim();
+        const apiSecret = document.getElementById('apiSecretInput').value.trim();
+
+        if (!url.startsWith('http')) {
+            alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
+            return;
+        }
+        if (!measurementId.startsWith('G-')) {
+            alert("कृपया सही GA4 ID (G- से शुरू होने वाली) दर्ज करें।");
+            return;
+        }
+        if (apiSecret.length < 5) {
+            alert("कृपया सही API Secret दर्ज करें।");
+            return;
+        }
+        if (isRunning) return;
+
+        isRunning = true;
+        startButton.disabled = true;
+        startButton.textContent = "Simulation Running... (DO NOT CLOSE TAB)";
+        
+        successfulViews = 0;
+        viewCount = 0;
+        outputDiv.innerHTML = ''; 
+        
+        log(`🚀 Simulation Started. Target: ${totalViews} Views.`, 'info');
+        statusDiv.innerHTML = "Starting requests...";
+
+        generateView(url, measurementId, apiSecret);
+    }
+
+    function finishSimulation() {
+        clearTimeout(simulationTimeout);
+        if (!isRunning) return;
+        
+        log("<hr>", 'info');
+        log(`✅ **Simulation Complete!**`, 'info');
+        log(`Final Successful Views: <b>${successfulViews}</b>`, 'info');
+        log("<hr>", 'info');
+        
+        startButton.disabled = false;
+        startButton.textContent = "Start Simulation";
+        isRunning = false;
+        statusDiv.innerHTML = `Finished. Total Views: ${successfulViews}`;
+    }
+</script>
+
 </body>
 </html>
