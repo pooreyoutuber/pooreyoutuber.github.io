@@ -3,58 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fast View Simulator (HTML/JS)</title>
+    <title>GA-Friendly View Simulator (No Python)</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f7f6; }
-        .container { max-width: 650px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-        h2 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; text-align: center; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #e8f5e9; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); }
+        h2 { color: #388e3c; border-bottom: 2px solid #388e3c; padding-bottom: 10px; text-align: center; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
-        input[type="url"], input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; }
-        button:disabled { background-color: #6c757d; cursor: not-allowed; }
-        #output { margin-top: 20px; padding: 15px; border: 1px solid #ddd; background-color: #e9ecef; border-radius: 5px; max-height: 250px; overflow-y: scroll; font-size: 0.9em; }
-        .disclaimer { font-size: 0.85em; color: #dc3545; margin-top: 15px; padding: 10px; border: 1px solid #f5c6cb; background-color: #f8d7da; border-radius: 5px; }
+        input[type="url"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #66bb6a; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; }
+        button:disabled { background-color: #a5d6a7; cursor: not-allowed; }
+        #output { margin-top: 20px; padding: 15px; border: 1px solid #c8e6c9; background-color: #f1f8e9; border-radius: 5px; max-height: 250px; overflow-y: scroll; font-size: 0.9em; }
+        .disclaimer { font-size: 0.85em; color: #d32f2f; margin-top: 15px; padding: 10px; border: 1px solid #ffcdd2; background-color: #ffebee; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🚀 HTML/JS View Traffic Booster</h2>
+    <h2>🎯 Reliable Traffic Simulator (Web Only)</h2>
 
     <div class="disclaimer">
-        ⚠️ **ज़रूरी सूचना:** यह टूल आपके ब्राउज़र की गति से चलेगा। 5 मिनट में 1000 व्यूज़ पूरे करने के लिए, ब्राउज़र को खुला रखें। इसका उपयोग केवल अनुमति प्राप्त साइटों पर ही करें।
+        ⚠️ **ध्यान दें:** यह टूल लगभग **50-60 व्यूज़** 5-7 मिनट में भेजने के लिए धीमी गति से चलता है ताकि यह बॉट न लगे। सफलता के लिए कृपया ब्राउज़र को खुला रखें।
     </div>
 
     <label for="urlInput">वेबसाइट URL:</label>
     <input type="url" id="urlInput" placeholder="https://your-project.com" required>
-
-    <label for="viewCount">व्यूज़ की संख्या:</label>
-    <input type="number" id="viewCount" value="1000" min="1" required>
-
-    <label for="concurrency">एक साथ रिक्वेस्ट (Concurrency):</label>
-    <input type="number" id="concurrency" value="50" min="1" max="100" required>
-
-    <button id="startButton" onclick="startSimulation()">Simulate Views</button>
     
-    <div id="status" style="margin-top:10px; font-weight:bold; color:#007bff;">Status: Ready</div>
+    <label for="status">स्थिति:</label>
+    <div id="status" style="font-size:1.1em; color:#007bff;">Ready</div>
 
+    <button id="startButton" onclick="startSimulation()">Start 5-Minute Simulation (60 Views)</button>
+    
     <label>आउटपुट लॉग:</label>
     <div id="output"></div>
 </div>
 
 <script>
-    let totalViewsAttempted = 0;
+    let totalViews = 60; // 5 मिनट में 60 व्यूज़ का लक्ष्य
     let successfulViews = 0;
+    let viewCount = 0;
     let isRunning = false;
-    let startTime;
+    let simulationInterval;
 
     const outputDiv = document.getElementById('output');
     const statusDiv = document.getElementById('status');
     const startButton = document.getElementById('startButton');
 
-    // रैंडम देरी (0.1 सेकंड से 0.5 सेकंड) - तेज़ स्पीड के लिए
+    // **महत्वपूर्ण: लंबा रैंडम डिले (4 से 8 सेकंड)**
+    // 5 मिनट (300 सेकंड) में 60 व्यूज़ के लिए, प्रति व्यू 5 सेकंड आवश्यक है (300/60)।
     function getRandomDelay() {
-        return Math.random() * (500 - 100) + 100;
+        return Math.random() * (8000 - 4000) + 4000; // 4000ms से 8000ms (4 से 8 सेकंड)
     }
 
     function log(message, type = 'info') {
@@ -63,95 +60,83 @@
         if (type === 'error') p.style.color = 'red';
         if (type === 'success') p.style.color = 'green';
         outputDiv.prepend(p);
-        if (outputDiv.children.length > 50) outputDiv.removeChild(outputDiv.lastChild);
     }
 
     // मुख्य व्यू जनरेट करने वाला फ़ंक्शन
-    async function generateView(url, viewId) {
-        if (!isRunning) return;
-
-        const delay = getRandomDelay();
-        await new Promise(resolve => setTimeout(resolve, delay)); // देरी के लिए इंतज़ार
-
+    async function generateView(url) {
+        viewCount++;
+        const currentViewId = viewCount;
+        
         try {
             // Fetch API का उपयोग करके रिक्वेस्ट भेजना
             const response = await fetch(url, {
                 method: 'GET',
-                cache: 'no-cache', // कैशिंग को रोकता है
-                // Note: User-Agent CANNOT be set from browser JS for security.
+                cache: 'no-cache', 
             });
 
             if (response.ok) {
                 successfulViews++;
-                log(`View ${viewId}: <span style="color:green;">SUCCESS</span> | Status: ${response.status} | Total Success: ${successfulViews}`, 'success');
+                log(`View ${currentViewId}: <span style="color:green;">SUCCESS</span> | Status: ${response.status}`, 'success');
             } else {
-                log(`View ${viewId}: <span style="color:red;">FAILED</span> | Status: ${response.status}`, 'error');
+                log(`View ${currentViewId}: <span style="color:red;">FAILED</span> | Status: ${response.status}`, 'error');
             }
         } catch (error) {
-            log(`View ${viewId}: <span style="color:red;">ERROR</span> | Connection Failed.`, 'error');
+            log(`View ${currentViewId}: <span style="color:red;">ERROR</span> | Connection Failed.`, 'error');
         }
         
         // स्टेटस अपडेट करें
-        statusDiv.textContent = `Running... Attempts: ${viewId} | Successful: ${successfulViews}`;
+        statusDiv.innerHTML = `Running... View Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+
+        // सिमुलेशन समाप्त करें
+        if (currentViewId >= totalViews) {
+            clearInterval(simulationInterval);
+            finishSimulation();
+        }
     }
 
-    // सिमुलेशन शुरू करने का फ़ंक्शन
-    async function startSimulation() {
-        if (isRunning) return;
-
+    function startSimulation() {
         const url = document.getElementById('urlInput').value;
-        const count = parseInt(document.getElementById('viewCount').value);
-        const concurrency = parseInt(document.getElementById('concurrency').value);
-
-        if (!url || count <= 0 || concurrency <= 0) {
-            alert("कृपया URL और सही संख्याएँ दर्ज करें।");
+        if (!url || isRunning) {
+            alert("कृपया एक वैध URL दर्ज करें या सिमुलेशन पहले ही चल रहा है!");
             return;
         }
 
         isRunning = true;
         startButton.disabled = true;
-        startButton.textContent = "Simulating... ब्राउज़र बंद न करें";
+        startButton.textContent = "Simulation Running... (Please keep this tab open)";
         
-        totalViewsAttempted = 0;
         successfulViews = 0;
+        viewCount = 0;
         outputDiv.innerHTML = ''; 
         startTime = new Date();
         
-        log(`🚀 Simulation Started: ${url} | Target Views: ${count} | Concurrency: ${concurrency}`, 'info');
+        log(`🚀 Simulation Started for ${url}. Target: ${totalViews} views.`, 'info');
+        statusDiv.textContent = "Starting requests...";
 
-        const viewPromises = [];
-
-        for (let i = 1; i <= count; i++) {
-            totalViewsAttempted = i;
-            viewPromises.push(generateView(url, i));
-
-            // कंकरेंसी लिमिट को मैनेज करना
-            if (viewPromises.length >= concurrency) {
-                // एक रिक्वेस्ट खत्म होने का इंतज़ार करें (सबसे तेज़)
-                await Promise.race(viewPromises.map(p => p.catch(() => {})));
-                
-                // पूरा होने वाले प्रॉमिस को हटा दें (सिंपलीफिकेशन: यहाँ हम बस प्रतीक्षा कर रहे हैं)
-                
-                // छोटे ब्रेक के लिए setTimeout (ब्राउज़र को फ्री रखने के लिए)
-                await new Promise(resolve => setTimeout(resolve, 1)); 
+        // रैंडम डिले के साथ रिक्वेस्ट को शुरू करने के लिए setInterval का उपयोग
+        simulationInterval = setInterval(() => {
+            const delay = getRandomDelay(); // 4 से 8 सेकंड का डिले
+            
+            // यह सुनिश्चित करने के लिए कि अगली रिक्वेस्ट पिछली रिक्वेस्ट पूरी होने से पहले शुरू हो
+            if (viewCount < totalViews) {
+                // एक छोटे टाइमआउट के बाद रिक्वेस्ट भेजें
+                setTimeout(() => generateView(url), delay); 
             }
-        }
-        
-        // बाकी रिक्वेस्ट खत्म होने का इंतज़ार करें
-        await Promise.all(viewPromises.map(p => p.catch(() => {})));
+        }, 500); // हर 0.5 सेकंड में एक नई रिक्वेस्ट शेड्यूल करें
+    }
 
+    function finishSimulation() {
         const endTime = new Date();
         const duration = (endTime - startTime) / 1000;
         
         log("<hr>", 'info');
         log(`✅ **Simulation Complete!**`, 'info');
-        log(`Total Views Attempted: <b>${totalViewsAttempted}</b>`, 'info');
-        log(`Total Views Successful: <b>${successfulViews}</b>`, 'info');
         log(`Total Time Taken: <b>${duration.toFixed(2)} seconds</b> (${(duration/60).toFixed(2)} minutes)`, 'info');
+        log(`Final Successful Views: <b>${successfulViews}</b>`, 'info');
         log("<hr>", 'info');
         
         startButton.disabled = false;
-        startButton.textContent = "Simulate Views";
+        startButton.textContent = "Start 5-Minute Simulation (60 Views)";
         isRunning = false;
     }
 </script>
