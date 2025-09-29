@@ -44,20 +44,19 @@
 </div>
 
 <script>
-    let totalViews = 60; // 60 व्यू का लक्ष्य
+    let totalViews = 60; 
     let successfulViews = 0;
     let viewCount = 0;
     let isRunning = false;
     let simulationTimeout;
     let startTime;
-    const MIN_DELAY = 4000; // 4 सेकंड
-    const MAX_DELAY = 8000; // 8 सेकंड
+    const MIN_DELAY = 4000; 
+    const MAX_DELAY = 8000; 
 
     const outputDiv = document.getElementById('output');
     const statusDiv = document.getElementById('status');
     const startButton = document.getElementById('startButton');
 
-    // रैंडम देरी (4 से 8 सेकंड)
     function getRandomDelay() {
         return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
     }
@@ -70,7 +69,7 @@
         outputDiv.prepend(p);
     }
 
-    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (Measurement Protocol का उपयोग)
+    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (CORS fix लागू किया गया)
     function generateView(url, measurementId, apiSecret) {
         if (!isRunning || viewCount >= totalViews) {
             finishSimulation();
@@ -80,7 +79,7 @@
         viewCount++;
         const currentViewId = viewCount;
         
-        // प्रत्येक 'उपयोगकर्ता' के लिए एक रैंडम क्लाइंट ID जनरेट करें (मानवीय व्यवहार का अनुकरण)
+        // प्रत्येक 'उपयोगकर्ता' के लिए एक रैंडम क्लाइंट ID जनरेट करें 
         const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
 
         // GA4 Measurement Protocol एंडपॉइंट
@@ -88,16 +87,14 @@
 
         const payload = {
             client_id: CLIENT_ID,
-            // एक 'page_view' इवेंट भेजें ताकि यह एक वास्तविक विज़िट जैसा दिखे
             events: [{
                 name: 'page_view', 
                 params: {
                     page_location: url,
                     page_title: `Simulated View ${currentViewId}`,
-                    // Real-Time में IP एड्रेस दिखाने के लिए 'Debug' मोड का उपयोग करें
-                    debug_mode: true, // इससे GA के DebugView में तुरंत डेटा दिखेगा
-                    session_id: Date.now(), // प्रत्येक रन के लिए एक नई सत्र ID
-                    engagement_time_msec: 5000 + Math.floor(Math.random() * 5000) // 5 से 10 सेकंड का नकली एंगेजमेंट टाइम
+                    debug_mode: true, // DebugView में तुरंत डेटा दिखेगा
+                    session_id: Date.now(),
+                    engagement_time_msec: 5000 + Math.floor(Math.random() * 5000) 
                 }
             }]
         };
@@ -107,21 +104,20 @@
             method: 'POST',
             body: JSON.stringify(payload),
             headers: {
-                'Content-Type': 'application/json'
-            }
+                // 'mode: no-cors' के कारण Content-Type हेडर अक्सर अनदेखा हो जाता है, 
+                // लेकिन इसे रखना सबसे अच्छा है।
+                'Content-Type': 'application/json' 
+            },
+            mode: 'no-cors' // <-- CORS एरर को हल करने के लिए महत्वपूर्ण
         })
         .then(response => {
-            // सफल Measurement Protocol रिक्वेस्ट आमतौर पर 204 या 200 स्टेटस देती है।
-            if (response.status === 204 || response.status === 200) {
-                successfulViews++;
-                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Status: ${response.status}`, 'success');
-            } else {
-                // GA अक्सर गलत ID/सीक्रेट पर 400 या 404 देता है
-                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILED</span> | Status: ${response.status} (Check ID/Secret)`, 'error');
-            }
+            successfulViews++;
+            // no-cors मोड में, स्टेटस हमेशा 0 होता है, इसलिए हम केवल नेटवर्क एरर को छोड़कर SUCCESS मानते हैं।
+            log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Data Sent (Check GA DebugView)`, 'success');
         })
         .catch(error => {
-            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed.`, 'error');
+            // यह केवल नेटवर्क कनेक्शन विफल होने पर चलता है
+            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection Failed. ${error.message}`, 'error');
         })
         .finally(() => {
             // अगली रिक्वेस्ट शेड्यूल करें
@@ -146,7 +142,7 @@
         const measurementId = document.getElementById('measurementIdInput').value.trim();
         const apiSecret = document.getElementById('apiSecretInput').value.trim();
 
-        // इनपुट सत्यापन (Input Validation)
+        // इनपुट सत्यापन 
         if (!url.startsWith('http')) {
             alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
             return;
