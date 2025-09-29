@@ -1,291 +1,164 @@
-<!doctype html>
-<html lang="hi">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Traffic Simulator — Demo (Safe)</title>
+  <meta charset="UTF-8">
+  <title>Website Traffic Simulator</title>
   <style>
-    body{font-family:Inter,system-ui,Arial;margin:0;background:#0b1220;color:#e6eef6;padding:18px}
-    .card{background:#071428;padding:14px;border-radius:10px;max-width:980px;margin:0 auto;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
-    h1{margin:0 0 8px 0;font-size:20px}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    input,select,button{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:12px;margin-top:14px}
-    .panel{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px}
-    .stat{font-size:22px;font-weight:700}
-    .small{color:#99a6b6;font-size:13px}
-    .bar{height:120px; display:flex; align-items:end; gap:4px; padding:6px}
-    .bar > div{flex:1;background:linear-gradient(180deg,#38bdf8,#036);border-radius:4px;display:flex;align-items:flex-end;justify-content:center;color:#fff;font-size:12px;padding-bottom:6px}
-    .log{height:180px;overflow:auto;font-family:monospace;background:#051022;padding:8px;border-radius:6px;margin-top:8px}
-    footer{margin-top:12px;color:#9aa6b3;font-size:13px}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fc;
+      margin: 0; padding: 20px;
+    }
+    .card {
+      background: white;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .controls label {
+      display: block;
+      margin: 10px 0;
+    }
+    .controls input {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      min-width: 240px;
+    }
+    button {
+      padding: 10px 16px;
+      margin: 10px 5px 0 0;
+      border: none;
+      border-radius: 6px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1e40af;
+    }
+    #log {
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 13px;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 8px;
+      height: 250px;
+      overflow-y: auto;
+      white-space: pre-line;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Website Traffic Simulator — Demo (Safe)</h1>
-    <div class="small">Ye tool real views nahi banata. College demo ke liye simulated traffic aur metrics dikhata hai.</div>
+    <h1>Website Traffic Simulator</h1>
 
     <div class="controls">
+      <label>Website URL:
+        <input id="simUrl" type="text" value="https://pooreyoutuber.github.io/">
+      </label>
       <label>Duration (minutes):
-        <select id="duration">
-          <option value="1">1</option>
-          <option value="3">3</option>
-          <option value="5" selected>5</option>
-          <option value="10">10</option>
-        </select>
+        <input id="duration" type="number" value="5" min="1" max="60">
       </label>
-
-      <label>Target peak/min (simulated visits per min):
-        <input id="peak" type="number" value="900" min="1" />
+      <label>Base Views per Minute:
+        <input id="baseViews" type="number" value="200" min="10">
       </label>
+    </div>
 
-      <label>Traffic shape:
-        <select id="shape">
-          <option value="spike">Single Spike</option>
-          <option value="steady" selected>Steady Rise</option>
-          <option value="bursty">Bursty Peaks</option>
-        </select>
-      </label>
-
-      <label>Source mix:
-        <select id="sourceMix">
-          <option value="social" selected>Social-focused</option>
-          <option value="email">Email-focused</option>
-          <option value="ads">Paid Ads</option>
-        </select>
-      </label>
-
+    <div>
       <button id="startBtn">Start Simulation</button>
-      <button id="resetBtn">Reset</button>
+      <button id="stopBtn">Stop</button>
+      <button id="exportBtn">Export CSV</button>
     </div>
 
-    <div class="grid">
-      <div>
-        <div class="panel">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div class="small">Total Simulated Views</div>
-              <div class="stat" id="totalViews">0</div>
-            </div>
-            <div>
-              <div class="small">Avg Session (s)</div>
-              <div class="stat" id="avgSession">0</div>
-            </div>
-            <div>
-              <div class="small">Bounce %</div>
-              <div class="stat" id="bounce">0%</div>
-            </div>
-          </div>
-
-          <div style="margin-top:12px">
-            <div class="small">Per-minute breakdown (last N minutes)</div>
-            <div class="bar" id="barArea"></div>
-          </div>
-
-          <div style="margin-top:12px">
-            <div class="small">Event Log</div>
-            <div class="log" id="log"></div>
-          </div>
-        </div>
-
-        <div class="panel" style="margin-top:10px">
-          <div class="small">Simulated Metrics Explanation</div>
-          <ul class="small">
-            <li><strong>Views:</strong> Page loads (simulated)</li>
-            <li><strong>Avg Session:</strong> Average time spent on site (simulated)</li>
-            <li><strong>Bounce %:</strong> Percent of single-page sessions (simulated)</li>
-          </ul>
-        </div>
-      </div>
-
-      <div>
-        <div class="panel">
-          <div class="small">Source Breakdown</div>
-          <div id="sources" style="margin-top:8px">
-            <!-- source bars -->
-          </div>
-          <div style="margin-top:10px">
-            <div class="small">Controls</div>
-            <div style="margin-top:8px; display:flex; gap:8px;">
-              <button id="showCSV">Export CSV</button>
-              <button id="screenshot">Download Snapshot</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel" style="margin-top:10px">
-          <div class="small">Experiment Notes</div>
-          <ol class="small">
-            <li>Use different shapes to model campaigns (spike = one big post; steady = email list).</li>
-            <li>Record metrics and compare CTR / bounce for each source.</li>
-            <li>Show how page speed & content can change session duration & bounce.</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-
-    <footer>Demo tool — safe for presentation. For real traffic, follow ethical promotion strategies (listed after the demo).</footer>
+    <div id="log"></div>
   </div>
 
-<script>
-(function(){
-  const startBtn = document.getElementById('startBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const durationEl = document.getElementById('duration');
-  const peakEl = document.getElementById('peak');
-  const shapeEl = document.getElementById('shape');
-  const sourceMixEl = document.getElementById('sourceMix');
-  const totalViewsEl = document.getElementById('totalViews');
-  const avgSessionEl = document.getElementById('avgSession');
-  const bounceEl = document.getElementById('bounce');
-  const barArea = document.getElementById('barArea');
-  const logEl = document.getElementById('log');
-  const sourcesDiv = document.getElementById('sources');
-  const showCSV = document.getElementById('showCSV');
-  const screenshot = document.getElementById('screenshot');
-
-  let simInterval, state;
-
-  function reset(){
-    clearInterval(simInterval);
-    state = {
-      minutes: parseInt(durationEl.value,10),
-      currentMin: 0,
-      perMinute: [],
-      total: 0,
-      avgSession: 0,
-      bounce: 0,
-      sourceCounts: {social:0,email:0,organic:0,referral:0,ads:0}
+  <script>
+    let state = {
+      running: false,
+      minute: 0,
+      timer: null,
+      data: []
     };
-    totalViewsEl.textContent = '0';
-    avgSessionEl.textContent = '0';
-    bounceEl.textContent = '0%';
-    barArea.innerHTML = '';
-    sourcesDiv.innerHTML = '';
-    logEl.textContent = '';
-  }
 
-  reset();
+    const logEl = document.getElementById('log');
+    const durationEl = document.getElementById('duration');
+    const baseViewsEl = document.getElementById('baseViews');
+    const simUrlEl = document.getElementById('simUrl');
 
-  function sample(min, max){ return Math.floor(min + Math.random()*(max-min+1)); }
-
-  function simulateMinute(){
-    const peak = parseInt(peakEl.value,10);
-    const shape = shapeEl.value;
-    const dur = state.minutes;
-
-    let factor = 1;
-    // shape models
-    if(shape === 'spike'){
-      // spike centered near middle
-      const center = Math.ceil(dur/2);
-      const dist = Math.abs(state.currentMin - center);
-      factor = Math.max(0.1, 1.5 - (dist*0.5));
-    } else if(shape === 'steady'){
-      factor = 0.5 + (state.currentMin / dur) * 1.2; // gradual rise
-    } else { // bursty
-      factor = 0.4 + (Math.random() > 0.8 ? 1.5 : 0.5);
+    function log(msg){
+      logEl.textContent = msg + "\\n" + logEl.textContent;
     }
 
-    // source mix
-    const mix = sourceMixEl.value;
-    let socialPct=0.4, emailPct=0.2, adsPct=0.15, organicPct=0.15, refPct=0.1;
-    if(mix === 'email'){ emailPct=0.6; socialPct=0.15; adsPct=0.05; organicPct=0.15; refPct=0.05; }
-    if(mix === 'ads'){ adsPct=0.6; socialPct=0.1; emailPct=0.05; organicPct=0.15; refPct=0.1; }
+    function startSimulation(){
+      if(state.running) return;
+      state.running = true;
+      state.minute = 0;
+      state.data = [];
+      logEl.textContent = "";
+      const duration = parseInt(durationEl.value);
+      const baseViews = parseInt(baseViewsEl.value);
 
-    // randomize views this minute around peak * factor
-    const mean = Math.max(1, Math.round(peak * factor));
-    // add noise
-    const views = sample(Math.max(1, Math.round(mean*0.6)), Math.round(mean*1.4));
+      log(`Simulation started for ${duration} minutes on ${simUrlEl.value}`);
 
-    // session time & bounce simulated
-    const avgSession = +(10 + Math.random()*140).toFixed(1); // seconds
-    const bounce = Math.min(98, Math.round(20 + Math.random()*60 - (avgSession/5)));
+      state.timer = setInterval(()=>{
+        state.minute++;
+        const views = Math.round(baseViews + (Math.random()-0.5)*50);
+        const bounce = (30 + Math.random()*20).toFixed(1);
+        const avgSession = (1 + Math.random()*3).toFixed(2);
 
-    // distribute sources
-    const social = Math.round(views * socialPct * (1 + (Math.random()-0.5)*0.3));
-    const email = Math.round(views * emailPct * (1 + (Math.random()-0.5)*0.3));
-    const ads = Math.round(views * adsPct * (1 + (Math.random()-0.5)*0.3));
-    const organic = Math.round(views * organicPct * (1 + (Math.random()-0.5)*0.3));
-    const ref = Math.max(0, views - (social+email+ads+organic));
+        const record = {
+          minute: state.minute,
+          views, bounce, avgSession,
+          site: simUrlEl.value
+        };
+        state.data.push(record);
 
-    state.perMinute.push({minute:state.currentMin+1, views, avgSession, bounce, social, email, ads, organic, ref});
-    state.total += views;
-    // recalc aggregated metrics (simple average)
-    state.avgSession = ((state.avgSession * (state.currentMin)) + avgSession) / (state.currentMin+1);
-    state.bounce = ((state.bounce * (state.currentMin)) + bounce) / (state.currentMin+1);
+        log(`Minute ${state.minute}: ${views} views | Bounce ${bounce}% | Avg. Session ${avgSession} min | Site: ${record.site}`);
 
-    // update source totals
-    state.sourceCounts.social += social;
-    state.sourceCounts.email += email;
-    state.sourceCounts.ads += ads;
-    state.sourceCounts.organic += organic;
-    state.sourceCounts.referral += ref;
-
-    // UI updates
-    totalViewsEl.textContent = state.total;
-    avgSessionEl.textContent = Math.round(state.avgSession) + 's';
-    bounceEl.textContent = Math.round(state.bounce) + '%';
-
-    renderBars();
-    renderSources();
-    logEl.textContent = `Minute ${state.currentMin+1}: ${views} views — social:${social} email:${email} ads:${ads} organic:${organic} ref:${ref}\n` + logEl.textContent;
-
-    state.currentMin++;
-    if(state.currentMin >= state.minutes){
-      clearInterval(simInterval);
-      logEl.textContent = 'Simulation finished.\n' + logEl.textContent;
+        if(state.minute >= duration){
+          stopSimulation();
+          log("Simulation finished.");
+        }
+      }, 1000); // 1 second = 1 minute in demo
     }
-  }
 
-  function renderBars(){
-    barArea.innerHTML = '';
-    const max = Math.max(...state.perMinute.map(p=>p.views), 1);
-    state.perMinute.forEach(p=>{
-      const d = document.createElement('div');
-      d.style.height = (Math.round((p.views/max) * 100)) + '%';
-      d.title = `${p.minute}m — ${p.views} views`;
-      d.textContent = p.views;
-      barArea.appendChild(d);
-    });
-  }
+    function stopSimulation(){
+      clearInterval(state.timer);
+      state.running = false;
+    }
 
-  function renderSources(){
-    sourcesDiv.innerHTML = '';
-    const tot = Math.max(1, state.total);
-    Object.entries(state.sourceCounts).forEach(([k,v])=>{
-      const pct = Math.round((v/tot)*100);
-      const wr = document.createElement('div');
-      wr.style.marginBottom = '8px';
-      wr.innerHTML = `<div class="small">${k.toUpperCase()} — ${v} views (${pct}%)</div>
-        <div style="background:#021228;height:10px;border-radius:6px;overflow:hidden"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#06b6d4,#0ea5b7)"></div></div>`;
-      sourcesDiv.appendChild(wr);
-    });
-  }
+    function exportCSV(){
+      if(state.data.length === 0){
+        alert("No data to export!");
+        return;
+      }
+      let csv = "minute,views,bounce,avgSession,site\\n";
+      state.data.forEach(r=>{
+        csv += `${r.minute},${r.views},${r.bounce},${r.avgSession},${r.site}\\n`;
+      });
+      const blob = new Blob([csv], {type:"text/csv"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "traffic_simulation.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
 
-  startBtn.addEventListener('click', ()=>{
-    reset();
-    const min = parseInt(durationEl.value,10);
-    // run simulateMinute once per real second to model each minute (for demo speed)
-    simulateMinute(); // first
-    simInterval = setInterval(simulateMinute, 1000); // 1 sec per simulated minute
-  });
-
-  resetBtn.addEventListener('click', reset);
-
-  showCSV.addEventListener('click', ()=>{
-    if(state.perMinute.length===0){ alert('Run simulation first'); return; }
-    let csv = 'minute,views,avgSession,bounce,social,email,ads,organic,referral\n';
-    state.perMinute.forEach(p=> csv += `${p.minute},${p.views},${p.avgSession},${p.bounce},${p.social},${p.email},${p.ads},${p.organic},${p.ref}\n`);
-    const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'simulated-traffic.csv'; a.click(); URL.revokeObjectURL(url);
-  });
-
-  screenshot.addEventListener('click', ()=>{
-    alert('For presentation, use browser screenshot or record screen. (This button is placeholder.)');
-  });
-
-})();
-</script>
+    document.getElementById('startBtn').onclick = startSimulation;
+    document.getElementById('stopBtn').onclick = stopSimulation;
+    document.getElementById('exportBtn').onclick = exportCSV;
+  </script>
 </body>
 </html>
