@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GA4 Traffic Injector - Final</title>
+    <title>GA4 Traffic Injector - Final Code</title>
     
     <style>
         body {
@@ -27,29 +27,28 @@
 </head>
 <body>
 
-    <h1>GA4 ट्रैफिक सिमुलेशन (GitHub)</h1>
+    <h1>GA4 ट्रैफिक सिमुलेशन (फाइनल)</h1>
     <p>लक्ष्य: 250 व्यूज़ और यूज़र्स</p>
     <div id="status">सिमुलेशन शुरू हो रहा है...</div>
 
     <script>
-        // --- 🎯 यहाँ आपको सिर्फ़ यह 3 चीज़ें बदलनी हैं (अपनी जानकारी डालें) ---
+        // --- 🎯 यहाँ आपको सिर्फ़ यह 3 चीज़ें बदलनी हैं (अपनी जानकारी ध्यान से भरें) ---
         
-        // 1. अपनी GA4 Measurement ID (G-XXXXXXX) यहाँ डालें
+        // 1. अपनी GA4 Measurement ID (G-XXXXXXX) यहाँ डालें। (उदाहरण: 'G-1A2B3C4D5E')
         const MEASUREMENT_ID = 'अपनी_G-XXXXXXX_ID_यहाँ_डालें'; 
         
-        // 2. अपनी वेबसाइट का URL यहाँ डालें (जैसे: 'https://mysite.com/')
+        // 2. अपनी वेबसाइट का URL यहाँ डालें। (उदाहरण: 'https://username.github.io/my-project/')
         const WEBSITE_URL = 'अपनी_वेबसाइट_का_URL_यहाँ_डालें'; 
         
-        // 3. आपको कुल कितने Views चाहिए 
-        const TOTAL_VIEWS = 250; // आप इसे बदल सकते हैं
+        // 3. आपको कुल कितने Views चाहिए। (ज़रूरत के हिसाब से बदलें)
+        const TOTAL_VIEWS = 250; 
         
-        // API_SECRET client-side code में ज़रूरी नहीं है, इसलिए उसे छोड़ दिया गया है।
         // ----------------------------------------------------------------------
 
         const MIN_DELAY = 1500; 
         const MAX_DELAY = 4000; 
 
-        // 🎯 15 देशों की सूची (Country Trick के लिए)
+        // 🎯 15 देशों की सूची (यह आपके Page Report में दिखेगी)
         const countries = [
             "Japan", "United States", "Germany", "Canada", "Netherlands", "India",
             "Brazil", "Mexico", "South Korea", "Australia", "Singapore", "France",
@@ -63,9 +62,9 @@
 
         const statusDiv = document.getElementById('status');
         
-        // Validation Check
-        if (MEASUREMENT_ID === 'अपनी_G-XXXXXXX_ID_यहाँ_डालें' || WEBSITE_URL === 'अपनी_वेबसाइट_का_URL_यहाँ_डालें') {
-            document.body.innerHTML = '<h2>🛑 कोड में बदलाव करें!</h2><p>कृपया script टैग के अंदर <code>MEASUREMENT_ID</code> और <code>WEBSITE_URL</code> को बदलें।</p>';
+        // --- Validation Check (ज़रूरी IDs न बदलने पर एरर देगा) ---
+        if (MEASUREMENT_ID.includes('अपनी_') || WEBSITE_URL.includes('अपनी_')) {
+            document.body.innerHTML = '<h2>🛑 कोड में बदलाव करें!</h2><p>कृपया <code>script</code> टैग के अंदर <code>MEASUREMENT_ID</code> और <code>WEBSITE_URL</code> को अपनी असली जानकारी से बदलें।</p>';
             throw new Error("Missing configuration.");
         }
 
@@ -86,7 +85,7 @@
         }
 
         async function sendData(eventType, currentViewId, countryName) {
-            // GA Endpoint में सिर्फ़ Measurement ID का इस्तेमाल होगा
+            // GA Endpoint (सिर्फ़ Measurement ID का इस्तेमाल)
             const GA_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${MEASUREMENT_ID}`; 
             
             const SESSION_ID = Date.now();
@@ -98,8 +97,8 @@
                     name: eventType,
                     params: {
                         session_id: SESSION_ID,
-                        page_location: WEBSITE_URL, // यह आपकी वेबसाइट का URL है
-                        // Page Title में Country Trick (रिपोर्ट में दिखाने के लिए)
+                        page_location: WEBSITE_URL, 
+                        // Country Trick: Page Title में देश का नाम
                         page_title: `PROJECT_VIEW_${currentViewId}_FROM_${countryName}`, 
                         engagement_time_msec: engagementTime,
                         _ss: eventType === 'session_start' ? 1 : undefined,
