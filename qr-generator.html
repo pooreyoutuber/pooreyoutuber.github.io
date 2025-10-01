@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Traffic Injector (FINAL CLOUD FIX)</title>
+    <title>GA4 Traffic Simulator (FINAL - GEO DIVERSE & STABLE)</title>
     <style>
-        /* Compact UI */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 90%; max-width: 420px; background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
-        h2 { color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 6px; margin-top: 0; text-align: center; font-size: 1.4em; }
-        label { display: block; margin-top: 10px; font-weight: 600; color: #333; font-size: 0.85em; }
-        input[type="url"], input[type="text"] { width: 100%; padding: 8px; margin-top: 3px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 0.85em; }
-        button { background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 0.95em; font-weight: bold; transition: background-color 0.3s; }
-        button:disabled { background-color: #90ee90; cursor: not-allowed; }
-        #output { margin-top: 12px; padding: 8px; border: 1px solid #ffe8cc; background-color: #fff8e1; border-radius: 4px; max-height: 120px; overflow-y: scroll; font-size: 0.75em; }
-        #status { padding: 6px; background-color: #dc3545; border-radius: 4px; font-weight: bold; color: white; margin-top: 10px; text-align: center; font-size: 0.85em; }
-        .disclaimer { font-size: 0.75em; color: #333; margin-top: 8px; padding: 8px; border: 1px solid #d4edda; background-color: #f0fdf2; border-radius: 4px; }
-        .input-group { margin-bottom: 12px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #e6f0ff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 90%; max-width: 480px; background: #ffffff; padding: 25px; border-radius: 15px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25); }
+        h2 { color: #004085; border-bottom: 3px solid #004085; padding-bottom: 8px; margin-top: 0; text-align: center; font-size: 1.8em; }
+        label { display: block; margin-top: 15px; font-weight: 700; color: #333; font-size: 0.9em; }
+        input[type="url"], input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #a3b1c6; border-radius: 8px; box-sizing: border-box; font-size: 0.9em; }
+        button { background-color: #007bff; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 25px; font-size: 1.1em; font-weight: bold; transition: background-color 0.3s; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        #output { margin-top: 15px; padding: 10px; border: 1px solid #cce5ff; background-color: #e7f4ff; border-radius: 8px; max-height: 200px; overflow-y: scroll; font-size: 0.8em; }
+        #status { padding: 10px; background-color: #28a745; border-radius: 8px; font-weight: bold; color: white; margin-top: 15px; text-align: center; font-size: 0.95em; }
+        .note { font-size: 0.8em; color: #005a5a; margin-top: 10px; padding: 10px; border: 1px solid #b3e0e0; background-color: #e0ffff; border-radius: 6px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🚨 GA4 ट्रैफिक (अंतिम क्लाउड फिक्स)</h2>
+    <h2>🎯 GA4 प्रोजेक्ट सिमुलेशन (अंतिम - स्थिर भौगोलिक)</h2>
 
-    <div class="disclaimer">
-        **अंतिम प्रयास:** इस कोड में एक नए पब्लिक प्रॉक्सी का उपयोग किया गया है। यदि यह भी विफल होता है, तो यह पुष्टि हो जाएगी कि ब्राउज़र में यह काम नहीं करेगा। परिणाम देखने के लिए **Admin -> DebugView** खोलें।
+    <div class="note">
+        **FIX:** अनुरोध विलंब 2-10 सेकंड तक बढ़ाया गया है। भौगोलिक विविधता के लिए **20+ देश/क्षेत्र** जोड़े गए हैं। यह 'not set' और ड्रॉपिंग को रोकेगा।
     </div>
 
     <div class="input-group">
@@ -43,42 +41,58 @@
         <input type="url" id="urlInput" placeholder="https://your-project.com" required>
     </div>
     
-    <div id="status">Status: Ready | Target: 100 Views</div>
+    <div id="status">Status: Ready | Target: 250 Views per Cycle</div>
 
-    <button id="startButton" onclick="startSimulation()">Start Simulation</button>
+    <button id="startButton" onclick="startSimulation()">Start Stable Geo Simulation</button>
     
     <label>आउटपुट लॉग:</label>
     <div id="output"></div>
 </div>
 
 <script>
-    let totalViews = 100;
+    let totalViews = 250; 
     let successfulViews = 0;
     let viewCount = 0;
     let isRunning = false;
     let simulationTimeout;
-    const MIN_DELAY = 1500;
-    const MAX_DELAY = 4000;
     
-    // FIX: एक अलग, और अधिक भरोसेमंद (उम्मीद है) प्रॉक्सी URL
-    const PROXY_URL = 'https://cors-anywhere.herokuapp.com/'; 
-    // नोट: यह प्रॉक्सी भी कभी भी काम करना बंद कर सकता है।
-
-    // User Agents की सूची (मल्टी-ब्राउज़र सिमुलेशन के लिए)
-    const userAgents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
-        "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+    const MIN_DELAY = 2000; 
+    const MAX_DELAY = 10000; 
+    
+    // भौगोलिक विविधता के लिए 20+ स्थान
+    const geoLocations = [
+        { country: "United States", region: "California" },
+        { country: "China", region: "Guangdong" },
+        { country: "India", region: "Maharashtra" },
+        { country: "United States", region: "Texas" },
+        { country: "China", region: "Beijing" },
+        { country: "India", region: "Delhi" },
+        { country: "Germany", region: "Bavaria" },
+        { country: "Brazil", region: "Sao Paulo" },
+        { country: "Russia", region: "Moscow" },
+        { country: "Japan", region: "Tokyo" },
+        { country: "United Kingdom", region: "England" },
+        { country: "France", region: "Paris" },
+        { country: "Australia", region: "New South Wales" },
+        { country: "Canada", region: "Ontario" },
+        { country: "Mexico", region: "Mexico City" },
+        { country: "South Korea", region: "Seoul" },
+        { country: "Italy", region: "Lombardy" },
+        { country: "Spain", region: "Madrid" },
+        { country: "Netherlands", region: "Holland" },
+        { country: "South Africa", region: "Gauteng" },
+        { country: "India", region: "Karnataka" },
+        { country: "United States", region: "New York" }
     ];
 
     function getRandomDelay() {
         return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
     }
     
-    function getRandomUserAgent() {
-        return userAgents[Math.floor(Math.random() * userAgents.length)];
+    function getRandomGeo() {
+        return geoLocations[Math.floor(Math.random() * geoLocations.length)];
     }
-
+    
     const outputDiv = document.getElementById('output');
     const statusDiv = document.getElementById('status');
     const startButton = document.getElementById('startButton');
@@ -88,47 +102,39 @@
         p.innerHTML = message;
         if (type === 'error') p.style.color = '#dc3545';
         if (type === 'success') p.style.color = '#28a745';
+        if (type === 'warn') p.style.color = '#ffc107';
         outputDiv.prepend(p);
     }
     
-    // POST Request के साथ प्रॉक्सी का उपयोग
-    async function sendData(gaEndpointUrl, payload, currentViewId, userAgent) {
-        
-        // FIX: प्रॉक्सी URL को GA4 एंडपॉइंट के साथ जोड़ें
-        const proxiedUrl = PROXY_URL + gaEndpointUrl;
-
+    async function sendData(gaEndpointUrl, payload, currentViewId, eventName) {
         try {
-            const response = await fetch(proxiedUrl, {
+            const response = await fetch(gaEndpointUrl, {
                 method: 'POST',
                 body: JSON.stringify(payload),
                 headers: { 
                     'Content-Type': 'application/json',
-                    // User Agent को हेडर के रूप में भेजें (POST के लिए आवश्यक)
-                    'User-Agent': userAgent, 
-                    // CORS-Anywhere के लिए आवश्यक हेडर
-                    'X-Requested-With': 'XMLHttpRequest' 
                 }
             });
 
-            // GA4 204 No Content लौटाता है यदि सफल हो
             if (response.status === 204) { 
-                successfulViews++;
-                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Device: ${userAgent.split('(')[1].split(')')[0]}`, 'success');
+                if (eventName === 'page_view') {
+                    successfulViews++;
+                    const geoInfo = payload.user_properties.geo.value;
+                    log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Location Hint: ${geoInfo}`, 'success');
+                } else {
+                    log(`View ${currentViewId}: Event: ${eventName} sent.`, 'info');
+                }
             } else {
-                 // अगर प्रॉक्सी या GA4 ने एरर दी
-                const errorText = await response.text();
-                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILURE</span> | Status: ${response.status}. GA4 did not accept data.`, 'error');
-                log(`DEBUG: Response Text (First 100 chars): ${errorText.substring(0, 100)}...`, 'error');
+                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILURE</span> | Event: ${eventName} | Status: ${response.status}.`, 'error');
             }
             
         } catch (error) {
-            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection/Proxy Failed. ${error.message}`, 'error');
+            log(`View ${currentViewId}: <span style="font-weight:bold;">CRITICAL ERROR</span> | Connection Failed (CORS issue?). ${error.message}`, 'error');
         } finally {
-            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful Views: ${successfulViews}`;
         }
     }
 
-    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (पुराने पैरामीटर्स के साथ)
     function generateView(url, measurementId, apiSecret) {
         if (!isRunning || viewCount >= totalViews) {
             finishSimulation();
@@ -140,47 +146,44 @@
         
         const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
         const SESSION_ID = Date.now(); 
-        const USER_AGENT = getRandomUserAgent(); 
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
+
+        const geo = getRandomGeo();
+        // 30 से 120 सेकंड का वास्तविक एंगेजमेंट टाइम
+        const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
+
+        // यूजर प्रॉपर्टीज में भौगोलिक डेटा
+        const commonUserProperties = {
+            geo: { value: `${geo.country}, ${geo.region}` }
+        };
 
         // 1. Session Start Event
         const sessionStartPayload = {
             client_id: CLIENT_ID,
-            events: [{
-                name: 'session_start', 
-                params: {
-                    debug_mode: true, 
-                    session_id: SESSION_ID,
-                    _ss: 1 
-                }
-            }]
+            user_properties: commonUserProperties, 
+            events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }]
         };
-        sendData(gaEndpoint, sessionStartPayload, currentViewId, USER_AGENT);
-
+        setTimeout(() => { sendData(gaEndpoint, sessionStartPayload, currentViewId, 'session_start'); }, 100); 
+       
         // 2. Page View Event
-        const engagementTime = 10000 + Math.floor(Math.random() * 10000); 
-
         const pageViewPayload = {
             client_id: CLIENT_ID,
-            events: [{
-                name: 'page_view', 
-                params: {
-                    page_location: url, // Standard MP parameter
-                    page_title: `PROJECT_VIEW_${currentViewId}`, // Standard MP parameter
-                    debug_mode: true, 
-                    session_id: SESSION_ID, 
-                    engagement_time_msec: engagementTime, 
-                }
-            }]
+            user_properties: commonUserProperties, 
+            events: [{ name: 'page_view', params: { page_location: url, page_title: `PROJECT_PAGE_${currentViewId}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
         };
-        
+        setTimeout(() => { sendData(gaEndpoint, pageViewPayload, currentViewId, 'page_view'); }, 500); 
+
+        // 3. User Engagement Event
+        const engagementPayload = {
+            client_id: CLIENT_ID,
+            user_properties: commonUserProperties, 
+            events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
+        };
         setTimeout(() => {
-            sendData(gaEndpoint, pageViewPayload, currentViewId, USER_AGENT);
-            scheduleNextView(url, measurementId, apiSecret);
-        }, 500); 
-
+            sendData(gaEndpoint, engagementPayload, currentViewId, 'user_engagement');
+            scheduleNextView(url, measurementId, apiSecret); 
+        }, 1000); 
     }
-
 
     function scheduleNextView(url, measurementId, apiSecret) {
         if (viewCount < totalViews && isRunning) {
@@ -196,18 +199,9 @@
         const measurementId = document.getElementById('measurementIdInput').value.trim();
         const apiSecret = document.getElementById('apiSecretInput').value.trim();
 
-        if (!url.startsWith('http')) {
-            alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
-            return;
-        }
-        if (!measurementId.startsWith('G-')) {
-            alert("कृपया सही GA4 ID (G- से शुरू होने वाली) दर्ज करें।");
-            return;
-        }
-        if (apiSecret.length < 5) {
-            alert("कृपया सही API Secret दर्ज करें।");
-            return;
-        }
+        if (!url.startsWith('http')) { alert("कृपया URL 'https://' या 'http://' से शुरू करें।"); return; }
+        if (!measurementId.startsWith('G-')) { alert("कृपया सही GA4 ID (G- से शुरू होने वाली) दर्ज करें।"); return; }
+        if (apiSecret.length < 5) { alert("कृपया सही API Secret दर्ज करें।"); return; }
         if (isRunning) return;
 
         isRunning = true;
@@ -218,8 +212,8 @@
         viewCount = 0;
         outputDiv.innerHTML = ''; 
         
-        log(`🚀 Simulation Started. Target: ${totalViews} Views.`, 'info');
-        statusDiv.innerHTML = "Starting requests...";
+        log(`🚀 Stable Simulation Started. Target: ${totalViews} Views.`, 'info');
+        statusDiv.innerHTML = "Starting cycle 1...";
 
         generateView(url, measurementId, apiSecret);
     }
@@ -229,14 +223,20 @@
         if (!isRunning) return;
         
         log("<hr>", 'info');
-        log(`✅ **Simulation Complete!**`, 'info');
-        log(`Final Successful Views: <b>${successfulViews}</b>`, 'info');
-        log("<hr>", 'info');
+        log(`✅ **Cycle Complete!** Total Success: <b>${successfulViews}</b>`, 'info');
         
-        startButton.disabled = false;
-        startButton.textContent = "Start Simulation";
-        isRunning = false;
-        statusDiv.innerHTML = `Finished. Total Views: ${successfulViews}`;
+        const restartDelay = 10 * 60 * 1000; 
+        const nextCycleTime = new Date(Date.now() + restartDelay).toLocaleTimeString();
+        
+        log(`💤 Resting for 10 minutes. Restarting at approx. ${nextCycleTime}`, 'warn');
+
+        statusDiv.style.backgroundColor = '#ffc107'; 
+        statusDiv.innerHTML = `RESTING. Next cycle starts at ${nextCycleTime}. Keep tab open!`;
+        
+        simulationTimeout = setTimeout(function() {
+            isRunning = false; 
+            startSimulation(); 
+        }, restartDelay); 
     }
 </script>
 
