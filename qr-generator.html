@@ -24,17 +24,17 @@
     <h2>🎯 GA4 DebugView सिम्युलेटर</h2>
 
     <div class="error-note">
-        **⚠️ महत्वपूर्ण:** ब्राउज़र सुरक्षा (CORS) के कारण यह कोड **फेल** हो जाएगा जब तक कि आप CORS बायपास एक्सटेंशन (जैसे 'Allow CORS') को सक्रिय न करें। परिणाम केवल **GA4 DebugView** में दिखेंगे।
+        **⚠️ महत्वपूर्ण:** यह कोड CORS एरर के कारण काम नहीं करेगा जब तक कि आप ब्राउज़र सुरक्षा को बायपास नहीं करते हैं। परिणाम केवल **GA4 DebugView** में दिखेंगे।
     </div>
 
     <div class="input-group">
         <label for="measurementIdInput">GA4 ID (G-XXXXXXX):</label>
-        <input type="text" id="measurementIdInput" value="G-ZPMC525FGT" required>
+        <input type="text" id="measurementIdInput" placeholder="G-XXXXXXXXXX (Fill Here)" required>
     </div>
     
     <div class="input-group">
         <label for="apiSecretInput">API Secret:</label>
-        <input type="text" id="apiSecretInput" value="pSaScGPuTWa95eOdSkbV7w" required>
+        <input type="text" id="apiSecretInput" placeholder="आपका_API_सीक्रेट (Fill Here)" required>
     </div>
 
     <div class="input-group">
@@ -51,9 +51,9 @@
 </div>
 
 <script>
-    // 🔑 आपकी कुंजियाँ सीधे कोड में डाली गई हैं
-    const MEASUREMENT_ID = 'G-ZPMC525FGT'; 
-    const API_SECRET = 'pSaScGPuTWa95eOdSkbV7w'; 
+    // 🔑 आपकी कुंजियाँ यहाँ से हटा दी गई हैं और इनपुट फ़ील्ड से ली जाएँगी
+    let MEASUREMENT_ID; 
+    let API_SECRET; 
 
     let totalViews = 250; 
     let successfulViews = 0;
@@ -61,7 +61,7 @@
     let isRunning = false;
     let simulationTimeout;
     
-    // ब्राउज़र में तेज़ फीडबैक के लिए विलंब कम किया गया है
+    // ब्राउज़र में तेज़ फीडबैक के लिए विलंब
     const MIN_DELAY = 1000; // 1 सेकंड
     const MAX_DELAY = 3000; // 3 सेकंड
     
@@ -86,6 +86,8 @@
     const outputDiv = document.getElementById('output');
     const statusDiv = document.getElementById('status');
     const startButton = document.getElementById('startButton');
+    const measurementIdInput = document.getElementById('measurementIdInput');
+    const apiSecretInput = document.getElementById('apiSecretInput');
 
     function log(message, type = 'info') {
         const p = document.createElement('p');
@@ -121,6 +123,10 @@
     }
 
     function generateView(url) {
+        // कुंजियाँ इनपुट से लें
+        const measurementId = measurementIdInput.value.trim();
+        const apiSecret = apiSecretInput.value.trim();
+        
         if (!isRunning || viewCount >= totalViews) {
             finishSimulation();
             return;
@@ -131,7 +137,7 @@
         
         const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
         const SESSION_ID = Date.now(); 
-        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`;
+        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
 
         const geo = getRandomGeo();
         const engagementTime = 10000 + Math.floor(Math.random() * 20000); 
@@ -181,9 +187,15 @@
 
     function startSimulation() {
         const url = document.getElementById('urlInput').value.trim();
+        const measurementId = measurementIdInput.value.trim();
+        const apiSecret = apiSecretInput.value.trim();
 
         if (!url.startsWith('http')) {
             alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
+            return;
+        }
+        if (!measurementId.startsWith('G-') || apiSecret.length < 5) {
+            alert("कृपया सही GA4 ID और API Secret दर्ज करें।");
             return;
         }
         if (isRunning) return;
