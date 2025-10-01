@@ -1,244 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Traffic Injector (FINAL CLOUD FIX)</title>
-    <style>
-        /* Compact UI */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 90%; max-width: 420px; background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
-        h2 { color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 6px; margin-top: 0; text-align: center; font-size: 1.4em; }
-        label { display: block; margin-top: 10px; font-weight: 600; color: #333; font-size: 0.85em; }
-        input[type="url"], input[type="text"] { width: 100%; padding: 8px; margin-top: 3px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 0.85em; }
-        button { background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 0.95em; font-weight: bold; transition: background-color 0.3s; }
-        button:disabled { background-color: #90ee90; cursor: not-allowed; }
-        #output { margin-top: 12px; padding: 8px; border: 1px solid #ffe8cc; background-color: #fff8e1; border-radius: 4px; max-height: 120px; overflow-y: scroll; font-size: 0.75em; }
-        #status { padding: 6px; background-color: #dc3545; border-radius: 4px; font-weight: bold; color: white; margin-top: 10px; text-align: center; font-size: 0.85em; }
-        .disclaimer { font-size: 0.75em; color: #333; margin-top: 8px; padding: 8px; border: 1px solid #d4edda; background-color: #f0fdf2; border-radius: 4px; }
-        .input-group { margin-bottom: 12px; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA4 GitHub Pages Simulator (Stable Geo)</title>
+    <style>
+        /* CSS Styles for Clean UI */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #e6f0ff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 90%; max-width: 480px; background: #ffffff; padding: 25px; border-radius: 15px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25); }
+        h2 { color: #004085; border-bottom: 3px solid #004085; padding-bottom: 8px; margin-top: 0; text-align: center; font-size: 1.8em; }
+        label { display: block; margin-top: 15px; font-weight: 700; color: #333; font-size: 0.9em; }
+        input[type="url"], input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #a3b1c6; border-radius: 8px; box-sizing: border-box; font-size: 0.9em; }
+        button { background-color: #28a745; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 25px; font-size: 1.1em; font-weight: bold; transition: background-color 0.3s; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        #output { margin-top: 15px; padding: 10px; border: 1px solid #cce5ff; background-color: #e7f4ff; border-radius: 8px; max-height: 200px; overflow-y: scroll; font-size: 0.8em; }
+        #status { padding: 10px; background-color: #007bff; border-radius: 8px; font-weight: bold; color: white; margin-top: 15px; text-align: center; font-size: 0.95em; }
+        .note { font-size: 0.8em; color: #005a5a; margin-top: 10px; padding: 10px; border: 1px solid #b3e0e0; background-color: #e0ffff; border-radius: 6px; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🚨 GA4 ट्रैफिक (अंतिम क्लाउड फिक्स)</h2>
+    <h2>🎯 GA4 GitHub सिम्युलेशन</h2>
 
-    <div class="disclaimer">
-        **अंतिम प्रयास:** इस कोड में एक नए पब्लिक प्रॉक्सी का उपयोग किया गया है। यदि यह भी विफल होता है, तो यह पुष्टि हो जाएगी कि ब्राउज़र में यह काम नहीं करेगा। परिणाम देखने के लिए **Admin -> DebugView** खोलें।
-    </div>
+    <div class="note">
+        **FIX:** यह कोड रियलटाइम/मुख्य रिपोर्ट के लिए ऑप्टिमाइज़ किया गया है। GitHub Pages पर चलने से CORS की समस्या कम होगी।
+    </div>
 
-    <div class="input-group">
-        <label for="measurementIdInput">GA4 ID (G-XXXXXXX):</label>
-        <input type="text" id="measurementIdInput" placeholder="G-XXXXXXXXXX" required>
-    </div>
-    
-    <div class="input-group">
-        <label for="apiSecretInput">API Secret:</label>
-        <input type="text" id="apiSecretInput" placeholder="आपका_API_सीक्रेट" required>
-    </div>
+    <div class="input-group">
+        <label for="measurementIdInput">GA4 ID (G-XXXXXXX):</label>
+        <input type="text" id="measurementIdInput" placeholder="G-XXXXXXXXXX (Fill Here)" required>
+    </div>
+    
+    <div class="input-group">
+        <label for="apiSecretInput">API Secret:</label>
+        <input type="text" id="apiSecretInput" placeholder="आपका_API_सीक्रेट (Fill Here)" required>
+    </div>
 
-    <div class="input-group">
-        <label for="urlInput">वेबसाइट URL (https://):</label>
-        <input type="url" id="urlInput" placeholder="https://your-project.com" required>
-    </div>
-    
-    <div id="status">Status: Ready | Target: 100 Views</div>
+    <div class="input-group">
+        <label for="urlInput">वेबसाइट URL (https://):</label>
+        <input type="url" id="urlInput" placeholder="https://your-project.com" required>
+    </div>
+    
+    <div id="status">Status: Ready | Target: 250 Views per Cycle</div>
 
-    <button id="startButton" onclick="startSimulation()">Start Simulation</button>
-    
-    <label>आउटपुट लॉग:</label>
-    <div id="output"></div>
+    <button id="startButton" onclick="startSimulation()">Start GitHub Stable Simulation</button>
+    
+    <label>आउटपुट लॉग:</label>
+    <div id="output"></div>
 </div>
 
 <script>
-    let totalViews = 100;
-    let successfulViews = 0;
-    let viewCount = 0;
-    let isRunning = false;
-    let simulationTimeout;
-    const MIN_DELAY = 1500;
-    const MAX_DELAY = 4000;
-    
-    // FIX: एक अलग, और अधिक भरोसेमंद (उम्मीद है) प्रॉक्सी URL
-    const PROXY_URL = 'https://cors-anywhere.herokuapp.com/'; 
-    // नोट: यह प्रॉक्सी भी कभी भी काम करना बंद कर सकता है।
+    let totalViews = 250; 
+    let successfulViews = 0;
+    let viewCount = 0;
+    let isRunning = false;
+    let simulationTimeout;
+    
+    // धीमा और स्थिर ट्रैफ़िक (2-10 सेकंड)
+    const MIN_DELAY = 2000; 
+    const MAX_DELAY = 10000; 
+    const RESTART_DELAY = 10 * 60 * 1000; // 10 मिनट
+    
+    // भौगोलिक विविधता (Geo-Diversity)
+    const geoLocations = [
+        { country: "United States", region: "California" },
+        { country: "China", region: "Guangdong" },
+        { country: "India", region: "Maharashtra" },
+        { country: "Germany", region: "Bavaria" },
+        { country: "Brazil", region: "Sao Paulo" },
+        { country: "Japan", region: "Tokyo" },
+        { country: "United Kingdom", region: "England" },
+        { country: "Canada", region: "Ontario" }
+    ];
 
-    // User Agents की सूची (मल्टी-ब्राउज़र सिमुलेशन के लिए)
-    const userAgents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
-        "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
-    ];
+    function getRandomDelay() { return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; }
+    function getRandomGeo() { return geoLocations[Math.floor(Math.random() * geoLocations.length)]; }
+    
+    const outputDiv = document.getElementById('output');
+    const statusDiv = document.getElementById('status');
+    const startButton = document.getElementById('startButton');
+    const measurementIdInput = document.getElementById('measurementIdInput');
+    const apiSecretInput = document.getElementById('apiSecretInput');
 
-    function getRandomDelay() {
-        return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
-    }
-    
-    function getRandomUserAgent() {
-        return userAgents[Math.floor(Math.random() * userAgents.length)];
-    }
+    function log(message, type = 'info') {
+        const p = document.createElement('p');
+        p.innerHTML = message;
+        if (type === 'error') p.style.color = '#dc3545';
+        if (type === 'success') p.style.color = '#28a745';
+        outputDiv.prepend(p);
+    }
+    
+    async function sendData(gaEndpointUrl, payload, currentViewId, eventName) {
+        try {
+            const response = await fetch(gaEndpointUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 
+                    'Content-Type': 'application/json',
+                }
+            });
 
-    const outputDiv = document.getElementById('output');
-    const statusDiv = document.getElementById('status');
-    const startButton = document.getElementById('startButton');
+            if (response.status === 204) { 
+                successfulViews++;
+                const geoInfo = payload.user_properties.geo.value;
+                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS (Check Realtime)</span> | Location Hint: ${geoInfo}`, 'success');
+            } else {
+                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILURE</span> | Status: ${response.status}.`, 'error');
+            }
+        } catch (error) {
+            // यह CORS/Connection Failed एरर है
+            log(`View ${currentViewId}: <span style="font-weight:bold;">CRITICAL ERROR (CORS/Connection)</span> | Failed to fetch. **Try Node.js!**`, 'error');
+        } finally {
+            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+        }
+    }
 
-    function log(message, type = 'info') {
-        const p = document.createElement('p');
-        p.innerHTML = message;
-        if (type === 'error') p.style.color = '#dc3545';
-        if (type === 'success') p.style.color = '#28a745';
-        outputDiv.prepend(p);
-    }
-    
-    // POST Request के साथ प्रॉक्सी का उपयोग
-    async function sendData(gaEndpointUrl, payload, currentViewId, userAgent) {
-        
-        // FIX: प्रॉक्सी URL को GA4 एंडपॉइंट के साथ जोड़ें
-        const proxiedUrl = PROXY_URL + gaEndpointUrl;
+    function generateView(url, measurementId, apiSecret) {
+        if (!isRunning || viewCount >= totalViews) {
+            finishSimulation(url, measurementId, apiSecret);
+            return;
+        }
 
-        try {
-            const response = await fetch(proxiedUrl, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: { 
-                    'Content-Type': 'application/json',
-                    // User Agent को हेडर के रूप में भेजें (POST के लिए आवश्यक)
-                    'User-Agent': userAgent, 
-                    // CORS-Anywhere के लिए आवश्यक हेडर
-                    'X-Requested-With': 'XMLHttpRequest' 
-                }
-            });
+        viewCount++;
+        const currentViewId = viewCount;
+        
+        const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+        const SESSION_ID = Date.now(); 
+        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
 
-            // GA4 204 No Content लौटाता है यदि सफल हो
-            if (response.status === 204) { 
-                successfulViews++;
-                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Device: ${userAgent.split('(')[1].split(')')[0]}`, 'success');
-            } else {
-                 // अगर प्रॉक्सी या GA4 ने एरर दी
-                const errorText = await response.text();
-                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILURE</span> | Status: ${response.status}. GA4 did not accept data.`, 'error');
-                log(`DEBUG: Response Text (First 100 chars): ${errorText.substring(0, 100)}...`, 'error');
-            }
-            
-        } catch (error) {
-            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection/Proxy Failed. ${error.message}`, 'error');
-        } finally {
-            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
-        }
-    }
+        const geo = getRandomGeo();
+        const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
 
-    // मुख्य व्यू जनरेट करने वाला फ़ंक्शन (पुराने पैरामीटर्स के साथ)
-    function generateView(url, measurementId, apiSecret) {
-        if (!isRunning || viewCount >= totalViews) {
-            finishSimulation();
-            return;
-        }
+        const commonUserProperties = {
+            geo: { value: `${geo.country}, ${geo.region}` }
+        };
 
-        viewCount++;
-        const currentViewId = viewCount;
-        
-        const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-        const SESSION_ID = Date.now(); 
-        const USER_AGENT = getRandomUserAgent(); 
-        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
+        // 1. Session Start Event
+        const sessionStartPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] };
+        setTimeout(() => { sendData(gaEndpoint, sessionStartPayload, currentViewId, 'session_start'); }, 100); 
+       
+        // 2. Page View Event (Realtime/Reports में जाएगा)
+        const pageViewPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'page_view', params: { page_location: url, page_title: `PROJECT_GITHUB_${currentViewId}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }] };
+        setTimeout(() => { sendData(gaEndpoint, pageViewPayload, currentViewId, 'page_view'); }, 500); 
 
-        // 1. Session Start Event
-        const sessionStartPayload = {
-            client_id: CLIENT_ID,
-            events: [{
-                name: 'session_start', 
-                params: {
-                    debug_mode: true, 
-                    session_id: SESSION_ID,
-                    _ss: 1 
-                }
-            }]
-        };
-        sendData(gaEndpoint, sessionStartPayload, currentViewId, USER_AGENT);
+        // 3. User Engagement Event
+        const engagementPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] };
+        setTimeout(() => {
+            sendData(gaEndpoint, engagementPayload, currentViewId, 'user_engagement');
+            scheduleNextView(url, measurementId, apiSecret); 
+        }, 1000); 
+    }
 
-        // 2. Page View Event
-        const engagementTime = 10000 + Math.floor(Math.random() * 10000); 
+    function scheduleNextView(url, measurementId, apiSecret) {
+        if (viewCount < totalViews && isRunning) {
+            const delay = getRandomDelay();
+            simulationTimeout = setTimeout(() => generateView(url, measurementId, apiSecret), delay);
+        } else {
+            finishSimulation(url, measurementId, apiSecret);
+        }
+    }
 
-        const pageViewPayload = {
-            client_id: CLIENT_ID,
-            events: [{
-                name: 'page_view', 
-                params: {
-                    page_location: url, // Standard MP parameter
-                    page_title: `PROJECT_VIEW_${currentViewId}`, // Standard MP parameter
-                    debug_mode: true, 
-                    session_id: SESSION_ID, 
-                    engagement_time_msec: engagementTime, 
-                }
-            }]
-        };
-        
-        setTimeout(() => {
-            sendData(gaEndpoint, pageViewPayload, currentViewId, USER_AGENT);
-            scheduleNextView(url, measurementId, apiSecret);
-        }, 500); 
+    function startSimulation() {
+        const url = document.getElementById('urlInput').value.trim();
+        const measurementId = measurementIdInput.value.trim();
+        const apiSecret = apiSecretInput.value.trim();
 
-    }
+        if (!url.startsWith('http')) { alert("कृपया URL 'https://' या 'http://' से शुरू करें।"); return; }
+        if (!measurementId.startsWith('G-') || apiSecret.length < 5) { alert("कृपया सही GA4 ID और API Secret दर्ज करें।"); return; }
+        if (isRunning) return;
 
+        isRunning = true;
+        startButton.disabled = true;
+        startButton.textContent = "Simulation Running... (DO NOT CLOSE TAB)";
+        
+        successfulViews = 0;
+        viewCount = 0;
+        outputDiv.innerHTML = ''; 
+        
+        log(`🚀 GitHub Simulation Started. Target: ${totalViews} Views.`, 'info');
+        statusDiv.style.backgroundColor = '#007bff';
+        statusDiv.innerHTML = "Starting requests...";
 
-    function scheduleNextView(url, measurementId, apiSecret) {
-        if (viewCount < totalViews && isRunning) {
-            const delay = getRandomDelay();
-            simulationTimeout = setTimeout(() => generateView(url, measurementId, apiSecret), delay);
-        } else {
-            finishSimulation();
-        }
-    }
+        generateView(url, measurementId, apiSecret);
+    }
 
-    function startSimulation() {
-        const url = document.getElementById('urlInput').value.trim();
-        const measurementId = document.getElementById('measurementIdInput').value.trim();
-        const apiSecret = document.getElementById('apiSecretInput').value.trim();
+    function finishSimulation(url, measurementId, apiSecret) {
+        clearTimeout(simulationTimeout);
+        if (!isRunning) return;
+        
+        log("<hr>", 'info');
+        log(`✅ **Cycle Complete!** Total Success: <b>${successfulViews}</b>`, 'info');
+        
+        const nextCycleTime = new Date(Date.now() + RESTART_DELAY).toLocaleTimeString();
+        
+        log(`💤 Resting for 10 minutes. Restarting at approx. ${nextCycleTime}`, 'info');
 
-        if (!url.startsWith('http')) {
-            alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
-            return;
-        }
-        if (!measurementId.startsWith('G-')) {
-            alert("कृपया सही GA4 ID (G- से शुरू होने वाली) दर्ज करें।");
-            return;
-        }
-        if (apiSecret.length < 5) {
-            alert("कृपया सही API Secret दर्ज करें।");
-            return;
-        }
-        if (isRunning) return;
-
-        isRunning = true;
-        startButton.disabled = true;
-        startButton.textContent = "Simulation Running... (DO NOT CLOSE TAB)";
-        
-        successfulViews = 0;
-        viewCount = 0;
-        outputDiv.innerHTML = ''; 
-        
-        log(`🚀 Simulation Started. Target: ${totalViews} Views.`, 'info');
-        statusDiv.innerHTML = "Starting requests...";
-
-        generateView(url, measurementId, apiSecret);
-    }
-
-    function finishSimulation() {
-        clearTimeout(simulationTimeout);
-        if (!isRunning) return;
-        
-        log("<hr>", 'info');
-        log(`✅ **Simulation Complete!**`, 'info');
-        log(`Final Successful Views: <b>${successfulViews}</b>`, 'info');
-        log("<hr>", 'info');
-        
-        startButton.disabled = false;
-        startButton.textContent = "Start Simulation";
-        isRunning = false;
-        statusDiv.innerHTML = `Finished. Total Views: ${successfulViews}`;
-    }
+        statusDiv.style.backgroundColor = '#ffc107'; 
+        statusDiv.innerHTML = `RESTING. Next cycle starts at ${nextCycleTime}. Keep tab open!`;
+        
+        simulationTimeout = setTimeout(function() {
+            isRunning = false; 
+            startSimulation(url, measurementId, apiSecret); 
+        }, RESTART_DELAY); 
+    }
 </script>
 
 </body>
-</html> 
+</html>
