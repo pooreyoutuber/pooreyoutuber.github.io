@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GA4 Traffic Injector (GitHub Pages)</title>
+    <title>GA4 Traffic Injector - Final</title>
     
     <style>
         body {
@@ -32,16 +32,24 @@
     <div id="status">सिमुलेशन शुरू हो रहा है...</div>
 
     <script>
-        // --- 🎯 आपकी GA4 Keys (Measurement ID ही चाहिए) ---
-        const MEASUREMENT_ID = 'G-ZPMC525FGT'; 
-        // API_SECRET client-side code में ज़रूरी नहीं है, इसलिए हम सिर्फ़ Measurement ID का इस्तेमाल करेंगे
-        // ------------------------------------
+        // --- 🎯 यहाँ आपको सिर्फ़ यह 3 चीज़ें बदलनी हैं (अपनी जानकारी डालें) ---
+        
+        // 1. अपनी GA4 Measurement ID (G-XXXXXXX) यहाँ डालें
+        const MEASUREMENT_ID = 'अपनी_G-XXXXXXX_ID_यहाँ_डालें'; 
+        
+        // 2. अपनी वेबसाइट का URL यहाँ डालें (जैसे: 'https://mysite.com/')
+        const WEBSITE_URL = 'अपनी_वेबसाइट_का_URL_यहाँ_डालें'; 
+        
+        // 3. आपको कुल कितने Views चाहिए 
+        const TOTAL_VIEWS = 250; // आप इसे बदल सकते हैं
+        
+        // API_SECRET client-side code में ज़रूरी नहीं है, इसलिए उसे छोड़ दिया गया है।
+        // ----------------------------------------------------------------------
 
-        const TOTAL_VIEWS = 250; 
-        const MIN_DELAY = 1500; // 1.5 seconds
-        const MAX_DELAY = 4000; // 4 seconds
+        const MIN_DELAY = 1500; 
+        const MAX_DELAY = 4000; 
 
-        // 🎯 15 देशों की सूची जो Page Titles में दिखेगी
+        // 🎯 15 देशों की सूची (Country Trick के लिए)
         const countries = [
             "Japan", "United States", "Germany", "Canada", "Netherlands", "India",
             "Brazil", "Mexico", "South Korea", "Australia", "Singapore", "France",
@@ -51,11 +59,17 @@
         let successfulViews = 0;
         let viewCount = 0;
         let countryIndex = 0;
-        // हर बार जब यह पेज लोड होगा, तो एक नया client_id बनेगा।
         let clientId = Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 
         const statusDiv = document.getElementById('status');
         
+        // Validation Check
+        if (MEASUREMENT_ID === 'अपनी_G-XXXXXXX_ID_यहाँ_डालें' || WEBSITE_URL === 'अपनी_वेबसाइट_का_URL_यहाँ_डालें') {
+            document.body.innerHTML = '<h2>🛑 कोड में बदलाव करें!</h2><p>कृपया script टैग के अंदर <code>MEASUREMENT_ID</code> और <code>WEBSITE_URL</code> को बदलें।</p>';
+            throw new Error("Missing configuration.");
+        }
+
+
         function getNextCountry() {
             const country = countries[countryIndex % countries.length];
             countryIndex++;
@@ -72,8 +86,8 @@
         }
 
         async function sendData(eventType, currentViewId, countryName) {
-            // Measurement Protocol URL (Client-side tracking for page views)
-            const GA_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${MEASUREMENT_ID}&api_secret=`; 
+            // GA Endpoint में सिर्फ़ Measurement ID का इस्तेमाल होगा
+            const GA_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${MEASUREMENT_ID}`; 
             
             const SESSION_ID = Date.now();
             const engagementTime = 10000 + Math.floor(Math.random() * 10000);
@@ -84,8 +98,8 @@
                     name: eventType,
                     params: {
                         session_id: SESSION_ID,
-                        page_location: window.location.href,
-                        // 🎯 Page Title में Country Trick
+                        page_location: WEBSITE_URL, // यह आपकी वेबसाइट का URL है
+                        // Page Title में Country Trick (रिपोर्ट में दिखाने के लिए)
                         page_title: `PROJECT_VIEW_${currentViewId}_FROM_${countryName}`, 
                         engagement_time_msec: engagementTime,
                         _ss: eventType === 'session_start' ? 1 : undefined,
@@ -95,15 +109,13 @@
             };
 
             try {
-                // Fetch call to Google Analytics
                 const response = await fetch(GA_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
-                    mode: 'no-cors' // This is necessary for client-side JavaScript to bypass CORS issues
+                    mode: 'no-cors' 
                 });
 
-                // Client-side MP calls return 'opaque' response in no-cors mode, which is usually a success.
                 if (response.status === 204 || response.type === 'opaque') {
                     if (eventType === 'page_view') {
                         successfulViews++;
@@ -130,10 +142,10 @@
             const currentViewId = viewCount;
             const COUNTRY = getNextCountry(); 
 
-            // 1. Session Start Event (यह नया User बनाएगा)
+            // 1. Session Start Event (नया User)
             await sendData('session_start', currentViewId, COUNTRY);
             
-            // 2. Page View Event (यह नया View बनाएगा)
+            // 2. Page View Event (नया View)
             await new Promise(resolve => setTimeout(resolve, 500)); 
             await sendData('page_view', currentViewId, COUNTRY);
 
@@ -143,12 +155,10 @@
             updateStatus(`[STATUS] View ${currentViewId} पूरा हुआ। देश: ${COUNTRY}. अगला व्यू ${Math.round(delay/1000)}s में...`);
             await new Promise(resolve => setTimeout(resolve, delay));
             
-            // Re-run the function recursively
             generateView(); 
         }
 
         updateStatus(`🚀 सिमुलेशन शुरू हो रहा है. लक्ष्य: ${TOTAL_VIEWS} व्यूज़...`);
-        // Start the process
         generateView();
     </script>
 </body>
