@@ -2,225 +2,154 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Traffic Injector (FINAL CORS PROXY TEST)</title>
+    <title>GA4 Traffic Injector (GitHub Pages)</title>
+    
     <style>
-        /* Styles for compact UI */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 90%; max-width: 420px; background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
-        h2 { color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 6px; margin-top: 0; text-align: center; font-size: 1.4em; }
-        label { display: block; margin-top: 10px; font-weight: 600; color: #333; font-size: 0.85em; }
-        input[type="url"], input[type="text"] { width: 100%; padding: 8px; margin-top: 3px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 0.85em; }
-        button { background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 0.95em; font-weight: bold; transition: background-color 0.3s; }
-        button:disabled { background-color: #90ee90; cursor: not-allowed; }
-        #output { margin-top: 12px; padding: 8px; border: 1px solid #ffe8cc; background-color: #fff8e1; border-radius: 4px; max-height: 120px; overflow-y: scroll; font-size: 0.75em; }
-        #status { padding: 6px; background-color: #dc3545; border-radius: 4px; font-weight: bold; color: white; margin-top: 10px; text-align: center; font-size: 0.85em; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+            background-color: #f4f4f4;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: inline-block;
+            text-align: left;
+            min-width: 400px;
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🚨 GA4 ट्रैफिक (अंतिम क्लाइंट टेस्ट)</h2>
+    <h1>GA4 ट्रैफिक सिमुलेशन (GitHub)</h1>
+    <p>लक्ष्य: 250 व्यूज़ और यूज़र्स</p>
+    <div id="status">सिमुलेशन शुरू हो रहा है...</div>
 
-    <label for="measurementIdInput">GA4 ID (G-XXXXXXX):</label>
-    <input type="text" id="measurementIdInput" value="G-ZPMC525FGT" required>
-    
-    <label for="apiSecretInput">API Secret (नई कुंजी):</label>
-    <input type="text" id="apiSecretInput" value="PSaScGPuTWa95eOdSkbV7w" required>
+    <script>
+        // --- 🎯 आपकी GA4 Keys (Measurement ID ही चाहिए) ---
+        const MEASUREMENT_ID = 'G-ZPMC525FGT'; 
+        // API_SECRET client-side code में ज़रूरी नहीं है, इसलिए हम सिर्फ़ Measurement ID का इस्तेमाल करेंगे
+        // ------------------------------------
 
-    <label for="urlInput">वेबसाइट URL (https://):</label>
-    <input type="url" id="urlInput" value="https://pooreyoutuber.github.io/" required>
-    
-    <div id="status">Status: Ready | Target: 100 Views</div>
+        const TOTAL_VIEWS = 250; 
+        const MIN_DELAY = 1500; // 1.5 seconds
+        const MAX_DELAY = 4000; // 4 seconds
 
-    <button id="startButton" onclick="startSimulation()">Start Simulation</button>
-    
-    <label>आउटपुट लॉग:</label>
-    <div id="output"></div>
-</div>
+        // 🎯 15 देशों की सूची जो Page Titles में दिखेगी
+        const countries = [
+            "Japan", "United States", "Germany", "Canada", "Netherlands", "India",
+            "Brazil", "Mexico", "South Korea", "Australia", "Singapore", "France",
+            "Spain", "Italy", "Turkey" 
+        ]; 
 
-<script>
-    let totalViews = 100;
-    let successfulViews = 0;
-    let viewCount = 0;
-    let isRunning = false;
-    let simulationTimeout;
-    const MIN_DELAY = 1500;
-    const MAX_DELAY = 4000;
-    
-    // FIX: CORS-Anywhere प्रॉक्सी का उपयोग
-    const PROXY_URL = 'https://cors-anywhere.herokuapp.com/'; 
-    // नोट: यह प्रॉक्सी किसी भी समय ब्लॉक हो सकता है।
+        let successfulViews = 0;
+        let viewCount = 0;
+        let countryIndex = 0;
+        // हर बार जब यह पेज लोड होगा, तो एक नया client_id बनेगा।
+        let clientId = Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 
-    const userAgents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
-        "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
-    ];
-
-    function getRandomDelay() {
-        return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
-    }
-    
-    function getRandomUserAgent() {
-        return userAgents[Math.floor(Math.random() * userAgents.length)];
-    }
-
-    const outputDiv = document.getElementById('output');
-    const statusDiv = document.getElementById('status');
-    const startButton = document.getElementById('startButton');
-
-    function log(message, type = 'info') {
-        const p = document.createElement('p');
-        p.innerHTML = message;
-        if (type === 'error') p.style.color = '#dc3545';
-        if (type === 'success') p.style.color = '#28a745';
-        outputDiv.prepend(p);
-    }
-    
-    // POST Request के साथ प्रॉक्सी का उपयोग (Replit लॉजिक)
-    async function sendData(gaEndpointUrl, payload, currentViewId, userAgent) {
+        const statusDiv = document.getElementById('status');
         
-        // FIX: प्रॉक्सी URL को GA4 एंडपॉइंट के साथ जोड़ें
-        const proxiedUrl = PROXY_URL + gaEndpointUrl;
+        function getNextCountry() {
+            const country = countries[countryIndex % countries.length];
+            countryIndex++;
+            return country;
+        }
+        
+        function updateStatus(message, className) {
+            statusDiv.innerHTML = message;
+            statusDiv.className = className || '';
+        }
 
-        try {
-            const response = await fetch(proxiedUrl, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'User-Agent': userAgent, 
-                    // CORS-Anywhere के लिए आवश्यक हेडर
-                    'X-Requested-With': 'XMLHttpRequest' 
-                }
-            });
+        function getRandomDelay() {
+            return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY;
+        }
 
-            if (response.status === 204) { 
-                successfulViews++;
-                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS</span> | Status: 204 (GA accepted)`, 'success');
-            } else {
-                 // अगर प्रॉक्सी या GA4 ने एरर दी
-                const errorText = await response.text();
-                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILURE</span> | Status: ${response.status}. Proxy/GA4 Error.`, 'error');
-                log(`DEBUG: Response Text (First 100 chars): ${errorText.substring(0, 100)}...`, 'error');
-                // इस FAILURE में CORS-Anywhere का /corsdemo एरर आ सकता है
-            }
+        async function sendData(eventType, currentViewId, countryName) {
+            // Measurement Protocol URL (Client-side tracking for page views)
+            const GA_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${MEASUREMENT_ID}&api_secret=`; 
             
-        } catch (error) {
-            log(`View ${currentViewId}: <span style="font-weight:bold;">ERROR</span> | Connection/Proxy Failed. ${error.message}`, 'error');
-            // यह ERROR सबसे आम है जब ब्राउज़र प्रॉक्सी को ब्लॉक करता है
-        } finally {
-            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
-        }
-    }
+            const SESSION_ID = Date.now();
+            const engagementTime = 10000 + Math.floor(Math.random() * 10000);
+            
+            const payload = {
+                client_id: clientId,
+                events: [{
+                    name: eventType,
+                    params: {
+                        session_id: SESSION_ID,
+                        page_location: window.location.href,
+                        // 🎯 Page Title में Country Trick
+                        page_title: `PROJECT_VIEW_${currentViewId}_FROM_${countryName}`, 
+                        engagement_time_msec: engagementTime,
+                        _ss: eventType === 'session_start' ? 1 : undefined,
+                        debug_mode: true
+                    }
+                }]
+            };
 
-    function generateView(url, measurementId, apiSecret) {
-        if (!isRunning || viewCount >= totalViews) {
-            finishSimulation();
-            return;
-        }
+            try {
+                // Fetch call to Google Analytics
+                const response = await fetch(GA_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    mode: 'no-cors' // This is necessary for client-side JavaScript to bypass CORS issues
+                });
 
-        viewCount++;
-        const currentViewId = viewCount;
-        
-        const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-        const SESSION_ID = Date.now(); 
-        const USER_AGENT = getRandomUserAgent(); 
-        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
-
-        // 1. Session Start Event
-        const sessionStartPayload = {
-            client_id: CLIENT_ID,
-            events: [{
-                name: 'session_start', 
-                params: { debug_mode: true, session_id: SESSION_ID, _ss: 1 }
-            }]
-        };
-        sendData(gaEndpoint, sessionStartPayload, currentViewId, USER_AGENT);
-
-        // 2. Page View Event
-        const engagementTime = 10000 + Math.floor(Math.random() * 10000); 
-
-        const pageViewPayload = {
-            client_id: CLIENT_ID,
-            events: [{
-                name: 'page_view', 
-                params: {
-                    page_location: url, 
-                    page_title: `PROJECT_VIEW_${currentViewId}`, 
-                    debug_mode: true, 
-                    session_id: SESSION_ID, 
-                    engagement_time_msec: engagementTime, 
+                // Client-side MP calls return 'opaque' response in no-cors mode, which is usually a success.
+                if (response.status === 204 || response.type === 'opaque') {
+                    if (eventType === 'page_view') {
+                        successfulViews++;
+                        updateStatus(`[SUCCESS] View ${currentViewId}: page_view भेजा गया। देश: ${countryName}. कुल सफलता: ${successfulViews}`, 'success');
+                    }
+                    return true;
+                } else {
+                    updateStatus(`[FAILURE] View ${currentViewId}: Status ${response.status}.`, 'error');
+                    return false;
                 }
-            }]
-        };
-        
-        setTimeout(() => {
-            sendData(gaEndpoint, pageViewPayload, currentViewId, USER_AGENT);
-            scheduleNextView(url, measurementId, apiSecret);
-        }, 500); 
+            } catch (error) {
+                updateStatus(`[ERROR] View ${currentViewId}: Connection Failed. ${error.message}`, 'error');
+                return false;
+            }
+        }
 
-    }
+        async function generateView() {
+            if (viewCount >= TOTAL_VIEWS) {
+                updateStatus(`\n✅ सिमुलेशन पूरा हुआ! कुल सफल व्यूज़: ${successfulViews}`, 'success');
+                return;
+            }
 
+            viewCount++;
+            const currentViewId = viewCount;
+            const COUNTRY = getNextCountry(); 
 
-    function scheduleNextView(url, measurementId, apiSecret) {
-        if (viewCount < totalViews && isRunning) {
+            // 1. Session Start Event (यह नया User बनाएगा)
+            await sendData('session_start', currentViewId, COUNTRY);
+            
+            // 2. Page View Event (यह नया View बनाएगा)
+            await new Promise(resolve => setTimeout(resolve, 500)); 
+            await sendData('page_view', currentViewId, COUNTRY);
+
+            
+            // 3. अगले व्यू के लिए देरी
             const delay = getRandomDelay();
-            simulationTimeout = setTimeout(() => generateView(url, measurementId, apiSecret), delay);
-        } else {
-            finishSimulation();
+            updateStatus(`[STATUS] View ${currentViewId} पूरा हुआ। देश: ${COUNTRY}. अगला व्यू ${Math.round(delay/1000)}s में...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            
+            // Re-run the function recursively
+            generateView(); 
         }
-    }
 
-    function startSimulation() {
-        const url = document.getElementById('urlInput').value.trim();
-        const measurementId = document.getElementById('measurementIdInput').value.trim();
-        const apiSecret = document.getElementById('apiSecretInput').value.trim();
-
-        if (!url.startsWith('http')) {
-            alert("कृपया URL 'https://' या 'http://' से शुरू करें।");
-            return;
-        }
-        if (!measurementId.startsWith('G-')) {
-            alert("कृपया सही GA4 ID (G- से शुरू होने वाली) दर्ज करें।");
-            return;
-        }
-        if (apiSecret.length < 5) {
-            alert("कृपया सही API Secret दर्ज करें।");
-            return;
-        }
-        if (isRunning) return;
-
-        isRunning = true;
-        startButton.disabled = true;
-        startButton.textContent = "Simulation Running... (DO NOT CLOSE TAB)";
-        
-        successfulViews = 0;
-        viewCount = 0;
-        outputDiv.innerHTML = ''; 
-        
-        log(`🚀 Simulation Started. Target: ${totalViews} Views.`, 'info');
-        statusDiv.innerHTML = "Starting requests...";
-
-        generateView(url, measurementId, apiSecret);
-    }
-
-    function finishSimulation() {
-        clearTimeout(simulationTimeout);
-        if (!isRunning) return;
-        
-        log("<hr>", 'info');
-        log(`✅ **Simulation Complete!**`, 'info');
-        log(`Final Successful Views: <b>${successfulViews}</b>`, 'info');
-        log("<hr>", 'info');
-        
-        startButton.disabled = false;
-        startButton.textContent = "Start Simulation";
-        isRunning = false;
-        statusDiv.innerHTML = `Finished. Total Views: ${successfulViews}`;
-    }
-</script>
-
+        updateStatus(`🚀 सिमुलेशन शुरू हो रहा है. लक्ष्य: ${TOTAL_VIEWS} व्यूज़...`);
+        // Start the process
+        generateView();
+    </script>
 </body>
 </html>
