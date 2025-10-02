@@ -1,27 +1,27 @@
 const { Builder, By, Key, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const express = require('express');
-const cors = require('cors'); // CORS लाइब्रेरी को इम्पोर्ट करें
+const cors = require('cors'); // <-- CORS लाइब्रेरी इम्पोर्ट करें
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
 // 🚨 CORS CONFIGURATION (कनेक्शन एरर को ठीक करने के लिए ज़रूरी) 🚨
-// यह केवल आपकी GitHub Pages वेबसाइट को API कॉल करने की अनुमति देता है।
+// यह केवल आपकी GitHub Pages वेबसाइट (pooreyoutuber.github.io) को API कॉल करने की अनुमति देता है।
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
-    methods: 'POST', // हम केवल POST रिक्वेस्ट स्वीकार करते हैं
+    methods: 'POST', 
     optionsSuccessStatus: 200 
 }));
 // ------------------------------------
 
-// Middleware for parsing JSON requests (इसे CORS के नीचे रखें)
+// Middleware for parsing JSON requests
 app.use(express.json());
 
 // ****************************************************
-// 🔑 CONFIGURATION: Proxies (आपके वर्किंग प्रॉक्सी)
+// 🔑 CONFIGURATION: Proxies and Settings
 // ****************************************************
 
-// 1. Search Keywords (यूजर के URL को Google पर क्लिक दिलाने के लिए)
+// 1. Search Keywords (CTR boost के लिए Google search simulation)
 const SEARCH_KEYWORDS = [
     "advanced project",
     "youtube project site",
@@ -32,6 +32,7 @@ const SEARCH_KEYWORDS = [
 
 // 2. 🌐 AUTHENTICATED PROXY LIST 
 // फॉर्मेट: http://username:password@ip:port
+// सुनिश्चित करें कि प्रॉक्सी लिस्ट में कोई अतिरिक्त कॉमा न छूटे
 const PROXY_LIST = [
     'http://bqcftypvz:399xb3kxxqv6i@142.111.48.253:7030', 
     'http://bqcftypvz:399xb3kxxqv6i@198.23.239.134:6540', 
@@ -42,10 +43,10 @@ const PROXY_LIST = [
     'http://bqcftypvz:399xb3kxxqv6i@84.247.60.125:6095', 
     'http://bqcftypvz:399xb3kxxqv6i@216.10.27.159:6837', 
     'http://bqcftypvz:399xb3kxxqv6i@142.111.67.146:5611', 
-    'http://bqcftypvz:399xb3kxxqv6i@142.147.128.93:6593', 
+    'http://bqcftypvz:399xb3kxxqv6i@142.147.128.93:6593' // <-- आखिरी एंट्री के बाद कॉमा नहीं है!
 ];
 const PROXY_RETRY_COUNT = 2; 
-const BREAK_BETWEEN_VIEWS_MS = 60000; // 1 मिनट का ब्रेक (60 सेकंड)
+const BREAK_BETWEEN_VIEWS_MS = 60000; 
 
 let proxyIndex = 0;
 let totalProxies = PROXY_LIST.length;
@@ -56,12 +57,11 @@ function sleep(ms) {
 }
 
 // ----------------------------------------------------
-// Core Logic: User Simulation Function (Dynamic URL)
+// Core Logic: User Simulation Function
 // ----------------------------------------------------
 
 async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     let driver;
-    // प्रॉक्सी में से Auth part हटाकर display करना
     const displayProxy = proxy.split('@').pop() || proxy; 
     const logPrefix = `[REQ ${currentViewNumber} | PROXY: ${displayProxy}]`;
 
@@ -155,7 +155,7 @@ app.post('/boost-url', async (req, res) => {
     // API तुरंत response दे: इसे background में चलाने के लिए
     res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} in background.` });
 
-    // लॉजिक को background में चलाएं
+    // लॉजिक को background में चलाएं (API कॉल को ब्लॉक होने से रोकता है)
     (async () => {
         let successfulViews = 0;
         
@@ -191,11 +191,3 @@ app.post('/boost-url', async (req, res) => {
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Traffic Booster API is running.' });
-});
-
-// ----------------------------------------------------
-// Server Start
-// ----------------------------------------------------
-app.listen(PORT, () => {
-  console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
-});
