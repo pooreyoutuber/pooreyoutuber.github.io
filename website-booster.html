@@ -6,10 +6,34 @@
     <title>Website Booster Tool - PooreYouTuber</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
-        header { background: #007bff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .logo-container { display: flex; align-items: center; gap: 10px; }
-        .home-link { color: white; text-decoration: none; font-size: 24px; font-weight: bold; }
-        .container { max-width: 700px; margin: auto; padding: 30px; text-align: center; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 50px; }
+        header { 
+            background: #007bff; 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .logo-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .home-link { 
+            color: white; 
+            text-decoration: none; 
+            font-size: 24px; 
+            font-weight: bold; 
+        }
+        .container { 
+            max-width: 700px; 
+            margin: auto; 
+            padding: 30px; 
+            text-align: center; 
+            background: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            margin-top: 50px; 
+        }
         /* Tool-specific styles */
         #booster-tool input {
             width: 100%;
@@ -17,7 +41,7 @@
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 8px;
-            box-sizing: border-box; /* Padding included in width */
+            box-sizing: border-box; 
         }
         #booster-tool button {
             background: #28a745; /* Green button */
@@ -60,8 +84,8 @@
     </div>
 
     <script>
-        // 🚨 स्टेप 2 के बाद आपको यह URL बदलना होगा 🚨
-        // Render पर Web Service लाइव होने के बाद, उसका URL यहाँ डालें।
+        // 🚀 Render Web Service का Final URL
+        // यह URL आपके पिछले लॉग (https://pooreyoutuber-github-io.onrender.com) से लिया गया है।
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-url'; 
 
         async function startBoost() {
@@ -90,15 +114,23 @@
             try {
                 const response = await fetch(RENDER_API_URL, {
                     method: 'POST',
+                    // CORS समस्या को हल करने के लिए Content-Type ज़रूरी है
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    // JSON डेटा Render API को भेजें
                     body: JSON.stringify({ url: targetUrl, views: views })
                 });
 
+                // चेक करें कि HTTP response सफल था (200-299)
+                if (!response.ok) {
+                    // अगर Render API CORS या किसी और कारण से फ़ेल हुआ
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
 
-                if (response.ok && data.status === 'processing') {
+                if (data.status === 'processing') {
                     statusMessage.style.color = 'green';
                     statusMessage.textContent = `✅ रिक्वेस्ट सफल! ${views} व्यूज बैकग्राउंड में जेनरेट हो रहे हैं।`;
                 } else {
@@ -107,8 +139,9 @@
                 }
 
             } catch (error) {
+                // यह ब्लॉक कनेक्शन या CORS एरर को पकड़ता है
                 statusMessage.style.color = 'red';
-                statusMessage.textContent = '❌ कनेक्शन एरर: Render API तक पहुंचने में विफल रहा। सुनिश्चित करें कि API URL सही है।';
+                statusMessage.textContent = '❌ कनेक्शन एरर: Render API तक पहुंचने में विफल रहा। (CORS या URL जाँचें)';
                 console.error('Fetch error:', error);
             }
         }
