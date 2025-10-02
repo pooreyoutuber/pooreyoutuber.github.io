@@ -1,14 +1,13 @@
 const { Builder, By, Key, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const express = require('express');
-const cors = require('cors'); // <-- CORS लाइब्रेरी इम्पोर्ट करें
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// 🚨 CORS CONFIGURATION (कनेक्शन एरर को ठीक करने के लिए ज़रूरी) 🚨
-// यह केवल आपकी GitHub Pages वेबसाइट (pooreyoutuber.github.io) को API कॉल करने की अनुमति देता है।
+// 🚨 CORS CONFIGURATION 🚨
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', 
+    origin: 'https://pooreyoutuber.github.io', // आपकी वेबसाइट का URL
     methods: 'POST', 
     optionsSuccessStatus: 200 
 }));
@@ -30,21 +29,41 @@ const SEARCH_KEYWORDS = [
     "online utilities" 
 ]; 
 
-// 2. 🌐 AUTHENTICATED PROXY LIST 
-// फॉर्मेट: http://username:password@ip:port
-// सुनिश्चित करें कि प्रॉक्सी लिस्ट में कोई अतिरिक्त कॉमा न छूटे
+// 2. 🌐 NEW PROXY LIST (Elite Public Proxies from latest list)
+// फॉर्मेट: http://ip:port
+// हमने आपके पिछले Authenticated Proxies को बदल दिया है।
 const PROXY_LIST = [
-    'http://bqcftypvz:399xb3kxxqv6i@142.111.48.253:7030', 
-    'http://bqcftypvz:399xb3kxxqv6i@198.23.239.134:6540', 
-    'http://bqcftypvz:399xb3kxxqv6i@45.38.107.97:6014',  
-    'http://bqcftypvz:399xb3kxxqv6i@107.172.163.27:6543', 
-    'http://bqcftypvz:399xb3kxxqv6i@64.137.96.74:6641',  
-    'http://bqcftypvz:399xb3kxxqv6i@154.203.43.247:5536', 
-    'http://bqcftypvz:399xb3kxxqv6i@84.247.60.125:6095', 
-    'http://bqcftypvz:399xb3kxxqv6i@216.10.27.159:6837', 
-    'http://bqcftypvz:399xb3kxxqv6i@142.111.67.146:5611', 
-    'http://bqcftypvz:399xb3kxxqv6i@142.147.128.93:6593' // <-- आखिरी एंट्री के बाद कॉमा नहीं है!
+    // 1. Canada, Elite, ~435 ms
+    'http://159.203.61.169:8080', 
+
+    // 2. Russia - Seversk, Elite, ~498 ms
+    'http://109.194.34.246:8082', 
+
+    // 3. Kazakhstan - Almaty, Elite, ~824 ms
+    'http://82.115.60.65:80',
+
+    // 4. China - Beijing, Elite, ~2469 ms
+    'http://8.130.39.117:8080', 
+
+    // 5. China - Shenzhen, Elite, ~2479 ms
+    'http://47.121.183.107:9080',
+
+    // 6. China - Guangzhou, Elite, ~2569 ms
+    'http://8.138.125.130:9098',
+
+    // 7. United States, Elite, ~2374 ms
+    'http://47.251.87.199:2083',
+
+    // 8. Singapore, Elite, ~2440 ms
+    'http://47.237.2.245:3128', 
+
+    // 9. Canada, Elite, ~2150 ms
+    'http://72.10.160.90:22615',
+
+    // 10. Germany - Frankfurt, Elite, ~2064 ms 
+    'http://8.209.96.245:80'
 ];
+
 const PROXY_RETRY_COUNT = 2; 
 const BREAK_BETWEEN_VIEWS_MS = 60000; 
 
@@ -62,7 +81,8 @@ function sleep(ms) {
 
 async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     let driver;
-    const displayProxy = proxy.split('@').pop() || proxy; 
+    // Public proxy में username/password नहीं होता है, इसलिए displayProxy सीधे proxy होगा
+    const displayProxy = proxy.replace('http://', ''); 
     const logPrefix = `[REQ ${currentViewNumber} | PROXY: ${displayProxy}]`;
 
     // Configure Chrome Options (Render पर ज़रूरी)
@@ -73,7 +93,6 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     options.addArguments('--disable-gpu');
     
     // PROXY CONFIGURATION
-    const authPart = proxy.replace('http://', '').split('@')[0];
     options.addArguments(`--proxy-server=${displayProxy}`); 
     
     // Bot Detection से बचने के लिए
@@ -88,14 +107,9 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
             .setChromeOptions(options)
             .build();
             
-        // 🚨 PROXY AUTHENTICATION STEP (CDP) 🚨
-        const client = await driver.getDevToolsClient();
-        await client.send('Network.setExtraHTTPHeaders', {
-             headers: {
-                 'Proxy-Authorization': `Basic ${Buffer.from(authPart).toString('base64')}`
-             }
-        });
-
+        // 🚨 PROXY AUTHENTICATION CODE हटा दिया गया है 🚨
+        // क्योंकि हम पब्लिक प्रॉक्सी का उपयोग कर रहे हैं (username/password के बिना)।
+        
         // 1. Google पर जाएँ
         await driver.get('https://www.google.com');
         await sleep(2000 + Math.random() * 2000); 
@@ -127,7 +141,8 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
         return true; 
 
     } catch (error) {
-        console.error(`${logPrefix} ❌ ERROR: विज़िट विफल (Proxy/Timeout/Blocked).`);
+        // प्रॉक्सी फ़ेल होने पर स्पष्ट एरर मैसेज
+        console.error(`${logPrefix} ❌ ERROR: विज़िट विफल (Proxy Blocked/Timeout/Failed).`);
         return false; 
     } finally {
         if (driver) {
@@ -194,7 +209,7 @@ app.get('/', (req, res) => {
 });
 
 // ----------------------------------------------------
-// Server Start (यह हिस्सा मिसिंग था)
+// Server Start
 // ----------------------------------------------------
 app.listen(PORT, () => {
   console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
