@@ -7,13 +7,10 @@ const PORT = process.env.PORT || 10000;
 
 // 🚨 CORS CONFIGURATION 🚨
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', // आपकी वेबसाइट का URL
+    origin: 'https://pooreyoutuber.github.io', 
     methods: 'POST', 
     optionsSuccessStatus: 200 
 }));
-// ------------------------------------
-
-// Middleware for parsing JSON requests
 app.use(express.json());
 
 // ****************************************************
@@ -29,39 +26,14 @@ const SEARCH_KEYWORDS = [
     "online utilities" 
 ]; 
 
-// 2. 🌐 NEW PROXY LIST (Elite Public Proxies from latest list)
-// फॉर्मेट: http://ip:port
-// हमने आपके पिछले Authenticated Proxies को बदल दिया है।
+// 2. 🌐 PROXY LIST (अपनी ORIGINAL Authenticated Proxies यहाँ भरें)
+// फॉर्मेट: http://username:password@ip:port
+// आपको इन्हें अपनी प्रोवाइडर लिस्ट से कॉपी करना होगा (जैसे image_d8ad88.png से)
 const PROXY_LIST = [
-    // 1. Canada, Elite, ~435 ms
-    'http://159.203.61.169:8080', 
-
-    // 2. Russia - Seversk, Elite, ~498 ms
-    'http://109.194.34.246:8082', 
-
-    // 3. Kazakhstan - Almaty, Elite, ~824 ms
-    'http://82.115.60.65:80',
-
-    // 4. China - Beijing, Elite, ~2469 ms
-    'http://8.130.39.117:8080', 
-
-    // 5. China - Shenzhen, Elite, ~2479 ms
-    'http://47.121.183.107:9080',
-
-    // 6. China - Guangzhou, Elite, ~2569 ms
-    'http://8.138.125.130:9098',
-
-    // 7. United States, Elite, ~2374 ms
-    'http://47.251.87.199:2083',
-
-    // 8. Singapore, Elite, ~2440 ms
-    'http://47.237.2.245:3128', 
-
-    // 9. Canada, Elite, ~2150 ms
-    'http://72.10.160.90:22615',
-
-    // 10. Germany - Frankfurt, Elite, ~2064 ms 
-    'http://8.209.96.245:80'
+    // EXAMPLE: इसे अपनी असली प्रॉक्सी से बदलें
+    'http://bqctypvz:399xb3kxfd6j@142.111.48.253:7030', // <--- अपनी पहली प्रॉक्सी
+    'http://bqctypvz:399xb3kxfd6j@198.23.239.134:6540', // <--- अपनी दूसरी प्रॉक्सी
+    // अपनी बाकी की 8 प्रॉक्सी यहाँ जोड़ें
 ];
 
 const PROXY_RETRY_COUNT = 2; 
@@ -81,11 +53,11 @@ function sleep(ms) {
 
 async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     let driver;
-    // Public proxy में username/password नहीं होता है, इसलिए displayProxy सीधे proxy होगा
-    const displayProxy = proxy.replace('http://', ''); 
+    // प्रॉक्सी स्ट्रिंग को तोड़ें: 'http://username:password@ip:port'
+    const authPart = proxy.split('//')[1].split('@')[0]; // username:password
+    const displayProxy = proxy.split('@')[1]; // ip:port
     const logPrefix = `[REQ ${currentViewNumber} | PROXY: ${displayProxy}]`;
 
-    // Configure Chrome Options (Render पर ज़रूरी)
     let options = new chrome.Options();
     options.addArguments('--headless'); 
     options.addArguments('--no-sandbox');
@@ -93,7 +65,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     options.addArguments('--disable-gpu');
     
     // PROXY CONFIGURATION
-    options.addArguments(`--proxy-server=${displayProxy}`); 
+    options.addArguments(`--proxy-server=http://${displayProxy}`); 
     
     // Bot Detection से बचने के लिए
     options.addArguments('--disable-blink-features=AutomationControlled');
@@ -107,8 +79,14 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
             .setChromeOptions(options)
             .build();
             
-        // 🚨 PROXY AUTHENTICATION CODE हटा दिया गया है 🚨
-        // क्योंकि हम पब्लिक प्रॉक्सी का उपयोग कर रहे हैं (username/password के बिना)।
+        // 🚨 PROXY AUTHENTICATION STEP (CDP) 🚨
+        // यह कोड Username/Password वाले प्रॉक्सी के लिए ज़रूरी है
+        const client = await driver.getDevToolsClient();
+        await client.send('Network.setExtraHTTPHeaders', {
+             headers: {
+                 'Proxy-Authorization': `Basic ${Buffer.from(authPart).toString('base64')}`
+             }
+        });
         
         // 1. Google पर जाएँ
         await driver.get('https://www.google.com');
@@ -141,8 +119,8 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
         return true; 
 
     } catch (error) {
-        // प्रॉक्सी फ़ेल होने पर स्पष्ट एरर मैसेज
         console.error(`${logPrefix} ❌ ERROR: विज़िट विफल (Proxy Blocked/Timeout/Failed).`);
+        // console.error(error); // Detailed error
         return false; 
     } finally {
         if (driver) {
@@ -151,15 +129,12 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     }
 }
 
-// ----------------------------------------------------
-// 🌐 API ENDPOINT (/boost-url)
-// ----------------------------------------------------
+// ... (Rest of the code remains the same: /boost-url endpoint and server start) ...
 
 app.post('/boost-url', async (req, res) => {
     const targetUrl = req.body.url;
     const viewsToGenerate = parseInt(req.body.views) || 5; 
     
-    // URL Validation
     if (!targetUrl || !targetUrl.startsWith('http')) {
         return res.status(400).json({ status: 'error', message: 'Invalid URL provided. Must start with http or https.' });
     }
@@ -167,10 +142,8 @@ app.post('/boost-url', async (req, res) => {
     requestCount++;
     console.log(`\n--- NEW BOOST REQUEST #${requestCount} for ${targetUrl} (Views: ${viewsToGenerate}) ---`);
 
-    // API तुरंत response दे: इसे background में चलाने के लिए
     res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} in background.` });
 
-    // लॉजिक को background में चलाएं (API कॉल को ब्लॉक होने से रोकता है)
     (async () => {
         let successfulViews = 0;
         
@@ -192,25 +165,18 @@ app.post('/boost-url', async (req, res) => {
                 }
             }
             
-            // प्रॉक्सी रोटेट करें
             proxyIndex = (proxyIndex + 1) % totalProxies;
-            
-            // ब्रेक दें
-            await sleep(BREAK_BETWEEN_VIEWS_MS + Math.random() * 30000); // 1 से 1.5 मिनट
+            await sleep(BREAK_BETWEEN_VIEWS_MS + Math.random() * 30000); 
         }
         
         console.log(`\n--- BOOST REQUEST #${requestCount} FINISHED. Total success: ${successfulViews}/${viewsToGenerate} ---`);
     })(); 
 });
 
-// Health check endpoint
 app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Traffic Booster API is running.' });
 });
 
-// ----------------------------------------------------
-// Server Start
-// ----------------------------------------------------
 app.listen(PORT, () => {
   console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
