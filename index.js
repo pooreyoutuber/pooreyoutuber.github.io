@@ -26,17 +26,14 @@ const SEARCH_KEYWORDS = [
     "online utilities" 
 ]; 
 
-// 2. 🌐 PROXY LIST (अपनी ORIGINAL Authenticated Proxies यहाँ भरें)
-// फॉर्मेट: http://username:password@ip:port
-// आपको इन्हें अपनी प्रोवाइडर लिस्ट से कॉपी करना होगा (जैसे image_d8ad88.png से)
+// 2. 🌐 FINAL ROTATING PROXY ENDPOINT
+// यह एक URL हर बार एक नया IP देगा, जो Google Blocking को पार कर लेगा।
+// फॉर्मेट: http://username:password@domain:port
 const PROXY_LIST = [
-    // EXAMPLE: इसे अपनी असली प्रॉक्सी से बदलें
-    'http://bqctypvz:399xb3kxfd6j@142.111.48.253:7030', // <--- अपनी पहली प्रॉक्सी
-    'http://bqctypvz:399xb3kxfd6j@198.23.239.134:6540', // <--- अपनी दूसरी प्रॉक्सी
-    // अपनी बाकी की 8 प्रॉक्सी यहाँ जोड़ें
+    `http://bqctypvz-rotate:399xb3kxfd6j@p.webshare.io:80` // <--- आपका Rotating Proxy Endpoint
 ];
 
-const PROXY_RETRY_COUNT = 2; 
+const PROXY_RETRY_COUNT = 1; // Rotating Proxy में रिट्राई की ज़रूरत नहीं होती
 const BREAK_BETWEEN_VIEWS_MS = 60000; 
 
 let proxyIndex = 0;
@@ -54,9 +51,10 @@ function sleep(ms) {
 async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     let driver;
     // प्रॉक्सी स्ट्रिंग को तोड़ें: 'http://username:password@ip:port'
+    // .split('@')[0] से 'http://username:password' मिलता है, फिर 'http://' हटाते हैं।
     const authPart = proxy.split('//')[1].split('@')[0]; // username:password
-    const displayProxy = proxy.split('@')[1]; // ip:port
-    const logPrefix = `[REQ ${currentViewNumber} | PROXY: ${displayProxy}]`;
+    const displayProxy = proxy.split('@')[1]; // domain:port
+    const logPrefix = `[REQ ${currentViewNumber} | PROXY: ROTATING / ${displayProxy}]`;
 
     let options = new chrome.Options();
     options.addArguments('--headless'); 
@@ -101,6 +99,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
         await sleep(4000 + Math.random() * 3000); 
 
         // 3. यूजर की वेबसाइट के लिंक पर क्लिक करें
+        // 15 सेकंड तक लिंक मिलने का इंतज़ार करें
         const targetLinkSelector = By.xpath(`//a[contains(@href, "${targetDomain}")]`);
         await driver.wait(until.elementLocated(targetLinkSelector), 15000); 
         let targetLink = await driver.findElement(targetLinkSelector);
@@ -119,7 +118,9 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
         return true; 
 
     } catch (error) {
-        console.error(`${logPrefix} ❌ ERROR: विज़िट विफल (Proxy Blocked/Timeout/Failed).`);
+        // अगर Rotating Proxy फ़ेल होता है, तो 99% संभावना Google ब्लॉकिंग की है, 
+        // लेकिन यह कोशिश करने का सबसे अच्छा तरीका है।
+        console.error(`${logPrefix} ❌ ERROR: विज़िट विफल (Rotating Proxy failed or Google blocked).`);
         // console.error(error); // Detailed error
         return false; 
     } finally {
@@ -129,7 +130,9 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     }
 }
 
-// ... (Rest of the code remains the same: /boost-url endpoint and server start) ...
+// ----------------------------------------------------
+// 🌐 API ENDPOINT (/boost-url)
+// ----------------------------------------------------
 
 app.post('/boost-url', async (req, res) => {
     const targetUrl = req.body.url;
@@ -148,35 +151,36 @@ app.post('/boost-url', async (req, res) => {
         let successfulViews = 0;
         
         for (let i = 0; i < viewsToGenerate; i++) {
-            const currentProxy = PROXY_LIST[proxyIndex];
-            let attemptSuccess = false;
+            const currentProxy = PROXY_LIST[proxyIndex]; // Rotating Proxy के लिए हमेशा Index 0
             
-            for (let attempt = 1; attempt <= PROXY_RETRY_COUNT; attempt++) {
-                console.log(`\n-- View ${i + 1}/${viewsToGenerate} on Proxy Index ${proxyIndex} --`);
-                
-                const success = await simulateUserVisit(targetUrl, requestCount, currentProxy);
-                
-                if (success) {
-                    successfulViews++;
-                    attemptSuccess = true;
-                    break;
-                } else {
-                    console.log("Proxy failed. Trying next proxy or retry.");
-                }
+            // Rotating Proxy का उपयोग करने पर सिर्फ़ एक ही प्रयास करें
+            console.log(`\n-- View ${i + 1}/${viewsToGenerate} on Rotating Proxy --`);
+            
+            const success = await simulateUserVisit(targetUrl, requestCount, currentProxy);
+            
+            if (success) {
+                successfulViews++;
+            } else {
+                console.log("Rotating Proxy failed. Stopping further attempts for this request.");
+                break; // अगर Rotating Proxy भी फ़ेल हो, तो आगे बढ़ना व्यर्थ है।
             }
             
-            proxyIndex = (proxyIndex + 1) % totalProxies;
-            await sleep(BREAK_BETWEEN_VIEWS_MS + Math.random() * 30000); 
+            // ब्रेक दें
+            await sleep(BREAK_BETWEEN_VIEWS_MS + Math.random() * 30000); // 1 से 1.5 मिनट
         }
         
         console.log(`\n--- BOOST REQUEST #${requestCount} FINISHED. Total success: ${successfulViews}/${viewsToGenerate} ---`);
     })(); 
 });
 
+// Health check endpoint
 app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Traffic Booster API is running.' });
 });
 
+// ----------------------------------------------------
+// Server Start
+// ----------------------------------------------------
 app.listen(PORT, () => {
   console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
