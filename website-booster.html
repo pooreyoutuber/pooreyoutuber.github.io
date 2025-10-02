@@ -42,7 +42,7 @@
             margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box; 
+            box-sizing: border-box; /* Ensures padding doesn't affect total width */
         }
         button {
             background-color: #007bff;
@@ -84,11 +84,11 @@
 <body>
     <div class="container">
         <h2>Website Booster Tool ✅</h2>
-        <p>व्यूज जनरेट करने के लिए बटन दबाएँ।</p>
+        <p>अपना URL पेस्ट करें और जनरेट करने के लिए व्यूज की संख्या चुनें।</p>
         
         <form id="boosterForm">
             <label for="url">लक्ष्य URL (Target URL):</label>
-            <input type="text" id="url" value="https://pooreyoutuber.github.io/" readonly required>
+            <input type="text" id="url" value="https://pooreyoutuber.github.io/" required>
             
             <label for="views">व्यूज की संख्या (Views to Generate):</label>
             <input type="number" id="views" value="5" min="1" required>
@@ -101,7 +101,8 @@
     </div>
 
     <script>
-        // 🚨 API URL FIXED है (आपके Render सर्विस से) 🚨
+        // 🚨 महत्वपूर्ण: इस API URL को अपने Render Service URL से बदलें 
+        // आपके पिछले लॉग्स के अनुसार यह URL है:
         const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-url'; 
         
         const form = document.getElementById('boosterForm');
@@ -114,6 +115,11 @@
             // Get values from input fields
             const targetUrl = document.getElementById('url').value;
             const viewsCount = parseInt(document.getElementById('views').value);
+
+            if (!targetUrl || viewsCount < 1) {
+                showMessage('error', 'कृपया एक मान्य URL और व्यूज की संख्या दर्ज करें।');
+                return;
+            }
 
             // Disable button and show processing message
             submitBtn.disabled = true;
@@ -131,11 +137,12 @@
             .then(response => {
                 if (!response.ok) {
                     // This handles HTTP errors like 500, 404, 503 etc.
-                    throw new Error(`HTTP Error: ${response.status}`);
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
                 }
                 return response.json();
             })
             .then(data => {
+                // This handles the JSON response from the API
                 if (data.status === 'processing' || data.status === 'ok') {
                     showMessage('success', `✨ सफलता! API ने रिक्वेस्ट स्वीकार कर ली है। Render लॉग्स में प्रगति देखें।`);
                 } else {
@@ -143,11 +150,11 @@
                 }
             })
             .catch(error => {
-                // This handles network errors
-                showMessage('error', `❌ कनेक्शन एरर: Render API तक पहुंचने में विफल रहा। सुनिश्चित करें कि API URL सही है और Render सर्विस चालू है।`, true);
+                // This handles network errors or errors thrown above
+                showMessage('error', `❌ कनेक्शन एरर: Render API तक पहुंचने में विफल रहा। सुनिश्चित करें कि API URL सही है और Render सर्विस चालू है। (${error.message})`, true);
             })
             .finally(() => {
-                // Re-enable button after 5 seconds
+                // Re-enable button after 5 seconds to prevent rapid clicking
                 setTimeout(() => {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'व्यूज जनरेट करें';
@@ -159,7 +166,7 @@
             messageDiv.className = type;
             messageDiv.textContent = message;
             
-            // Clear message after 10 seconds if not permanent
+            // Clear message after 10 seconds if it's not a permanent error
             if (!permanent) {
                 setTimeout(() => {
                     messageDiv.textContent = '';
