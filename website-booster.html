@@ -1,10 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Traffic Generator - Live Dashboard</title>
-    <meta http-equiv="refresh" content="0; url='https://your-replit-project.your-username.repl.co'">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Booster Tool | College Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Ensures padding doesn't affect total width */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+    </style>
 </head>
 <body>
-    <p>Redirecting to Live Traffic Generator Dashboard...</p>
+    <div class="container">
+        <h2>Website Booster Tool ✅</h2>
+        <p>अपना URL पेस्ट करें और जनरेट करने के लिए व्यूज की संख्या चुनें।</p>
+        
+        <form id="boosterForm">
+            <label for="url">लक्ष्य URL (Target URL):</label>
+            <input type="text" id="url" value="https://pooreyoutuber.github.io/" required>
+            
+            <label for="views">व्यूज की संख्या (Views to Generate):</label>
+            <input type="number" id="views" value="5" min="1" required>
+            
+            <button type="submit" id="submitBtn">व्यूज जनरेट करें</button>
+        </form>
+        
+        <div id="message"></div>
+        
+    </div>
+
+    <script>
+        // 🚨 महत्वपूर्ण: इस API URL को अपने Render Service URL से बदलें 
+        // आपके पिछले लॉग्स के अनुसार यह URL है:
+        const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-url'; 
+        
+        const form = document.getElementById('boosterForm');
+        const messageDiv = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Get values from input fields
+            const targetUrl = document.getElementById('url').value;
+            const viewsCount = parseInt(document.getElementById('views').value);
+
+            if (!targetUrl || viewsCount < 1) {
+                showMessage('error', 'कृपया एक मान्य URL और व्यूज की संख्या दर्ज करें।');
+                return;
+            }
+
+            // Disable button and show processing message
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'प्रोसेसिंग शुरू हो रही है...';
+            showMessage('info', `✅ ${viewsCount} व्यूज के लिए रिक्वेस्ट भेजी जा रही है... Render Logs चेक करें।`);
+
+            // Send POST request to the Render API
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: targetUrl, views: viewsCount })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // This handles HTTP errors like 500, 404, 503 etc.
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // This handles the JSON response from the API
+                if (data.status === 'processing' || data.status === 'ok') {
+                    showMessage('success', `✨ सफलता! API ने रिक्वेस्ट स्वीकार कर ली है। Render लॉग्स में प्रगति देखें।`);
+                } else {
+                    showMessage('error', `❌ API एरर: ${data.message || 'अज्ञात त्रुटि। Render Logs चेक करें।'}`, true);
+                }
+            })
+            .catch(error => {
+                // This handles network errors or errors thrown above
+                showMessage('error', `❌ कनेक्शन एरर: Render API तक पहुंचने में विफल रहा। सुनिश्चित करें कि API URL सही है और Render सर्विस चालू है। (${error.message})`, true);
+            })
+            .finally(() => {
+                // Re-enable button after 5 seconds to prevent rapid clicking
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'व्यूज जनरेट करें';
+                }, 5000);
+            });
+        });
+
+        function showMessage(type, message, permanent = false) {
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            
+            // Clear message after 10 seconds if it's not a permanent error
+            if (!permanent) {
+                setTimeout(() => {
+                    messageDiv.textContent = '';
+                    messageDiv.className = '';
+                }, 10000);
+            }
+        }
+    </script>
 </body>
 </html>
