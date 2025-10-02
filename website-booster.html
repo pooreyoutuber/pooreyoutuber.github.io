@@ -73,11 +73,11 @@
 
     <div class="container">
         <h1>Website Booster Tool 📈</h1>
-        <p>अपना URL पेस्ट करें और जेनरेट करने के लिए व्यूज की संख्या चुनें।</p>
+        <p>अपना URL पेस्ट करें और जेनरेट करने के लिए व्यूज की संख्या चुनें। **(अधिकतम 250 व्यूज)**</p>
 
         <div id="booster-tool">
             <input type="text" id="target-url" placeholder="अपनी वेबसाइट का URL (https://...) पेस्ट करें" required>
-            <input type="number" id="target-views" value="5" min="1" max="10" placeholder="कितने व्यूज चाहिए (अधिकतम 10)" required>
+            <input type="number" id="target-views" value="10" min="1" max="250" placeholder="कितने व्यूज चाहिए (अधिकतम 250)" required>
             <button onclick="startBoost()">व्यूज जेनरेट करें</button>
             <p id="status-message" style="margin-top: 25px; font-weight: bold;"></p>
         </div>
@@ -85,7 +85,7 @@
 
     <script>
         // 🚀 Render Web Service का Final URL
-        // यह URL आपके पिछले लॉग (https://pooreyoutuber-github-io.onrender.com) से लिया गया है।
+        // सुनिश्चित करें कि यह URL आपके Live Render API का है।
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-url'; 
 
         async function startBoost() {
@@ -102,14 +102,15 @@
                 statusMessage.textContent = '❌ कृपया एक वैध URL (https://) दर्ज करें।';
                 return;
             }
-            if (views < 1 || views > 10) {
+            // MAX VIEWS 250
+            if (views < 1 || views > 250) {
                  statusMessage.style.color = 'red';
-                 statusMessage.textContent = '❌ व्यूज 1 और 10 के बीच होने चाहिए।';
+                 statusMessage.textContent = '❌ व्यूज 1 और 250 के बीच होने चाहिए।';
                  return;
             }
 
             statusMessage.style.color = 'orange';
-            statusMessage.textContent = `⏳ ${views} व्यूज शुरू हो रहे हैं... कृपया 5 मिनट तक प्रतीक्षा करें।`;
+            statusMessage.textContent = `⏳ ${views} व्यूज शुरू हो रहे हैं... कृपया Render Logs में प्रोग्रेस देखें।`;
 
             try {
                 const response = await fetch(RENDER_API_URL, {
@@ -122,10 +123,11 @@
                     body: JSON.stringify({ url: targetUrl, views: views })
                 });
 
-                // चेक करें कि HTTP response सफल था (200-299)
+                // अगर HTTP response 4xx या 5xx है
                 if (!response.ok) {
-                    // अगर Render API CORS या किसी और कारण से फ़ेल हुआ
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                     // ❌ एरर: Render API response ठीक नहीं था (जैसे 400 Bad Request)
+                     const errorData = await response.json().catch(() => ({ message: 'API ने अनपेक्षित एरर दिया।' }));
+                     throw new Error(`Render API Error: ${errorData.message || response.statusText}`);
                 }
 
                 const data = await response.json();
@@ -135,18 +137,19 @@
                     statusMessage.textContent = `✅ रिक्वेस्ट सफल! ${views} व्यूज बैकग्राउंड में जेनरेट हो रहे हैं।`;
                 } else {
                     statusMessage.style.color = 'red';
-                    statusMessage.textContent = `❌ एरर: ${data.message || 'API से कोई प्रतिक्रिया नहीं मिली।'}`;
+                    statusMessage.textContent = `❌ API एरर: ${data.message || 'API से कोई प्रतिक्रिया नहीं मिली।'}`;
                 }
 
             } catch (error) {
                 // यह ब्लॉक कनेक्शन या CORS एरर को पकड़ता है
                 statusMessage.style.color = 'red';
-                statusMessage.textContent = '❌ कनेक्शन एरर: Render API तक पहुंचने में विफल रहा। (CORS या URL जाँचें)';
+                // ❌ सरल एरर मैसेज
+                statusMessage.textContent = '❌ कनेक्शन फेल! Render API URL या CORS सेटिंग्स की जाँच करें।'; 
                 console.error('Fetch error:', error);
             }
         }
     </script>
     <footer>
-        </footer>
+    </footer>
 </body>
 </html>
