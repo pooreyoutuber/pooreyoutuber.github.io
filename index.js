@@ -1,10 +1,20 @@
 const { Builder, By, Key, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const express = require('express');
+const cors = require('cors'); // CORS लाइब्रेरी को इम्पोर्ट करें
 const app = express();
-const PORT = process.env.PORT || 10000; // Render uses a dynamic PORT, setting 10000 as a fallback.
+const PORT = process.env.PORT || 10000; 
 
-// Middleware for parsing JSON requests from your GitHub site
+// 🚨 CORS CONFIGURATION (कनेक्शन एरर को ठीक करने के लिए ज़रूरी) 🚨
+// यह केवल आपकी GitHub Pages वेबसाइट को API कॉल करने की अनुमति देता है।
+app.use(cors({
+    origin: 'https://pooreyoutuber.github.io', 
+    methods: 'POST', // हम केवल POST रिक्वेस्ट स्वीकार करते हैं
+    optionsSuccessStatus: 200 
+}));
+// ------------------------------------
+
+// Middleware for parsing JSON requests (इसे CORS के नीचे रखें)
 app.use(express.json());
 
 // ****************************************************
@@ -17,11 +27,11 @@ const SEARCH_KEYWORDS = [
     "youtube project site",
     "traffic booster tool",
     "web traffic generation",
-    "best online tools" 
+    "online utilities" 
 ]; 
 
-// 2. 🌐 LATEST AUTHENTICATED PROXY LIST 
-// Format: http://username:password@ip:port
+// 2. 🌐 AUTHENTICATED PROXY LIST 
+// फॉर्मेट: http://username:password@ip:port
 const PROXY_LIST = [
     'http://bqcftypvz:399xb3kxxqv6i@142.111.48.253:7030', 
     'http://bqcftypvz:399xb3kxxqv6i@198.23.239.134:6540', 
@@ -34,7 +44,7 @@ const PROXY_LIST = [
     'http://bqcftypvz:399xb3kxxqv6i@142.111.67.146:5611', 
     'http://bqcftypvz:399xb3kxxqv6i@142.147.128.93:6593', 
 ];
-const PROXY_RETRY_COUNT = 2; // कोशिशों को कम रखें ताकि जल्दी से रोटेट हो
+const PROXY_RETRY_COUNT = 2; 
 const BREAK_BETWEEN_VIEWS_MS = 60000; // 1 मिनट का ब्रेक (60 सेकंड)
 
 let proxyIndex = 0;
@@ -51,7 +61,8 @@ function sleep(ms) {
 
 async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     let driver;
-    const displayProxy = proxy.split('@').pop() || proxy;
+    // प्रॉक्सी में से Auth part हटाकर display करना
+    const displayProxy = proxy.split('@').pop() || proxy; 
     const logPrefix = `[REQ ${currentViewNumber} | PROXY: ${displayProxy}]`;
 
     // Configure Chrome Options (Render पर ज़रूरी)
@@ -144,8 +155,7 @@ app.post('/boost-url', async (req, res) => {
     // API तुरंत response दे: इसे background में चलाने के लिए
     res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} in background.` });
 
-    // 💡 ध्यान दें: हम लॉजिक को एक अलग असिंक्रोनस फ़ंक्शन में चला रहे हैं 
-    // ताकि API कॉल ब्लॉक न हो।
+    // लॉजिक को background में चलाएं
     (async () => {
         let successfulViews = 0;
         
@@ -178,12 +188,14 @@ app.post('/boost-url', async (req, res) => {
     })(); 
 });
 
-// Health check endpoint (Render इसे सर्विस की स्थिति जांचने के लिए उपयोग करेगा)
+// Health check endpoint
 app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Traffic Booster API is running.' });
 });
 
+// ----------------------------------------------------
 // Server Start
+// ----------------------------------------------------
 app.listen(PORT, () => {
   console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
