@@ -1,212 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 GitHub Pages Simulator (Stable Geo)</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Booster Tool - PooreYouTuber</title>
     <style>
-        /* CSS Styles for Clean UI */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #e6f0ff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 90%; max-width: 480px; background: #ffffff; padding: 25px; border-radius: 15px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25); }
-        h2 { color: #004085; border-bottom: 3px solid #004085; padding-bottom: 8px; margin-top: 0; text-align: center; font-size: 1.8em; }
-        label { display: block; margin-top: 15px; font-weight: 700; color: #333; font-size: 0.9em; }
-        input[type="url"], input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #a3b1c6; border-radius: 8px; box-sizing: border-box; font-size: 0.9em; }
-        button { background-color: #28a745; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 25px; font-size: 1.1em; font-weight: bold; transition: background-color 0.3s; }
-        button:disabled { background-color: #6c757d; cursor: not-allowed; }
-        #output { margin-top: 15px; padding: 10px; border: 1px solid #cce5ff; background-color: #e7f4ff; border-radius: 8px; max-height: 200px; overflow-y: scroll; font-size: 0.8em; }
-        #status { padding: 10px; background-color: #007bff; border-radius: 8px; font-weight: bold; color: white; margin-top: 15px; text-align: center; font-size: 0.95em; }
-        .note { font-size: 0.8em; color: #005a5a; margin-top: 10px; padding: 10px; border: 1px solid #b3e0e0; background-color: #e0ffff; border-radius: 6px; }
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
+        header { background: #007bff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .home-link { color: white; text-decoration: none; font-size: 24px; font-weight: bold; }
+        .container { max-width: 700px; margin: auto; padding: 30px; text-align: center; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 50px; }
+        /* Tool-specific styles */
+        #booster-tool input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box; /* Padding included in width */
+        }
+        #booster-tool button {
+            background: #28a745; /* Green button */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        #booster-tool button:hover {
+            background: #218838;
+        }
+        #status-message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <div class="logo-container">
+            <a href="index.html" class="home-link">PooreYouTuber Tools</a>
+        </div>
+    </header>
 
-<div class="container">
-    <h2>🎯 GA4 GitHub सिम्युलेशन</h2>
+    <div class="container">
+        <h1>Website Booster Tool 📈</h1>
+        <p>अपना URL पेस्ट करें और जेनरेट करने के लिए व्यूज की संख्या चुनें।</p>
 
-    <div class="note">
-        **FIX:** यह कोड रियलटाइम/मुख्य रिपोर्ट के लिए ऑप्टिमाइज़ किया गया है। अपने 1. Chrome ब्राउज़र में 'Allow CORS: Access-Control-Allow-Origin' एक्सटेंशन इंस्टॉल करें।
-
-एक्सटेंशन इंस्टॉल करने के बाद, ब्राउज़र के ऊपर दाहिनी ओर दिए गए एक्सटेंशन आइकन पर क्लिक करके उसे ON करें (आमतौर पर वह नीला या हरा हो जाएगा) 2.परिणाम: CORS एक्सटेंशन के कारण, ब्राउज़र अब Google के सर्वर को डेटा भेजने की अनुमति देगा, और आपको CRITICAL ERROR के बजाय SUCCESS (Check DebugView) मैसेज दिखाई देगा।
+        <div id="booster-tool">
+            <input type="text" id="target-url" placeholder="अपनी वेबसाइट का URL (https://...) पेस्ट करें" required>
+            <input type="number" id="target-views" value="5" min="1" max="10" placeholder="कितने व्यूज चाहिए (अधिकतम 10)" required>
+            <button onclick="startBoost()">व्यूज जेनरेट करें</button>
+            <p id="status-message" style="margin-top: 25px; font-weight: bold;"></p>
+        </div>
     </div>
 
-    <div class="input-group">
-        <label for="measurementIdInput">GA4 ID (G-XXXXXXX):</label>
-        <input type="text" id="measurementIdInput" placeholder="G-XXXXXXXXXX (Fill Here)" required>
-    </div>
-    
-    <div class="input-group">
-        <label for="apiSecretInput">API Secret:</label>
-        <input type="text" id="apiSecretInput" placeholder="आपका_API_सीक्रेट (Fill Here)" required>
-    </div>
+    <script>
+        // 🚨 स्टेप 2 के बाद आपको यह URL बदलना होगा 🚨
+        // Render पर Web Service लाइव होने के बाद, उसका URL यहाँ डालें।
+        const RENDER_API_URL = 'https://YOUR-RENDER-SERVICE-NAME.onrender.com/boost-url'; 
 
-    <div class="input-group">
-        <label for="urlInput">वेबसाइट URL (https://):</label>
-        <input type="url" id="urlInput" placeholder="https://your-project.com" required>
-    </div>
-    
-    <div id="status">Status: Ready | Target: 250 Views per Cycle</div>
+        async function startBoost() {
+            const urlInput = document.getElementById('target-url');
+            const viewsInput = document.getElementById('target-views');
+            const statusMessage = document.getElementById('status-message');
+            
+            const targetUrl = urlInput.value.trim();
+            const views = parseInt(viewsInput.value);
 
-    <button id="startButton" onclick="startSimulation()">Start GitHub Stable Simulation</button>
-    
-    <label>आउटपुट लॉग:</label>
-    <div id="output"></div>
-</div>
-
-<script>
-    let totalViews = 250; 
-    let successfulViews = 0;
-    let viewCount = 0;
-    let isRunning = false;
-    let simulationTimeout;
-    
-    // धीमा और स्थिर ट्रैफ़िक (2-10 सेकंड)
-    const MIN_DELAY = 2000; 
-    const MAX_DELAY = 10000; 
-    const RESTART_DELAY = 10 * 60 * 1000; // 10 मिनट
-    
-    // भौगोलिक विविधता (Geo-Diversity)
-    const geoLocations = [
-        { country: "United States", region: "California" },
-        { country: "China", region: "Guangdong" },
-        { country: "India", region: "Maharashtra" },
-        { country: "Germany", region: "Bavaria" },
-        { country: "Brazil", region: "Sao Paulo" },
-        { country: "Japan", region: "Tokyo" },
-        { country: "United Kingdom", region: "England" },
-        { country: "Canada", region: "Ontario" }
-    ];
-
-    function getRandomDelay() { return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; }
-    function getRandomGeo() { return geoLocations[Math.floor(Math.random() * geoLocations.length)]; }
-    
-    const outputDiv = document.getElementById('output');
-    const statusDiv = document.getElementById('status');
-    const startButton = document.getElementById('startButton');
-    const measurementIdInput = document.getElementById('measurementIdInput');
-    const apiSecretInput = document.getElementById('apiSecretInput');
-
-    function log(message, type = 'info') {
-        const p = document.createElement('p');
-        p.innerHTML = message;
-        if (type === 'error') p.style.color = '#dc3545';
-        if (type === 'success') p.style.color = '#28a745';
-        outputDiv.prepend(p);
-    }
-    
-    async function sendData(gaEndpointUrl, payload, currentViewId, eventName) {
-        try {
-            const response = await fetch(gaEndpointUrl, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: { 
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (response.status === 204) { 
-                successfulViews++;
-                const geoInfo = payload.user_properties.geo.value;
-                log(`View ${currentViewId}: <span style="font-weight:bold;">SUCCESS (Check Realtime)</span> | Location Hint: ${geoInfo}`, 'success');
-            } else {
-                log(`View ${currentViewId}: <span style="font-weight:bold;">FAILURE</span> | Status: ${response.status}.`, 'error');
+            // फ्रंटएंड URL वैलिडेशन
+            if (!targetUrl || !targetUrl.startsWith('http')) {
+                statusMessage.style.color = 'red';
+                statusMessage.textContent = '❌ कृपया एक वैध URL (https://) दर्ज करें।';
+                return;
             }
-        } catch (error) {
-            // यह CORS/Connection Failed एरर है
-            log(`View ${currentViewId}: <span style="font-weight:bold;">CRITICAL ERROR (CORS/Connection)</span> | Failed to fetch. **Try Node.js!**`, 'error');
-        } finally {
-            statusDiv.innerHTML = `Running... Attempts: <b>${currentViewId}</b> of <b>${totalViews}</b> | Successful: ${successfulViews}`;
+            if (views < 1 || views > 10) {
+                 statusMessage.style.color = 'red';
+                 statusMessage.textContent = '❌ व्यूज 1 और 10 के बीच होने चाहिए।';
+                 return;
+            }
+
+            statusMessage.style.color = 'orange';
+            statusMessage.textContent = `⏳ ${views} व्यूज शुरू हो रहे हैं... कृपया 5 मिनट तक प्रतीक्षा करें।`;
+
+            try {
+                const response = await fetch(RENDER_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: targetUrl, views: views })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'processing') {
+                    statusMessage.style.color = 'green';
+                    statusMessage.textContent = `✅ रिक्वेस्ट सफल! ${views} व्यूज बैकग्राउंड में जेनरेट हो रहे हैं।`;
+                } else {
+                    statusMessage.style.color = 'red';
+                    statusMessage.textContent = `❌ एरर: ${data.message || 'API से कोई प्रतिक्रिया नहीं मिली।'}`;
+                }
+
+            } catch (error) {
+                statusMessage.style.color = 'red';
+                statusMessage.textContent = '❌ कनेक्शन एरर: Render API तक पहुंचने में विफल रहा। सुनिश्चित करें कि API URL सही है।';
+                console.error('Fetch error:', error);
+            }
         }
-    }
-
-    function generateView(url, measurementId, apiSecret) {
-        if (!isRunning || viewCount >= totalViews) {
-            finishSimulation(url, measurementId, apiSecret);
-            return;
-        }
-
-        viewCount++;
-        const currentViewId = viewCount;
-        
-        const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-        const SESSION_ID = Date.now(); 
-        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`;
-
-        const geo = getRandomGeo();
-        const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-
-        const commonUserProperties = {
-            geo: { value: `${geo.country}, ${geo.region}` }
-        };
-
-        // 1. Session Start Event
-        const sessionStartPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] };
-        setTimeout(() => { sendData(gaEndpoint, sessionStartPayload, currentViewId, 'session_start'); }, 100); 
-       
-        // 2. Page View Event (Realtime/Reports में जाएगा)
-        const pageViewPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'page_view', params: { page_location: url, page_title: `PROJECT_GITHUB_${currentViewId}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }] };
-        setTimeout(() => { sendData(gaEndpoint, pageViewPayload, currentViewId, 'page_view'); }, 500); 
-
-        // 3. User Engagement Event
-        const engagementPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] };
-        setTimeout(() => {
-            sendData(gaEndpoint, engagementPayload, currentViewId, 'user_engagement');
-            scheduleNextView(url, measurementId, apiSecret); 
-        }, 1000); 
-    }
-
-    function scheduleNextView(url, measurementId, apiSecret) {
-        if (viewCount < totalViews && isRunning) {
-            const delay = getRandomDelay();
-            simulationTimeout = setTimeout(() => generateView(url, measurementId, apiSecret), delay);
-        } else {
-            finishSimulation(url, measurementId, apiSecret);
-        }
-    }
-
-    function startSimulation() {
-        const url = document.getElementById('urlInput').value.trim();
-        const measurementId = measurementIdInput.value.trim();
-        const apiSecret = apiSecretInput.value.trim();
-
-        if (!url.startsWith('http')) { alert("कृपया URL 'https://' या 'http://' से शुरू करें।"); return; }
-        if (!measurementId.startsWith('G-') || apiSecret.length < 5) { alert("कृपया सही GA4 ID और API Secret दर्ज करें।"); return; }
-        if (isRunning) return;
-
-        isRunning = true;
-        startButton.disabled = true;
-        startButton.textContent = "Simulation Running... (DO NOT CLOSE TAB)";
-        
-        successfulViews = 0;
-        viewCount = 0;
-        outputDiv.innerHTML = ''; 
-        
-        log(`🚀 GitHub Simulation Started. Target: ${totalViews} Views.`, 'info');
-        statusDiv.style.backgroundColor = '#007bff';
-        statusDiv.innerHTML = "Starting requests...";
-
-        generateView(url, measurementId, apiSecret);
-    }
-
-    function finishSimulation(url, measurementId, apiSecret) {
-        clearTimeout(simulationTimeout);
-        if (!isRunning) return;
-        
-        log("<hr>", 'info');
-        log(`✅ **Cycle Complete!** Total Success: <b>${successfulViews}</b>`, 'info');
-        
-        const nextCycleTime = new Date(Date.now() + RESTART_DELAY).toLocaleTimeString();
-        
-        log(`💤 Resting for 10 minutes. Restarting at approx. ${nextCycleTime}`, 'info');
-
-        statusDiv.style.backgroundColor = '#ffc107'; 
-        statusDiv.innerHTML = `RESTING. Next cycle starts at ${nextCycleTime}. Keep tab open!`;
-        
-        simulationTimeout = setTimeout(function() {
-            isRunning = false; 
-            startSimulation(url, measurementId, apiSecret); 
-        }, RESTART_DELAY); 
-    }
-</script>
-
+    </script>
+    <footer>
+        </footer>
 </body>
 </html>
