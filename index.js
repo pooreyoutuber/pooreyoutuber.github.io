@@ -191,3 +191,11 @@ app.post('/boost-url', async (req, res) => {
 // Health check endpoint
 app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Traffic Booster API is running.' });
+});
+
+// ----------------------------------------------------
+// Server Start (यह हिस्सा मिसिंग था)
+// ----------------------------------------------------
+app.listen(PORT, () => {
+  console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
+});
