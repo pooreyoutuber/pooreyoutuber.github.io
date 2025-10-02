@@ -6,7 +6,18 @@ const app = express();
 const PORT = process.env.PORT || 10000; 
 
 // ****************************************************
-// 🔑 CONFIGURATION: Free Proxy Test
+// 🚨 FIX: Body Parser Middleware MUST be here before any routes
+// ****************************************************
+// CORS configuration to allow your GitHub frontend to call this API
+app.use(cors({
+    origin: 'https://pooreyoutuber.github.io', 
+    methods: 'POST', 
+    optionsSuccessStatus: 200 
+}));
+app.use(express.json()); // ⬅️ THIS LINE FIXES THE 'Cannot read properties of undefined' ERROR
+
+// ****************************************************
+// 🔑 CONFIGURATION: Target and Settings
 // ****************************************************
 const TARGET_URL = 'https://pooreyoutuber.github.io/';
 const SEARCH_KEYWORDS = [
@@ -52,8 +63,6 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     try {
         console.log(`${logPrefix} 🚀 ब्राउज़र शुरू हो रहा है. Target: ${targetUrl}`);
         
-        // 🚨 MODIFICATION HERE: Use the path to the ChromeDriver executable if Render requires it 🚨
-        // Though Render usually handles this, adding the service builder can sometimes resolve issues.
         driver = await new Builder()
             .forBrowser('chrome')
             .setChromeOptions(options)
@@ -61,10 +70,9 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
             
         // 1. Go to Google
         await driver.get('https://www.google.com');
-        // ... (rest of the logic: search, click, sleep) ...
         await sleep(2000 + Math.random() * 2000); 
 
-        // 2. Search Random Keyword (This is key for Search Console results)
+        // 2. Search Random Keyword
         const targetDomain = new URL(targetUrl).hostname;
         const currentSearchKeyword = SEARCH_KEYWORDS[Math.floor(Math.random() * SEARCH_KEYWORDS.length)] + " " + targetDomain.replace('www.', '');
         console.log(`${logPrefix} 🔎 Google पर सर्च कर रहा है: "${currentSearchKeyword}"`);
@@ -72,7 +80,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
         await searchBox.sendKeys(currentSearchKeyword, Key.RETURN);
         await sleep(4000 + Math.random() * 3000); 
 
-        // 3. Click the Link (Locate the link containing your domain)
+        // 3. Click the Link 
         const targetLinkSelector = By.xpath(`//a[contains(@href, "${targetDomain}")]`);
         await driver.wait(until.elementLocated(targetLinkSelector), 15000); 
         let targetLink = await driver.findElement(targetLinkSelector);
@@ -92,7 +100,6 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
 
     } catch (error) {
         console.error(`${logPrefix} ❌ ERROR: विज़िट विफल (Proxy Dead/Blocked).`);
-        // console.error(error); // Uncomment for deep debugging
         return false; 
     } finally {
         if (driver) {
@@ -106,6 +113,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
 // ----------------------------------------------------
 
 app.post('/boost-url', async (req, res) => {
+    // 🚨 FIX IS NOW COMPLETE: req.body can be read safely
     const viewsToGenerate = parseInt(req.body.views) || 5; 
     
     if (PROXY_LIST.length === 0) {
@@ -132,8 +140,6 @@ app.post('/boost-url', async (req, res) => {
 // ----------------------------------------------------
 // Server Start and Health Check
 // ----------------------------------------------------
-app.use(cors({ origin: 'https://pooreyoutuber.github.io', methods: 'POST', optionsSuccessStatus: 200 }));
-app.use(express.json());
 
 app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Traffic Booster API is running. Use /boost-url POST.' });
@@ -142,3 +148,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
+        
