@@ -1,117 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>YouTube Video Info Checker</title>
-  <script src="https://apis.google.com/js/api.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f9f9f9; }
-    input[type="text"] { width: 500px; padding: 10px; margin-top: 10px; }
-    button { padding: 10px 20px; margin-top: 10px; }
-    #output { margin-top: 30px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .section { margin-bottom: 15px; }
-    .comment { border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YouTube Video Info Tool</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h2>YouTube Video Info Checker</h2>
+  <div class="container">
+    <h1>YouTube Video Metadata Tool</h1>
+    <input type="text" id="videoUrl" placeholder="Paste YouTube video link here..." />
+    <button onclick="getVideoInfo()">Fetch Info</button>
 
-  <label for="videoUrl">Enter YouTube Video URL:</label><br>
-  <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=VIDEO_ID">
-  <br>
-  <button id="btnFetch">Fetch Video Info</button>
+    <div id="result" class="card hidden">
+      <img id="thumbnail" src="" alt="Thumbnail" />
+      <h2 id="title"></h2>
+      <p><strong>Channel:</strong> <span id="channelTitle"></span></p>
+      <p><strong>Published:</strong> <span id="publishedAt"></span></p>
+      <p><strong>Views:</strong> <span id="views"></span></p>
+      <p><strong>Likes:</strong> <span id="likes"></span></p>
+      <p><strong>Description:</strong></p>
+      <p id="description"></p>
+    </div>
+  </div>
 
-  <div id="output"></div>
-
-  <script>
-    const API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo";  // ← आपकी API Key
-
-    document.getElementById("btnFetch").addEventListener("click", () => {
-      const url = document.getElementById("videoUrl").value.trim();
-      const videoId = extractVideoId(url);
-      if (!videoId) {
-        alert("Invalid YouTube video URL.");
-        return;
-      }
-      fetchVideoInfo(videoId);
-    });
-
-    function extractVideoId(url) {
-      const match = url.match(/(?:v=|\.be\/)([a-zA-Z0-9_-]{11})/);
-      return match ? match[1] : null;
-    }
-
-    function fetchVideoInfo(videoId) {
-      gapi.load("client", () => {
-        gapi.client.init({ apiKey: API_KEY }).then(() => {
-          return gapi.client.youtube.videos.list({
-            part: "snippet,statistics",
-            id: videoId
-          });
-        }).then(response => {
-          const video = response.result.items[0];
-          if (!video) {
-            showOutput("Video not found.");
-            return;
-          }
-          displayVideoInfo(video);
-          fetchComments(videoId);
-        }).catch(err => {
-          console.error("Error:", err);
-          showOutput("Failed to fetch video data.");
-        });
-      });
-    }
-
-    function displayVideoInfo(video) {
-      const snippet = video.snippet;
-      const stats = video.statistics;
-
-      let html = "";
-      html += `<div class="section"><strong>Title:</strong> ${snippet.title}</div>`;
-      html += `<div class="section"><strong>Description:</strong><br> ${snippet.description.replace(/\n/g, "<br>")}</div>`;
-      html += `<div class="section"><strong>Channel:</strong> ${snippet.channelTitle}</div>`;
-      html += `<div class="section"><strong>Published On:</strong> ${new Date(snippet.publishedAt).toLocaleString()}</div>`;
-      html += `<div class="section"><strong>Tags:</strong> ${snippet.tags ? snippet.tags.join(", ") : "None"}</div>`;
-      html += `<div class="section"><strong>Views:</strong> ${stats.viewCount}</div>`;
-      html += `<div class="section"><strong>Likes:</strong> ${stats.likeCount || "Hidden"}</div>`;
-      html += `<div class="section"><strong>Comments:</strong> ${stats.commentCount || "Unavailable"}</div>`;
-
-      document.getElementById("output").innerHTML = html;
-    }
-
-    function fetchComments(videoId) {
-      gapi.client.youtube.commentThreads.list({
-        part: "snippet",
-        videoId: videoId,
-        maxResults: 5,
-        textFormat: "plainText"
-      }).then(response => {
-        const items = response.result.items;
-        if (!items || items.length === 0) {
-          document.getElementById("output").innerHTML += "<div>No comments found or comments are disabled.</div>";
-          return;
-        }
-
-        let html = "<div class='section'><strong>Top 5 Comments:</strong></div>";
-        items.forEach(item => {
-          const c = item.snippet.topLevelComment.snippet;
-          html += `
-            <div class="comment">
-              <strong>${c.authorDisplayName}</strong>:<br>
-              ${c.textDisplay}<br>
-              <small>👍 ${c.likeCount} | 🕒 ${new Date(c.publishedAt).toLocaleString()}</small>
-            </div>`;
-        });
-        document.getElementById("output").innerHTML += html;
-      }).catch(err => {
-        console.warn("Comments fetch error:", err);
-      });
-    }
-
-    function showOutput(html) {
-      document.getElementById("output").innerHTML = html;
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
