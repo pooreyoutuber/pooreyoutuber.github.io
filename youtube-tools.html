@@ -38,7 +38,7 @@
     /* Input and Button Group Styling */
     .input-group {
         display: flex;
-        margin-bottom: 25px; /* Space between input and explanation */
+        margin-bottom: 25px; 
     }
     input[type="text"] {
         flex-grow: 1;
@@ -63,14 +63,14 @@
     button.generate-btn:hover {
         background: #0056b3;
     }
-    /* Utility Explanation Section (Now below the input/button) */
+    /* Utility Explanation Section */
     .utility-explanation {
         text-align: left;
         margin-bottom: 30px;
         padding: 20px;
-        background-color: #f8f9fa; /* Lighter background for a cleaner look */
+        background-color: #f8f9fa; 
         border-radius: 10px;
-        border: 1px solid #e9ecef; /* Subtle border */
+        border: 1px solid #e9ecef; 
     }
     .utility-explanation h2 {
         color: #007bff;
@@ -92,8 +92,8 @@
     /* Results Styling */
     .result {
         margin-top: 20px;
-        border-top: 2px solid #eee;
         padding-top: 20px;
+        /* Note: No border-top here, as it's handled by JS positioning */
     }
     .video-card {
         background: #ffffff;
@@ -143,18 +143,20 @@
 
 <div class="container">
     
-    <div class="input-group">
+    <div id="input-section" class="input-group">
         <input type="text" id="videoTitle" placeholder="Enter Video Title (e.g., 'Easy Chicken Curry Recipe in 20 Mins')">
         <button class="generate-btn" onclick="generate()">Generate SEO Content</button>
     </div>
 
-    <div class="utility-explanation">
+    <div class="result" id="output"></div>
+    
+    <div id="explanation-section" class="utility-explanation">
         <h2>🚀 Unlock Your Video's Potential: How This Tool Helps You Grow</h2>
         
         <p>Welcome, Creator! This **YouTube Content Generator** is designed to give you a powerful head-start in video publishing. We know that writing effective descriptions and brainstorming tags can take hours. This tool simplifies that entire process by providing you with multiple, well-structured metadata options instantly. Our goal is simple: to help you focus more on **creating great content** and less on the repetitive task of SEO writing.</p>
 
         <h3>Why You Should Use Our Generator</h3>
-        <p>Your video's **description** and **tags** are the primary way YouTube's algorithm understands your content and connects it with the right audience. Using this tool ensures your metadata is:**</p>
+        <p>Your video's **description** and **tags** are the primary way YouTube's algorithm understands your content and connects it with the right audience. Using this tool ensures your metadata is:</p>
         
         <ul>
             <li>**Search Engine Ready:** Each generated option integrates potential keywords naturally, increasing the chances of your video appearing in YouTube and Google search results.</li>
@@ -169,28 +171,39 @@
 
         <p><strong>Tag Strategy:</strong> The suggested tags cover a wide spectrum, from the main topic of your title to broader, related categories. This strategy helps your video show up in the "Suggested Videos" feed—a major source of organic traffic. **Remember:** These are suggestions to help you start; always review and adjust them to perfectly match your specific video and channel brand.</p>
         
-        <p><strong>A Quick Note:</strong> This generator provides suggestions based on common SEO patterns. **We do not collect any personal data, nor do we access external APIs for live trends.** The generated content is for your convenience and is intended to be a helpful starting point. Your success ultimately depends on the quality of your video and your unique connection with your audience. We're here to make the technical part easier!</p>
+        <p><strong>A Quick Note:</strong> This generator provides suggestions based on common SEO patterns. The generated content is for your convenience and is intended to be a helpful starting point. Your success ultimately depends on the quality of your video and your unique connection with your audience. We're here to make the technical part easier!</p>
         
-        <p><strong>Ready to start?</strong> Enter your video title above and generate your perfect SEO description and tags now!</p>
+        <p><strong>Ready to start?</strong> Enter your video title above and click **"Generate"** to receive multiple, SEO-ready content options now!</p>
     </div>
-
-    <div class="result" id="output"></div>
 </div>
 
 <script>
 function generate() {
     const title = document.getElementById("videoTitle").value.trim();
     const output = document.getElementById("output");
+    const container = document.querySelector('.container');
+    const explanationSection = document.getElementById('explanation-section');
+    const inputSection = document.getElementById('input-section');
     output.innerHTML = "";
 
     if (!title) {
         output.innerHTML = "<p class='error' style='color: red; background: #fff3cd; padding: 10px; border-radius: 5px; border: 1px solid #ffeeba;'>⚠️ Please enter a video title to start content generation!</p>";
+        // Ensure explanation section remains visible if no title is entered
+        if (!container.contains(explanationSection)) {
+            container.appendChild(explanationSection);
+        }
         return;
+    }
+
+    // 1. Move Explanation Section BELOW the Output/Results
+    // This is the key change to ensure results (output) appear above the explanation.
+    if (explanationSection && container.contains(explanationSection)) {
+        // Move explanation section to the end of the container (after output)
+        container.appendChild(explanationSection);
     }
 
     // --- AI-like generation logic (Mockup) ---
     const baseTags = ["Tutorial", "Guide", "Tips", "Tricks", "Unboxing", "Vlog", "Review", "HowTo"]; 
-    // Clean up title words for dynamic tags
     const titleWords = title.toLowerCase().split(/\s+/).filter(word => word.length > 2 && !["a", "an", "the", "in", "for", "with", "is"].includes(word));
     
     const results = [];
@@ -199,11 +212,10 @@ function generate() {
         const description = 
             `Description Option ${i}: Hey everyone! Today's video is all about **"${title}"**. We'll show you the complete step-by-step process and share some valuable insights we learned along the way. This guide is perfect for anyone looking to ${titleWords.slice(0, 2).join(' ')}. If you found this helpful, please give it a thumbs up and subscribe! Share your thoughts in the comments below!\n\n---\n*Time Stamps Placeholder*\n*Links to your Socials & Products*`;
         
-        // Dynamic tags generation (mixing title words, base tags, and variations)
+        // Dynamic tags generation 
         let generatedTags = [...new Set([title, ...titleWords, ...baseTags.slice(0, 5), "SEO", "YouTubeTips"])];
         
-        // Add some variation based on the iteration
-        if (i % 2 === 0) generatedTags.push(new Date().getFullYear().toString()); // Add current year
+        if (i % 2 === 0) generatedTags.push(new Date().getFullYear().toString()); 
         if (i % 3 === 0) generatedTags.push(titleWords[0] ? `${titleWords[0]} guide` : 'new video');
         
         results.push({ description, tags: generatedTags });
@@ -211,10 +223,9 @@ function generate() {
     // --- AI-like generation logic ends here ---
 
 
-    // Display results
+    // 2. Display results (Output)
     let html = "<h2>✅ Generated SEO Content Options</h2>";
     results.forEach((video, index) => {
-        // Safely escape strings for use in JavaScript function call
         const safeDesc = video.description.replace(/'/g, "\\'").replace(/"/g, '\\"');
         const safeTags = video.tags.join(', ').replace(/'/g, "\\'").replace(/"/g, '\\"');
 
@@ -232,7 +243,6 @@ function generate() {
 // Copy function
 function copyText(desc, tags) {
     const temp = document.createElement('textarea');
-    // Combine description and tags for a single copy action
     temp.value = `Description:\n${desc}\n\nTags:\n${tags}`;
     document.body.appendChild(temp);
     temp.select();
