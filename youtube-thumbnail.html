@@ -2,42 +2,221 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YouTube Thumbnail Downloader</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
-    input { width: 70%; padding: 10px; margin: 20px 0; border: 1px solid #ccc; border-radius: 5px; }
-    button { padding: 10px 20px; background: #dc3545; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
-    button:hover { background: #a71d2a; }
-    img { margin-top: 20px; max-width: 90%; border: 1px solid #ccc; padding: 5px; }
-    a { display: block; margin-top: 10px; color: #007bff; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    /* Base Styles */
+    body { 
+        font-family: 'Arial', sans-serif; 
+        background: #f0f2f5; 
+        margin: 0; 
+        padding: 0; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        min-height: 100vh; 
+    }
+    .container {
+        margin-top: 30px;
+        width: 90%;
+        max-width: 800px; 
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+    h2 {
+        color: #ff0000; /* YouTube Red */
+        font-size: 2em;
+        margin-bottom: 25px;
+    }
+    /* Input and Button Group Styling */
+    .input-group {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 25px;
+    }
+    input[type="text"] { 
+        width: 70%; 
+        padding: 12px 15px; 
+        border: 1px solid #ccc; 
+        border-radius: 5px 0 0 5px; 
+        font-size: 16px; 
+        box-sizing: border-box;
+    }
+    button { 
+        padding: 12px 20px; 
+        background: #ff0000; 
+        color: #fff; 
+        border: none; 
+        cursor: pointer; 
+        border-radius: 0 5px 5px 0;
+        font-size: 16px;
+        transition: 0.3s;
+        font-weight: bold;
+    }
+    button:hover { 
+        background: #cc0000; 
+    }
+
+    /* Result Area Styling */
+    .result-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid #eee; /* Visual separation after generation */
+    }
+    #thumbnail { 
+        margin-top: 20px; 
+        max-width: 100%; 
+        height: auto;
+        border: 4px solid #fff; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        transition: 0.3s;
+        max-height: 450px; /* Control size on desktop */
+    }
+    #downloadLink { 
+        display: block; 
+        margin: 20px auto 0; 
+        color: white; 
+        background: #007bff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none; 
+        width: 250px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    #downloadLink:hover { 
+        background: #0056b3;
+    }
+
+    /* Utility Explanation Section */
+    .utility-explanation {
+        text-align: left;
+        margin-top: 30px; /* Separator for when it's placed after results */
+        padding: 20px;
+        background-color: #f8f9fa; 
+        border-radius: 10px;
+        border: 1px solid #e9ecef; 
+    }
+    .utility-explanation h3 {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 5px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+    }
+    .utility-explanation p, .utility-explanation ul {
+        line-height: 1.6;
+        color: #495057;
+        margin-bottom: 15px;
+    }
+    .utility-explanation strong {
+        color: #333;
+    }
   </style>
 </head>
 <body>
-  <h2>YouTube Thumbnail Downloader</h2>
-  <input type="text" id="videoURL" placeholder="Enter YouTube Video URL"><br>
-  <button onclick="getThumbnail()">Get Thumbnail</button>
-  <div>
-    <img id="thumbnail" src="">
-    <a id="downloadLink" href="#" download="thumbnail.jpg" style="display:none;">Download Thumbnail</a>
-  </div>
 
-  <script>
+<div class="container">
+    <h2>📸 YouTube Thumbnail Downloader</h2>
+    
+    <div id="input-section" class="input-group">
+        <input type="text" id="videoURL" placeholder="Enter YouTube Video URL (e.g., https://www.youtube.com/watch?v=XXXXXX)">
+        <button onclick="getThumbnail()">Get Thumbnail</button>
+    </div>
+
+    <div id="output" class="result-section" style="display: none;">
+        <img id="thumbnail" src="" alt="Thumbnail Preview">
+        <a id="downloadLink" href="#" download="YouTube_Thumbnail.jpg">Download High-Resolution Thumbnail</a>
+    </div>
+
+    <div id="explanation-section" class="utility-explanation">
+        <h3>💡 Why Use This Thumbnail Downloader?</h3>
+        
+        <p>This simple, free **YouTube Thumbnail Downloader** is an indispensable tool for every content creator, marketer, and analyst. A video's thumbnail is its most critical marketing asset—it's the first thing viewers see and the primary driver of the **Click-Through Rate (CTR)**.</p>
+
+        <h4>How This Tool Empowers Your Content Strategy (Approx. 600-700 Words Total)</h4>
+        <p>Whether you need to grab a high-quality thumbnail of your **own video** for social media promotion, or if you are conducting a **competitive analysis**, this tool delivers immediate results. By simply pasting a YouTube URL, you can extract the highest resolution image available for that video, typically **1280x720 (maxresdefault)**.</p>
+
+        <p><strong>Use Cases for Creators:</strong></p>
+        <ul>
+            <li>**Social Media Promotion:** Easily get the original, crisp thumbnail to use in Facebook, X (Twitter), or blog posts, ensuring brand consistency across all platforms.</li>
+            <li>**A/B Testing:** Download competitors' thumbnails to analyze their design elements, color palettes, and text placement. This helps you understand visual trends in your niche, informing your own thumbnail design strategy.</li>
+            <li>**Re-upload or Backup:** If you accidentally lose the original thumbnail file, this tool provides a quick way to retrieve the highest available version for safekeeping.</li>
+        </ul>
+
+        <h4>The Technical Advantage: Quality and Speed</h4>
+        <p>Unlike simply taking a screenshot, this tool uses the dedicated YouTube image server structure to pull the actual source file. This guarantees you are getting the image at its **full, uncompressed resolution** (up to 1280x720 pixels), which is vital for professional use.</p>
+
+        <p><strong>Different Thumbnail Resolutions Available (The tool defaults to the best):</strong></p>
+        <p>YouTube generates multiple sizes for every video. While the tool targets the `maxresdefault.jpg` (highest quality), others include `hqdefault.jpg` (high quality), `mqdefault.jpg` (medium quality), and `default.jpg` (standard). Retrieving the highest resolution is crucial for print media or large banners where clarity is essential.</p>
+
+        <p><strong>A Friendly Reminder on Usage:</strong></p>
+        <p>This tool is designed for educational, analytical, and personal promotional use. Please respect copyright laws. Only download and use thumbnails that you have the right to use, such as your own content, or content used purely for non-commercial research purposes (like analyzing design). We are here to provide the technical means; ethical use is your responsibility.</p>
+        
+        <p><strong>Get Started:</strong> Paste your YouTube video URL into the box above and click **"Get Thumbnail"** to instantly download the highest quality image available!</p>
+    </div>
+</div>
+
+<script>
+    function extractVideoId(url) {
+        // Regex to extract Video ID from various YouTube URL formats
+        const regex = /(?:v=|\/)([0-9A-Za-z_-]{11})/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    }
+
     function getThumbnail() {
-      const url = document.getElementById("videoURL").value;
-      const videoIdMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
-      if (!videoIdMatch) {
+      const url = document.getElementById("videoURL").value.trim();
+      const videoId = extractVideoId(url);
+      const thumbnailImg = document.getElementById("thumbnail");
+      const downloadLink = document.getElementById("downloadLink");
+      const outputSection = document.getElementById("output");
+      const container = document.querySelector('.container');
+      const explanationSection = document.getElementById('explanation-section');
+      
+      // Clear previous results
+      thumbnailImg.src = "";
+      outputSection.style.display = "none";
+
+      if (!videoId) {
         alert("Please enter a valid YouTube URL!");
+        // Ensure explanation section is visible if error
+        if (!container.contains(explanationSection)) {
+            container.appendChild(explanationSection);
+        }
         return;
       }
-      const videoId = videoIdMatch[1];
+
+      // 1. Move Explanation Section BELOW the Output/Results
+      if (explanationSection && container.contains(explanationSection)) {
+          // Move explanation section to the end of the container (after output)
+          container.appendChild(explanationSection);
+      }
+      
+      // Target the highest available resolution
       const thumbnailURL = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
-      document.getElementById("thumbnail").src = thumbnailURL;
-      const downloadLink = document.getElementById("downloadLink");
+      // 2. Display the Result
+      thumbnailImg.src = thumbnailURL;
       downloadLink.href = thumbnailURL;
-      downloadLink.style.display = "block";
+      outputSection.style.display = "block";
+      
+      // Optional: Force a small scroll to the result if it's below the fold
+      outputSection.scrollIntoView({ behavior: 'smooth' });
+
+      // Note: If maxresdefault is not available, YouTube will automatically serve a lower resolution (e.g., hqdefault).
     }
-  </script>
+
+    // Ensure initial state is correct (Explanation is visible)
+    document.addEventListener('DOMContentLoaded', () => {
+        const outputSection = document.getElementById("output");
+        outputSection.style.display = "none";
+    });
+</script>
 </body>
 </html>
