@@ -40,7 +40,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         --youtube-dark-red: #CC0000;
         --link-color: #FF0000; 
 
-        /* Light Mode Variables */
+        /* Light Mode Variables (Default) */
         --bg-color: #f4f6f9;
         --card-bg: #fff;
         --text-color: #222;
@@ -48,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         --border-color: #ddd;
     }
 
-    /* Dark Mode Variables */
+    /* Dark Mode Variables (Applied when body has dark-mode class) */
     body.dark-mode {
         --bg-color: #121212;
         --card-bg: #1e1e1e;
@@ -195,7 +195,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     @media (max-width: 768px) {
         
-        /* General Adjustments */
         .container {
             padding: 15px;
         }
@@ -351,12 +350,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const toggleButton = document.getElementById('dark-mode-toggle');
     const body = document.body;
 
-    // **IMPORTANT FIX:** This function now checks localStorage and applies the theme immediately on page load.
+    // 1. Function to apply the saved theme immediately on page load
     function applyThemeFromLocalStorage() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             body.classList.add('dark-mode');
-            if (toggleButton) { // Check if the button exists on the page
+            if (toggleButton) { 
                 toggleButton.textContent = '☀️ Light Mode';
             }
         } else {
@@ -367,9 +366,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     }
 
-    // Apply theme when the page loads
+    // Apply theme when the page loads (FIX for theme persistence)
     document.addEventListener('DOMContentLoaded', applyThemeFromLocalStorage);
 
+    // 2. Function to toggle the theme (ONLY USED ON THIS PAGE)
     function toggleDarkMode() {
         body.classList.toggle('dark-mode');
         
@@ -379,10 +379,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             localStorage.setItem('theme', 'light');
         }
         
-        // Update button text immediately
         applyThemeFromLocalStorage(); 
     }
   </script>
 </body>
-  </html>
-  
+</html>
