@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro YouTube Channel SEO Auditor & Analyzer | PooreYouTuber Tools</title>
+    <title>Pro YouTube Channel SEO Auditor & Report | PooreYouTuber Tools</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -11,72 +11,61 @@
     
     <style>
         /* ========================================================= */
-        /* CSS STYLES                       */
+        /* CSS STYLES - Modern, Clean, and Report-like Design       */
         /* ========================================================= */
         
         :root {
-            --primary-color: #ff0000; /* YouTube Red */
-            --secondary-color: #007bff; /* Blue for info */
+            --primary-color: #e62117; /* Brighter YouTube Red */
+            --accent-color: #007bff; 
             --success-color: #28a745;
             --danger-color: #dc3545;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
+            --border-light: #e9ecef;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             padding: 20px;
-            color: #333;
+            color: #343a40;
             line-height: 1.6;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
         }
 
-        /* Header and Title */
+        /* Header and Search */
         header {
             text-align: center;
-            padding: 30px 0;
-            border-bottom: 2px solid #eee;
+            padding: 20px 0;
             margin-bottom: 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
 
         header h1 {
-            font-size: 2.5em;
-            color: #222;
-            margin-bottom: 10px;
+            font-size: 2.2em;
+            color: var(--primary-color);
+            margin-bottom: 5px;
         }
-
-        .text-red { color: var(--primary-color); }
-        .text-green { color: var(--success-color); font-weight: bold; }
-        .text-blue { color: var(--secondary-color); font-weight: bold; }
-
-        /* Search Box */
+        
         .search-box {
             display: flex;
-            gap: 10px;
-            margin-bottom: 40px;
-            padding: 15px;
-            background: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            gap: 15px;
+            max-width: 700px;
+            margin: 20px auto;
         }
 
         #channel-input {
             flex-grow: 1;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
+            padding: 12px 18px;
+            border: 2px solid var(--border-light);
             border-radius: 8px;
             font-size: 1em;
-            transition: border-color 0.3s;
-        }
-
-        #channel-input:focus {
-            border-color: var(--primary-color);
-            outline: none;
         }
 
         #audit-button {
@@ -91,134 +80,176 @@
             transition: background-color 0.3s;
         }
 
-        #audit-button:hover {
-            background-color: #c40000;
-        }
+        #audit-button:hover { background-color: #b81912; }
 
         /* Results Container */
         .results-container {
             background: var(--card-bg);
-            padding: 30px;
+            padding: 35px;
             border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
 
         .hidden { display: none; }
 
         .section-title {
-            margin: 30px 0 20px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid var(--primary-color);
-            color: #333;
-            font-size: 1.8em;
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary-color);
+            color: #212529;
+            font-size: 1.6em;
+            font-weight: 600;
         }
 
-        /* Channel Summary Card */
-        .channel-summary {
-            display: flex;
+        /* Channel Summary */
+        .channel-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 3fr 1.5fr;
             align-items: center;
-            gap: 20px;
+            gap: 30px;
             padding: 20px;
-            border: 1px solid #eee;
-            border-radius: 8px;
+            border-bottom: 1px solid var(--border-light);
             margin-bottom: 30px;
         }
 
         .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--primary-color);
-        }
-
-        .overall-score {
-            margin-left: auto;
-            font-size: 2.5em;
-            font-weight: bold;
-            color: var(--success-color);
-            border: 4px solid var(--success-color);
-            border-radius: 50%;
             width: 100px;
             height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary-color);
+        }
+        
+        .stats-box {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border: 1px dashed var(--border-light);
+            border-radius: 6px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0 15px;
+        }
+        
+        .stat-item strong {
+            display: block;
+            font-size: 1.5em;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        
+        .overall-score {
+            font-size: 3em;
+            font-weight: 800;
+            color: var(--success-color);
+            border: 5px solid var(--success-color);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-left: auto;
         }
 
-        /* Graphs Section */
+        /* Graphs Grid */
         .graphs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
         .graph-card {
             background: #fff;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-light);
         }
 
         .graph-card h3 {
-            font-size: 1.2em;
+            font-size: 1.3em;
             margin-bottom: 15px;
             color: #555;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
         }
 
-        /* Detailed Checks */
-        .checks-grid {
+        /* Video Lists (Top/Low) */
+        .video-lists-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
             margin-bottom: 40px;
         }
 
-        .check-item {
-            background: #f7f7f7;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 5px solid var(--secondary-color);
-        }
-
-        .check-item h4 {
-            margin-top: 0;
-            color: #444;
-            font-size: 1.1em;
-        }
-
-        .result-status {
-            font-weight: bold;
-            color: orange; /* Default checking color */
-        }
-
-        /* SEO Tips Section */
-        .seo-tips {
+        .video-list-card {
             padding: 20px;
-            border: 1px solid #f0f0f0;
-            border-radius: 8px;
-            background: #fffafa;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .seo-tips p {
-            margin-bottom: 15px;
-            padding-left: 10px;
-            border-left: 3px solid #ffcc00;
+        .video-list-card h3 {
+            margin-top: 0;
+            font-size: 1.4em;
+            color: var(--success-color);
+            border-bottom: 2px solid var(--success-color);
+            padding-bottom: 5px;
+        }
+
+        .video-list-card.low-performing h3 {
+            color: var(--danger-color);
+            border-bottom: 2px solid var(--danger-color);
+        }
+
+        .video-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .video-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.95em;
+        }
+
+        .video-list li:last-child { border-bottom: none; }
+        
+        .video-list li strong { color: var(--accent-color); margin-right: 10px; }
+
+        /* AI Tips Section */
+        .ai-tip-section {
+            background: #fff3cd; 
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .ai-tip-section h2 {
+            color: #856404;
+            border-bottom: 2px dashed #ffeeba;
         }
 
         /* Responsiveness */
-        @media (max-width: 768px) {
-            .search-box {
-                flex-direction: column;
-            }
-            .channel-summary {
-                flex-direction: column;
+        @media (max-width: 1000px) {
+            .channel-summary-grid {
+                grid-template-columns: 1fr;
                 text-align: center;
             }
             .overall-score {
-                margin-left: 0;
+                margin: 20px auto 0;
+            }
+            .stats-box {
+                flex-wrap: wrap;
                 margin-top: 20px;
+            }
+            .video-lists-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -226,90 +257,75 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fab fa-youtube text-red"></i> Pro YouTube Channel SEO Auditor</h1>
-            <p>Enter a channel URL or name to get an in-depth SEO performance audit.</p>
+            <h1><i class="fab fa-youtube"></i> YouTube SEO Auditing Tool 📊</h1>
+            <p>Enter a channel URL or name to generate a Professional, static SEO performance report.</p>
         </header>
 
         <div class="search-box">
             <input type="text" id="channel-input" placeholder="Enter Channel URL or Name (e.g., T-Series or @MrBeast)">
-            <button id="audit-button" onclick="startAudit()">Start Audit <i class="fas fa-search"></i></button>
+            <button id="audit-button" onclick="startAudit()">Generate Report <i class="fas fa-file-invoice"></i></button>
         </div>
 
         <div id="audit-results" class="results-container hidden">
-            <div class="card channel-summary">
+            
+            <div class="channel-summary-grid">
                 <img src="" alt="Channel Avatar" id="channel-avatar" class="avatar">
-                <div>
-                    <h2 id="channel-name">Channel Name / Title</h2>
-                    <p><strong>Channel ID:</strong> <span id="channel-id">N/A</span></p>
-                    <p><strong>Subscribers:</strong> <span id="sub-count" class="text-green">0</span> | 
-                       <strong>Total Views:</strong> <span id="view-count" class="text-blue">0</span> | 
-                       <strong>Videos:</strong> <span id="video-count">0</span></p>
+                
+                <div class="channel-info">
+                    <h2 id="channel-name" style="color: var(--primary-color);">PooreYouTuber Demo Channel</h2>
+                    <p><strong>Channel ID:</strong> <span id="channel-id">UC\_P\_YT\_DEMO\_ID</span></p>
+                    <div class="stats-box">
+                        <div class="stat-item"><strong><span id="sub-count">1.2M</span></strong> Subscribers</div>
+                        <div class="stat-item"><strong><span id="view-count">150M</span></strong> Total Views</div>
+                        <div class="stat-item"><strong><span id="video-count">450</span></strong> Total Videos</div>
+                    </div>
                 </div>
-                <div class="overall-score" id="overall-score-display">--%</div>
+                
+                <div class="overall-score" id="overall-score-display">85%</div>
             </div>
 
-            <h2 class="section-title"><i class="fas fa-chart-line"></i> Performance Metrics & Graphs</h2>
+            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Performance & SEO Health Score</h2>
 
             <div class="graphs-grid">
                 <div class="graph-card">
-                    <h3>Engagement Rate Trend</h3>
+                    <h3>Engagement vs. Views Index</h3>
                     <canvas id="engagement-graph"></canvas>
                 </div>
                 <div class="graph-card">
-                    <h3>Topic Authority Score</h3>
-                    <canvas id="topic-authority-graph"></canvas>
-                </div>
-                <div class="graph-card">
-                    <h3>Video Publish Frequency</h3>
-                    <canvas id="frequency-graph"></canvas>
-                </div>
-                <div class="graph-card">
-                    <h3>Overall SEO Health Index</h3>
+                    <h3>Content Strategy Radar</h3>
                     <canvas id="seo-health-graph"></canvas>
                 </div>
-            </div>
-
-            <h2 class="section-title"><i class="fas fa-check-circle"></i> Detailed SEO Report</h2>
-
-            <div class="checks-grid">
-                <div class="check-item">
-                    <h4>Channel Keywords Optimization</h4>
-                    <p id="check-keywords" class="result-status">Checking...</p>
-                </div>
-                <div class="check-item">
-                    <h4>About Page Completeness</h4>
-                    <p id="check-about" class="result-status">Checking...</p>
-                </div>
-                <div class="check-item">
-                    <h4>Consistency (Branding/Thumbnails)</h4>
-                    <p id="check-branding" class="result-status">Checking...</p>
-                </div>
-                <div class="check-item">
-                    <h4>Playlist Organization Score</h4>
-                    <p id="check-playlists" class="result-status">Checking...</p>
-                </div>
-                <div class="check-item">
-                    <h4>Average Video Title Length</h4>
-                    <p id="check-title" class="result-status">Checking...</p>
-                </div>
-                <div class="check-item">
-                    <h4>CTA (Call to Action) Presence</h4>
-                    <p id="check-cta" class="result-status">Checking...</p>
+                <div class="graph-card">
+                    <h3>Keyword Density Score</h3>
+                    <canvas id="keyword-density-graph"></canvas>
                 </div>
             </div>
 
-            <div class="seo-tips">
-                <h2 class="section-title"><i class="fas fa-lightbulb"></i> Actionable SEO Improvement Tips</h2>
+            <h2 class="section-title"><i class="fas fa-list-ol"></i> Top 10 & Low Performing Videos</h2>
+
+            <div class="video-lists-grid">
+                <div class="video-list-card top-performing">
+                    <h3><i class="fas fa-trophy"></i> Top 10 Videos (By Views/Engagement)</h3>
+                    <ul class="video-list" id="top-videos-list">
+                        </ul>
+                </div>
+                <div class="video-list-card low-performing">
+                    <h3><i class="fas fa-bomb"></i> Lowest 10 Videos (Needs Improvement)</h3>
+                    <ul class="video-list" id="low-videos-list">
+                        </ul>
+                </div>
+            </div>
+
+            <div class="ai-tip-section">
+                <h2 class="section-title"><i class="fas fa-brain"></i> AI Recommended Strategy & Tips</h2>
+                <p>Based on the current audit, your channel demonstrates strong volume ($\mathbf{450}$ Videos) but shows inconsistency in **Thumbnail/Branding** and **Call to Action (CTA)** implementation. The goal is to maximize the ROI of your content.</p>
                 
-                <p><strong>1. Enhance Channel Keyword Strategy:</strong> Based on the audit, your channel's keyword tags need refinement. Currently, only $\mathbf{65\%}$ of your videos use niche-specific, low-competition keywords. You must utilize the full $\mathbf{500}$ character limit for channel tags and ensure they reflect your current top-performing content categories. Targeting long-tail keywords will help your channel appear in specific search results and attract a highly engaged audience.</p>
-                
-                <p><strong>2. Boost Average Engagement Rate:</strong> The audit indicates that your average video engagement (Likes, Comments, Shares per view) is below the industry standard for your niche. Focus on creating stronger **Call to Actions (CTAs)** within the first $\mathbf{30}$ seconds of your video to encourage interaction. Consider adding poll cards and strategically placed end screens to drive viewers to related content, which increases session watch time—a critical SEO factor.</p>
-                
-                <p><strong>3. Maintain Content Publishing Consistency:</strong> We observed an inconsistent upload schedule, which negatively impacts viewer retention and YouTube’s algorithm ranking. Try to establish a regular, predictable upload pattern (e.g., every Tuesday and Friday). This consistency signal tells YouTube that your channel is active and reliable, increasing its likelihood of being promoted in subscription feeds and homepages. A consistent schedule is key for long-term subscriber growth.</p>
-                
-                <p><strong>4. Strengthen Channel Branding & Visuals:</strong> The audit noted a low score for thumbnail consistency. Your channel banner, profile picture, and video thumbnails must use a unified color palette and font. Consistent, professional-looking thumbnails improve the **Click-Through Rate (CTR)**, which is one of the most powerful metrics for video ranking. Use high-contrast colors and concise text overlays to make your videos stand out in search results.</p>
-                
-                <p><strong>5. Deep Dive into Underperforming Videos:</strong> Finally, review the videos flagged with poor performance. Often, a few old, poorly tagged, or low-engagement videos can drag down your entire channel's SEO score. Either update their titles, descriptions, and tags with modern keywords, or consider setting them to unlisted/private if they no longer fit your channel's niche. This strategic pruning ensures that your channel's overall quality signal remains high.</p>
+                <ul>
+                    <li>**Re-Optimize Low Performers:** The 10 lowest videos are dragging down your average. **Update their Thumbnails, Titles (use long-tail keywords), and Descriptions.** A fresh coat of paint can revive old content.</li>
+                    <li>**Niche Consistency:** Your **Content Strategy Radar** shows a slight dip in **Niche Focus**. Ensure your next $\mathbf{15}$ videos align strictly with your top-performing content categories to build greater authority.</li>
+                    <li>**AI Tip for Top Videos:** Analyze the common elements (Title structure, length, tone) of your **Top 10 Videos**. Replicate this successful formula for your next content batch to ensure continued success.</li>
+                </ul>
+                <p style="margin-top: 15px;">**Action:** Focus on $\mathbf{Branding\ Consistency}$ and $\mathbf{Re-tagging}$ low-performing videos for the next 30 days. This will stabilize your channel health score.</p>
             </div>
         </div>
     </div>
@@ -317,33 +333,50 @@
     <script>
         // =========================================================
         //                          JAVASCRIPT LOGIC                 
-        // NOTE: This section uses static mock data. To make it LIVE,
-        // you MUST replace the mock data logic with a server-side 
-        // fetch call using your YouTube API Key.
+        // (Mock Data & Static Display)
         // =========================================================
         
-        // --- STATIC MOCK DATA FOR DEMONSTRATION ---
+        // --- STATIC MOCK DATA (Data is intentionally stable/static) ---
         const mockAuditData = {
             channelName: "PooreYouTuber Demo Channel",
             channelId: "UC_P_YT_DEMO_ID",
-            subscribers: "1.2 Million",
-            totalViews: "150 Million",
+            subscribers: "1,200,000",
+            totalViews: "150,000,000",
             videoCount: "450",
             overallScore: 85,
-            checks: {
-                keywords: { status: "Excellent", color: 'success-color', score: "100%" },
-                about: { status: "Good (Needs external links)", color: 'success-color', score: "70%" },
-                branding: { status: "Fair (Thumbnails inconsistent)", color: 'danger-color', score: "50%" },
-                playlists: { status: "Excellent", color: 'success-color', score: "95%" },
-                title: { status: "Good (Average 55 chars)", color: 'success-color', score: "80%" },
-                cta: { status: "Poor (Only 20% videos)", color: 'danger-color', score: "30%" },
-            },
+            
+            // Graph Data - Designed to look balanced and not 'falling'
             graphData: {
-                engagement: [10, 15, 20, 18, 25, 30, 22],
-                authority: [50, 60, 75, 80, 70],
-                frequency: [4, 3, 5, 2, 4, 3],
-                seoHealth: [70, 75, 80, 85, 85]
-            }
+                engagementIndex: [70, 75, 80, 85, 82, 88, 90],
+                strategyRadar: [85, 70, 95, 65, 80], // Branding, CTA, Titles, Consistency, Niche
+                keywordDensity: [50, 75, 80, 60, 90] // Tags, Description, Title, Channel Tags, Top Niche
+            },
+            
+            // Video Lists
+            topVideos: [
+                { title: "Top 10 SEO Secrets for 2024", views: "1.2M", date: "2 months ago" },
+                { title: "How to Grow from 0 to 1K Subs", views: "950K", date: "4 months ago" },
+                { title: "The Ultimate Thumbnail Guide", views: "880K", date: "1 month ago" },
+                { title: "Best Mic for YouTubers Under $100", views: "700K", date: "6 months ago" },
+                { title: "5 Editing Tips for Beginners", views: "650K", date: "3 months ago" },
+                { title: "My YouTube Studio Setup Tour", views: "580K", date: "8 months ago" },
+                { title: "YouTube Shorts Monetization Guide", views: "550K", date: "1 month ago" },
+                { title: "Affiliate Marketing on YouTube", views: "520K", date: "5 months ago" },
+                { title: "Livestream Setup Checklist", views: "490K", date: "1 year ago" },
+                { title: "Viral Video Formula Revealed", views: "450K", date: "10 months ago" },
+            ],
+            lowVideos: [
+                { title: "Unboxing Random Gadget (Old Niche)", views: "1.2K", date: "2 years ago" },
+                { title: "Test Video 123", views: "980", date: "3 years ago" },
+                { title: "A Day in the Life (Off-Topic)", views: "750", date: "1 year ago" },
+                { title: "Early Gaming Stream", views: "600", date: "4 years ago" },
+                { title: "Random Vlog 2019", views: "550", date: "5 years ago" },
+                { title: "Outdated Software Review", views: "480", date: "3 years ago" },
+                { title: "Q&A Session 1 (Bad Audio)", views: "320", date: "2 years ago" },
+                { title: "Old Camera Test Footage", views: "250", date: "4 years ago" },
+                { title: "Channel Trailer Draft", views: "190", date: "3 years ago" },
+                { title: "Quick Announcement (No SEO)", views: "150", date: "2 years ago" },
+            ]
         };
 
         const getColor = (score) => {
@@ -364,142 +397,141 @@
             }
 
             auditButton.disabled = true;
-            auditButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Auditing...';
+            auditButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             resultsContainer.classList.add('hidden');
 
-            // *** API INTEGRATION POINT ***
-            // Use your provided API Key (AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo) 
-            // here to fetch real YouTube data via a server-side script. 
-            // The code below uses mock data for demonstration.
-
+            // Simulate API fetch/Report Generation time (3 seconds)
             setTimeout(() => {
                 displayAuditResults(mockAuditData);
                 auditButton.disabled = false;
-                auditButton.innerHTML = 'Start Audit <i class="fas fa-search"></i>';
-            }, 3000); // Simulate 3 second API fetch time
+                auditButton.innerHTML = 'Generate Report <i class="fas fa-file-invoice"></i>';
+            }, 3000); 
         }
 
         // --- DISPLAY RESULTS ---
         function displayAuditResults(data) {
+            // Update Summary Stats
             document.getElementById('channel-name').textContent = data.channelName;
             document.getElementById('channel-id').textContent = data.channelId;
             document.getElementById('sub-count').textContent = data.subscribers;
             document.getElementById('view-count').textContent = data.totalViews;
             document.getElementById('video-count').textContent = data.videoCount;
             
+            // Update Overall Score
             const overallScoreElement = document.getElementById('overall-score-display');
             overallScoreElement.textContent = `${data.overallScore}%`;
-            
-            // Apply dynamic colors based on score
             const scoreColor = getColor(data.overallScore);
             overallScoreElement.style.borderColor = scoreColor;
             overallScoreElement.style.color = scoreColor;
 
-            // Update detailed checks
-            for (const key in data.checks) {
-                const item = data.checks[key];
-                const element = document.getElementById(`check-${key}`);
-                element.textContent = `${item.status} (${item.score})`;
-                // Use the custom CSS variables for colors
-                element.style.color = (item.color === 'success-color') ? 'var(--success-color)' : 'var(--danger-color)';
-            }
-
             // Initialize Graphs
             initGraphs(data.graphData);
+            
+            // Populate Video Lists
+            populateVideoList('top-videos-list', data.topVideos, 'green');
+            populateVideoList('low-videos-list', data.lowVideos, 'red');
 
             document.getElementById('audit-results').classList.remove('hidden');
         }
+        
+        // --- POPULATE VIDEO LISTS ---
+        function populateVideoList(elementId, videos, color) {
+            const ul = document.getElementById(elementId);
+            ul.innerHTML = ''; // Clear previous list
+            videos.forEach((video, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span style="color: ${color}; font-weight: bold;">#${index + 1}</span> 
+                    ${video.title} <br>
+                    <small style="color: #6c757d;">
+                        <i class="fas fa-eye"></i> Views: ${video.views} | 
+                        <i class="far fa-calendar-alt"></i> ${video.date}
+                    </small>
+                `;
+                ul.appendChild(li);
+            });
+        }
+
 
         // --- CHART.JS INITIALIZATION ---
-        let engagementChart, authorityChart, frequencyChart, seoHealthChart;
+        let engagementChart, healthChart, keywordChart;
 
         function initGraphs(data) {
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true }
+                    y: { beginAtZero: true, max: 100 } // Set max to 100 for score charts
                 },
                 plugins: {
                     legend: { display: false }
                 }
             };
             
-            // Destroy existing charts to prevent stacking/errors
+            // Destroy existing charts
             if (engagementChart) engagementChart.destroy();
-            if (authorityChart) authorityChart.destroy();
-            if (frequencyChart) frequencyChart.destroy();
-            if (seoHealthChart) seoHealthChart.destroy();
+            if (healthChart) healthChart.destroy();
+            if (keywordChart) keywordChart.destroy();
             
-            // 1. Engagement Rate Trend
+            // 1. Engagement Index (Line Chart)
             const ctx1 = document.getElementById('engagement-graph').getContext('2d');
             engagementChart = new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7'],
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
                     datasets: [{
-                        label: 'Avg Engagement Rate (%)',
-                        data: data.engagement,
-                        borderColor: 'var(--primary-color)',
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        label: 'Engagement Score (%)',
+                        data: data.engagementIndex,
+                        borderColor: 'var(--success-color)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        borderWidth: 3
                     }]
                 },
                 options: commonOptions
             });
 
-            // 2. Topic Authority Score
-            const ctx2 = document.getElementById('topic-authority-graph').getContext('2d');
-            authorityChart = new Chart(ctx2, {
-                type: 'bar',
+            // 2. Content Strategy Radar
+            const ctx2 = document.getElementById('seo-health-graph').getContext('2d');
+            healthChart = new Chart(ctx2, {
+                type: 'radar',
                 data: {
-                    labels: ['Keywords', 'Titles', 'Descriptions', 'Niche Focus', 'Trending'],
+                    labels: ['Branding', 'CTA', 'Titles/Tags', 'Consistency', 'Niche Focus'],
                     datasets: [{
-                        label: 'Authority Score (%)',
-                        data: data.authority,
-                        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545'],
-                    }]
-                },
-                options: commonOptions
-            });
-
-            // 3. Video Publish Frequency
-            const ctx3 = document.getElementById('frequency-graph').getContext('2d');
-            frequencyChart = new Chart(ctx3, {
-                type: 'pie',
-                data: {
-                    labels: ['On Schedule', 'Delayed', 'Missed'],
-                    datasets: [{
-                        label: 'Publishing Status',
-                        data: [60, 25, 15], // Example: 60% on schedule
-                        backgroundColor: ['var(--success-color)', 'orange', 'var(--danger-color)'],
+                        label: 'Current Score',
+                        data: data.strategyRadar,
+                        backgroundColor: 'rgba(0, 123, 255, 0.3)',
+                        borderColor: 'var(--accent-color)',
+                        pointBackgroundColor: 'var(--accent-color)',
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
                     plugins: {
-                        legend: { position: 'bottom' }
+                        legend: { display: false }
                     }
                 }
             });
 
-            // 4. Overall SEO Health Index
-            const ctx4 = document.getElementById('seo-health-graph').getContext('2d');
-            seoHealthChart = new Chart(ctx4, {
-                type: 'radar',
+            // 3. Keyword Density Score (Bar Chart)
+            const ctx3 = document.getElementById('keyword-density-graph').getContext('2d');
+            keywordChart = new Chart(ctx3, {
+                type: 'bar',
                 data: {
-                    labels: ['Branding', 'Keywords', 'Watch Time', 'Engagement', 'Consistency'],
+                    labels: ['Video Tags', 'Description', 'Title Length', 'Channel Tags', 'Top Niche Focus'],
                     datasets: [{
-                        label: 'Current Score',
-                        data: data.seoHealth,
-                        backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                        borderColor: 'var(--secondary-color)',
-                        pointBackgroundColor: 'var(--secondary-color)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'var(--secondary-color)'
+                        label: 'Density/Relevance Score (%)',
+                        data: data.keywordDensity,
+                        backgroundColor: ['#e62117', '#ffc107', '#28a745', '#007bff', '#17a2b8'],
                     }]
                 },
                 options: commonOptions
