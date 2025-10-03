@@ -16,54 +16,128 @@
   <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
 
   <style>
-    /* Global Styles */
-    body {font-family: 'Arial', sans-serif; background:#f4f6f9; text-align:center; margin:0; padding:0; display: flex; flex-direction: column; align-items: center; min-height: 100vh;}
+    /* ================================================= */
+    /* 1. DARK MODE CSS VARIABLES */
+    /* ================================================= */
+    :root {
+        /* Light Mode Variables (Default) */
+        --bg-color: #f4f6f9;
+        --container-bg: #fff;
+        --text-color: #333;
+        --secondary-text-color: #555;
+        --input-border: #ccc;
+        --youtube-red: #ff0000;
+        --youtube-dark-red: #cc0000;
+        --blue-accent: #007bff;
+        --blue-accent-hover: #0056b3;
+        --result-border: #eee;
+        --explanation-bg: #f8f9fa;
+        --warning-bg: #e6f7ff;
+        --warning-border: #b3d9ff;
+    }
+
+    /* Dark Mode Variables (Applied when body has dark-mode class) */
+    body.dark-mode {
+        --bg-color: #121212;
+        --container-bg: #1e1e1e;
+        --text-color: #f0f0f0;
+        --secondary-text-color: #b0b0b0;
+        --input-border: #444;
+        --youtube-dark-red: #8b0000;
+        --blue-accent: #3498db;
+        --blue-accent-hover: #2980b9;
+        --result-border: #333;
+        --explanation-bg: #2d2d2d;
+        --warning-bg: #1c2e4a; /* Darker warning background */
+        --warning-border: #3498db;
+    }
+
+    /* ================================================= */
+    /* 2. BASE STYLES & DARK MODE APPLICATION */
+    /* ================================================= */
+    body {
+        font-family: 'Arial', sans-serif; 
+        background: var(--bg-color); 
+        text-align: center; 
+        margin: 0; 
+        padding: 0; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        min-height: 100vh;
+        color: var(--text-color);
+        transition: background 0.3s, color 0.3s;
+    }
     .container-wrapper {
         width: 90%;
         max-width: 1400px;
         margin: 30px auto;
-        background: white;
+        background: var(--container-bg);
         padding: 30px;
         border-radius: 12px;
         box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        transition: background 0.3s, box-shadow 0.3s;
     }
-    h1 {color:#ff0000; margin-top:0; font-size: 2.2em;}
-    p.subtitle {color: #555; margin-bottom: 25px;}
+    h1 {
+        color: var(--youtube-red); 
+        margin-top:0; 
+        font-size: 2.2em;
+    }
+    p.subtitle {
+        color: var(--secondary-text-color); 
+        margin-bottom: 25px;
+    }
 
     /* Input & Button Styles */
-    #input-section { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;}
+    #input-section { 
+        display: flex; 
+        justify-content: center; 
+        gap: 10px; 
+        margin-bottom: 30px; 
+        flex-wrap: wrap;
+    }
     input, button {
       padding:12px 15px;
       margin:0;
       border-radius:6px;
-      border:1px solid #ccc;
+      border:1px solid var(--input-border);
       font-size:16px;
       box-sizing: border-box;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
     }
-    input { width: 350px; }
-    input[type="number"] { width: 150px; }
+    input { 
+        width: 350px; 
+        background: var(--container-bg);
+        color: var(--text-color);
+    }
+    input[type="number"] { 
+        width: 150px; 
+    }
     button {
-      background:#007bff;
-      color:#fff;
+      background: var(--blue-accent);
+      color: #fff;
       cursor:pointer;
-      border: 1px solid #007bff;
+      border: 1px solid var(--blue-accent);
       font-weight: bold;
-      transition: 0.3s;
     }
-    button:hover { background:#0056b3; border-color: #0056b3; }
+    button:hover { 
+        background: var(--blue-accent-hover); 
+        border-color: var(--blue-accent-hover); 
+    }
 
     /* Players Container Styles */
     #players {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted for better fit */
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
       padding: 20px 0;
-      border-top: 2px solid #eee;
+      border-top: 2px solid var(--result-border);
       margin-bottom: 30px;
+      transition: border-top 0.3s;
     }
     iframe {
       width: 100%;
-      height: 480px; /* Standard Shorts Aspect Ratio */
+      height: 480px;
       border: none;
       border-radius:12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -74,35 +148,81 @@
     .utility-explanation {
         text-align: left;
         padding: 25px;
-        background-color: #f8f9fa; 
+        background-color: var(--explanation-bg); 
         border-radius: 10px;
-        border: 1px solid #e9ecef; 
+        border: 1px solid var(--input-border); 
         line-height: 1.6;
+        color: var(--secondary-text-color);
     }
     .utility-explanation h3 {
-        color: #007bff;
-        border-bottom: 2px solid #007bff;
+        color: var(--blue-accent);
+        border-bottom: 2px solid var(--blue-accent);
         padding-bottom: 5px;
         margin-top: 0;
         margin-bottom: 15px;
         font-size: 1.5em;
     }
-    .utility-explanation strong { color: #333; }
+    .utility-explanation strong { 
+        color: var(--text-color); 
+    }
     
-    /* Crucial Warning Highlight - FRIENDLY STYLE */
+    /* Crucial Warning Highlight */
     .warning-note {
-        background-color: #e6f7ff; /* Light Blue/White Background for Neutral Tone */
-        color: #000; /* Black text */
-        border: 1px solid #b3d9ff;
-        padding: 15px;
-        margin: 20px 0;
-        border-radius: 8px;
-        text-align: center;
-        border-left: 5px solid #007bff; 
+        background-color: var(--warning-bg); 
+        color: var(--text-color); 
+        border: 1px solid var(--warning-border);
+        border-left: 5px solid var(--blue-accent); 
     }
     .warning-note strong {
         font-size: 1.1em;
-        color: #000; 
+        color: var(--text-color); 
+    }
+
+    /* ================================================= */
+    /* 3. MOBILE RESPONSIVENESS FIX */
+    /* ================================================= */
+    @media (max-width: 650px) {
+        body {
+            padding: 10px;
+        }
+        .container-wrapper {
+            margin: 15px auto;
+            padding: 15px;
+            width: 100%;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        h1 {
+            font-size: 1.8em;
+        }
+
+        /* Stack Input and Button on Mobile */
+        #input-section {
+            flex-direction: column;
+            gap: 15px;
+        }
+        input, button {
+            width: 100%;
+            border-radius: 6px; /* Reset to match standard buttons */
+        }
+        input[type="number"] {
+             width: 100%;
+        }
+
+        /* Players container adjustments */
+        #players {
+            /* Force single column for better vertical viewing experience of Shorts */
+            grid-template-columns: 1fr; 
+            gap: 15px;
+        }
+        iframe {
+             /* Make Short player slightly shorter for smaller screens */
+            height: 420px; 
+        }
+
+        .utility-explanation {
+            padding: 15px;
+        }
     }
   </style>
 </head>
@@ -214,6 +334,23 @@
     // Initial check: Ensure players container is hidden on load
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('players').style.display = 'none';
+        
+        // ==========================================================
+        // 4. DARK MODE PERSISTENCE LOGIC (The fix for your problem)
+        // ==========================================================
+        const body = document.body;
+        
+        function applyThemeFromLocalStorage() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+        }
+
+        // पेज लोड होते ही थीम लागू करें
+        applyThemeFromLocalStorage();
     });
 </script>
 </body>
