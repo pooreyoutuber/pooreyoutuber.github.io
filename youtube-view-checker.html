@@ -1,117 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>YouTube Video Info Checker</title>
-  <script src="https://apis.google.com/js/api.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f9f9f9; }
-    input[type="text"] { width: 500px; padding: 10px; margin-top: 10px; }
-    button { padding: 10px 20px; margin-top: 10px; }
-    #output { margin-top: 30px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .section { margin-bottom: 15px; }
-    .comment { border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px; }
-  </style>
+  <meta charset="UTF-8">
+  <title>YouTube Video Info Checker</title>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <style>
+    /* ========================================================= */
+    /* BASE STYLES */
+    /* ========================================================= */
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f9f9f9; }
+    input[type="text"] { width: 500px; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { 
+      padding: 10px 20px; 
+      margin-top: 10px; 
+      background-color: #e62117; /* YouTube Red */
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover { background-color: #b81912; }
+    
+    #output { 
+      margin-top: 30px; 
+      background-color: white; 
+      padding: 20px; 
+      border-radius: 8px; 
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+    }
+    .section { margin-bottom: 15px; }
+    .comment { border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px; }
+
+    /* ========================================================= */
+    /* DISCLAIMER STYLES */
+    /* ========================================================= */
+    .disclaimer-section {
+      max-width: 800px;
+      margin: 40px auto; 
+      padding: 30px;
+      background: #ffffff; 
+      border: 1px solid #ffcc00; /* Yellow Border for Attention */
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      font-size: 0.9em;
+      color: #6c757d; 
+      line-height: 1.6;
+    }
+
+    .disclaimer-section h2 {
+      border-bottom: 2px solid #ffcc00;
+      color: #343a40;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.4em;
+      padding-bottom: 10px;
+    }
+
+    .disclaimer-section p {
+      margin-bottom: 10px;
+      padding-left: 5px;
+    }
+
+    .disclaimer-section strong {
+      color: #000;
+    }
+  </style>
 </head>
 <body>
-  <h2>YouTube Video Info Checker</h2>
+  <h2>YouTube Video Info Checker</h2>
 
-  <label for="videoUrl">Enter YouTube Video URL:</label><br>
-  <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=VIDEO_ID">
-  <br>
-  <button id="btnFetch">Fetch Video Info</button>
+  <label for="videoUrl">Enter YouTube Video URL:</label><br>
+  <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=VIDEO_ID">
+  <br>
+  <button id="btnFetch">Fetch Video Info</button>
 
-  <div id="output"></div>
+  <div id="output"></div>
 
-  <script>
-    const API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo";  // ← आपकी API Key
+    <div class="disclaimer-section">
+    <h2>Comprehensive Website Disclaimer: PooreYoutuber Tools</h2>
+    <p><strong>1. General Acceptance and Scope:</strong></p>
+    <p>Welcome to **PooreYoutuber Tools** (the "Website"), which includes all associated features, resources, tools, services, and content (collectively, the "Services"). By accessing, browsing, or utilizing any of the tools available on this Website—whether the **YouTube SEO Auditor**, the **Video Info Checker**, a **Keyword Planner**, a **Title Analyzer**, or any other utility—you acknowledge and agree to be bound by the terms and conditions outlined in this disclaimer. If you do not agree with these terms, your only recourse is to discontinue the use of our Services immediately.</p>
 
-    document.getElementById("btnFetch").addEventListener("click", () => {
-      const url = document.getElementById("videoUrl").value.trim();
-      const videoId = extractVideoId(url);
-      if (!videoId) {
-        alert("Invalid YouTube video URL.");
-        return;
-      }
-      fetchVideoInfo(videoId);
-    });
+    <p><strong>2. Nature of Services, API Use, and Limitation of Liability:</strong></p>
+    <p><strong>Non-Official Status and Reliance on External API:</strong> The tools and resources provided by PooreYoutuber Tools are developed independently and are **not endorsed, affiliated with, or officially sanctioned by YouTube, Google, or any other third-party platform.** This Video Info Checker relies entirely on the **YouTube Data API (v3)** provided by Google to retrieve data.</p>
+    <p><strong>Data Accuracy and Completeness:</strong> All results, statistics (Views, Likes, Comments), and snippet data (Title, Description, Tags) are derived directly from the API's response. **PooreYoutuber Tools makes absolutely no representation or warranty regarding the complete accuracy, reliability, timeliness, or completeness of this information.** Data may be limited, incorrect, or incomplete if the video owner has disabled or hidden specific features (e.g., hiding the like count, disabling comments, or limiting API access).</p>
 
-    function extractVideoId(url) {
-      const match = url.match(/(?:v=|\.be\/)([a-zA-Z0-9_-]{11})/);
-      return match ? match[1] : null;
-    }
+    <p><strong>3. User Responsibility and Absence of Professional Advice:</strong></p>
+    <p><strong>API Key Management:</strong> This tool requires a Google API Key (`API_KEY`) to function. **The user is solely responsible for the use, security, and compliance of the provided API key** and must adhere strictly to the **Google API Terms of Service** and **YouTube API Services Terms of Service** at all times. Any consequences, including but not limited to API quota issues, misuse, or account suspension, are the sole responsibility of the user.</p>
+    <p><strong>Assumption of Risk:</strong> The content available through the Services is for **informational and educational purposes only**. By using our Services, you agree that your access and reliance on any information or tool output is **entirely at your own risk.** PooreYoutuber Tools, its operators, affiliates, and employees shall not be held liable for any direct, indirect, incidental, or consequential damages, losses, or costs arising from the use of, or inability to use, our Services.</p>
+    
+    <p style="margin-top: 20px; font-weight: bold; color: #e62117;">By utilizing any and all PooreYoutuber Tools, you hereby agree to these terms, confirming your understanding that the Services rely on external data and do not offer certified information or professional advice.</p>
+  </div>
+  
+  <script>
+    // =========================================================
+    // JAVASCRIPT LOGIC
+    // =========================================================
+    const API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo";  // ← आपकी API Key
 
-    function fetchVideoInfo(videoId) {
-      gapi.load("client", () => {
-        gapi.client.init({ apiKey: API_KEY }).then(() => {
-          return gapi.client.youtube.videos.list({
-            part: "snippet,statistics",
-            id: videoId
-          });
-        }).then(response => {
-          const video = response.result.items[0];
-          if (!video) {
-            showOutput("Video not found.");
-            return;
-          }
-          displayVideoInfo(video);
-          fetchComments(videoId);
-        }).catch(err => {
-          console.error("Error:", err);
-          showOutput("Failed to fetch video data.");
-        });
-      });
-    }
+    document.getElementById("btnFetch").addEventListener("click", () => {
+      const url = document.getElementById("videoUrl").value.trim();
+      const videoId = extractVideoId(url);
+      if (!videoId) {
+        alert("Invalid YouTube video URL.");
+        return;
+      }
+      fetchVideoInfo(videoId);
+    });
 
-    function displayVideoInfo(video) {
-      const snippet = video.snippet;
-      const stats = video.statistics;
+    function extractVideoId(url) {
+      const match = url.match(/(?:v=|\.be\/)([a-zA-Z0-9_-]{11})/);
+      return match ? match[1] : null;
+    }
 
-      let html = "";
-      html += `<div class="section"><strong>Title:</strong> ${snippet.title}</div>`;
-      html += `<div class="section"><strong>Description:</strong><br> ${snippet.description.replace(/\n/g, "<br>")}</div>`;
-      html += `<div class="section"><strong>Channel:</strong> ${snippet.channelTitle}</div>`;
-      html += `<div class="section"><strong>Published On:</strong> ${new Date(snippet.publishedAt).toLocaleString()}</div>`;
-      html += `<div class="section"><strong>Tags:</strong> ${snippet.tags ? snippet.tags.join(", ") : "None"}</div>`;
-      html += `<div class="section"><strong>Views:</strong> ${stats.viewCount}</div>`;
-      html += `<div class="section"><strong>Likes:</strong> ${stats.likeCount || "Hidden"}</div>`;
-      html += `<div class="section"><strong>Comments:</strong> ${stats.commentCount || "Unavailable"}</div>`;
+    function fetchVideoInfo(videoId) {
+      showOutput('<p style="color: #e62117; font-weight: bold;">Fetching data... Please wait.</p>');
+      gapi.load("client", () => {
+        gapi.client.init({ apiKey: API_KEY }).then(() => {
+          return gapi.client.youtube.videos.list({
+            part: "snippet,statistics",
+            id: videoId
+          });
+        }).then(response => {
+          const video = response.result.items[0];
+          if (!video) {
+            showOutput("Video not found or API key/quota issue.");
+            return;
+          }
+          displayVideoInfo(video);
+          fetchComments(videoId);
+        }).catch(err => {
+          console.error("Error:", err);
+          showOutput("<p style='color: red;'>Failed to fetch video data. Check your API Key, network connection, or console for errors.</p>");
+        });
+      });
+    }
 
-      document.getElementById("output").innerHTML = html;
-    }
+    function displayVideoInfo(video) {
+      const snippet = video.snippet;
+      const stats = video.statistics;
 
-    function fetchComments(videoId) {
-      gapi.client.youtube.commentThreads.list({
-        part: "snippet",
-        videoId: videoId,
-        maxResults: 5,
-        textFormat: "plainText"
-      }).then(response => {
-        const items = response.result.items;
-        if (!items || items.length === 0) {
-          document.getElementById("output").innerHTML += "<div>No comments found or comments are disabled.</div>";
-          return;
-        }
+      let html = "";
+      html += `<div class="section"><strong>Title:</strong> ${snippet.title}</div>`;
+      html += `<div class="section"><strong>Description:</strong><br> ${snippet.description.replace(/\n/g, "<br>")}</div>`;
+      html += `<div class="section"><strong>Channel:</strong> ${snippet.channelTitle}</div>`;
+      html += `<div class="section"><strong>Published On:</strong> ${new Date(snippet.publishedAt).toLocaleString()}</div>`;
+      html += `<div class="section"><strong>Tags:</strong> ${snippet.tags ? snippet.tags.join(", ") : "None"}</div>`;
+      html += `<div class="section"><strong>Views:</strong> ${stats.viewCount || "Unavailable"}</div>`;
+      html += `<div class="section"><strong>Likes:</strong> ${stats.likeCount || "Hidden/Unavailable"}</div>`;
+      html += `<div class="section"><strong>Comments Count:</strong> ${stats.commentCount || "Unavailable"}</div>`;
 
-        let html = "<div class='section'><strong>Top 5 Comments:</strong></div>";
-        items.forEach(item => {
-          const c = item.snippet.topLevelComment.snippet;
-          html += `
-            <div class="comment">
-              <strong>${c.authorDisplayName}</strong>:<br>
-              ${c.textDisplay}<br>
-              <small>👍 ${c.likeCount} | 🕒 ${new Date(c.publishedAt).toLocaleString()}</small>
-            </div>`;
-        });
-        document.getElementById("output").innerHTML += html;
-      }).catch(err => {
-        console.warn("Comments fetch error:", err);
-      });
-    }
+      document.getElementById("output").innerHTML = html;
+    }
 
-    function showOutput(html) {
-      document.getElementById("output").innerHTML = html;
-    }
-  </script>
+    function fetchComments(videoId) {
+      gapi.client.youtube.commentThreads.list({
+        part: "snippet",
+        videoId: videoId,
+        maxResults: 5,
+        textFormat: "plainText"
+      }).then(response => {
+        const items = response.result.items;
+        
+        // Append comments to the existing output
+        let commentHtml = "";
+        
+        if (!items || items.length === 0) {
+          commentHtml += "<div class='section'><strong>Top 5 Comments:</strong> No comments found or comments are disabled.</div>";
+        } else {
+          commentHtml += "<div class='section'><strong>Top 5 Comments:</strong></div>";
+          items.forEach(item => {
+            const c = item.snippet.topLevelComment.snippet;
+            commentHtml += `
+              <div class="comment">
+                <strong>${c.authorDisplayName}</strong>:<br>
+                ${c.textDisplay}<br>
+                <small>👍 ${c.likeCount} | 🕒 ${new Date(c.publishedAt).toLocaleString()}</small>
+              </div>`;
+          });
+        }
+
+        document.getElementById("output").innerHTML += commentHtml;
+      }).catch(err => {
+        console.warn("Comments fetch error:", err);
+        document.getElementById("output").innerHTML += "<div class='section'><strong style='color: orange;'>Note:</strong> Failed to fetch comments. (May be disabled for this video)</div>";
+      });
+    }
+
+    function showOutput(html) {
+      document.getElementById("output").innerHTML = html;
+    }
+  </script>
 </body>
 </html>
