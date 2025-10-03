@@ -73,7 +73,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: nowrap; /* Keep components on one line for desktop */
+      flex-wrap: nowrap;
     }
 
     .logo-container {
@@ -146,6 +146,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
         transition: transform 0.3s, box-shadow 0.3s;
     }
+    .tool:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+    .tool h3 { margin-top: 0; color: var(--text-color); }
     .tool a { 
         text-decoration: none; 
         color: #fff; 
@@ -157,8 +159,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         font-weight: bold; 
     }
     .tool a:hover { background: var(--youtube-dark-red); } 
-    
-    /* Footer and SEO Description Styles... (kept the same) */
+
+    /* SEO Description Section */
     .seo-description {
         max-width: 900px;
         margin: 50px auto 30px;
@@ -216,7 +218,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             flex-direction: column;
             width: 100%;
             gap: 10px;
-            align-items: center; /* Center the entire block */
+            align-items: center; 
         }
         
         /* Navigation Links */
@@ -224,7 +226,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             width: 100%;
             display: flex;
             flex-wrap: wrap; 
-            justify-content: space-around; /* Distribute links evenly */
+            justify-content: space-around; 
             margin-bottom: 5px;
         }
 
@@ -232,12 +234,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             margin: 5px 0;
             padding: 5px 8px;
             font-size: 14px;
-            flex-grow: 0; /* Links don't need to take full width */
+            flex-grow: 0; 
         }
         
         /* Dark Mode Toggle Button */
         #dark-mode-toggle {
-            width: 95%; /* Make button almost full width */
+            width: 95%; 
             padding: 10px;
         }
         
@@ -349,31 +351,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const toggleButton = document.getElementById('dark-mode-toggle');
     const body = document.body;
 
-    // Check for user preference in localStorage on page load
-    document.addEventListener('DOMContentLoaded', () => {
+    // **IMPORTANT FIX:** This function now checks localStorage and applies the theme immediately on page load.
+    function applyThemeFromLocalStorage() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             body.classList.add('dark-mode');
-            toggleButton.textContent = '☀️ Light Mode';
+            if (toggleButton) { // Check if the button exists on the page
+                toggleButton.textContent = '☀️ Light Mode';
+            }
         } else {
-            // Default is light mode
             body.classList.remove('dark-mode');
-            toggleButton.textContent = '🌙 Dark Mode';
+            if (toggleButton) {
+                toggleButton.textContent = '🌙 Dark Mode';
+            }
         }
-    });
+    }
+
+    // Apply theme when the page loads
+    document.addEventListener('DOMContentLoaded', applyThemeFromLocalStorage);
 
     function toggleDarkMode() {
         body.classList.toggle('dark-mode');
         
         if (body.classList.contains('dark-mode')) {
             localStorage.setItem('theme', 'dark');
-            toggleButton.textContent = '☀️ Light Mode';
         } else {
             localStorage.setItem('theme', 'light');
-            toggleButton.textContent = '🌙 Dark Mode';
         }
+        
+        // Update button text immediately
+        applyThemeFromLocalStorage(); 
     }
   </script>
 </body>
-    </html>
-    
+  </html>
+  
