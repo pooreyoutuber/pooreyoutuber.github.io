@@ -1,41 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Image to URL Converter</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
-    input { margin: 10px; }
-    button { padding: 10px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
-    button:hover { background: #0056b3; }
-    img { margin-top: 20px; max-width: 90%; border: 1px solid #ccc; padding: 5px; }
-    textarea { width: 80%; margin-top: 20px; padding: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Photo Studio Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; margin-bottom: 30px; }
+        .controls { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 25px; 
+            margin-bottom: 20px; 
+        }
+        .upload-section, .edit-section { 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 8px; 
+        }
+        #image-preview { 
+            max-width: 100%; 
+            height: auto; 
+            display: block; 
+            margin-top: 15px; 
+            border: 0px solid black; /* Default border */
+        }
+        .info { margin-top: 10px; font-size: 14px; color: #555; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input[type="range"], input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; width: 100%; }
+        .button:hover { background-color: #0056b3; }
+        
+        /* Passport Print Grid */
+        .passport-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4x2 grid for 8 photos */
+            width: 80%; /* Adjusted for better print simulation */
+            margin: 20px auto;
+            border: 1px dashed #aaa;
+            padding: 10px;
+        }
+        .passport-photo { 
+            width: 100%; 
+            height: auto;
+            aspect-ratio: 35 / 45; /* Standard passport ratio (35mm x 45mm) */
+            object-fit: cover; 
+            margin: 2px;
+            border: 1px solid #000; /* Border for individual photos */
+        }
+    </style>
 </head>
 <body>
-  <h2>Image to URL Converter</h2>
-  <input type="file" id="upload" accept="image/*"><br>
-  <button onclick="convertToURL()">Convert</button>
-  <div>
-    <img id="preview" src="">
-    <textarea id="urlBox" readonly placeholder="Image URL will appear here..."></textarea>
-  </div>
+    <div class="container">
+        <h1>📸 फोटो स्टूडियो: पासपोर्ट और एडिटिंग</h1>
+        <p>अपनी फोटो अपलोड करें और उसे बॉर्डर, साइज़ के साथ प्रोफेशनल तरीके से एडिट करें।</p>
+        
+        <div class="controls">
+            <div class="upload-section">
+                <h2>1. फोटो अपलोड करें</h2>
+                <input type="file" id="image-upload" accept="image/*">
+                
+                <img id="image-preview" alt="अपलोड की गई फोटो" style="max-height: 250px;">
+                <div class="info" id="image-info"></div>
+            </div>
+            
+            <div class="edit-section">
+                <h2>2. एडिटिंग कंट्रोल्स</h2>
+                
+                <label for="border-thickness">बॉर्डर मोटाई (Pixels):</label>
+                <input type="range" id="border-thickness" min="0" max="15" value="0">
+                <p class="info">मोटाई: <span id="current-thickness">0</span>px</p>
+                
+                <label for="border-color">बॉर्डर रंग:</label>
+                <input type="color" id="border-color" value="#000000">
 
-  <script>
-    function convertToURL() {
-      const file = document.getElementById("upload").files[0];
-      if (!file) {
-        alert("Please upload an image first!");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const imageURL = e.target.result;
-        document.getElementById("preview").src = imageURL;
-        document.getElementById("urlBox").value = imageURL;
-      };
-      reader.readAsDataURL(file);
-    }
-  </script>
+                <label for="output-size">आउटपुट साइज़:</label>
+                <select id="output-size">
+                    <option value="default">ओरिजिनल साइज़</option>
+                    <option value="passport">पासपोर्ट साइज़ (35x45mm Ratio)</option>
+                    <option value="sq">स्क्वायर (1:1)</option>
+                </select>
+
+                <button class="button" onclick="generatePassportPhotos()">3. 8 पासपोर्ट फोटो प्रिंट लेआउट बनाएँ</button>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 30px 0;">
+
+        <h2>4. प्रिंट लेआउट</h2>
+        <div id="passport-output-container" style="text-align: center;">
+            <p class="info">प्रिंट के लिए तैयार 8 फोटो का ग्रिड।</p>
+            <div class="passport-grid" id="passport-output">
+                </div>
+        </div>
+
+        <button class="button" onclick="window.print()">5. प्रिंट कमांड दें</button>
+    </div>
+
+    <script>
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const imageInfo = document.getElementById('image-info');
+        const borderThickness = document.getElementById('border-thickness');
+        const currentColor = document.getElementById('border-color');
+        const currentThickness = document.getElementById('current-thickness');
+        const outputSize = document.getElementById('output-size');
+        const passportOutput = document.getElementById('passport-output');
+        let uploadedImage = new Image();
+
+        // 1. फोटो अपलोड करना
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImage.onload = () => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    updateImageInfo(file.size);
+                    applyEdits(); // Apply default edits
+                };
+                uploadedImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // साइज़ और जानकारी अपडेट करना
+        function updateImageInfo(size) {
+            imageInfo.innerHTML = `
+                **ओरिजिनल साइज़:** ${uploadedImage.naturalWidth}px x ${uploadedImage.naturalHeight}px<br>
+                **फ़ाइल साइज़:** ${(size / 1024).toFixed(2)} KB
+            `;
+        }
+
+        // 2. एडिटिंग लागू करना (बॉर्डर और साइज़)
+        [borderThickness, currentColor, outputSize].forEach(element => {
+            element.addEventListener('input', applyEdits);
+        });
+        
+        function applyEdits() {
+            if (!uploadedImage.src) return;
+
+            // 1. बॉर्डर लगाना
+            const thickness = borderThickness.value;
+            const color = currentColor.value;
+            imagePreview.style.border = `${thickness}px solid ${color}`;
+            currentThickness.textContent = thickness;
+
+            // 2. आउटपुट साइज़/रेश्यो बदलना
+            const size = outputSize.value;
+            if (size === 'passport') {
+                imagePreview.style.aspectRatio = '35 / 45';
+                imagePreview.style.objectFit = 'cover';
+            } else if (size === 'sq') {
+                imagePreview.style.aspectRatio = '1 / 1';
+                imagePreview.style.objectFit = 'cover';
+            } else {
+                imagePreview.style.aspectRatio = 'auto';
+                imagePreview.style.objectFit = 'contain';
+            }
+        }
+
+        // 3. 8 पासपोर्ट फोटो बनाना और लेआउट दिखाना
+        function generatePassportPhotos() {
+            if (!uploadedImage.src) {
+                alert("पहले एक फोटो अपलोड करें और एडिटिंग लागू करें।");
+                return;
+            }
+
+            passportOutput.innerHTML = ''; // पुराने फोटो हटाएँ
+            
+            // 8 फोटो बनाएँ
+            for (let i = 0; i < 8; i++) {
+                const photo = document.createElement('img');
+                photo.src = uploadedImage.src;
+                photo.className = 'passport-photo';
+                photo.alt = `Passport Photo ${i+1}`;
+                
+                // प्रीव्यू पर लगे बॉर्डर को हर पासपोर्ट फोटो पर भी लागू करें
+                const thickness = borderThickness.value;
+                const color = currentColor.value;
+                photo.style.border = `${thickness}px solid ${color}`;
+
+                passportOutput.appendChild(photo);
+            }
+            
+            passportOutput.style.display = 'grid';
+            alert("8 पासपोर्ट साइज़ फोटो प्रिंट लेआउट में तैयार हैं!");
+        }
+    </script>
 </body>
 </html>
