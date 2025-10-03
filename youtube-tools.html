@@ -1,141 +1,197 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube Description & Tags Generator</title>
-<style>
-    /* Base Styles */
-    body {
-        font-family: 'Arial', sans-serif;
-        background: #f0f2f5;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 100vh;
-    }
-    header {
-        background: #ff0000;
-        width: 100%;
-        padding: 20px;
-        text-align: center;
-        color: white;
-        font-size: 26px;
-        font-weight: bold;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .container {
-        margin-top: 30px;
-        width: 90%;
-        max-width: 800px; 
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-    /* Input and Button Group Styling */
-    .input-group {
-        display: flex;
-        margin-bottom: 25px; 
-    }
-    input[type="text"] {
-        flex-grow: 1;
-        padding: 12px 15px;
-        border-radius: 5px 0 0 5px;
-        border: 1px solid #ccc;
-        font-size: 16px;
-        box-sizing: border-box;
-    }
-    button.generate-btn {
-        background: #007bff; 
-        color: white;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 0 5px 5px 0;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-        white-space: nowrap;
-    }
-    button.generate-btn:hover {
-        background: #0056b3;
-    }
-    /* Utility Explanation Section */
-    .utility-explanation {
-        text-align: left;
-        margin-bottom: 30px;
-        padding: 20px;
-        background-color: #f8f9fa; 
-        border-radius: 10px;
-        border: 1px solid #e9ecef; 
-    }
-    .utility-explanation h2 {
-        color: #007bff;
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 5px;
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 1.5em;
-    }
-    .utility-explanation p, .utility-explanation ul {
-        line-height: 1.6;
-        color: #495057;
-        margin-bottom: 15px;
-    }
-    .utility-explanation strong {
-        color: #333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Description & Tags Generator</title>
 
-    /* Results Styling */
-    .result {
-        margin-top: 20px;
-        padding-top: 20px;
-        /* Note: No border-top here, as it's handled by JS positioning */
-    }
-    .video-card {
-        background: #ffffff;
-        padding: 20px;
-        margin-bottom: 15px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        position: relative;
-        text-align: left;
-    }
-    .video-card h3 {
-        margin: 0 0 10px 0;
-        color: #ff0000;
-        font-size: 1.2em;
-    }
-    .video-card p {
-        margin: 0 0 8px 0;
-        color: #555;
-    }
-    .tags {
-        font-size: 14px;
-        color: #007bff;
-        font-weight: 500;
-        word-break: break-word; 
-    }
-    .copy-btn {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        padding: 8px 15px;
-        font-size: 14px;
-        border: none;
-        border-radius: 5px;
-        background: #28a745; 
-        color: white;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-    .copy-btn:hover {
-        background: #1e7e34;
-    }
-</style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsense.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
+
+    <style>
+        /* ================================================= */
+        /* 1. DARK MODE CSS VARIABLES */
+        /* ================================================= */
+        :root {
+            /* Light Mode Variables (Default) */
+            --bg-color: #f0f2f5;
+            --header-bg: #ff0000;
+            --container-bg: #fff;
+            --text-color: #333;
+            --secondary-text-color: #555;
+            --input-border: #ccc;
+            --blue-accent: #007bff;
+            --blue-accent-hover: #0056b3;
+            --green-accent: #28a745;
+            --explanation-bg: #f8f9fa;
+        }
+
+        /* Dark Mode Variables (Applied when body has dark-mode class) */
+        body.dark-mode {
+            --bg-color: #121212;
+            --header-bg: #cc0000;
+            --container-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --secondary-text-color: #b0b0b0;
+            --input-border: #444;
+            --blue-accent: #3498db;
+            --blue-accent-hover: #2980b9;
+            --green-accent: #2ecc71;
+            --explanation-bg: #2d2d2d;
+        }
+
+        /* ================================================= */
+        /* 2. BASE STYLES & DARK MODE APPLICATION */
+        /* ================================================= */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+        }
+        header {
+            background: var(--header-bg);
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 26px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+        }
+        .container {
+            margin-top: 30px;
+            width: 90%;
+            max-width: 800px; 
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        
+        /* Input and Button Group Styling */
+        .input-group {
+            display: flex;
+            margin-bottom: 25px; 
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border-radius: 5px 0 0 5px;
+            border: 1px solid var(--input-border);
+            font-size: 16px;
+            box-sizing: border-box;
+            background: var(--container-bg);
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        button.generate-btn {
+            background: var(--blue-accent); 
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        button.generate-btn:hover {
+            background: var(--blue-accent-hover);
+        }
+
+        /* Utility Explanation Section */
+        .utility-explanation {
+            background-color: var(--explanation-bg); 
+            border: 1px solid var(--input-border); 
+            color: var(--secondary-text-color);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .utility-explanation h2 {
+            color: var(--blue-accent);
+            border-bottom: 2px solid var(--blue-accent);
+        }
+        .utility-explanation p, .utility-explanation ul {
+            color: var(--secondary-text-color);
+        }
+        .utility-explanation strong {
+            color: var(--text-color);
+        }
+
+        /* Results Styling */
+        .video-card {
+            background: var(--container-bg);
+            border: 1px solid var(--input-border);
+        }
+        .video-card h3 {
+            color: var(--header-bg); /* YouTube Red */
+        }
+        .video-card p {
+            color: var(--secondary-text-color);
+        }
+        .tags {
+            color: var(--blue-accent);
+        }
+        .copy-btn {
+            background: var(--green-accent); 
+        }
+        .copy-btn:hover {
+            background: var(--blue-accent-hover);
+        }
+
+        /* ================================================= */
+        /* 3. MOBILE RESPONSIVENESS FIX */
+        /* ================================================= */
+        @media (max-width: 600px) {
+            header {
+                font-size: 22px;
+                padding: 15px;
+            }
+            .container {
+                margin-top: 20px;
+                padding: 15px;
+                width: 95%;
+            }
+            
+            /* Stack Input and Button on Mobile */
+            .input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            input[type="text"] {
+                width: 100%;
+                border-radius: 5px; /* Full rounded corners */
+            }
+            button.generate-btn {
+                width: 100%;
+                border-radius: 5px; /* Full rounded corners */
+                padding: 15px 20px;
+            }
+
+            .utility-explanation {
+                padding: 15px;
+            }
+            
+            .video-card {
+                padding: 15px;
+            }
+            .copy-btn {
+                position: static; /* Move button below content */
+                display: block;
+                width: 100%;
+                margin-top: 10px;
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -183,11 +239,10 @@ function generate() {
     const output = document.getElementById("output");
     const container = document.querySelector('.container');
     const explanationSection = document.getElementById('explanation-section');
-    const inputSection = document.getElementById('input-section');
     output.innerHTML = "";
 
     if (!title) {
-        output.innerHTML = "<p class='error' style='color: red; background: #fff3cd; padding: 10px; border-radius: 5px; border: 1px solid #ffeeba;'>⚠️ Please enter a video title to start content generation!</p>";
+        output.innerHTML = "<p class='error' style='color: var(--youtube-red); background: var(--explanation-bg); padding: 10px; border-radius: 5px; border: 1px solid var(--input-border);'>⚠️ Please enter a video title to start content generation!</p>";
         // Ensure explanation section remains visible if no title is entered
         if (!container.contains(explanationSection)) {
             container.appendChild(explanationSection);
@@ -196,9 +251,7 @@ function generate() {
     }
 
     // 1. Move Explanation Section BELOW the Output/Results
-    // This is the key change to ensure results (output) appear above the explanation.
     if (explanationSection && container.contains(explanationSection)) {
-        // Move explanation section to the end of the container (after output)
         container.appendChild(explanationSection);
     }
 
@@ -232,7 +285,7 @@ function generate() {
         html += `
         <div class="video-card">
             <h3>Option ${index + 1}</h3>
-            <p><strong>Description:</strong> <pre style="white-space: pre-wrap; font-family: inherit;">${video.description}</pre></p>
+            <p><strong>Description:</strong> <pre style="white-space: pre-wrap; font-family: inherit; color: var(--secondary-text-color);">${video.description}</pre></p>
             <p class="tags"><strong>Tags:</strong> ${video.tags.join(', ')}</p>
             <button class="copy-btn" onclick="copyText('${safeDesc}', '${safeTags}')">Copy All</button>
         </div>`;
@@ -250,6 +303,23 @@ function copyText(desc, tags) {
     document.body.removeChild(temp);
     alert("Description & Tags Copied to Clipboard!");
 }
+
+    // ==========================================================
+    // 4. DARK MODE PERSISTENCE LOGIC (The fix for your problem)
+    // ==========================================================
+    const body = document.body;
+    
+    function applyThemeFromLocalStorage() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
+        }
+    }
+
+    // पेज लोड होते ही थीम लागू करें
+    document.addEventListener('DOMContentLoaded', applyThemeFromLocalStorage);
 </script>
 
 </body>
