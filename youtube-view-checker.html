@@ -4,26 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Video Checker | SEO Tool</title>
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsense.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
+
     <style>
-        /* Modern UI/UX Styles */
+        /* ================================================= */
+        /* 1. DARK MODE CSS VARIABLES (Mandatory for Persistence) */
+        /* ================================================= */
+        :root {
+            /* Light Mode Variables (Default) */
+            --bg-color: #f0f2f5;
+            --container-bg: #fff;
+            --text-color: #333;
+            --secondary-text-color: #666;
+            --input-border: #ddd;
+            --explanation-bg: #e3f2fd; /* Light Blue */
+            --explanation-border-left: #007bff;
+            --data-card-bg: #ffffff;
+            --stat-item-bg: #f1f8ff;
+            --youtube-red: #ff0000;
+            --youtube-dark-red: #cc0000;
+        }
+
+        /* Dark Mode Variables (Applied when body has dark-mode class) */
+        body.dark-mode {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --secondary-text-color: #aaa;
+            --input-border: #555;
+            --explanation-bg: #283e51; /* Darker Blue-Gray */
+            --explanation-border-left: #3498db;
+            --data-card-bg: #222;
+            --stat-item-bg: #333;
+        }
+        
+        /* ================================================= */
+        /* BASE STYLES & DARK MODE APPLICATION */
+        /* ================================================= */
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 20px;
             text-align: center;
+            transition: background-color 0.3s, color 0.3s; /* Smooth transition */
         }
         .container {
             max-width: 900px;
             margin: 0 auto;
-            background: #fff;
+            background: var(--container-bg);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s, box-shadow 0.3s;
         }
         h1 {
-            color: #ff0000; /* YouTube Red */
+            color: var(--youtube-red);
             margin-bottom: 5px;
             font-size: 2.2em;
             display: flex;
@@ -31,35 +69,38 @@
             justify-content: center;
         }
         h1 span {
+            color: var(--text-color); /* Ensure the icon part changes color */
             margin-left: 10px;
         }
         p.subtitle {
             margin-bottom: 30px;
-            color: #666;
+            color: var(--secondary-text-color);
             font-size: 1.1em;
-        }
-        input[type="text"] {
-            width: 70%;
-            padding: 12px;
-            margin-bottom: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px 0 0 8px; /* Rounded left side */
-            font-size: 16px;
-            transition: border-color 0.3s;
-            box-sizing: border-box;
-            float: left;
         }
         .input-group {
             display: flex;
             justify-content: center;
             margin-bottom: 30px;
         }
+        input[type="text"] {
+            width: 70%;
+            padding: 12px;
+            margin-bottom: 0; 
+            border: 2px solid var(--input-border);
+            border-right: none; /* Removed for grouped look */
+            border-radius: 8px 0 0 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: var(--container-bg); /* Use card BG for inputs */
+            color: var(--text-color);
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
         button {
             padding: 12px 25px;
-            background-color: #ff0000; /* YouTube Red */
+            background-color: var(--youtube-red);
             color: white;
             border: none;
-            border-radius: 0 8px 8px 0; /* Rounded right side */
+            border-radius: 0 8px 8px 0;
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
@@ -67,95 +108,86 @@
             white-space: nowrap;
         }
         button:hover {
-            background-color: #cc0000;
-        }
-        #result {
-            margin-top: 30px;
-            text-align: left;
-            border-top: 1px solid #eee;
-            padding-top: 25px;
+            background-color: var(--youtube-dark-red);
         }
         
-        /* Tool Explanation/Disclaimer Section Styling */
+        /* Explanation Section */
         .explanation-section {
-            text-align: left;
-            margin-top: 20px;
-            padding: 25px;
-            background-color: #e3f2fd; /* Light Blue background for contrast */
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border-left: 5px solid #007bff;
+            background-color: var(--explanation-bg);
+            border-left: 5px solid var(--explanation-border-left);
+            color: var(--text-color); /* Inherit or explicitly set text color */
         }
         .explanation-section h2 {
-            color: #007bff;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 5px;
-            margin-top: 0;
-            margin-bottom: 15px;
+            color: var(--explanation-border-left);
+            border-bottom: 2px solid var(--explanation-border-left);
         }
         .explanation-section p, .explanation-section ul {
-            line-height: 1.7;
-            color: #555;
-            margin-bottom: 15px;
+            color: var(--secondary-text-color);
         }
-        .explanation-section strong {
-            color: #333;
-        }
-        
+
         /* Result Styling */
         .data-card {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-        }
-        .data-card h2 {
-            font-size: 1.5em;
-            color: #007bff;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 5px;
-            margin-top: 0;
-            margin-bottom: 20px;
+            background-color: var(--data-card-bg);
+            border: 1px solid var(--input-border);
+            transition: background-color 0.3s, border-color 0.3s;
         }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
-            margin-top: 15px;
         }
         .stat-item {
-            background-color: #f1f8ff;
-            padding: 15px;
-            border-radius: 8px;
+            background-color: var(--stat-item-bg);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s;
         }
         .stat-item strong {
-            display: block;
-            font-size: 0.9em;
-            color: #007bff;
-            margin-bottom: 5px;
+            color: var(--explanation-border-left); /* Use the accent color */
         }
         .stat-item span {
-            font-size: 1.5em;
-            color: #333;
-            font-weight: 600;
-        }
-        .tag-badge {
-            display: inline-block;
-            background-color: #ffc107;
-            color: #333;
-            padding: 5px 10px;
-            margin: 5px 5px 5px 0;
-            border-radius: 20px;
-            font-size: 0.9em;
+            color: var(--text-color);
         }
         .error {
-            color: #dc3545;
-            font-weight: bold;
-            padding: 10px;
-            background-color: #f8d7da;
-            border-radius: 5px;
+            /* Error colors */
+        }
+
+        /* ================================================= */
+        /* 3. MOBILE RESPONSIVENESS FIX (for mobile-friendly layout) */
+        /* ================================================= */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+                box-shadow: none; /* Less shadow on mobile */
+                border-radius: 0;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+
+            /* Stack Input and Button on mobile */
+            .input-group {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            input[type="text"] {
+                width: 100%;
+                border-radius: 8px; /* Full rounded corners */
+                border-right: 2px solid var(--input-border); /* Restore right border */
+            }
+            button {
+                width: 100%;
+                border-radius: 8px; /* Full rounded corners */
+                padding: 15px;
+            }
+
+            /* Statistics grid to single column */
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -186,7 +218,7 @@
             <li><strong>Comment Count:</strong> Measure community interaction and the video's ability to spark conversation. Active comments are a strong ranking signal.</li>
         </ul>
 
-        <h3>Why is This Information Useful for SEO? (Approx. 650 words total in this section)</h3>
+        <h3>Why is This Information Useful for SEO?</h3>
         <p>In the competitive world of YouTube, success isn't just about creating good content—it's about making that content **discoverable**. Our tool demystifies the technical side of video marketing, making it accessible to everyone. By analyzing top-performing videos, you can uncover their secrets:</p>
         
         <p><strong>Reverse-Engineer Success:</strong> When a competitor's video ranks high for your target keyword, simply check their video. What phrases did they use in their title? How did they structure their description to capture long-tail search traffic? This tool provides the raw materials for you to **reverse-engineer** their successful strategy, allowing you to adapt those effective elements for your own content.</p>
@@ -266,13 +298,13 @@
 
         // SEO Snippet Details
         html += `<div class="data-card">`;
-        html += `<h2 style="color: #ff0000; border-bottom-color: #ff0000;">Video Details & Metadata</h2>`;
+        html += `<h2 style="color: var(--youtube-red); border-bottom-color: var(--youtube-red);">Video Details & Metadata</h2>`;
         html += `<p><strong>Title:</strong> ${snippet.title}</p>`;
         
         // Description
         const descriptionText = snippet.description || 'No description available.';
         const fullDescription = descriptionText.replace(/\n/g, '<br>');
-        html += `<p><strong>Description:</strong> <br><span style="font-size: 0.9em; color: #555;">${fullDescription}</span></p>`;
+        html += `<p><strong>Description:</strong> <br><span style="font-size: 0.9em; color: var(--secondary-text-color);">${fullDescription}</span></p>`;
         
         // Tags
         html += `<p><strong>Tags:</strong> <br>`;
@@ -306,6 +338,23 @@
 
         resultDiv.innerHTML = html;
     }
+    
+    // ==========================================================
+    // 4. DARK MODE PERSISTENCE LOGIC (The fix for your problem)
+    // ==========================================================
+    const body = document.body;
+    
+    function applyThemeFromLocalStorage() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
+        }
+    }
+
+    // पेज लोड होते ही थीम लागू करें (यही वह चीज़ है जो थीम को याद रखती है)
+    document.addEventListener('DOMContentLoaded', applyThemeFromLocalStorage);
 </script>
 
 </body>
