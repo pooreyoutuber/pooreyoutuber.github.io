@@ -1,84 +1,66 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>YouTube Video Info Tool — Enhanced</title>
-  <meta name="description" content="Paste any YouTube video link and instantly get title, description, views, likes, channel name and more. Clean UI, mobile friendly." />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YouTube Video Info Tool | Free Metadata Extractor</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo card" aria-hidden>
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="6" fill="#0b1220"/>
-          <path d="M9 8.5v7l6-3.5-6-3.5z" fill="url(#g)" />
-          <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#1e90ff"/><stop offset="1" stop-color="#6ad6ff"/></linearGradient></defs>
-        </svg>
+  <div class="container">
+    <!-- Hero Section -->
+    <div class="hero card">
+      <h1>🎬 YouTube Video Info Tool</h1>
+      <p class="subtitle">
+        Enter any YouTube video URL to instantly get its title, views, likes, publish date, channel name, and full description.
+      </p>
+      <div class="input-row">
+        <input type="text" id="videoUrl" placeholder="Paste YouTube video link here...">
+        <button id="fetchBtn">Fetch Info 📊</button>
       </div>
-      <div>
-        <h1>YouTube Video Metadata Tool</h1>
-        <p class="lead">Paste a YouTube link to instantly fetch title, views, likes, channel and full description — fast &amp; mobile-friendly.</p>
-      </div>
-    </header>
+      <p id="status"></p>
+    </div>
 
-    <div class="card">
-      <div class="top-row">
-        <div class="input-block">
-          <label for="videoUrl">YouTube video URL or ID</label>
-          <div class="input-row">
-            <input id="videoUrl" type="text" placeholder="https://www.youtube.com/watch?v=..." aria-label="YouTube URL or ID" />
-            <button class="btn" id="fetchBtn">Fetch Info</button>
-            <button class="btn ghost" id="clearBtn">Clear</button>
-          </div>
-        </div>
-        <div class="status" id="status"></div>
-      </div>
-
-      <div class="grid hidden" id="resultCard">
-        <div>
-          <img id="thumbnail" class="thumb" src="" alt="Video thumbnail" />
-          <div class="action-row">
-            <button class="btn" id="openBtn">Open on YouTube</button>
-            <button class="btn ghost" id="copyBtn">Copy URL</button>
-          </div>
-        </div>
-
-        <div class="meta">
-          <h2 id="title">&nbsp;</h2>
+    <!-- Result Section -->
+    <div id="result" class="card hidden">
+      <div class="video-meta">
+        <img id="thumbnail" src="" alt="Thumbnail" />
+        <div class="info">
+          <h2 id="title"></h2>
           <p><strong>Channel:</strong> <span id="channelTitle"></span></p>
           <p><strong>Published:</strong> <span id="publishedAt"></span></p>
-          <div class="stat-row">
-            <div class="stat">Views: <span id="views">—</span></div>
-            <div class="stat">Likes: <span id="likes">—</span></div>
-            <div class="stat">Comments: <span id="comments">—</span></div>
-            <div class="stat">Duration: <span id="duration">—</span></div>
-          </div>
-          <div class="desc" id="description">&nbsp;</div>
+          <p><strong>Views:</strong> <span id="views"></span></p>
+          <p><strong>Likes:</strong> <span id="likes"></span></p>
+          <p><strong>Comments:</strong> <span id="comments"></span></p>
         </div>
       </div>
-
-      <div class="summary">
-        <h3>About This YouTube Video Info Tool</h3>
-        <p>
-          This YouTube Video Metadata Tool is designed to give creators, researchers, and curious viewers rapid access to a video’s public metadata in a single, clean interface. By simply pasting a YouTube video link or ID, users receive the video’s official title, full description text, channel name, publication date, view count, likes, comments, and thumbnail — information that helps with content analysis, competitive research, SEO testing, and quick checks before embedding or sharing a video.
-        </p>
-        <p>
-          Built for both novices and advanced users, the tool supports common workflows like keyword research, competitive benchmarking, and content audits. Content creators can quickly inspect titles and descriptions to spot keyword placement and tag hints; marketers can evaluate engagement signals such as views and likes to prioritize outreach or inspiration; and educators can verify publication dates and source channels before referencing a video in lessons.
-        </p>
-        <p>
-          The design focuses on accessibility and mobile responsiveness, so it performs well across devices whether you’re on a desktop browser or a smartphone. Lightweight front-end code ensures rapid load times and fewer dependencies. Developers who want to extend the functionality can add features like CSV export, bulk URL processing, or automatic keyword extraction from titles and descriptions.
-        </p>
-        <p>
-          For accuracy and freshness, this implementation uses the official YouTube Data API (v3) to fetch real-time statistics and snippet fields. The tool also handles common URL formats and ID-only input, offers helpful status messages when a video is unavailable or private, and provides graceful error feedback where the API key is missing or rate-limited.
-        </p>
-        <p>
-          In short, the tool is a compact, reliable utility that reduces friction when gathering YouTube video metadata. Whether you’re validating a source, auditing competitors, or doing quick content research, this tool is intended to be your fast and friendly metadata helper.
-        </p>
+      <div class="description">
+        <h3>Description:</h3>
+        <p id="description"></p>
       </div>
+    </div>
 
-      <div class="footer">Tip: Replace <code>YOUR_API_KEY_HERE</code> in <code>script.js</code> with your YouTube Data API key.</div>
+    <!-- Summary Section -->
+    <div class="summary card">
+      <h2>📌 About This YouTube Video Info Tool</h2>
+      <p>
+        The YouTube Video Info Tool is a simple yet powerful utility that helps you extract detailed metadata from any public YouTube video. Whether you are a content creator, a digital marketer, a teacher, or simply a curious viewer, this tool brings valuable insights to your fingertips. By just pasting a YouTube video link, you instantly receive important details such as the video’s official title, publishing date, channel name, number of views, likes, comments, and the complete description.
+      </p>
+      <p>
+        For content creators, this tool is extremely helpful in analyzing competitors’ videos. You can easily check how top creators structure their titles and descriptions, how many views they are generating, and the level of engagement reflected through likes and comments. This allows you to refine your own video strategy, learn SEO patterns, and implement best practices for titles and descriptions that are proven to work.
+      </p>
+      <p>
+        Marketers and SEO professionals can also benefit from this tool. By analyzing video metadata, you can identify keyword opportunities, observe trending content, and benchmark engagement metrics against your own campaigns. Since the data is pulled directly from YouTube’s official API, you can trust that it’s accurate and updated in real time.
+      </p>
+      <p>
+        Teachers and educators can use the tool to verify the source and credibility of a video before including it in lessons or presentations. The publish date and channel information provide transparency, while the description offers additional context that may be valuable for research and academic use.
+      </p>
+      <p>
+        Unlike browser extensions or heavy software, this web-based tool is lightweight, fast, and works on any device. No installation or login is required. Simply paste a video URL, click “Fetch Info,” and your results appear instantly in a clean, user-friendly interface. It’s built with modern HTML, CSS, and JavaScript to ensure speed and compatibility across platforms.
+      </p>
+      <p>
+        In conclusion, the YouTube Video Info Tool is a must-have resource for anyone who needs quick access to YouTube video statistics and metadata. Whether your goal is content optimization, academic research, marketing analysis, or personal curiosity, this tool saves time and delivers the insights you need in seconds. Completely free, easy to use, and accessible anytime, it’s your reliable companion for YouTube data exploration.
+      </p>
     </div>
   </div>
 
