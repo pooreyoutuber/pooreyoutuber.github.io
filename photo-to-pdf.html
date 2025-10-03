@@ -109,7 +109,7 @@
             <p>Follow these simple steps to convert and edit your images into a single PDF file efficiently:</p>
             <ol>
                 <li>**Upload Your Images:** Click on the $\mathbf{"Choose\ File"}$ button above or drag and drop your $\mathbf{PNG}$ or $\mathbf{JPEG}$ files. You can select multiple images at once. Each image will appear in the list below as an editable card.</li>
-                <li>**Edit (Optional but Recommended):** For each image card, click the $\mathbf{"Crop\ /\ एडवांस\ फ़िल्टर"}$ button to open the editing modal.
+                <li>**Edit (Optional but Recommended):** For each image card, click the $\mathbf{"Crop\ /\ Advanced\ Filter"}$ button to open the editing modal.
                     <ul>
                         <li>**Cropping:** Use the powerful interface to select the perfect area of your image, eliminating unwanted edges or background.</li>
                         <li>**Color Filters:** Select from available filters like $\mathbf{Grayscale}$ or $\mathbf{Sepia}$ to adjust the tone for a consistent, document-ready look.</li>
@@ -136,13 +136,13 @@
     <div id="crop-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <h2>इमेज क्रॉप करें और एडिट करें</h2>
+            <h2>Crop and Edit Image</h2>
             <div id="crop-image-container">
-                <img id="crop-image" alt="क्रॉप करने के लिए इमेज">
+                <img id="crop-image" alt="Image to Crop">
             </div>
-            <button class="button convert-button" style="width:auto; float:right;" onclick="applyCropAndFilter()">क्रॉप और फ़िल्टर लागू करें</button>
+            <button class="button convert-button" style="width:auto; float:right;" onclick="applyCropAndFilter()">Apply Crop and Filter</button>
             
-            <label for="modal-filter-select" style="font-weight: normal;">कलर फ़िल्टर:</label>
+            <label for="modal-filter-select" style="font-weight: normal;">Color Filter:</label>
             <select id="modal-filter-select" class="filter-select" style="width: 200px;">
                 <option value="original">Original</option>
                 <option value="grayscale">Black & White (Grayscale)</option>
@@ -154,7 +154,7 @@
 
     <script>
         // **********************************************
-        // ********* JAvaScript Logic (Unchanged from Hindi Version) *********
+        // ********* JAvaScript Logic (Alerts and Button Text Changed to English) *********
         // **********************************************
         const { jsPDF } = window.jspdf;
         const imageList = document.getElementById('image-list');
@@ -208,8 +208,8 @@
                     <option value="vibrant">Vibrant</option>
                 </select>
                 <div class="edit-controls">
-                    <button class="button" onclick="openCropModal(${id})">क्रॉप / एडवांस फ़िल्टर</button>
-                    <button class="button delete-btn" onclick="deleteImage(${id})">हटाएँ</button>
+                    <button class="button" onclick="openCropModal(${id})">Crop / Advanced Filter</button>
+                    <button class="button delete-btn" onclick="deleteImage(${id})">Delete</button>
                 </div>
             `;
             imageList.appendChild(card);
@@ -244,7 +244,7 @@
         }
 
 
-        // 4. Opening Cropping Modal
+        // 4. Opening Cropping Modal (Unchanged)
         function openCropModal(id) {
             const imgData = imagesData.find(img => img.id === id);
             currentImageId = id;
@@ -306,10 +306,11 @@
             document.getElementById(`filter-select-${id}`).value = selectedFilter;
             
             closeModal();
-            alert("क्रॉप और फ़िल्टर सफलतापूर्वक लागू किए गए!");
+            // Updated Alert Message
+            alert("Crop and filter applied successfully!");
         }
 
-        // Canvas Filter Function
+        // Canvas Filter Function (Unchanged)
         function applyCanvasFilter(ctx, filter) {
             switch (filter) {
                 case 'grayscale':
@@ -328,7 +329,7 @@
             }
         }
 
-        // 6. Closing Modal
+        // 6. Closing Modal (Unchanged)
         function closeModal() {
             cropModal.style.display = "none";
             if (cropperInstance) {
@@ -337,7 +338,7 @@
             }
         }
         
-        // 7. Deleting Image
+        // 7. Deleting Image (Unchanged)
         function deleteImage(id) {
             const card = document.querySelector(`.image-card[data-id="${id}"]`);
             if (card) {
@@ -349,7 +350,8 @@
         // 8. Converting to PDF
         function convertToPDF() {
             if (imagesData.length === 0) {
-                alert("पहले एक या एक से ज़्यादा इमेज अपलोड करें!");
+                // Updated Alert Message
+                alert("Please upload one or more images first!");
                 return;
             }
 
