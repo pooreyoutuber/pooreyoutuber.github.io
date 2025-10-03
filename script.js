@@ -1,4 +1,4 @@
-const API_KEY = "YOUR_API_KEY_HERE"; // replace with your YouTube Data API v3 key
+const API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo"; // replace with your YouTube Data API v3 key
 const fetchBtn = document.getElementById("fetchBtn");
 const status = document.getElementById("status");
 
