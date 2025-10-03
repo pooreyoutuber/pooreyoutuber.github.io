@@ -18,7 +18,6 @@
         
         .upload-section { margin-bottom: 30px; padding: 20px; border: 2px dashed #007bff; border-radius: 8px; text-align: center; }
         
-        /* इमेज लिस्ट स्टाइलिंग */
         .image-list { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
         .image-card { 
             position: relative; 
@@ -30,7 +29,7 @@
         }
         .image-card img { 
             width: 100%; 
-            height: 150px; /* फिक्स्ड हाइट */
+            height: 150px; 
             object-fit: contain; 
             display: block; 
             margin-bottom: 10px; 
@@ -51,18 +50,27 @@
         .convert-button:hover { background-color: #1e7e34; }
         
         .delete-btn { background-color: #dc3545; }
-        .delete-btn:hover { background-color: #c82333; }
         
-        .filter-select { width: 100%; padding: 6px; border-radius: 4px; margin-top: 5px; }
-
-        /* क्रॉपिंग Modal स्टाइल */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); }
-        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 800px; border-radius: 8px; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-        .close:hover, .close:focus { color: #fff; text-decoration: none; cursor: pointer; }
-        #crop-image-container { max-height: 50vh; margin-bottom: 20px; }
-        #crop-image { max-width: 100%; display: block; }
-        .cropper-view-box { border-radius: 0 !important; } /* Cropper.js के लिए */
+        /* Description Section Styles */
+        #description-content {
+            display: none; /* डिफ़ॉल्ट रूप से छुपा हुआ */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 20px;
+            background-color: #fff8e1; /* हल्का पीला रंग ताकि ध्यान आकर्षित करे */
+        }
+        #toggle-description-btn {
+            background-color: #ff9800;
+            color: #333;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #toggle-description-btn:hover {
+            background-color: #fb8c00;
+        }
     </style>
 </head>
 <body>
@@ -70,14 +78,46 @@
         <h1>📑 इमेज-टू-PDF कनवर्टर और प्रो एडिटर</h1>
         <p>अपनी इमेज अपलोड करें, क्रॉप करें, फिल्टर लगाएँ और एक सिंगल PDF फ़ाइल में डाउनलोड करें।</p>
         
-        <div class="upload-section">
-            <input type="file" id="image-upload" accept="image/*" multiple>
-        </div>
-
-        <div class="image-list" id="image-list">
+        <div class="tool-interface">
+            <div class="upload-section">
+                <input type="file" id="image-upload" accept="image/*" multiple>
             </div>
 
-        <button class="button convert-button" onclick="convertToPDF()">सभी एडिटेड इमेज को PDF में कन्वर्ट करें और डाउनलोड करें</button>
+            <div class="image-list" id="image-list">
+                </div>
+
+            <button class="button convert-button" onclick="convertToPDF()">सभी एडिटेड इमेज को PDF में कन्वर्ट करें और डाउनलोड करें</button>
+        </div>
+        
+        <button class="button" id="toggle-description-btn" onclick="toggleDescription()">टूल के बारे में जानकारी, उपयोग और फायदे (400+ शब्द)</button>
+
+        <div id="description-content">
+            <h2>टूल क्या है और यह आपके लिए क्यों उपयोगी है?</h2>
+            <p>हमारा **प्रो इमेज-टू-PDF कनवर्टर** एक मुफ़्त और सुरक्षित ऑनलाइन टूल है जो आपकी $\mathbf{JPEG}$ या $\mathbf{PNG}$ फ़ाइलों को आसानी से एक ही पोर्टेबल $\mathbf{PDF}$ दस्तावेज़ में बदलता है। यह उन सभी यूज़र्स के लिए ज़रूरी है जिन्हें नोट्स, हैंडआउट्स, या फोटो कलेक्शन को साझा करने या प्रिंट करने की ज़रूरत होती है।</p>
+            <p>बाज़ार के अन्य टूल्स के विपरीत, हमारा टूल $\mathbf{Cropper.js}$ जैसी एडवांस लाइब्रेरी का उपयोग करता है, जिससे आपको **पेशेवर क्रॉपिंग** और **कलर फ़िल्टर** (जैसे Black & White, Soft Tone/Sepia, और Vibrant इफ़ेक्ट) लागू करने की पूरी स्वतंत्रता मिलती है। यह टूल **पूरी तरह से ब्राउज़र-आधारित** है, जिसका मतलब है कि आपकी इमेज अपलोड करने के बाद कहीं भी सेव नहीं होती; आपकी गोपनीयता (Privacy) हमारे लिए सर्वोपरि है।</p>
+            
+            <hr>
+            
+            <h2>टूल का उपयोग कैसे करें? (आसान स्टेप-बाय-स्टेप गाइड)</h2>
+            <ol>
+                <li>**इमेज अपलोड करें:** ऊपर दिए गए $\mathbf{"Choose\ File"}$ बटन का उपयोग करके अपनी सभी ज़रूरी फोटो एक साथ चुनें। हर फोटो नीचे लिस्ट में एक कार्ड के रूप में दिखाई देगी।</li>
+                <li>**क्रॉप और फ़िल्टर लागू करें:** हर इमेज कार्ड के नीचे मौजूद $\mathbf{"क्रॉप\ /\ एडवांस\ फ़िल्टर"}$ बटन पर क्लिक करें।
+                    <ul>
+                        <li>**क्रॉपिंग:** Pop-up विंडो में, इमेज को खींचकर और ज़ूम करके मनचाहा हिस्सा चुनें।</li>
+                        <li>**कलर फ़िल्टर:** Pop-up में दिए गए ड्रॉपडाउन से $\mathbf{Black\ &\ White}$ या $\mathbf{Soft\ Tone}$ जैसे फ़िल्टर चुनें।</li>
+                        <li>बदलाव सेव करने के लिए $\mathbf{"क्रॉप\ और\ फ़िल्टर\ लागू\ करें"}$ बटन पर क्लिक करें।</li>
+                    </ul>
+                </li>
+                <li>**PDF में कन्वर्ट करें:** जब सभी एडिटिंग पूरी हो जाए और लिस्ट में सारी इमेज सही क्रम में हों, तो $\mathbf{"सभी\ एडिटेड\ इमेज\ को\ PDF\ में\ कन्वर्ट\ करें"}$ बटन पर क्लिक करें।</li>
+                <li>**डाउनलोड करें:** $\mathbf{jsPDF}$ लाइब्रेरी आपके ब्राउज़र में ही PDF को बनाएगी और यह तुरंत आपके डिवाइस पर डाउनलोड हो जाएगी।</li>
+            </ol>
+
+            <hr>
+            
+            <h2>यह टूल YouTubers और क्रिएटर्स के लिए क्यों उपयोगी है?</h2>
+            <p>एक YouTuber के रूप में, आपको अक्सर अपने वर्कफ़्लो के लिए डिजिटल दस्तावेज़ों की आवश्यकता होती है। चाहे वह आपके वीडियो के लिए $\mathbf{स्क्रिप्ट\ के\ नोट्स}$ हों, $\mathbf{थंबनेल\ आइडियाज}$ के स्क्रीनशॉट्स हों, या $\mathbfक्लाइंट्स\ को\ भेजने\ के\ लिए\ प्रूफ\ ऑफ़\ वर्क}$ हो, इन सभी इमेजेस को एक प्रोफेशनल $\mathbf{PDF}$ फ़ाइल में व्यवस्थित करना बहुत आसान होता है। यह टूल आपको वह नियंत्रण देता है जो अन्य साधारण कनवर्टर नहीं देते—खासकर $\mathbf{फ़िल्टर\ और\ क्रॉपिंग}$ का विकल्प, जो यह सुनिश्चित करता है कि आपके PDF दस्तावेज़ हमेशा **साफ़ और आकर्षक** दिखें। हमारा टूल आपकी समय और मेहनत दोनों बचाता है।</p>
+            </div>
+
     </div>
 
     <div id="crop-modal" class="modal">
@@ -100,18 +140,34 @@
     </div>
 
     <script>
+        // **********************************************
+        // ********* JAvaScript Logic (Same as before) *********
+        // **********************************************
         const { jsPDF } = window.jspdf;
         const imageList = document.getElementById('image-list');
         const imageUpload = document.getElementById('image-upload');
         const cropModal = document.getElementById('crop-modal');
         const cropImage = document.getElementById('crop-image');
         const modalFilterSelect = document.getElementById('modal-filter-select');
+        const descriptionContent = document.getElementById('description-content');
+        const toggleDescriptionBtn = document.getElementById('toggle-description-btn');
 
         let imagesData = [];
         let cropperInstance = null;
         let currentImageId = null;
 
-        // 1. मल्टीपल इमेज को हैंडल करना
+        // नए फंक्शन: जानकारी सेक्शन को दिखाना/छुपाना
+        function toggleDescription() {
+            if (descriptionContent.style.display === 'none' || descriptionContent.style.display === '') {
+                descriptionContent.style.display = 'block';
+                toggleDescriptionBtn.textContent = 'टूल के बारे में जानकारी, उपयोग और फायदे (छुपाएँ)';
+            } else {
+                descriptionContent.style.display = 'none';
+                toggleDescriptionBtn.textContent = 'टूल के बारे में जानकारी, उपयोग और फायदे (400+ शब्द)';
+            }
+        }
+
+        // 1. मल्टीपल इमेज को हैंडल करना (Code is same)
         imageUpload.addEventListener('change', (event) => {
             const files = event.target.files;
             Array.from(files).forEach(file => {
@@ -126,14 +182,14 @@
             imageUpload.value = '';
         });
 
-        // 2. इमेज लिस्ट में कार्ड बनाना
+        // 2. इमेज लिस्ट में कार्ड बनाना (Code is same)
         function addImageCard(dataURL) {
             const id = Date.now();
             
             const newImage = {
                 id: id,
-                originalDataURL: dataURL, // हमेशा ओरिजिनल URL रखें
-                editedDataURL: dataURL,   // एडिटिंग के बाद का URL
+                originalDataURL: dataURL,
+                editedDataURL: dataURL,
                 filter: 'original',
                 cropData: null,
             };
@@ -164,7 +220,7 @@
             const imgData = imagesData.find(img => img.id === id);
             const imgElement = document.getElementById(`img-preview-${id}`);
             
-            imgData.filter = filterValue; // डेटा में अपडेट करें
+            imgData.filter = filterValue; 
 
             // CSS Filter सिर्फ़ प्रीव्यू पर लागू करें
             applyCssFilter(imgElement, filterValue);
@@ -188,31 +244,27 @@
             }
         }
 
-
-        // 4. क्रॉपिंग मॉडल खोलना
+        // 4. क्रॉपिंग मॉडल खोलना (Code is same)
         function openCropModal(id) {
             const imgData = imagesData.find(img => img.id === id);
             currentImageId = id;
             
-            // Cropper.js को Destroy करें अगर यह पहले से मौजूद है
             if (cropperInstance) {
                 cropperInstance.destroy();
             }
 
             cropImage.src = imgData.originalDataURL;
-            modalFilterSelect.value = imgData.filter; // फ़िल्टर वैल्यू सेट करें
+            modalFilterSelect.value = imgData.filter; 
             
             cropModal.style.display = "block";
             
-            // Cropper.js को लोड होने में थोड़ा समय दें
             setTimeout(() => {
                 cropperInstance = new Cropper(cropImage, {
-                    aspectRatio: NaN, // फ्री क्रॉपिंग
+                    aspectRatio: NaN, 
                     viewMode: 1,
                     initialAspectRatio: imgData.cropData ? imgData.cropData.width / imgData.cropData.height : NaN,
                     ready: function () {
                         if (imgData.cropData) {
-                            // अगर पहले से क्रॉप डेटा है तो उसे सेट करें
                             this.cropper.setData(imgData.cropData);
                         }
                     }
@@ -220,7 +272,7 @@
             }, 100);
         }
         
-        // 5. क्रॉपिंग और फ़िल्टर लागू करना (सबसे ज़रूरी हिस्सा)
+        // 5. क्रॉपिंग और फ़िल्टर लागू करना (Code is same)
         function applyCropAndFilter() {
             const id = currentImageId;
             const imgData = imagesData.find(img => img.id === id);
@@ -228,11 +280,9 @@
 
             if (!cropperInstance) return;
 
-            // 5a. क्रॉप डेटा प्राप्त करें और स्टोर करें
             const cropData = cropperInstance.getData();
             imgData.cropData = cropData; 
 
-            // 5b. कैनवास का उपयोग करके इमेज को क्रॉप करें और फ़िल्टर लागू करें
             const croppedCanvas = cropperInstance.getCroppedCanvas();
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -240,32 +290,25 @@
             canvas.width = croppedCanvas.width;
             canvas.height = croppedCanvas.height;
 
-            // कैनवास पर फ़िल्टर लागू करें
             applyCanvasFilter(ctx, selectedFilter);
 
-            // cropped image को canvas पर draw करें
             ctx.drawImage(croppedCanvas, 0, 0, canvas.width, canvas.height);
 
-            // फाइनल डेटा URL प्राप्त करें
             const finalDataURL = canvas.toDataURL('image/jpeg', 0.9);
             
-            // 5c. डेटा और प्रीव्यू अपडेट करें
             imgData.editedDataURL = finalDataURL;
-            imgData.filter = selectedFilter; // फ़िल्टर डेटा में सेव करें
+            imgData.filter = selectedFilter; 
             
-            // मेन लिस्ट के प्रीव्यू को अपडेट करें
             const previewImg = document.getElementById(`img-preview-${id}`);
             previewImg.src = finalDataURL;
-            previewImg.style.filter = 'none'; // Canvas ने फ़िल्टर लागू कर दिया है
+            previewImg.style.filter = 'none'; 
             
-            // मेन लिस्ट के फ़िल्टर सेलेक्टर को भी अपडेट करें
             document.getElementById(`filter-select-${id}`).value = selectedFilter;
             
             closeModal();
             alert("क्रॉप और फ़िल्टर सफलतापूर्वक लागू किए गए!");
         }
 
-        // कैनवास पर फ़िल्टर लगाने के लिए फ़ंक्शन
         function applyCanvasFilter(ctx, filter) {
             switch (filter) {
                 case 'grayscale':
@@ -284,7 +327,7 @@
             }
         }
 
-        // 6. मॉडल बंद करना
+        // 6. मॉडल बंद करना (Code is same)
         function closeModal() {
             cropModal.style.display = "none";
             if (cropperInstance) {
@@ -293,7 +336,7 @@
             }
         }
         
-        // 7. इमेज हटाना
+        // 7. इमेज हटाना (Code is same)
         function deleteImage(id) {
             const card = document.querySelector(`.image-card[data-id="${id}"]`);
             if (card) {
@@ -302,7 +345,7 @@
             }
         }
 
-        // 8. PDF में कन्वर्ट करना
+        // 8. PDF में कन्वर्ट करना (Code is same)
         function convertToPDF() {
             if (imagesData.length === 0) {
                 alert("पहले एक या एक से ज़्यादा इमेज अपलोड करें!");
@@ -317,14 +360,13 @@
                     doc.addPage();
                 }
                 
-                const finalDataURL = imgData.editedDataURL; // एडिट की गई इमेज का URL उपयोग करें
+                const finalDataURL = imgData.editedDataURL; 
 
                 const imgProps = doc.getImageProperties(finalDataURL);
                 const pdfWidth = doc.internal.pageSize.getWidth();
                 const pdfHeight = doc.internal.pageSize.getHeight();
                 const ratio = imgProps.width / imgProps.height;
                 
-                // इमेज को A4 पेज पर फिट करने के लिए कैलकुलेशन
                 let finalImgWidth = pdfWidth * 0.9;
                 let finalImgHeight = finalImgWidth / ratio;
 
@@ -338,9 +380,11 @@
 
                 doc.addImage(finalDataURL, 'JPEG', x, y, finalImgWidth, finalImgHeight);
                 isFirstPage = false;
+
+                if (index === imagesData.length - 1) {
+                    doc.save("edited_images_to_pdf.pdf");
+                }
             });
-            
-            doc.save("edited_images_to_pdf.pdf");
         }
     </script>
 </body>
