@@ -1,422 +1,384 @@
-<!doctype html>
-<html lang="hi">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>YouTube Channel Audit — Single File</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    :root{
-      --bg:#071025; --card:#0f1724; --muted:#9fb0c8; --accent:#ff7a59;
-    }
-    *{box-sizing:border-box;font-family:Inter, system-ui, Arial, sans-serif}
-    body{margin:0;background:linear-gradient(180deg,#041027 0%,#071226 100%);color:#e6eef6;padding:20px}
-    .wrap{max-width:980px;margin:0 auto}
-    h1{margin:6px 0 2px;font-size:22px}
-    p.lead{color:var(--muted);margin:0 0 12px}
-    .row{display:flex;gap:10px}
-    input[type="text"]{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit}
-    button{padding:12px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),#ff582e);color:#051223;font-weight:700;cursor:pointer}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:14px;border-radius:12px;margin-top:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-    .channel{display:flex;gap:12px;align-items:center}
-    .channel img{width:96px;height:96px;border-radius:12px;object-fit:cover}
-    .meta .title{font-size:18px;margin-bottom:6px}
-    .kv{color:var(--muted);font-size:13px}
-    .stats{display:flex;gap:10px;margin-top:8px}
-    .stat{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:10px;text-align:center}
-    .stat .n{font-weight:700}
-    .videos{margin-top:12px;display:grid;gap:10px}
-    .video{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;background:rgba(255,255,255,0.01)}
-    .video img{width:160px;height:90px;border-radius:8px;object-fit:cover}
-    .video .info{flex:1}
-    .badge{display:inline-block;background:rgba(255,255,255,0.04);padding:4px 8px;border-radius:999px;color:var(--muted);font-size:12px;margin-left:8px}
-    .rec{padding:10px;border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,0.015),rgba(255,255,255,0.01));margin-top:8px}
-    .small{font-size:13px;color:var(--muted)}
-    .error{color:#ff9b9b}
-    footer{margin-top:16px;color:var(--muted);font-size:13px;text-align:center}
-    .loader{display:inline-block;margin-left:8px;border:3px solid rgba(255,255,255,0.06);border-top:3px solid #fff;border-radius:50%;width:14px;height:14px;animation:spin 1s linear infinite;vertical-align:middle}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @media (max-width:700px){ .row{flex-direction:column} .video img{width:120px;height:68px} }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Image to PDF Converter & Editor | PooreYouTuber Tools</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    
+    <style>
+        /* General Styling */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; margin-bottom: 30px; }
+        
+        .upload-section { margin-bottom: 30px; padding: 20px; border: 2px dashed #007bff; border-radius: 8px; text-align: center; }
+        
+        /* Image List Styling */
+        .image-list { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+        .image-card { 
+            position: relative; 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            border-radius: 8px; 
+            width: 240px; 
+            background: #f9f9f9;
+        }
+        .image-card img { 
+            width: 100%; 
+            height: 150px; 
+            object-fit: contain; 
+            display: block; 
+            margin-bottom: 10px; 
+            border-radius: 4px;
+        }
+        .edit-controls { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+            margin-top: 10px; 
+            justify-content: space-between;
+        }
+        
+        /* Button Styling */
+        .button { background-color: #007bff; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
+        .button:hover { background-color: #0056b3; }
+        .convert-button { width: 100%; margin-top: 30px; padding: 15px; font-size: 18px; background-color: #28a745; }
+        .convert-button:hover { background-color: #1e7e34; }
+        
+        .delete-btn { background-color: #dc3545; }
+        .delete-btn:hover { background-color: #c82333; }
+        
+        .filter-select { width: 100%; padding: 6px; border-radius: 4px; margin-top: 5px; }
+
+        /* Cropping Modal Style */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 800px; border-radius: 8px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close:hover, .close:focus { color: #fff; text-decoration: none; cursor: pointer; }
+        #crop-image-container { max-height: 50vh; margin-bottom: 20px; }
+        #crop-image { max-width: 100%; display: block; }
+        .cropper-view-box { border-radius: 0 !important; }
+
+        /* Content Section Styles for SEO */
+        .content-section {
+            padding: 25px;
+            border: 1px solid #ffe0b2;
+            border-radius: 10px;
+            margin-top: 40px;
+            background-color: #fffaf0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .content-section h2 {
+            color: #d84315;
+            border-bottom: 2px solid #ffcc80;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+        .content-section ol {
+            padding-left: 20px;
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>YouTube Channel Audit</h1>
-    <p class="lead">Paste channel URL / @handle / channel id / or video URL.</p>
+    <div class="container">
+        <h1>📑 Image-to-PDF Converter & Pro Editor</h1>
+        <p>Upload your images, crop, apply filters, and download them as a single PDF file.</p>
+        
+        <div class="upload-section">
+            <input type="file" id="image-upload" accept="image/*" multiple>
+        </div>
 
-    <div class="card">
-      <div class="row">
-        <input id="inp" type="text" placeholder="e.g. https://youtube.com/@gtx1050tifireflygaming?si=_eZKs2R_0dpIFlHh" />
-        <button id="btn">Analyze</button>
-      </div>
-      <div style="margin-top:10px" class="small">
-        <strong>Note:</strong>
-      </div>
-      <div id="status" class="small" style="margin-top:8px"></div>
+        <div class="image-list" id="image-list">
+            </div>
+
+        <button class="button convert-button" onclick="convertToPDF()">Convert All Edited Images to PDF and Download</button>
+
+        <div class="content-section">
+            <h2>About the Pro Image-to-PDF Converter & Editor</h2>
+            <p>Welcome to the **Pro Image-to-PDF Converter & Editor** by PooreYouTuber Tools. This is a powerful, secure, and user-friendly online utility that lets you transform one or more images ($\mathbf{JPEG}$, $\mathbf{PNG}$) into a polished, single PDF document. Whether you're a content creator compiling research notes, a student digitizing homework, or a professional creating a presentation, our tool ensures high-quality output every time. The core process utilizes client-side rendering with the $\mathbf{jsPDF}$ library, meaning your sensitive images remain absolutely **private** and are **never uploaded** to any server.</p>
+
+            <hr>
+
+            <h2>Mastering the Editing Features: Crop and Filter</h2>
+            <p>What sets our tool apart are the integrated editing controls, ensuring your images are perfectly sized and styled before conversion. Once you upload your files using the designated area, you will see a list of image cards. Here's how to use the editing features:</p>
+            <ol>
+                <li>**Select an Image Card:** Each uploaded image displays a preview, a dropdown $\mathbf{Filter\ Select}$ option, and an $\mathbf{Edit\ Controls}$ section.</li>
+                <li>**Quick Filters:** Use the primary dropdown menu on the image card to instantly apply CSS-based filters for previewing. Options include **Original**, **Black & White** (Grayscale), **Soft Tone** (Sepia), and **Vibrant**. This is fast but doesn't permanently change the image data until the next step.</li>
+                <li>**Advanced Editing:** Click the **"क्रॉप / एडवांस फ़िल्टर"** button (which translates to **Crop / Advanced Filter**) to open the modal. This is where the magic happens:
+                    <ul>
+                        <li>**Cropping:** The main area features the $\mathbf{Cropper.js}$ tool, allowing precise selection of the image area. This is essential for removing unnecessary borders or setting specific aspect ratios for professional documents.</li>
+                        <li>**Filter Application:** In the modal, the **Color Filter** selector (**Original, Grayscale, Sepia, Vibrant**) determines the final look.</li>
+                        <li>To finalize your adjustments, hit the **"क्रॉप और फ़िल्टर लागू करें"** button (meaning **Apply Crop and Filter**). This action renders the cropped and filtered image onto a canvas, creating a new **Edited Data URL** that will be used for the final PDF.</li>
+                    </ul>
+                </li>
+                <li>**Removing Images:** If you change your mind, the **"हटाएँ"** button (meaning **Delete**) removes the image from the list and the PDF queue immediately.</li>
+            </ol>
+
+            <hr>
+            
+            <h2>Finalizing the PDF Conversion and Download</h2>
+            <p>After perfecting your images, the final step is conversion. The large, prominent button labeled **"Convert All Edited Images to PDF and Download"** initiates the process. The tool sequentially places each edited image onto a new A4 page within the PDF, automatically scaling it to fit while maintaining aspect ratio and quality. The use of $\mathbf{Image\ Properties}$ and careful scaling ensures that your visual content looks sharp on every page of the final PDF.</p>
+            <p>Our commitment is to provide a $\mathbf{100\%}$ free, $\mathbf{privacy-focused}$ tool for high-efficiency document creation. By relying on browser technologies, we eliminate server load and security concerns, delivering the final, merged PDF directly to your downloads folder instantly. This feature makes us the preferred choice for reliable $\mathbf{Image-to-PDF\ conversion}$ and $\mathbf{editing\ online}$.</p>
+        </div>
     </div>
 
-    <div id="out"></div>
+    <div id="crop-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>इमेज क्रॉप करें और एडिट करें</h2>
+            <div id="crop-image-container">
+                <img id="crop-image" alt="क्रॉप करने के लिए इमेज">
+            </div>
+            <button class="button convert-button" style="width:auto; float:right;" onclick="applyCropAndFilter()">क्रॉप और फ़िल्टर लागू करें</button>
+            
+            <label for="modal-filter-select" style="font-weight: normal;">कलर फ़िल्टर:</label>
+            <select id="modal-filter-select" class="filter-select" style="width: 200px;">
+                <option value="original">Original</option>
+                <option value="grayscale">Black & White (Grayscale)</option>
+                <option value="sepia">Soft Tone (Sepia)</option>
+                <option value="vibrant">Vibrant (Saturation)</option>
+            </select>
+        </div>
+    </div>
 
-    <footer>Built for you — paste & run. If a request fails.</footer>
-  </div>
+    <script>
+        // **********************************************
+        // ********* JAvaScript Logic (Unchanged) *********
+        // **********************************************
+        const { jsPDF } = window.jspdf;
+        const imageList = document.getElementById('image-list');
+        const imageUpload = document.getElementById('image-upload');
+        const cropModal = document.getElementById('crop-modal');
+        const cropImage = document.getElementById('crop-image');
+        const modalFilterSelect = document.getElementById('modal-filter-select');
 
-<script>
-/*
-  Single-file YouTube audit
-  - Robust input parsing for many URL forms (handles ?si=, @handle, channel/, user/, video URL)
-  - Uses YouTube Data API v3 client-side with API_KEY below
-  - Fetches channel info, uploads playlist, video details, selects top 10 by views
-  - Shows SEO/UX recommendations
-*/
+        let imagesData = [];
+        let cropperInstance = null;
+        let currentImageId = null;
 
-/* ---------- CONFIG: paste your API key here ---------- */
-const API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo"; // <-- your key (testing only)
-
-/* ---------- UI refs ---------- */
-const inp = document.getElementById('inp');
-const btn = document.getElementById('btn');
-const out = document.getElementById('out');
-const status = document.getElementById('status');
-
-btn.addEventListener('click', runAudit);
-inp.addEventListener('keydown', e => { if (e.key === 'Enter') runAudit(); });
-
-function setStatus(txt, loading=false, isError=false){
-  status.innerHTML = txt + (loading? '<span class="loader"></span>':'');
-  status.className = isError ? 'error small' : 'small';
-}
-
-function clearOutput(){ out.innerHTML = ''; }
-
-/* ---------- Helpers ---------- */
-function human(n){
-  if (n === undefined || n === null) return '-';
-  n = Number(n);
-  if (isNaN(n)) return '-';
-  if (n >= 1e9) return (n/1e9).toFixed(2)+'B';
-  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
-  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
-  return n.toString();
-}
-
-function parseInput(input){
-  input = (input||'').trim();
-  if (!input) return { type: 'invalid' };
-
-  // direct channel id: UC...
-  if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return { type:'channelId', id: input };
-
-  // video id / watch?v= / youtu.be/
-  let m = input.match(/(?:v=|youtu\.be\/|\/watch\/|\/embed\/)([A-Za-z0-9_-]{11})/);
-  if (m) return { type:'videoId', id: m[1] };
-
-  // channel URL: /channel/ID
-  m = input.match(/youtube\.com\/channel\/([A-Za-z0-9_-]+)/i);
-  if (m) return { type:'channelId', id: m[1] };
-
-  // user URL: /user/NAME
-  m = input.match(/youtube\.com\/user\/([^\/?\s]+)/i);
-  if (m) return { type:'forUsername', id: m[1] };
-
-  // handle: @handle in URL or plain @handle
-  m = input.match(/@([A-Za-z0-9_]+)/);
-  if (m) return { type:'handle', id: m[1] };
-
-  // channel custom URL (youtube.com/c/Name) - use search fallback
-  m = input.match(/youtube\.com\/c\/([^\/?\s]+)/i);
-  if (m) return { type:'search', id: m[1] };
-
-  // plain domainless handle or plain name: treat as search
-  return { type:'search', id: input };
-}
-
-/* ---------- API wrappers ---------- */
-
-async function apiGET(url){
-  const res = await fetch(url);
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`HTTP ${res.status}: ${text}`);
-  }
-  return res.json();
-}
-
-async function resolveChannelIdFromInput(input){
-  const parsed = parseInput(input);
-  if (parsed.type === 'invalid') throw new Error('Kuch daala hi nahi — channel URL / handle dalo.');
-  if (parsed.type === 'channelId') return parsed.id;
-
-  if (parsed.type === 'videoId') {
-    // get video snippet -> channelId
-    setStatus('Resolving channel from video id...', true);
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${parsed.id}&key=${API_KEY}`;
-    const j = await apiGET(url);
-    if (!j.items || j.items.length === 0) throw new Error('Video not found or private.');
-    return j.items[0].snippet.channelId;
-  }
-
-  if (parsed.type === 'forUsername') {
-    setStatus('Resolving channel by username...', true);
-    const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id&forUsername=${encodeURIComponent(parsed.id)}&key=${API_KEY}`;
-    // Note: forUsername is a parameter to channels.list; browsers sometimes block, but we'll attempt search fallback if it fails.
-    try {
-      const j = await apiGET(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&forUsername=${encodeURIComponent(parsed.id)}&key=${API_KEY}`);
-      if (j.items && j.items.length) return j.items[0].id;
-    } catch(e){
-      // fallback to search below
-    }
-    // fallback to search
-    parsed.type = 'search';
-  }
-
-  if (parsed.type === 'handle' || parsed.type === 'search') {
-    setStatus('Searching for channel (handle/name)...', true);
-    // search for channel — search.list returns id.channelId in items[].id.channelId
-    const q = encodeURIComponent(parsed.id.startsWith('@')? parsed.id : parsed.id);
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${q}&maxResults=5&key=${API_KEY}`;
-    const j = await apiGET(url);
-    if (!j.items || j.items.length === 0) throw new Error('Channel not found by search. Try full channel URL or exact handle (with @).');
-    // prefer exact handle match if available
-    for (const it of j.items) {
-      const chId = it.id && (it.id.channelId || it.id.channelId);
-      const title = it.snippet && it.snippet.channelTitle;
-      const handleCandidate = it.snippet && it.snippet.customUrl;
-      if (parsed.type === 'handle') {
-        // match @handle to title or customUrl heuristically
-        if (it.snippet && (it.snippet.customUrl && it.snippet.customUrl.toLowerCase() === parsed.id.toLowerCase()
-            || ('@'+(it.snippet.customUrl||'')).toLowerCase() === ('@'+parsed.id).toLowerCase())) {
-          if (chId) return chId;
-        }
-      }
-    }
-    // else return first result's channelId
-    const first = j.items[0];
-    if (first && first.id && first.id.channelId) return first.id.channelId;
-    throw new Error('Unable to resolve channel id from search result.');
-  }
-
-  throw new Error('Unsupported input format.');
-}
-
-async function getChannelDetails(channelId){
-  setStatus('Fetching channel details...', true);
-  const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelId}&key=${API_KEY}`;
-  const j = await apiGET(url);
-  if (!j.items || !j.items.length) throw new Error('Channel details not found.');
-  const ch = j.items[0];
-  return {
-    id: ch.id,
-    title: ch.snippet.title,
-    desc: ch.snippet.description || '',
-    thumb: (ch.snippet.thumbnails && (ch.snippet.thumbnails.high || ch.snippet.thumbnails.default)) ? (ch.snippet.thumbnails.high?.url || ch.snippet.thumbnails.default?.url) : '',
-    subs: ch.statistics.subscriberCount || 0,
-    views: ch.statistics.viewCount || 0,
-    uploadsPlaylist: ch.contentDetails && ch.contentDetails.relatedPlaylists && ch.contentDetails.relatedPlaylists.uploads
-  };
-}
-
-async function fetchAllPlaylistVideoIds(playlistId, maxToFetch=200){
-  if (!playlistId) return [];
-  let ids = [];
-  let pageToken = '';
-  while (true) {
-    setStatus(`Fetching playlist items (${ids.length} fetched)...`, true);
-    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${playlistId}&maxResults=50&key=${API_KEY}${pageToken?('&pageToken='+pageToken):''}`;
-    const j = await apiGET(url);
-    if (!j.items) break;
-    for (const it of j.items) {
-      if (it.contentDetails && it.contentDetails.videoId) ids.push(it.contentDetails.videoId);
-      if (ids.length >= maxToFetch) break;
-    }
-    if (!j.nextPageToken || ids.length >= maxToFetch) break;
-    pageToken = j.nextPageToken;
-  }
-  return ids;
-}
-
-async function fetchVideoDetailsBulk(videoIds){
-  const details = [];
-  // fetch in batches of 50
-  for (let i=0;i<videoIds.length;i+=50){
-    const batch = videoIds.slice(i,i+50);
-    setStatus(`Fetching video details ${i+1} - ${i+batch.length}...`, true);
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${batch.join(',')}&maxResults=50&key=${API_KEY}`;
-    const j = await apiGET(url);
-    if (j.items && j.items.length) {
-      for (const v of j.items) {
-        details.push({
-          id: v.id,
-          title: v.snippet.title,
-          desc: v.snippet.description || '',
-          thumb: (v.snippet.thumbnails && (v.snippet.thumbnails.medium || v.snippet.thumbnails.default)) ? (v.snippet.thumbnails.medium?.url || v.snippet.thumbnails.default?.url) : '',
-          published: v.snippet.publishedAt,
-          tags: v.snippet.tags || [],
-          views: Number(v.statistics.viewCount || 0),
-          likes: Number(v.statistics.likeCount || 0),
-          comments: Number(v.statistics.commentCount || 0)
+        // 1. Handling Multiple Images
+        imageUpload.addEventListener('change', (event) => {
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        addImageCard(e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            imageUpload.value = '';
         });
-      }
-    }
-  }
-  return details;
-}
 
-/* ---------- Business logic / rendering ---------- */
+        // 2. Creating Image Cards
+        function addImageCard(dataURL) {
+            const id = Date.now();
+            
+            const newImage = {
+                id: id,
+                originalDataURL: dataURL,
+                editedDataURL: dataURL,
+                filter: 'original',
+                cropData: null,
+            };
+            imagesData.push(newImage);
 
-function generateRecommendations(channel, topVideos){
-  const recs = [];
-  if (!channel.thumb) recs.push('Add a clear channel profile image for branding.');
-  else recs.push('Channel profile image present — keep consistent brand colors.');
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            card.dataset.id = id;
 
-  if (!channel.desc || channel.desc.length < 80) recs.push('Write a 50–300 char channel description with 2–3 target keywords and links (schedule, socials).');
-  else recs.push('Channel description OK — include a short tagline + links + upload schedule at top.');
+            card.innerHTML = `
+                <img src="${dataURL}" alt="Uploaded Image" id="img-preview-${id}">
+                <select id="filter-select-${id}" class="filter-select" onchange="updateFilter(${id}, this.value)">
+                    <option value="original">Original</option>
+                    <option value="grayscale">Black & White</option>
+                    <option value="sepia">Soft Tone (Sepia)</option>
+                    <option value="vibrant">Vibrant</option>
+                </select>
+                <div class="edit-controls">
+                    <button class="button" onclick="openCropModal(${id})">क्रॉप / एडवांस फ़िल्टर</button>
+                    <button class="button delete-btn" onclick="deleteImage(${id})">हटाएँ</button>
+                </div>
+            `;
+            imageList.appendChild(card);
+        }
 
-  if (Number(channel.subs) > 0) {
-    const subs = Number(channel.subs);
-    const views = Number(channel.views) || 0;
-    const ratio = views / Math.max(subs,1);
-    if (ratio < 20) recs.push('Engagement seems low vs subscribers — add strong CTAs, pinned comment & end screens.');
-    else recs.push('Engagement vs subscribers looks reasonable. Focus on retention & thumbnails.');
-  }
+        // 3. Updating Filter (for preview only)
+        function updateFilter(id, filterValue) {
+            const imgData = imagesData.find(img => img.id === id);
+            const imgElement = document.getElementById(`img-preview-${id}`);
+            
+            imgData.filter = filterValue; 
 
-  if (topVideos.length === 0){
-    recs.push('No public videos found — check if uploads are private or the playlist is empty.');
-    return recs;
-  }
+            applyCssFilter(imgElement, filterValue);
+        }
 
-  // Video-specific quick tips (up to 6)
-  for (let i=0;i<Math.min(topVideos.length,6);i++){
-    const v = topVideos[i];
-    if (v.title.length < 25) recs.push(`Title short: "${v.title}" — add descriptive keywords early in title.`);
-    if ((v.desc||'').length < 100) recs.push(`Description short for "${v.title}" — add 2-line summary, links & 3 target keywords.`);
-    if (!v.tags || v.tags.length === 0) recs.push(`Add tags for "${v.title}" (5–12 relevant tags).`);
-  }
+        function applyCssFilter(element, filter) {
+            switch (filter) {
+                case 'grayscale':
+                    element.style.filter = 'grayscale(100%)';
+                    break;
+                case 'sepia':
+                    element.style.filter = 'sepia(80%) saturate(120%)';
+                    break;
+                case 'vibrant':
+                    element.style.filter = 'saturate(150%) brightness(110%)';
+                    break;
+                case 'original':
+                default:
+                    element.style.filter = 'none';
+                    break;
+            }
+        }
 
-  recs.push('Thumbnail tips: use high contrast, readable text, big faces or central object; keep consistent style.');
-  recs.push('SEO checklist: title with keyword early, first 1–2 lines of description keyword-rich, tags, chapters for long videos, subtitles/transcript.');
-  recs.push('Use end screens & cards to promote playlists and increase session watch time.');
 
-  return recs;
-}
+        // 4. Opening Cropping Modal
+        function openCropModal(id) {
+            const imgData = imagesData.find(img => img.id === id);
+            currentImageId = id;
+            
+            if (cropperInstance) {
+                cropperInstance.destroy();
+            }
 
-function render(channel, topVideos, recs){
-  clearOutput();
-  setStatus('Done', false);
-  const wrap = document.createElement('div');
+            cropImage.src = imgData.originalDataURL;
+            modalFilterSelect.value = imgData.filter; 
+            
+            cropModal.style.display = "block";
+            
+            setTimeout(() => {
+                cropperInstance = new Cropper(cropImage, {
+                    aspectRatio: NaN,
+                    viewMode: 1,
+                    initialAspectRatio: imgData.cropData ? imgData.cropData.width / imgData.cropData.height : NaN,
+                    ready: function () {
+                        if (imgData.cropData) {
+                            this.cropper.setData(imgData.cropData);
+                        }
+                    }
+                });
+            }, 100);
+        }
+        
+        // 5. Applying Crop and Filter (Canvas Logic)
+        function applyCropAndFilter() {
+            const id = currentImageId;
+            const imgData = imagesData.find(img => img.id === id);
+            const selectedFilter = modalFilterSelect.value;
 
-  // Channel card
-  const chCard = document.createElement('div'); chCard.className='card';
-  chCard.innerHTML = `
-    <div class="channel">
-      <img src="${channel.thumb || ''}" alt="thumb" onerror="this.style.display='none'"/>
-      <div class="meta">
-        <div class="title">${escapeHtml(channel.title)} <span class="badge">${channel.id}</span></div>
-        <div class="kv">${escapeHtml(channel.desc ? channel.desc.slice(0,260) + (channel.desc.length>260?'…':'') : 'No description')}</div>
-        <div class="stats">
-          <div class="stat"><div class="n">${human(channel.subs)}</div><div class="kv">Subscribers</div></div>
-          <div class="stat"><div class="n">${human(channel.views)}</div><div class="kv">Total views</div></div>
-        </div>
-      </div>
-    </div>
-  `;
-  wrap.appendChild(chCard);
+            if (!cropperInstance) return;
 
-  // Top videos
-  const vidCard = document.createElement('div'); vidCard.className='card';
-  vidCard.innerHTML = `<h3>Top ${topVideos.length} videos (by views)</h3>`;
-  const vlist = document.createElement('div'); vlist.className='videos';
-  if (topVideos.length === 0) {
-    vlist.innerHTML = `<div class="small">No public videos found.</div>`;
-  } else {
-    topVideos.forEach((v, idx) => {
-      const vi = document.createElement('div'); vi.className='video';
-      vi.innerHTML = `
-        <img src="${v.thumb}" alt="thumb" onerror="this.style.display='none'"/>
-        <div class="info">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <a href="https://youtube.com/watch?v=${v.id}" target="_blank" style="font-weight:700;color:inherit;text-decoration:none">${idx+1}. ${escapeHtml(v.title)}</a>
-            <span class="badge">${human(v.views)} views</span>
-          </div>
-          <div class="kv" style="margin-top:6px">Published: ${new Date(v.published).toLocaleDateString()}</div>
-          <div class="kv">Tags: ${v.tags && v.tags.length ? escapeHtml(v.tags.slice(0,6).join(', ')) : '—'}</div>
-        </div>
-      `;
-      vlist.appendChild(vi);
-    });
-  }
-  vidCard.appendChild(vlist);
-  wrap.appendChild(vidCard);
+            const cropData = cropperInstance.getData();
+            imgData.cropData = cropData; 
 
-  // Recommendations
-  const recCard = document.createElement('div'); recCard.className='card';
-  recCard.innerHTML = `<h3>AI-style Recommendations & SEO Tips</h3>`;
-  recs.forEach(r => {
-    const el = document.createElement('div'); el.className='rec'; el.textContent = r;
-    recCard.appendChild(el);
-  });
-  wrap.appendChild(recCard);
+            const croppedCanvas = cropperInstance.getCroppedCanvas();
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
 
-  out.appendChild(wrap);
-}
+            canvas.width = croppedCanvas.width;
+            canvas.height = croppedCanvas.height;
 
-function escapeHtml(s){
-  if (!s) return '';
-  return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-}
+            applyCanvasFilter(ctx, selectedFilter);
 
-/* ---------- Main flow ---------- */
-async function runAudit(){
-  const val = inp.value.trim();
-  if (!val) { alert('Please paste a YouTube channel URL, handle, or video link.'); return; }
-  clearOutput();
-  setStatus('Starting...', true);
+            ctx.drawImage(croppedCanvas, 0, 0, canvas.width, canvas.height);
 
-  try {
-    // resolve channel id
-    const channelId = await resolveChannelIdFromInput(val);
-    setStatus('Channel resolved: ' + channelId, true);
+            const finalDataURL = canvas.toDataURL('image/jpeg', 0.9);
+            
+            imgData.editedDataURL = finalDataURL;
+            imgData.filter = selectedFilter; 
+            
+            const previewImg = document.getElementById(`img-preview-${id}`);
+            previewImg.src = finalDataURL;
+            previewImg.style.filter = 'none'; 
+            
+            document.getElementById(`filter-select-${id}`).value = selectedFilter;
+            
+            closeModal();
+            alert("क्रॉप और फ़िल्टर सफलतापूर्वक लागू किए गए!");
+        }
 
-    // get channel details
-    const channel = await getChannelDetails(channelId);
+        // Canvas Filter Function
+        function applyCanvasFilter(ctx, filter) {
+            switch (filter) {
+                case 'grayscale':
+                    ctx.filter = 'grayscale(100%)';
+                    break;
+                case 'sepia':
+                    ctx.filter = 'sepia(80%) saturate(120%)';
+                    break;
+                case 'vibrant':
+                    ctx.filter = 'saturate(150%) brightness(110%)';
+                    break;
+                case 'original':
+                default:
+                    ctx.filter = 'none';
+                    break;
+            }
+        }
 
-    // get video ids from uploads playlist (cap at 200 for speed/quota)
-    if (!channel.uploadsPlaylist) {
-      setStatus('No uploads playlist found; stopping.', false, true);
-      out.innerHTML = '<div class="card error">Uploads playlist not available (maybe channel is new or private).</div>';
-      return;
-    }
-    const videoIds = await fetchAllPlaylistVideoIds(channel.uploadsPlaylist, 200);
+        // 6. Closing Modal
+        function closeModal() {
+            cropModal.style.display = "none";
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+        }
+        
+        // 7. Deleting Image
+        function deleteImage(id) {
+            const card = document.querySelector(`.image-card[data-id="${id}"]`);
+            if (card) {
+                card.remove();
+                imagesData = imagesData.filter(img => img.id !== id);
+            }
+        }
 
-    // if no videos, render channel only
-    if (!videoIds || videoIds.length === 0) {
-      render(channel, [], generateRecommendations(channel, []));
-      return;
-    }
+        // 8. Converting to PDF
+        function convertToPDF() {
+            if (imagesData.length === 0) {
+                alert("पहले एक या एक से ज़्यादा इमेज अपलोड करें!");
+                return;
+            }
 
-    // fetch video details
-    const videoDetails = await fetchVideoDetailsBulk(videoIds);
+            const doc = new jsPDF();
+            let isFirstPage = true;
 
-    // sort by views and pick top 10
-    const topVideos = videoDetails.sort((a,b)=>b.views - a.views).slice(0,10);
+            imagesData.forEach((imgData, index) => {
+                if (!isFirstPage) {
+                    doc.addPage();
+                }
+                
+                const finalDataURL = imgData.editedDataURL;
 
-    // generate recommendations
-    const recs = generateRecommendations(channel, topVideos);
+                const imgProps = doc.getImageProperties(finalDataURL);
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = doc.internal.pageSize.getHeight();
+                const ratio = imgProps.width / imgProps.height;
+                
+                let finalImgWidth = pdfWidth * 0.9;
+                let finalImgHeight = finalImgWidth / ratio;
 
-    // render
-    render(channel, topVideos, recs);
+                if (finalImgHeight > pdfHeight * 0.9) { 
+                    finalImgHeight = pdfHeight * 0.9;
+                    finalImgWidth = finalImgHeight * ratio;
+                }
 
-  } catch (err){
-    console.error(err);
-    clearOutput();
-    setStatus('Error: ' + err.message, false, true);
-    out.innerHTML = `<div class="card error">❌ Error: ${escapeHtml(err.message)}</div>`;
-  }
-}
+                const x = (pdfWidth - finalImgWidth) / 2;
+                const y = (pdfHeight - finalImgHeight) / 2;
 
-/* ---------- initial focus ---------- */
-inp.focus();
-
-/* ---------- Optional: prefill the example URL the user gave (so they can click Analyze) ---------- */
-inp.value = "https://youtube.com/@gtx1050tifireflygaming?si=_eZKs2R_0dpIFlHh";
-</script>
+                doc.addImage(finalDataURL, 'JPEG', x, y, finalImgWidth, finalImgHeight);
+                isFirstPage = false;
+            });
+            
+            doc.save("edited_images_to_pdf.pdf");
+        }
+    </script>
 </body>
 </html>
