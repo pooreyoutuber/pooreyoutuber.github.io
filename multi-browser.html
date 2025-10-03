@@ -3,95 +3,207 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Multi Viewer | Watch Multiple Shorts Together</title>
+  <title>YouTube Multi Viewer | Boost Long Video Performance</title>
 
-  <meta name="description" content="Free YouTube Shorts Multi Viewer tool. Paste any Shorts URL and watch multiple Shorts videos simultaneously.">
-  <meta name="keywords" content="YouTube Shorts viewer, multi Shorts player, watch multiple Shorts, YouTube multi viewer, free Shorts tool, Shorts autoplay">
+  <meta name="description" content="Free YouTube Multi Viewer tool for long videos. Paste any video URL and watch multiple players simultaneously for initial analysis and boost.">
+  <meta name="keywords" content="YouTube multi viewer, watch multiple videos, long video player, YouTube initial boost, free video tool, Watch Time analysis">
   <meta name="robots" content="index, follow">
 
-  <meta property="og:title" content="YouTube Shorts Multi Viewer">
-  <meta property="og:description" content="Paste a YouTube Shorts link and watch multiple Shorts videos at the same time with this free tool.">
+  <meta property="og:title" content="YouTube Multi Viewer for Long Videos">
+  <meta property="og:description" content="Use this free tool to load multiple players of your YouTube long video for early performance testing and seeding.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yourwebsite.com/shorts-multi-viewer">
+  <meta property="og:url" content="https://yourwebsite.com/multi-viewer">
   <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
 
   <style>
-    body {font-family: Arial, sans-serif; background:#f4f6f9; text-align:center; margin:0; padding:0;}
-    h1 {color:#222; margin-top:20px;}
+    /* Global Styles */
+    body {font-family: 'Arial', sans-serif; background:#f4f6f9; text-align:center; margin:0; padding:0; display: flex; flex-direction: column; align-items: center; min-height: 100vh;}
+    .container-wrapper {
+        width: 90%;
+        max-width: 1400px;
+        margin: 30px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    h1 {color:#ff0000; margin-top:0; font-size: 2.2em;}
+    p.subtitle {color: #555; margin-bottom: 25px;}
+
+    /* Input & Button Styles */
+    #input-section { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;}
     input, button {
-      padding:10px;
-      margin:5px;
-      width:300px;
-      max-width:90%;
+      padding:12px 15px;
+      margin:0;
       border-radius:6px;
       border:1px solid #ccc;
+      font-size:16px;
+      box-sizing: border-box;
     }
+    input { width: 350px; }
+    input[type="number"] { width: 150px; }
     button {
       background:#007bff;
       color:#fff;
       cursor:pointer;
+      border: 1px solid #007bff;
+      font-weight: bold;
+      transition: 0.3s;
     }
-    button:hover {
-      background:#0056b3;
-    }
-    .container {
+    button:hover { background:#0056b3; border-color: #0056b3; }
+
+    /* Players Container Styles */
+    #players {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Wide aspect ratio for long videos */
       gap: 20px;
-      padding: 20px;
-      max-width: 1400px;
-      margin: auto;
+      padding: 20px 0;
+      border-top: 2px solid #eee;
+      margin-bottom: 30px;
     }
     iframe {
       width: 100%;
-      height: 300px;
+      height: 200px; /* 16:9 aspect ratio height for desktop */
       border: none;
       border-radius:12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: black;
     }
-    .ad-container {margin:20px 0; text-align:center;}
+
+    /* Utility Explanation Section */
+    .utility-explanation {
+        text-align: left;
+        padding: 25px;
+        background-color: #f8f9fa; 
+        border-radius: 10px;
+        border: 1px solid #e9ecef; 
+        line-height: 1.6;
+    }
+    .utility-explanation h3 {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 5px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+    }
+    .utility-explanation strong { color: #333; }
+    
+    /* Crucial Warning Highlight */
+    .warning-note {
+        background-color: #fff3cd; 
+        color: #856404; 
+        border: 1px solid #ffeeba;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+        border-left: 5px solid #ffc107; /* Highlight border */
+    }
   </style>
 </head>
 <body>
-  <h1>🚀 YouTube Shorts Multi Viewer</h1>
-  <p>Enter Video URL and how many players you want</p>
 
-  <input type="text" id="shortUrl" placeholder="Paste YouTube Shorts URL">
-  <input type="number" id="count" placeholder="Number of players">
-  <button onclick="generatePlayers()">Play</button>
+<div class="container-wrapper">
+    <h1>🚀 YouTube Multi Viewer (Long Videos)</h1>
+    <p class="subtitle">Enter any YouTube Video URL and choose how many players you want to generate.</p>
 
-  <div class="container" id="players"></div>
+    <div id="input-section">
+        <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL (Long Video)">
+        <input type="number" id="count" placeholder="Number of players" value="5" min="1">
+        <button onclick="generatePlayers()">Play</button>
+    </div>
 
-  <script>
-    function generatePlayers() {
-      const url = document.getElementById('shortUrl').value.trim();
-      const count = parseInt(document.getElementById('count').value);
-      const playersDiv = document.getElementById('players');
-      playersDiv.innerHTML = '';
+    <div class="container" id="players"></div>
 
-      if (!url || isNaN(count) || count <= 0) {
-        alert("Please enter a valid YouTube Shorts URL and a number greater than 0.");
-        return;
-      }
+    <div id="explanation-section" class="utility-explanation">
+        <h3>📈 Long Video Strategy: Boosting Watch Time with Multi Viewer</h3>
+        
+        <p>This **YouTube Multi Viewer** is tailored specifically for **Long-Form Content** (videos typically over 5 minutes). For these videos, YouTube's algorithm prioritizes **Watch Time** and **Audience Retention** above all else. This tool provides a controlled environment for initial seeding and performance analysis of your new content.</p>
 
-      let videoId = '';
-      if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1].split(/[?&]/)[0];
-      } else if (url.includes('/shorts/')) {
-        videoId = url.split('/shorts/')[1].split(/[?&]/)[0];
-      } else if (url.includes('watch?v=')) {
-        videoId = url.split('watch?v=')[1].split(/[?&]/)[0];
-      } else {
-        alert("Invalid YouTube Shorts URL format.");
-        return;
-      }
+        <div class="warning-note">
+            ⚠️ **ANALYTICS WARNING: DELAYED RESULTS.** Views and Watch Time generated by multi-viewer tools are subject to YouTube's verification process. The **real and final data will not appear immediately**. Expect the official YouTube Studio Analytics to update with verified numbers **2 से 4 घंटे (2 to 4 hours) या उससे अधिक समय** के बाद। अंतिम परिणामों के लिए हमेशा आधिकारिक YouTube Studio पर ही भरोसा करें।
+        </div>
+        
+        <h4>How Multi Viewing Supports Long Video SEO</h4>
+        
+        <p>For long videos, generating a strong, initial signal is crucial. If your video accumulates a reasonable amount of Watch Time early on, the algorithm is more likely to test it with a wider audience. This tool facilitates:</p>
 
-      for (let i=0; i<count; i++) {
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0`;
-        iframe.allowFullscreen = true;
-        playersDiv.appendChild(iframe);
-      }
+        <ul>
+            <li><strong>Initial Watch Time Seeding:</strong> By loading multiple players and initiating playback, you can achieve an early surge of Watch Time minutes, signaling activity to the algorithm.</li>
+            <li><strong>Player Compatibility Check:</strong> Ensure your video loads and plays correctly across multiple embedded instances simultaneously.</li>
+            <li><strong>Controlled Testing:</strong> You manage the exact number of players, allowing you to run controlled internal tests on your new uploads before broader promotion.</li>
+        </ul>
+
+        <p><strong>Important Note on Quality vs. Quantity:</strong></p>
+        <p>While this tool provides an excellent starting boost, remember that **long-term success depends entirely on the video's quality**. If viewers click away quickly from the embedded players, the negative signal of low retention can outweigh the benefit of high initial views. Use this tool strategically—for initial momentum—and focus primarily on creating content that genuinely engages your audience for the longest possible duration.</p>
+        
+        <p>We recommend using a browser that can handle multiple simultaneous video streams (e.g., Chrome or Firefox on a stable connection). Click **"Play"** to begin analysis.</p>
+    </div>
+</div>
+
+<script>
+    function extractVideoId(url) {
+        // Regex to handle standard YouTube URLs (watch?v=), short URLs (youtu.be/), and includes Shorts too, as embed code handles both.
+        const videoRegex = /(?:v=|\/)([0-9A-Za-z_-]{11})/;
+        const match = url.match(videoRegex);
+        return match ? match[1] : null;
     }
-  </script>
+
+    function generatePlayers() {
+        const url = document.getElementById('videoUrl').value.trim();
+        const count = parseInt(document.getElementById('count').value);
+        const playersDiv = document.getElementById('players');
+        const container = document.querySelector('.container-wrapper');
+        const explanationSection = document.getElementById('explanation-section');
+        
+        playersDiv.innerHTML = '';
+        playersDiv.style.display = 'grid'; 
+
+        if (!url || isNaN(count) || count <= 0 || count > 50) {
+            alert("Please enter a valid YouTube Video URL and a number between 1 and 50.");
+            playersDiv.style.display = 'none';
+            // Reposition explanation section back up if an error occurs
+            if (explanationSection.parentNode !== container || container.lastElementChild !== explanationSection) {
+                 container.insertBefore(explanationSection, playersDiv.nextSibling); 
+            }
+            return;
+        }
+
+        const videoId = extractVideoId(url);
+        if (!videoId) {
+            alert("Invalid YouTube Video URL format. Please ensure it links directly to a video.");
+            playersDiv.style.display = 'none';
+            if (explanationSection.parentNode !== container || container.lastElementChild !== explanationSection) {
+                 container.insertBefore(explanationSection, playersDiv.nextSibling); 
+            }
+            return;
+        }
+        
+        // 1. Move Explanation Section BELOW the Output/Results
+        if (explanationSection) {
+            container.appendChild(explanationSection);
+        }
+
+        // 2. Generate Players
+        for (let i=0; i<count; i++) {
+            const iframe = document.createElement('iframe');
+            // Using 'autoplay=0' and 'rel=0' (no related videos)
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&disablekb=1&controls=1&rel=0`; 
+            iframe.allowFullscreen = true;
+            iframe.title = `Youtubeer ${i + 1}`;
+            playersDiv.appendChild(iframe);
+        }
+
+        // Optional: Scroll to the players section for better UX
+        playersDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Initial check: Ensure players container is hidden on load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('players').style.display = 'none';
+    });
+</script>
 </body>
 </html>
