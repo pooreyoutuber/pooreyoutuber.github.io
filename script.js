@@ -1,59 +1,54 @@
-const API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo"; // replace with your YouTube Data API v3 key
-const fetchBtn = document.getElementById("fetchBtn");
-const status = document.getElementById("status");
+const API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo";
 
-fetchBtn.addEventListener("click", getVideoInfo);
-
-function extractVideoId(url) {
-  let id = "";
-  try {
-    if (url.includes("youtu.be/")) {
-      id = url.split("youtu.be/")[1].split("?")[0];
-    } else if (url.includes("v=")) {
-      id = url.split("v=")[1].split("&")[0];
-    } else {
-      id = url; // assume direct ID
-    }
-  } catch {
-    id = "";
-  }
-  return id;
-}
-
-async function getVideoInfo() {
-  const url = document.getElementById("videoUrl").value.trim();
-  const videoId = extractVideoId(url);
-  if (!videoId) {
-    status.textContent = "❌ Invalid YouTube URL or ID.";
+async function fetchVideoData() {
+  const url = document.getElementById("videoInput").value.trim();
+  if (!url) {
+    alert("Please enter a valid YouTube video URL!");
     return;
   }
 
-  status.textContent = "⏳ Fetching data...";
-  const endpoint = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoId}&key=${API_KEY}`;
+  // Extract video ID from URL
+  const videoIdMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+  if (!videoIdMatch) {
+    alert("Invalid YouTube Video URL!");
+    return;
+  }
+  const videoId = videoIdMatch[1];
 
   try {
-    const res = await fetch(endpoint);
-    const data = await res.json();
+    // Fetch video details
+    const videoRes = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`
+    );
+    const videoData = await videoRes.json();
 
-    if (!data.items || data.items.length === 0) {
-      status.textContent = "⚠️ Video not found or unavailable.";
+    if (!videoData.items || videoData.items.length === 0) {
+      alert("No video found! Please check the URL.");
       return;
     }
 
-    const video = data.items[0];
-    document.getElementById("title").textContent = video.snippet.title;
-    document.getElementById("channelTitle").textContent = video.snippet.channelTitle;
-    document.getElementById("publishedAt").textContent = new Date(video.snippet.publishedAt).toDateString();
-    document.getElementById("views").textContent = video.statistics.viewCount;
-    document.getElementById("likes").textContent = video.statistics.likeCount || "Hidden";
-    document.getElementById("comments").textContent = video.statistics.commentCount || "Disabled";
-    document.getElementById("description").textContent = video.snippet.description;
-    document.getElementById("thumbnail").src = video.snippet.thumbnails.high.url;
+    const video = videoData.items[0];
+    const snippet = video.snippet;
+    const stats = video.statistics;
 
-    document.getElementById("result").classList.remove("hidden");
-    status.textContent = "✅ Data loaded successfully!";
-  } catch (err) {
-    status.textContent = "❌ Error fetching video info.";
-    console.error(err);
+    // Display video details
+    document.getElementById("report").classList.remove("hidden");
+    document.getElementById("thumbnail").src = snippet.thumbnails.high.url;
+    document.getElementById("title").innerText = snippet.title;
+    document.getElementById("channel").innerText = snippet.channelTitle;
+    document.getElementById("views").innerText = stats.viewCount.toLocaleString() + " views";
+    document.getElementById("published").innerText = new Date(snippet.publishedAt).toDateString();
+    document.getElementById("description").innerText = snippet.description;
+
+    // Generate Summary (simple AI-like text)
+    document.getElementById("summaryText").innerText =
+      `This video titled "${snippet.title}" from channel "${snippet.channelTitle}" was published on ${new Date(snippet.publishedAt).toDateString()} 
+      and has already gained ${stats.viewCount.toLocaleString()} views. 
+      Based on the description and engagement, it provides useful insights and entertainment for its audience. 
+      Such videos are highly valuable for SEO research, content analysis, and understanding viewer trends.`;
+
+  } catch (error) {
+    console.error("Error fetching video data:", error);
+    alert("Something went wrong while fetching video details.");
   }
 }
