@@ -1,19 +1,55 @@
-.subtitle {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 20px;
+:root {
+  --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#1e90ff;
+  --glass: rgba(255,255,255,0.03); --radius:16px; --gap:18px; --maxw:980px;
+  font-family:Inter, sans-serif;
 }
+* { box-sizing:border-box; }
+body {
+  margin:0; background:linear-gradient(180deg,#071022 0%, #071b2e 60%);
+  color:#e6eef6; display:flex; justify-content:center; padding:32px;
+}
+.wrap { width:100%; max-width:var(--maxw); }
+header { display:flex; gap:14px; margin-bottom:18px; }
+.logo { background:var(--glass); padding:8px; border-radius:10px; display:flex; }
+h1 { font-size:20px; margin:0; }
+p.lead { color:var(--muted); margin:0; }
 
-.summary {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid #ddd;
-  color: #333;
-  font-size: 15px;
-  line-height: 1.6;
+.card {
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.03);
+  padding:20px; border-radius:var(--radius);
 }
-
-.summary h2 {
-  font-size: 22px;
-  margin-bottom: 10px;
+.input-row { display:flex; gap:12px; margin-top:12px; }
+input[type=text] {
+  flex:1; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1);
+  background:transparent; color:inherit; font-size:15px;
 }
+.btn {
+  padding:11px 14px; border-radius:12px; border:0;
+  background:linear-gradient(90deg,var(--accent),#4aa8ff); color:#012;
+  cursor:pointer; font-weight:600;
+}
+.btn.ghost {
+  background:transparent; border:1px solid rgba(255,255,255,0.2); color:var(--muted);
+}
+.grid { display:grid; grid-template-columns:360px 1fr; gap:18px; margin-top:18px; }
+.thumb { width:100%; height:200px; object-fit:cover; border-radius:12px; }
+.meta h2 { margin:0 0 6px; font-size:18px; }
+.meta p { margin:6px 0; color:var(--muted); }
+.stat-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.stat { background:rgba(255,255,255,0.02); padding:8px 10px; border-radius:10px; }
+.desc { white-space:pre-wrap; color:#dbe9ff; margin-top:10px; }
+.hidden { display:none; }
+.footer { margin-top:18px; color:var(--muted); font-size:14px; }
+@media (max-width:880px) {
+  .grid { grid-template-columns:1fr; }
+  .thumb { height:180px; }
+}
+.spinner {
+  width:32px; height:32px; border-radius:50%;
+  border:4px solid rgba(255,255,255,0.1);
+  border-top-color:var(--accent); animation:spin 1s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg);} }
+.summary { margin-top:22px; padding:18px; border-radius:12px;
+  background:rgba(255,255,255,0.02); }
