@@ -12,26 +12,54 @@
     
     <style>
         /* ========================================================= */
-        /* CSS STYLES - Focused on Stability and Readability         */
+        /* 1. DARK MODE CSS VARIABLES                                */
         /* ========================================================= */
         
         :root {
+            /* Light Mode Defaults */
             --primary-color: #e62117; 
+            --primary-dark: #b81912;
             --accent-color: #007bff; 
             --success-color: #28a745;
             --danger-color: #dc3545;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
+            --text-color: #343a40;
+            --section-border-color: #212529;
             --border-light: #e9ecef;
-            --disclaimer-border-color: #ffcc00; /* New color for disclaimer */
+            --disclaimer-border-color: #ffcc00; 
+            --disclaimer-bg: #ffffff;
+            --ai-tip-bg: #fff3cd;
+            --ai-tip-border: #ffeeba;
+            --ai-tip-text: #856404;
         }
+
+        body.dark-mode {
+            /* Dark Mode Overrides */
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --section-border-color: #f0f0f0;
+            --border-light: #333;
+            --disclaimer-border-color: #f39c12; 
+            --disclaimer-bg: #2d2d2d;
+            --ai-tip-bg: #2d2d00; /* Darker, subtle yellow for dark mode */
+            --ai-tip-border: #444;
+            --ai-tip-text: #ffd700; /* Goldish text */
+            --primary-dark: #a1160f; /* Slightly darker hover for dark mode */
+        }
+
+        /* ========================================================= */
+        /* 2. BASE STYLES & DARK MODE APPLICATION                    */
+        /* ========================================================= */
 
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             padding: 20px;
-            color: #343a40;
+            color: var(--text-color);
             line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
@@ -39,7 +67,7 @@
             margin: 0 auto;
         }
 
-        /* Header and Search (Same as before) */
+        /* Header and Search */
         header {
             text-align: center;
             padding: 20px 0;
@@ -47,6 +75,7 @@
             background: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: background 0.3s;
         }
 
         header h1 {
@@ -68,6 +97,9 @@
             border: 2px solid var(--border-light);
             border-radius: 8px;
             font-size: 1em;
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s, background 0.3s, color 0.3s;
         }
 
         #audit-button {
@@ -82,7 +114,7 @@
             transition: background-color 0.3s;
         }
 
-        #audit-button:hover { background-color: #b81912; }
+        #audit-button:hover { background-color: var(--primary-dark); }
 
         /* Results Container */
         .results-container {
@@ -90,6 +122,7 @@
             padding: 35px;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s;
         }
 
         .hidden { display: none; }
@@ -98,12 +131,13 @@
             margin: 40px 0 20px;
             padding-bottom: 10px;
             border-bottom: 3px solid var(--primary-color);
-            color: #212529;
+            color: var(--section-border-color);
             font-size: 1.6em;
             font-weight: 600;
+            transition: color 0.3s;
         }
 
-        /* Channel Summary (Same as before) */
+        /* Channel Summary */
         .channel-summary-grid {
             display: grid;
             grid-template-columns: 1fr 3fr 1.5fr;
@@ -133,6 +167,7 @@
         .stat-item {
             text-align: center;
             padding: 0 15px;
+            color: var(--text-color);
         }
         
         .stat-item strong {
@@ -156,31 +191,32 @@
             margin-left: auto;
         }
 
-        /* Graphs Grid (Improved for Static Scores) */
+        /* Graphs Grid */
         .graphs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
             margin-bottom: 40px;
         }
 
         .graph-card {
-            background: #fff;
+            background: var(--card-bg);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-light);
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .graph-card h3 {
             font-size: 1.3em;
             margin-bottom: 15px;
-            color: #555;
+            color: var(--text-color);
             border-left: 4px solid var(--accent-color);
             padding-left: 10px;
         }
 
-        /* Video Lists (Top/Low - Same as before) */
+        /* Video Lists */
         .video-lists-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -189,9 +225,12 @@
         }
 
         .video-list-card {
+            background: var(--card-bg);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-light);
+            transition: background 0.3s;
         }
 
         .video-list-card h3 {
@@ -222,37 +261,38 @@
         
         .video-list li strong { color: var(--accent-color); margin-right: 10px; }
 
-        /* AI Tips Section (Same as before) */
+        /* AI Tips Section */
         .ai-tip-section {
-            background: #fff3cd; 
-            border: 1px solid #ffeeba;
-            color: #856404;
+            background: var(--ai-tip-bg); 
+            border: 1px solid var(--ai-tip-border);
+            color: var(--ai-tip-text);
             padding: 30px;
             border-radius: 10px;
             margin-top: 30px;
         }
         
         .ai-tip-section h2 {
-            color: #856404;
-            border-bottom: 2px dashed #ffeeba;
+            color: var(--ai-tip-text);
+            border-bottom: 2px dashed var(--ai-tip-border);
         }
         
-        /* === NEW DISCLAIMER SECTION STYLING === */
+        /* Disclaimer Section */
         .disclaimer-section {
             max-width: 1200px;
             margin: 40px auto; 
             padding: 30px;
-            background: #ffffff; 
+            background: var(--disclaimer-bg); 
             border: 1px solid var(--disclaimer-border-color); 
             border-radius: 12px;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
             font-size: 0.9em;
-            color: #6c757d; 
+            color: var(--secondary-text-color, #6c757d); 
+            transition: background 0.3s;
         }
 
         .disclaimer-section .section-title {
             border-bottom: 2px solid var(--disclaimer-border-color);
-            color: #343a40;
+            color: var(--text-color);
             margin-top: 0;
             margin-bottom: 20px;
             font-size: 1.4em;
@@ -264,6 +304,9 @@
         }
         /* ======================================= */
 
+        /* ========================================================= */
+        /* 3. MOBILE RESPONSIVENESS FIX                              */
+        /* ========================================================= */
         @media (max-width: 1000px) {
             .channel-summary-grid {
                 grid-template-columns: 1fr;
@@ -278,6 +321,75 @@
             }
             .video-lists-grid {
                 grid-template-columns: 1fr;
+            }
+            .graphs-grid {
+                grid-template-columns: 1fr; /* Single column for graphs on smaller screens */
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            header {
+                padding: 15px 0;
+            }
+            header h1 {
+                font-size: 1.8em;
+            }
+            .container {
+                margin: 0;
+            }
+            .results-container {
+                padding: 15px;
+            }
+            
+            /* Search Box Stacking */
+            .search-box {
+                flex-direction: column;
+                gap: 10px;
+            }
+            #channel-input, #audit-button {
+                width: 100%;
+                border-radius: 8px;
+            }
+
+            .channel-summary-grid {
+                padding: 10px;
+            }
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+            .stat-item {
+                padding: 5px 10px;
+                flex-basis: 33%; /* Force stats to wrap */
+                font-size: 0.8em;
+            }
+            .stat-item strong {
+                font-size: 1.2em;
+            }
+            .overall-score {
+                width: 90px;
+                height: 90px;
+                font-size: 2.5em;
+            }
+
+            .graph-card {
+                padding: 15px;
+            }
+            .video-list-card {
+                padding: 15px;
+            }
+            .ai-tip-section {
+                padding: 20px;
+            }
+            .disclaimer-section {
+                padding: 15px;
+            }
+            .section-title {
+                font-size: 1.4em;
+                margin: 20px 0 15px;
             }
         }
     </style>
@@ -372,253 +484,4 @@
             <p><strong>4. Technical and Third-Party Data Disclaimer (Future API Use):</strong></p>
             <p>This Website may contain links or references to external websites, platforms, or resources. By using our Services, you agree that your access and reliance on any information or tool output is **entirely at your own risk.** PooreYoutuber Tools, its operators, affiliates, and employees shall not be held liable for any damages, losses, or costs arising from the use of, or inability to use, our Services. If our tools are updated in the future to utilize live Application Programming Interfaces (APIs) for data collection, the **user remains solely responsible** for adhering to the terms and conditions of that third-party API and for ensuring the secure and compliant management of any API keys or credentials.</p>
             
-            <p style="margin-top: 20px; font-weight: bold; color: var(--primary-color);">By utilizing any and all PooreYoutuber Tools, you hereby agree to these terms, confirming your understanding that the Services provide analytical insights based on estimations and models, and do not offer certified data or professional advice.</p>
-        </div>
-    </div>
-    
-    <script>
-        // =========================================================
-        //                          JAVASCRIPT LOGIC                 
-        // (Mock Data & Static Display - Graph Logic Updated)
-        // =========================================================
-        
-        // --- STATIC MOCK DATA (Data is intentionally stable/static) ---
-        const mockAuditData = {
-            channelName: "PooreYouTuber Demo Channel",
-            channelId: "UC_P_YT_DEMO_ID",
-            subscribers: "1,200,000",
-            totalViews: "150,000,000",
-            videoCount: "450",
-            overallScore: 85,
-            
-            // Graph Data - Designed to look balanced and static scores
-            graphData: {
-                // Now a single score for Doughnut Chart
-                engagementScore: 78, 
-                strategyRadar: [85, 70, 95, 65, 80], // Branding, CTA, Titles, Consistency, Niche
-                keywordDensity: [90, 75, 80, 60, 95] // Tags, Description, Title, Channel Tags, Top Niche
-            },
-            
-            // Video Lists (Same as before)
-            topVideos: [
-                { title: "Top 10 SEO Secrets for 2024", views: "1.2M", date: "2 months ago" },
-                { title: "How to Grow from 0 to 1K Subs", views: "950K", date: "4 months ago" },
-                { title: "The Ultimate Thumbnail Guide", views: "880K", date: "1 month ago" },
-                { title: "Best Mic for YouTubers Under $100", views: "700K", date: "6 months ago" },
-                { title: "5 Editing Tips for Beginners", views: "650K", date: "3 months ago" },
-                { title: "My YouTube Studio Setup Tour", views: "580K", date: "8 months ago" },
-                { title: "YouTube Shorts Monetization Guide", views: "550K", date: "1 month ago" },
-                { title: "Affiliate Marketing on YouTube", views: "520K", date: "5 months ago" },
-                { title: "Livestream Setup Checklist", views: "490K", date: "1 year ago" },
-                { title: "Viral Video Formula Revealed", views: "450K", date: "10 months ago" },
-            ],
-            lowVideos: [
-                { title: "Unboxing Random Gadget (Old Niche)", views: "1.2K", date: "2 years ago" },
-                { title: "Test Video 123", views: "980", date: "3 years ago" },
-                { title: "A Day in the Life (Off-Topic)", views: "750", date: "1 year ago" },
-                { title: "Early Gaming Stream", views: "600", date: "4 years ago" },
-                { title: "Random Vlog 2019", views: "550", date: "5 years ago" },
-                { title: "Outdated Software Review", views: "480", date: "3 years ago" },
-                { title: "Q&A Session 1 (Bad Audio)", views: "320", date: "2 years ago" },
-                { title: "Old Camera Test Footage", views: "250", date: "4 years ago" },
-                { title: "Channel Trailer Draft", views: "190", date: "3 years ago" },
-                { title: "Quick Announcement (No SEO)", views: "150", date: "2 years ago" },
-            ]
-        };
-
-        const getColor = (score) => {
-            if (score >= 80) return 'var(--success-color)';
-            if (score >= 60) return 'orange';
-            return 'var(--danger-color)';
-        }
-
-        // --- MAIN AUDIT FUNCTION (Same as before) ---
-        function startAudit() {
-            const input = document.getElementById('channel-input').value.trim();
-            const resultsContainer = document.getElementById('audit-results');
-            const auditButton = document.getElementById('audit-button');
-
-            if (input === "") {
-                alert("Please enter a Channel URL or Name.");
-                return;
-            }
-
-            auditButton.disabled = true;
-            auditButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-            resultsContainer.classList.add('hidden');
-
-            // Simulate Report Generation time (3 seconds)
-            setTimeout(() => {
-                displayAuditResults(mockAuditData);
-                auditButton.disabled = false;
-                auditButton.innerHTML = 'Generate Report <i class="fas fa-file-invoice"></i>';
-            }, 3000); 
-        }
-
-        // --- DISPLAY RESULTS (Same as before) ---
-        function displayAuditResults(data) {
-            // Update Summary Stats
-            document.getElementById('channel-name').textContent = data.channelName;
-            document.getElementById('channel-id').textContent = data.channelId;
-            document.getElementById('sub-count').textContent = data.subscribers;
-            document.getElementById('view-count').textContent = data.totalViews;
-            document.getElementById('video-count').textContent = data.videoCount;
-            
-            // Update Overall Score
-            const overallScoreElement = document.getElementById('overall-score-display');
-            overallScoreElement.textContent = `${data.overallScore}%`;
-            const scoreColor = getColor(data.overallScore);
-            overallScoreElement.style.borderColor = scoreColor;
-            overallScoreElement.style.color = scoreColor;
-
-            // Initialize Graphs
-            initGraphs(data.graphData);
-            
-            // Populate Video Lists
-            populateVideoList('top-videos-list', data.topVideos, 'green');
-            populateVideoList('low-videos-list', data.lowVideos, 'red');
-
-            document.getElementById('audit-results').classList.remove('hidden');
-        }
-        
-        // --- POPULATE VIDEO LISTS (Same as before) ---
-        function populateVideoList(elementId, videos, color) {
-            const ul = document.getElementById(elementId);
-            ul.innerHTML = ''; 
-            videos.forEach((video, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span style="color: ${color}; font-weight: bold;">#${index + 1}</span> 
-                    ${video.title} <br>
-                    <small style="color: #6c757d;">
-                        <i class="fas fa-eye"></i> Views: ${video.views} | 
-                        <i class="far fa-calendar-alt"></i> ${video.date}
-                    </small>
-                `;
-                ul.appendChild(li);
-            });
-        }
-
-
-        // --- CHART.JS INITIALIZATION (UPDATED FOR STABILITY) ---
-        let engagementChart, healthChart, keywordChart;
-
-        function initGraphs(data) {
-            
-            // Destroy existing charts
-            if (engagementChart) engagementChart.destroy();
-            if (healthChart) healthChart.destroy();
-            if (keywordChart) keywordChart.destroy();
-            
-            const engagementScore = data.engagementScore;
-            const remaining = 100 - engagementScore;
-            
-            // 1. Overall Engagement Score (Doughnut Chart for Static Score)
-            const ctx1 = document.getElementById('engagement-score-graph').getContext('2d');
-            engagementChart = new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Engagement Score', 'Remaining'],
-                    datasets: [{
-                        data: [engagementScore, remaining],
-                        backgroundColor: ['var(--primary-color)', 'var(--border-light)'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: false },
-                        // Custom plugin to show score in the center
-                        doughnutlabel: {
-                            labels: [
-                                { text: `${engagementScore}%`, font: { size: 28, weight: 'bold' } },
-                                { text: 'Engagement', font: { size: 14 } }
-                            ]
-                        }
-                    }
-                },
-                plugins: [{
-                    // Simple text-in-center plugin for Doughnut chart
-                    beforeDraw: function(chart) {
-                        const width = chart.width,
-                            height = chart.height,
-                            ctx = chart.ctx;
-                        ctx.restore();
-                        const fontSize = (height / 114).toFixed(2);
-                        ctx.font = `${fontSize}em sans-serif`;
-                        ctx.textBaseline = "middle";
-                        const text = `${engagementScore}%`,
-                            textX = Math.round((width - ctx.measureText(text).width) / 2),
-                            textY = height / 2;
-                        ctx.fillText(text, textX, textY);
-                        ctx.save();
-                    }
-                }]
-            });
-
-
-            // 2. Content Strategy Radar (Radar Chart for Snapshot)
-            const ctx2 = document.getElementById('seo-health-graph').getContext('2d');
-            healthChart = new Chart(ctx2, {
-                type: 'radar',
-                data: {
-                    labels: ['Branding', 'CTA', 'Titles/Tags', 'Consistency', 'Niche Focus'],
-                    datasets: [{
-                        label: 'Current Score',
-                        data: data.strategyRadar,
-                        backgroundColor: 'rgba(0, 123, 255, 0.3)',
-                        borderColor: 'var(--accent-color)',
-                        pointBackgroundColor: 'var(--accent-color)',
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { display: true },
-                            suggestedMin: 0,
-                            suggestedMax: 100,
-                            pointLabels: {
-                                font: { size: 12 }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-
-            // 3. Keyword Density Score (Bar Chart for Stable Scores)
-            const ctx3 = document.getElementById('keyword-density-graph').getContext('2d');
-            keywordChart = new Chart(ctx3, {
-                type: 'bar',
-                data: {
-                    labels: ['Video Tags', 'Description', 'Title Length', 'Channel Tags', 'Top Niche Focus'],
-                    datasets: [{
-                        label: 'Score (%)',
-                        data: data.keywordDensity,
-                        backgroundColor: ['#e62117', '#ffc107', '#28a745', '#007bff', '#17a2b8'],
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 100 },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-    </script>
-</body>
-</html>
+           
