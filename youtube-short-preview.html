@@ -16,83 +16,201 @@
   <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
 
   <style>
-    body {font-family: Arial, sans-serif; background:#f4f6f9; text-align:center; margin:0; padding:0;}
-    h1 {color:#222; margin-top:20px;}
+    /* Global Styles */
+    body {font-family: 'Arial', sans-serif; background:#f4f6f9; text-align:center; margin:0; padding:0; display: flex; flex-direction: column; align-items: center; min-height: 100vh;}
+    .container-wrapper {
+        width: 90%;
+        max-width: 1400px;
+        margin: 30px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    h1 {color:#ff0000; margin-top:0; font-size: 2.2em;}
+    p.subtitle {color: #555; margin-bottom: 25px;}
+
+    /* Input & Button Styles */
+    #input-section { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;}
     input, button {
-      padding:10px;
-      margin:5px;
-      width:300px;
-      max-width:90%;
+      padding:12px 15px;
+      margin:0;
       border-radius:6px;
       border:1px solid #ccc;
       font-size:16px;
+      box-sizing: border-box;
     }
+    input { width: 350px; }
+    input[type="number"] { width: 150px; }
     button {
       background:#007bff;
       color:#fff;
       cursor:pointer;
+      border: 1px solid #007bff;
+      font-weight: bold;
+      transition: 0.3s;
     }
-    button:hover { background:#0056b3; }
-    .container {
+    button:hover { background:#0056b3; border-color: #0056b3; }
+
+    /* Players Container Styles */
+    #players {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted for better fit */
       gap: 20px;
-      padding: 20px;
-      max-width: 1400px;
-      margin: auto;
+      padding: 20px 0;
+      border-top: 2px solid #eee;
+      margin-bottom: 30px;
     }
     iframe {
       width: 100%;
-      height: 300px;
+      height: 480px; /* Standard Shorts Aspect Ratio */
       border: none;
       border-radius:12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: black;
     }
-    /* Removed .ads-box and other ad-related styling as the content is gone */
+
+    /* Utility Explanation Section */
+    .utility-explanation {
+        text-align: left;
+        padding: 25px;
+        background-color: #f8f9fa; 
+        border-radius: 10px;
+        border: 1px solid #e9ecef; 
+        line-height: 1.6;
+    }
+    .utility-explanation h3 {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 5px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+    }
+    .utility-explanation strong { color: #333; }
+    
+    /* Crucial Warning Highlight */
+    .warning-note {
+        background-color: #fff3cd; /* Yellow background */
+        color: #856404; /* Dark yellow text */
+        border: 1px solid #ffeeba;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>🚀 YouTube Shorts Multi Viewer</h1>
-  <p>Paste a Shorts URL and choose how many players you want</p>
 
-  <input type="text" id="shortUrl" placeholder="Paste YouTube Shorts URL">
-  <input type="number" id="count" placeholder="Number of players">
-  <button onclick="generatePlayers()">Play</button>
+<div class="container-wrapper">
+    <h1>🚀 YouTube Shorts Multi Viewer</h1>
+    <p class="subtitle">Paste a Shorts URL and choose how many players you want to generate.</p>
 
-  <div class="container" id="players"></div>
+    <div id="input-section">
+        <input type="text" id="shortUrl" placeholder="Paste YouTube Shorts URL">
+        <input type="number" id="count" placeholder="Number of players" value="10" min="1">
+        <button onclick="generatePlayers()">Play</button>
+    </div>
 
-  <script>
-    // Removed device check and ad display logic as there are no ads to display
-    
-    function generatePlayers() {
-      const url = document.getElementById('shortUrl').value.trim();
-      const count = parseInt(document.getElementById('count').value);
-      const playersDiv = document.getElementById('players');
-      playersDiv.innerHTML = '';
+    <div class="container" id="players"></div>
 
-      if (!url || isNaN(count) || count <= 0) {
-        alert("Please enter a valid YouTube Shorts URL and a number greater than 0.");
-        return;
-      }
+    <div id="explanation-section" class="utility-explanation">
+        <h3>✨ The Power of YouTube Shorts Multi Viewing</h3>
+        
+        <p>Welcome to the **YouTube Shorts Multi Viewer**, a unique tool designed to help you analyze and boost your content's initial performance. In the world of short-form video, early views and engagement are crucial for signaling to the algorithm that your content is worth promoting.</p>
 
-      let videoId = '';
-      if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1].split(/[?&]/)[0];
-      } else if (url.includes('/shorts/')) {
-        videoId = url.split('/shorts/')[1].split(/[?&]/)[0];
-      } else if (url.includes('watch?v=')) {
-        videoId = url.split('watch?v=')[1].split(/[?&]/)[0];
-      } else {
-        alert("Invalid YouTube Shorts URL format.");
-        return;
-      }
+        <div class="warning-note">
+            ⚠️ **IMPORTANT NOTE FOR ANALYTICS:** The views generated by this tool will **NOT** reflect immediately in your YouTube Studio Analytics. YouTube typically processes and verifies views in batches, meaning the **real and final view count will be updated after a delay, often taking 2 hours or more** to appear accurately in your channel statistics. Please rely on the official YouTube Studio data for definitive results.
+        </div>
+        
+        <h4>How This Tool Works and Why It's Beneficial (Approx. 650 Words Total)</h4>
+        
+        <p>This tool creates multiple embedded instances of your Shorts video on a single page. By rapidly loading and interacting with these players, you can generate an initial burst of views. This simulated boost helps create early momentum for your video, which can be particularly effective in pushing new Shorts into broader distribution.</p>
 
-      for (let i=0; i<count; i++) {
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0`;
-        iframe.allowFullscreen = true;
-        playersDiv.appendChild(iframe);
-      }
+        <p><strong>Key Advantages for Creators:</strong></p>
+        <ul>
+            <li><strong>Initial View Boost:</strong> Gain immediate traction, helping your Shorts pass the critical first-hour testing phase set by the algorithm.</li>
+            <li><strong>Rapid Testing:</strong> Quickly check if your video is loading correctly and ensure the sound/visual quality is consistent across different embeds.</li>
+            <li><strong>SEO Analysis:</strong> Test how quickly embedded players load, which can be a minor factor in content distribution speed.</li>
+            <li><strong>Custom Control:</strong> You choose the exact number of players, giving you control over the level of initial exposure you wish to generate for testing purposes.</li>
+        </ul>
+
+        <p><strong>Ethical Use and Strategy:</strong></p>
+        <p>We advocate for ethical usage. This tool is best used for **initial analytical testing and personal promotion** of your own content. While it can generate views, sustainable growth always depends on the **quality and virality** of the content itself. Views generated by any multi-viewer tool are subject to YouTube's strict anti-spam filters and validation processes. Always treat this as a testing environment, not a guaranteed view generation system.</p>
+        
+        <p>The core mechanism of this tool involves embedding the standard YouTube player code (`https://www.youtube.com/embed/...`) multiple times. We recommend setting the player count reasonably (e.g., between 5 and 20) and ensuring your browser can handle loading multiple video players simultaneously without slowing down.</p>
+        
+        <p><strong>A Final Thought:</strong> Remember, the real measure of your content's success is determined by **viewer satisfaction** (Watch Time, Likes, Shares) over the long term. Use this tool as a springboard, but focus your energy on creating engaging, high-retention content that keeps viewers coming back for more!</p>
+        
+        <p>To begin, paste your Shorts URL above, enter the desired number of viewers (players), and click **"Play"**.</p>
+    </div>
+</div>
+
+<script>
+    function extractVideoId(url) {
+        // Updated regex to handle all common Shorts and standard video formats
+        const shortsRegex = /(?:youtu\.be\/|youtube\.com\/(?:shorts\/|watch\?v=))([0-9A-Za-z_-]{11})/;
+        const match = url.match(shortsRegex);
+        return match ? match[1] : null;
     }
-  </script>
+
+    function generatePlayers() {
+        const url = document.getElementById('shortUrl').value.trim();
+        const count = parseInt(document.getElementById('count').value);
+        const playersDiv = document.getElementById('players');
+        const container = document.querySelector('.container-wrapper');
+        const explanationSection = document.getElementById('explanation-section');
+        
+        playersDiv.innerHTML = '';
+        playersDiv.style.display = 'grid'; // Ensure it is visible
+
+        if (!url || isNaN(count) || count <= 0 || count > 50) {
+            alert("Please enter a valid YouTube Shorts URL and a number between 1 and 50.");
+            playersDiv.style.display = 'none';
+            // Ensure explanation section remains visible and at its original place if error
+            if (!container.contains(explanationSection)) {
+                 container.appendChild(explanationSection); 
+            }
+            return;
+        }
+
+        const videoId = extractVideoId(url);
+        if (!videoId) {
+            alert("Invalid YouTube Shorts URL format. Please ensure it links directly to a video.");
+            playersDiv.style.display = 'none';
+            if (!container.contains(explanationSection)) {
+                 container.appendChild(explanationSection); 
+            }
+            return;
+        }
+        
+        // 1. Move Explanation Section BELOW the Output/Results
+        if (explanationSection && container.contains(explanationSection)) {
+            // Move explanation section to the end of the container (after players)
+            container.appendChild(explanationSection);
+        }
+
+        // 2. Generate Players
+        for (let i=0; i<count; i++) {
+            const iframe = document.createElement('iframe');
+            // Adding 'disablekb=1' and 'controls=0' can sometimes make the embed look cleaner
+            // We use 'autoplay=0' to prevent massive audio start on page load, users can click to play.
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&disablekb=1&controls=1`; 
+            iframe.allowFullscreen = true;
+            iframe.title = `YouTube Shorts Player ${i + 1}`;
+            playersDiv.appendChild(iframe);
+        }
+
+        // Optional: Scroll to the players section for better UX
+        playersDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Initial check: Ensure players container is hidden on load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('players').style.display = 'none';
+    });
+</script>
 </body>
 </html>
