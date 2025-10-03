@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro YouTube Channel SEO Auditor & Report | PooreYouTuber Tools</title>
+    <title>Pro YouTube Channel SEO Auditor & Stable Report | PooreYouTuber Tools</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <style>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-doughnutlabel"></script> <style>
         /* ========================================================= */
-        /* CSS STYLES - Modern, Clean, and Report-like Design       */
+        /* CSS STYLES - Focused on Stability and Readability         */
         /* ========================================================= */
         
         :root {
-            --primary-color: #e62117; /* Brighter YouTube Red */
+            --primary-color: #e62117; 
             --accent-color: #007bff; 
             --success-color: #28a745;
             --danger-color: #dc3545;
@@ -37,7 +36,7 @@
             margin: 0 auto;
         }
 
-        /* Header and Search */
+        /* Header and Search (Same as before) */
         header {
             text-align: center;
             padding: 20px 0;
@@ -101,7 +100,7 @@
             font-weight: 600;
         }
 
-        /* Channel Summary */
+        /* Channel Summary (Same as before) */
         .channel-summary-grid {
             display: grid;
             grid-template-columns: 1fr 3fr 1.5fr;
@@ -154,7 +153,7 @@
             margin-left: auto;
         }
 
-        /* Graphs Grid */
+        /* Graphs Grid (Improved for Static Scores) */
         .graphs-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -178,7 +177,7 @@
             padding-left: 10px;
         }
 
-        /* Video Lists (Top/Low) */
+        /* Video Lists (Top/Low - Same as before) */
         .video-lists-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -220,7 +219,7 @@
         
         .video-list li strong { color: var(--accent-color); margin-right: 10px; }
 
-        /* AI Tips Section */
+        /* AI Tips Section (Same as before) */
         .ai-tip-section {
             background: #fff3cd; 
             border: 1px solid #ffeeba;
@@ -235,7 +234,6 @@
             border-bottom: 2px dashed #ffeeba;
         }
 
-        /* Responsiveness */
         @media (max-width: 1000px) {
             .channel-summary-grid {
                 grid-template-columns: 1fr;
@@ -284,20 +282,20 @@
                 <div class="overall-score" id="overall-score-display">85%</div>
             </div>
 
-            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Performance & SEO Health Score</h2>
+            <h2 class="section-title"><i class="fas fa-chart-pie"></i> Performance & SEO Score Breakdown</h2>
 
             <div class="graphs-grid">
                 <div class="graph-card">
-                    <h3>Engagement vs. Views Index</h3>
-                    <canvas id="engagement-graph"></canvas>
+                    <h3>Overall Engagement Score</h3>
+                    <div style="height: 250px;"><canvas id="engagement-score-graph"></canvas></div>
                 </div>
                 <div class="graph-card">
                     <h3>Content Strategy Radar</h3>
-                    <canvas id="seo-health-graph"></canvas>
+                    <div style="height: 250px;"><canvas id="seo-health-graph"></canvas></div>
                 </div>
                 <div class="graph-card">
                     <h3>Keyword Density Score</h3>
-                    <canvas id="keyword-density-graph"></canvas>
+                    <div style="height: 250px;"><canvas id="keyword-density-graph"></canvas></div>
                 </div>
             </div>
 
@@ -333,7 +331,7 @@
     <script>
         // =========================================================
         //                          JAVASCRIPT LOGIC                 
-        // (Mock Data & Static Display)
+        // (Mock Data & Static Display - Graph Logic Updated)
         // =========================================================
         
         // --- STATIC MOCK DATA (Data is intentionally stable/static) ---
@@ -345,14 +343,15 @@
             videoCount: "450",
             overallScore: 85,
             
-            // Graph Data - Designed to look balanced and not 'falling'
+            // Graph Data - Designed to look balanced and static scores
             graphData: {
-                engagementIndex: [70, 75, 80, 85, 82, 88, 90],
+                // Now a single score for Doughnut Chart
+                engagementScore: 78, 
                 strategyRadar: [85, 70, 95, 65, 80], // Branding, CTA, Titles, Consistency, Niche
-                keywordDensity: [50, 75, 80, 60, 90] // Tags, Description, Title, Channel Tags, Top Niche
+                keywordDensity: [90, 75, 80, 60, 95] // Tags, Description, Title, Channel Tags, Top Niche
             },
             
-            // Video Lists
+            // Video Lists (Same as before)
             topVideos: [
                 { title: "Top 10 SEO Secrets for 2024", views: "1.2M", date: "2 months ago" },
                 { title: "How to Grow from 0 to 1K Subs", views: "950K", date: "4 months ago" },
@@ -385,7 +384,7 @@
             return 'var(--danger-color)';
         }
 
-        // --- MAIN AUDIT FUNCTION ---
+        // --- MAIN AUDIT FUNCTION (Same as before) ---
         function startAudit() {
             const input = document.getElementById('channel-input').value.trim();
             const resultsContainer = document.getElementById('audit-results');
@@ -400,7 +399,7 @@
             auditButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             resultsContainer.classList.add('hidden');
 
-            // Simulate API fetch/Report Generation time (3 seconds)
+            // Simulate Report Generation time (3 seconds)
             setTimeout(() => {
                 displayAuditResults(mockAuditData);
                 auditButton.disabled = false;
@@ -408,7 +407,7 @@
             }, 3000); 
         }
 
-        // --- DISPLAY RESULTS ---
+        // --- DISPLAY RESULTS (Same as before) ---
         function displayAuditResults(data) {
             // Update Summary Stats
             document.getElementById('channel-name').textContent = data.channelName;
@@ -434,10 +433,10 @@
             document.getElementById('audit-results').classList.remove('hidden');
         }
         
-        // --- POPULATE VIDEO LISTS ---
+        // --- POPULATE VIDEO LISTS (Same as before) ---
         function populateVideoList(elementId, videos, color) {
             const ul = document.getElementById(elementId);
-            ul.innerHTML = ''; // Clear previous list
+            ul.innerHTML = ''; 
             videos.forEach((video, index) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
@@ -453,46 +452,68 @@
         }
 
 
-        // --- CHART.JS INITIALIZATION ---
+        // --- CHART.JS INITIALIZATION (UPDATED FOR STABILITY) ---
         let engagementChart, healthChart, keywordChart;
 
         function initGraphs(data) {
-            const commonOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, max: 100 } // Set max to 100 for score charts
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            };
             
             // Destroy existing charts
             if (engagementChart) engagementChart.destroy();
             if (healthChart) healthChart.destroy();
             if (keywordChart) keywordChart.destroy();
             
-            // 1. Engagement Index (Line Chart)
-            const ctx1 = document.getElementById('engagement-graph').getContext('2d');
+            const engagementScore = data.engagementScore;
+            const remaining = 100 - engagementScore;
+            
+            // 1. Overall Engagement Score (Doughnut Chart for Static Score)
+            const ctx1 = document.getElementById('engagement-score-graph').getContext('2d');
             engagementChart = new Chart(ctx1, {
-                type: 'line',
+                type: 'doughnut',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    labels: ['Engagement Score', 'Remaining'],
                     datasets: [{
-                        label: 'Engagement Score (%)',
-                        data: data.engagementIndex,
-                        borderColor: 'var(--success-color)',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 3
+                        data: [engagementScore, remaining],
+                        backgroundColor: ['var(--primary-color)', 'var(--border-light)'],
+                        borderWidth: 0
                     }]
                 },
-                options: commonOptions
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                        // Custom plugin to show score in the center
+                        doughnutlabel: {
+                            labels: [
+                                { text: `${engagementScore}%`, font: { size: 28, weight: 'bold' } },
+                                { text: 'Engagement', font: { size: 14 } }
+                            ]
+                        }
+                    }
+                },
+                plugins: [{
+                    // Simple text-in-center plugin for Doughnut chart
+                    beforeDraw: function(chart) {
+                        const width = chart.width,
+                            height = chart.height,
+                            ctx = chart.ctx;
+                        ctx.restore();
+                        const fontSize = (height / 114).toFixed(2);
+                        ctx.font = `${fontSize}em sans-serif`;
+                        ctx.textBaseline = "middle";
+                        const text = `${engagementScore}%`,
+                            textX = Math.round((width - ctx.measureText(text).width) / 2),
+                            textY = height / 2;
+                        ctx.fillText(text, textX, textY);
+                        ctx.save();
+                    }
+                }]
             });
 
-            // 2. Content Strategy Radar
+
+            // 2. Content Strategy Radar (Radar Chart for Snapshot)
             const ctx2 = document.getElementById('seo-health-graph').getContext('2d');
             healthChart = new Chart(ctx2, {
                 type: 'radar',
@@ -513,7 +534,10 @@
                         r: {
                             angleLines: { display: true },
                             suggestedMin: 0,
-                            suggestedMax: 100
+                            suggestedMax: 100,
+                            pointLabels: {
+                                font: { size: 12 }
+                            }
                         }
                     },
                     plugins: {
@@ -522,19 +546,29 @@
                 }
             });
 
-            // 3. Keyword Density Score (Bar Chart)
+            // 3. Keyword Density Score (Bar Chart for Stable Scores)
             const ctx3 = document.getElementById('keyword-density-graph').getContext('2d');
             keywordChart = new Chart(ctx3, {
                 type: 'bar',
                 data: {
                     labels: ['Video Tags', 'Description', 'Title Length', 'Channel Tags', 'Top Niche Focus'],
                     datasets: [{
-                        label: 'Density/Relevance Score (%)',
+                        label: 'Score (%)',
                         data: data.keywordDensity,
                         backgroundColor: ['#e62117', '#ffc107', '#28a745', '#007bff', '#17a2b8'],
                     }]
                 },
-                options: commonOptions
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
             });
         }
     </script>
