@@ -5,34 +5,35 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// Body Parser and CORS Setup (Necessary for reading user input)
+// Body Parser and CORS Setup
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: 'POST', 
     optionsSuccessStatus: 200 
 }));
-app.use(express.json()); // FIX: Reading req.body
+app.use(express.json()); // Essential for reading user input
 
-// CONFIGURATION
+// CONFIGURATION (NO PROXY LIST HERE)
 const SEARCH_KEYWORDS = [
     "advanced project",
     "web traffic generation",
-    "college project github" 
+    "college project traffic" 
 ]; 
 
-const BREAK_BETWEEN_VIEWS_MS = 15000; // Reduced break to 15 seconds (for quick testing)
+// Break between attempts: Reduced to 15 seconds for faster testing, but it can be blocked quicker.
+const BREAK_BETWEEN_VIEWS_MS = 15000; 
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // ----------------------------------------------------
-// Core Logic: User Simulation Function (NO Proxy)
+// Core Logic: User Simulation Function (DIRECT Render IP)
 // ----------------------------------------------------
 
 async function simulateUserVisit(targetUrl, currentViewNumber) {
     let driver;
-    const logPrefix = `[VIEW ${currentViewNumber} | DIRECT IP]`;
+    const logPrefix = `[VIEW ${currentViewNumber} | DIRECT RENDER IP]`;
 
     let options = new chrome.Options();
     options.addArguments('--headless'); 
@@ -40,7 +41,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber) {
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
     
-    // 🚨 PROXY ARGUMENT REMOVED!
+    // 🚨 IMPORTANT: NO PROXY ARGUMENT IS ADDED HERE.
     
     // Bot Evasion Arguments
     options.addArguments('--disable-blink-features=AutomationControlled');
@@ -59,7 +60,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber) {
         await driver.get('https://www.google.com');
         await sleep(2000 + Math.random() * 2000); 
 
-        // 2. Search Random Keyword
+        // 2. Search Random Keyword (Sending Referrer as Google Search)
         const targetDomain = new URL(targetUrl).hostname;
         const currentSearchKeyword = SEARCH_KEYWORDS[Math.floor(Math.random() * SEARCH_KEYWORDS.length)] + " " + targetDomain.replace('www.', '');
         console.log(`${logPrefix} 🔎 Searching Google for: "${currentSearchKeyword}"`);
@@ -69,7 +70,6 @@ async function simulateUserVisit(targetUrl, currentViewNumber) {
 
         // 3. Click the Link 
         const targetLinkSelector = By.xpath(`//a[contains(@href, "${targetDomain}")]`);
-        // Increased wait time since direct connection might be slow
         await driver.wait(until.elementLocated(targetLinkSelector), 20000); 
         let targetLink = await driver.findElement(targetLinkSelector);
         
@@ -77,7 +77,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber) {
         await targetLink.click();
 
         // 4. On-site Engagement 
-        const visitDuration = 45 + Math.random() * 90; // Reduced duration slightly
+        const visitDuration = 45 + Math.random() * 90; 
         console.log(`${logPrefix} ⏳ Staying on site for ${visitDuration.toFixed(0)} seconds...`);
         
         await driver.executeScript("window.scrollTo(0, document.body.scrollHeight * Math.random());");
@@ -110,7 +110,7 @@ app.post('/boost-url', async (req, res) => {
     }
     
     // Immediate response to prevent timeout
-    res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} via Direct Connection.` });
+    res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} via Direct Render IP. Check Render Logs for status.` });
 
     (async () => {
         let successfulViews = 0;
