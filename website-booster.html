@@ -16,7 +16,6 @@
         
         /* Page Distribution Grid */
         .page-entry { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
-        .page-entry label { flex-grow: 1; margin-bottom: 0; font-weight: normal; }
         .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; }
         .page-entry input[type="number"] { width: 60px; flex-grow: 0; margin-bottom: 0; text-align: center; background-color: #eef4ff; }
         .percent-label { font-weight: bold; width: 30px; }
@@ -34,11 +33,25 @@
         .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+        
+        /* Summary & Key Info Section */
+        .info-card { background-color: #eef4ff; padding: 20px; border-radius: 10px; margin-top: 25px; }
+        .info-card h3 { color: #007bff; margin-top: 0; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-bottom: 10px;}
+        .key-guide { margin-top: 15px; padding-left: 20px;}
+        .key-guide li { margin-bottom: 8px; }
+
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Website Booster Free Tool</h2>
+        
+        <div class="info-card">
+            <h3>Boost Your Website Traffic and Engagement</h3>
+            <p style="font-size: 0.95em; line-height: 1.5;">
+                This **Website Booster Tool** is designed to simulate natural, high-quality traffic to your pages by leveraging the Google Analytics 4 (GA4) Measurement Protocol API. By generating realistic session data, including randomized geo-locations, custom engagement times (30 to 120 seconds), and page view distribution, this tool helps you in several ways. It can **increase your total page views**, provide a **better average engagement time** metric in GA4, and help you analyze the performance of specific pages by driving traffic to them. This method is stable and runs entirely on the server side, ensuring your requests are processed reliably after submission. Use the multiple page options below to distribute the traffic across different sections of your website for a more organic and comprehensive boost. **Expected results will reflect in your GA4 dashboard within 24-48 hours** as Google processes the Measurement Protocol data.
+            </p>
+        </div>
         
         <form id="boosterForm">
             
@@ -96,10 +109,18 @@
         </form>
         
         <div id="message"></div>
+
+        <div class="info-card">
+            <h3>Where to find your GA4 Keys:</h3>
+            <ul class="key-guide">
+                <li>**Google Analytics ID (G-XXXXX):** Found in your GA4 dashboard under **Admin > Data Streams**. Click on your Web stream, and the ID is visible at the top (e.g., G-ZPMC525FGT).</li>
+                <li>**API Secret (Measurement Protocol Key):** Found in your GA4 dashboard under **Admin > Data Streams**. Click on your Web stream, then scroll down to **Measurement Protocol API Secrets**. Create a new one and copy the secret key (e.g., pSaScGPuTWa95eOdSkbV7w).</li>
+            </ul>
+        </div>
     </div>
     
     <script>
-        // 🚨 FINAL RENDER API URL
+        // 🚨 FINAL RENDER API URL - DYNAMICALLY SET
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
         const STORAGE_KEY = 'booster_details_v5'; 
         
@@ -207,8 +228,8 @@
             submitBtn.disabled = true;
             
             if (retriesLeft < 2) {
-                submitBtn.textContent = `⚠️ Pinging Render... Retrying in 5 seconds...`;
-                showMessage('info', `⚠️ Render API is waking up. Retrying in 5 seconds...`, false);
+                submitBtn.textContent = `⚠️ Pinging server... Retrying in 5 seconds...`;
+                showMessage('info', `⚠️ Server is waking up. Retrying in 5 seconds...`, false);
                 await new Promise(resolve => setTimeout(resolve, 5000));
             } else {
                 submitBtn.textContent = '✅ Request initiated. Checking server status...';
@@ -229,16 +250,16 @@
                 const responseData = await response.json();
 
                 if (responseData.status === 'processing' || responseData.status === 'ok') {
-                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. You can close this browser now.`, true);
+                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. **Results expected within 24-48 hours.** You can close this browser now.`, true);
                 } else {
-                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check Render Logs.'}.`, true);
+                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
                 }
 
             } catch (error) {
                 if (retriesLeft > 0) {
                     return submitData(data, retriesLeft - 1);
                 } else {
-                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your Render service is LIVE and the API URL is correct.`, true);
+                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your API service is LIVE and the URL is correct.`, true);
                 }
             } 
         }
