@@ -27,12 +27,12 @@
             margin-bottom: 20px;
         }
         .tip-box {
-            background-color: #e0f7fa; 
-            color: #0056b3;
+            background-color: #ffe0e0; /* Highlighted in Red for urgency */
+            color: #cc0000;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 25px;
-            border: 1px solid #b3e5fc;
+            border: 1px solid #ffb3b3;
             font-size: 0.95em;
             font-weight: 600;
         }
@@ -55,6 +55,10 @@
             border: 1px solid #cce0ff;
             border-radius: 6px;
             box-sizing: border-box;
+            /* Added for No History/No Autocomplete */
+            -webkit-appearance: none; 
+            -moz-appearance: none;
+            appearance: none;
         }
         button {
             background-color: #007bff;
@@ -81,7 +85,7 @@
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
 
-        /* GUIDELINES STYLES */
+        /* GUIDELINES STYLES (Kept for completeness) */
         #guidelines {
             text-align: left;
             padding-top: 20px;
@@ -118,7 +122,7 @@
 <body>
     <div class="container">
         <div class="tip-box">
-            🌟 **Sweet Tip:** Results will be visible in your Google Analytics Realtime and standard reports after **24-48 hours** of processing.
+            🛑 **IMPORTANT TIP (Render Sleep Issue):** If you see a connection error, **wait 30 seconds** and press "Generate Traffic" again. Your free Render server is waking up!
         </div>
 
         <h2>Professional Website Booster 🚀</h2>
@@ -126,16 +130,16 @@
         <form id="boosterForm">
             
             <label for="url">1. Target Website URL:</label>
-            <input type="text" id="url" placeholder="e.g., https://yourprojectsite.com" required>
+            <input type="text" id="url" placeholder="e.g., https://yourprojectsite.com" required autocomplete="off">
             
             <label for="gaid">2. Google Analytics ID (G-XXXXX):</label>
-            <input type="text" id="gaid" placeholder="e.g., G-A1B2C3D4E5" required>
+            <input type="text" id="gaid" placeholder="e.g., G-A1B2C3D4E5" required autocomplete="off">
             
             <label for="apikey">3. API Secret (Measurement Protocol):</label>
-            <input type="text" id="apikey" placeholder="Paste your generated API Secret" required>
+            <input type="text" id="apikey" placeholder="Paste your generated API Secret" required autocomplete="off">
             
             <label for="views">4. Views to Generate (Max 500):</label>
-            <input type="number" id="views" value="500" min="1" max="500" required>
+            <input type="number" id="views" value="500" min="1" max="500" required autocomplete="off">
             
             <button type="submit" id="submitBtn">Generate Traffic</button>
         </form>
@@ -162,35 +166,18 @@
             </li>
             <li>
                 <span class="step-title">2. Google Analytics ID (Measurement ID)</span>
-                <p>This unique ID is essential for tracking data in your GA4 property.</p>
-                <p><strong>Where to find it:</strong></p>
-                <ul>
-                    <li>Go to your Google Analytics (GA4) account.</li>
-                    <li>Click **Admin** (⚙️) in the bottom left.</li>
-                    <li>In the Property column, click **Data Streams**.</li>
-                    <li>Click on your Web stream. The ID is shown as the **Measurement ID** (e.g., **G-ABCDEFG123**).</li>
-                </ul>
+                <p><strong>Where to find it:</strong> Admin (⚙️) -> Data Streams -> Your Web stream. Look for **Measurement ID**.</p>
             </li>
             <li>
                 <span class="step-title">3. API Secret (Client Secret)</span>
-                <p>This secret key grants your tool permission to send data directly to Google Analytics (Measurement Protocol).</p>
-                <p><strong>Where to find it:</strong></p>
-                <ul>
-                    <li>In Google Analytics (GA4), go to **Admin** (⚙️) -> **Data Streams**.</li>
-                    <li>Click on your Web stream.</li>
-                    <li>Scroll down and click on **Measurement Protocol API secrets**.</li>
-                    <li>Click **Create** and **paste the new generated secret key** here.</li>
-                </ul>
+                <p><strong>Where to find it:</strong> Admin (⚙️) -> Data Streams -> Your Web stream -> **Measurement Protocol API secrets**. Create a new secret key and paste it here.</p>
             </li>
-            <li>
-                <span class="step-title">4. Views to Generate</span>
-                <p>Enter the desired number of views (max 500). Please check your **Render Logs** and **GA Realtime Reports** for instant feedback.</p>
             </li>
         </ol>
     </div>
 
     <script>
-        // 🚨 IMPORTANT: Replace the URL below with YOUR Render Service URL
+        // 🚨 IMPORTANT: This URL MUST match your Render Service's base URL + /boost-mp
         const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
         
         const form = document.getElementById('boosterForm');
@@ -198,7 +185,6 @@
         const submitBtn = document.getElementById('submitBtn');
         const guidelinesDiv = document.getElementById('guidelines');
 
-        // Function to toggle guidelines visibility
         function showGuidelines() {
             if (guidelinesDiv.style.display === 'none') {
                 guidelinesDiv.style.display = 'block';
@@ -226,7 +212,7 @@
             
             submitBtn.disabled = true;
             submitBtn.textContent = 'Processing Request...';
-            showMessage('info', `✅ Request for ${viewsCount} views initiated. Check Render Logs for status.`, false);
+            showMessage('info', `✅ Request for ${viewsCount} views initiated. Checking server status...`, false);
 
             fetch(API_URL, {
                 method: 'POST',
@@ -243,18 +229,18 @@
                 return response.json();
             })
             .then(data => {
-                if (data.status === 'processing') {
-                    showMessage('success', `✨ Success! API accepted the request. Check your GA Realtime reports!`, false);
+                if (data.status === 'processing' || data.status === 'ok') {
+                    showMessage('success', `✨ Success! API accepted the request. Check your GA Realtime reports! (Inputs cleared.)`, false);
+                    document.getElementById('boosterForm').reset(); // 👈 **Inputs Cleared**
                 } else {
                     showMessage('error', `❌ API Error: ${data.message || 'Unknown error. Check Render Logs.'}`, true);
                 }
             })
             .catch(error => {
-                // This error often means the Render server is asleep or the URL is wrong.
-                showMessage('error', `❌ Connection Error: Could not reach the Render API. Ensure your Render service is awake and the API URL is correct.`, true);
+                // Connection Error due to Render Sleep
+                showMessage('error', `❌ Connection Error: Render is likely asleep. Wait 30 seconds and click 'Generate Traffic' again!`, true);
             })
             .finally(() => {
-                // Re-enable button after a short delay
                 setTimeout(() => {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Generate Traffic';
