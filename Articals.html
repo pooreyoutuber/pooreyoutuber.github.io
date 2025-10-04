@@ -199,10 +199,20 @@
         const articlesListDiv = document.getElementById('articles-list');
         const noArticlesMsg = document.getElementById('no-articles-msg');
 
+        // --- NEW FUNCTION TO APPLY DARK MODE ON LOAD ---
+        function applySavedTheme() {
+            // Local Storage से 'theme' सेटिंग चेक करें
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        // --- END NEW FUNCTION ---
+
         // Function to load articles from Local Storage
         function getArticles() {
             const articlesJSON = localStorage.getItem(ARTICLES_KEY);
-            // Ensure likes are initialized if missing (for older saved articles)
             const articles = articlesJSON ? JSON.parse(articlesJSON) : [];
             return articles.map(article => ({ ...article, likes: article.likes || 0 }));
         }
@@ -218,10 +228,9 @@
             const articleIndex = articles.findIndex(a => a.timestamp == timestamp);
             
             if (articleIndex !== -1) {
-                // Increment the like count
                 articles[articleIndex].likes += 1;
                 saveArticles(articles);
-                renderArticles(); // Re-render to show updated count
+                renderArticles(); 
             }
         }
         
@@ -231,7 +240,7 @@
                 navigator.share({
                     title: title,
                     text: `Check out this amazing article: "${title}" on PooreYouTuber Tools!`,
-                    url: window.location.href // Shares the URL of this page
+                    url: window.location.href 
                 }).catch((error) => console.log('Error sharing:', error));
             } else {
                 alert(`Share feature is not supported in this browser. You can manually copy the link: ${window.location.href}`);
@@ -242,7 +251,7 @@
         // Function to render articles on the page (Latest on Top with numbers)
         function renderArticles() {
             const articles = getArticles();
-            articlesListDiv.innerHTML = ''; // Clear current list
+            articlesListDiv.innerHTML = ''; 
 
             if (articles.length === 0) {
                 if (noArticlesMsg) noArticlesMsg.style.display = 'block';
@@ -251,7 +260,6 @@
 
             if (noArticlesMsg) noArticlesMsg.style.display = 'none';
 
-            // Ensure sorting is by timestamp (latest first)
             articles.sort((a, b) => b.timestamp - a.timestamp); 
 
             articles.forEach((article, index) => {
@@ -262,7 +270,6 @@
                 const serialNumber = index + 1;
                 const likeCount = article.likes;
 
-                // Escape single quotes in the title for the onclick function
                 const safeTitle = article.title ? article.title.replace(/'/g, "\\'") : '';
 
                 articleCard.innerHTML = `
@@ -311,7 +318,6 @@
 
             const articles = getArticles();
             
-            // Add new article to the beginning of the array (for latest on top)
             articles.unshift(newArticle); 
 
             saveArticles(articles);
@@ -321,13 +327,11 @@
         });
 
         // Load and display articles when the page loads
-        document.addEventListener('DOMContentLoaded', renderArticles);
-        
-        // Dark Mode check
-        document.addEventListener('DOMContentLoaded', function() {
-             if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+             // 1. Theme check must happen first
+             applySavedTheme(); 
+             // 2. Then render articles
+             renderArticles();
         });
         
         // Expose functions globally for inline onclick handlers to work
