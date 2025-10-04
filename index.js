@@ -1,11 +1,25 @@
-const { Builder, By, Key, until } = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
 const express = require('express');
+const fetch = require('node-fetch');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// Body Parser and CORS Setup
+// CONFIGURATION (Measurement Protocol specific settings)
+const TOTAL_VIEWS_PER_REQUEST = 500; 
+const geoLocations = [
+    { country: "United States", region: "California" },
+    { country: "India", region: "Maharashtra" },
+    { country: "Germany", region: "Bavaria" },
+    { country: "Brazil", region: "Sao Paulo" },
+    { country: "Japan", region: "Tokyo" },
+    { country: "United Kingdom", region: "England" },
+    { country: "Australia", region: "New South Wales" },
+    { country: "South Korea", region: "Seoul" },
+    { country: "Canada", region: "Ontario" }
+];
+const MIN_DELAY = 100; // MP doesn't need long delays
+const MAX_DELAY = 500; 
+
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: 'POST', 
@@ -13,115 +27,100 @@ app.use(cors({
 }));
 app.use(express.json()); // Essential for reading user input
 
-// CONFIGURATION (NO PROXY LIST HERE)
-const SEARCH_KEYWORDS = [
-    "advanced project",
-    "web traffic generation",
-    "college project traffic" 
-]; 
+function getRandomDelay() {
+    return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
+}
 
-// Break between attempts: Reduced to 15 seconds for faster testing, but it can be blocked quicker.
-const BREAK_BETWEEN_VIEWS_MS = 15000; 
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function getRandomGeo() {
+    return geoLocations[Math.floor(Math.random() * geoLocations.length)];
 }
 
 // ----------------------------------------------------
-// Core Logic: User Simulation Function (DIRECT Render IP)
+// Core Logic: Sending Data (Measurement Protocol)
 // ----------------------------------------------------
 
-async function simulateUserVisit(targetUrl, currentViewNumber) {
-    let driver;
-    const logPrefix = `[VIEW ${currentViewNumber} | DIRECT RENDER IP]`;
+async function sendData(MEASUREMENT_ID, API_SECRET, targetUrl, currentViewId) {
+    const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+    const SESSION_ID = Date.now(); 
+    const geo = getRandomGeo();
+    const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
+    const pageTitle = `USER_VIEW_${currentViewId}`;
 
-    let options = new chrome.Options();
-    options.addArguments('--headless'); 
-    options.addArguments('--no-sandbox');
-    options.addArguments('--disable-dev-shm-usage');
-    options.addArguments('--disable-gpu');
-    
-    // 🚨 IMPORTANT: NO PROXY ARGUMENT IS ADDED HERE.
-    
-    // Bot Evasion Arguments
-    options.addArguments('--disable-blink-features=AutomationControlled');
-    options.excludeSwitches('enable-automation');
-    options.addArguments('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-    
+    const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`;
+
+    const commonUserProperties = {
+        geo: { value: `${geo.country}, ${geo.region}` }
+    };
+
+    // Combined payload for session_start, page_view, and user_engagement
+    const payload = {
+        client_id: CLIENT_ID,
+        user_properties: commonUserProperties,
+        events: [
+            // 1. Session Start Event
+            { name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } },
+            // 2. Page View Event
+            { name: 'page_view', params: { page_location: targetUrl, page_title: pageTitle, session_id: SESSION_ID, engagement_time_msec: engagementTime } },
+            // 3. User Engagement Event
+            { name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }
+        ]
+    };
+
     try {
-        console.log(`${logPrefix} 🚀 Browser starting (Direct Connection). Target: ${targetUrl}`);
-        
-        driver = await new Builder()
-            .forBrowser('chrome')
-            .setChromeOptions(options)
-            .build();
-            
-        // 1. Go to Google
-        await driver.get('https://www.google.com');
-        await sleep(2000 + Math.random() * 2000); 
+        const response = await fetch(gaEndpoint, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 
+                'Content-Type': 'application/json',
+            }
+        });
 
-        // 2. Search Random Keyword (Sending Referrer as Google Search)
-        const targetDomain = new URL(targetUrl).hostname;
-        const currentSearchKeyword = SEARCH_KEYWORDS[Math.floor(Math.random() * SEARCH_KEYWORDS.length)] + " " + targetDomain.replace('www.', '');
-        console.log(`${logPrefix} 🔎 Searching Google for: "${currentSearchKeyword}"`);
-        let searchBox = await driver.findElement(By.name('q'));
-        await searchBox.sendKeys(currentSearchKeyword, Key.RETURN);
-        await sleep(4000 + Math.random() * 3000); 
-
-        // 3. Click the Link 
-        const targetLinkSelector = By.xpath(`//a[contains(@href, "${targetDomain}")]`);
-        await driver.wait(until.elementLocated(targetLinkSelector), 20000); 
-        let targetLink = await driver.findElement(targetLinkSelector);
-        
-        console.log(`${logPrefix} 🔗 Clicking link to: ${targetDomain}`);
-        await targetLink.click();
-
-        // 4. On-site Engagement 
-        const visitDuration = 45 + Math.random() * 90; 
-        console.log(`${logPrefix} ⏳ Staying on site for ${visitDuration.toFixed(0)} seconds...`);
-        
-        await driver.executeScript("window.scrollTo(0, document.body.scrollHeight * Math.random());");
-        await sleep(visitDuration * 1000);
-
-        console.log(`${logPrefix} ✅ Visit Successful!`);
-        return true; 
-
-    } catch (error) {
-        console.error(`${logPrefix} ❌ CRITICAL ERROR: Visit failed. Render IP may be blocked or element not found.`);
-        return false; 
-    } finally {
-        if (driver) {
-            await driver.quit();
+        if (response.status === 204) { 
+            console.log(`[View ${currentViewId}]: SUCCESS ✅ | GA ID: ${MEASUREMENT_ID} | Location: ${geo.country}`);
+            return true;
+        } else {
+            // Log status and detailed response text for debugging GA credentials
+            const errorText = await response.text(); 
+            console.error(`[View ${currentViewId}]: FAILURE ❌ | Status: ${response.status}. Response: ${errorText}. Check GA ID/API Secret.`);
+            return false;
         }
+    } catch (error) {
+        console.error(`[View ${currentViewId}]: CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
+        return false;
     }
 }
 
 // ----------------------------------------------------
-// 🌐 API ENDPOINT (/boost-url)
+// 🌐 API ENDPOINT (/boost-mp)
 // ----------------------------------------------------
 
-app.post('/boost-url', async (req, res) => {
-    // Reading URL and Views from user input
-    const targetUrl = req.body.url; 
-    const viewsToGenerate = parseInt(req.body.views) || 500; 
+app.post('/boost-mp', async (req, res) => {
+    // 1. Get data from the user's HTML form
+    const { url: targetUrl, ga_id: measurementId, api_key: apiSecret, views: viewsToGenerateRaw } = req.body; 
     
-    if (!targetUrl || !targetUrl.startsWith('http')) {
-        return res.status(400).json({ status: 'error', message: 'Invalid URL. Please use http:// or https://.' });
+    // Validation
+    const viewsToGenerate = Math.min(parseInt(viewsToGenerateRaw) || TOTAL_VIEWS_PER_REQUEST, TOTAL_VIEWS_PER_REQUEST);
+    
+    if (!targetUrl || !measurementId || !apiSecret || !targetUrl.startsWith('http')) {
+        return res.status(400).json({ status: 'error', message: 'Invalid or missing URL, GA ID, or API Secret.' });
     }
     
-    // Immediate response to prevent timeout
-    res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} via Direct Render IP. Check Render Logs for status.` });
+    // 2. Immediate response to prevent timeout
+    res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} using Measurement Protocol.` });
 
+    // 3. Start the view generation process in the background
     (async () => {
         let successfulViews = 0;
+        console.log(`\n--- STARTING MP BOOST for ${viewsToGenerate} views on ${targetUrl} ---`);
+        
         for (let i = 0; i < viewsToGenerate; i++) {
-            console.log(`\n-- Attempting View ${i + 1}/${viewsToGenerate} --`);
-            // Calling simulation without proxy argument
-            const success = await simulateUserVisit(targetUrl, i + 1); 
+            const success = await sendData(measurementId, apiSecret, targetUrl, i + 1); 
             if (success) {
                 successfulViews++;
             }
-            await sleep(BREAK_BETWEEN_VIEWS_MS + Math.random() * 10000); 
+            // Small delay
+            const delay = getRandomDelay();
+            await new Promise(resolve => setTimeout(resolve, delay));
         }
         console.log(`\n--- BOOST FINISHED. Total success: ${successfulViews}/${viewsToGenerate} ---`);
     })(); 
@@ -132,9 +131,9 @@ app.post('/boost-url', async (req, res) => {
 // ----------------------------------------------------
 
 app.get('/', (req, res) => {
-    res.json({ status: 'ok', message: 'Traffic Booster API is running. Use /boost-url POST.' });
+    res.json({ status: 'ok', message: 'Traffic Booster API (MP) is running. Use /boost-mp POST.' });
 });
 
 app.listen(PORT, () => {
-  console.log(`\n🌐 Traffic Booster API running and ready on port ${PORT}. (No Proxy)`);
+  console.log(`\n🌐 Traffic Booster API (Measurement Protocol) running and ready on port ${PORT}.`);
 });
