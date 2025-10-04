@@ -20,10 +20,11 @@
             background-color: #ffffff;
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 450px;
             text-align: center;
+            margin-bottom: 20px; /* Space between tool and guidelines */
         }
         .tip-box {
             background-color: #fff3cd;
@@ -98,6 +99,7 @@
         .guideline-link {
             margin-top: 30px;
             font-size: 0.9em;
+            cursor: pointer; /* Added pointer for link */
         }
         .guideline-link a {
             color: #007bff;
@@ -106,6 +108,17 @@
         }
         .guideline-link a:hover {
             text-decoration: underline;
+        }
+        #guidelines li {
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+        #guidelines p {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        #guidelines strong {
+            color: #007bff;
         }
     </style>
 </head>
@@ -123,8 +136,8 @@
             <label for="url">Target Website URL:</label>
             <input type="text" id="url" placeholder="e.g., https://yourprojectsite.com" required>
             
-            <label for="gaid">Google Analytics ID (G-XXXXX):</label>
-            <input type="text" id="gaid" placeholder="e.g., G-A1B2C3D4E5 (For reference only)" >
+            <label for="gaid">Google Analytics API Key (G-XXXXX):</label>
+            <input type="text" id="gaid" placeholder="e.g., G-A1B2C3D4E5 (For tracking reference)" >
             
             <label for="views">Views to Generate (Max 500):</label>
             <input type="number" id="views" value="500" min="1" max="500" required>
@@ -140,23 +153,33 @@
     </div>
     
     <div class="guideline-link">
-        <a href="#guidelines" onclick="showGuidelines()">**Click here for Step-by-Step Guidelines**</a>
+        <span onclick="showGuidelines()" style="cursor: pointer;">
+            **Click here for Step-by-Step Guidelines**
+        </span>
     </div>
 
-    <div id="guidelines" class="container" style="margin-top: 20px; display: none; max-width: 600px; text-align: left;">
+    <div id="guidelines" class="container" style="display: none; max-width: 600px; text-align: left;">
         <h2>📝 Guidelines: Where to find your details</h2>
         <ol>
-            <li>**Step 1: Your Target URL**
-                <p>This is the full URL of the website or GitHub page you want to boost. Ensure it starts with `http://` or `https://`.</p>
+            <li>**Step 1: Target Website URL**
+                <p>This is the full address of the site you want to boost. Always include **https://**.</p>
             </li>
-            <li>**Step 2: Google Analytics (GA) ID (G-XXXXX)**
-                <p>Find this unique tracking ID in your Google Analytics dashboard under **Admin > Property Settings**. While our tool doesn't use the ID directly, entering it here helps you track the project's data later. *Note: Most generated traffic will appear as "Not Set" due to our automated method.*</p>
+            <li>**Step 2: Google Analytics API Key (G-XXXXX)**
+                <p>This is your Google Analytics **Measurement ID** (often called API Key or Tracking ID).</p>
+                <p><strong>Where to find it:</strong></p>
+                <ul>
+                    <li>Go to your Google Analytics dashboard.</li>
+                    <li>Click **Admin** (gear icon ⚙️ in the bottom left).</li>
+                    <li>In the Property column, click **Data Streams**.</li>
+                    <li>Click on your website's data stream. The ID is shown as **Measurement ID** (e.g., <strong>G-ABCDEFG123</strong>).</li>
+                </ul>
+                <p>*Note: This ID is stored locally for your reference; the tool uses the URL for boosting.*</p>
             </li>
             <li>**Step 3: Views to Generate**
-                <p>Enter the desired number of simulated visits (up to 500 per request). Please remember that generating too many hits too quickly may lead to proxy failure.</p>
+                <p>Enter the number of simulated visits (up to 500). Too many concurrent requests may be blocked by Google.</p>
             </li>
             <li>**Step 4: Tracking the Results**
-                <p>After clicking 'Generate Traffic', check your **Render Logs** for real-time progress. The final data will be visible in your Google Analytics account after the 24-48 hour processing period.</p>
+                <p>After clicking 'Generate Traffic', check your **Render Logs** for real-time progress. The final, processed data will appear in Google Analytics after the **24-48 hour** processing period.</p>
             </li>
         </ol>
     </div>
@@ -174,7 +197,6 @@
         function showGuidelines() {
             if (guidelinesDiv.style.display === 'none') {
                 guidelinesDiv.style.display = 'block';
-                // Scroll to the guidelines
                 guidelinesDiv.scrollIntoView({ behavior: 'smooth' });
             } else {
                 guidelinesDiv.style.display = 'none';
@@ -188,7 +210,7 @@
             const targetUrl = document.getElementById('url').value.trim();
             let viewsCount = parseInt(document.getElementById('views').value);
             
-            // Limit views to 500 maximum
+            // Validation and view limit
             if (viewsCount > 500) {
                 viewsCount = 500;
                 document.getElementById('views').value = 500;
@@ -228,7 +250,7 @@
                 showMessage('error', `❌ Connection Error: Could not reach the Render API. Ensure your Render service is awake.`, true);
             })
             .finally(() => {
-                // Re-enable button after 5 seconds to prevent rapid clicking
+                // Re-enable button after 5 seconds
                 setTimeout(() => {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Generate Traffic';
