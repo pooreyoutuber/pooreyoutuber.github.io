@@ -85,39 +85,6 @@
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-
-        /* GUIDELINES STYLES */
-        #guidelines {
-            text-align: left;
-            padding-top: 20px;
-            margin-top: 15px;
-        }
-        #guidelines ol {
-            padding-left: 20px;
-        }
-        #guidelines li {
-            margin-bottom: 20px;
-        }
-        #guidelines .step-title {
-            font-weight: bold;
-            color: #28a745;
-            margin-top: 5px;
-            display: block;
-        }
-        .guideline-link {
-            cursor: pointer;
-            margin-top: 30px;
-        }
-        .guideline-link span {
-            color: #007bff;
-            text-decoration: underline;
-            font-weight: bold;
-        }
-        .contact-info {
-            margin-top: 20px;
-            font-size: 0.85em;
-            color: #777;
-        }
     </style>
 </head>
 <body>
@@ -151,34 +118,6 @@
             Any issues? Contact us! We are here to help and ensure a friendly experience.
         </div>
     </div>
-    
-    <div class="guideline-link">
-        <span onclick="showGuidelines()">
-            **Click here for Step-by-Step Guidelines: Find your GA ID & Secret**
-        </span>
-    </div>
-
-    <div id="guidelines" class="container" style="display: none; max-width: 600px;">
-        <h2>📝 Detailed Setup Guidelines</h2>
-        <ol>
-            <li>
-                <span class="step-title">1. Target Website URL</span>
-                <p>Enter the full address of your website. Ensure it includes **https://**.</p>
-            </li>
-            <li>
-                <span class="step-title">2. Google Analytics ID (Measurement ID)</span>
-                <p><strong>Where to find it:</strong> Admin (⚙️) -> Data Streams -> Your Web stream. Look for **Measurement ID**.</p>
-            </li>
-            <li>
-                <span class="step-title">3. API Secret (Client Secret)</span>
-                <p><strong>Where to find it:</strong> Admin (⚙️) -> Data Streams -> Your Web stream -> **Measurement Protocol API secrets**. Create a new secret key and paste it here.</p>
-            </li>
-            <li>
-                <span class="step-title">4. Views to Generate</span>
-                <p>Enter the desired number of views (max 500).</p>
-            </li>
-        </ol>
-    </div>
 
     <script>
         // 🚨 IMPORTANT: This URL MUST match your Render Service's base URL + /boost-mp
@@ -187,17 +126,6 @@
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
-        const guidelinesDiv = document.getElementById('guidelines');
-
-        function showGuidelines() {
-            if (guidelinesDiv.style.display === 'none') {
-                guidelinesDiv.style.display = 'block';
-                guidelinesDiv.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                guidelinesDiv.style.display = 'none';
-            }
-        }
-        window.showGuidelines = showGuidelines;
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -214,15 +142,15 @@
 
             viewsCount = Math.min(viewsCount, 500);
 
-            // Start the submission process with an initial retry count
+            // Start the submission process with an initial retry count of 1 (means it will try twice total)
             submitData({ url: targetUrl, ga_id: gaId, api_key: apiKey, views: viewsCount }, 1);
         });
 
         async function submitData(data, retries) {
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing Request...';
             
             const initialMsg = retries === 1 ? '✅ Request initiated. Checking server status...' : '⚠️ Render is waking up. Retrying in 5 seconds...';
+            submitBtn.textContent = initialMsg;
             showMessage('info', initialMsg, false);
 
             try {
@@ -233,7 +161,6 @@
                 });
                 
                 if (!response.ok) {
-                    // Check if the server responded but with an error status (e.g., 500 error)
                     throw new Error(`HTTP Error: ${response.status}`);
                 }
                 
@@ -253,10 +180,10 @@
                     setTimeout(() => submitData(data, retries - 1), 5000);
                 } else {
                     // Final attempt failed
-                    showMessage('error', `❌ Final Connection Error: Server did not respond after retry. Please check your Render link.`, true);
+                    showMessage('error', `❌ Final Connection Error: Server did not respond after retry. Please ensure your Render service is awake.`, true);
                 }
             } finally {
-                // Only re-enable the button if no automatic retry is scheduled
+                // Only re-enable the button if no automatic retry is scheduled (i.e., final attempt finished)
                 if (retries === 0) {
                     setTimeout(() => {
                         submitBtn.disabled = false;
