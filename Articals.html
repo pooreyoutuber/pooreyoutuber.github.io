@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Your Article | PooreYouTuber</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
         /* New YouTube Red Theme */
         :root {
@@ -53,209 +55,107 @@
             margin-bottom: 30px;
         }
 
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
+        /* Custom Disclaimer Style */
+        .disclaimer {
+            background: #ffe6e6; /* Light red background */
+            color: #cc0000; /* Dark red text */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--youtube-red);
             font-weight: bold;
         }
+        body.dark-mode .disclaimer {
+            background: #330000;
+            color: #ffcccc;
+            border-left-color: var(--youtube-red);
+        }
 
+        /* Form Styles (Unchanged) */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
         input[type="text"], textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            box-sizing: border-box; 
-            background: var(--secondary-bg);
-            color: var(--text-color);
+            width: 100%; padding: 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; box-sizing: border-box; 
+            background: var(--secondary-bg); color: var(--text-color);
         }
-
-        textarea {
-            resize: vertical;
-            min-height: 150px;
-        }
-
+        textarea { resize: vertical; min-height: 150px; }
         button {
-            background: var(--youtube-red);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.3s;
+            background: var(--youtube-red); color: white; border: none;
+            padding: 12px 25px; border-radius: 6px; cursor: pointer;
+            font-size: 16px; font-weight: bold; transition: background 0.3s;
         }
-
-        button:hover {
-            background: var(--youtube-dark-red);
-        }
+        button:hover { background: var(--youtube-dark-red); }
         
         /* Articles List Styles */
         #article-list-container {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
+            margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color);
         }
 
         .article-card {
-            background: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-        }
-
-        .article-card h3 {
-            color: var(--youtube-red);
-            margin-top: 0;
-        }
-
-        .article-card p {
-            white-space: pre-wrap; /* Preserve line breaks from textarea */
+            background: var(--secondary-bg); border: 1px solid var(--border-color);
+            padding: 20px; margin-bottom: 15px; border-radius: 8px;
+            display: flex; /* Enable flexbox for numbering */
         }
         
-        .article-meta {
-            font-size: 0.9em;
-            color: #888;
-            margin-bottom: 10px;
+        .article-number {
+            font-size: 1.5em; font-weight: bold; color: var(--youtube-red);
+            margin-right: 15px; min-width: 30px; text-align: right;
         }
+        
+        .article-content-wrapper { flex-grow: 1; }
+
+        .article-card h3 { color: var(--youtube-red); margin-top: 0; }
+        .article-card p { white-space: pre-wrap; }
+        .article-meta { font-size: 0.9em; color: #888; margin-bottom: 10px; }
+
+        /* Like & Share Button Styles */
+        .article-actions {
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-button {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .action-button i { margin-right: 5px; }
+
+        .like-button:hover {
+            background-color: #fcebeb; /* Light red hover */
+            border-color: var(--youtube-red);
+        }
+        
+        .like-button.liked {
+            background-color: var(--youtube-red);
+            color: white;
+            border-color: var(--youtube-dark-red);
+        }
+        body.dark-mode .like-button.liked {
+            background-color: var(--youtube-dark-red);
+        }
+        body.dark-mode .action-button:hover {
+             background-color: #333;
+        }
+
 
         /* Responsive adjustments */
         @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            button {
-                width: 100%;
-            }
+            .container { padding: 15px; }
+            button { width: 100%; }
+            .article-card { flex-direction: column; }
+            .article-number { text-align: left; margin-bottom: 10px; }
+            .article-actions { justify-content: space-around; }
         }
     </style>
 </head>
-<body>
-
-    <div class="container">
-        <h1>🖊️ Article Submission Tool</h1>
-        <p>यह टूल लोकल स्टोरेज का उपयोग करता है। आपके द्वारा सबमिट किए गए आर्टिकल केवल आपके ब्राउज़र में सेव होंगे।</p>
-
-        <form id="article-form">
-            <h2>Submit Your Article</h2>
-            <div class="form-group">
-                <label for="article-title">Article Title</label>
-                <input type="text" id="article-title" required>
-            </div>
-            <div class="form-group">
-                <label for="article-content">Article Content</label>
-                <textarea id="article-content" required></textarea>
-            </div>
-            <button type="submit">Publish Article</button>
-        </form>
-
-        <div id="article-list-container">
-            <h2>Latest Articles (Local)</h2>
-            <div id="articles-list">
-                <p id="no-articles-msg">No articles found in your local storage. Submit one!</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const ARTICLES_KEY = 'pooreyoutuber_local_articles';
-        const articleForm = document.getElementById('article-form');
-        const articlesListDiv = document.getElementById('articles-list');
-        const noArticlesMsg = document.getElementById('no-articles-msg');
-
-        // Function to load articles from Local Storage
-        function getArticles() {
-            const articlesJSON = localStorage.getItem(ARTICLES_KEY);
-            return articlesJSON ? JSON.parse(articlesJSON) : [];
-        }
-
-        // Function to save articles to Local Storage
-        function saveArticles(articles) {
-            localStorage.setItem(ARTICLES_KEY, JSON.stringify(articles));
-        }
-
-        // Function to render articles on the page (Latest on Top)
-        function renderArticles() {
-            const articles = getArticles();
-            articlesListDiv.innerHTML = ''; // Clear current list
-
-            if (articles.length === 0) {
-                articlesListDiv.appendChild(noArticlesMsg);
-                noArticlesMsg.style.display = 'block';
-                return;
-            }
-
-            noArticlesMsg.style.display = 'none';
-
-            // Sort articles by timestamp (latest first) is generally unnecessary 
-            // if we use unshift(), but kept for robust sorting in case of data corruption.
-            articles.sort((a, b) => b.timestamp - a.timestamp); 
-
-            articles.forEach(article => {
-                const articleCard = document.createElement('div');
-                articleCard.className = 'article-card';
-                
-                // Format date for display
-                const date = new Date(article.timestamp).toLocaleString();
-
-                articleCard.innerHTML = `
-                    <h3>${article.title}</h3>
-                    <div class="article-meta">Published: ${date}</div>
-                    <p>${article.content}</p>
-                `;
-                articlesListDiv.appendChild(articleCard);
-            });
-        }
-
-        // Handle form submission
-        articleForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent page reload
-
-            const title = document.getElementById('article-title').value.trim();
-            const content = document.getElementById('article-content').value.trim();
-
-            if (!title || !content) {
-                alert('Please enter both title and content for the article.');
-                return;
-            }
-
-            const newArticle = {
-                title: title,
-                content: content,
-                timestamp: Date.now() // Get current time in milliseconds
-            };
-
-            const articles = getArticles();
-            
-            // Add new article to the beginning of the array (for latest on top)
-            articles.unshift(newArticle); 
-
-            saveArticles(articles);
-            
-            // Clear the form fields
-            articleForm.reset();
-            
-            // Update the display
-            renderArticles();
-            alert('Article Published Successfully (Locally)!');
-        });
-
-        // Load and display articles when the page loads
-        document.addEventListener('DOMContentLoaded', renderArticles);
-        
-        // Dark Mode check (To apply existing theme)
-        document.addEventListener('DOMContentLoaded', function() {
-             if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
-        });
-        
-    </script>
-</body>
-</html>
