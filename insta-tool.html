@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Instagram Caption & Tag Generator</title>
+    <title>AI Instagram Content Generator</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f9; }
         .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -13,9 +13,6 @@
         button { background-color: #405de6; color: white; padding: 12px 20px; margin-top: 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; width: 100%; transition: background-color 0.3s; }
         button:hover { background-color: #5851db; }
         .output-box { background: #e9ecef; border: 1px solid #ced4da; padding: 20px; margin-top: 30px; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; }
-        .disclaimer { margin-top: 30px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; border-radius: 8px; font-size: 0.9em; text-align: center; }
-        
-        /* कॉपी बटन स्टाइल */
         .copy-btn { background-color: #28a745; margin-top: 10px; }
         .copy-btn:hover { background-color: #218838; }
     </style>
@@ -25,42 +22,55 @@
         <h1>✨ AI Instagram Content Generator</h1>
         
         <form method="POST">
-            <label for="topic">1. आपका विषय क्या है? (जैसे: कॉफी शॉप में पढ़ाई, दोस्तों के साथ बीच पर मस्ती)</label>
-            <input type="text" id="topic" name="topic" value="{{ current_topic }}" placeholder="फोटो का मुख्य विषय यहाँ लिखें" required>
+            <label for="topic">1. What is the topic of your post? (e.g., My PUBG Mobile Chicken Dinner, Morning ride in the mountains)</label>
+            <input type="text" id="topic" name="topic" value="{{ current_topic }}" placeholder="Enter the main subject of your photo/video" required>
 
-            <label for="tone">2. कैप्शन का टोन/फीलिंग कैसी चाहिए?</label>
+            <label for="category">2. What is the content category?</label>
+            <select id="category" name="category" required>
+                <option value="Gaming/Entertainment" {% if current_category == 'Gaming/Entertainment' %}selected{% endif %}>Gaming/Entertainment</option>
+                <option value="Travel and Adventure" {% if current_category == 'Travel and Adventure' %}selected{% endif %}>Travel and Adventure</option>
+                <option value="Fitness and Lifestyle" {% if current_category == 'Fitness and Lifestyle' %}selected{% endif %}>Fitness and Lifestyle</option>
+                <option value="Food and Cooking" {% if current_category == 'Food and Cooking' %}selected{% endif %}>Food and Cooking</option>
+                <option value="Technology and Gadgets" {% if current_category == 'Technology and Gadgets' %}selected{% endif %}>Technology and Gadgets</option>
+                <option value="Fashion and Beauty" {% if current_category == 'Fashion and Beauty' %}selected{% endif %}>Fashion and Beauty</option>
+            </select>
+            
+            <label for="tone">3. What should be the tone/vibe?</label>
             <select id="tone" name="tone" required>
-                <option value="Inspirational" {% if current_tone == 'Inspirational' %}selected{% endif %}>प्रेरणादायक (Inspirational)</option>
-                <option value="Funny and Witty" {% if current_tone == 'Funny and Witty' %}selected{% endif %}>मज़ेदार और हास्यपूर्ण (Funny)</option>
-                <option value="Serious and Informative" {% if current_tone == 'Serious and Informative' %}selected{% endif %}>गंभीर और जानकारीपूर्ण (Informative)</option>
-                <option value="Adventure and Travel" {% if current_tone == 'Adventure and Travel' %}selected{% endif %}>एडवेंचर और यात्रा (Travel)</option>
-                <option value="Short and Punchy" {% if current_tone == 'Short and Punchy' %}selected{% endif %}>छोटा और आकर्षक (Punchy)</option>
+                <option value="Inspirational" {% if current_tone == 'Inspirational' %}selected{% endif %}>Inspirational & Motivational</option>
+                <option value="Funny and Witty" {% if current_tone == 'Funny and Witty' %}selected{% endif %}>Funny and Witty</option>
+                <option value="Professional and Informative" {% if current_tone == 'Professional and Informative' %}selected{% endif %}>Professional & Informative</option>
+                <option value="Sarcastic" {% if current_tone == 'Sarcastic' %}selected{% endif %}>Sarcastic & Relatable</option>
+                <option value="Short and Punchy" {% if current_tone == 'Short and Punchy' %}selected{% endif %}>Short and Punchy</option>
             </select>
 
-            <button type="submit">AI कैप्शन और टैग जेनरेट करें</button>
+            <button type="submit">Generate AI Caption & Tags</button>
         </form>
 
         {% if ai_caption %}
-        <h2>🔥 AI जेनरेटेड रिजल्ट</h2>
+        <h2>🔥 AI Generated Result</h2>
         <div class="output-box" id="aiOutput">
             {{ ai_caption }}
         </div>
-        <button class="copy-btn" onclick="copyContent()">कॉपी करें</button>
+        <button class="copy-btn" onclick="copyContent()">Copy Content</button>
         {% endif %}
-
-        <div class="disclaimer">
-            ⚠️ **अस्वीकरण (Disclaimer):** यह टूल शैक्षिक उद्देश्यों के लिए बनाया गया है और Gemini AI द्वारा संचालित है। AI की दैनिक सीमा (Free Tier) पार होने पर टूल काम करना बंद कर सकता है।
-        </div>
+        
     </div>
     
     <script>
         function copyContent() {
             const output = document.getElementById('aiOutput').innerText;
-            navigator.clipboard.writeText(output).then(() => {
-                alert('कैप्शन और हैशटैग सफलतापूर्वक कॉपी हो गए!');
+            // The prompt instructs the AI to separate caption and hashtags with a blank line.
+            // We'll clean the output slightly for a cleaner copy.
+            
+            // Replaces multiple new lines with single ones, for cleaner hashtag copying.
+            const cleanedOutput = output.trim().replace(/\n\s*\n/g, '\n'); 
+
+            navigator.clipboard.writeText(cleanedOutput).then(() => {
+                alert('Caption and Hashtags successfully copied! Go get those views!');
             }).catch(err => {
-                console.error('कॉपी करने में त्रुटि:', err);
-                alert('कॉपी करने में विफल। कृपया मैन्युअल रूप से कॉपी करें।');
+                console.error('Copy failed:', err);
+                alert('Copy failed. Please copy manually.');
             });
         }
     </script>
