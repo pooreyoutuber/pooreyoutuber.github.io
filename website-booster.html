@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Traffic Booster Tool</title>
+    <title>Professional Web Booster (Measurement Protocol)</title>
     <style>
-        /* (Use the CSS from the previous simplest answer) */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #e9eef7;
@@ -23,22 +22,23 @@
             border-radius: 12px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px; 
+            max-width: 480px; 
             text-align: center;
+            margin-bottom: 20px;
         }
         .tip-box {
-            background-color: #f0f8ff; 
+            background-color: #e0f7fa; 
             color: #0056b3;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 25px;
-            border: 1px solid #cce0ff;
+            border: 1px solid #b3e5fc;
             font-size: 0.95em;
             font-weight: 600;
         }
         h2 {
             color: #007bff;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-size: 1.8em;
         }
         label {
@@ -51,13 +51,13 @@
         input[type="text"], input[type="number"] {
             width: 100%;
             padding: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px; 
             border: 1px solid #cce0ff;
             border-radius: 6px;
             box-sizing: border-box;
         }
         button {
-            background-color: #28a745; 
+            background-color: #007bff;
             color: white;
             padding: 12px 20px;
             border: none;
@@ -67,8 +67,9 @@
             font-weight: bold;
             transition: background-color 0.3s ease;
             width: 100%;
+            margin-top: 10px;
         }
-        button:hover { background-color: #1e7e34; }
+        button:hover { background-color: #0056b3; }
         #message {
             margin-top: 25px;
             padding: 15px;
@@ -79,7 +80,34 @@
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        
+
+        /* GUIDELINES STYLES */
+        #guidelines {
+            text-align: left;
+            padding-top: 20px;
+            margin-top: 15px;
+        }
+        #guidelines ol {
+            padding-left: 20px;
+        }
+        #guidelines li {
+            margin-bottom: 20px;
+        }
+        #guidelines .step-title {
+            font-weight: bold;
+            color: #28a745;
+            margin-top: 5px;
+            display: block;
+        }
+        .guideline-link {
+            cursor: pointer;
+            margin-top: 30px;
+        }
+        .guideline-link span {
+            color: #007bff;
+            text-decoration: underline;
+            font-weight: bold;
+        }
         .contact-info {
             margin-top: 20px;
             font-size: 0.85em;
@@ -90,17 +118,23 @@
 <body>
     <div class="container">
         <div class="tip-box">
-            🌟 **Sweet Tip:** Results are best observed in Google Analytics after **24-48 hours**!
+            🌟 **Sweet Tip:** Results will be visible in your Google Analytics Realtime and standard reports after **24-48 hours** of processing.
         </div>
 
-        <h2>Simple Traffic Booster ✨</h2>
+        <h2>Professional Website Booster 🚀</h2>
         
         <form id="boosterForm">
             
-            <label for="url">Target Website URL:</label>
+            <label for="url">1. Target Website URL:</label>
             <input type="text" id="url" placeholder="e.g., https://yourprojectsite.com" required>
             
-            <label for="views">Views to Generate (Max 500):</label>
+            <label for="gaid">2. Google Analytics ID (G-XXXXX):</label>
+            <input type="text" id="gaid" placeholder="e.g., G-A1B2C3D4E5" required>
+            
+            <label for="apikey">3. API Secret (Measurement Protocol):</label>
+            <input type="text" id="apikey" placeholder="e.g., pSaScGPuTWa95eOdSkbV7w" required>
+            
+            <label for="views">4. Views to Generate (Max 500):</label>
             <input type="number" id="views" value="500" min="1" max="500" required>
             
             <button type="submit" id="submitBtn">Generate Traffic</button>
@@ -109,43 +143,108 @@
         <div id="message"></div>
         
         <div class="contact-info">
-            Facing issues? Don't worry, we are here to help. Contact us!
+            Any issues? Contact us! We are here to help and ensure a friendly experience.
         </div>
+    </div>
+    
+    <div class="guideline-link">
+        <span onclick="showGuidelines()">
+            **Click here for Step-by-Step Guidelines: Find your GA ID & Secret**
+        </span>
+    </div>
+
+    <div id="guidelines" class="container" style="display: none; max-width: 600px;">
+        <h2>📝 Detailed Setup Guidelines</h2>
+        <ol>
+            <li>
+                <span class="step-title">1. Target Website URL</span>
+                <p>Enter the full address of your website. Ensure it includes **https://**.</p>
+            </li>
+            <li>
+                <span class="step-title">2. Google Analytics ID (Measurement ID)</span>
+                <p>This unique ID is essential for tracking data in your GA4 property.</p>
+                <p><strong>Where to find it:</strong></p>
+                <ul>
+                    <li>Go to your Google Analytics (GA4) account.</li>
+                    <li>Click **Admin** (⚙️) in the bottom left.</li>
+                    <li>In the Property column, click **Data Streams**.</li>
+                    <li>Click on your Web stream. The ID is shown as the **Measurement ID** (e.g., **G-ABCDEFG123**).</li>
+                </ul>
+            </li>
+            <li>
+                <span class="step-title">3. API Secret (Client Secret)</span>
+                <p>This secret key grants your tool permission to send data directly to Google Analytics (Measurement Protocol).</p>
+                <p><strong>Where to find it:</strong></p>
+                <ul>
+                    <li>In Google Analytics (GA4), go to **Admin** (⚙️) -> **Data Streams**.</li>
+                    <li>Click on your Web stream.</li>
+                    <li>Scroll down and click on **Measurement Protocol API secrets**.</li>
+                    <li>Click **Create** and copy the generated secret key (e.g., **pSaScGPuTWa95eOdSkbV7w**).</li>
+                </ul>
+            </li>
+            <li>
+                <span class="step-title">4. Views to Generate</span>
+                <p>Enter the desired number of views (max 500). Please check your **Render Logs** and **GA Realtime Reports** for instant feedback.</p>
+            </li>
+        </ol>
     </div>
 
     <script>
-        // 🚨 IMPORTANT: Your Render API URL
-        const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-url'; 
+        // 🚨 IMPORTANT: Your Render API URL (Using the stable MP endpoint)
+        const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
+        const guidelinesDiv = document.getElementById('guidelines');
+
+        // Function to toggle guidelines visibility
+        function showGuidelines() {
+            if (guidelinesDiv.style.display === 'none') {
+                guidelinesDiv.style.display = 'block';
+                guidelinesDiv.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                guidelinesDiv.style.display = 'none';
+            }
+        }
+        window.showGuidelines = showGuidelines;
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             
             const targetUrl = document.getElementById('url').value.trim();
+            const gaId = document.getElementById('gaid').value.trim();
+            const apiKey = document.getElementById('apikey').value.trim();
             let viewsCount = parseInt(document.getElementById('views').value);
             
-            if (viewsCount > 500) { viewsCount = 500; document.getElementById('views').value = 500; }
-            if (!targetUrl || viewsCount < 1) { showMessage('error', 'Please enter a valid URL and view count.', true); return; }
+            if (!targetUrl || !gaId || !apiKey || viewsCount < 1) {
+                showMessage('error', '❌ Error: Please fill all four required fields.', true);
+                return;
+            }
 
+            viewsCount = Math.min(viewsCount, 500);
+            
             submitBtn.disabled = true;
             submitBtn.textContent = 'Processing Request...';
-            showMessage('info', `✅ Requesting ${viewsCount} views. Check Render Logs for status!`, false);
+            showMessage('info', `✅ Request for ${viewsCount} views initiated. Check Render Logs for status.`, false);
 
             fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', },
-                body: JSON.stringify({ url: targetUrl, views: viewsCount })
+                body: JSON.stringify({ 
+                    url: targetUrl, 
+                    ga_id: gaId, 
+                    api_key: apiKey, 
+                    views: viewsCount 
+                })
             })
             .then(response => {
                 if (!response.ok) { throw new Error(`HTTP Error: ${response.status}`); }
                 return response.json();
             })
             .then(data => {
-                if (data.status === 'processing' || data.status === 'ok') {
-                    showMessage('success', `✨ Success! API accepted the request. Check your Render logs now!`, false);
+                if (data.status === 'processing') {
+                    showMessage('success', `✨ Success! API accepted the request. Check your GA Realtime reports!`, false);
                 } else {
                     showMessage('error', `❌ API Error: ${data.message || 'Unknown error. Check Render Logs.'}`, true);
                 }
@@ -154,6 +253,7 @@
                 showMessage('error', `❌ Connection Error: Could not reach the Render API. Ensure your Render service is awake.`, true);
             })
             .finally(() => {
+                // Re-enable button after a short delay
                 setTimeout(() => {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Generate Traffic';
