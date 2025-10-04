@@ -1,0 +1,55 @@
+/* Base Layout: Desktop First */
+body { margin: 0; padding: 0; background-color: #1e1e1e; color: #f0f0f0; font-family: 'Segoe UI', sans-serif; }
+.editor-container { display: flex; height: 100vh; width: 100%; }
+
+/* Sidebars (Left & Right) */
+.sidebar { width: 280px; padding: 15px; background-color: #252526; overflow-y: auto; border-right: 1px solid #333; }
+.properties-panel { border-right: none; border-left: 1px solid #333; }
+.panel-header { color: #007bff; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+
+/* Canvas Area */
+.canvas-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; background-color: #3e3e3e; position: relative; }
+#photo-canvas { max-width: 90%; max-height: 90%; background-color: white; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); }
+.canvas-overlay-text { position: absolute; color: #aaa; font-size: 1.2em; }
+
+/* Controls Styling */
+.tool-button, .btn { width: 100%; padding: 10px; margin-bottom: 8px; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; color: white; }
+.tool-button { background-color: #333; text-align: left; }
+.tool-button.active { background-color: #007bff; }
+.tool-button:hover:not(.active) { background-color: #444; }
+
+.btn-primary { background-color: #28a745; }
+.btn-secondary { background-color: #6c757d; }
+.btn-danger { background-color: #dc3545; }
+
+label { display: block; margin-top: 10px; margin-bottom: 5px; font-size: 0.9em; color: #aaa; }
+input[type="range"] { width: 100%; }
+
+.tool-content { display: none; padding: 10px 0; border-top: 1px solid #333; }
+.tool-content.active { display: block; }
+
+
+/* RESPONSIVE DESIGN: MOBILE FRIENDLY */
+@media (max-width: 768px) {
+    .editor-container { flex-direction: column; }
+    
+    /* Sidebars ko chota aur bottom par le jaana */
+    .sidebar { width: 100%; height: auto; min-height: 50px; border: none; }
+    .properties-panel { display: none; /* Mobile par properties panel chhupa diya */ }
+    
+    /* Mobile par tools panel ko bottom bar banana */
+    .tools-panel { order: 2; /* Neeche rakhein */
+                   padding: 5px; 
+                   display: flex; 
+                   flex-wrap: wrap; 
+                   justify-content: space-around;
+                   border-top: 1px solid #333;
+    }
+    
+    .tool-button { width: 22%; margin: 5px 2px; text-align: center; padding: 8px 5px; font-size: 0.8em; }
+    .tool-content { display: none !important; /* Mobile par yeh content chhup jayega, sirf buttons dikhenge */ }
+    
+    .canvas-area { height: calc(100vh - 50px); /* Baki height canvas ko de dein */
+                   order: 1; /* Upar rakhein */
+    }
+}
