@@ -3,55 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Booster Tool | College Project</title>
+    <title>Professional Traffic Booster | College Project</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9eef7;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            color: #333;
         }
         .container {
             background-color: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
         }
+        .tip-box {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #ffeeba;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
         h2 {
-            color: #333;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            color: #007bff;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        p {
+            margin-bottom: 25px;
+            color: #555;
         }
         label {
             display: block;
             text-align: left;
             margin-bottom: 5px;
-            color: #555;
+            color: #333;
             font-weight: bold;
         }
         input[type="text"], input[type="number"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box; /* Ensures padding doesn't affect total width */
+            border: 1px solid #cce0ff;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #007bff;
+            outline: none;
         }
         button {
             background-color: #007bff;
             color: white;
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1em;
+            font-weight: bold;
             transition: background-color 0.3s ease;
             width: 100%;
         }
@@ -59,74 +80,130 @@
             background-color: #0056b3;
         }
         #message {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #cfe2ff; color: #055160; border: 1px solid #b6d4fe; }
+        
+        .contact-info {
             margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
+            font-size: 0.85em;
+            color: #777;
+        }
+        .guideline-link {
+            margin-top: 30px;
+            font-size: 0.9em;
+        }
+        .guideline-link a {
+            color: #007bff;
+            text-decoration: none;
             font-weight: bold;
         }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .info {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
+        .guideline-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Website Booster Tool ✅</h2>
-        <p>अपना URL पेस्ट करें और जनरेट करने के लिए व्यूज की संख्या चुनें।</p>
+        <div class="tip-box">
+            🌟 **Sweet Tip:** For best results, Google Analytics takes **24-48 hours** to fully process traffic data!
+        </div>
+
+        <h2>Website Traffic Booster 🚀</h2>
+        <p>Boost your website traffic and visibility using our professional tool.</p>
         
         <form id="boosterForm">
-            <label for="url">लक्ष्य URL (Target URL):</label>
-            <input type="text" id="url" value="https://pooreyoutuber.github.io/" required>
             
-            <label for="views">व्यूज की संख्या (Views to Generate):</label>
-            <input type="number" id="views" value="5" min="1" required>
+            <label for="url">Target Website URL:</label>
+            <input type="text" id="url" placeholder="e.g., https://yourprojectsite.com" required>
             
-            <button type="submit" id="submitBtn">व्यूज जनरेट करें</button>
+            <label for="gaid">Google Analytics ID (G-XXXXX):</label>
+            <input type="text" id="gaid" placeholder="e.g., G-A1B2C3D4E5 (For reference only)" >
+            
+            <label for="views">Views to Generate (Max 500):</label>
+            <input type="number" id="views" value="500" min="1" max="500" required>
+            
+            <button type="submit" id="submitBtn">Generate Traffic</button>
         </form>
         
         <div id="message"></div>
         
+        <div class="contact-info">
+            Facing any issues? Feel free to contact us! We're here to help.
+        </div>
+    </div>
+    
+    <div class="guideline-link">
+        <a href="#guidelines" onclick="showGuidelines()">**Click here for Step-by-Step Guidelines**</a>
+    </div>
+
+    <div id="guidelines" class="container" style="margin-top: 20px; display: none; max-width: 600px; text-align: left;">
+        <h2>📝 Guidelines: Where to find your details</h2>
+        <ol>
+            <li>**Step 1: Your Target URL**
+                <p>This is the full URL of the website or GitHub page you want to boost. Ensure it starts with `http://` or `https://`.</p>
+            </li>
+            <li>**Step 2: Google Analytics (GA) ID (G-XXXXX)**
+                <p>Find this unique tracking ID in your Google Analytics dashboard under **Admin > Property Settings**. While our tool doesn't use the ID directly, entering it here helps you track the project's data later. *Note: Most generated traffic will appear as "Not Set" due to our automated method.*</p>
+            </li>
+            <li>**Step 3: Views to Generate**
+                <p>Enter the desired number of simulated visits (up to 500 per request). Please remember that generating too many hits too quickly may lead to proxy failure.</p>
+            </li>
+            <li>**Step 4: Tracking the Results**
+                <p>After clicking 'Generate Traffic', check your **Render Logs** for real-time progress. The final data will be visible in your Google Analytics account after the 24-48 hour processing period.</p>
+            </li>
+        </ol>
     </div>
 
     <script>
-        // 🚨 महत्वपूर्ण: इस API URL को अपने Render Service URL से बदलें 
-        // आपके पिछले लॉग्स के अनुसार यह URL है:
+        // 🚨 IMPORTANT: Your Render API URL
         const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-url'; 
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
+        const guidelinesDiv = document.getElementById('guidelines');
+
+        // Function to show/hide guidelines
+        function showGuidelines() {
+            if (guidelinesDiv.style.display === 'none') {
+                guidelinesDiv.style.display = 'block';
+                // Scroll to the guidelines
+                guidelinesDiv.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                guidelinesDiv.style.display = 'none';
+            }
+        }
+        window.showGuidelines = showGuidelines; // Make it globally accessible
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             
-            // Get values from input fields
-            const targetUrl = document.getElementById('url').value;
-            const viewsCount = parseInt(document.getElementById('views').value);
+            const targetUrl = document.getElementById('url').value.trim();
+            let viewsCount = parseInt(document.getElementById('views').value);
+            
+            // Limit views to 500 maximum
+            if (viewsCount > 500) {
+                viewsCount = 500;
+                document.getElementById('views').value = 500;
+                showMessage('info', 'Maximum views per request is 500. Request adjusted.', false);
+            }
 
             if (!targetUrl || viewsCount < 1) {
-                showMessage('error', 'कृपया एक मान्य URL और व्यूज की संख्या दर्ज करें।');
+                showMessage('error', 'Please enter a valid URL and view count.', true);
                 return;
             }
 
-            // Disable button and show processing message
             submitBtn.disabled = true;
-            submitBtn.textContent = 'प्रोसेसिंग शुरू हो रही है...';
-            showMessage('info', `✅ ${viewsCount} व्यूज के लिए रिक्वेस्ट भेजी जा रही है... Render Logs चेक करें।`);
+            submitBtn.textContent = 'Processing Request...';
+            showMessage('info', `✅ Requesting ${viewsCount} views. Please check Render Logs for progress.`, false);
 
-            // Send POST request to the Render API
             fetch(API_URL, {
                 method: 'POST',
                 headers: {
@@ -136,28 +213,25 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    // This handles HTTP errors like 500, 404, 503 etc.
-                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                    throw new Error(`HTTP Error: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                // This handles the JSON response from the API
                 if (data.status === 'processing' || data.status === 'ok') {
-                    showMessage('success', `✨ सफलता! API ने रिक्वेस्ट स्वीकार कर ली है। Render लॉग्स में प्रगति देखें।`);
+                    showMessage('success', `✨ Success! API accepted the request. Check your Render logs now!`, false);
                 } else {
-                    showMessage('error', `❌ API एरर: ${data.message || 'अज्ञात त्रुटि। Render Logs चेक करें।'}`, true);
+                    showMessage('error', `❌ API Error: ${data.message || 'Unknown error. Check Render Logs.'}`, true);
                 }
             })
             .catch(error => {
-                // This handles network errors or errors thrown above
-                showMessage('error', `❌ कनेक्शन एरर: Render API तक पहुंचने में विफल रहा। सुनिश्चित करें कि API URL सही है और Render सर्विस चालू है। (${error.message})`, true);
+                showMessage('error', `❌ Connection Error: Could not reach the Render API. Ensure your Render service is awake.`, true);
             })
             .finally(() => {
                 // Re-enable button after 5 seconds to prevent rapid clicking
                 setTimeout(() => {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'व्यूज जनरेट करें';
+                    submitBtn.textContent = 'Generate Traffic';
                 }, 5000);
             });
         });
@@ -166,7 +240,6 @@
             messageDiv.className = type;
             messageDiv.textContent = message;
             
-            // Clear message after 10 seconds if it's not a permanent error
             if (!permanent) {
                 setTimeout(() => {
                     messageDiv.textContent = '';
