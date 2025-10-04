@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Social View Booster</title>
+    <style>
+        /* --- General & Responsive Styles --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #e6f3ff; /* Light Background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            padding: 20px 10px;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 50, 100, 0.1);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #cceeff;
+            transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
+        }
+        h2 {
+            color: #007bff;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+        /* --- Form Elements --- */
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: color 0.3s;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 20px; 
+            border: 2px solid #e0f0ff;
+            background-color: #f9f9f9;
+            color: #333;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            background-color: #ff5722; 
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.1s;
+            width: 100%;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(255, 87, 34, 0.4);
+        }
+        button:hover { 
+            background-color: #e64a19;
+            transform: translateY(-2px);
+        }
+        /* --- Message & Guidelines --- */
+        #message {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1em;
+            text-align: center;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+
+        .guideline-box {
+            background-color: #f0f8ff;
+            color: #0056b3;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 5px solid #007bff;
+            text-align: left;
+            font-size: 0.9em;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        .guideline-box strong {
+            color: #333;
+            transition: color 0.3s;
+        }
+        
+        /* --- DARK MODE STYLES --- */
+        .dark-mode {
+            background-color: #121212; /* Deep Black Background */
+            color: #e0e0e0;
+        }
+        .dark-mode .container {
+            background-color: #1f1f1f;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-color: #333;
+        }
+        .dark-mode h2 {
+            color: #8ab4f8; /* Soft Blue for contrast */
+        }
+        .dark-mode label {
+            color: #bdbdbd;
+        }
+        .dark-mode input[type="text"], .dark-mode input[type="number"] {
+            border-color: #444;
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+        }
+        .dark-mode input:focus {
+            border-color: #8ab4f8;
+        }
+        .dark-mode .guideline-box {
+            background-color: #2c2c2c;
+            color: #bdbdbd;
+            border-left-color: #8ab4f8;
+        }
+        .dark-mode .guideline-box strong {
+            color: #e0e0e0;
+        }
+        /* Dark mode for success/error messages */
+        .dark-mode .success { background-color: #1b5e20; color: #a5d6a7; border-color: #388e3c; }
+        .dark-mode .error { background-color: #b71c1c; color: #ffcdd2; border-color: #e57373; }
+        .dark-mode .info { background-color: #ffb300; color: #1f1f1f; border-color: #ffa000; }
+
+        /* --- Dark Mode Toggle Button --- */
+        #darkModeToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        .dark-mode #darkModeToggle {
+            background: #8ab4f8;
+            color: #1f1f1f;
+        }
+        /* Mobile optimization */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                border-radius: 10px;
+            }
+            #darkModeToggle {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <button id="darkModeToggle" onclick="toggleDarkMode()">Switch to Dark Mode</button>
+    
+    <div class="container">
+        <h2>🚀 Instant View Booster Tool</h2>
+        <p style="color: #666; margin-bottom: 25px;">Works for Facebook Videos/Reels, Instagram Reels, and YouTube Videos.</p>
+        
+        <form id="boosterForm">
+            
+            <label for="url">1. Paste Your Target Link Here:</label>
+            <input type="text" id="url" placeholder="e.g., https://www.facebook.com/yourvideo" required autocomplete="off">
+            
+            <label for="views">2. Select Number of Views (Max 20):</label>
+            <input type="number" id="views" value="10" min="1" max="20" required autocomplete="off">
+            
+            <label for="delay">3. Delay (seconds) between opening windows:</label>
+            <input type="number" id="delay" value="2" min="0" max="5" required autocomplete="off">
+            
+            <button type="submit" id="submitBtn">Boost Views Instantly!</button>
+        </form>
+        
+        <div id="message"></div>
+
+        <div class="guideline-box">
+            <strong>📊 Important Note on Results:</strong><br>
+            The views are successfully sent now! Please allow up to **24 hours** for the platform (Facebook/Instagram/YouTube) to fully process and display the final, stabilized count on your public video or post. Immediate results are usually visible, but the official number takes time to update.
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('boosterForm');
+        const messageDiv = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const darkModeToggleBtn = document.getElementById('darkModeToggle');
+        const MAX_WINDOWS = 20;
+
+        // --- Dark Mode Logic ---
+
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkModeEnabled', isDarkMode);
+            updateDarkModeButton(isDarkMode);
+        }
+
+        function loadDarkModePreference() {
+            const savedPreference = localStorage.getItem('darkModeEnabled');
+            const isDarkMode = savedPreference === 'true';
+
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            updateDarkModeButton(isDarkMode);
+        }
+
+        function updateDarkModeButton(isDarkMode) {
+            darkModeToggleBtn.textContent = isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        }
+        
+        // Load preference when the page loads
+        document.addEventListener('DOMContentLoaded', loadDarkModePreference);
+
+        // --- View Booster Logic ---
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const targetUrl = document.getElementById('url').value.trim();
+            let viewsCount = parseInt(document.getElementById('views').value);
+            let delayTime = parseFloat(document.getElementById('delay').value) * 1000;
+            
+            if (!targetUrl || viewsCount < 1) {
+                showMessage('error', '❌ Error: Please provide a valid URL and view count.', true);
+                return;
+            }
+
+            viewsCount = Math.min(viewsCount, MAX_WINDOWS); 
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = `Processing Request...`;
+            
+            showMessage('success', `✅ Request for ${viewsCount} views initiated! The process is starting now...`, false);
+
+            openMultipleWindows(targetUrl, viewsCount, delayTime);
+        });
+
+        function openMultipleWindows(url, count, delay) {
+            let windowsOpened = 0;
+            const openedWindows = [];
+
+            function openNextWindow() {
+                if (windowsOpened < count) {
+                    // Open the URL in a new pop-up window
+                    const newWindow = window.open(url, `_view_${Date.now()}_${windowsOpened}`, 'width=350,height=300,toolbar=no,menubar=no,scrollbars=no,resizable=yes');
+                    
+                    if (newWindow) {
+                        openedWindows.push(newWindow);
+                        windowsOpened++;
+                        
+                        submitBtn.textContent = `Opening Window ${windowsOpened} of ${count}...`;
+
+                        // Schedule the next window to open
+                        setTimeout(openNextWindow, delay);
+                    } else {
+                        // Browser blocked pop-up
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Boost Views Instantly!';
+                        showMessage('error', '⚠️ Error: Pop-ups were blocked by your browser! Please allow pop-ups for this site and try again.', true);
+                    }
+                } else {
+                    // All windows opened
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Boost Views Instantly!';
+                    showMessage('success', `🎉 All ${count} windows successfully opened! Keep them running for a few seconds for maximum effect.`, false);
+                    
+                    // Optional: Close windows after 10 seconds to clean up the user's screen
+                    setTimeout(() => {
+                        openedWindows.forEach(win => {
+                            try {
+                                if (!win.closed) win.close();
+                            } catch (e) {
+                                // Ignore error if window was already closed by user
+                            }
+                        });
+                        // Update message after cleanup
+                        showMessage('info', 'All booster windows have been closed automatically for cleanup.', false);
+                    }, 10000); 
+                }
+            }
+            
+            openNextWindow();
+        }
+
+        function showMessage(type, message, permanent = false) {
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            
+            if (!permanent) {
+                setTimeout(() => {
+                    if (messageDiv.textContent === message) {
+                        messageDiv.textContent = '';
+                        messageDiv.className = '';
+                    }
+                }, 15000); 
+            }
+        }
+    </script>
+</body>
+</html>
