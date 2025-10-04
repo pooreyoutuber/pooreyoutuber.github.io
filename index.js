@@ -12,8 +12,8 @@ app.use(cors());
 app.use(express.json()); 
 
 // --- Constants & Helper Functions ---
-const MIN_DELAY = 3000; // Minimum delay 3 seconds
-const MAX_DELAY = 12000; // Maximum delay 12 seconds
+const MIN_DELAY = 3000; // 3 seconds
+const MAX_DELAY = 12000; // 12 seconds
 
 const geoLocations = [
     { country: "United States", region: "California" },
@@ -51,7 +51,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId) {
 
         if (response.status === 204) { 
             if (eventName === 'page_view') {
-                // Console log for tracking on Render dashboard
                 console.log(`[View ${currentViewId}] SUCCESS ✅ | URL: ${payload.events[0].params.page_location}`);
             }
             return { success: true };
@@ -77,7 +76,6 @@ function generateViewPlan(totalViews, pages) {
         return [];
     }
     
-    // हर पेज के लिए व्यूज़ की संख्या निर्धारित करें
     pages.forEach(page => {
         const viewsForPage = Math.round(totalViews * (page.percent / 100));
         for (let i = 0; i < viewsForPage; i++) {
@@ -85,7 +83,6 @@ function generateViewPlan(totalViews, pages) {
         }
     });
 
-    // Plan को shuffle करें (अनियमितता के लिए)
     viewPlan.sort(() => Math.random() - 0.5);
     
     return viewPlan;
@@ -97,16 +94,16 @@ app.post('/boost-mp', async (req, res) => {
 
     // Validation
     if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0) {
-        return res.status(400).json({ status: 'error', message: 'GA keys, View count (1-500), और Page URL/Percentage आवश्यक हैं।' });
+        return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
     }
     
     const viewPlan = generateViewPlan(parseInt(views), pages);
     if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'व्यू डिस्ट्रीब्यूशन विफल। सुनिश्चित करें कि Total % 100 है।' });
+         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100.' });
     }
 
     // Acknowledge the request immediately (Allows user to close browser)
-    res.json({ status: 'processing', message: `अनुरोध (${viewPlan.length} व्यूज़) स्वीकार किया गया। प्रोसेसिंग पृष्ठभूमि में शुरू हो गई है।` });
+    res.json({ status: 'processing', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
 
     // Background Processing 
     (async () => {
@@ -119,7 +116,7 @@ app.post('/boost-mp', async (req, res) => {
             const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
             const SESSION_ID = Date.now(); 
             const geo = getRandomGeo();
-            const engagementTime = 30000 + Math.floor(Math.random() * 90000); // 30 से 120 सेकंड
+            const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
 
             const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
 
@@ -156,3 +153,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
+                                                     
