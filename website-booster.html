@@ -55,7 +55,6 @@
             border: 1px solid #cce0ff;
             border-radius: 6px;
             box-sizing: border-box;
-            /* Prevents browser from showing history */
             autocomplete: 'off';
             -webkit-appearance: none; 
             -moz-appearance: none;
@@ -120,7 +119,8 @@
     </div>
 
     <script>
-        // 🚨 IMPORTANT: This URL MUST match your Render Service's base URL + /boost-mp
+        // 🚨 IMPORTANT: इस URL को अपने Render Service के URL से बदलें
+        // उदाहरण के लिए: 'https://mera-project-api.onrender.com/boost-mp'
         const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
         
         const form = document.getElementById('boosterForm');
@@ -168,7 +168,7 @@
 
                 if (responseData.status === 'processing' || responseData.status === 'ok') {
                     showMessage('success', `✨ Success! API accepted the request. Check your GA Realtime reports! (Inputs cleared.)`, false);
-                    document.getElementById('boosterForm').reset(); // 👈 Inputs Cleared
+                    document.getElementById('boosterForm').reset(); 
                 } else {
                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check Render Logs.'}`, true);
                 }
