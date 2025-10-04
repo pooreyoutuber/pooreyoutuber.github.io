@@ -5,41 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Web Booster (Measurement Protocol)</title>
     <style>
+        /* Base styles for responsiveness and modern look */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e9eef7;
+            background-color: #f7f9fc;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             color: #333;
+            padding: 20px 10px;
+            box-sizing: border-box;
         }
         .container {
             background-color: #ffffff;
-            padding: 40px;
+            padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 480px; 
+            max-width: 500px; /* Max width for large screens */
             text-align: center;
             margin-bottom: 20px;
+            box-sizing: border-box;
         }
         .tip-box {
-            background-color: #e0f7fa; 
-            color: #0056b3;
+            background-color: #e3f2fd; /* Light Blue */
+            color: #1565c0;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 25px;
-            border: 1px solid #b3e5fc;
-            font-size: 0.95em;
+            border: 1px solid #90caf9;
+            font-size: 0.9em;
             font-weight: 600;
         }
         h2 {
             color: #007bff;
-            margin-bottom: 15px;
-            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
         }
         label {
             display: block;
@@ -47,21 +52,19 @@
             margin-bottom: 5px;
             color: #333;
             font-weight: bold;
+            font-size: 0.95em;
         }
         input[type="text"], input[type="number"] {
             width: 100%;
             padding: 12px;
             margin-bottom: 15px; 
-            border: 1px solid #cce0ff;
+            border: 1px solid #ccc;
             border-radius: 6px;
             box-sizing: border-box;
-            autocomplete: 'off';
-            -webkit-appearance: none; 
-            -moz-appearance: none;
-            appearance: none;
+            font-size: 1em;
         }
         button {
-            background-color: #007bff;
+            background-color: #28a745; /* Green for Generate */
             color: white;
             padding: 12px 20px;
             border: none;
@@ -73,23 +76,69 @@
             width: 100%;
             margin-top: 10px;
         }
-        button:hover { background-color: #0056b3; }
+        button:hover { background-color: #1e7e34; }
         #message {
             margin-top: 25px;
             padding: 15px;
             border-radius: 8px;
             font-weight: bold;
             font-size: 0.9em;
+            text-align: left;
         }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+
+        /* GUIDELINES STYLES */
+        #guidelines {
+            text-align: left;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        #guidelines h3 {
+            color: #007bff;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        #guidelines ol {
+            padding-left: 20px;
+        }
+        #guidelines li {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #28a745;
+            margin-top: 5px;
+            display: block;
+        }
+        .guideline-toggle {
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 1em;
+            color: #007bff;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+        
+        /* Mobile optimization */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                border-radius: 0;
+            }
+            body {
+                padding: 0;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="tip-box">
-            ✨ **Sweet Tip:** The tool will **automatically retry** if the server is asleep. Results will be visible in GA Realtime reports!
+            ✨ **Sweet Tip:** The tool will **automatically retry** if the server is asleep. **Your details are saved on this device!**
         </div>
 
         <h2>Professional Website Booster 🚀</h2>
@@ -114,18 +163,100 @@
         <div id="message"></div>
         
         <div class="contact-info">
-            Any issues? Contact us! We are here to help and ensure a friendly experience.
+            Any issues? We are here to help and ensure a friendly experience.
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="guideline-toggle" onclick="toggleGuidelines()">
+            Click here for Step-by-Step Guidance and Troubleshooting
+        </div>
+        
+        <div id="guidelines" style="display: none;">
+            <h3>📝 Detailed Guidance & Troubleshooting</h3>
+            
+            <h4>Setup Guide (Where to find keys):</h4>
+            <ol>
+                <li>
+                    <span class="step-title">1. Target Website URL</span>
+                    <p>Enter the full address of your website. Include **https://**.</p>
+                </li>
+                <li>
+                    <span class="step-title">2. Google Analytics ID (Measurement ID)</span>
+                    <p>Find this in GA4: Admin (⚙️) -> Data Streams -> Your Web stream. Look for **Measurement ID**.</p>
+                </li>
+                <li>
+                    <span class="step-title">3. API Secret</span>
+                    <p>Find this in GA4: Admin (⚙️) -> Data Streams -> Your Web stream -> **Measurement Protocol API secrets**. Create a new secret key and paste it here.</p>
+                </li>
+            </ol>
+            
+            <h4>🛠️ Troubleshooting (Views Not Increasing):</h4>
+            <p>If views do not appear in GA4 Realtime reports, the **API Secret is usually the error source**:</p>
+            <ol>
+                <li>Check your **Render Live Logs** after clicking "Generate Traffic."</li>
+                <li>If the logs show **FAILURE ❌ | Status: 400**, your **API Secret is invalid**.</li>
+                <li>**Solution:** Go to GA4 and generate a **brand new API Secret**. Use the new key in the tool.</li>
+            </ol>
         </div>
     </div>
 
     <script>
-        // 🚨 IMPORTANT: इस URL को अपने Render Service के URL से बदलें
-        // उदाहरण के लिए: 'https://mera-project-api.onrender.com/boost-mp'
+        // 🚨 IMPORTANT: This URL MUST match your Render Service's base URL + /boost-mp
         const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
+        const STORAGE_KEY = 'booster_details';
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
+        const guidelinesDiv = document.getElementById('guidelines');
+
+        // --- History / Local Storage Functions ---
+
+        function loadSavedDetails() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    document.getElementById('url').value = data.url || '';
+                    document.getElementById('gaid').value = data.gaid || '';
+                    document.getElementById('apikey').value = data.apikey || '';
+                    // Views is not loaded to encourage fresh input, but can be loaded if needed.
+                } catch (e) {
+                    console.error("Error loading localStorage data:", e);
+                }
+            }
+        }
+
+        function saveDetails(url, gaid, apikey) {
+            const data = { url, gaid, apikey };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // --- UI Functions ---
+
+        function toggleGuidelines() {
+            if (guidelinesDiv.style.display === 'none' || guidelinesDiv.style.display === '') {
+                guidelinesDiv.style.display = 'block';
+            } else {
+                guidelinesDiv.style.display = 'none';
+            }
+        }
+        window.toggleGuidelines = toggleGuidelines; // Make function globally accessible
+
+        function showMessage(type, message, permanent = false) {
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            
+            if (!permanent) {
+                setTimeout(() => {
+                    messageDiv.textContent = '';
+                    messageDiv.className = '';
+                }, 10000);
+            }
+        }
+
+        // --- Main Submission Logic ---
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -141,6 +272,9 @@
             }
 
             viewsCount = Math.min(viewsCount, 500);
+            
+            // Save details immediately upon successful validation
+            saveDetails(targetUrl, gaId, apiKey); 
 
             // Start the submission process with an initial retry count of 1 (means it will try twice total)
             submitData({ url: targetUrl, ga_id: gaId, api_key: apiKey, views: viewsCount }, 1);
@@ -161,49 +295,44 @@
                 });
                 
                 if (!response.ok) {
+                    // This handles server-side errors (e.g., 500 Internal Server Error)
                     throw new Error(`HTTP Error: ${response.status}`);
                 }
                 
                 const responseData = await response.json();
 
                 if (responseData.status === 'processing' || responseData.status === 'ok') {
-                    showMessage('success', `✨ Success! API accepted the request. Check your GA Realtime reports! (Inputs cleared.)`, false);
-                    document.getElementById('boosterForm').reset(); 
+                    showMessage('success', `✨ Success! API accepted the request. Check your GA Realtime reports! (Processing takes 40-60 mins for 500 views.)`, false);
                 } else {
                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check Render Logs.'}`, true);
                 }
 
             } catch (error) {
-                // Connection Error (Fetch failed) - This is the Render sleep issue
+                // Connection Error (Fetch failed) - This handles Render being asleep OR a server crash
                 if (retries > 0) {
-                    // Automatically retry after 5 seconds
                     setTimeout(() => submitData(data, retries - 1), 5000);
                 } else {
-                    // Final attempt failed
-                    showMessage('error', `❌ Final Connection Error: Server did not respond after retry. Please ensure your Render service is awake.`, true);
+                    showMessage('error', `❌ Final Connection Error: Server did not respond after retry. Please ensure your Render service is awake and running.`, true);
                 }
             } finally {
-                // Only re-enable the button if no automatic retry is scheduled (i.e., final attempt finished)
+                // Only re-enable the button if no automatic retry is scheduled
                 if (retries === 0) {
                     setTimeout(() => {
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Generate Traffic';
                     }, 5000);
+                } else {
+                    // Re-enable button after successful submission or first retry failed
+                    if (submitBtn.textContent !== '⚠️ Render is waking up. Retrying in 5 seconds...') {
+                         submitBtn.disabled = false;
+                         submitBtn.textContent = 'Generate Traffic';
+                    }
                 }
             }
         }
 
-        function showMessage(type, message, permanent = false) {
-            messageDiv.className = type;
-            messageDiv.textContent = message;
-            
-            if (!permanent) {
-                setTimeout(() => {
-                    messageDiv.textContent = '';
-                    messageDiv.className = '';
-                }, 10000);
-            }
-        }
+        // Load details when the page loads
+        document.addEventListener('DOMContentLoaded', loadSavedDetails);
     </script>
 </body>
 </html>
