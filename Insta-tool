@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Instagram Caption & Tag Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f9; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #405de6; text-align: center; margin-bottom: 20px; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
+        input[type="text"], select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { background-color: #405de6; color: white; padding: 12px 20px; margin-top: 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; width: 100%; transition: background-color 0.3s; }
+        button:hover { background-color: #5851db; }
+        .output-box { background: #e9ecef; border: 1px solid #ced4da; padding: 20px; margin-top: 30px; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; }
+        .disclaimer { margin-top: 30px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; border-radius: 8px; font-size: 0.9em; text-align: center; }
+        
+        /* कॉपी बटन स्टाइल */
+        .copy-btn { background-color: #28a745; margin-top: 10px; }
+        .copy-btn:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ AI Instagram Content Generator</h1>
+        
+        <form method="POST">
+            <label for="topic">1. आपका विषय क्या है? (जैसे: कॉफी शॉप में पढ़ाई, दोस्तों के साथ बीच पर मस्ती)</label>
+            <input type="text" id="topic" name="topic" value="{{ current_topic }}" placeholder="फोटो का मुख्य विषय यहाँ लिखें" required>
+
+            <label for="tone">2. कैप्शन का टोन/फीलिंग कैसी चाहिए?</label>
+            <select id="tone" name="tone" required>
+                <option value="Inspirational" {% if current_tone == 'Inspirational' %}selected{% endif %}>प्रेरणादायक (Inspirational)</option>
+                <option value="Funny and Witty" {% if current_tone == 'Funny and Witty' %}selected{% endif %}>मज़ेदार और हास्यपूर्ण (Funny)</option>
+                <option value="Serious and Informative" {% if current_tone == 'Serious and Informative' %}selected{% endif %}>गंभीर और जानकारीपूर्ण (Informative)</option>
+                <option value="Adventure and Travel" {% if current_tone == 'Adventure and Travel' %}selected{% endif %}>एडवेंचर और यात्रा (Travel)</option>
+                <option value="Short and Punchy" {% if current_tone == 'Short and Punchy' %}selected{% endif %}>छोटा और आकर्षक (Punchy)</option>
+            </select>
+
+            <button type="submit">AI कैप्शन और टैग जेनरेट करें</button>
+        </form>
+
+        {% if ai_caption %}
+        <h2>🔥 AI जेनरेटेड रिजल्ट</h2>
+        <div class="output-box" id="aiOutput">
+            {{ ai_caption }}
+        </div>
+        <button class="copy-btn" onclick="copyContent()">कॉपी करें</button>
+        {% endif %}
+
+        <div class="disclaimer">
+            ⚠️ **अस्वीकरण (Disclaimer):** यह टूल शैक्षिक उद्देश्यों के लिए बनाया गया है और Gemini AI द्वारा संचालित है। AI की दैनिक सीमा (Free Tier) पार होने पर टूल काम करना बंद कर सकता है।
+        </div>
+    </div>
+    
+    <script>
+        function copyContent() {
+            const output = document.getElementById('aiOutput').innerText;
+            navigator.clipboard.writeText(output).then(() => {
+                alert('कैप्शन और हैशटैग सफलतापूर्वक कॉपी हो गए!');
+            }).catch(err => {
+                console.error('कॉपी करने में त्रुटि:', err);
+                alert('कॉपी करने में विफल। कृपया मैन्युअल रूप से कॉपी करें।');
+            });
+        }
+    </script>
+</body>
+</html>
