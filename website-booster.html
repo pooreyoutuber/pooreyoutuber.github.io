@@ -132,7 +132,7 @@
             <input type="text" id="gaid" placeholder="e.g., G-A1B2C3D4E5" required>
             
             <label for="apikey">3. API Secret (Measurement Protocol):</label>
-            <input type="text" id="apikey" placeholder="e.g., pSaScGPuTWa95eOdSkbV7w" required>
+            <input type="text" id="apikey" placeholder="Paste your generated API Secret" required>
             
             <label for="views">4. Views to Generate (Max 500):</label>
             <input type="number" id="views" value="500" min="1" max="500" required>
@@ -179,7 +179,7 @@
                     <li>In Google Analytics (GA4), go to **Admin** (⚙️) -> **Data Streams**.</li>
                     <li>Click on your Web stream.</li>
                     <li>Scroll down and click on **Measurement Protocol API secrets**.</li>
-                    <li>Click **Create** and copy the generated secret key (e.g., **pSaScGPuTWa95eOdSkbV7w**).</li>
+                    <li>Click **Create** and **paste the new generated secret key** here.</li>
                 </ul>
             </li>
             <li>
@@ -190,7 +190,7 @@
     </div>
 
     <script>
-        // 🚨 IMPORTANT: Your Render API URL (Using the stable MP endpoint)
+        // 🚨 IMPORTANT: Replace the URL below with YOUR Render Service URL
         const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
         
         const form = document.getElementById('boosterForm');
@@ -250,7 +250,8 @@
                 }
             })
             .catch(error => {
-                showMessage('error', `❌ Connection Error: Could not reach the Render API. Ensure your Render service is awake.`, true);
+                // This error often means the Render server is asleep or the URL is wrong.
+                showMessage('error', `❌ Connection Error: Could not reach the Render API. Ensure your Render service is awake and the API URL is correct.`, true);
             })
             .finally(() => {
                 // Re-enable button after a short delay
