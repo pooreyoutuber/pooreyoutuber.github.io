@@ -1,4 +1,4 @@
-// index.js (Final Code with Multi-Page View Logic)
+// index.js (Final and Stable Express API Code for Render)
 
 const express = require('express');
 const fetch = require('node-fetch');
@@ -7,15 +7,14 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// Middleware
+// Middleware for API functionality
 app.use(cors()); 
 app.use(express.json()); 
 
 // --- Constants & Helper Functions ---
-const MIN_DELAY = 2000; 
-const MAX_DELAY = 10000; 
+const MIN_DELAY = 2000; // 2 seconds
+const MAX_DELAY = 10000; // 10 seconds
 
-// भौगोलिक विविधता के लिए स्थान
 const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
@@ -37,7 +36,7 @@ function getRandomGeo() {
 }
 
 // ----------------------------------------------------
-// Core Logic: Sending Data to GA4 (Same as before)
+// Core Logic: Sending Data to GA4 (Measurement Protocol)
 // ----------------------------------------------------
 async function sendData(gaId, apiSecret, payload, currentViewId, eventName) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
@@ -51,10 +50,11 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventName) {
 
         if (response.status === 204) { 
             if (eventName === 'page_view') {
-                console.log(`[View ${currentViewId}] SUCCESS ✅ | Status 204 | URL: ${payload.events[0].params.page_location}`);
+                console.log(`[View ${currentViewId}] SUCCESS ✅ | URL: ${payload.events[0].params.page_location}`);
             }
             return { success: true };
         } else {
+            // Status 400 means GA4 key/secret is wrong.
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Check API Secret.`);
             return { success: false, message: `Status ${response.status}` };
         }
@@ -65,15 +65,15 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventName) {
 }
 
 
-// --- NEW HELPER: Views को Pages में विभाजित करें ---
+// --- Views को Pages में विभाजित करें ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
-    let viewsRemaining = totalViews;
-
-    // सुनिश्चित करें कि pages की total percentage 100% हो
+    
     const totalPercentage = pages.reduce((sum, page) => sum + page.percent, 0);
-    if (totalPercentage !== 100) {
-        console.error("View distribution failed: Total percentage must be 100.");
+
+    // Percentage validation (allows slight floating point tolerance)
+    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
+        console.error(`View distribution failed: Total percentage must be 100.`);
         return [];
     }
     
@@ -93,12 +93,12 @@ function generateViewPlan(totalViews, pages) {
 
 // --- API Endpoint: /boost-mp ---
 app.post('/boost-mp', async (req, res) => {
-    // pages list अब req.body से आएगी: [{url: '...', percent: 50}, ...]
+    // pages list now contains all URLs/percentages
     const { ga_id, api_key, views, pages } = req.body; 
 
-    // Validation (pages list की जाँच करें)
+    // Validation
     if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0) {
-        return res.status(400).json({ status: 'error', message: 'Missing or invalid GA4 keys, view count, or pages list.' });
+        return res.status(400).json({ status: 'error', message: 'Missing or invalid parameters.' });
     }
     
     // View Plan जनरेट करें
@@ -107,15 +107,15 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Check if percentages equal 100.' });
     }
 
-    // Acknowledge the request immediately
-    res.json({ status: 'processing', message: `Request accepted for ${viewPlan.length} views across ${pages.length} pages. Processing started in the background.` });
+    // Acknowledge the request immediately (THIS KEEPS VIEWS RUNNING AFTER BROWSER IS CLOSED)
+    res.json({ status: 'processing', message: `Request accepted for ${viewPlan.length} views. Processing started in the background.` });
 
     // Background Processing 
     (async () => {
         let successfulViews = 0;
 
         for (let i = 0; i < viewPlan.length; i++) {
-            const targetUrl = viewPlan[i]; // इस बार URL, viewPlan से लिया जाएगा
+            const targetUrl = viewPlan[i]; 
 
             const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
             const SESSION_ID = Date.now(); 
@@ -144,7 +144,7 @@ app.post('/boost-mp', async (req, res) => {
             // Delay
             await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
         }
-        console.log(`--- MULTI-PAGE BOOST FINISHED. Total success: ${successfulViews}/${viewPlan.length} ---`);
+        console.log(`--- BOOST FINISHED. Total success: ${successfulViews}/${viewPlan.length} ---`);
     })();
 });
 
@@ -157,4 +157,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
-    
+
