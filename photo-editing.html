@@ -2,384 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Editing PRO | PooreYouTuber Tools</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/camanjs/4.1.2/caman.full.min.js"></script>
-    
+    <title>Pro Editor Tool for Your Site</title>
     <style>
-        :root {
-            --youtube-red: #FF0000;
-            --youtube-dark-red: #CC0000;
-            --bg-color: #f4f6f9;
-            --card-bg: #fff;
-            --text-color: #222;
-            --secondary-bg: #fff;
-            --border-color: #ddd;
-        }
-
-        /* Dark Mode support */
-        body.dark-mode {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #f0f0f0;
-            --secondary-bg: #222;
-            --border-color: #333;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        h1 {
-            color: var(--youtube-red);
-            text-align: center;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        /* Editor Layout */
-        .editor-container {
-            display: flex;
-            gap: 20px;
-            min-height: 500px;
-        }
-
-        .controls {
-            width: 250px;
-            padding: 15px;
-            background: var(--secondary-bg);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            overflow-y: auto;
-        }
-
-        .canvas-area {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #222; /* Dark background for canvas area */
-            border-radius: 8px;
-            position: relative;
-        }
+        /* CSS: Ek Clean, Professional Layout ke Liye */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .editor-app { background-color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 90%; max-width: 1200px; display: flex; min-height: 80vh; }
+        .toolbar { width: 250px; padding: 20px; border-right: 1px solid #eee; background-color: #f9f9f9; }
+        .main-canvas-area { flex-grow: 1; padding: 20px; text-align: center; }
+        #photo-canvas { border: 2px solid #ddd; max-width: 100%; max-height: 70vh; margin-top: 15px; background-color: #fff; }
         
-        /* Canvas and Placeholder */
-        #image-canvas {
-            max-width: 100%;
-            max-height: 100%;
-            display: none; /* Initially hidden */
-        }
+        /* Controls Styling */
+        button { width: 100%; padding: 10px; margin-bottom: 10px; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
+        .action-btn { background-color: #007bff; color: white; }
+        .action-btn:hover { background-color: #0056b3; }
+        .pro-feature-btn { background-color: #28a745; color: white; }
+        .pro-feature-btn:hover { background-color: #1e7e34; }
         
-        #image-placeholder {
-            color: white;
-            font-size: 1.2em;
-            padding: 20px;
-            text-align: center;
-        }
-
-        /* Control Group Styling */
-        .control-group {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed var(--border-color);
-        }
-        
-        .control-group:last-child {
-            border-bottom: none;
-        }
-        
-        .control-group h3 {
-            margin-top: 0;
-            color: var(--youtube-red);
-            font-size: 1.1em;
-        }
-
-        /* Buttons */
-        .btn, button {
-            background: var(--youtube-red);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: background 0.3s;
-            display: block;
-            width: 100%;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        
-        .btn:hover, button:hover {
-            background: var(--youtube-dark-red);
-        }
-
-        /* Inputs and Ranges */
-        input[type="range"] {
-            width: 100%;
-            margin: 5px 0 10px;
-        }
-
-        .range-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 800px) {
-            .editor-container {
-                flex-direction: column;
-            }
-            .controls {
-                width: 100%;
-                max-height: 300px; /* Make controls scrollable on small screens */
-            }
-        }
+        .upload-area { margin-bottom: 20px; padding: 15px; border: 2px dashed #007bff; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>✨ Photo Editing PRO Tool</h1>
-        
-        <div class="editor-container">
-            <div class="controls">
-                
-                <div class="control-group">
-                    <h3>Load Image</h3>
-                    <input type="file" id="image-upload" accept="image/*" class="btn" style="padding: 0;">
-                </div>
-                
-                <div class="control-group" id="adjustment-controls" style="display:none;">
-                    <h3>Adjustments</h3>
-                    
-                    <label class="range-label">Brightness (<span id="brightness-val">0</span>)</label>
-                    <input type="range" id="brightness" min="-100" max="100" value="0">
-
-                    <label class="range-label">Contrast (<span id="contrast-val">0</span>)</label>
-                    <input type="range" id="contrast" min="-100" max="100" value="0">
-
-                    <label class="range-label">Saturation (<span id="saturation-val">0</span>)</label>
-                    <input type="range" id="saturation" min="-100" max="100" value="0">
-                </div>
-                
-                <div class="control-group" id="filter-controls" style="display:none;">
-                    <h3>Filters</h3>
-                    <button onclick="applyFilter('vintage')">Vintage</button>
-                    <button onclick="applyFilter('lomo')">Lomo</button>
-                    <button onclick="applyFilter('clarity')">Clarity</button>
-                    <button onclick="applyFilter('sinCity')">Sin City (B&W)</button>
-                    <button onclick="applyFilter('crossProcess')">Cross Process</button>
-                </div>
-                
-                <div class="control-group" id="transform-controls" style="display:none;">
-                    <h3>Transform</h3>
-                    <button onclick="rotateImage(90)">Rotate 90° Right</button>
-                    <button onclick="flipImage('h')">Flip Horizontal</button>
-                    <button onclick="flipImage('v')">Flip Vertical</button>
-                </div>
-
-                <div class="control-group" id="utility-controls" style="display:none;">
-                    <h3>Utility</h3>
-                    <button onclick="revertChanges()">Revert/Undo</button>
-                    <button onclick="downloadImage()">Download Edited Image</button>
-                </div>
-                
-            </div>
+    <div class="editor-app">
+        <div class="toolbar">
+            <h2>Toolbox</h2>
             
-            <div class="canvas-area">
-                <p id="image-placeholder">⬆️ Upload an image to start editing</p>
-                <canvas id="image-canvas"></canvas>
+            <div class="upload-area">
+                <p>Image Upload Karein</p>
+                <input type="file" id="image-upload" accept="image/*">
             </div>
+
+            <hr>
+            
+            <h3>Photo Editing</h3>
+            <button class="action-btn" onclick="applyFilter('grayscale')">Grayscale Filter</button>
+            <button class="action-btn" onclick="applyFilter('blur(5px)')">Blur Effect</button>
+
+            <hr>
+
+            <h3>Passport/BG Tools</h3>
+            <button class="pro-feature-btn" onclick="alert('Passport Size Logic Yahan Aayega (35x45mm set).')">Passport Size Fix</button>
+            <button class="pro-feature-btn" style="background-color: #dc3545;" onclick="alert('Background Remove ke liye AI API ki zaroorat hai (jaise remove.bg).')">One-Click BG Remove 🤖</button>
+
+            <hr>
+            
+            <button class="action-btn" onclick="downloadImage()">Download Final Photo</button>
+        </div>
+
+        <div class="main-canvas-area">
+            <h2>Live Editor</h2>
+            <canvas id="photo-canvas"></canvas>
+            <p id="status-message" style="color: gray;">Ek photo upload karein aur editing shuru karein.</p>
         </div>
     </div>
 
-    <script>
-        // Global variables
-        let Caman = null;
-        let originalImageURL = null;
-        const canvas = document.getElementById('image-canvas');
-        const controls = document.querySelectorAll('.control-group');
-        const placeholder = document.getElementById('image-placeholder');
-        const uploadInput = document.getElementById('image-upload');
-        const brightnessRange = document.getElementById('brightness');
-        const contrastRange = document.getElementById('contrast');
-        const saturationRange = document.getElementById('saturation');
-        
-        // Function to hide placeholder and show controls
-        function showEditor() {
-            placeholder.style.display = 'none';
-            canvas.style.display = 'block';
-            controls.forEach(control => control.style.display = 'block');
-        }
-
-        // Function to apply filters
-        function applyFilter(filterName) {
-            if (!Caman) return;
-            // Revert to original before applying a new full filter
-            revertChanges(); 
-            
-            // Apply the new filter
-            Caman(canvas, function() {
-                // Check if the filter exists in CamanJS
-                if (typeof this[filterName] === 'function') {
-                    this[filterName]();
-                    this.render();
-                } else {
-                    alert(`Filter "${filterName}" not found.`);
-                }
-            });
-        }
-        
-        // Function to revert all changes to the original state
-        function revertChanges() {
-            if (!Caman || !originalImageURL) return;
-            
-            // 1. Reset Caman instance
-            Caman.reset(); 
-            
-            // 2. Reset the image URL on the canvas to reload the original
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const img = new Image();
-            img.onload = function() {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                
-                // Reinitialize Caman with the original image
-                Caman(canvas, function() {
-                    // Caman is reloaded.
-                });
-            };
-            img.src = originalImageURL;
-
-            // 3. Reset sliders
-            brightnessRange.value = 0;
-            contrastRange.value = 0;
-            saturationRange.value = 0;
-            document.getElementById('brightness-val').innerText = 0;
-            document.getElementById('contrast-val').innerText = 0;
-            document.getElementById('saturation-val').innerText = 0;
-        }
-        
-        // Function to handle transformations (Rotate/Flip)
-        function rotateImage(degrees) {
-            if (!Caman) return;
-            Caman(canvas, function () {
-                this.rotate(degrees).render();
-            });
-        }
-        
-        function flipImage(direction) {
-            if (!Caman) return;
-            Caman(canvas, function () {
-                if (direction === 'h') {
-                    this.flip('horizontal').render();
-                } else if (direction === 'v') {
-                    this.flip('vertical').render();
-                }
-            });
-        }
-
-        // Function to download the final image
-        function downloadImage() {
-            if (canvas.style.display === 'none') {
-                 alert('Please upload an image first.');
-                 return;
-            }
-            const dataURL = canvas.toDataURL("image/png"); // PNG format is best for quality
-            const link = document.createElement('a');
-            link.href = dataURL;
-            link.download = 'pooreyoutuber_edited.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Image upload handler
-        uploadInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    // Set canvas size to image size
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    
-                    // Draw image on canvas
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-
-                    // Store original URL for reverting
-                    originalImageURL = event.target.result;
-                    
-                    // Initialize CamanJS on the canvas
-                    Caman(canvas, function () {
-                        // Caman is ready
-                        Caman = this; // Store Caman instance globally
-                        showEditor();
-                    });
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // Live adjustments handler (Brightness/Contrast/Saturation)
-        function applyLiveAdjustments() {
-            if (!Caman) return;
-
-            const brightness = parseInt(brightnessRange.value);
-            const contrast = parseInt(contrastRange.value);
-            const saturation = parseInt(saturationRange.value);
-
-            document.getElementById('brightness-val').innerText = brightness;
-            document.getElementById('contrast-val').innerText = contrast;
-            document.getElementById('saturation-val').innerText = saturation;
-
-            Caman.revert(false); // Revert all previous filters/adjustments without clearing the image
-            
-            Caman(canvas, function () {
-                this.brightness(brightness)
-                    .contrast(contrast)
-                    .saturation(saturation)
-                    .render();
-            });
-        }
-
-        brightnessRange.addEventListener('input', applyLiveAdjustments);
-        contrastRange.addEventListener('input', applyLiveAdjustments);
-        saturationRange.addEventListener('input', applyLiveAdjustments);
-        
-        // Dark Mode check on load
-        document.addEventListener('DOMContentLoaded', function() {
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
-        });
-    </script>
+    <script src="editor.js"></script>
 </body>
 </html>
