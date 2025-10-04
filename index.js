@@ -14,15 +14,17 @@ app.use(cors({
     methods: 'POST', 
     optionsSuccessStatus: 200 
 }));
-app.use(express.json()); // ⬅️ THIS LINE FIXES THE 'Cannot read properties of undefined' ERROR
+app.use(express.json()); // ⬅️ FIXES THE 'Cannot read properties of undefined' ERROR
 
 // ****************************************************
-// 🔑 CONFIGURATION: Target and Settings
+// 🔑 CONFIGURATION: Global Settings (NO hardcoded URL here)
 // ****************************************************
-const TARGET_URL = 'https://pooreyoutuber.github.io/';
+
+// 🚨 महत्वपूर्ण: TARGET_URL अब यहां HARDCODE नहीं है। इसे API रिक्वेस्ट से पढ़ा जाएगा।
 const SEARCH_KEYWORDS = [
     "advanced project",
-    "web traffic generation"
+    "web traffic generation",
+    "best college project" // Added one more keyword
 ]; 
 
 // 🚨 IMPORTANT: Replace these with fresh, low-latency free proxies. 
@@ -52,7 +54,6 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
     
-    // Set Proxy Server (No Auth needed for Free Proxies)
     options.addArguments(`--proxy-server=${proxy}`); 
     
     // Bot Evasion Arguments
@@ -113,21 +114,28 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
 // ----------------------------------------------------
 
 app.post('/boost-url', async (req, res) => {
-    // 🚨 FIX IS NOW COMPLETE: req.body can be read safely
-    const viewsToGenerate = parseInt(req.body.views) || 5; 
+    // 🚨 FIX: Reading URL and Views from user input (req.body)
+    const targetUrl = req.body.url; 
+    const viewsToGenerate = parseInt(req.body.views) || 500; // Defaulting to 500
+    
+    // Validation
+    if (!targetUrl || !targetUrl.startsWith('http')) {
+        return res.status(400).json({ status: 'error', message: 'कृपया एक मान्य URL दर्ज करें (http:// या https:// के साथ)।' });
+    }
     
     if (PROXY_LIST.length === 0) {
-        return res.status(503).json({ status: 'error', message: 'No proxy configured. Update PROXY_LIST.' });
+        return res.status(503).json({ status: 'error', message: 'कोई प्रॉक्सी कॉन्फ़िगर नहीं किया गया है। PROXY_LIST अपडेट करें।' });
     }
 
-    res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${TARGET_URL} in background.` });
+    res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} in background.` });
 
     (async () => {
         let successfulViews = 0;
         for (let i = 0; i < viewsToGenerate; i++) {
             const currentProxy = PROXY_LIST[i % PROXY_LIST.length]; 
             console.log(`\n-- Attempting View ${i + 1}/${viewsToGenerate} --`);
-            const success = await simulateUserVisit(TARGET_URL, i + 1, currentProxy);
+            // Passing dynamic targetUrl
+            const success = await simulateUserVisit(targetUrl, i + 1, currentProxy); 
             if (success) {
                 successfulViews++;
             }
@@ -148,4 +156,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
-        
