@@ -3,193 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Photo Studio Tool</title>
+    <title>Photo Editing PRO | PooreYouTuber Tools</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/camanjs/4.1.2/caman.full.min.js"></script>
+    
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #333; text-align: center; margin-bottom: 30px; }
-        .controls { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 25px; 
-            margin-bottom: 20px; 
+        :root {
+            --youtube-red: #FF0000;
+            --youtube-dark-red: #CC0000;
+            --bg-color: #f4f6f9;
+            --card-bg: #fff;
+            --text-color: #222;
+            --secondary-bg: #fff;
+            --border-color: #ddd;
         }
-        .upload-section, .edit-section { 
-            border: 1px solid #ddd; 
-            padding: 20px; 
-            border-radius: 8px; 
+
+        /* Dark Mode support */
+        body.dark-mode {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --secondary-bg: #222;
+            --border-color: #333;
         }
-        #image-preview { 
-            max-width: 100%; 
-            height: auto; 
-            display: block; 
-            margin-top: 15px; 
-            border: 0px solid black; /* Default border */
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
-        .info { margin-top: 10px; font-size: 14px; color: #555; }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        input[type="range"], input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; width: 100%; }
-        .button:hover { background-color: #0056b3; }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: var(--youtube-red);
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Editor Layout */
+        .editor-container {
+            display: flex;
+            gap: 20px;
+            min-height: 500px;
+        }
+
+        .controls {
+            width: 250px;
+            padding: 15px;
+            background: var(--secondary-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        .canvas-area {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #222; /* Dark background for canvas area */
+            border-radius: 8px;
+            position: relative;
+        }
         
-        /* Passport Print Grid */
-        .passport-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4x2 grid for 8 photos */
-            width: 80%; /* Adjusted for better print simulation */
-            margin: 20px auto;
-            border: 1px dashed #aaa;
-            padding: 10px;
+        /* Canvas and Placeholder */
+        #image-canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: none; /* Initially hidden */
         }
-        .passport-photo { 
-            width: 100%; 
-            height: auto;
-            aspect-ratio: 35 / 45; /* Standard passport ratio (35mm x 45mm) */
-            object-fit: cover; 
-            margin: 2px;
-            border: 1px solid #000; /* Border for individual photos */
+        
+        #image-placeholder {
+            color: white;
+            font-size: 1.2em;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Control Group Styling */
+        .control-group {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .control-group:last-child {
+            border-bottom: none;
+        }
+        
+        .control-group h3 {
+            margin-top: 0;
+            color: var(--youtube-red);
+            font-size: 1.1em;
+        }
+
+        /* Buttons */
+        .btn, button {
+            background: var(--youtube-red);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s;
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover, button:hover {
+            background: var(--youtube-dark-red);
+        }
+
+        /* Inputs and Ranges */
+        input[type="range"] {
+            width: 100%;
+            margin: 5px 0 10px;
+        }
+
+        .range-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 800px) {
+            .editor-container {
+                flex-direction: column;
+            }
+            .controls {
+                width: 100%;
+                max-height: 300px; /* Make controls scrollable on small screens */
+            }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>📸 फोटो स्टूडियो: पासपोर्ट और एडिटिंग</h1>
-        <p>अपनी फोटो अपलोड करें और उसे बॉर्डर, साइज़ के साथ प्रोफेशनल तरीके से एडिट करें।</p>
+        <h1>✨ Photo Editing PRO Tool</h1>
         
-        <div class="controls">
-            <div class="upload-section">
-                <h2>1. फोटो अपलोड करें</h2>
-                <input type="file" id="image-upload" accept="image/*">
+        <div class="editor-container">
+            <div class="controls">
                 
-                <img id="image-preview" alt="अपलोड की गई फोटो" style="max-height: 250px;">
-                <div class="info" id="image-info"></div>
+                <div class="control-group">
+                    <h3>Load Image</h3>
+                    <input type="file" id="image-upload" accept="image/*" class="btn" style="padding: 0;">
+                </div>
+                
+                <div class="control-group" id="adjustment-controls" style="display:none;">
+                    <h3>Adjustments</h3>
+                    
+                    <label class="range-label">Brightness (<span id="brightness-val">0</span>)</label>
+                    <input type="range" id="brightness" min="-100" max="100" value="0">
+
+                    <label class="range-label">Contrast (<span id="contrast-val">0</span>)</label>
+                    <input type="range" id="contrast" min="-100" max="100" value="0">
+
+                    <label class="range-label">Saturation (<span id="saturation-val">0</span>)</label>
+                    <input type="range" id="saturation" min="-100" max="100" value="0">
+                </div>
+                
+                <div class="control-group" id="filter-controls" style="display:none;">
+                    <h3>Filters</h3>
+                    <button onclick="applyFilter('vintage')">Vintage</button>
+                    <button onclick="applyFilter('lomo')">Lomo</button>
+                    <button onclick="applyFilter('clarity')">Clarity</button>
+                    <button onclick="applyFilter('sinCity')">Sin City (B&W)</button>
+                    <button onclick="applyFilter('crossProcess')">Cross Process</button>
+                </div>
+                
+                <div class="control-group" id="transform-controls" style="display:none;">
+                    <h3>Transform</h3>
+                    <button onclick="rotateImage(90)">Rotate 90° Right</button>
+                    <button onclick="flipImage('h')">Flip Horizontal</button>
+                    <button onclick="flipImage('v')">Flip Vertical</button>
+                </div>
+
+                <div class="control-group" id="utility-controls" style="display:none;">
+                    <h3>Utility</h3>
+                    <button onclick="revertChanges()">Revert/Undo</button>
+                    <button onclick="downloadImage()">Download Edited Image</button>
+                </div>
+                
             </div>
             
-            <div class="edit-section">
-                <h2>2. एडिटिंग कंट्रोल्स</h2>
-                
-                <label for="border-thickness">बॉर्डर मोटाई (Pixels):</label>
-                <input type="range" id="border-thickness" min="0" max="15" value="0">
-                <p class="info">मोटाई: <span id="current-thickness">0</span>px</p>
-                
-                <label for="border-color">बॉर्डर रंग:</label>
-                <input type="color" id="border-color" value="#000000">
-
-                <label for="output-size">आउटपुट साइज़:</label>
-                <select id="output-size">
-                    <option value="default">ओरिजिनल साइज़</option>
-                    <option value="passport">पासपोर्ट साइज़ (35x45mm Ratio)</option>
-                    <option value="sq">स्क्वायर (1:1)</option>
-                </select>
-
-                <button class="button" onclick="generatePassportPhotos()">3. 8 पासपोर्ट फोटो प्रिंट लेआउट बनाएँ</button>
+            <div class="canvas-area">
+                <p id="image-placeholder">⬆️ Upload an image to start editing</p>
+                <canvas id="image-canvas"></canvas>
             </div>
         </div>
-
-        <hr style="border: 0; border-top: 1px solid #ccc; margin: 30px 0;">
-
-        <h2>4. प्रिंट लेआउट</h2>
-        <div id="passport-output-container" style="text-align: center;">
-            <p class="info">प्रिंट के लिए तैयार 8 फोटो का ग्रिड।</p>
-            <div class="passport-grid" id="passport-output">
-                </div>
-        </div>
-
-        <button class="button" onclick="window.print()">5. प्रिंट कमांड दें</button>
     </div>
 
     <script>
-        const imageUpload = document.getElementById('image-upload');
-        const imagePreview = document.getElementById('image-preview');
-        const imageInfo = document.getElementById('image-info');
-        const borderThickness = document.getElementById('border-thickness');
-        const currentColor = document.getElementById('border-color');
-        const currentThickness = document.getElementById('current-thickness');
-        const outputSize = document.getElementById('output-size');
-        const passportOutput = document.getElementById('passport-output');
-        let uploadedImage = new Image();
+        // Global variables
+        let Caman = null;
+        let originalImageURL = null;
+        const canvas = document.getElementById('image-canvas');
+        const controls = document.querySelectorAll('.control-group');
+        const placeholder = document.getElementById('image-placeholder');
+        const uploadInput = document.getElementById('image-upload');
+        const brightnessRange = document.getElementById('brightness');
+        const contrastRange = document.getElementById('contrast');
+        const saturationRange = document.getElementById('saturation');
+        
+        // Function to hide placeholder and show controls
+        function showEditor() {
+            placeholder.style.display = 'none';
+            canvas.style.display = 'block';
+            controls.forEach(control => control.style.display = 'block');
+        }
 
-        // 1. फोटो अपलोड करना
-        imageUpload.addEventListener('change', (event) => {
-            const file = event.target.files[0];
+        // Function to apply filters
+        function applyFilter(filterName) {
+            if (!Caman) return;
+            // Revert to original before applying a new full filter
+            revertChanges(); 
+            
+            // Apply the new filter
+            Caman(canvas, function() {
+                // Check if the filter exists in CamanJS
+                if (typeof this[filterName] === 'function') {
+                    this[filterName]();
+                    this.render();
+                } else {
+                    alert(`Filter "${filterName}" not found.`);
+                }
+            });
+        }
+        
+        // Function to revert all changes to the original state
+        function revertChanges() {
+            if (!Caman || !originalImageURL) return;
+            
+            // 1. Reset Caman instance
+            Caman.reset(); 
+            
+            // 2. Reset the image URL on the canvas to reload the original
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const img = new Image();
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                // Reinitialize Caman with the original image
+                Caman(canvas, function() {
+                    // Caman is reloaded.
+                });
+            };
+            img.src = originalImageURL;
+
+            // 3. Reset sliders
+            brightnessRange.value = 0;
+            contrastRange.value = 0;
+            saturationRange.value = 0;
+            document.getElementById('brightness-val').innerText = 0;
+            document.getElementById('contrast-val').innerText = 0;
+            document.getElementById('saturation-val').innerText = 0;
+        }
+        
+        // Function to handle transformations (Rotate/Flip)
+        function rotateImage(degrees) {
+            if (!Caman) return;
+            Caman(canvas, function () {
+                this.rotate(degrees).render();
+            });
+        }
+        
+        function flipImage(direction) {
+            if (!Caman) return;
+            Caman(canvas, function () {
+                if (direction === 'h') {
+                    this.flip('horizontal').render();
+                } else if (direction === 'v') {
+                    this.flip('vertical').render();
+                }
+            });
+        }
+
+        // Function to download the final image
+        function downloadImage() {
+            if (canvas.style.display === 'none') {
+                 alert('Please upload an image first.');
+                 return;
+            }
+            const dataURL = canvas.toDataURL("image/png"); // PNG format is best for quality
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'pooreyoutuber_edited.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Image upload handler
+        uploadInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = (e) => {
-                uploadedImage.onload = () => {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                    updateImageInfo(file.size);
-                    applyEdits(); // Apply default edits
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // Set canvas size to image size
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    
+                    // Draw image on canvas
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+
+                    // Store original URL for reverting
+                    originalImageURL = event.target.result;
+                    
+                    // Initialize CamanJS on the canvas
+                    Caman(canvas, function () {
+                        // Caman is ready
+                        Caman = this; // Store Caman instance globally
+                        showEditor();
+                    });
                 };
-                uploadedImage.src = e.target.result;
+                img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         });
 
-        // साइज़ और जानकारी अपडेट करना
-        function updateImageInfo(size) {
-            imageInfo.innerHTML = `
-                **ओरिजिनल साइज़:** ${uploadedImage.naturalWidth}px x ${uploadedImage.naturalHeight}px<br>
-                **फ़ाइल साइज़:** ${(size / 1024).toFixed(2)} KB
-            `;
+        // Live adjustments handler (Brightness/Contrast/Saturation)
+        function applyLiveAdjustments() {
+            if (!Caman) return;
+
+            const brightness = parseInt(brightnessRange.value);
+            const contrast = parseInt(contrastRange.value);
+            const saturation = parseInt(saturationRange.value);
+
+            document.getElementById('brightness-val').innerText = brightness;
+            document.getElementById('contrast-val').innerText = contrast;
+            document.getElementById('saturation-val').innerText = saturation;
+
+            Caman.revert(false); // Revert all previous filters/adjustments without clearing the image
+            
+            Caman(canvas, function () {
+                this.brightness(brightness)
+                    .contrast(contrast)
+                    .saturation(saturation)
+                    .render();
+            });
         }
 
-        // 2. एडिटिंग लागू करना (बॉर्डर और साइज़)
-        [borderThickness, currentColor, outputSize].forEach(element => {
-            element.addEventListener('input', applyEdits);
-        });
+        brightnessRange.addEventListener('input', applyLiveAdjustments);
+        contrastRange.addEventListener('input', applyLiveAdjustments);
+        saturationRange.addEventListener('input', applyLiveAdjustments);
         
-        function applyEdits() {
-            if (!uploadedImage.src) return;
-
-            // 1. बॉर्डर लगाना
-            const thickness = borderThickness.value;
-            const color = currentColor.value;
-            imagePreview.style.border = `${thickness}px solid ${color}`;
-            currentThickness.textContent = thickness;
-
-            // 2. आउटपुट साइज़/रेश्यो बदलना
-            const size = outputSize.value;
-            if (size === 'passport') {
-                imagePreview.style.aspectRatio = '35 / 45';
-                imagePreview.style.objectFit = 'cover';
-            } else if (size === 'sq') {
-                imagePreview.style.aspectRatio = '1 / 1';
-                imagePreview.style.objectFit = 'cover';
-            } else {
-                imagePreview.style.aspectRatio = 'auto';
-                imagePreview.style.objectFit = 'contain';
+        // Dark Mode check on load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
             }
-        }
-
-        // 3. 8 पासपोर्ट फोटो बनाना और लेआउट दिखाना
-        function generatePassportPhotos() {
-            if (!uploadedImage.src) {
-                alert("पहले एक फोटो अपलोड करें और एडिटिंग लागू करें।");
-                return;
-            }
-
-            passportOutput.innerHTML = ''; // पुराने फोटो हटाएँ
-            
-            // 8 फोटो बनाएँ
-            for (let i = 0; i < 8; i++) {
-                const photo = document.createElement('img');
-                photo.src = uploadedImage.src;
-                photo.className = 'passport-photo';
-                photo.alt = `Passport Photo ${i+1}`;
-                
-                // प्रीव्यू पर लगे बॉर्डर को हर पासपोर्ट फोटो पर भी लागू करें
-                const thickness = borderThickness.value;
-                const color = currentColor.value;
-                photo.style.border = `${thickness}px solid ${color}`;
-
-                passportOutput.appendChild(photo);
-            }
-            
-            passportOutput.style.display = 'grid';
-            alert("8 पासपोर्ट साइज़ फोटो प्रिंट लेआउट में तैयार हैं!");
-        }
+        });
     </script>
 </body>
 </html>
