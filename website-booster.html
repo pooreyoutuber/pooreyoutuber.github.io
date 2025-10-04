@@ -1,242 +1,164 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Web Booster (Measurement Protocol)</title>
+    <title>Realistic Multi-Page Booster</title>
     <style>
-        /* Base styles for responsiveness and modern look */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f7f9fc;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: #333;
-            padding: 20px 10px;
-            box-sizing: border-box;
-        }
-        .container {
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-sizing: border-box;
-        }
-        .tip-box {
-            background-color: #e3f2fd;
-            color: #1565c0;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border: 1px solid #90caf9;
-            font-size: 0.9em;
-            font-weight: 600;
-        }
-        h2 {
-            color: #007bff;
-            margin-bottom: 20px;
-            font-size: 1.6em;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-        }
-        label {
-            display: block;
-            text-align: left;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: bold;
-            font-size: 0.95em;
-        }
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px; 
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1em;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            margin-top: 10px;
-        }
-        button:hover { background-color: #1e7e34; }
-        #message {
-            margin-top: 25px;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.9em;
-            text-align: left;
-        }
+        /* (Styles are mostly copied from your previous version for consistency) */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7f9fc; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; color: #333; padding: 20px 10px; box-sizing: border-box; }
+        .container { background-color: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; text-align: center; margin-bottom: 20px; box-sizing: border-box; }
+        h2 { color: #d9534f; margin-bottom: 20px; font-size: 1.8em; border-bottom: 2px solid #d9534f; padding-bottom: 10px; }
+        .tip-box { background-color: #fcebeb; color: #d9534f; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #f9c0c3; font-size: 0.9em; font-weight: 600; }
+        label { display: block; text-align: left; margin-bottom: 5px; color: #333; font-weight: bold; font-size: 0.95em; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1em; }
+        button { background-color: #5cb85c; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background-color 0.3s ease; width: 100%; margin-top: 10px; }
+        button:hover { background-color: #4cae4c; }
+        #message { margin-top: 25px; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 0.9em; text-align: left; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        /* Guidelines styles (copied from your previous code) */
-        #guidelines { text-align: left; padding: 20px; margin-top: 20px; }
-        #guidelines h3 { color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        #guidelines ol { padding-left: 20px; }
-        #guidelines li { margin-bottom: 15px; font-size: 0.9em; }
-        .step-title { font-weight: bold; color: #28a745; margin-top: 5px; display: block; }
-        .guideline-toggle { cursor: pointer; margin-top: 15px; font-size: 1em; color: #007bff; text-decoration: underline; font-weight: bold; }
-        @media (max-width: 600px) { .container { padding: 20px; border-radius: 0; } body { padding: 0; } }
+        
+        /* New Styles for Multi-Page Section */
+        .page-entry { display: flex; gap: 10px; margin-bottom: 10px; align-items: center;}
+        .page-entry input[type="text"] { flex-grow: 3; margin-bottom: 0;}
+        .page-entry input[type="number"] { width: 60px; flex-grow: 0; margin-bottom: 0;}
+        .percent-label { font-weight: bold; width: 50px; text-align: right; }
+        #totalPercent { font-weight: bold; color: #d9534f; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="tip-box">
-            ✨ **Sweet Tip:** The tool will **automatically retry** if the server is asleep. **Your details are saved on this device!**
+            🔥 **Realistic Tip:** Views are distributed across pages for **higher credibility**. **Total percentage must be 100!**
         </div>
 
-        <h2>Professional Website Booster 🚀</h2>
+        <h2>Realistic Multi-Page Booster</h2>
         
         <form id="boosterForm">
             
-            <label for="url">1. Target Website URL:</label>
-            <input type="text" id="url" placeholder="e.g., https://yourprojectsite.com" required autocomplete="off">
-            
-            <label for="gaid">2. Google Analytics ID (G-XXXXX):</label>
+            <label for="gaid">1. Google Analytics ID (G-XXXXX):</label>
             <input type="text" id="gaid" placeholder="e.g., G-A1B2C3D4E5" required autocomplete="off">
             
-            <label for="apikey">3. API Secret (Measurement Protocol):</label>
+            <label for="apikey">2. API Secret (Measurement Protocol):</label>
             <input type="text" id="apikey" placeholder="Paste your generated API Secret" required autocomplete="off">
             
-            <label for="views">4. Views to Generate (Max 500):</label>
-            <input type="number" id="views" value="500" min="1" max="500" required autocomplete="off">
+            <label for="views">3. Total Views to Generate (Max 500):</label>
+            <input type="number" id="views" value="100" min="1" max="500" required autocomplete="off">
             
-            <button type="submit" id="submitBtn">Generate Traffic</button>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            <label style="margin-bottom: 15px;">4. View Distribution Plan (Total % must be 100):</label>
+
+            <div class="page-entry">
+                <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (e.g., https://site.com)" required autocomplete="off">
+                <input type="number" id="percent1" class="page-percent" value="40" min="1" max="100" required>
+                <span class="percent-label">%</span>
+            </div>
+
+            <div class="page-entry">
+                <input type="text" id="url2" class="page-url" placeholder="Page 2 URL (e.g., https://site.com/tool)" required autocomplete="off">
+                <input type="number" id="percent2" class="page-percent" value="30" min="1" max="100" required>
+                <span class="percent-label">%</span>
+            </div>
+
+            <div class="page-entry">
+                <input type="text" id="url3" class="page-url" placeholder="Page 3 URL (e.g., https://site.com/about)" required autocomplete="off">
+                <input type="number" id="percent3" class="page-percent" value="30" min="1" max="100" required>
+                <span class="percent-label">%</span>
+            </div>
+            
+            <p style="text-align: right; margin-top: 5px;">
+                Total Percentage: <span id="totalPercent">100</span>%
+            </p>
+            
+            <button type="submit" id="submitBtn">Start Realistic Traffic</button>
         </form>
         
         <div id="message"></div>
-        
-        <div class="contact-info">
-            Any issues? We are here to help and ensure a friendly experience.
-        </div>
     </div>
     
-    <div class="container">
-        <div class="guideline-toggle" onclick="toggleGuidelines()">
-            Click here for Step-by-Step Guidance and Troubleshooting
-        </div>
-        
-        <div id="guidelines" style="display: none;">
-            <h3>📝 Detailed Guidance & Troubleshooting</h3>
-            
-            <h4>Setup Guide (Where to find keys):</h4>
-            <ol>
-                <li>
-                    <span class="step-title">1. Target Website URL</span>
-                    <p>Enter the full address of your website. Include **https://**.</p>
-                </li>
-                <li>
-                    <span class="step-title">2. Google Analytics ID (Measurement ID)</span>
-                    <p>Find this in GA4: Admin (⚙️) -> Data Streams -> Your Web stream. Look for **Measurement ID**.</p>
-                </li>
-                <li>
-                    <span class="step-title">3. API Secret</span>
-                    <p>Find this in GA4: Admin (⚙️) -> Data Streams -> Your Web stream -> **Measurement Protocol API secrets**. Create a new secret key and paste it here.</p>
-                </li>
-            </ol>
-            
-            <h4>🛠️ Troubleshooting (Views Not Increasing):</h4>
-            <p>If views do not appear in GA4 Realtime reports, the **API Secret is usually the error source**:</p>
-            <ol>
-                <li>Check your **Render Live Logs** after clicking "Generate Traffic."</li>
-                <li>If the logs show **FAILURE ❌ | Status: 400**, your **API Secret is invalid**.</li>
-                <li>**Solution:** Go to GA4 and generate a **brand new API Secret**. Use the new key in the tool.</li>
-            </ol>
-        </div>
-    </div>
-
     <script>
         // 🚨 IMPORTANT: इस URL को अपने Render Service के URL से बदलें
-        // (आपके Render URL का उपयोग करें, जैसे: https://pooreyoutuber-github-io.onrender.com/boost-mp)
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_v1';
+        const STORAGE_KEY = 'booster_details_v2'; // New key for multi-page storage
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
-        const guidelinesDiv = document.getElementById('guidelines');
+        const percentInputs = document.querySelectorAll('.page-percent');
+        const totalPercentSpan = document.getElementById('totalPercent');
 
-        // --- History / Local Storage Functions ---
+        // --- Local Storage Functions ---
         function loadSavedDetails() {
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (savedData) {
                 try {
                     const data = JSON.parse(savedData);
-                    document.getElementById('url').value = data.url || '';
                     document.getElementById('gaid').value = data.gaid || '';
                     document.getElementById('apikey').value = data.apikey || '';
-                } catch (e) { /* Error ignored */ }
+                    document.getElementById('views').value = data.views || '100';
+                    document.getElementById('url1').value = data.urls[0].url || '';
+                    document.getElementById('percent1').value = data.urls[0].percent || '40';
+                    document.getElementById('url2').value = data.urls[1].url || '';
+                    document.getElementById('percent2').value = data.urls[1].percent || '30';
+                    document.getElementById('url3').value = data.urls[2].url || '';
+                    document.getElementById('percent3').value = data.urls[2].percent || '30';
+                } catch (e) { console.error("Error loading localStorage data:", e); }
             }
         }
 
-        function saveDetails(url, gaid, apikey) {
-            const data = { url, gaid, apikey };
+        function saveDetails(gaid, apikey, views, pages) {
+            const data = { gaid, apikey, views, urls: pages };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
-
+        
         // --- UI Functions ---
-        function toggleGuidelines() {
-            if (guidelinesDiv.style.display === 'none' || guidelinesDiv.style.display === '') {
-                guidelinesDiv.style.display = 'block';
-            } else {
-                guidelinesDiv.style.display = 'none';
-            }
+        function updateDisplayTotal() {
+            let total = 0;
+            percentInputs.forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            totalPercentSpan.textContent = total;
+            totalPercentSpan.style.color = total === 100 ? '#5cb85c' : '#d9534f';
+            return total;
         }
-        window.toggleGuidelines = toggleGuidelines;
 
-        function showMessage(type, message, permanent = false) {
-            messageDiv.className = type;
-            messageDiv.textContent = message;
-            
-            if (!permanent) {
-                setTimeout(() => {
-                    if (messageDiv.textContent === message) {
-                        messageDiv.textContent = '';
-                        messageDiv.className = '';
-                    }
-                }, 10000);
-            }
-        }
+        percentInputs.forEach(input => {
+            input.addEventListener('input', updateDisplayTotal);
+        });
 
         // --- Main Submission Logic ---
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             
-            const targetUrl = document.getElementById('url').value.trim();
             const gaId = document.getElementById('gaid').value.trim();
             const apiKey = document.getElementById('apikey').value.trim();
             let viewsCount = parseInt(document.getElementById('views').value);
             
-            if (!targetUrl || !gaId || !apiKey || viewsCount < 1) {
-                showMessage('error', '❌ Error: Please fill all four required fields.', true);
+            const totalPercent = updateDisplayTotal();
+            if (totalPercent !== 100) {
+                showMessage('error', `❌ Error: Total percentage must be 100%, but it is ${totalPercent}%.`, true);
                 return;
             }
 
-            viewsCount = Math.min(viewsCount, 500);
-            saveDetails(targetUrl, gaId, apiKey); 
+            // Collect page distribution data
+            const pages = [
+                { url: document.getElementById('url1').value.trim(), percent: parseInt(document.getElementById('percent1').value) },
+                { url: document.getElementById('url2').value.trim(), percent: parseInt(document.getElementById('percent2').value) },
+                { url: document.getElementById('url3').value.trim(), percent: parseInt(document.getElementById('percent3').value) },
+            ].filter(p => p.url && p.percent > 0); // Only send valid, non-zero entries
 
-            // Payload keys must match index.js: url, ga_id, api_key, views
-            const payload = { url: targetUrl, ga_id: gaId, api_key: apiKey, views: viewsCount };
+            if (pages.length === 0) {
+                 showMessage('error', '❌ Error: Please enter at least one valid URL.', true);
+                 return;
+            }
+
+            // Save details
+            saveDetails(gaId, apiKey, viewsCount, pages); 
+
+            // Payload keys must match index.js: ga_id, api_key, views, pages
+            const payload = { ga_id: gaId, api_key: apiKey, views: viewsCount, pages: pages };
             
             // Start the submission process with 2 retries (3 total attempts)
             submitData(payload, 2);
@@ -269,7 +191,7 @@
 
                 if (responseData.status === 'processing' || responseData.status === 'ok') {
                     // Success! The server accepted the job and is running in the background.
-                    showMessage('success', `✨ Success! API accepted the request for ${data.views} views. You can close this browser now. Processing takes 40-60 mins for 500 views.`, true);
+                    showMessage('success', `✨ Success! API accepted the request for ${data.views} views. You can close this browser now.`, true);
                 } else {
                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check Render Logs.'}`, true);
                 }
@@ -286,11 +208,16 @@
             
             // Re-enable the button only after success or final failure
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Generate Traffic';
+            submitBtn.textContent = 'Start Realistic Traffic';
         }
 
         // Load details when the page loads
-        document.addEventListener('DOMContentLoaded', loadSavedDetails);
+        document.addEventListener('DOMContentLoaded', () => {
+             loadSavedDetails();
+             updateDisplayTotal(); // Initialize the total percentage display
+        });
     </script>
 </body>
 </html>
+
+            
