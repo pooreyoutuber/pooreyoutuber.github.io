@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -24,13 +24,13 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 500px; /* Max width for large screens */
+            max-width: 500px;
             text-align: center;
             margin-bottom: 20px;
             box-sizing: border-box;
         }
         .tip-box {
-            background-color: #e3f2fd; /* Light Blue */
+            background-color: #e3f2fd;
             color: #1565c0;
             padding: 15px;
             border-radius: 8px;
@@ -64,7 +64,7 @@
             font-size: 1em;
         }
         button {
-            background-color: #28a745; /* Green for Generate */
+            background-color: #28a745;
             color: white;
             padding: 12px 20px;
             border: none;
@@ -88,51 +88,14 @@
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-
-        /* GUIDELINES STYLES */
-        #guidelines {
-            text-align: left;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        #guidelines h3 {
-            color: #007bff;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-        #guidelines ol {
-            padding-left: 20px;
-        }
-        #guidelines li {
-            margin-bottom: 15px;
-            font-size: 0.9em;
-        }
-        .step-title {
-            font-weight: bold;
-            color: #28a745;
-            margin-top: 5px;
-            display: block;
-        }
-        .guideline-toggle {
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 1em;
-            color: #007bff;
-            text-decoration: underline;
-            font-weight: bold;
-        }
-        
-        /* Mobile optimization */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-                border-radius: 0;
-            }
-            body {
-                padding: 0;
-            }
-        }
+        /* Guidelines styles (copied from your previous code) */
+        #guidelines { text-align: left; padding: 20px; margin-top: 20px; }
+        #guidelines h3 { color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+        #guidelines ol { padding-left: 20px; }
+        #guidelines li { margin-bottom: 15px; font-size: 0.9em; }
+        .step-title { font-weight: bold; color: #28a745; margin-top: 5px; display: block; }
+        .guideline-toggle { cursor: pointer; margin-top: 15px; font-size: 1em; color: #007bff; text-decoration: underline; font-weight: bold; }
+        @media (max-width: 600px) { .container { padding: 20px; border-radius: 0; } body { padding: 0; } }
     </style>
 </head>
 <body>
@@ -203,8 +166,8 @@
 
     <script>
         // 🚨 IMPORTANT: इस URL को अपने Render Service के URL से बदलें
-        // (यह URL Render लॉग्स में 'Available at your primary URL' के साथ दिखता है)
-        const API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
+        // (आपके Render URL का उपयोग करें, जैसे: https://pooreyoutuber-github-io.onrender.com/boost-mp)
+        const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
         const STORAGE_KEY = 'booster_details_v1';
         
         const form = document.getElementById('boosterForm');
@@ -213,7 +176,6 @@
         const guidelinesDiv = document.getElementById('guidelines');
 
         // --- History / Local Storage Functions ---
-
         function loadSavedDetails() {
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (savedData) {
@@ -222,9 +184,7 @@
                     document.getElementById('url').value = data.url || '';
                     document.getElementById('gaid').value = data.gaid || '';
                     document.getElementById('apikey').value = data.apikey || '';
-                } catch (e) {
-                    console.error("Error loading localStorage data:", e);
-                }
+                } catch (e) { /* Error ignored */ }
             }
         }
 
@@ -234,7 +194,6 @@
         }
 
         // --- UI Functions ---
-
         function toggleGuidelines() {
             if (guidelinesDiv.style.display === 'none' || guidelinesDiv.style.display === '') {
                 guidelinesDiv.style.display = 'block';
@@ -242,7 +201,7 @@
                 guidelinesDiv.style.display = 'none';
             }
         }
-        window.toggleGuidelines = toggleGuidelines; // Make function globally accessible
+        window.toggleGuidelines = toggleGuidelines;
 
         function showMessage(type, message, permanent = false) {
             messageDiv.className = type;
@@ -250,8 +209,10 @@
             
             if (!permanent) {
                 setTimeout(() => {
-                    messageDiv.textContent = '';
-                    messageDiv.className = '';
+                    if (messageDiv.textContent === message) {
+                        messageDiv.textContent = '';
+                        messageDiv.className = '';
+                    }
                 }, 10000);
             }
         }
@@ -272,23 +233,29 @@
             }
 
             viewsCount = Math.min(viewsCount, 500);
-            
-            // Save details immediately upon successful validation
             saveDetails(targetUrl, gaId, apiKey); 
 
-            // Start the submission process with an initial retry count of 1 (means it will try twice total)
-            submitData({ url: targetUrl, ga_id: gaId, api_key: apiKey, views: viewsCount }, 1);
+            // Payload keys must match index.js: url, ga_id, api_key, views
+            const payload = { url: targetUrl, ga_id: gaId, api_key: apiKey, views: viewsCount };
+            
+            // Start the submission process with 2 retries (3 total attempts)
+            submitData(payload, 2);
         });
 
-        async function submitData(data, retries) {
+        async function submitData(data, retriesLeft) {
             submitBtn.disabled = true;
             
-            const initialMsg = retries === 1 ? '✅ Request initiated. Checking server status...' : '⚠️ Render is waking up. Retrying in 5 seconds...';
-            submitBtn.textContent = initialMsg;
-            showMessage('info', initialMsg, false);
-
+            if (retriesLeft < 2) {
+                submitBtn.textContent = `⚠️ Server is waking up. Retrying in 5 seconds...`;
+                showMessage('info', `⚠️ Render is waking up. Retrying in 5 seconds...`, false);
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            } else {
+                submitBtn.textContent = '✅ Request initiated. Checking server status...';
+                showMessage('info', '✅ Request initiated. Checking server status...', false);
+            }
+            
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(RENDER_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -301,33 +268,25 @@
                 const responseData = await response.json();
 
                 if (responseData.status === 'processing' || responseData.status === 'ok') {
-                    // Success means the server accepted the job and is processing in background
-                    showMessage('success', `✨ Success! API accepted the request. Check your GA Realtime reports! (Processing takes 40-60 mins for 500 views.)`, false);
+                    // Success! The server accepted the job and is running in the background.
+                    showMessage('success', `✨ Success! API accepted the request for ${data.views} views. You can close this browser now. Processing takes 40-60 mins for 500 views.`, true);
                 } else {
                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check Render Logs.'}`, true);
                 }
 
             } catch (error) {
-                // Connection Error (Fetch failed) - This handles Render being asleep OR a server crash
-                if (retries > 0) {
-                    setTimeout(() => submitData(data, retries - 1), 5000);
+                // Connection Error (Fetch failed) - Handles Render being asleep OR a server crash
+                if (retriesLeft > 0) {
+                    // Retry immediately by calling itself recursively
+                    return submitData(data, retriesLeft - 1);
                 } else {
-                    showMessage('error', `❌ Final Connection Error: Server did not respond after retry. Please ensure your Render service is awake and the **index.js is correct**.`, true);
+                    showMessage('error', `❌ Final Connection Error: Server did not respond after 3 attempts. Please ensure Render service is running.`, true);
                 }
-            } finally {
-                // Only re-enable the button if no automatic retry is scheduled
-                if (retries === 0) {
-                    setTimeout(() => {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Generate Traffic';
-                    }, 5000);
-                } else {
-                    if (submitBtn.textContent !== '⚠️ Render is waking up. Retrying in 5 seconds...') {
-                         submitBtn.disabled = false;
-                         submitBtn.textContent = 'Generate Traffic';
-                    }
-                }
-            }
+            } 
+            
+            // Re-enable the button only after success or final failure
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Generate Traffic';
         }
 
         // Load details when the page loads
