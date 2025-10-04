@@ -5,48 +5,34 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// ****************************************************
-// 🚨 FIX: Body Parser Middleware MUST be here before any routes
-// ****************************************************
-// CORS configuration to allow your GitHub frontend to call this API
+// Body Parser and CORS Setup (Necessary for reading user input)
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: 'POST', 
     optionsSuccessStatus: 200 
 }));
-app.use(express.json()); // ⬅️ FIXES THE 'Cannot read properties of undefined' ERROR
+app.use(express.json()); // FIX: Reading req.body
 
-// ****************************************************
-// 🔑 CONFIGURATION: Global Settings (NO hardcoded URL here)
-// ****************************************************
-
-// 🚨 महत्वपूर्ण: TARGET_URL अब यहां HARDCODE नहीं है। इसे API रिक्वेस्ट से पढ़ा जाएगा।
+// CONFIGURATION
 const SEARCH_KEYWORDS = [
     "advanced project",
     "web traffic generation",
-    "best college project" // Added one more keyword
+    "college project github" 
 ]; 
 
-// 🚨 IMPORTANT: Replace these with fresh, low-latency free proxies. 
-const PROXY_LIST = [
-    "203.203.1.252:8080",  // Example from the list
-    "103.197.106.196:8080", // Example
-    // Add more fresh free proxies here.
-];
-
-const BREAK_BETWEEN_VIEWS_MS = 60000; // 1 minute break
+const BREAK_BETWEEN_VIEWS_MS = 15000; // Reduced break to 15 seconds (for quick testing)
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // ----------------------------------------------------
-// Core Logic: User Simulation Function (with FREE Proxy)
+// Core Logic: User Simulation Function (NO Proxy)
 // ----------------------------------------------------
 
-async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
+async function simulateUserVisit(targetUrl, currentViewNumber) {
     let driver;
-    const logPrefix = `[VIEW ${currentViewNumber} | PROXY: ${proxy}]`;
+    const logPrefix = `[VIEW ${currentViewNumber} | DIRECT IP]`;
 
     let options = new chrome.Options();
     options.addArguments('--headless'); 
@@ -54,7 +40,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
     
-    options.addArguments(`--proxy-server=${proxy}`); 
+    // 🚨 PROXY ARGUMENT REMOVED!
     
     // Bot Evasion Arguments
     options.addArguments('--disable-blink-features=AutomationControlled');
@@ -62,7 +48,7 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
     options.addArguments('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     
     try {
-        console.log(`${logPrefix} 🚀 ब्राउज़र शुरू हो रहा है. Target: ${targetUrl}`);
+        console.log(`${logPrefix} 🚀 Browser starting (Direct Connection). Target: ${targetUrl}`);
         
         driver = await new Builder()
             .forBrowser('chrome')
@@ -76,31 +62,32 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
         // 2. Search Random Keyword
         const targetDomain = new URL(targetUrl).hostname;
         const currentSearchKeyword = SEARCH_KEYWORDS[Math.floor(Math.random() * SEARCH_KEYWORDS.length)] + " " + targetDomain.replace('www.', '');
-        console.log(`${logPrefix} 🔎 Google पर सर्च कर रहा है: "${currentSearchKeyword}"`);
+        console.log(`${logPrefix} 🔎 Searching Google for: "${currentSearchKeyword}"`);
         let searchBox = await driver.findElement(By.name('q'));
         await searchBox.sendKeys(currentSearchKeyword, Key.RETURN);
         await sleep(4000 + Math.random() * 3000); 
 
         // 3. Click the Link 
         const targetLinkSelector = By.xpath(`//a[contains(@href, "${targetDomain}")]`);
-        await driver.wait(until.elementLocated(targetLinkSelector), 15000); 
+        // Increased wait time since direct connection might be slow
+        await driver.wait(until.elementLocated(targetLinkSelector), 20000); 
         let targetLink = await driver.findElement(targetLinkSelector);
         
-        console.log(`${logPrefix} 🔗 वेबसाइट पर क्लिक कर रहा है: ${targetDomain}`);
+        console.log(`${logPrefix} 🔗 Clicking link to: ${targetDomain}`);
         await targetLink.click();
 
         // 4. On-site Engagement 
-        const visitDuration = 90 + Math.random() * 150;
-        console.log(`${logPrefix} ⏳ साइट पर ${visitDuration.toFixed(0)} सेकंड के लिए रुका है...`);
+        const visitDuration = 45 + Math.random() * 90; // Reduced duration slightly
+        console.log(`${logPrefix} ⏳ Staying on site for ${visitDuration.toFixed(0)} seconds...`);
         
         await driver.executeScript("window.scrollTo(0, document.body.scrollHeight * Math.random());");
         await sleep(visitDuration * 1000);
 
-        console.log(`${logPrefix} ✅ विज़िट पूरी हुई!`);
+        console.log(`${logPrefix} ✅ Visit Successful!`);
         return true; 
 
     } catch (error) {
-        console.error(`${logPrefix} ❌ ERROR: विज़िट विफल (Proxy Dead/Blocked).`);
+        console.error(`${logPrefix} ❌ CRITICAL ERROR: Visit failed. Render IP may be blocked or element not found.`);
         return false; 
     } finally {
         if (driver) {
@@ -114,32 +101,27 @@ async function simulateUserVisit(targetUrl, currentViewNumber, proxy) {
 // ----------------------------------------------------
 
 app.post('/boost-url', async (req, res) => {
-    // 🚨 FIX: Reading URL and Views from user input (req.body)
+    // Reading URL and Views from user input
     const targetUrl = req.body.url; 
-    const viewsToGenerate = parseInt(req.body.views) || 500; // Defaulting to 500
+    const viewsToGenerate = parseInt(req.body.views) || 500; 
     
-    // Validation
     if (!targetUrl || !targetUrl.startsWith('http')) {
-        return res.status(400).json({ status: 'error', message: 'कृपया एक मान्य URL दर्ज करें (http:// या https:// के साथ)।' });
+        return res.status(400).json({ status: 'error', message: 'Invalid URL. Please use http:// or https://.' });
     }
     
-    if (PROXY_LIST.length === 0) {
-        return res.status(503).json({ status: 'error', message: 'कोई प्रॉक्सी कॉन्फ़िगर नहीं किया गया है। PROXY_LIST अपडेट करें।' });
-    }
-
-    res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} in background.` });
+    // Immediate response to prevent timeout
+    res.json({ status: 'processing', message: `Starting ${viewsToGenerate} views for ${targetUrl} via Direct Connection.` });
 
     (async () => {
         let successfulViews = 0;
         for (let i = 0; i < viewsToGenerate; i++) {
-            const currentProxy = PROXY_LIST[i % PROXY_LIST.length]; 
             console.log(`\n-- Attempting View ${i + 1}/${viewsToGenerate} --`);
-            // Passing dynamic targetUrl
-            const success = await simulateUserVisit(targetUrl, i + 1, currentProxy); 
+            // Calling simulation without proxy argument
+            const success = await simulateUserVisit(targetUrl, i + 1); 
             if (success) {
                 successfulViews++;
             }
-            await sleep(BREAK_BETWEEN_VIEWS_MS + Math.random() * 30000); 
+            await sleep(BREAK_BETWEEN_VIEWS_MS + Math.random() * 10000); 
         }
         console.log(`\n--- BOOST FINISHED. Total success: ${successfulViews}/${viewsToGenerate} ---`);
     })(); 
@@ -154,5 +136,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n🌐 Traffic Booster API running and ready to accept commands on port ${PORT}.`);
+  console.log(`\n🌐 Traffic Booster API running and ready on port ${PORT}. (No Proxy)`);
 });
