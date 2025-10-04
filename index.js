@@ -153,4 +153,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
-                                                     
