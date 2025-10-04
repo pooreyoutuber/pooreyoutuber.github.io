@@ -1,106 +1,117 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Booster Free Tool - PooreYoutuber</title>
+    <title>Website Booster Free Tool</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9f0f9; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
-        .container { background-color: #ffffff; padding: 30px; border-radius: 15px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; margin-bottom: 20px; border-top: 5px solid #007bff; }
-        h2 { color: #007bff; margin-bottom: 25px; font-size: 2em; text-align: center; }
+        /* Base Styles and Responsiveness */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
+        .container { background-color: #ffffff; padding: 30px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); width: 100%; max-width: 650px; margin-bottom: 20px; border-top: 5px solid #007bff; }
+        h2 { color: #007bff; margin-bottom: 25px; font-size: 2em; text-align: center; font-weight: 700; }
+        
+        /* Input Field Styling */
         label { display: block; text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: #333; }
         input[type="text"], input[type="number"] { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
-        button { background-color: #5cb85c; color: white; padding: 15px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 1.1em; transition: background-color 0.3s; }
-        button:hover { background-color: #4cae4c; }
-        #message { margin-top: 25px; padding: 15px; border-radius: 8px; font-weight: bold; text-align: left; }
-        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .info { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         
-        /* Distribution Section */
-        .page-entry { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .page-entry input[type="text"] { flex-grow: 3; margin-bottom: 0; }
-        .page-entry input[type="number"] { width: 60px; flex-grow: 0; margin-bottom: 0; text-align: center; background-color: #f0f8ff; }
+        /* Page Distribution Grid */
+        .page-entry { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+        .page-entry label { flex-grow: 1; margin-bottom: 0; font-weight: normal; }
+        .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; }
+        .page-entry input[type="number"] { width: 60px; flex-grow: 0; margin-bottom: 0; text-align: center; background-color: #eef4ff; }
         .percent-label { font-weight: bold; width: 30px; }
-        .optional-section { border: 2px solid #007bff; padding: 15px; border-radius: 10px; margin-top: 20px; background-color: #f0f8ff; }
-        .optional-header { font-weight: bold; color: #007bff; cursor: pointer; margin-bottom: 10px; text-decoration: underline; font-size: 1.1em; }
-        .total-percent-display { text-align: right; margin-top: 10px; font-weight: bold; }
+
+        /* Total Percentage Display */
+        .total-percent-display { text-align: right; margin-top: 15px; font-weight: bold; padding: 10px; border-top: 1px dashed #ccc; }
+        #totalPercent { font-size: 1.2em; font-weight: 700; }
+
+        /* Button Styling */
+        button { background-color: #5cb85c; color: white; padding: 15px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 25px; font-size: 1.1em; transition: background-color 0.3s; }
+        button:hover { background-color: #4cae4c; }
+
+        /* Message Box Styling */
+        #message { margin-top: 25px; padding: 15px; border-radius: 8px; font-weight: bold; text-align: center; border: 1px solid transparent; }
+        .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Website Booster Free Tool</h2>
         
-        <p class="tip-box info" style="font-weight: normal; margin-bottom: 25px;">
-            **यह टूल प्रोक्सी/ब्राउज़र का उपयोग नहीं करता** है। अनुरोध स्वीकार होते ही आप ब्राउज़र बंद कर सकते हैं। व्यूज़ **Render सर्वर पर** बनते रहेंगे।
-        </p>
-        
         <form id="boosterForm">
             
             <label for="gaid">1. Google Analytics ID (G-XXXXX):</label>
-            <input type="text" id="gaid" placeholder="उदाहरण: G-A1B2C3D4E5" required autocomplete="off">
+            <input type="text" id="gaid" placeholder="Example: G-A1B2C3D4E5" required autocomplete="off">
             
-            <label for="apikey">2. API Secret (Measurement Protocol):</label>
-            <input type="text" id="apikey" placeholder="अपना API Secret यहाँ पेस्ट करें" required autocomplete="off">
+            <label for="apikey">2. API Secret (Measurement Protocol Key):</label>
+            <input type="text" id="apikey" placeholder="Paste your API Secret here" required autocomplete="off">
             
-            <label for="views">3. कुल व्यूज़ की संख्या (अधिकतम 500):</label>
+            <label for="views">3. Total Views to Generate (Max 500):</label>
             <input type="number" id="views" value="100" min="1" max="500" required autocomplete="off">
             
-            <label for="url1">4. मुख्य वेबसाइट URL (या पहला पेज):</label>
-            <input type="text" id="url1" class="page-url" placeholder="उदाहरण: https://pooreyoutuber.github.io/" required autocomplete="off">
-            
-            <div class="optional-section">
-                <div class="optional-header" onclick="toggleMultiPage()">
-                    + **PRO Mode:** मल्टीपल पेज पर व्यूज़ डिस्ट्रीब्यूट करें (दिखाने/छिपाने के लिए क्लिक करें)
+            <div style="margin-top: 25px;">
+                <label>4. Page 1 URL and View % (Minimum 1 URL required):</label>
+                <div class="page-entry">
+                    <input type="text" id="url1" class="page-url" placeholder="https://yourwebsite.com/page-1" required autocomplete="off">
+                    <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
+                    <span class="percent-label">%</span>
                 </div>
                 
-                <div id="multiPageSection" style="display:none;">
-                    <p style="font-size: 0.9em; color: #d9534f; margin-bottom: 15px;">
-                        ⚠️ **आवश्यक:** सभी पेजों का **Total Percentage** हमेशा **100%** होना चाहिए।
-                    </p>
-                    
-                    <label style="width: 100%; text-align: left;">Primary Page (%):</label>
-                    <div class="page-entry">
-                        <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
-                        <span class="percent-label">%</span>
-                    </div>
+                <label>5. Page 2 URL and View % (Optional):</label>
+                <div class="page-entry">
+                    <input type="text" id="url2" class="page-url" placeholder="https://yourwebsite.com/page-2">
+                    <input type="number" id="percent2" class="page-percent" value="0" min="0" max="100" required>
+                    <span class="percent-label">%</span>
+                </div>
 
-                    <label>पेज 2 URL (वैकल्पिक):</label>
-                    <div class="page-entry">
-                        <input type="text" id="url2" class="page-url" placeholder="उदाहरण: https://site.com/tool-1">
-                        <input type="number" id="percent2" class="page-percent" value="0" min="0" max="100" required>
-                        <span class="percent-label">%</span>
-                    </div>
+                <label>6. Page 3 URL and View % (Optional):</label>
+                <div class="page-entry">
+                    <input type="text" id="url3" class="page-url" placeholder="https://yourwebsite.com/page-3">
+                    <input type="number" id="percent3" class="page-percent" value="0" min="0" max="100" required>
+                    <span class="percent-label">%</span>
+                </div>
 
-                    <label>पेज 3 URL (वैकल्पिक):</label>
-                    <div class="page-entry">
-                        <input type="text" id="url3" class="page-url" placeholder="उदाहरण: https://site.com/about">
-                        <input type="number" id="percent3" class="page-percent" value="0" min="0" max="100" required>
-                        <span class="percent-label">%</span>
-                    </div>
-                    
-                    <p class="total-percent-display">
-                        कुल प्रतिशत (Total %): <span id="totalPercent">100</span>%
-                    </p>
+                <label>7. Page 4 URL and View % (Optional):</label>
+                <div class="page-entry">
+                    <input type="text" id="url4" class="page-url" placeholder="https://yourwebsite.com/page-4">
+                    <input type="number" id="percent4" class="page-percent" value="0" min="0" max="100" required>
+                    <span class="percent-label">%</span>
+                </div>
+                
+                <label>8. Page 5 URL and View % (Optional):</label>
+                <div class="page-entry">
+                    <input type="text" id="url5" class="page-url" placeholder="https://yourwebsite.com/page-5">
+                    <input type="number" id="percent5" class="page-percent" value="0" min="0" max="100" required>
+                    <span class="percent-label">%</span>
                 </div>
             </div>
             
-            <button type="submit" id="submitBtn">ट्रैफ़िक जनरेट करें और ब्राउज़र बंद करें</button>
+            <p class="total-percent-display">
+                **Total Percentage (Required 100%):** <span id="totalPercent" style="color:#d9534f;">100</span>%
+            </p>
+            
+            <button type="submit" id="submitBtn">Generate Traffic and Close Browser</button>
         </form>
         
         <div id="message"></div>
     </div>
     
     <script>
-        // 🚨 IMPORTANT: यहाँ आपको अपना Render API URL डालना है
+        // 🚨 FINAL RENDER API URL
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_v4'; // लोकल स्टोरेज की नई कुंजी
+        const STORAGE_KEY = 'booster_details_v5'; 
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
         const totalPercentSpan = document.getElementById('totalPercent');
-        const multiPageSection = document.getElementById('multiPageSection');
+        
+        const pageInputs = [1, 2, 3, 4, 5].map(i => ({
+            url: document.getElementById(`url${i}`),
+            percent: document.getElementById(`percent${i}`)
+        }));
 
         // --- Local Storage Functions ---
         function loadSavedDetails() {
@@ -111,45 +122,25 @@
                     document.getElementById('gaid').value = data.gaid || '';
                     document.getElementById('apikey').value = data.apikey || '';
                     document.getElementById('views').value = data.views || '100';
-                    document.getElementById('url1').value = data.pages[0].url || '';
                     
-                    if (data.multiMode === true) {
-                        multiPageSection.style.display = 'block';
-                        document.getElementById('percent1').value = data.pages[0].percent || '40';
-                        document.getElementById('url2').value = data.pages[1]?.url || '';
-                        document.getElementById('percent2').value = data.pages[1]?.percent || '30';
-                        document.getElementById('url3').value = data.pages[2]?.url || '';
-                        document.getElementById('percent3').value = data.pages[2]?.percent || '30';
-                    }
+                    data.pages.forEach((page, index) => {
+                        if (index < 5) {
+                            pageInputs[index].url.value = page.url || '';
+                            pageInputs[index].percent.value = page.percent || '0';
+                        }
+                    });
+
                 } catch (e) { /* Error ignored */ }
                 updateDisplayTotal();
             }
         }
 
-        function saveDetails(gaid, apikey, views, pages, multiMode) {
-            const data = { gaid, apikey, views, pages, multiMode };
+        function saveDetails(gaid, apikey, views, pages) {
+            const data = { gaid, apikey, views, pages };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
         // --- UI Functions ---
-        function toggleMultiPage() {
-            if (multiPageSection.style.display === 'none') {
-                multiPageSection.style.display = 'block';
-                // PRO Mode Default
-                document.getElementById('percent1').value = 40;
-                document.getElementById('percent2').value = 30;
-                document.getElementById('percent3').value = 30;
-            } else {
-                multiPageSection.style.display = 'none';
-                // Beginner Mode Default
-                document.getElementById('percent1').value = 100;
-                document.getElementById('percent2').value = 0;
-                document.getElementById('percent3').value = 0;
-            }
-            updateDisplayTotal();
-        }
-        window.toggleMultiPage = toggleMultiPage;
-
         function updateDisplayTotal() {
             let total = 0;
             document.querySelectorAll('.page-percent').forEach(input => {
@@ -168,7 +159,7 @@
             messageDiv.innerHTML = message;
             if (reenable) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'ट्रैफ़िक जनरेट करें और ब्राउज़र बंद करें';
+                submitBtn.textContent = 'Generate Traffic and Close Browser';
             }
         }
 
@@ -179,56 +170,49 @@
             const gaId = document.getElementById('gaid').value.trim();
             const apiKey = document.getElementById('apikey').value.trim();
             let viewsCount = parseInt(document.getElementById('views').value);
-            const url1 = document.getElementById('url1').value.trim();
             
-            if (!url1 || !gaId || !apiKey || viewsCount < 1) {
-                showMessage('error', '❌ त्रुटि: GA Keys, Views, और Primary URL भरना आवश्यक है।', true);
+            if (!gaId || !apiKey || viewsCount < 1) {
+                showMessage('error', '❌ Error: GA Keys, API Secret, and Total Views are required.', true);
                 return;
             }
 
-            const isMultiMode = multiPageSection.style.display !== 'none';
-            let pages = [];
-            
-            if (isMultiMode) {
-                const totalPercent = updateDisplayTotal();
-                if (totalPercent !== 100) {
-                    showMessage('error', `❌ त्रुटि: Total percentage 100% होनी चाहिए। वर्तमान में ${totalPercent}% है।`, true);
-                    return;
-                }
-                
-                // Collect custom multi-page distribution
-                pages = [
-                    { url: url1, percent: parseInt(document.getElementById('percent1').value) },
-                    { url: document.getElementById('url2').value.trim(), percent: parseInt(document.getElementById('percent2').value) },
-                    { url: document.getElementById('url3').value.trim(), percent: parseInt(document.getElementById('percent3').value) },
-                ].filter(p => p.url && p.percent > 0);
-
-            } else {
-                // Beginner/Single URL Mode (URL1 gets 100%)
-                pages = [{ url: url1, percent: 100 }];
+            const totalPercent = updateDisplayTotal();
+            if (totalPercent !== 100) {
+                showMessage('error', `❌ Error: Total percentage must be 100%, but it is ${totalPercent}%.`, true);
+                return;
             }
+            
+            let pages = [];
+            // Collect all pages with URL and percentage > 0
+            pageInputs.forEach(input => {
+                const url = input.url.value.trim();
+                const percent = parseInt(input.percent.value) || 0;
+                if (url && percent > 0) {
+                    pages.push({ url: url, percent: percent });
+                }
+            });
 
             if (pages.length === 0) {
-                 showMessage('error', '❌ त्रुटि: URL/Distribution Plan खाली नहीं हो सकता।', true);
+                 showMessage('error', '❌ Error: At least one Page URL (Page 1) with 100% must be filled.', true);
                  return;
             }
 
-            saveDetails(gaId, apiKey, viewsCount, pages, isMultiMode); 
+            saveDetails(gaId, apiKey, viewsCount, pages); 
             const payload = { ga_id: gaId, api_key: apiKey, views: viewsCount, pages: pages };
             
-            submitData(payload, 2); // 2 retries = 3 total attempts
+            submitData(payload, 2); 
         });
 
         async function submitData(data, retriesLeft) {
             submitBtn.disabled = true;
             
             if (retriesLeft < 2) {
-                submitBtn.textContent = `⚠️ Render Server को जगाया जा रहा है। 5 सेकंड में पुनः प्रयास...`;
-                showMessage('info', `⚠️ Render Server को जगाया जा रहा है। 5 सेकंड में पुनः प्रयास...`, false);
+                submitBtn.textContent = `⚠️ Pinging Render... Retrying in 5 seconds...`;
+                showMessage('info', `⚠️ Render API is waking up. Retrying in 5 seconds...`, false);
                 await new Promise(resolve => setTimeout(resolve, 5000));
             } else {
-                submitBtn.textContent = '✅ अनुरोध शुरू। सर्वर स्थिति की जाँच...';
-                showMessage('info', '✅ अनुरोध शुरू। सर्वर स्थिति की जाँच...', false);
+                submitBtn.textContent = '✅ Request initiated. Checking server status...';
+                showMessage('info', '✅ Request initiated. Checking server status...', false);
             }
             
             try {
@@ -245,21 +229,18 @@
                 const responseData = await response.json();
 
                 if (responseData.status === 'processing' || responseData.status === 'ok') {
-                    showMessage('success', `✨ सफलता! ${data.views} व्यूज़ का अनुरोध स्वीकार किया गया। अब आप इस ब्राउज़र को बंद कर सकते हैं।`, true);
+                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. You can close this browser now.`, true);
                 } else {
-                    showMessage('error', `❌ API त्रुटि: ${responseData.message || 'अज्ञात त्रुटि। Render Logs देखें।'}.`, true);
+                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check Render Logs.'}.`, true);
                 }
 
             } catch (error) {
                 if (retriesLeft > 0) {
                     return submitData(data, retriesLeft - 1);
                 } else {
-                    showMessage('error', `❌ अंतिम कनेक्शन त्रुटि: Render से संपर्क नहीं हो सका (3 प्रयास)। कृपया सुनिश्चित करें कि आपकी Render service LIVE है और URL सही है।`, true);
+                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your Render service is LIVE and the API URL is correct.`, true);
                 }
             } 
-            
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'ट्रैफ़िक जनरेट करें और ब्राउज़र बंद करें';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
