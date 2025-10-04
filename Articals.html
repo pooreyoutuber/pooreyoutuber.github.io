@@ -57,8 +57,8 @@
 
         /* Custom Disclaimer Style */
         .disclaimer {
-            background: #ffe6e6; /* Light red background */
-            color: #cc0000; /* Dark red text */
+            background: #ffe6e6; 
+            color: #cc0000; 
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 25px;
@@ -71,7 +71,7 @@
             border-left-color: var(--youtube-red);
         }
 
-        /* Form Styles (Unchanged) */
+        /* Form Styles */
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; }
         input[type="text"], textarea {
@@ -80,12 +80,12 @@
             background: var(--secondary-bg); color: var(--text-color);
         }
         textarea { resize: vertical; min-height: 150px; }
-        button {
+        button[type="submit"] {
             background: var(--youtube-red); color: white; border: none;
             padding: 12px 25px; border-radius: 6px; cursor: pointer;
             font-size: 16px; font-weight: bold; transition: background 0.3s;
         }
-        button:hover { background: var(--youtube-dark-red); }
+        button[type="submit"]:hover { background: var(--youtube-dark-red); }
         
         /* Articles List Styles */
         #article-list-container {
@@ -95,7 +95,7 @@
         .article-card {
             background: var(--secondary-bg); border: 1px solid var(--border-color);
             padding: 20px; margin-bottom: 15px; border-radius: 8px;
-            display: flex; /* Enable flexbox for numbering */
+            display: flex; 
         }
         
         .article-number {
@@ -132,7 +132,7 @@
         .action-button i { margin-right: 5px; }
 
         .like-button:hover {
-            background-color: #fcebeb; /* Light red hover */
+            background-color: #fcebeb; 
             border-color: var(--youtube-red);
         }
         
@@ -152,10 +152,188 @@
         /* Responsive adjustments */
         @media (max-width: 600px) {
             .container { padding: 15px; }
-            button { width: 100%; }
+            button[type="submit"] { width: 100%; }
             .article-card { flex-direction: column; }
             .article-number { text-align: left; margin-bottom: 10px; }
             .article-actions { justify-content: space-around; }
         }
     </style>
 </head>
+<body>
+
+    <div class="container">
+        <h1>🖊️ Article Submission Tool</h1>
+
+        <div class="disclaimer">
+            **IMPORTANT NOTICE:** This tool uses **Local Storage**. The articles you submit are saved *only* in your web browser and will not be visible to any other user or device.
+        </div>
+
+        <form id="article-form">
+            <h2>Submit Your Article</h2>
+             <div class="form-group">
+                <label for="author-name">Your Name (Author)</label>
+                <input type="text" id="author-name" placeholder="E.g., PooreYouTuber Fan" required>
+            </div>
+            <div class="form-group">
+                <label for="article-title">Article Title</label>
+                <input type="text" id="article-title" required>
+            </div>
+            <div class="form-group">
+                <label for="article-content">Article Content</label>
+                <textarea id="article-content" required></textarea>
+            </div>
+            <button type="submit">Publish Article</button>
+        </form>
+
+        <div id="article-list-container">
+            <h2>Latest Articles (Local)</h2>
+            <div id="articles-list">
+                <p id="no-articles-msg">No articles found in your local storage. Submit one!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ARTICLES_KEY = 'pooreyoutuber_local_articles';
+        const articleForm = document.getElementById('article-form');
+        const articlesListDiv = document.getElementById('articles-list');
+        const noArticlesMsg = document.getElementById('no-articles-msg');
+
+        // Function to load articles from Local Storage
+        function getArticles() {
+            const articlesJSON = localStorage.getItem(ARTICLES_KEY);
+            // Ensure likes are initialized if missing (for older saved articles)
+            const articles = articlesJSON ? JSON.parse(articlesJSON) : [];
+            return articles.map(article => ({ ...article, likes: article.likes || 0 }));
+        }
+
+        // Function to save articles to Local Storage
+        function saveArticles(articles) {
+            localStorage.setItem(ARTICLES_KEY, JSON.stringify(articles));
+        }
+        
+        // Handle the Like button click
+        function toggleLike(timestamp) {
+            const articles = getArticles();
+            const articleIndex = articles.findIndex(a => a.timestamp == timestamp);
+            
+            if (articleIndex !== -1) {
+                // Increment the like count
+                articles[articleIndex].likes += 1;
+                saveArticles(articles);
+                renderArticles(); // Re-render to show updated count
+            }
+        }
+        
+        // Handle the Share button click
+        function shareArticle(title) {
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: `Check out this amazing article: "${title}" on PooreYouTuber Tools!`,
+                    url: window.location.href // Shares the URL of this page
+                }).catch((error) => console.log('Error sharing:', error));
+            } else {
+                alert(`Share feature is not supported in this browser. You can manually copy the link: ${window.location.href}`);
+            }
+        }
+        
+
+        // Function to render articles on the page (Latest on Top with numbers)
+        function renderArticles() {
+            const articles = getArticles();
+            articlesListDiv.innerHTML = ''; // Clear current list
+
+            if (articles.length === 0) {
+                if (noArticlesMsg) noArticlesMsg.style.display = 'block';
+                return;
+            }
+
+            if (noArticlesMsg) noArticlesMsg.style.display = 'none';
+
+            // Ensure sorting is by timestamp (latest first)
+            articles.sort((a, b) => b.timestamp - a.timestamp); 
+
+            articles.forEach((article, index) => {
+                const articleCard = document.createElement('div');
+                articleCard.className = 'article-card';
+                
+                const date = new Date(article.timestamp).toLocaleString();
+                const serialNumber = index + 1;
+                const likeCount = article.likes;
+
+                // Escape single quotes in the title for the onclick function
+                const safeTitle = article.title ? article.title.replace(/'/g, "\\'") : '';
+
+                articleCard.innerHTML = `
+                    <div class="article-number">#${serialNumber}</div>
+                    <div class="article-content-wrapper">
+                        <h3>${article.title}</h3>
+                        <div class="article-meta">
+                            By: **${article.author || 'Anonymous'}** | Published: ${date}
+                        </div>
+                        <p>${article.content}</p>
+                        
+                        <div class="article-actions">
+                            <button class="action-button like-button" onclick="toggleLike('${article.timestamp}')">
+                                <i class="fas fa-heart"></i> Like (${likeCount})
+                            </button>
+                            <button class="action-button share-button" onclick="shareArticle('${safeTitle}')">
+                                <i class="fas fa-share-alt"></i> Share
+                            </button>
+                        </div>
+                        </div>
+                `;
+                articlesListDiv.appendChild(articleCard);
+            });
+        }
+
+        // Handle form submission
+        articleForm.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+
+            const author = document.getElementById('author-name').value.trim();
+            const title = document.getElementById('article-title').value.trim();
+            const content = document.getElementById('article-content').value.trim();
+
+            if (!author || !title || !content) {
+                alert('Please fill out all fields: Name, Title, and Content.');
+                return;
+            }
+
+            const newArticle = {
+                author: author,
+                title: title,
+                content: content,
+                timestamp: Date.now(),
+                likes: 0
+            };
+
+            const articles = getArticles();
+            
+            // Add new article to the beginning of the array (for latest on top)
+            articles.unshift(newArticle); 
+
+            saveArticles(articles);
+            articleForm.reset();
+            renderArticles();
+            alert('Article Published Successfully (Locally)!');
+        });
+
+        // Load and display articles when the page loads
+        document.addEventListener('DOMContentLoaded', renderArticles);
+        
+        // Dark Mode check
+        document.addEventListener('DOMContentLoaded', function() {
+             if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        });
+        
+        // Expose functions globally for inline onclick handlers to work
+        window.toggleLike = toggleLike;
+        window.shareArticle = shareArticle;
+        
+    </script>
+</body>
+</html>
