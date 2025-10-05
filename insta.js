@@ -1,57 +1,31 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const PORT = process.env.PORT || 3000;
 
-app.post('/generate-captions', async (req, res) => {
-  const { title, style } = req.body;
+// Demo captions generator function (replace with real AI API call)
+function generateCaptions(title) {
+  // Normally you will call Gemini or OpenAI here with the title
+  // For demo, we return 10 dummy captions:
+  return Array.from({ length: 10 }, (_, i) => `${title} - Amazing Caption #${i + 1}`);
+}
 
-  if (!title) {
+app.post('/generate-captions', (req, res) => {
+  const { title } = req.body;
+  if (!title || title.trim().length === 0) {
     return res.status(400).json({ error: 'Title is required' });
   }
 
-  try {
-    const prompt = `Generate 10 short, catchy Instagram captions (under 100 characters) for a video titled: "${title}". Style: ${style || 'trendy & catchy'}. Return the result as a JSON array.`;
+  // Generate captions
+  const captions = generateCaptions(title.trim());
 
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        contents: [{ parts: [{ text: prompt }] }]
-      },
-      {
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
-
-    const text = response.data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-    let captions = [];
-    try {
-      captions = JSON.parse(text);
-    } catch {
-      captions = text
-        .split('\n')
-        .map(c => c.replace(/^\d+\.\s*/, '').trim())
-        .filter(Boolean)
-        .slice(0, 10);
-    }
-
-    res.json({ captions });
-  } catch (error) {
-    console.error('Error:', error.message);
-    res.status(500).json({ error: 'Something went wrong' });
-  }
+  res.json({ captions });
 });
 
-// OLD tool's routes here (if any)
-
-// Server listen
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
