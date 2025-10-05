@@ -1,256 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pro Image Resizer & Editor</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Image Resizer & Editor</title>
 
-  <meta name="description" content="A free, fast, and secure online tool to resize images to specific dimensions and apply basic photo editing filters like rotation, grayscale, and sepia.">
-  <meta name="keywords" content="image resizer, photo editor, resize image online, crop image, rotate photo, grayscale filter, sepia effect">
-  <meta name="robots" content="index, follow">
+  <meta name="description" content="A free, fast, and secure online tool to resize images to specific dimensions and apply basic photo editing filters like rotation, grayscale, and sepia.">
+  <meta name="keywords" content="image resizer, photo editor, resize image online, crop image, rotate photo, grayscale filter, sepia effect">
+  <meta name="robots" content="index, follow">
 
-  <style>
-    /* General Styling */
-    body { font-family: 'Arial', sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f4f6f9; }
-    .container { 
-        max-width: 900px; 
-        margin: 30px auto; 
-        background: #fff; 
-        padding: 30px; 
-        border-radius: 12px; 
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-    h1 { color: #333; margin-bottom: 5px; }
-    p.subtitle { color: #666; margin-bottom: 20px; }
-    
-    /* Input and Controls */
-    .control-group { margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; display: inline-block; }
-    .control-group input, .control-group button { margin: 8px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
-    
-    .editor-controls button { background: #ffc107; color: #333; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
-    .editor-controls button:hover { background: #e0a800; }
-    
-    .resize-button { padding: 12px 30px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; font-size: 16px; margin-top: 15px; }
-    .resize-button:hover { background: #1e7e34; }
-    
-    /* Image Preview */
-    .image-preview-area { margin-top: 25px; border-top: 2px solid #eee; padding-top: 25px; }
-    #preview-img { max-width: 100%; max-height: 500px; border: 1px solid #ccc; padding: 5px; display: block; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    #canvas { display: none; }
+  <style>
+    /* General Styling */
+    body { font-family: 'Arial', sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f4f6f9; }
+    .container { 
+        max-width: 900px; 
+        margin: 30px auto; 
+        background: #fff; 
+        padding: 30px; 
+        border-radius: 12px; 
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    h1 { color: #333; margin-bottom: 5px; }
+    p.subtitle { color: #666; margin-bottom: 20px; }
+    
+    /* Input and Controls */
+    .control-group { margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; display: inline-block; }
+    .control-group input, .control-group button { margin: 8px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
+    
+    .editor-controls button { background: #ffc107; color: #333; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
+    .editor-controls button:hover { background: #e0a800; }
+    
+    .resize-button { padding: 12px 30px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; font-size: 16px; margin-top: 15px; }
+    .resize-button:hover { background: #1e7e34; }
+    
+    /* Image Preview */
+    .image-preview-area { margin-top: 25px; border-top: 2px solid #eee; padding-top: 25px; }
+    #preview-img { max-width: 100%; max-height: 500px; border: 1px solid #ccc; padding: 5px; display: block; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    #canvas { display: none; }
 
-    /* Description Section */
-    .description-section {
-        text-align: left;
-        padding: 25px;
-        margin-top: 40px;
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        border: 1px solid #e9ecef;
-        line-height: 1.6;
-    }
-    .description-section h2 {
-        color: #007bff;
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 5px;
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 1.5em;
-    }
-    .description-section strong { color: #333; }
-  </style>
-</head>
+    /* Description Section */
+    .description-section {
+        text-align: left;
+        padding: 25px;
+        margin-top: 40px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        line-height: 1.6;
+    }
+    .description-section h2 {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 5px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+    }
+    .description-section strong { color: #333; }
+    
+    /* Ad Styling for clarity */
+    .ad-container { margin: 20px auto; padding: 10px; background-color: #ffe0b2; border: 1px solid #ff9800; border-radius: 8px; max-width: 728px; font-size: 12px; color: #333; }
+    .ad-container strong { color: #d32f2f; }
+  </style>
+  
+      <script>
+    // YAHAN APNA MONETAG ONCLICK/POPUNDER AD KA ASLI CODE LAGAYEN (e.g., OnClick ID 9914699)
+    console.log("Monetag OnClick/Popunder Ad Zone Initialized");
+    // <MONETAG_ONCLICK_AD_CODE_HERE>
+  </script>
+  
+  </head>
 <body>
 <div class="container">
-    <h1>🖼️ Pro Image Resizer & Editor</h1>
-    <p class="subtitle">Quickly resize your images to exact dimensions and apply basic photo filters instantly.</p>
+        <div class="ad-container">
+        Ad Slot: **Native Banner / Interscroller** (e.g., Lovey-dovey tag 9914741)
+        <div id="monetag-top-native" style="min-height: 90px;">
+                        <script>
+                // <MONETAG_NATIVE_BANNER_AD_CODE_HERE>
+            </script>
+        </div>
+    </div>
 
-    <div class="control-group">
-        <input type="file" id="upload" accept="image/*">
-    </div>
-    
-    <div class="control-group">
-        <input type="number" id="width" placeholder="New Width (px)" value="800">
-        <input type="number" id="height" placeholder="New Height (px)" value="450">
-    </div>
-    
-    <div class="editor-controls control-group">
-        <button onclick="rotateImage()">🔄 Rotate 90°</button>
-        <button onclick="applyFilter('grayscale')">⚫ Grayscale</button>
-        <button onclick="applyFilter('sepia')">🟤 Sepia</button>
-        <button onclick="applyFilter('original')">✨ Reset Filters</button>
-    </div>
+    <h1>🖼️ Pro Image Resizer & Editor</h1>
+    <p class="subtitle">Quickly resize your images to exact dimensions and apply basic photo filters instantly.</p>
 
-    <div>
-        <button class="resize-button" onclick="resizeAndDownload()">Resize & Download Final Image</button>
-    </div>
+    <div class="control-group">
+        <input type="file" id="upload" accept="image/*">
+    </div>
+    
+    <div class="control-group">
+        <input type="number" id="width" placeholder="New Width (px)" value="800">
+        <input type="number" id="height" placeholder="New Height (px)" value="450">
+    </div>
+    
+    <div class="editor-controls control-group">
+        <button onclick="rotateImage()">🔄 Rotate 90°</button>
+        <button onclick="applyFilter('grayscale')">⚫ Grayscale</button>
+        <button onclick="applyFilter('sepia')">🟤 Sepia</button>
+        <button onclick="applyFilter('original')">✨ Reset Filters</button>
+    </div>
 
-    <div class="image-preview-area">
-        <img id="preview-img" src="" alt="Image Preview">
-        <canvas id="canvas"></canvas>
-    </div>
-    
-    <div class="description-section">
-        <h2>About This Tool: Resize, Edit, and Enhance</h2>
-        <p>The **Pro Image Resizer and Editor** is an all-in-one utility for content creators, web developers, and everyday users who need **quick and secure** image modifications. Unlike many online tools, the entire resizing and editing process happens **directly in your browser**, meaning your images are never uploaded to a server, ensuring your **absolute privacy**.</p>
-        
-        <p>This tool is perfect for:</p>
-        <ul>
-            <li>**Social Media:** Quickly resizing profile pictures, cover photos, or post images to exact pixel requirements (e.g., 1080x1080).</li>
-            <li>**Web Optimization:** Scaling down large images to improve website loading speed and performance.</li>
-            <li>**Basic Editing:** Applying common edits like **rotation** and **color filters** (grayscale for professional documents or sepia for a vintage look) before the final resize.</li>
-        </ul>
-        
-        <p>Simply upload your file, enter your desired width and height, apply any necessary edits, and click **"Resize & Download"**. The final image will be downloaded instantly, ready for use.</p>
-    </div>
-</div>
+    <div>
+        <button class="resize-button" onclick="resizeAndDownload()">Resize & Download Final Image</button>
+    </div>
+    
+        <div class="ad-container" style="margin-top: 25px;">
+        Ad Slot: **Vignette Banner** / **Native Banner** (e.g., Strong tag 9914765)
+        <div id="monetag-center-vignette" style="min-height: 90px;">
+                        <script>
+                // <MONETAG_VIGNETTE_BANNER_AD_CODE_HERE>
+            </script>
+        </div>
+    </div>
 
-<script>
-    let uploadedImage = null;
-    let rotationAngle = 0; // 0, 90, 180, 270
-    let currentFilter = 'original';
 
-    const uploadInput = document.getElementById("upload");
-    const previewImg = document.getElementById("preview-img");
-    const canvas = document.getElementById("canvas");
-
-    // --- Core Upload Handler ---
-    uploadInput.addEventListener("change", function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                uploadedImage = new Image();
-                uploadedImage.src = e.target.result;
-                uploadedImage.onload = function() {
-                    // Reset everything when a new image is loaded
-                    rotationAngle = 0;
-                    currentFilter = 'original';
-                    previewImg.style.transform = 'none';
-                    previewImg.style.filter = 'none';
-                    previewImg.src = uploadedImage.src;
-                    
-                    // Set default dimensions to original size for a better start
-                    document.getElementById("width").value = uploadedImage.width;
-                    document.getElementById("height").value = uploadedImage.height;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // --- Editing Functions ---
-    
-    function rotateImage() {
-        if (!uploadedImage) {
-            alert("Please upload an image first!");
-            return;
-        }
-        rotationAngle = (rotationAngle + 90) % 360;
-        previewImg.style.transform = `rotate(${rotationAngle}deg)`;
-    }
-
-    function applyFilter(filter) {
-        if (!uploadedImage) {
-            alert("Please upload an image first!");
-            return;
-        }
-        currentFilter = filter;
-        
-        switch (filter) {
-            case 'grayscale':
-                previewImg.style.filter = 'grayscale(100%)';
-                break;
-            case 'sepia':
-                previewImg.style.filter = 'sepia(80%)';
-                break;
-            case 'original':
-            default:
-                previewImg.style.filter = 'none';
-                break;
-        }
-    }
-
-    // --- Final Action and Download ---
-
-    function resizeAndDownload() {
-        if (!uploadedImage) {
-            alert("Please upload an image first!");
-            return;
-        }
-        
-        const targetWidth = parseInt(document.getElementById("width").value);
-        const targetHeight = parseInt(document.getElementById("height").value);
-
-        if (!targetWidth || !targetHeight) {
-            alert("Please enter valid width and height!");
-            return;
-        }
-
-        const ctx = canvas.getContext("2d");
-        
-        // --- 1. Set Canvas Dimensions for Rotation ---
-        let finalWidth, finalHeight;
-        if (rotationAngle === 90 || rotationAngle === 270) {
-            // Swap dimensions if rotated 90/270 degrees
-            finalWidth = targetHeight;
-            finalHeight = targetWidth;
-        } else {
-            finalWidth = targetWidth;
-            finalHeight = targetHeight;
-        }
-
-        canvas.width = finalWidth;
-        canvas.height = finalHeight;
-        
-        // --- 2. Apply Filter (Canvas Context Filter) ---
-        switch (currentFilter) {
-            case 'grayscale':
-                ctx.filter = 'grayscale(100%)';
-                break;
-            case 'sepia':
-                ctx.filter = 'sepia(80%)';
-                break;
-            case 'original':
-            default:
-                ctx.filter = 'none';
-                break;
-        }
-
-        // --- 3. Apply Rotation Transformation ---
-        ctx.save();
-        ctx.translate(finalWidth / 2, finalHeight / 2);
-        ctx.rotate(rotationAngle * Math.PI / 180);
-
-        // Calculate draw dimensions (always based on the original image dimensions relative to the unrotated canvas size)
-        let drawWidth, drawHeight;
-        if (rotationAngle === 90 || rotationAngle === 270) {
-            drawWidth = targetWidth;
-            drawHeight = targetHeight;
-        } else {
-            drawWidth = targetWidth;
-            drawHeight = targetHeight;
-        }
-
-        // Draw the image onto the canvas, rotated and resized
-        ctx.drawImage(uploadedImage, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
-        ctx.restore(); // Restore context to default (no rotation)
-        
-        // --- 4. Get Final Data and Download ---
-        const resizedImage = canvas.toDataURL("image/png");
-        
-        // Update the preview (optional, since it will look flat without the CSS rotation)
-        previewImg.src = resizedImage;
-        previewImg.style.transform = 'none'; // Clear CSS transform on final preview
-        
-        // Download image
-        const link = document.createElement("a");
-        link.href = resizedImage;
-        link.download = `edited-resized-${targetWidth}x${targetHeight}.png`;
-        link.click();
-        
-        // Reset canvas filter after download to avoid issues
-        ctx.filter = 'none';
-    }
-</script>
-</body>
-</html>
+    <div class="image-preview-area">
+        <img id="preview-img" src="" alt="Image Preview">
+        <canvas id="canvas"></canvas>
+    </div>
+    
+        <div class="ad-container" style="margin-top: 25px;">
+        Ad Slot: **In-Page Push** / **Rich tag** (e.g., Well-to-do tag 9914700)
+        <div id="monetag-footer-inpage" style="min-height: 90px;">
+                        <script>
+                // <MONETAG_IN_PAGE_PUSH_AD_CODE_HERE>
+            </script>
+        </div>
+    </div>
+    
+    <div class="description-section">
+        <h2>About This Tool: Resize, Edit, and Enhance</h2>
+        <p>The **Pro Image Resizer and Editor** is an all-in-one utility for content creators, web developers, and everyday users who need **quick and secure** image modifications. Unlike many online tools, the entire resizing and editing process happens **directly in your
