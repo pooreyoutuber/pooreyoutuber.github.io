@@ -1,57 +1,60 @@
 const express = require('express');
 const cors = require('cors');
-// Gemini AI SDK इंपोर्ट करें
 const { GoogleGenAI } = require('@google/genai');
-// .env फ़ाइल को लोकल डेवलपमेंट के लिए लोड करें (Render इसे खुद से संभालता है)
 require('dotenv').config(); 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 app.use(cors());
 app.use(express.json());
 
-// Gemini AI क्लाइंट को इनिशियलाइज़ करें
-// यह GEMINI_API_KEY को environment variables से ऑटोमैटिकली ले लेगा।
+// GEMINI_API_KEY environment variable से लिया जाएगा
 const ai = new GoogleGenAI({});
 
 // AI से कैप्शन जनरेट करने का फंक्शन
 async function generateCaptions(title) {
-  const model = "gemini-1.5-flash"; // तेज और शक्तिशाली मॉडल
+  const model = "gemini-1.5-flash"; 
   
-  // 🔥 प्रॉम्प्ट: AI से प्रोफेशनल, ट्रेंडिंग और हैशटैग के साथ कैप्शन माँगने का तरीका।
-  const prompt = `
-    Generate 10 highly engaging, professional, and viral-worthy Instagram/Reels captions 
-    for a post about: "${title}".
+  // 🔥 प्रॉम्प्ट सुधार: AI को साफ़ निर्देश कि वह कोई नंबर, ऑप्शन, या लिस्ट न बनाए।
+  const systemInstruction = "You are a professional social media marketing expert specializing in viral Instagram Reels. Your output must be ready-to-copy captions, including line breaks, relevant emojis, and a dedicated block of trending hashtags. DO NOT use numbering, bullets, 'Option', 'Trending Caption', or any prefix before the captions.";
+  
+  const userQuery = `
+    Generate 10 highly engaging, viral-worthy Instagram/Reels captions for a post about: "${title}".
     
-    Each caption must include:
-    1. A catchy hook line.
-    2. Relevant and popular **emojis**.
-    3. A strong set of **trending and popular hashtags** related to the topic (e.g., #pubg #pubgmobile #reel #trending #gaming).
+    Each caption must be structured like a real post:
+    1. A strong hook line with relevant emojis.
+    2. A space/line break.
+    3. A block of 10-15 trending and niche-specific hashtags (e.g., #pubg #pubgmobile #reel #trending).
     
-    Provide only the 10 captions, with each caption separated by a new line. Do not include any numbering or extra descriptive text.
+    Provide only the 10 final, polished captions, with each caption separated by a new line.
   `;
   
   try {
     const response = await ai.models.generateContent({
       model: model,
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [{ role: "user", parts: [{ text: userQuery }] }],
       config: {
-        // साधारण टेक्स्ट आउटपुट के लिए responseMimeType को हटा दें।
-        temperature: 0.9 // उच्च तापमान से अधिक रचनात्मक और ट्रेंडिंग आउटपुट मिलेगा
+        temperature: 0.9 // उच्च रचनात्मकता
+      },
+      systemInstruction: {
+        parts: [{ text: systemInstruction }]
       }
     });
 
     const resultText = response.text.trim();
     
-    // टेक्स्ट को लाइनों के आधार पर 10 कैप्शन्स की ऐरे में बदलें
+    // टेक्स्ट को साफ़ करके 10 कैप्शन्स की ऐरे में बदलें
     const captionsArray = resultText.split('\n')
                                      .map(caption => caption.trim())
-                                     .filter(caption => caption.length > 0)
-                                     .slice(0, 10); // सुनिश्चित करें कि 10 ही हों
+                                     // AI से आ सकने वाले बचे-खुचे फालतू शब्दों को हटाने के लिए अंतिम सफ़ाई
+                                     .map(caption => caption.replace(/^\d+\.\s*/, '').replace(/option\s*\d+\s*:\s*/i, ''))
+                                     .filter(caption => caption.length > 30) // सुनिश्चित करें कि सिर्फ़ सार्थक कैप्शन ही पास हों
+                                     .slice(0, 10); 
 
     if (captionsArray.length === 0) {
-        return ["AI could not generate captions. Try a different title."];
+        // यदि कोई सार्थक कैप्शन नहीं मिला, तो एक साफ़ त्रुटि संदेश भेजें
+        return ["AI could not generate clean and meaningful captions. Try a different title or topic."];
     }
     
     return captionsArray;
@@ -70,7 +73,6 @@ app.post('/generate-captions', async (req, res) => {
   }
   
   try {
-    // AI फंक्शन को कॉल करें
     const captions = await generateCaptions(title.trim()); 
     res.json({ captions });
   } catch (err) {
