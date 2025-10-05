@@ -1,155 +1,83 @@
-// index.js (FINAL STABLE & PROXY-FREE CODE for Render)
-
 const express = require('express');
-const fetch = require('node-fetch');
-const cors = require('cors'); 
+const cors = require('cors');
+// Gemini AI SDK
+const { GoogleGenAI } = require('@google/genai');
+require('dotenv').config(); // Load environment variables locally
 
 const app = express();
-const PORT = process.env.PORT || 10000; 
+const PORT = process.env.PORT || 10000;
 
-// Middleware
-app.use(cors()); 
-app.use(express.json()); 
+app.use(cors());
+app.use(express.json());
 
-// --- Constants & Helper Functions ---
-const MIN_DELAY = 3000; // 3 seconds
-const MAX_DELAY = 12000; // 12 seconds
+// Initialize the Gemini AI client using the API key from environment variables (Render Secrets)
+const ai = new GoogleGenAI({});
 
-const geoLocations = [
-    { country: "United States", region: "California" },
-    { country: "India", region: "Maharashtra" },
-    { country: "Germany", region: "Bavaria" },
-    { country: "Japan", region: "Tokyo" },
-    { country: "United Kingdom", region: "England" },
-    { country: "Canada", region: "Ontario" },
-    { country: "Brazil", region: "Sao Paulo" },
-    { country: "France", region: "Paris" },
-    { country: "Mexico", region: "Mexico City" },
-];
-
-function getRandomDelay() {
-    return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
-}
-
-function getRandomGeo() {
-    return geoLocations[Math.floor(Math.random() * geoLocations.length)];
-}
-
-// ----------------------------------------------------
-// Core Logic: Sending Data to GA4 (Measurement Protocol)
-// ----------------------------------------------------
-async function sendData(gaId, apiSecret, payload, currentViewId) {
-    const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
-    const eventName = payload.events[0].name;
-
-    try {
-        const response = await fetch(gaEndpoint, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.status === 204) { 
-            if (eventName === 'page_view') {
-                console.log(`[View ${currentViewId}] SUCCESS ✅ | URL: ${payload.events[0].params.page_location}`);
-            }
-            return { success: true };
-        } else {
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Check API Secret/GA ID.`);
-            return { success: false };
-        }
-    } catch (error) {
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
-        return { success: false };
-    }
-}
-
-
-// --- Views को Pages में विभाजित करें ---
-function generateViewPlan(totalViews, pages) {
-    const viewPlan = [];
+// Function to generate 10 short, viral Instagram captions with hashtags
+async function generateCaptions(title) {
+  const model = "gemini-1.5-flash"; 
+  
+  // A professional and short prompt for viral content
+  const prompt = `
+    Generate 10 highly engaging and viral Instagram captions for a post about: "${title}".
     
-    // Percentage validation
-    const totalPercentage = pages.reduce((sum, page) => sum + page.percent, 0);
-    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
-        console.error(`Distribution Failed: Total percentage is not 100.`);
-        return [];
-    }
+    Each caption must be short (under 20 words), include relevant emojis, 
+    and be followed by a strong set of 10 to 15 trending, popular hashtags (e.g., #PUBGMOBILE #Reel #Trending #GamingLife).
     
-    pages.forEach(page => {
-        const viewsForPage = Math.round(totalViews * (page.percent / 100));
-        for (let i = 0; i < viewsForPage; i++) {
-            viewPlan.push(page.url);
-        }
+    Provide only the 10 final captions, with each caption separated by a new line. 
+    Do not include any numbering, extra descriptive text, or markdown formatting.
+  `;
+  
+  try {
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: {
+        temperature: 0.9, 
+      }
     });
 
-    viewPlan.sort(() => Math.random() - 0.5);
+    const resultText = response.text.trim();
     
-    return viewPlan;
+    // Split the text into lines (captions)
+    const captionsArray = resultText.split('\n')
+                                     .map(caption => caption.trim())
+                                     .filter(caption => caption.length > 0)
+                                     .slice(0, 10); // Ensure we only take up to 10
+
+    if (captionsArray.length === 0) {
+        // Fallback in case AI response format is unexpected
+        return ["AI could not generate captions. Try a simpler title."];
+    }
+    
+    return captionsArray;
+
+  } catch (error) {
+    console.error("AI Generation Error:", error.message);
+    return [`Error: Failed to connect to AI service. (${error.message})`];
+  }
 }
 
-// --- API Endpoint: /boost-mp ---
-app.post('/boost-mp', async (req, res) => {
-    const { ga_id, api_key, views, pages } = req.body; 
-
-    // Validation
-    if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0) {
-        return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
-    }
-    
-    const viewPlan = generateViewPlan(parseInt(views), pages);
-    if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100.' });
-    }
-
-    // Acknowledge the request immediately (Allows user to close browser)
-    res.json({ status: 'processing', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
-
-    // Background Processing 
-    (async () => {
-        let successfulViews = 0;
-        const totalViews = viewPlan.length;
-
-        for (let i = 0; i < totalViews; i++) {
-            const targetUrl = viewPlan[i]; 
-
-            const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-            const SESSION_ID = Date.now(); 
-            const geo = getRandomGeo();
-            const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-
-            const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
-
-            // 1. Session Start
-            const sessionStartPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] };
-            await sendData(ga_id, api_key, sessionStartPayload, i + 1);
-
-            // 2. Page View 
-            const pageViewPayload = {
-                client_id: CLIENT_ID,
-                user_properties: commonUserProperties, 
-                events: [{ name: 'page_view', params: { page_location: targetUrl, page_title: `PROJECT_PAGE_${i + 1}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
-            };
-            const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1);
-            if (pageViewResult.success) successfulViews++;
-
-            // 3. User Engagement
-            const engagementPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] };
-            await sendData(ga_id, api_key, engagementPayload, i + 1);
-
-            // Delay for realistic traffic
-            await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-        }
-        console.log(`--- BOOST FINISHED. Total success: ${successfulViews}/${totalViews} ---`);
-    })();
+app.post('/generate-captions', async (req, res) => {
+  const { title } = req.body;
+  
+  if (!title || title.trim() === '') {
+    return res.status(400).json({ error: 'Title is required' });
+  }
+  
+  try {
+    const captions = await generateCaptions(title.trim()); 
+    res.json({ captions });
+  } catch (err) {
+    console.error("Express Error:", err);
+    res.status(500).json({ error: 'Failed to process request due to an internal server error.' });
+  }
 });
 
-// Default route for health check
 app.get('/', (req, res) => {
-    res.send({ status: 'ok', message: 'Traffic Booster API is running.' });
+  res.send({ status: 'ok', message: 'Instagram Caption AI Backend is running.' });
 });
 
-// Start the server
 app.listen(PORT, () => {
-    console.log(`Traffic Booster API running and ready to accept commands on port ${PORT}.`);
+  console.log(`AI Caption Server running on port ${PORT}.`);
 });
