@@ -1,97 +1,150 @@
-<!-- templates/index.html -->
-<!doctype html>
+{<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Instagram AI Caption</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Instagram Caption Generator</title>
   <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 20px; background:#f7f7fb; color:#111; }
-    .card { max-width:700px; margin: 20px auto; background:#fff; padding:20px; border-radius:12px; box-shadow: 0 6px 20px rgba(25,25,40,0.06); }
-    textarea { width:100%; min-height:110px; padding:12px; border-radius:8px; border:1px solid #e2e8f0; font-size:15px; resize:vertical; }
-    input, select { padding:8px 10px; border-radius:8px; border:1px solid #e2e8f0; font-size:14px; }
-    button { background:#374151; color:#fff; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:600;}
-    .cap { background:#f1f5f9; padding:10px 12px; border-radius:8px; margin:8px 0; }
-    .small { font-size:13px; color:#6b7280; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: white;
+      padding: 24px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+    p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .caption {
+      background: #f0f4ff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .copy-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #status {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Instagram AI Caption Generator</h2>
-    <p class="small">Type a short description of the photo or the mood and click Generate. (Server-side Gemini API key is used.)</p>
+  <div class="container">
+    <h1>Instagram Caption Generator</h1>
+    <p>Enter a video title and select tone to generate engaging captions.</p>
 
-    <label>Description / Photo details</label>
-    <textarea id="prompt" placeholder="e.g. Beach sunset with coffee, cozy outfit, feeling grateful"></textarea>
+    <input type="text" id="title" placeholder="Enter your video title" />
+    <select id="tone">
+      <option value="trendy & catchy">Trendy & Catchy</option>
+      <option value="funny">Funny</option>
+      <option value="motivational">Motivational</option>
+      <option value="short & snappy">Short & Snappy</option>
+      <option value="emotional">Emotional</option>
+    </select>
+    <button id="generate">Generate Captions</button>
 
-    <div style="display:flex; gap:10px; margin-top:8px;">
-      <select id="tone">
-        <option value="funny">Funny</option>
-        <option value="romantic">Romantic</option>
-        <option value="motivational">Motivational</option>
-        <option value="minimal">Minimal</option>
-        <option value="witty">Witty</option>
-      </select>
-      <select id="style">
-        <option value="short">Short</option>
-        <option value="detailed">Detailed</option>
-        <option value="hashtags">With hashtags</option>
-      </select>
-      <button id="gen">Generate</button>
-    </div>
-
-    <div id="result" style="margin-top:16px;"></div>
+    <div id="status"></div>
+    <div id="results"></div>
   </div>
 
   <script>
-    document.getElementById("gen").addEventListener("click", async () => {
-      const prompt = document.getElementById("prompt").value.trim();
-      const tone = document.getElementById("tone").value;
-      const style = document.getElementById("style").value;
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "<div class='small'>Generating...</div>";
+    const backendUrl = "https://your-backend.onrender.com/generate-captions"; // Replace with your actual Render backend URL
 
-      if (!prompt) {
-        resultDiv.innerHTML = "<div class='small' style='color:crimson;'>Please enter a description first.</div>";
+    document.getElementById("generate").addEventListener("click", async () => {
+      const title = document.getElementById("title").value.trim();
+      const tone = document.getElementById("tone").value;
+      const status = document.getElementById("status");
+      const results = document.getElementById("results");
+
+      status.textContent = "";
+      results.innerHTML = "";
+
+      if (!title) {
+        status.textContent = "Please enter a title.";
         return;
       }
 
+      status.textContent = "Generating captions...";
+
       try {
-        const res = await fetch("/generate", {
+        const res = await fetch(backendUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt, tone, style })
+          body: JSON.stringify({ title, style: tone })
         });
-        const j = await res.json();
-        if (!res.ok) {
-          resultDiv.innerHTML = "<div class='small' style='color:crimson;'>Error: " + (j.error || res.statusText) + "</div>";
-          return;
-        }
-        const captions = j.captions || [];
-        if (captions.length === 0) {
-          resultDiv.innerHTML = "<div class='small'>No captions returned.</div>";
+
+        const data = await res.json();
+
+        if (!res.ok || !data.captions) {
+          status.textContent = data.error || "Error generating captions.";
           return;
         }
 
-        resultDiv.innerHTML = captions.map(c => `<div class="cap">${escapeHtml(c)}</div>`).join("") +
-                              `<div style="margin-top:10px;"><button id="copyAll">Copy All</button></div>`;
+        status.textContent = `Generated ${data.captions.length} captions:`;
+        data.captions.forEach((caption, index) => {
+          const div = document.createElement("div");
+          div.className = "caption";
 
-        document.getElementById("copyAll").addEventListener("click", () => {
-          navigator.clipboard.writeText(captions.join("\\n\\n")).then(() => {
-            alert("Copied to clipboard");
-          });
+          const span = document.createElement("span");
+          span.textContent = `${index + 1}. ${caption}`;
+
+          const btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.onclick = () => {
+            navigator.clipboard.writeText(caption);
+            btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = "Copy"), 1000);
+          };
+
+          div.appendChild(span);
+          div.appendChild(btn);
+          results.appendChild(div);
         });
-
       } catch (err) {
-        resultDiv.innerHTML = "<div class='small' style='color:crimson;'>Network or server error.</div>";
         console.error(err);
+        status.textContent = "Server error.";
       }
     });
-
-    function escapeHtml(text) {
-      return text.replace(/[&<>"']/g, function(m) {
-        return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]);
-      });
-    }
   </script>
 </body>
 </html>
