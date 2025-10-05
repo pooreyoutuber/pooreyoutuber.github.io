@@ -1,107 +1,95 @@
-<!DOCTYPE html>
+<!-- templates/index.html -->
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Instagram AI Caption Generator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Instagram AI Caption</title>
   <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background: #f8f9fa;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      color: #e1306c;
-      margin-bottom: 20px;
-      font-size: 22px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      background-color: #0095f6;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    button:hover { background-color: #007ad9; }
-    .error {
-      background: #ffeaea;
-      color: #e63946;
-      border: 1px solid #e63946;
-      padding: 10px;
-      border-radius: 6px;
-      text-align: center;
-      margin-top: 15px;
-    }
-    .captions {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 8px;
-      background: #fafafa;
-      border: 1px solid #eee;
-      white-space: pre-wrap;
-      font-size: 15px;
-    }
-    .copy-btn {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 8px 14px;
-      background: #28a745;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .copy-btn:hover { background: #218838; }
-    @media (max-width: 768px) {
-      .container { margin: 0; border-radius: 0; box-shadow: none; }
-    }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 20px; background:#f7f7fb; color:#111; }
+    .card { max-width:700px; margin: 20px auto; background:#fff; padding:20px; border-radius:12px; box-shadow: 0 6px 20px rgba(25,25,40,0.06); }
+    textarea { width:100%; min-height:110px; padding:12px; border-radius:8px; border:1px solid #e2e8f0; font-size:15px; resize:vertical; }
+    input, select { padding:8px 10px; border-radius:8px; border:1px solid #e2e8f0; font-size:14px; }
+    button { background:#374151; color:#fff; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:600;}
+    .cap { background:#f1f5f9; padding:10px 12px; border-radius:8px; margin:8px 0; }
+    .small { font-size:13px; color:#6b7280; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📸 Instagram AI Caption Generator</h1>
-    <form method="POST" action="/">
-      <input type="text" name="topic" placeholder="Enter your post topic..." value="{{ current_topic or '' }}" required />
-      <button type="submit">✨ Generate Captions</button>
-    </form>
+  <div class="card">
+    <h2>Instagram AI Caption Generator</h2>
+    <p class="small">Type a short description of the photo or the mood and click Generate. (Server-side Gemini API key is used.)</p>
 
-    {% if error_message %}
-      <div class="error">{{ error_message }}</div>
-    {% endif %}
+    <label>Description / Photo details</label>
+    <textarea id="prompt" placeholder="e.g. Beach sunset with coffee, cozy outfit, feeling grateful"></textarea>
 
-    {% if captions %}
-      <div class="captions" id="captionBox">{{ captions }}</div>
-      <button class="copy-btn" onclick="copyCaptions()">Copy All 📋</button>
-    {% endif %}
+    <div style="display:flex; gap:10px; margin-top:8px;">
+      <select id="tone">
+        <option value="funny">Funny</option>
+        <option value="romantic">Romantic</option>
+        <option value="motivational">Motivational</option>
+        <option value="minimal">Minimal</option>
+        <option value="witty">Witty</option>
+      </select>
+      <select id="style">
+        <option value="short">Short</option>
+        <option value="detailed">Detailed</option>
+        <option value="hashtags">With hashtags</option>
+      </select>
+      <button id="gen">Generate</button>
+    </div>
+
+    <div id="result" style="margin-top:16px;"></div>
   </div>
 
   <script>
-    function copyCaptions() {
-      const text = document.getElementById("captionBox").innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("All captions copied! 🚀");
+    document.getElementById("gen").addEventListener("click", async () => {
+      const prompt = document.getElementById("prompt").value.trim();
+      const tone = document.getElementById("tone").value;
+      const style = document.getElementById("style").value;
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "<div class='small'>Generating...</div>";
+
+      if (!prompt) {
+        resultDiv.innerHTML = "<div class='small' style='color:crimson;'>Please enter a description first.</div>";
+        return;
+      }
+
+      try {
+        const res = await fetch("/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, tone, style })
+        });
+        const j = await res.json();
+        if (!res.ok) {
+          resultDiv.innerHTML = "<div class='small' style='color:crimson;'>Error: " + (j.error || res.statusText) + "</div>";
+          return;
+        }
+        const captions = j.captions || [];
+        if (captions.length === 0) {
+          resultDiv.innerHTML = "<div class='small'>No captions returned.</div>";
+          return;
+        }
+
+        resultDiv.innerHTML = captions.map(c => `<div class="cap">${escapeHtml(c)}</div>`).join("") +
+                              `<div style="margin-top:10px;"><button id="copyAll">Copy All</button></div>`;
+
+        document.getElementById("copyAll").addEventListener("click", () => {
+          navigator.clipboard.writeText(captions.join("\\n\\n")).then(() => {
+            alert("Copied to clipboard");
+          });
+        });
+
+      } catch (err) {
+        resultDiv.innerHTML = "<div class='small' style='color:crimson;'>Network or server error.</div>";
+        console.error(err);
+      }
+    });
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) {
+        return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]);
       });
     }
   </script>
