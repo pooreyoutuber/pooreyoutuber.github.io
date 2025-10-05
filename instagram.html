@@ -1,131 +1,192 @@
- <!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Best AI Trending Caption and Tags</title>
-    <style>
-        /* Base Reset */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #fafafa; color: #262626; }
-        
-        /* Container and Structure */
-        .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border: 1px solid #dbdbdb; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
-        /* Typography */
-        h1 { color: #262626; text-align: center; margin-bottom: 30px; font-size: 24px; font-weight: 600; }
-        h1 span { color: #405de6; } /* Instagram Blue Highlight */
-        h2 { font-size: 18px; margin-top: 30px; margin-bottom: 15px; color: #000; font-weight: 600; }
-        
-        /* Form Elements */
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #262626; }
-        input[type="text"] { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid #dbdbdb; 
-            border-radius: 5px; 
-            box-sizing: border-box; 
-            font-size: 14px; 
-            margin-bottom: 20px;
-            background-color: #fafafa;
-        }
-        
-        /* Buttons */
-        button { 
-            background-color: #0095f6; /* Instagram Blue */
-            color: white; 
-            padding: 12px 20px; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-size: 16px; 
-            width: 100%; 
-            font-weight: 600; 
-            transition: background-color 0.2s; 
-        }
-        button:hover { background-color: #007bb6; }
-        
-        .copy-btn { 
-            background-color: #28a745; /* Success Green */
-            margin-top: 15px; 
-            margin-bottom: 0; 
-        }
-        .copy-btn:hover { background-color: #218838; }
-        
-        /* Output and Error Display */
-        .output-box { 
-            background: #f9f9f9; 
-            border: 1px solid #efefef; 
-            padding: 20px; 
-            margin-top: 20px; 
-            border-radius: 8px; 
-            white-space: pre-wrap; 
-            word-wrap: break-word; 
-            font-size: 14px; 
-            color: #262626; 
-            line-height: 1.5;
-        }
-        .error-message { 
-            color: #ed4956; /* Instagram Error Red */
-            font-weight: bold; 
-            margin-top: 20px; 
-            padding: 15px;
-            background-color: #ffeaea;
-            border: 1px solid #ed4956;
-            border-radius: 5px;
-            text-align: center; 
-        }
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Multi Viewer (no heavy embeds) — Instagram & Facebook</title>
+  <style>
+    :root{ --bg:#f4f6fb; --card:#fff; --accent:#0b78d1; --muted:#6b7280; --radius:12px; --gap:14px; }
+    body{ margin:0; font-family:Inter,system-ui,Roboto,Arial; background:var(--bg); color:#111827; }
+    .wrap{ max-width:1060px; margin:18px auto; padding:12px; }
+    .card{ background:var(--card); border-radius:14px; padding:12px; box-shadow:0 6px 18px rgba(12,18,32,0.06); }
+    header{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    header h1{ margin:0; color:var(--accent); font-size:18px; }
+    .controls{ display:flex; gap:8px; align-items:center; flex:1; flex-wrap:wrap; }
+    input[type=text], input[type=number]{ padding:10px 12px; border-radius:10px; border:1px solid #e6e9ef; font-size:14px; }
+    input[type=number]{ width:90px; }
+    button{ background:var(--accent); color:white; border:0; padding:10px 12px; border-radius:10px; cursor:pointer; font-weight:600; }
+    button.ghost{ background:#efefef; color:#111; }
+    .note{ color:var(--muted); font-size:13px; margin-top:10px; }
 
-        /* Mobile Optimization */
-        @media (max-width: 650px) {
-            .container {
-                margin: 0;
-                padding: 20px 15px;
-                border: none;
-                border-radius: 0;
-            }
-            h1 { font-size: 22px; }
-        }
-    </style>
+    .grid{ display:grid; gap:var(--gap); margin-top:16px; grid-template-columns: repeat(2,1fr); }
+    .embed-card{ background:#fff; border-radius:var(--radius); overflow:hidden; padding:8px; box-shadow:0 6px 18px rgba(17,24,39,0.04); display:flex; flex-direction:column; gap:8px; }
+    .poster{
+      position:relative; width:100%; padding-top:56.25%; border-radius:10px; background:linear-gradient(180deg,#111,#333);
+      display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px;
+    }
+    .play{
+      position:absolute; width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.95); display:flex; align-items:center; justify-content:center; color:#d33; font-size:28px;
+      transform:translateY(-6px);
+    }
+    .meta{ font-size:13px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+    .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+    @media(min-width:1100px){ .grid{ grid-template-columns: repeat(5,1fr); } }
+    @media(min-width:700px) and (max-width:1099px){ .grid{ grid-template-columns: repeat(3,1fr); } }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1><span>Instagram Best AI</span> Trending Caption & Tags</h1>
-        
-        <form method="POST" action="/">
-            <label for="topic">What is the topic of your post? (e.g., My PUBG Mobile Victory, Travel to Manali)</label>
-            <input type="text" id="topic" name="topic" value="{{ current_topic or '' }}" 
-                   placeholder="Enter the main subject of your photo/video" required>
-            
-            <button type="submit">✨ Generate Viral Content</button>
-        </form>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>📱 Multi Viewer — Light Preview (less login prompts)</h1>
+        <div class="controls">
+          <input id="videoUrl" type="text" placeholder="Paste Instagram or Facebook video URL (public post/reel)...">
+          <input id="count" type="number" min="1" max="50" value="8">
+          <button id="generate">Generate</button>
+          <button id="clear" class="ghost">Clear</button>
+        </div>
+      </header>
+      <div class="note">This viewer avoids heavy platform embeds. It shows lightweight preview cards and opens mobile/basic versions (which often reduce login prompts). For private posts, login may still be required.</div>
 
-        {% if ai_caption %}
-            {% if "Sorry" in ai_caption or "ERROR" in ai_caption or "FATAL" in ai_caption or "Quota" in ai_caption %}
-                <div class="error-message">{{ ai_caption }}</div>
-            {% else %}
-                <h2>🔥 AI Generated Result (Copy & Paste Ready)</h2>
-                <div class="output-box" id="aiOutput">
-                    {{ ai_caption }}
-                </div>
-                <button class="copy-btn" onclick="copyContent()">Copy Content</button>
-            {% endif %}
-        {% endif %}
-        
+      <div id="grid" class="grid"></div>
     </div>
-    
-    <script>
-        function copyContent() {
-            const output = document.getElementById('aiOutput').innerText;
-            // Clean the output for copy-paste (removes extra empty lines)
-            const cleanedOutput = output.trim().replace(/\n\s*\n/g, '\n'); 
+  </div>
 
-            navigator.clipboard.writeText(cleanedOutput).then(() => {
-                alert('Content copied! Go viral on Instagram! 🚀');
-            }).catch(err => {
-                console.error('Copy failed:', err);
-                alert('Copy failed. Please copy manually.');
-            });
-        }
-    </script>
+  <!-- Modal for lightweight iframe try -->
+  <div id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:9999;">
+    <div style="width:92%; max-width:900px; height:70%; background:#fff; border-radius:10px; overflow:hidden; display:flex; flex-direction:column;">
+      <div style="padding:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div id="modalTitle" style="font-weight:700; color:#111;"></div>
+        <div>
+          <button id="openNew" style="margin-right:8px; padding:8px 10px; border-radius:8px; border:0; background:#efefef; cursor:pointer;">Open in new tab</button>
+          <button id="closeModal" style="padding:8px 10px; border-radius:8px; border:0; background:#f44336; color:#fff; cursor:pointer;">Close</button>
+        </div>
+      </div>
+      <div style="flex:1; background:#000;">
+        <iframe id="modalFrame" style="width:100%; height:100%; border:0;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Helpers
+    function detectPlatform(url){
+      try{
+        const u = new URL(url);
+        const h = u.hostname.toLowerCase();
+        if(h.includes('instagram.com') || h.includes('instagr.am')) return 'instagram';
+        if(h.includes('facebook.com') || h.includes('fb.watch') || h.includes('m.facebook.com')) return 'facebook';
+      }catch(e){}
+      return null;
+    }
+
+    function toMobileFacebook(url){
+      try{
+        const u = new URL(url);
+        // Replace hostname with mbasic.facebook.com for basic view which often is lighter
+        u.hostname = 'mbasic.facebook.com';
+        return u.toString();
+      }catch(e){ return url; }
+    }
+
+    function toMobileInstagram(url){
+      try{
+        const u = new URL(url);
+        // Use instagram mobile path (www -> www is okay). Mobile user agent sometimes shows video without login.
+        // We just return the same URL with /?__a=1 avoided (since it needs token). So return original.
+        return u.toString();
+      }catch(e){ return url; }
+    }
+
+    function shortText(s, n=40){ if(!s) return ''; return s.length>n ? s.slice(0,n)+'…' : s; }
+
+    function createCard(baseUrl, idx){
+      const platform = detectPlatform(baseUrl) || 'unknown';
+      const card = document.createElement('div'); card.className='embed-card';
+      const poster = document.createElement('div'); poster.className='poster';
+      poster.innerHTML = '<div style="text-align:center;"><div style="font-size:13px;opacity:0.9;">' + (platform==='instagram' ? 'Instagram' : (platform==='facebook'?'Facebook':'Link')) + '</div><div style="font-size:12px;margin-top:6px;color:rgba(255,255,255,0.9)">' + shortText(baseUrl, 60) + '</div></div>';
+
+      const play = document.createElement('div'); play.className='play'; play.innerHTML = '▶';
+      poster.appendChild(play);
+
+      // Meta + actions
+      const meta = document.createElement('div'); meta.className='meta';
+      const left = document.createElement('div'); left.textContent = (platform==='instagram'?'Instagram':(platform==='facebook'?'Facebook':'Link')) + ' • View ' + (idx+1);
+      const right = document.createElement('div'); right.textContent = shortText(baseUrl, 32);
+      meta.appendChild(left); meta.appendChild(right);
+
+      const actions = document.createElement('div'); actions.className='actions';
+      const btnOpen = document.createElement('button'); btnOpen.textContent='Open (New Tab)'; btnOpen.style.background='#0b78d1'; btnOpen.style.color='white';
+      const btnMobile = document.createElement('button'); btnMobile.textContent='Open Mobile/Basic'; btnMobile.className='ghost'; btnMobile.style.background='#efefef'; btnMobile.style.color='#111';
+
+      // Event handlers
+      btnOpen.addEventListener('click', function(e){
+        window.open(baseUrl, '_blank');
+      });
+
+      btnMobile.addEventListener('click', function(e){
+        const p = detectPlatform(baseUrl);
+        let u = baseUrl;
+        if(p === 'facebook') u = toMobileFacebook(baseUrl);
+        if(p === 'instagram') u = toMobileInstagram(baseUrl);
+        window.open(u, '_blank');
+      });
+
+      // Clicking poster tries to open lightweight modal iframe first (may be blocked)
+      poster.addEventListener('click', function(){
+        openModal(baseUrl);
+      });
+
+      actions.appendChild(btnOpen); actions.appendChild(btnMobile);
+
+      card.appendChild(poster);
+      card.appendChild(meta);
+      card.appendChild(actions);
+      return card;
+    }
+
+    // Modal behavior
+    const modal = document.getElementById('modal');
+    const modalFrame = document.getElementById('modalFrame');
+    const modalTitle = document.getElementById('modalTitle');
+    const openNewBtn = document.getElementById('openNew');
+    const closeModal = document.getElementById('closeModal');
+
+    function openModal(url){
+      modal.style.display = 'flex';
+      modalTitle.textContent = 'Preview: ' + shortText(url, 80);
+      // Try to load in iframe. If platform forbids embedding, iframe will show login or be blocked.
+      // We keep sandbox to limit cross-origin issues.
+      modalFrame.src = url;
+      openNewBtn.onclick = () => window.open(url,'_blank');
+    }
+    closeModal.onclick = () => { modal.style.display='none'; modalFrame.src='about:blank'; };
+
+    // Generate grid
+    function createGrid(baseUrl, count){
+      const grid = document.getElementById('grid'); grid.innerHTML = '';
+      for(let i=0;i<count;i++){
+        const card = createCard(baseUrl, i);
+        grid.appendChild(card);
+      }
+    }
+
+    document.getElementById('generate').addEventListener('click', function(){
+      const url = document.getElementById('videoUrl').value.trim();
+      const count = Math.max(1, Math.min(50, parseInt(document.getElementById('count').value||'8')));
+      if(!url){ alert('Paste Instagram or Facebook video URL.'); return; }
+      // Basic validation
+      const p = detectPlatform(url);
+      if(!p){ if(!confirm('URL not clearly Instagram/Facebook. Continue?')) return; }
+      createGrid(url, count);
+    });
+
+    document.getElementById('clear').addEventListener('click', function(){ document.getElementById('grid').innerHTML=''; });
+
+    // Allow Enter
+    document.getElementById('videoUrl').addEventListener('keypress', function(e){ if(e.key==='Enter') document.getElementById('generate').click(); });
+
+  </script>
 </body>
 </html>
