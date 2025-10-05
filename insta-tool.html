@@ -3,200 +3,192 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Instagram Viral Caption & Hashtag Generator</title>
+    <title>Instagram Post Ready Caption Generator</title>
     <style>
+        /* [STYLES REMAIN SAME FOR PROFESSIONAL LOOK] */
         body { 
-            font-family: Arial, sans-serif; 
-            margin: 30px auto; 
-            max-width: 700px; 
+            font-family: 'Inter', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px;
             background: #f0f2f5; 
-            padding: 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px; /* Instagram-focused container */
         }
         h1 { 
             text-align: center; 
-            color: #1e50b3; /* YouTube Red को Insta Blue जैसा लुक दिया */
+            color: #E1306C; /* Instagram Pink */
             font-size: 28px;
             margin-bottom: 30px;
+            padding-bottom: 5px;
         }
-        /* इनपुट और बटन का कंटेनर */
         .input-container {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
         }
         input[type="text"] { 
-            flex-grow: 1; /* इनपुट को ज़्यादा जगह दें */
+            flex-grow: 1; 
             padding: 12px; 
             border-radius: 8px; 
             border: 1px solid #ccc; 
             font-size: 16px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
         }
         button#generateBtn { 
             padding: 12px 20px; 
-            background: #e62117; /* Insta Blue की जगह, एक आकर्षक रंग */
+            background: linear-gradient(45deg, #f09433 0%,#e6680a 25%,#c63d42 50%,#8744a7 75%,#5851db 100%); 
             color: white; 
             border: none; 
             border-radius: 8px; 
             cursor: pointer; 
             font-weight: bold;
-            transition: background 0.3s;
+            transition: opacity 0.3s;
         }
-        button#generateBtn:hover { 
-            background: #c21c13; 
+        button#generateBtn:hover:not(:disabled) { 
+            opacity: 0.9;
         }
-        .error { color: red; text-align: center; margin-top: 10px; font-weight: bold; }
-        
-        /* जनरेटेड कंटेंट बॉक्स स्टाइल */
-        #contentContainer {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        button#generateBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .error { color: #c0392b; text-align: center; margin-top: 10px; font-weight: bold; }
+        h2.generated-heading {
+            font-size: 20px;
+            color: #333;
             margin-top: 20px;
-        }
-        .success-message {
-            color: #1aae6f; /* Success Green */
-            font-weight: bold;
             margin-bottom: 15px;
-            display: flex;
-            align-items: center;
+            text-align: center;
         }
-        .success-message::before {
-            content: '✓';
-            font-size: 20px;
-            margin-right: 8px;
-            color: white;
-            background: #1aae6f;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        /* ऑप्शन स्टाइल */
-        .option {
-            border: 1px solid #eee;
+        .caption-card {
+            background: white;
             padding: 20px;
-            margin-bottom: 25px;
-            border-radius: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid #eee;
         }
-        .option h2 {
-            color: #e62117; /* Option Heading Color */
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
-        }
-        .caption-text, .tags-text {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-top: 10px;
-            border-radius: 6px;
-            background: #f9f9f9;
-            white-space: pre-wrap; /* फॉर्मेटिंग बनाए रखने के लिए */
+        .caption-text {
+            font-size: 15px;
+            color: #333;
+            white-space: pre-wrap; 
             word-wrap: break-word;
-            font-size: 14px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
         }
-        .tags-text {
-            color: #1e50b3; /* Hashtag color */
-            font-weight: 500;
-        }
-
         .copy-btn {
-            background: #1e50b3;
+            background: #5851db;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 8px 15px;
             border-radius: 6px;
             cursor: pointer;
-            margin-top: 15px;
             font-weight: bold;
             transition: background 0.3s;
+            text-transform: uppercase;
         }
         .copy-btn:hover {
-            background: #17458f;
+            background: #4740b8;
         }
-        .label {
-            font-weight: bold;
-            color: #333;
-            display: block;
-            margin-top: 10px;
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border-left-color: #E1306C;
+            animation: spin 1s ease infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <h1>🔥 Instagram Viral Caption & Hashtag Generator</h1>
-    <div class="input-container">
-        <input id="titleInput" type="text" placeholder="Enter video/photo topic (e.g., PUBG Mobile Headshots)" />
-        <button id="generateBtn">Generate SEO Content</button>
-    </div>
-    
-    <div class="error" id="errorMsg"></div>
-    
-    <div id="contentContainer" style="display: none;">
-        <div class="success-message">Generated Content Options</div>
-        <ul id="optionsList">
-            </ul>
+    <div class="container">
+        <h1>📸 Instagram Viral Caption Generator</h1>
+        
+        <div class="input-container">
+            <input id="titleInput" type="text" value="PUBG mobile" placeholder="वीडियो/फोटो का टॉपिक डालें (जैसे: Chicken Dinner, New Reel)" />
+            <button id="generateBtn">SEO कंटेंट जनरेट करें</button>
+        </div>
+        
+        <div class="error" id="errorMsg"></div>
+        
+        <div id="contentContainer" style="display: none;">
+            <h2 class="generated-heading">Generated Captions</h2>
+            <div id="captionsList">
+                <!-- Generated caption cards will be injected here -->
+            </div>
+        </div>
     </div>
 
     <script>
-        const API_ENDPOINT = 'https://pooreyoutuber-github-io.onrender.com/generate-captions'; // अपना Render URL उपयोग करें
+        // API Endpoint: Render पर डिप्लॉय किया गया आपका Node.js सर्वर
+        const API_ENDPOINT = 'https://pooreyoutuber-github-io.onrender.com/generate-captions';
         
         const generateBtn = document.getElementById('generateBtn');
         const titleInput = document.getElementById('titleInput');
         const errorMsg = document.getElementById('errorMsg');
         const contentContainer = document.getElementById('contentContainer');
-        const optionsList = document.getElementById('optionsList');
+        const captionsList = document.getElementById('captionsList');
 
-        // एक कैप्शन स्ट्रिंग को अलग-अलग कैप्शन और टैग्स में विभाजित करने का फंक्शन
-        function parseCaptionAndTags(fullCaption) {
-            // हैशटैग अक्सर अंत में होते हैं। हम इसे दो भागों में बांटेंगे।
-            const hashtagRegex = /#\w+/g; 
-            const tags = (fullCaption.match(hashtagRegex) || []).join(' ');
-            
-            // कैप्शन: टैग्स को हटाकर बाकी टेक्स्ट को कैप्शन मानते हैं
-            let caption = fullCaption.replace(hashtagRegex, '').trim();
-
-            // अगर caption बहुत छोटा है, तो पूरा टेक्स्ट ही कैप्शन है (टैग्स के बिना)
-            if (caption.length < fullCaption.length * 0.5 && tags.length > 0) {
-                // फुल कैप्शन में से टैग्स को हटा दें
-                caption = fullCaption.replace(tags, '').trim();
+        // एक्सपोनेंशियल बैकऑफ़ के साथ API कॉल करने का फंक्शन
+        async function fetchWithRetry(url, options, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    return response;
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed. Retrying...`);
+                    if (i < retries - 1) {
+                        const delay = Math.pow(2, i) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw error;
+                    }
+                }
             }
-
-            // अगर AI ने कैप्शन और टैग्स को एक ही लाइन में नहीं दिया, तो हम सिर्फ़ पहली लाइन को कैप्शन मानते हैं।
-            if (caption.includes('\n')) {
-                const parts = caption.split('\n').filter(p => p.trim() !== '');
-                caption = parts[0] || 'Check the full text below.';
-            }
-
-            // सुनिश्चित करें कि टैग्स साफ़ दिखें
-            const formattedTags = tags.length > 0 ? tags : "#InstaViral #TrendingReels #ExplorePage";
-            
-            return {
-                caption: caption,
-                tags: formattedTags
-            };
         }
+
+        // AI से आने वाले फालतू टेक्स्ट को हटाने का अंतिम सफ़ाई फंक्शन
+        function cleanCaptionText(text) {
+            // AI से आ सकने वाले सभी फालतू शब्द या नंबरिंग हटाएँ
+            const cleaned = text
+                .replace(/^\s*[\d\.]+\s*/, '') // Start numbering (1., 2.)
+                .replace(/^(option|caption)\s*\d+\s*:?\s*/i, '') // "Option 1:", "Caption 2:"
+                .replace(/trending caption\s*\d+\s*/gi, '') // "trending caption 1"
+                .trim();
+            return cleaned;
+        }
+
 
         generateBtn.addEventListener('click', async () => {
             errorMsg.textContent = '';
-            optionsList.innerHTML = '';
+            captionsList.innerHTML = '';
             contentContainer.style.display = 'none';
+            generateBtn.disabled = true;
 
             const title = titleInput.value.trim();
             if (!title) {
-                errorMsg.textContent = 'Please enter a video/photo topic.';
+                errorMsg.textContent = 'कृपया वीडियो/फोटो का टॉपिक डालें।';
+                generateBtn.disabled = false;
                 return;
             }
 
-            optionsList.innerHTML = `<div style="text-align:center; padding: 20px;">Loading... Generating best captions for you...</div>`;
+            // लोडिंग स्थिति दिखाएँ
+            captionsList.innerHTML = `<div class="spinner"></div><p style="text-align:center;">आपके टॉपिक "${title}" के लिए वायरल कंटेंट जनरेट हो रहा है...</p>`;
             contentContainer.style.display = 'block';
 
             try {
-                const response = await fetch(API_ENDPOINT, {
+                const response = await fetchWithRetry(API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title })
@@ -204,35 +196,71 @@
 
                 if (!response.ok) {
                     const errData = await response.json();
-                    throw new Error(errData.error || 'Server error: Failed to get AI response.');
+                    throw new Error(errData.error || 'सर्वर एरर। AI बैकएंड निष्क्रिय हो सकता है।');
                 }
 
                 const data = await response.json();
-                optionsList.innerHTML = '';
+                captionsList.innerHTML = '';
 
                 if (data.captions && data.captions.length > 0) {
+                    let validCaptionFound = false;
+                    
                     data.captions.forEach((fullCaption, index) => {
-                        const parsed = parseCaptionAndTags(fullCaption);
-                        
-                        // लिस्ट आइटम (पूरा ऑप्शन बॉक्स)
-                        const li = document.createElement('li');
-                        li.className = 'option';
-                        li.innerHTML = `
-                            <h2>Option ${index + 1}</h2>
-                            <span class="label">Caption:</span>
-                            <div class="caption-text" id="caption-${index}">${parsed.caption}</div>
-                            
-                            <span class="label" style="margin-top: 15px;">Trending Hashtags:</span>
-                            <div class="tags-text" id="tags-${index}">${parsed.tags}</div>
-                            
-                            <button class="copy-btn" data-target="caption-${index}|tags-${index}">Copy All</button>
-                        `;
-                        optionsList.appendChild(li);
-                    });
+                        // AI से आने वाले टेक्स्ट को साफ करें
+                        const finalCaption = cleanCaptionText(fullCaption);
 
-                    // सभी 'Copy All' बटनों के लिए इवेंट लिसनर
+                        // जांचें कि साफ करने के बाद भी कैप्शन सार्थक है या नहीं
+                        if (finalCaption.length > title.length + 15) { 
+                            validCaptionFound = true;
+                            const card = document.createElement('div');
+                            card.className = 'caption-card';
+                            
+                            card.innerHTML = `
+                                <div class="caption-text" id="caption-${index}">${finalCaption}</div>
+                                <button class="copy-btn" data-target="caption-${index}">COPY</button>
+                            `;
+                            captionsList.appendChild(card);
+                        }
+                    });
+                    
+                    if (!validCaptionFound) {
+                        captionsList.innerHTML = '<div style="text-align:center; padding: 20px;">AI ने कोई उपयोगी, साफ़ कंटेंट जनरेट नहीं किया। कृपया टॉपिक बदलकर देखें।</div>';
+                    }
+
+                    // सभी 'Copy' बटनों के लिए इवेंट लिसनर
                     document.querySelectorAll('.copy-btn').forEach(button => {
                         button.addEventListener('click', (e) => {
-                            const targets = e.target.dataset.target.split('|');
-                            const captionText = document.getElementById(targets[0]).textContent.trim();
-                            const tagsText = document.getElementById(targets[1]).textContent.trim();
+                            const targetId = e.target.dataset.target;
+                            const textToCopy = document.getElementById(targetId).textContent.trim(); 
+                            
+                            // कॉपी ऑपरेशन
+                            const tempInput = document.createElement('textarea');
+                            tempInput.value = textToCopy;
+                            document.body.appendChild(tempInput);
+                            tempInput.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(tempInput);
+                            
+                            // Visual feedback
+                            const originalText = e.target.textContent;
+                            e.target.textContent = 'Copied!';
+                            setTimeout(() => {
+                                e.target.textContent = originalText;
+                            }, 1500);
+                        });
+                    });
+                } else {
+                    captionsList.innerHTML = '<div style="text-align:center; padding: 20px;">AI ने कोई कंटेंट जनरेट नहीं किया। कृपया टॉपिक बदलकर देखें।</div>';
+                }
+
+            } catch (err) {
+                contentContainer.style.display = 'none';
+                errorMsg.textContent = 'एरर: ' + err.message + ' (Render सर्वर स्लीप मोड में हो सकता है। कृपया 1 मिनट बाद पुन: प्रयास करें।)';
+            } finally {
+                generateBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
+
