@@ -1,80 +1,90 @@
 const express = require('express');
-const cors = require('cors');
 const { GoogleGenAI } = require('@google/genai');
+const cors = require('cors');
+
+// Load environment variables (dotenv is primarily for local testing)
+require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
 
-app.use(cors());
+// Initialize the GoogleGenAI client
+// It automatically uses the GEMINI_API_KEY from Render environment variables.
+if (!process.env.GEMINI_API_KEY) {
+    console.error("FATAL: GEMINI_API_KEY is not set in environment variables.");
+    // In a production app, you might crash the process here.
+}
+const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+
+// Middleware
+// CORS Configuration: ONLY allows requests from your specific frontend domain for security
+app.use(cors({
+    origin: 'https://pooreyoutuber-github-io.onrender.com', 
+    methods: ['POST'],
+}));
 app.use(express.json());
 
-// API Key सीधे Render Environment Variables से लिया जाएगा
-const ai = new GoogleGenAI({});
-
-// AI से कैप्शन जनरेट करने का फंक्शन
-async function generateCaptions(title) {
-  const model = "gemini-1.5-flash"; 
-  
-  // 🔥 प्रॉम्प्ट: AI को कोई नंबर, ऑप्शन, या लिस्ट न बनाने का सख्त निर्देश
-  const systemInstruction = "You are a professional social media marketing expert specializing in viral Instagram Reels. Your output must be ready-to-copy captions, including line breaks, relevant emojis, and a dedicated block of trending hashtags. DO NOT use numbering, bullets, 'Option', 'Trending Caption', or any prefix before the captions. Provide ONLY the final post text.";
-  
-  const userQuery = `
-    Generate 10 highly engaging, viral-worthy Instagram/Reels captions for a post about: "${title}".
-    
-    Each caption must be a full, complete Instagram post (caption + 10-15 trending hashtags).
-    
-    Provide only the 10 final, polished captions, with each caption separated by two newline characters (to form a list).
-  `;
-  
-  try {
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: [{ role: "user", parts: [{ text: userQuery }] }],
-      config: { temperature: 0.9 },
-      systemInstruction: { parts: [{ text: systemInstruction }] }
-    });
-
-    const resultText = response.text.trim();
-    
-    // AI से आ सकने वाले फालतू शब्दों को हटाने के लिए अंतिम सफ़ाई
-    const captionsArray = resultText.split('\n\n') // दो न्यूलाइन से अलग करना (जैसा प्रॉम्प्ट में कहा गया है)
-                                     .map(caption => caption.trim())
-                                     .filter(caption => caption.length > 50) // सिर्फ़ सार्थक कैप्शन ही पास हों
-                                     .map(caption => caption.replace(/^\s*[\d\.]+\s*-\s*/, '')) // अंतिम सफ़ाई: 1. - हटाओ
-                                     .slice(0, 10); 
-
-    if (captionsArray.length === 0) {
-        return ["AI could not generate clean and meaningful captions. Try a different title or topic."];
-    }
-    
-    return captionsArray;
-
-  } catch (error) {
-    console.error("AI Generation Error:", error.message);
-    return [`Error: Failed to generate captions. Please check the server logs. (${error.message})`];
-  }
-}
-
-app.post('/generate-captions', async (req, res) => {
-  const { title } = req.body;
-  
-  if (!title || title.trim() === '') {
-    return res.status(400).json({ error: 'Title is required' });
-  }
-  
-  try {
-    const captions = await generateCaptions(title.trim()); 
-    res.json({ captions });
-  } catch (err) {
-    console.error("Express Error:", err);
-    res.status(500).json({ error: 'Failed to generate captions due to an internal server error.' });
-  }
-});
-
+// ----------------------------------------------------
+// Health Check Endpoint
+// ----------------------------------------------------
 app.get('/', (req, res) => {
-  res.send('Caption backend is running with Professional Gemini AI integration.');
+    res.status(200).send('Caption Generator API is running successfully!');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}.`);
+
+// ----------------------------------------------------
+// Main Caption Generation Endpoint
+// ----------------------------------------------------
+app.post('/api/generate', async (req, res) => {
+    const { reelTitle } = req.body;
+
+    if (!reelTitle) {
+        return res.status(400).json({ error: 'Reel title is required.' });
+    }
+
+    // Detailed prompt instructing Gemini on format and content
+    const prompt = `Generate 10 trending, catchy, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". Each caption must be followed by 3-5 relevant, high-reach hashtags on a new line. The output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                // Force the model to return a valid JSON structure
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            caption: {
+                                type: "string",
+                                description: "A catchy Instagram reel caption with relevant hashtags."
+                            }
+                        },
+                        required: ["caption"]
+                    }
+                },
+                temperature: 0.8, // Slightly higher temperature for creative captions
+            },
+        });
+
+        // The response text is a JSON string, which we parse
+        const captions = JSON.parse(response.text.trim());
+        
+        // Return the captions array to the frontend
+        res.status(200).json({ captions: captions });
+
+    } catch (error) {
+        console.error('Gemini API Error:', error.message);
+        // Send a generic error message back to the frontend
+        res.status(500).json({ 
+            error: 'Failed to generate captions. Check the server logs for details.',
+        });
+    }
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });
