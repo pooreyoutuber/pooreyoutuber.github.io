@@ -7,189 +7,103 @@
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      background: #fafafa;
+      background: #f8f9fa;
       margin: 0;
       padding: 0;
-      color: #222;
     }
-
     .container {
-      max-width: 800px;
+      max-width: 600px;
       margin: 40px auto;
-      background: #fff;
+      background: white;
       padding: 25px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-
     h1 {
       text-align: center;
-      color: #405de6;
-      font-size: 26px;
-      margin-bottom: 10px;
+      color: #e1306c;
+      margin-bottom: 20px;
+      font-size: 22px;
     }
-
-    p {
-      text-align: center;
-      color: #666;
-      margin-bottom: 25px;
-    }
-
-    input {
+    input[type="text"] {
       width: 100%;
-      padding: 12px 15px;
-      border-radius: 10px;
+      padding: 12px;
       border: 1px solid #ddd;
-      font-size: 16px;
+      border-radius: 6px;
       margin-bottom: 15px;
-    }
-
-    button {
-      background: #405de6;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 10px;
       font-size: 16px;
-      cursor: pointer;
-      font-weight: 600;
+    }
+    button {
       width: 100%;
+      background-color: #0095f6;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
     }
-
-    button:hover {
-      background: #3046c5;
+    button:hover { background-color: #007ad9; }
+    .error {
+      background: #ffeaea;
+      color: #e63946;
+      border: 1px solid #e63946;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      margin-top: 15px;
     }
-
-    .result {
-      margin-top: 25px;
-      display: grid;
-      gap: 15px;
-    }
-
-    .caption-box {
-      background: #f7f8ff;
-      border: 1px solid #dfe3ff;
-      border-radius: 10px;
+    .captions {
+      margin-top: 20px;
       padding: 15px;
-      position: relative;
-    }
-
-    .caption-box pre {
-      margin: 0;
+      border-radius: 8px;
+      background: #fafafa;
+      border: 1px solid #eee;
       white-space: pre-wrap;
-      word-wrap: break-word;
-      color: #111;
       font-size: 15px;
     }
-
     .copy-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #10b981;
-      border: none;
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 14px;
+      background: #28a745;
       color: white;
-      padding: 6px 10px;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 14px;
     }
-
-    .error {
-      background: #ffe5e5;
-      color: #d00;
-      border: 1px solid #f99;
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        margin: 0;
-        border-radius: 0;
-        min-height: 100vh;
-      }
+    .copy-btn:hover { background: #218838; }
+    @media (max-width: 768px) {
+      .container { margin: 0; border-radius: 0; box-shadow: none; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>📸 Instagram AI Caption Generator</h1>
-    <p>Get 10 viral captions with trending hashtags using Gemini AI</p>
+    <form method="POST" action="/">
+      <input type="text" name="topic" placeholder="Enter your post topic..." value="{{ current_topic or '' }}" required />
+      <button type="submit">✨ Generate Captions</button>
+    </form>
 
-    <input id="topic" type="text" placeholder="Enter your topic e.g. Travel to Goa" />
-    <button id="generateBtn">✨ Generate Captions</button>
+    {% if error_message %}
+      <div class="error">{{ error_message }}</div>
+    {% endif %}
 
-    <div id="errorBox" class="error" style="display: none;"></div>
-    <div id="resultBox" class="result"></div>
+    {% if captions %}
+      <div class="captions" id="captionBox">{{ captions }}</div>
+      <button class="copy-btn" onclick="copyCaptions()">Copy All 📋</button>
+    {% endif %}
   </div>
 
   <script>
-    const btn = document.getElementById("generateBtn");
-    const topicInput = document.getElementById("topic");
-    const resultBox = document.getElementById("resultBox");
-    const errorBox = document.getElementById("errorBox");
-
-    btn.onclick = async () => {
-      const topic = topicInput.value.trim();
-      if (!topic) {
-        alert("Please enter a topic first!");
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = "⏳ Generating...";
-      resultBox.innerHTML = "";
-      errorBox.style.display = "none";
-
-      try {
-        const res = await fetch("/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          errorBox.style.display = "block";
-          errorBox.textContent = data.error || "Something went wrong!";
-          btn.disabled = false;
-          btn.textContent = "✨ Generate Captions";
-          return;
-        }
-
-        const captions = data.captions;
-        captions.forEach((c, i) => {
-          const box = document.createElement("div");
-          box.className = "caption-box";
-
-          const pre = document.createElement("pre");
-          pre.textContent = c;
-
-          const copy = document.createElement("button");
-          copy.className = "copy-btn";
-          copy.textContent = "Copy";
-          copy.onclick = () => {
-            navigator.clipboard.writeText(c);
-            copy.textContent = "Copied!";
-            setTimeout(() => (copy.textContent = "Copy"), 1500);
-          };
-
-          box.appendChild(pre);
-          box.appendChild(copy);
-          resultBox.appendChild(box);
-        });
-      } catch (err) {
-        errorBox.style.display = "block";
-        errorBox.textContent = "⚠️ Server error. Please try again.";
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "✨ Generate Captions";
-      }
-    };
+    function copyCaptions() {
+      const text = document.getElementById("captionBox").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("All captions copied! 🚀");
+      });
+    }
   </script>
 </body>
 </html>
