@@ -104,11 +104,12 @@
           body: JSON.stringify({ title }),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to generate captions');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to generate captions');
         }
+
+        const data = await response.json();
 
         captionsList.innerHTML = '';
         data.captions.forEach(caption => {
@@ -116,7 +117,6 @@
           li.textContent = caption;
           captionsList.appendChild(li);
         });
-
       } catch (error) {
         captionsList.innerHTML = '';
         errorMsg.textContent = 'Error: ' + error.message;
