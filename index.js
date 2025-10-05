@@ -1,8 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-// Gemini AI SDK
 const { GoogleGenAI } = require('@google/genai');
-require('dotenv').config(); // Load environment variables locally
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -10,51 +8,50 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// Initialize the Gemini AI client using the API key from environment variables (Render Secrets)
+// API Key सीधे Render Environment Variables से लिया जाएगा
 const ai = new GoogleGenAI({});
 
-// Function to generate 10 short, viral Instagram captions with hashtags
+// AI से कैप्शन जनरेट करने का फंक्शन
 async function generateCaptions(title) {
   const model = "gemini-1.5-flash"; 
   
-  // A professional and short prompt for viral content
-  const prompt = `
-    Generate 10 highly engaging and viral Instagram captions for a post about: "${title}".
+  // 🔥 प्रॉम्प्ट: AI को कोई नंबर, ऑप्शन, या लिस्ट न बनाने का सख्त निर्देश
+  const systemInstruction = "You are a professional social media marketing expert specializing in viral Instagram Reels. Your output must be ready-to-copy captions, including line breaks, relevant emojis, and a dedicated block of trending hashtags. DO NOT use numbering, bullets, 'Option', 'Trending Caption', or any prefix before the captions. Provide ONLY the final post text.";
+  
+  const userQuery = `
+    Generate 10 highly engaging, viral-worthy Instagram/Reels captions for a post about: "${title}".
     
-    Each caption must be short (under 20 words), include relevant emojis, 
-    and be followed by a strong set of 10 to 15 trending, popular hashtags (e.g., #PUBGMOBILE #Reel #Trending #GamingLife).
+    Each caption must be a full, complete Instagram post (caption + 10-15 trending hashtags).
     
-    Provide only the 10 final captions, with each caption separated by a new line. 
-    Do not include any numbering, extra descriptive text, or markdown formatting.
+    Provide only the 10 final, polished captions, with each caption separated by two newline characters (to form a list).
   `;
   
   try {
     const response = await ai.models.generateContent({
       model: model,
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: {
-        temperature: 0.9, 
-      }
+      contents: [{ role: "user", parts: [{ text: userQuery }] }],
+      config: { temperature: 0.9 },
+      systemInstruction: { parts: [{ text: systemInstruction }] }
     });
 
     const resultText = response.text.trim();
     
-    // Split the text into lines (captions)
-    const captionsArray = resultText.split('\n')
+    // AI से आ सकने वाले फालतू शब्दों को हटाने के लिए अंतिम सफ़ाई
+    const captionsArray = resultText.split('\n\n') // दो न्यूलाइन से अलग करना (जैसा प्रॉम्प्ट में कहा गया है)
                                      .map(caption => caption.trim())
-                                     .filter(caption => caption.length > 0)
-                                     .slice(0, 10); // Ensure we only take up to 10
+                                     .filter(caption => caption.length > 50) // सिर्फ़ सार्थक कैप्शन ही पास हों
+                                     .map(caption => caption.replace(/^\s*[\d\.]+\s*-\s*/, '')) // अंतिम सफ़ाई: 1. - हटाओ
+                                     .slice(0, 10); 
 
     if (captionsArray.length === 0) {
-        // Fallback in case AI response format is unexpected
-        return ["AI could not generate captions. Try a simpler title."];
+        return ["AI could not generate clean and meaningful captions. Try a different title or topic."];
     }
     
     return captionsArray;
 
   } catch (error) {
     console.error("AI Generation Error:", error.message);
-    return [`Error: Failed to connect to AI service. (${error.message})`];
+    return [`Error: Failed to generate captions. Please check the server logs. (${error.message})`];
   }
 }
 
@@ -70,14 +67,14 @@ app.post('/generate-captions', async (req, res) => {
     res.json({ captions });
   } catch (err) {
     console.error("Express Error:", err);
-    res.status(500).json({ error: 'Failed to process request due to an internal server error.' });
+    res.status(500).json({ error: 'Failed to generate captions due to an internal server error.' });
   }
 });
 
 app.get('/', (req, res) => {
-  res.send({ status: 'ok', message: 'Instagram Caption AI Backend is running.' });
+  res.send('Caption backend is running with Professional Gemini AI integration.');
 });
 
 app.listen(PORT, () => {
-  console.log(`AI Caption Server running on port ${PORT}.`);
+  console.log(`Server running on port ${PORT}.`);
 });
