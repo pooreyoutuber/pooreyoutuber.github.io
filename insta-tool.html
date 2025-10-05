@@ -6,151 +6,54 @@
     <title>Instagram AI Caption Generator | Trending Reels Captions</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS for a modern, Instagram-inspired dark theme and responsiveness */
         :root {
-            --insta-pink: #E1306C;
-            --insta-purple: #C13584;
-            --insta-orange: #F56040;
-            --bg-dark: #121212;
-            --card-dark: #1E1E1E;
-            --text-light: #FFFFFF;
+            --insta-pink: #E1306C; --insta-purple: #C13584; --insta-orange: #F56040;
+            --bg-dark: #121212; --card-dark: #1E1E1E; --text-light: #FFFFFF;
             --input-bg: #333333;
         }
-
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif; background-color: var(--bg-dark);
+            color: var(--text-light); margin: 0; padding: 0; display: flex;
+            justify-content: center; align-items: center; min-height: 100vh;
+            padding: 20px; box-sizing: border-box;
         }
-
         .container {
-            width: 100%;
-            max-width: 700px;
-            background-color: var(--card-dark);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            padding: 30px;
+            width: 100%; max-width: 700px; background-color: var(--card-dark);
+            border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); padding: 30px;
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--input-bg);
-            padding-bottom: 15px;
-        }
-
+        header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--input-bg); padding-bottom: 15px; }
         header h1 {
-            font-size: 2em;
-            background: linear-gradient(45deg, var(--insta-pink), var(--insta-orange), var(--insta-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-            margin: 0;
+            font-size: 2em; background: linear-gradient(45deg, var(--insta-pink), var(--insta-orange), var(--insta-purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; margin: 0;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #AAAAAA;
-        }
-
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #AAAAAA; }
         input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--input-bg);
-            color: var(--text-light);
-            box-sizing: border-box;
-            font-size: 1em;
-            transition: border 0.3s;
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            background-color: var(--input-bg); color: var(--text-light); box-sizing: border-box;
+            font-size: 1em; transition: border 0.3s;
         }
-
-        input[type="text"]:focus {
-            outline: none;
-            border: 2px solid var(--insta-pink);
-        }
-
+        input[type="text"]:focus { outline: none; border: 2px solid var(--insta-pink); }
         button {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            color: var(--text-light);
+            width: 100%; padding: 15px; border: none; border-radius: 8px;
+            font-size: 1.1em; font-weight: bold; color: var(--text-light);
             background: linear-gradient(to right, var(--insta-pink), var(--insta-purple));
-            cursor: pointer;
-            transition: opacity 0.3s, transform 0.1s;
+            cursor: pointer; transition: opacity 0.3s, transform 0.1s;
         }
-
-        button:hover:not(:disabled) {
-            opacity: 0.9;
-        }
-        
-        button:disabled {
-            background: #555555;
-            cursor: not-allowed;
-        }
-
-        button:active:not(:disabled) {
-            transform: scale(0.99);
-        }
-
-        .results-container {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px dashed var(--input-bg);
-        }
-
-        .caption-list {
-            list-style: none;
-            padding: 0;
-        }
-
+        button:hover:not(:disabled) { opacity: 0.9; }
+        button:disabled { background: #555555; cursor: not-allowed; }
+        .results-container { margin-top: 30px; padding-top: 20px; border-top: 1px dashed var(--input-bg); }
+        .caption-list { list-style: none; padding: 0; }
         .caption-item {
-            background-color: var(--input-bg);
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 10px;
-            position: relative;
-            word-wrap: break-word;
-            white-space: pre-wrap;
+            background-color: var(--input-bg); margin-bottom: 15px; padding: 15px;
+            border-radius: 10px; position: relative; word-wrap: break-word; white-space: pre-wrap;
         }
-
         .copy-btn {
-            background-color: var(--insta-orange);
-            color: var(--text-light);
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8em;
-            margin-top: 10px;
-            display: block;
-            float: right;
+            background-color: var(--insta-orange); color: var(--text-light); border: none;
+            padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em;
+            margin-top: 10px; display: block; float: right;
         }
-
-        .loading {
-            text-align: center;
-            font-size: 1.2em;
-            color: var(--insta-pink);
-            display: none;
-            margin: 20px 0;
-        }
+        .loading { text-align: center; font-size: 1.2em; color: var(--insta-pink); display: none; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -182,9 +85,10 @@
 </div>
 
 <script>
-    // ⚠️ IMPORTANT: Replace this with the actual URL of your *Render Web Service* (Backend)
-    // Example: https://my-caption-api.onrender.com/api/generate
-    const RENDER_BACKEND_URL = 'YOUR_RENDER_BACKEND_URL/api/generate'; 
+    // ⚠️ IMPORTANT: We use a relative path /api/gemini/generate, assuming your
+    // frontend and backend are deployed in a way that allows direct communication.
+    // If your backend service is running on a different domain, use the full URL.
+    const CAPTION_API_ENDPOINT = '/api/gemini/generate'; 
 
     async function generateCaptions() {
         const reelTitle = document.getElementById('reel-title').value.trim();
@@ -198,7 +102,6 @@
             return;
         }
 
-        // UI State: Disable button, show loading
         generateBtn.disabled = true;
         generateBtn.textContent = 'Generating...';
         loadingMessage.style.display = 'block';
@@ -206,18 +109,15 @@
         captionList.innerHTML = '';
 
         try {
-            const response = await fetch(RENDER_BACKEND_URL, {
+            const response = await fetch(CAPTION_API_ENDPOINT, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ reelTitle: reelTitle }),
             });
 
             if (!response.ok) {
-                 // Try to read error message from the server response
                  const errorText = await response.text();
-                 throw new Error(`Server error (${response.status}): ${errorText.substring(0, 100)}...`);
+                 throw new Error(`Server error (${response.status}). Check server logs or if API Key is set.`);
             }
 
             const data = await response.json();
@@ -227,14 +127,11 @@
                  throw new Error("AI did not return any captions. Try a different title.");
             }
             
-            // Render the results
             captionList.innerHTML = '';
             captions.forEach((item, index) => {
                 const listItem = document.createElement('li');
                 listItem.className = 'caption-item';
-                
                 const formattedCaption = `${index + 1}. ${item.caption.trim()}`;
-                
                 const captionText = document.createElement('div');
                 captionText.innerText = formattedCaption;
                 captionText.style.marginBottom = '10px';
@@ -242,10 +139,7 @@
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'copy-btn';
                 copyBtn.textContent = 'Copy';
-                copyBtn.onclick = (e) => {
-                    e.preventDefault();
-                    copyToClipboard(formattedCaption, copyBtn);
-                };
+                copyBtn.onclick = (e) => { e.preventDefault(); copyToClipboard(formattedCaption, copyBtn); };
                 
                 listItem.appendChild(captionText);
                 listItem.appendChild(copyBtn);
@@ -258,45 +152,23 @@
             console.error("API Error:", error);
             alert(`Error: ${error.message}. Please check console for details.`);
         } finally {
-            // UI State: Reset
             generateBtn.disabled = false;
             generateBtn.textContent = 'Generate Top 10 Captions';
             loadingMessage.style.display = 'none';
         }
     }
 
-    /**
-     * Copies the provided text to the user's clipboard and provides visual feedback.
-     */
     function copyToClipboard(text, button) {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => {
                 button.textContent = '✅ Copied!';
-                setTimeout(() => {
-                    button.textContent = 'Copy';
-                }, 2000);
-            }).catch(err => {
-                fallbackCopy(text, button);
+                setTimeout(() => { button.textContent = 'Copy'; }, 2000);
             });
-        } else {
-            fallbackCopy(text, button);
         }
-    }
-
-    function fallbackCopy(text, button) {
-        const tempInput = document.createElement('textarea');
-        tempInput.value = text;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        
-        button.textContent = '✅ Copied!';
-        setTimeout(() => {
-            button.textContent = 'Copy';
-        }, 2000);
     }
 </script>
 
 </body>
 </html>
+
+                
