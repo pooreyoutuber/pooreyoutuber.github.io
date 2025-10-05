@@ -10,7 +10,7 @@
   <meta name="robots" content="index, follow">
 
   <style>
-    /* General Styling */
+    /* General Styling (Original CSS) */
     body { font-family: 'Arial', sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f4f6f9; }
     .container { 
         max-width: 900px; 
@@ -23,7 +23,7 @@
     h1 { color: #333; margin-bottom: 5px; }
     p.subtitle { color: #666; margin-bottom: 20px; }
     
-    /* Input and Controls */
+    /* Input and Controls (Original CSS) */
     .control-group { margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; display: inline-block; }
     .control-group input, .control-group button { margin: 8px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
     
@@ -33,12 +33,12 @@
     .resize-button { padding: 12px 30px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; font-size: 16px; margin-top: 15px; }
     .resize-button:hover { background: #1e7e34; }
     
-    /* Image Preview */
+    /* Image Preview (Original CSS) */
     .image-preview-area { margin-top: 25px; border-top: 2px solid #eee; padding-top: 25px; }
     #preview-img { max-width: 100%; max-height: 500px; border: 1px solid #ccc; padding: 5px; display: block; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     #canvas { display: none; }
 
-    /* Description Section */
+    /* Description Section (Original CSS) */
     .description-section {
         text-align: left;
         padding: 25px;
@@ -58,31 +58,28 @@
     }
     .description-section strong { color: #333; }
     
-    /* Ad Styling for clarity */
-    .ad-container { margin: 20px auto; padding: 10px; background-color: #ffe0b2; border: 1px solid #ff9800; border-radius: 8px; max-width: 728px; font-size: 12px; color: #333; }
-    .ad-container strong { color: #d32f2f; }
+    /* NEW: Ad Container for Spacing - UI ko zyada na badalte hue ads ke liye jagah */
+    .monetag-ad-space { margin: 20px auto; max-width: 728px; text-align: center; }
   </style>
   
       <script>
     // YAHAN APNA MONETAG ONCLICK/POPUNDER AD KA ASLI CODE LAGAYEN (e.g., OnClick ID 9914699)
-    console.log("Monetag OnClick/Popunder Ad Zone Initialized");
     // <MONETAG_ONCLICK_AD_CODE_HERE>
   </script>
   
   </head>
 <body>
 <div class="container">
-        <div class="ad-container">
-        Ad Slot: **Native Banner / Interscroller** (e.g., Lovey-dovey tag 9914741)
-        <div id="monetag-top-native" style="min-height: 90px;">
+    <h1>🖼️ Pro Image Resizer & Editor</h1>
+    <p class="subtitle">Quickly resize your images to exact dimensions and apply basic photo filters instantly.</p>
+
+        <div class="monetag-ad-space">
+                <div id="monetag-top-native">
                         <script>
                 // <MONETAG_NATIVE_BANNER_AD_CODE_HERE>
             </script>
         </div>
     </div>
-
-    <h1>🖼️ Pro Image Resizer & Editor</h1>
-    <p class="subtitle">Quickly resize your images to exact dimensions and apply basic photo filters instantly.</p>
 
     <div class="control-group">
         <input type="file" id="upload" accept="image/*">
@@ -104,11 +101,10 @@
         <button class="resize-button" onclick="resizeAndDownload()">Resize & Download Final Image</button>
     </div>
     
-        <div class="ad-container" style="margin-top: 25px;">
-        Ad Slot: **Vignette Banner** / **Native Banner** (e.g., Strong tag 9914765)
-        <div id="monetag-center-vignette" style="min-height: 90px;">
+        <div class="monetag-ad-space">
+                <div id="monetag-center-inpage">
                         <script>
-                // <MONETAG_VIGNETTE_BANNER_AD_CODE_HERE>
+                // <MONETAG_IN_PAGE_PUSH_AD_CODE_HERE>
             </script>
         </div>
     </div>
@@ -119,15 +115,55 @@
         <canvas id="canvas"></canvas>
     </div>
     
-        <div class="ad-container" style="margin-top: 25px;">
-        Ad Slot: **In-Page Push** / **Rich tag** (e.g., Well-to-do tag 9914700)
-        <div id="monetag-footer-inpage" style="min-height: 90px;">
+        <div class="monetag-ad-space">
+                <div id="monetag-footer-vignette">
                         <script>
-                // <MONETAG_IN_PAGE_PUSH_AD_CODE_HERE>
+                // <MONETAG_VIGNETTE_BANNER_AD_CODE_HERE>
             </script>
         </div>
     </div>
     
     <div class="description-section">
         <h2>About This Tool: Resize, Edit, and Enhance</h2>
-        <p>The **Pro Image Resizer and Editor** is an all-in-one utility for content creators, web developers, and everyday users who need **quick and secure** image modifications. Unlike many online tools, the entire resizing and editing process happens **directly in your
+        <p>The **Pro Image Resizer and Editor** is an all-in-one utility for content creators, web developers, and everyday users who need **quick and secure** image modifications. Unlike many online tools, the entire resizing and editing process happens **directly in your browser**, meaning your images are never uploaded to a server, ensuring your **absolute privacy**.</p>
+        
+        <p>This tool is perfect for:</p>
+        <ul>
+            <li>**Social Media:** Quickly resizing profile pictures, cover photos, or post images to exact pixel requirements (e.g., 1080x1080).</li>
+            <li>**Web Optimization:** Scaling down large images to improve website loading speed and performance.</li>
+            <li>**Basic Editing:** Applying common edits like **rotation** and **color filters** (grayscale for professional documents or sepia for a vintage look) before the final resize.</li>
+        </ul>
+        
+        <p>Simply upload your file, enter your desired width and height, apply any necessary edits, and click **"Resize & Download"**. The final image will be downloaded instantly, ready for use.</p>
+    </div>
+</div>
+
+<script>
+    let uploadedImage = null;
+    let rotationAngle = 0; // 0, 90, 180, 270
+    let currentFilter = 'original';
+
+    const uploadInput = document.getElementById("upload");
+    const previewImg = document.getElementById("preview-img");
+    const canvas = document.getElementById("canvas");
+
+    // --- Core Upload Handler ---
+    uploadInput.addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage = new Image();
+                uploadedImage.src = e.target.result;
+                uploadedImage.onload = function() {
+                    // Reset everything when a new image is loaded
+                    rotationAngle = 0;
+                    currentFilter = 'original';
+                    previewImg.style.transform = 'none';
+                    previewImg.style.filter = 'none';
+                    previewImg.src = uploadedImage.src;
+                    
+                    // Set default dimensions to original size for a better start
+                    document.getElementById("width").value = uploadedImage.width;
+                    document.getElementById("height").value = uploadedImage.height;
+                }
