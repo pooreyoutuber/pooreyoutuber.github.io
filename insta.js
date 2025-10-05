@@ -4,10 +4,11 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());            // CORS enable karo
-app.use(express.json());    // JSON body parsing
+app.use(cors());
+app.use(express.json());
 
-// Dummy captions generator function (yahan Gemini AI call kar sakte ho apni API se)
+// Aap apni Gemini AI integration yahan kar sakte ho
+// Filhal dummy captions return kar raha hoon
 function generateCaptions(title) {
   return Array.from({ length: 10 }, (_, i) => `${title} - Best Caption #${i + 1}`);
 }
@@ -20,10 +21,9 @@ app.post('/generate-captions', (req, res) => {
   }
 
   const captions = generateCaptions(title.trim());
-
   res.json({ captions });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server started on port ${PORT}`);
 });
