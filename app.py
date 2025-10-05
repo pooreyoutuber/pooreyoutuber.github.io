@@ -9,10 +9,11 @@ def load_api_key_from_secret_file():
     secret_path = os.path.join("/etc/secrets", SECRET_FILE_NAME)
     
     try:
+        # Render Secret File से Key को लोड करें
         with open(secret_path, 'r') as f:
             return f.read().strip() 
     except Exception:
-        # If the file is not found (e.g., local testing), try environment variable
+        # अगर Secret File नहीं मिली, तो Environment Variable से Key लेने की कोशिश करें (Local Testing के लिए)
         return os.getenv("GEMINI_API_KEY")
 
 # --- Flask App Configuration ---
@@ -28,32 +29,32 @@ else:
     client = genai.Client(api_key=API_KEY)
 
 
-def generate_instagram_content(topic, tone, category):
-    """Generates high-quality, trending English caption and hashtags."""
+def generate_instagram_content(topic):
+    """AI का उपयोग करके आकर्षक इंग्लिश कैप्शन और हैशटैग जेनरेट करता है।"""
     
     if not client:
-        return "Sorry, the AI service is currently unavailable. (Error Code: Key Missing)"
+        # अगर Key मिसिंग है
+        return "Sorry! The AI service key is missing. Please contact the administrator. (Error: KEY_MISSING)"
 
-    # IMPROVED ENGLISH PROMPT for better results
+    # SIMPLIFIED & EFFECTIVE ENGLISH PROMPT
     prompt = f"""
-    You are an expert Instagram content strategist specialized in driving high engagement and views.
+    You are an expert Instagram content strategist focused on generating viral English posts for high views and engagement.
     
     - Topic: {topic}
-    - Tone/Style: {tone}
-    - Content Category: {category}
     
-    Your task is to generate highly optimized English content that will perform well on Instagram for the specified topic.
+    Analyze the topic and generate highly optimized content. Automatically choose the most fitting tone (funny, inspirational, motivational, etc.) for the topic.
     
     Provide the output in the following structure, which must be strictly followed:
     
-    1. CAPTION: Write a punchy, engaging English caption (3-5 sentences) suitable for a professional/trending Instagram post. Include 2-3 relevant emojis and a Call-to-Action (CTA).
+    1. CAPTION: Write a punchy, engaging English caption (4-5 sentences) with a strong hook, 3 relevant emojis, and a clear Call-to-Action (CTA).
     
-    2. HASHTAGS: Provide exactly 15 high-performing, niche-relevant English hashtags separated by commas (e.g., #pubgmobile #mobilegaming #esports). Ensure a mix of small, medium, and large hashtags for maximum reach.
+    2. HASHTAGS: Provide exactly 10 high-performing, niche-relevant English hashtags separated by commas (e.g., #pubgmobile #mobilegaming #esports). Ensure a mix of small, medium, and large hashtags for maximum reach.
     
-    Present the output clearly, with a blank line separating the CAPTION and HASHTAGS sections. Do not use any introductory phrases like 'Here is your caption'.
+    Present the output clearly, with a blank line separating the CAPTION and HASHTAGS sections. Do not use any labels like 'CAPTION:' or 'HASHTAGS:'. The user should be able to copy the content directly.
     """
     
     try:
+        # AI मॉडल से कंटेंट जेनरेट करें
         response = client.models.generate_content(
             model="gemini-2.5-flash", 
             contents=prompt
@@ -61,40 +62,36 @@ def generate_instagram_content(topic, tone, category):
         return response.text
         
     except Exception as e:
-        # Handle Quota Exceeded and other errors
+        # Quota Exceeded (फ्री टियर सीमा) एरर को संभालें
         if "Quota exceeded" in str(e):
-            return "⚠️ Quota limit reached. Please try again tomorrow. (Service reset in 24h)"
+            return "⚠️ Quota limit reached. The service will reset in 24 hours. Please try again tomorrow."
         else:
-            return f"Sorry, an unexpected error occurred. Please check your inputs. Error: {e}"
+            return f"Sorry, an unexpected error occurred. Error: {e}"
 
 
-# --- Web Routes and Logic ---
+# --- वेब रूट और लॉजिक ---
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    """Handles the main page and form submission."""
+    """वेबसाइट का मुख्य पेज जो GET और POST अनुरोधों को संभालता है।"""
     ai_caption = None
     topic = ""
-    tone = "Inspirational"
-    category = "Gaming/Entertainment" # Default category
 
     if request.method == 'POST':
-        # Get form data
+        # फॉर्म डेटा प्राप्त करें
         topic = request.form.get('topic')
-        tone = request.form.get('tone')
-        category = request.form.get('category')
         
         if topic:
-            # Call AI function
-            ai_caption = generate_instagram_content(topic, tone, category)
+            # AI फंक्शन को कॉल करें
+            ai_caption = generate_instagram_content(topic)
 
-    # Render index.html with data
+    # index.html को रेंडर करें
     return render_template('index.html', 
                            ai_caption=ai_caption, 
-                           current_topic=topic, 
-                           current_tone=tone,
-                           current_category=category)
+                           current_topic=topic)
 
-# --- Start App (For Render Deployment) ---
+# --- ऐप को शुरू करें (Render डिप्लॉयमेंट के लिए ज़रूरी) ---
 if __name__ == '__main__':
+    # Render, 'PORT' environment variable का उपयोग करेगा
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+    
