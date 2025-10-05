@@ -1,90 +1,87 @@
+// TOP OF YOUR SERVER FILE (e.g., server.js or insta.js)
 const express = require('express');
-const cors = require('cors');
-const { GoogleGenAI } = require('@google/genai');
-require('dotenv').config(); 
+const { GoogleGenAI } = require('@google/genai'); // Import Gemini SDK
+const cors = require('cors'); 
+// const fetch = require('node-fetch'); // If you need node-fetch for your old booster tool
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
 
-app.use(cors());
+// Initialize the GoogleGenAI client (will look for GEMINI_API_KEY)
+const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+
+// Middleware
+app.use(cors()); // Allow all origins for simplicity, or specify your frontend URL
 app.use(express.json());
 
-// GEMINI_API_KEY environment variable से लिया जाएगा
-const ai = new GoogleGenAI({});
+// -------------------------------------------------------------------
+// 1. YOUR EXISTING WEBSITE BOOSTER LOGIC HERE
+// -------------------------------------------------------------------
 
-// AI से कैप्शन जनरेट करने का फंक्शन
-async function generateCaptions(title) {
-  const model = "gemini-1.5-flash"; 
-  
-  // 🔥 प्रॉम्प्ट सुधार: AI को साफ़ निर्देश कि वह कोई नंबर, ऑप्शन, या लिस्ट न बनाए।
-  const systemInstruction = "You are a professional social media marketing expert specializing in viral Instagram Reels. Your output must be ready-to-copy captions, including line breaks, relevant emojis, and a dedicated block of trending hashtags. DO NOT use numbering, bullets, 'Option', 'Trending Caption', or any prefix before the captions.";
-  
-  const userQuery = `
-    Generate 10 highly engaging, viral-worthy Instagram/Reels captions for a post about: "${title}".
-    
-    Each caption must be structured like a real post:
-    1. A strong hook line with relevant emojis.
-    2. A space/line break.
-    3. A block of 10-15 trending and niche-specific hashtags (e.g., #pubg #pubgmobile #reel #trending).
-    
-    Provide only the 10 final, polished captions, with each caption separated by a new line.
-  `;
-  
-  try {
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: [{ role: "user", parts: [{ text: userQuery }] }],
-      config: {
-        temperature: 0.9 // उच्च रचनात्मकता
-      },
-      systemInstruction: {
-        parts: [{ text: systemInstruction }]
-      }
-    });
+// Example of your existing endpoint (KEEP THIS, DO NOT CHANGE IT)
+// app.post('/api/booster', async (req, res) => {
+//     // Your current insta.js logic for website boosting goes here...
+//     // For example:
+//     // const { url, cid } = req.body;
+//     // await fetch(`https://www.google-analytics.com/collect?v=1&tid=UA-XXXXX-Y&cid=${cid}&t=pageview&dp=${url}`);
+//     res.status(200).json({ message: "Booster request processed." });
+// });
 
-    const resultText = response.text.trim();
-    
-    // टेक्स्ट को साफ़ करके 10 कैप्शन्स की ऐरे में बदलें
-    const captionsArray = resultText.split('\n')
-                                     .map(caption => caption.trim())
-                                     // AI से आ सकने वाले बचे-खुचे फालतू शब्दों को हटाने के लिए अंतिम सफ़ाई
-                                     .map(caption => caption.replace(/^\d+\.\s*/, '').replace(/option\s*\d+\s*:\s*/i, ''))
-                                     .filter(caption => caption.length > 30) // सुनिश्चित करें कि सिर्फ़ सार्थक कैप्शन ही पास हों
-                                     .slice(0, 10); 
 
-    if (captionsArray.length === 0) {
-        // यदि कोई सार्थक कैप्शन नहीं मिला, तो एक साफ़ त्रुटि संदेश भेजें
-        return ["AI could not generate clean and meaningful captions. Try a different title or topic."];
+// -------------------------------------------------------------------
+// 2. NEW GEMINI CAPTION GENERATOR ENDPOINT
+// -------------------------------------------------------------------
+app.post('/api/gemini/generate', async (req, res) => {
+    // Check if the API key is available
+    if (!process.env.GEMINI_API_KEY) {
+        return res.status(500).json({ error: 'Server configuration error: GEMINI_API_KEY not found in Render secrets.' });
     }
     
-    return captionsArray;
+    const { reelTitle } = req.body;
 
-  } catch (error) {
-    console.error("AI Generation Error:", error.message);
-    return [`Error: Failed to generate captions. Please check the server logs. (${error.message})`];
-  }
-}
+    if (!reelTitle) {
+        return res.status(400).json({ error: 'Reel title is required.' });
+    }
 
-app.post('/generate-captions', async (req, res) => {
-  const { title } = req.body;
-  
-  if (!title || title.trim() === '') {
-    return res.status(400).json({ error: 'Title is required' });
-  }
-  
-  try {
-    const captions = await generateCaptions(title.trim()); 
-    res.json({ captions });
-  } catch (err) {
-    console.error("Express Error:", err);
-    res.status(500).json({ error: 'Failed to generate captions due to an internal server error.' });
-  }
+    // Detailed prompt for Gemini
+    const prompt = `Generate 10 trending, catchy, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". Each caption must be followed by 3-5 relevant, high-reach hashtags on a new line. The output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            caption: {
+                                type: "string"
+                            }
+                        },
+                        required: ["caption"]
+                    }
+                },
+                temperature: 0.8,
+            },
+        });
+
+        const captions = JSON.parse(response.text.trim());
+        
+        // Return generated captions
+        res.status(200).json({ captions: captions });
+
+    } catch (error) {
+        console.error('Gemini API Error:', error.message);
+        res.status(500).json({ 
+            error: 'Failed to generate captions. Check API Key and server logs.',
+        });
+    }
 });
 
-app.get('/', (req, res) => {
-  res.send('Caption backend is running with Professional Gemini AI integration.');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Start the server (Make sure this is the last part of your file)
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });
