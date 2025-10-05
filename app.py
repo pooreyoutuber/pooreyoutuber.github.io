@@ -1,5 +1,4 @@
-# app.py
-import os
+mport os
 import json
 from flask import Flask, render_template, request, jsonify
 import requests
@@ -11,76 +10,57 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 if not GEMINI_API_KEY:
+    # Render पर, आपको यह कुंजी Environment Variables या Secret Files में सेट करनी होगी।
     raise RuntimeError("GEMINI_API_KEY environment variable not set")
 
 # Helper to call Gemini / Generative Language API (REST)
-def call_gemini_generate(prompt_text, max_output_tokens=80, temperature=0.8):
+def call_gemini_generate(prompt_text, max_output_tokens=220, temperature=0.9): # max_output_tokens increased
     """
     Uses Google Generative Language endpoint to generate text.
-    Uses x-goog-api-key header to authenticate with the API key stored server-side.
     """
-    # Endpoint pattern (v1beta - example). Docs show generateContent / generate endpoint usage.
+    # Gemini API के लिए सही endpoint
     endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
     headers = {
         "Content-Type": "application/json",
-        # Use API key in header -- Google SDKs use x-goog-api-key header for API key usage.
+        # API key को header में उपयोग करना सही है (x-goog-api-key)
         "x-goog-api-key": GEMINI_API_KEY
     }
 
+    # FIX 1: API Payload का सही फॉर्मेट
     body = {
-        "prompt": {
-            "text": prompt_text
-        },
-        # Basic parameters (may be adjusted based on model support)
-        "maxOutputTokens": max_output_tokens,
-        "temperature": temperature
+        "contents": [{
+            "parts": [{"text": prompt_text}]
+        }],
+        "config": {
+            "maxOutputTokens": max_output_tokens,
+            "temperature": temperature
+        }
     }
 
     resp = requests.post(endpoint, headers=headers, json=body, timeout=30)
-    resp.raise_for_status()
+    resp.raise_for_status() # HTTP error code (4xx, 5xx) होने पर exception उठाता है
     data = resp.json()
 
-    # Response parsing: handle a few possible shapes. The official SDK returns structured fields.
-    # Try to extract generated text robustly:
+    # FIX 2: Gemini API response से text निकालने का सही और सरल तरीका
     text = None
-    # common fields used by various doc examples:
-    if isinstance(data, dict):
-        # new-style responses often include 'candidates' or 'output'
-        # check nested keys
-        if "candidates" in data and isinstance(data["candidates"], list) and len(data["candidates"]) > 0:
-            text = data["candidates"][0].get("output", None) or data["candidates"][0].get("content", None)
-        elif "output" in data and isinstance(data["output"], list):
-            # sometimes output is list of dicts with 'content' or 'text'
-            contents = []
-            for item in data["output"]:
-                if isinstance(item, dict) and "content" in item:
-                    # content may be a list of pieces or a string
-                    content = item["content"]
-                    if isinstance(content, list):
-                        for c in content:
-                            if isinstance(c, dict) and "text" in c:
-                                contents.append(c["text"])
-                            elif isinstance(c, str):
-                                contents.append(c)
-                    elif isinstance(content, str):
-                        contents.append(content)
-                elif isinstance(item, str):
-                    contents.append(item)
-            if contents:
-                text = " ".join(contents)
-        elif "generatedText" in data:
-            text = data["generatedText"]
-        else:
-            # Try find first string value in response heuristically
-            for v in data.values():
-                if isinstance(v, str) and len(v) > 0:
-                    text = v
-                    break
+    try:
+        # Standard structure: data.candidates[0].content.parts[0].text
+        candidate = data.get("candidates", [])[0]
+        text = candidate.get("content", {}).get("parts", [])[0].get("text", "")
+        
+        # Check for block reason (अगर text नहीं मिला और finish reason STOP नहीं है)
+        if not text and candidate.get("finishReason") != "STOP":
+            return f"Error: Content was blocked due to safety settings or response length. Reason: {candidate.get('finishReason', 'UNKNOWN')}"
+
+    except (IndexError, AttributeError, TypeError, KeyError):
+        # Parsing में कोई भी Error आने पर raw data return करें
+        return f"Error parsing response. Raw Data (Partial): {json.dumps(data, indent=2)[:500]}..."
+
 
     if not text:
-        # fallback: pretty-print entire JSON for debugging (but normally won't be shown to end-user)
-        text = json.dumps(data)[:1500]  # limit length
+        # अंतिम जाँच (Final check)
+        return "Content generation returned no valid text."
 
     return text
 
@@ -100,30 +80,38 @@ def generate():
 
     # Compose a user-facing prompt for Gemini
     composed = (
-        f"You're an Instagram caption writer. Create 6 short Instagram captions for this photo/topic:\n\n"
-        f"Topic / description: {prompt}\n"
+        f"You are an expert Instagram caption writer. Create 6 distinct, high-quality, English Instagram captions for this content. "
+        f"Return each caption on a new line. Do not include numbering, bullet points, or any introductory commentary. "
+        f"Topic/Description: {prompt}\n"
         f"Tone: {tone}\n"
-        f"Style: {style}\n\n"
-        f"Return each caption on a new line, no extra commentary."
+        f"Style: {style} (e.g., Short, Detailed, With hashtags)"
     )
 
     try:
+        # max_output_tokens को 220 कर दिया गया है ताकि 6 captions के लिए जगह हो
         gen_text = call_gemini_generate(composed, max_output_tokens=220, temperature=0.9)
+        
+        # अगर Error string return हुई है (safety block, parsing error, etc.)
+        if gen_text.startswith(("Error:", "Content generation returned")):
+            return jsonify({"error": gen_text}), 500
+            
     except requests.HTTPError as e:
-        return jsonify({"error": "API request failed", "details": str(e), "response_text": getattr(e.response, "text", "")}), 502
+        return jsonify({"error": "API request failed", "details": f"HTTP Error: {e.response.status_code}. Please check your API key."}), 502
     except Exception as e:
-        return jsonify({"error": "Unexpected error", "details": str(e)}), 500
+        return jsonify({"error": "Unexpected server error", "details": str(e)}), 500
 
     # Split the output into lines and trim
     lines = [line.strip() for line in gen_text.splitlines() if line.strip()]
+    
     # If only one long paragraph returned, try to split by sentences into multiple captions
     if len(lines) == 1:
         import re
+        # Sentence splitting logic
         sentences = re.split(r'(?<=[.!?])\s+', lines[0])
         lines = [s.strip() for s in sentences if s.strip()][:6]
 
     # Limit to 6 captions
-    captions = lines[:6] if lines else [gen_text]
+    captions = lines[:6] if lines else [gen_text] # Fallback to raw text if no lines found
 
     return jsonify({"captions": captions})
 
