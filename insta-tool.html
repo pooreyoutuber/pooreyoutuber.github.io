@@ -1,122 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Best AI Trending Caption and Tags</title>
-    <style>
-        /* Base Styling (Similar to Instagram/Clean look) */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #fafafa; color: #262626; }
-        .container { max-width: 700px; margin: 40px auto; background: white; padding: 30px; border: 1px solid #dbdbdb; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        h1 { color: #262626; text-align: center; margin-bottom: 30px; font-size: 26px; font-weight: 600; }
-        h1 span { color: #405de6; }
-        
-        /* Form */
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #262626; }
-        input[type="text"] { 
-            width: 100%; padding: 12px; border: 1px solid #dbdbdb; border-radius: 5px; box-sizing: border-box; font-size: 16px; margin-bottom: 20px; background-color: #fafafa;
-        }
-        button[type="submit"] { 
-            background-color: #0095f6; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; font-weight: 600; 
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instagram AI Caption Generator</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #fafafa;
+      margin: 0;
+      padding: 0;
+      color: #222;
+    }
 
-        /* Option Boxes (The key feature) */
-        .result-title { font-size: 20px; font-weight: 600; margin-top: 30px; color: #262626; }
-        .option-box { 
-            border: 1px solid #dbdbdb; 
-            border-radius: 8px; 
-            margin-top: 20px; 
-            padding: 20px; 
-            background-color: #f9f9f9; 
-        }
-        .option-header { 
-            font-weight: 700; 
-            color: #0095f6; /* Blue Header */
-            margin-bottom: 15px; 
-            font-size: 18px;
-        }
-        .output-content {
-            white-space: pre-wrap; 
-            word-wrap: break-word; 
-            font-size: 15px; 
-            line-height: 1.6;
-        }
-        
-        /* Copy Button */
-        .copy-btn { 
-            background-color: #28a745; 
-            width: auto; 
-            padding: 8px 15px; 
-            margin-top: 10px;
-            float: right;
-        }
-        .copy-btn:hover { background-color: #218838; }
-        .clearfix::after { content: ""; clear: both; display: table; }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
 
-        /* Error */
-        .error-message { color: #ed4956; font-weight: bold; margin-top: 20px; padding: 15px; background-color: #ffeaea; border: 1px solid #ed4956; border-radius: 5px; text-align: center; }
+    h1 {
+      text-align: center;
+      color: #405de6;
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
 
-        /* Mobile Optimization */
-        @media (max-width: 768px) {
-            .container { margin: 0; padding: 20px 15px; border: none; border-radius: 0; }
-        }
-    </style>
+    p {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background: #405de6;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #3046c5;
+    }
+
+    .result {
+      margin-top: 25px;
+      display: grid;
+      gap: 15px;
+    }
+
+    .caption-box {
+      background: #f7f8ff;
+      border: 1px solid #dfe3ff;
+      border-radius: 10px;
+      padding: 15px;
+      position: relative;
+    }
+
+    .caption-box pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #111;
+      font-size: 15px;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #10b981;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .error {
+      background: #ffe5e5;
+      color: #d00;
+      border: 1px solid #f99;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 0;
+        border-radius: 0;
+        min-height: 100vh;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1><span>Instagram Best AI</span> Trending Caption & Tags</h1>
-        
-        <form method="POST" action="/">
-            <label for="topic">What is the topic of your post?</label>
-            <input type="text" id="topic" name="topic" value="{{ current_topic or '' }}" 
-                   placeholder="e.g., PUBG Mobile Victory, Travel to Manali, New Gym Day" required>
-            
-            <button type="submit">✨ Generate 2 Best Content Options</button>
-        </form>
+  <div class="container">
+    <h1>📸 Instagram AI Caption Generator</h1>
+    <p>Get 10 viral captions with trending hashtags using Gemini AI</p>
 
-        {% if error_message %}
-            <div class="error-message">{{ error_message }}</div>
-        {% endif %}
+    <input id="topic" type="text" placeholder="Enter your topic e.g. Travel to Goa" />
+    <button id="generateBtn">✨ Generate Captions</button>
 
-        {% if option1 and option2 %}
-        <h2 class="result-title">🔥 AI Generated Content Options</h2>
-            
-            <div class="option-box">
-                <div class="clearfix">
-                    <div class="option-header">Option 1: Viral Caption Style</div>
-                    <button class="copy-btn" onclick="copyContent('option1')">Copy & Use</button>
-                </div>
-                <div class="output-content" id="option1">
-                    {{ option1 }}
-                </div>
-            </div>
-            
-            <div class="option-box">
-                <div class="clearfix">
-                    <div class="option-header">Option 2: Punchy & Short Style</div>
-                    <button class="copy-btn" onclick="copyContent('option2')">Copy & Use</button>
-                </div>
-                <div class="output-content" id="option2">
-                    {{ option2 }}
-                </div>
-            </div>
-        {% endif %}
-        
-    </div>
-    
-    <script>
-        function copyContent(id) {
-            const output = document.getElementById(id).innerText;
-            // Clean the output for copy-paste (removes extra empty lines)
-            const cleanedOutput = output.trim().replace(/\n\s*\n/g, '\n'); 
+    <div id="errorBox" class="error" style="display: none;"></div>
+    <div id="resultBox" class="result"></div>
+  </div>
 
-            navigator.clipboard.writeText(cleanedOutput).then(() => {
-                alert(`Content from ${id.toUpperCase()} copied! Go viral on Instagram! 🚀`);
-            }).catch(err => {
-                console.error('Copy failed:', err);
-                alert('Copy failed. Please copy manually.');
-            });
+  <script>
+    const btn = document.getElementById("generateBtn");
+    const topicInput = document.getElementById("topic");
+    const resultBox = document.getElementById("resultBox");
+    const errorBox = document.getElementById("errorBox");
+
+    btn.onclick = async () => {
+      const topic = topicInput.value.trim();
+      if (!topic) {
+        alert("Please enter a topic first!");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "⏳ Generating...";
+      resultBox.innerHTML = "";
+      errorBox.style.display = "none";
+
+      try {
+        const res = await fetch("/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorBox.style.display = "block";
+          errorBox.textContent = data.error || "Something went wrong!";
+          btn.disabled = false;
+          btn.textContent = "✨ Generate Captions";
+          return;
         }
-    </script>
+
+        const captions = data.captions;
+        captions.forEach((c, i) => {
+          const box = document.createElement("div");
+          box.className = "caption-box";
+
+          const pre = document.createElement("pre");
+          pre.textContent = c;
+
+          const copy = document.createElement("button");
+          copy.className = "copy-btn";
+          copy.textContent = "Copy";
+          copy.onclick = () => {
+            navigator.clipboard.writeText(c);
+            copy.textContent = "Copied!";
+            setTimeout(() => (copy.textContent = "Copy"), 1500);
+          };
+
+          box.appendChild(pre);
+          box.appendChild(copy);
+          resultBox.appendChild(box);
+        });
+      } catch (err) {
+        errorBox.style.display = "block";
+        errorBox.textContent = "⚠️ Server error. Please try again.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✨ Generate Captions";
+      }
+    };
+  </script>
 </body>
 </html>
