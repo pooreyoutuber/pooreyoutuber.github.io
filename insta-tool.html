@@ -9,58 +9,71 @@
       font-family: Arial, sans-serif;
       max-width: 600px;
       margin: 40px auto;
-      padding: 0 20px;
-      background: #f7f7f7;
+      padding: 20px;
+      background-color: #fafafa;
+      color: #333;
     }
     h1 {
       text-align: center;
-      color: #333;
+      margin-bottom: 30px;
     }
     label {
+      font-weight: bold;
       display: block;
       margin-bottom: 8px;
-      font-weight: bold;
     }
     input[type="text"] {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       font-size: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      margin-bottom: 20px;
     }
     button {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
       background-color: #3897f0;
       border: none;
+      border-radius: 6px;
       color: white;
-      padding: 12px 20px;
-      font-size: 1rem;
-      border-radius: 5px;
       cursor: pointer;
-      width: 100%;
+      transition: background-color 0.3s ease;
     }
     button:hover {
-      background-color: #2d78d9;
+      background-color: #2a6ad1;
     }
     ul {
-      margin-top: 20px;
+      margin-top: 25px;
       padding-left: 20px;
     }
     li {
       background: white;
-      margin-bottom: 8px;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgb(0 0 0 / 0.1);
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 1rem;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
+
   <h1>Instagram Caption Generator</h1>
-  <label for="titleInput">Enter Video/Photo Title</label>
+
+  <label for="titleInput">Enter Video/Photo Title:</label>
   <input type="text" id="titleInput" placeholder="Type your title here..." />
 
   <button id="generateBtn">Generate Captions</button>
+
+  <div class="error" id="errorMsg"></div>
 
   <ul id="captionsList"></ul>
 
@@ -68,37 +81,45 @@
     const generateBtn = document.getElementById('generateBtn');
     const titleInput = document.getElementById('titleInput');
     const captionsList = document.getElementById('captionsList');
+    const errorMsg = document.getElementById('errorMsg');
 
     generateBtn.addEventListener('click', async () => {
+      errorMsg.textContent = '';
+      captionsList.innerHTML = '';
+
       const title = titleInput.value.trim();
       if (!title) {
-        alert('Please enter a title');
+        errorMsg.textContent = 'Please enter a title!';
         return;
       }
 
       captionsList.innerHTML = '<li>Loading captions...</li>';
 
       try {
-        const response = await fetch('http://localhost:3000/generate-captions', {
+        const response = await fetch('https://pooreyoutuber-github-io.onrender.com/generate-captions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({ title }),
         });
 
         const data = await response.json();
 
-        if (response.ok && data.captions) {
-          captionsList.innerHTML = '';
-          data.captions.forEach(caption => {
-            const li = document.createElement('li');
-            li.textContent = caption;
-            captionsList.appendChild(li);
-          });
-        } else {
-          captionsList.innerHTML = '<li>Error generating captions</li>';
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to generate captions');
         }
+
+        captionsList.innerHTML = '';
+        data.captions.forEach(caption => {
+          const li = document.createElement('li');
+          li.textContent = caption;
+          captionsList.appendChild(li);
+        });
+
       } catch (error) {
-        captionsList.innerHTML = `<li>Network error: ${error.message}</li>`;
+        captionsList.innerHTML = '';
+        errorMsg.textContent = 'Error: ' + error.message;
       }
     });
   </script>
