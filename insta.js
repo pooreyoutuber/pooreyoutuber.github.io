@@ -2,25 +2,23 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-
 const PORT = process.env.PORT || 3000;
 
-// Demo captions generator function (replace with real AI API call)
+app.use(cors());            // CORS enable karo
+app.use(express.json());    // JSON body parsing
+
+// Dummy captions generator function (yahan Gemini AI call kar sakte ho apni API se)
 function generateCaptions(title) {
-  // Normally you will call Gemini or OpenAI here with the title
-  // For demo, we return 10 dummy captions:
-  return Array.from({ length: 10 }, (_, i) => `${title} - Amazing Caption #${i + 1}`);
+  return Array.from({ length: 10 }, (_, i) => `${title} - Best Caption #${i + 1}`);
 }
 
 app.post('/generate-captions', (req, res) => {
   const { title } = req.body;
-  if (!title || title.trim().length === 0) {
+
+  if (!title || title.trim() === '') {
     return res.status(400).json({ error: 'Title is required' });
   }
 
-  // Generate captions
   const captions = generateCaptions(title.trim());
 
   res.json({ captions });
