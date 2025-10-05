@@ -3,8 +3,8 @@ const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -16,25 +16,20 @@ app.post('/generate-captions', async (req, res) => {
   }
 
   try {
-    // Prompt for Gemini
-    const prompt = `Generate 10 short, engaging Instagram captions (under 100 characters) for a video titled: "${title}". Style: ${style || 'trendy & catchy'}. Return the result as a JSON array.`;
+    const prompt = `Generate 10 short, catchy Instagram captions (under 100 characters) for a video titled: "${title}". Style: ${style || 'trendy & catchy'}. Return the result as a JSON array.`;
 
-    // Call Gemini Pro API (Generative Language API)
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
       {
         contents: [{ parts: [{ text: prompt }] }]
       },
       {
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       }
     );
 
     const text = response.data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // Try to parse text into an array
     let captions = [];
     try {
       captions = JSON.parse(text);
@@ -48,10 +43,15 @@ app.post('/generate-captions', async (req, res) => {
 
     res.json({ captions });
   } catch (error) {
-    console.error('Error generating captions:', error.message);
-    res.status(500).json({ error: 'Something went wrong.' });
+    console.error('Error:', error.message);
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
+// OLD tool's routes here (if any)
+
+// Server listen
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
