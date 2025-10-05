@@ -9,11 +9,9 @@ def load_api_key_from_secret_file():
     secret_path = os.path.join("/etc/secrets", SECRET_FILE_NAME)
     
     try:
-        # Render Secret File से Key को लोड करें
         with open(secret_path, 'r') as f:
             return f.read().strip() 
     except Exception:
-        # अगर Secret File नहीं मिली, तो Environment Variable से Key लेने की कोशिश करें (Local Testing के लिए)
         return os.getenv("GEMINI_API_KEY")
 
 # --- Flask App Configuration ---
@@ -30,68 +28,77 @@ else:
 
 
 def generate_instagram_content(topic):
-    """AI का उपयोग करके आकर्षक इंग्लिश कैप्शन और हैशटैग जेनरेट करता है।"""
+    """AI से दो अलग-अलग आकर्षक इंग्लिश कैप्शन और हैशटैग सेट जेनरेट करवाता है।"""
     
     if not client:
-        # अगर Key मिसिंग है
-        return "Sorry! The AI service key is missing. Please contact the administrator. (Error: KEY_MISSING)"
+        return None, "Sorry! The AI service key is missing. Please contact the administrator. (Error: KEY_MISSING)"
 
-    # SIMPLIFIED & EFFECTIVE ENGLISH PROMPT
+    # NEW PROMPT: Generate two distinct options
     prompt = f"""
-    You are an expert Instagram content strategist focused on generating viral English posts for high views and engagement.
+    You are an expert Instagram content strategist. Your task is to generate TWO (2) distinct, high-performing English content options for the topic: '{topic}'.
     
-    - Topic: {topic}
+    Both options must be optimized for views and engagement, but must have a different style/approach.
     
-    Analyze the topic and generate highly optimized content. Automatically choose the most fitting tone (funny, inspirational, motivational, etc.) for the topic.
+    Strict Output Format:
     
-    Provide the output in the following structure, which must be strictly followed:
+    --- OPTION 1 ---
+    CAPTION: Write an engaging 4-5 sentence caption with a Call-to-Action.
+    HASHTAGS: Provide 10 trending, niche-relevant hashtags, comma-separated.
     
-    1. CAPTION: Write a punchy, engaging English caption (4-5 sentences) with a strong hook, 3 relevant emojis, and a clear Call-to-Action (CTA).
+    --- OPTION 2 ---
+    CAPTION: Write a punchy, short 2-3 sentence caption with a different Call-to-Action than Option 1.
+    HASHTAGS: Provide 10 different trending hashtags, comma-separated.
     
-    2. HASHTAGS: Provide exactly 10 high-performing, niche-relevant English hashtags separated by commas (e.g., #pubgmobile #mobilegaming #esports). Ensure a mix of small, medium, and large hashtags for maximum reach.
-    
-    Present the output clearly, with a blank line separating the CAPTION and HASHTAGS sections. Do not use any labels like 'CAPTION:' or 'HASHTAGS:'. The user should be able to copy the content directly.
+    Do NOT include any other text or labels (like 'CAPTION:' or 'HASHTAGS:') in the output. The options must be clearly separated by '--- OPTION 1 ---' and '--- OPTION 2 ---'.
     """
     
     try:
-        # AI मॉडल से कंटेंट जेनरेट करें
         response = client.models.generate_content(
             model="gemini-2.5-flash", 
             contents=prompt
         )
-        return response.text
+        
+        # आउटपुट को दो ऑप्शंस में स्प्लिट करें
+        raw_output = response.text
+        if "--- OPTION 2 ---" in raw_output:
+            option1_data = raw_output.split("--- OPTION 2 ---")[0].replace("--- OPTION 1 ---", "").strip()
+            option2_data = raw_output.split("--- OPTION 2 ---")[1].strip()
+            return option1_data, option2_data
+        
+        # अगर आउटपुट फॉर्मेट सही नहीं आया
+        return None, "Error: Could not parse AI output into two options. Try a different topic."
         
     except Exception as e:
-        # Quota Exceeded (फ्री टियर सीमा) एरर को संभालें
         if "Quota exceeded" in str(e):
-            return "⚠️ Quota limit reached. The service will reset in 24 hours. Please try again tomorrow."
+            return None, "⚠️ Quota limit reached. Please try again tomorrow. (Service reset in 24h)"
         else:
-            return f"Sorry, an unexpected error occurred. Error: {e}"
+            return None, f"Sorry, an unexpected error occurred. Error: {e}"
 
 
 # --- वेब रूट और लॉजिक ---
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """वेबसाइट का मुख्य पेज जो GET और POST अनुरोधों को संभालता है।"""
-    ai_caption = None
+    option1 = None
+    option2 = None
+    error_message = None
     topic = ""
 
     if request.method == 'POST':
-        # फॉर्म डेटा प्राप्त करें
         topic = request.form.get('topic')
         
         if topic:
             # AI फंक्शन को कॉल करें
-            ai_caption = generate_instagram_content(topic)
-
+            option1, option2 = generate_instagram_content(topic)
+            if option1 is None and option2:
+                error_message = option2 # अगर एरर आई तो option2 में एरर मैसेज होगा
+                option2 = None
+            
     # index.html को रेंडर करें
     return render_template('index.html', 
-                           ai_caption=ai_caption, 
+                           option1=option1, 
+                           option2=option2, 
+                           error_message=error_message,
                            current_topic=topic)
 
-# --- ऐप को शुरू करें (Render डिप्लॉयमेंट के लिए ज़रूरी) ---
-if __name__ == '__main__':
-    # Render, 'PORT' environment variable का उपयोग करेगा
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
-    
+# ... (बाकी app.py कोड वही रहेगा) ...
