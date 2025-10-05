@@ -1,274 +1,131 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Player View Booster (Single Page)</title>
+    <title>Instagram Best AI Trending Caption and Tags</title>
     <style>
-        /* --- General & Responsive Styles --- */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #e6f3ff; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: #333;
-            padding: 20px 10px;
-            box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 50, 100, 0.1);
-            width: 100%;
-            max-width: 900px; /* Wider container for players */
-            text-align: center;
+        /* Base Reset */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #fafafa; color: #262626; }
+        
+        /* Container and Structure */
+        .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border: 1px solid #dbdbdb; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        /* Typography */
+        h1 { color: #262626; text-align: center; margin-bottom: 30px; font-size: 24px; font-weight: 600; }
+        h1 span { color: #405de6; } /* Instagram Blue Highlight */
+        h2 { font-size: 18px; margin-top: 30px; margin-bottom: 15px; color: #000; font-weight: 600; }
+        
+        /* Form Elements */
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #262626; }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #dbdbdb; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+            font-size: 14px; 
             margin-bottom: 20px;
-            box-sizing: border-box;
-            border: 1px solid #cceeff;
-            transition: background-color 0.3s, border-color 0.3s;
+            background-color: #fafafa;
         }
-        h2 {
-            color: #007bff;
-            margin-bottom: 15px;
-            font-size: 1.8em;
-            font-weight: 700;
-            transition: color 0.3s;
+        
+        /* Buttons */
+        button { 
+            background-color: #0095f6; /* Instagram Blue */
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            width: 100%; 
+            font-weight: 600; 
+            transition: background-color 0.2s; 
         }
-        /* --- Form & Input Elements --- */
-        input[type="text"], input[type="number"] {
-            width: 70%;
-            padding: 14px;
-            margin-right: 10px;
-            border: 2px solid #e0f0ff;
-            background-color: #f9f9f9;
-            color: #333;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 1em;
-            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        button:hover { background-color: #007bb6; }
+        
+        .copy-btn { 
+            background-color: #28a745; /* Success Green */
+            margin-top: 15px; 
+            margin-bottom: 0; 
         }
-        input#views {
-            width: 15%; /* Smaller width for view count */
+        .copy-btn:hover { background-color: #218838; }
+        
+        /* Output and Error Display */
+        .output-box { 
+            background: #f9f9f9; 
+            border: 1px solid #efefef; 
+            padding: 20px; 
+            margin-top: 20px; 
+            border-radius: 8px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            font-size: 14px; 
+            color: #262626; 
+            line-height: 1.5;
         }
-        button#submitBtn {
-            width: 12%; 
-            min-width: 80px;
-            background-color: #ff5722; 
-            color: white;
-            padding: 14px 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-        /* --- Player Grid --- */
-        #playerGrid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
-            gap: 15px;
-            margin-top: 30px;
-            text-align: left;
-        }
-        .player-card {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #f0f0f0;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: box-shadow 0.3s, background-color 0.3s;
-        }
-        .player-card iframe {
-            width: 100%;
-            height: 180px; /* Fixed height for video player */
-            border: none;
-        }
-        .player-card p {
-            padding: 10px;
-            margin: 0;
-            font-size: 0.9em;
-            color: #555;
-        }
-        /* --- Dark Mode Styles --- */
-        .dark-mode {
-            background-color: #121212; 
-            color: #e0e0e0;
-        }
-        .dark-mode .container {
-            background-color: #1f1f1f;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            border-color: #333;
-        }
-        .dark-mode h2 {
-            color: #8ab4f8; 
-        }
-        .dark-mode input[type="text"], .dark-mode input[type="number"] {
-            border-color: #444;
-            background-color: #2c2c2c;
-            color: #e0e0e0;
-        }
-        .dark-mode .player-card {
-            background-color: #2c2c2c;
-            border-color: #333;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .dark-mode .player-card p {
-            color: #bdbdbd;
-        }
-        /* --- Utilities --- */
-        #darkModeToggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 12px;
+        .error-message { 
+            color: #ed4956; /* Instagram Error Red */
+            font-weight: bold; 
+            margin-top: 20px; 
+            padding: 15px;
+            background-color: #ffeaea;
+            border: 1px solid #ed4956;
             border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s;
+            text-align: center; 
         }
-        .dark-mode #darkModeToggle {
-            background: #8ab4f8;
-            color: #1f1f1f;
-        }
-        .guideline-box {
-            background-color: #f0f8ff; color: #0056b3; padding: 15px; border-radius: 10px; margin-top: 30px; border-left: 5px solid #007bff; text-align: left; font-size: 0.9em;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-        }
-        .dark-mode .guideline-box {
-            background-color: #2c2c2c; color: #bdbdbd; border-left-color: #8ab4f8;
-        }
-        /* Mobile adjustment for inputs */
-        @media (max-width: 600px) {
-            .container { padding: 20px; }
-            input[type="text"] { width: 60%; margin-right: 5px; }
-            input#views { width: 25%; }
-            button#submitBtn { width: 15%; min-width: 60px; padding: 10px 5px; font-size: 0.9em; }
-            #darkModeToggle { top: 10px; right: 10px; }
+
+        /* Mobile Optimization */
+        @media (max-width: 650px) {
+            .container {
+                margin: 0;
+                padding: 20px 15px;
+                border: none;
+                border-radius: 0;
+            }
+            h1 { font-size: 22px; }
         }
     </style>
 </head>
 <body>
-    <button id="darkModeToggle" onclick="toggleDarkMode()">Switch to Dark Mode</button>
-    
     <div class="container">
-        <h2>🚀 Multi-Player View Booster</h2>
-        <p style="color: #666; margin-bottom: 25px;">Enter a link to load multiple players on this page. (Works best with YouTube.)</p>
+        <h1><span>Instagram Best AI</span> Trending Caption & Tags</h1>
         
-        <form id="boosterForm" style="display: flex; justify-content: center; align-items: center;">
-            <input type="text" id="url" placeholder="Paste Video/Post Link Here" required autocomplete="off">
-            <input type="number" id="views" value="10" min="1" max="20" required autocomplete="off">
-            <button type="submit" id="submitBtn">Load</button>
+        <form method="POST" action="/">
+            <label for="topic">What is the topic of your post? (e.g., My PUBG Mobile Victory, Travel to Manali)</label>
+            <input type="text" id="topic" name="topic" value="{{ current_topic or '' }}" 
+                   placeholder="Enter the main subject of your photo/video" required>
+            
+            <button type="submit">✨ Generate Viral Content</button>
         </form>
+
+        {% if ai_caption %}
+            {% if "Sorry" in ai_caption or "ERROR" in ai_caption or "FATAL" in ai_caption or "Quota" in ai_caption %}
+                <div class="error-message">{{ ai_caption }}</div>
+            {% else %}
+                <h2>🔥 AI Generated Result (Copy & Paste Ready)</h2>
+                <div class="output-box" id="aiOutput">
+                    {{ ai_caption }}
+                </div>
+                <button class="copy-btn" onclick="copyContent()">Copy Content</button>
+            {% endif %}
+        {% endif %}
         
-        <div id="playerGrid">
-            </div>
-
-        <div class="guideline-box">
-            <strong>📊 Important Note on Results:</strong><br>
-            Players are now loading. Keep this page open for a few minutes. Please allow up to **24 hours** for the platform (Facebook/Instagram/YouTube) to fully process and display the final, stabilized count on your public video or post.
-        </div>
     </div>
-
+    
     <script>
-        const form = document.getElementById('boosterForm');
-        const playerGrid = document.getElementById('playerGrid');
-        const darkModeToggleBtn = document.getElementById('darkModeToggle');
-        const MAX_PLAYERS = 20;
+        function copyContent() {
+            const output = document.getElementById('aiOutput').innerText;
+            // Clean the output for copy-paste (removes extra empty lines)
+            const cleanedOutput = output.trim().replace(/\n\s*\n/g, '\n'); 
 
-        // --- Dark Mode Logic ---
-        function toggleDarkMode() {
-            const isDarkMode = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkModeEnabled', isDarkMode);
-            updateDarkModeButton(isDarkMode);
+            navigator.clipboard.writeText(cleanedOutput).then(() => {
+                alert('Content copied! Go viral on Instagram! 🚀');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                alert('Copy failed. Please copy manually.');
+            });
         }
-
-        function loadDarkModePreference() {
-            const savedPreference = localStorage.getItem('darkModeEnabled');
-            const isDarkMode = savedPreference === 'true';
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-            }
-            updateDarkModeButton(isDarkMode);
-        }
-
-        function updateDarkModeButton(isDarkMode) {
-            darkModeToggleBtn.textContent = isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-        }
-        document.addEventListener('DOMContentLoaded', loadDarkModePreference);
-
-        // --- Main Logic ---
-
-        function getEmbedUrl(url) {
-            // 1. YouTube Embed URL Logic
-            const youtubeMatch = url.match(/(?:youtu\.be\/|v=|embed\/)([^&?#]+)/);
-            if (youtubeMatch) {
-                // Autoplay is added to maximize view counting potential
-                return `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&mute=1`; 
-            }
-
-            // 2. Facebook Embed URL Logic
-            // Facebook requires its own embed script, but a direct iframe is simpler for a multi-viewer.
-            // Note: Facebook embedding often requires whitelisting and SDK, but we try a direct link for clicks/views.
-            // A simple link is used as a fallback, which might load in a frame, or just be a static image/text.
-            if (url.includes('facebook.com')) {
-                return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}&width=250&show_text=false`;
-            }
-
-            // 3. Instagram Embed URL Logic
-            // Instagram usually blocks direct embedding in iframes due to X-Frame-Options. 
-            // We use the original URL as a fallback, which may not work for a viewer.
-            if (url.includes('instagram.com')) {
-                 return url; 
-            }
-            
-            // Fallback for any other valid URL
-            return url;
-        }
-
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            playerGrid.innerHTML = ''; // Clear previous players
-
-            const targetUrl = document.getElementById('url').value.trim();
-            let playersCount = parseInt(document.getElementById('views').value);
-            
-            if (!targetUrl || playersCount < 1) {
-                alert('Please enter a valid link and number of players.');
-                return;
-            }
-
-            playersCount = Math.min(playersCount, MAX_PLAYERS); 
-
-            const embedUrl = getEmbedUrl(targetUrl);
-            
-            for (let i = 1; i <= playersCount; i++) {
-                const card = document.createElement('div');
-                card.className = 'player-card';
-                
-                const iframe = document.createElement('iframe');
-                iframe.src = embedUrl;
-                iframe.allow = 'autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
-                iframe.sandbox = 'allow-scripts allow-same-origin allow-popups'; // Reduced security for embed
-                
-                const title = document.createElement('p');
-                title.textContent = `▶️ Player ${i} Loaded`;
-
-                card.appendChild(iframe);
-                card.appendChild(title);
-                playerGrid.appendChild(card);
-            }
-            
-            alert(`🎉 Successfully loaded ${playersCount} players. Keep the page open for results.`);
-        });
     </script>
 </body>
 </html>
