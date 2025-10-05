@@ -1,266 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Instagram Post Ready Caption Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram AI Caption Generator | Trending Reels Captions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* [STYLES REMAIN SAME FOR PROFESSIONAL LOOK] */
-        body { 
-            font-family: 'Inter', Arial, sans-serif; 
-            margin: 0; 
-            padding: 20px;
-            background: #f0f2f5; 
+        /* CSS for a modern, Instagram-inspired dark theme and responsiveness */
+        :root {
+            --insta-pink: #E1306C;
+            --insta-purple: #C13584;
+            --insta-orange: #F56040;
+            --bg-dark: #121212;
+            --card-dark: #1E1E1E;
+            --text-light: #FFFFFF;
+            --input-bg: #333333;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
         }
+
         .container {
             width: 100%;
-            max-width: 600px; /* Instagram-focused container */
+            max-width: 700px;
+            background-color: var(--card-dark);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 30px;
         }
-        h1 { 
-            text-align: center; 
-            color: #E1306C; /* Instagram Pink */
-            font-size: 28px;
-            margin-bottom: 30px;
-            padding-bottom: 5px;
-        }
-        .input-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        input[type="text"] { 
-            flex-grow: 1; 
-            padding: 12px; 
-            border-radius: 8px; 
-            border: 1px solid #ccc; 
-            font-size: 16px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-        }
-        button#generateBtn { 
-            padding: 12px 20px; 
-            background: linear-gradient(45deg, #f09433 0%,#e6680a 25%,#c63d42 50%,#8744a7 75%,#5851db 100%); 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold;
-            transition: opacity 0.3s;
-        }
-        button#generateBtn:hover:not(:disabled) { 
-            opacity: 0.9;
-        }
-        button#generateBtn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        .error { color: #c0392b; text-align: center; margin-top: 10px; font-weight: bold; }
-        h2.generated-heading {
-            font-size: 20px;
-            color: #333;
-            margin-top: 20px;
-            margin-bottom: 15px;
+
+        header {
             text-align: center;
-        }
-        .caption-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            border: 1px solid #eee;
-        }
-        .caption-text {
-            font-size: 15px;
-            color: #333;
-            white-space: pre-wrap; 
-            word-wrap: break-word;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--input-bg);
             padding-bottom: 15px;
         }
-        .copy-btn {
-            background: #5851db;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
+
+        header h1 {
+            font-size: 2em;
+            background: linear-gradient(45deg, var(--insta-pink), var(--insta-orange), var(--insta-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
             font-weight: bold;
-            transition: background 0.3s;
-            text-transform: uppercase;
+            color: #AAAAAA;
         }
-        .copy-btn:hover {
-            background: #4740b8;
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-light);
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border 0.3s;
         }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border-left-color: #E1306C;
-            animation: spin 1s ease infinite;
-            margin: 20px auto;
+
+        input[type="text"]:focus {
+            outline: none;
+            border: 2px solid var(--insta-pink);
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--text-light);
+            background: linear-gradient(to right, var(--insta-pink), var(--insta-purple));
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.1s;
+        }
+
+        button:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+        
+        button:disabled {
+            background: #555555;
+            cursor: not-allowed;
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.99);
+        }
+
+        .results-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--input-bg);
+        }
+
+        .caption-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .caption-item {
+            background-color: var(--input-bg);
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            position: relative;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            background-color: var(--insta-orange);
+            color: var(--text-light);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-top: 10px;
+            display: block;
+            float: right;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.2em;
+            color: var(--insta-pink);
+            display: none;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📸 Instagram Viral Caption Generator</h1>
-        
-        <div class="input-container">
-            <input id="titleInput" type="text" value="PUBG mobile" placeholder="वीडियो/फोटो का टॉपिक डालें (जैसे: Chicken Dinner, New Reel)" />
-            <button id="generateBtn">SEO कंटेंट जनरेट करें</button>
+
+<div class="container">
+    <header>
+        <h1>🔥 AI Reels Caption Generator</h1>
+        <p>Get trending, high-reach, and viral captions in one click!</p>
+    </header>
+
+    <div class="form-section">
+        <div class="form-group">
+            <label for="reel-title">Reel Topic/Title:</label>
+            <input type="text" id="reel-title" placeholder="e.g., Best Travel Spots, Quick Recipe, My Daily Routine">
         </div>
-        
-        <div class="error" id="errorMsg"></div>
-        
-        <div id="contentContainer" style="display: none;">
-            <h2 class="generated-heading">Generated Captions</h2>
-            <div id="captionsList">
-                <!-- Generated caption cards will be injected here -->
-            </div>
-        </div>
+
+        <button id="generate-btn" onclick="generateCaptions()">Generate Top 10 Captions</button>
     </div>
 
-    <script>
-        // API Endpoint: Render पर डिप्लॉय किया गया आपका Node.js सर्वर
-        const API_ENDPOINT = 'https://pooreyoutuber-github-io.onrender.com/generate-captions';
+    <div class="loading" id="loading-message">
+        <p>✨ AI is crafting the best captions for you... Please wait.</p>
+    </div>
+
+    <div class="results-container" id="results-area" style="display: none;">
+        <h2>📝 Generated Captions</h2>
+        <ul class="caption-list" id="caption-list">
+            </ul>
+    </div>
+</div>
+
+<script>
+    // ⚠️ IMPORTANT: Replace this with the actual URL of your *Render Web Service* (Backend)
+    // Example: https://my-caption-api.onrender.com/api/generate
+    const RENDER_BACKEND_URL = 'YOUR_RENDER_BACKEND_URL/api/generate'; 
+
+    async function generateCaptions() {
+        const reelTitle = document.getElementById('reel-title').value.trim();
+        const generateBtn = document.getElementById('generate-btn');
+        const loadingMessage = document.getElementById('loading-message');
+        const resultsArea = document.getElementById('results-area');
+        const captionList = document.getElementById('caption-list');
+
+        if (reelTitle === "") {
+            alert("Please enter the topic or title of your Reel.");
+            return;
+        }
+
+        // UI State: Disable button, show loading
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Generating...';
+        loadingMessage.style.display = 'block';
+        resultsArea.style.display = 'none';
+        captionList.innerHTML = '';
+
+        try {
+            const response = await fetch(RENDER_BACKEND_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ reelTitle: reelTitle }),
+            });
+
+            if (!response.ok) {
+                 // Try to read error message from the server response
+                 const errorText = await response.text();
+                 throw new Error(`Server error (${response.status}): ${errorText.substring(0, 100)}...`);
+            }
+
+            const data = await response.json();
+            let captions = data.captions; 
+
+            if (!captions || captions.length === 0) {
+                 throw new Error("AI did not return any captions. Try a different title.");
+            }
+            
+            // Render the results
+            captionList.innerHTML = '';
+            captions.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'caption-item';
+                
+                const formattedCaption = `${index + 1}. ${item.caption.trim()}`;
+                
+                const captionText = document.createElement('div');
+                captionText.innerText = formattedCaption;
+                captionText.style.marginBottom = '10px';
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'Copy';
+                copyBtn.onclick = (e) => {
+                    e.preventDefault();
+                    copyToClipboard(formattedCaption, copyBtn);
+                };
+                
+                listItem.appendChild(captionText);
+                listItem.appendChild(copyBtn);
+                captionList.appendChild(listItem);
+            });
+
+            resultsArea.style.display = 'block';
+
+        } catch (error) {
+            console.error("API Error:", error);
+            alert(`Error: ${error.message}. Please check console for details.`);
+        } finally {
+            // UI State: Reset
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate Top 10 Captions';
+            loadingMessage.style.display = 'none';
+        }
+    }
+
+    /**
+     * Copies the provided text to the user's clipboard and provides visual feedback.
+     */
+    function copyToClipboard(text, button) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            }).catch(err => {
+                fallbackCopy(text, button);
+            });
+        } else {
+            fallbackCopy(text, button);
+        }
+    }
+
+    function fallbackCopy(text, button) {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
         
-        const generateBtn = document.getElementById('generateBtn');
-        const titleInput = document.getElementById('titleInput');
-        const errorMsg = document.getElementById('errorMsg');
-        const contentContainer = document.getElementById('contentContainer');
-        const captionsList = document.getElementById('captionsList');
+        button.textContent = '✅ Copied!';
+        setTimeout(() => {
+            button.textContent = 'Copy';
+        }, 2000);
+    }
+</script>
 
-        // एक्सपोनेंशियल बैकऑफ़ के साथ API कॉल करने का फंक्शन
-        async function fetchWithRetry(url, options, retries = 3) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    return response;
-                } catch (error) {
-                    console.error(`Attempt ${i + 1} failed. Retrying...`);
-                    if (i < retries - 1) {
-                        const delay = Math.pow(2, i) * 1000;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    } else {
-                        throw error;
-                    }
-                }
-            }
-        }
-
-        // AI से आने वाले फालतू टेक्स्ट को हटाने का अंतिम सफ़ाई फंक्शन
-        function cleanCaptionText(text) {
-            // AI से आ सकने वाले सभी फालतू शब्द या नंबरिंग हटाएँ
-            const cleaned = text
-                .replace(/^\s*[\d\.]+\s*/, '') // Start numbering (1., 2.)
-                .replace(/^(option|caption)\s*\d+\s*:?\s*/i, '') // "Option 1:", "Caption 2:"
-                .replace(/trending caption\s*\d+\s*/gi, '') // "trending caption 1"
-                .trim();
-            return cleaned;
-        }
-
-
-        generateBtn.addEventListener('click', async () => {
-            errorMsg.textContent = '';
-            captionsList.innerHTML = '';
-            contentContainer.style.display = 'none';
-            generateBtn.disabled = true;
-
-            const title = titleInput.value.trim();
-            if (!title) {
-                errorMsg.textContent = 'कृपया वीडियो/फोटो का टॉपिक डालें।';
-                generateBtn.disabled = false;
-                return;
-            }
-
-            // लोडिंग स्थिति दिखाएँ
-            captionsList.innerHTML = `<div class="spinner"></div><p style="text-align:center;">आपके टॉपिक "${title}" के लिए वायरल कंटेंट जनरेट हो रहा है...</p>`;
-            contentContainer.style.display = 'block';
-
-            try {
-                const response = await fetchWithRetry(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title })
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.error || 'सर्वर एरर। AI बैकएंड निष्क्रिय हो सकता है।');
-                }
-
-                const data = await response.json();
-                captionsList.innerHTML = '';
-
-                if (data.captions && data.captions.length > 0) {
-                    let validCaptionFound = false;
-                    
-                    data.captions.forEach((fullCaption, index) => {
-                        // AI से आने वाले टेक्स्ट को साफ करें
-                        const finalCaption = cleanCaptionText(fullCaption);
-
-                        // जांचें कि साफ करने के बाद भी कैप्शन सार्थक है या नहीं
-                        if (finalCaption.length > title.length + 15) { 
-                            validCaptionFound = true;
-                            const card = document.createElement('div');
-                            card.className = 'caption-card';
-                            
-                            card.innerHTML = `
-                                <div class="caption-text" id="caption-${index}">${finalCaption}</div>
-                                <button class="copy-btn" data-target="caption-${index}">COPY</button>
-                            `;
-                            captionsList.appendChild(card);
-                        }
-                    });
-                    
-                    if (!validCaptionFound) {
-                        captionsList.innerHTML = '<div style="text-align:center; padding: 20px;">AI ने कोई उपयोगी, साफ़ कंटेंट जनरेट नहीं किया। कृपया टॉपिक बदलकर देखें।</div>';
-                    }
-
-                    // सभी 'Copy' बटनों के लिए इवेंट लिसनर
-                    document.querySelectorAll('.copy-btn').forEach(button => {
-                        button.addEventListener('click', (e) => {
-                            const targetId = e.target.dataset.target;
-                            const textToCopy = document.getElementById(targetId).textContent.trim(); 
-                            
-                            // कॉपी ऑपरेशन
-                            const tempInput = document.createElement('textarea');
-                            tempInput.value = textToCopy;
-                            document.body.appendChild(tempInput);
-                            tempInput.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(tempInput);
-                            
-                            // Visual feedback
-                            const originalText = e.target.textContent;
-                            e.target.textContent = 'Copied!';
-                            setTimeout(() => {
-                                e.target.textContent = originalText;
-                            }, 1500);
-                        });
-                    });
-                } else {
-                    captionsList.innerHTML = '<div style="text-align:center; padding: 20px;">AI ने कोई कंटेंट जनरेट नहीं किया। कृपया टॉपिक बदलकर देखें।</div>';
-                }
-
-            } catch (err) {
-                contentContainer.style.display = 'none';
-                errorMsg.textContent = 'एरर: ' + err.message + ' (Render सर्वर स्लीप मोड में हो सकता है। कृपया 1 मिनट बाद पुन: प्रयास करें।)';
-            } finally {
-                generateBtn.disabled = false;
-            }
-        });
-    </script>
 </body>
 </html>
-
