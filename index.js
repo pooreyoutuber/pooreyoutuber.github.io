@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 10000;
 // ===================================================================
 let GEMINI_KEY;
 try {
-    // Key path is correct for your secret file
+    // Key path: /etc/secrets/gemini (matching your file name)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Combined API is running!');
 });
 
-// ===================================================================
+// =================================================0
 // --- WEBSITE BOOSTER FUNCTIONS (Improved Logging for Green Tick) ---
 // ===================================================================
 
