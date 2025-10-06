@@ -1,3 +1,4 @@
+      <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -36,7 +37,6 @@
             margin-bottom: 20px;
             font-size: 24px;
         }
-        /* Tabs Styling */
         .tabs { 
             display: flex; 
             border-bottom: 3px solid var(--insta-purple); 
@@ -58,8 +58,6 @@
             color: white; 
             border-bottom: 3px solid var(--insta-pink);
         }
-
-        /* Form Elements */
         label { 
             display: block; 
             margin-top: 15px; 
@@ -90,8 +88,6 @@
         button[type="submit"]:hover { 
             opacity: 0.9; 
         }
-
-        /* Results & Loading */
         .loading { 
             text-align: center; 
             color: var(--primary-color); 
@@ -197,27 +193,20 @@
 
 
 <script>
-    // --------------------------------------------------------------------------------
     // --- IMPORTANT: RENDER API URL ---
-    // This MUST match your live Render service address.
-    // --------------------------------------------------------------------------------
     const BASE_API_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
     const GENERATE_ENDPOINT = `${BASE_API_URL}/api/caption-generate`;
     const EDIT_ENDPOINT = `${BASE_API_URL}/api/caption-edit`;
 
 
     // --- UTILITY FUNCTIONS ---
-
     function showCopiedMessage() {
         const msg = document.getElementById('copiedMessage');
         msg.style.display = 'block';
-        setTimeout(() => {
-            msg.style.display = 'none';
-        }, 1500);
+        setTimeout(() => { msg.style.display = 'none'; }, 1500);
     }
 
     function copyContent(text) {
-        // Copy to clipboard using the modern API
         navigator.clipboard.writeText(text).then(() => {
             showCopiedMessage();
         }).catch(err => {
@@ -228,18 +217,13 @@
 
     // --- TAB SWITCHING LOGIC ---
     function showTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.style.display = 'none';
-        });
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        document.querySelectorAll('.tab-content').forEach(tab => { tab.style.display = 'none'; });
+        document.querySelectorAll('.tab-button').forEach(btn => { btn.classList.remove('active'); });
 
         document.getElementById(tabId).style.display = 'block';
         document.querySelector(`.tab-button[onclick*='${tabId}']`).classList.add('active');
     }
-    showTab('generate'); // Default tab on load
-
+    showTab('generate');
 
     // --- 1. CAPTION GENERATION LOGIC ---
     document.getElementById('generateForm').addEventListener('submit', async function(e) {
@@ -264,7 +248,6 @@
             if (response.ok && data.captions) {
                 let html = '<h3>Generated Captions:</h3>';
                 data.captions.forEach((item, index) => {
-                    // Item.caption contains the text and hashtags, separated by a newline
                     html += `
                         <div class="caption-item" id="caption-${index}">
                             ${item.caption}
@@ -283,10 +266,8 @@
         }
     });
     
-    // Global function to be called by the generated copy buttons
     window.copyCaption = function(index) {
         const itemDiv = document.getElementById(`caption-${index}`);
-        // To copy only the text inside the div, we get textContent and remove the button's text ('Copy')
         const button = itemDiv.querySelector('.copy-btn');
         const textToCopy = itemDiv.textContent.replace(button.textContent, '').trim(); 
         copyContent(textToCopy);
@@ -334,7 +315,6 @@
         }
     });
 
-    // Global function to copy edited caption
     window.copyEdited = function() {
         const itemDiv = document.getElementById('edited-result');
         const button = itemDiv.querySelector('.copy-btn');
