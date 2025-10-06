@@ -1,4 +1,4 @@
-// index.js (FINAL COMBINED CODE for Single Render Service)
+// index.js (FINAL COMPLETE CODE for Single Render Service)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); // Gemini SDK
@@ -9,7 +9,6 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Gemini Client Initialization
-// Ensure GEMINI_API_KEY is set in Render secrets
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); 
 
 // Middleware Setup
@@ -27,12 +26,13 @@ app.get('/', (req, res) => {
 });
 
 // ===================================================================
-// --- HELPER FUNCTIONS FOR WEBSITE BOOSTER ---
+// --- HELPER FUNCTIONS FOR WEBSITE BOOSTER (START) ---
 // ===================================================================
 
 const MIN_DELAY = 3000; 
 const MAX_DELAY = 12000; 
 
+// Geolocation array for realistic traffic simulation
 const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
@@ -66,6 +66,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId) {
 
         if (response.status === 204) { 
             if (eventName === 'page_view') {
+                // Log only successful page views for cleaner logs
                 console.log(`[View ${currentViewId}] SUCCESS ✅ | URL: ${payload.events[0].params.page_location}`);
             }
             return { success: true };
@@ -83,8 +84,9 @@ async function sendData(gaId, apiSecret, payload, currentViewId) {
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + page.percent, 0);
+    // Allowing a small tolerance for floating point errors (99.9% to 100.1%)
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
-        console.error("Distribution Failed: Total percentage is not 100.");
+        console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
         return [];
     }
     
@@ -95,6 +97,7 @@ function generateViewPlan(totalViews, pages) {
         }
     });
 
+    // Shuffle the final plan
     viewPlan.sort(() => Math.random() - 0.5);
     return viewPlan;
 }
@@ -115,13 +118,14 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100.' });
     }
 
-    // Acknowledge the request immediately
+    // Acknowledge the request immediately (Response to the user's browser)
     res.json({ status: 'processing', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
 
-    // Background Processing 
+    // Background Processing (This runs after sending the response to the user)
     (async () => {
         let successfulViews = 0;
         const totalViews = viewPlan.length;
+        console.log(`Starting Website Booster for ${totalViews} views...`);
 
         for (let i = 0; i < totalViews; i++) {
             const targetUrl = viewPlan[i]; 
@@ -159,10 +163,11 @@ app.post('/boost-mp', async (req, res) => {
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     
-    // Check if API Key is configured
+    // Check if API Key is configured on Render server
     if (!process.env.GEMINI_API_KEY) {
         console.error('FATAL: GEMINI_API_KEY is not set.');
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
+        // This returns JSON, preventing the "Unexpected token <" error on the frontend
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing on the server.' });
     }
     
     const { reelTitle, style } = req.body;
@@ -193,7 +198,7 @@ app.post('/api/caption-generate', async (req, res) => {
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
-        // Return 500 error if Gemini fails (e.g., rate limit, invalid key)
+        // Return JSON error if Gemini API call fails
         res.status(500).json({ error: 'Failed to generate captions. Please check server logs or Gemini API Key status.' });
     }
 });
