@@ -1,24 +1,22 @@
 // Insta Caption Generator and Website Booster API Logic
 
 const express = require('express');
-// ⚠️ Gemini SDK को इम्पोर्ट करना ज़रूरी है
-const { GoogleGenAI } = require('@google/genai'); 
+const { GoogleGenAI } = require('@google/genai'); // Gemini SDK Import
 const cors = require('cors'); 
-// ⚠️ यदि आपके Booster Logic में node-fetch का उपयोग होता है, तो इसे अन-कमेंट करें
-// const fetch = require('node-fetch'); 
+// const fetch = require('node-fetch'); // If needed for your booster logic
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Gemini Client Initialization
-// यह Render Secrets में रखी GEMINI_API_KEY का उपयोग करेगा।
 const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
 // Middleware Setup
-// CORS configuration to allow requests from your frontend
+// Configure CORS to allow your GitHub Pages frontend (https://pooreyoutuber.github.io)
 app.use(cors({
-    origin: 'https://pooreyoutuber-github-io.onrender.com', // ⚠️ आपके frontend का URL
+    origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
+    credentials: true
 }));
 app.use(express.json());
 
@@ -33,12 +31,13 @@ app.get('/', (req, res) => {
 // ===================================================================
 
 /* ----------------------------------------------------------
-   इस सेक्शन में अपना मौजूदा Website Booster का 'app.post()' कोड पेस्ट करें। 
-   उदाहरण के लिए, यदि आपका बूस्टर एंडपॉइंट '/api/booster' है:
+   *** महत्वपूर्ण ***: 
+   कृपया अपना मौजूदा Website Booster का 'app.post()' कोड यहाँ पेस्ट करें। 
+   
+   उदाहरण (इसे अपने कोड से बदलें):
    
    app.post('/api/booster', async (req, res) => {
-       // Your existing logic using req.body and node-fetch
-       // ...
+       // Your existing logic to handle traffic boosting...
        res.status(200).json({ status: "Booster request received." });
    });
 
@@ -50,9 +49,10 @@ app.get('/', (req, res) => {
 // 2. NEW GEMINI CAPTION GENERATOR ENDPOINT
 // ===================================================================
 app.post('/api/gemini/generate', async (req, res) => {
-    // Security and setup check
+    // Check for API Key presence
     if (!process.env.GEMINI_API_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: GEMINI_API_KEY not found.' });
+        console.error('FATAL: GEMINI_API_KEY is not set in Render secrets.');
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
     
     const { reelTitle } = req.body;
@@ -61,7 +61,7 @@ app.post('/api/gemini/generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
 
-    // Gemini Prompt with JSON Schema for reliable output
+    // Gemini Prompt with forced JSON Schema
     const prompt = `Generate 10 trending, catchy, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". Each caption must be followed by 3-5 relevant, high-reach hashtags on a new line. The output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
 
     try {
@@ -69,7 +69,6 @@ app.post('/api/gemini/generate', async (req, res) => {
             model: "gemini-2.5-flash",
             contents: prompt,
             config: {
-                // Force structured JSON output
                 responseMimeType: "application/json",
                 responseSchema: {
                     type: "array",
@@ -83,7 +82,7 @@ app.post('/api/gemini/generate', async (req, res) => {
                         required: ["caption"]
                     }
                 },
-                temperature: 0.8, // For creativity
+                temperature: 0.8,
             },
         });
 
@@ -94,14 +93,14 @@ app.post('/api/gemini/generate', async (req, res) => {
     } catch (error) {
         console.error('Gemini API Error:', error.message);
         res.status(500).json({ 
-            error: 'Failed to generate captions. Please check your GEMINI_API_KEY and service logs.',
+            error: 'Failed to generate captions. Check server logs for API details.',
         });
     }
 });
 
 
 // ===================================================================
-// START THE SERVER (Ensure this is at the end of the file)
+// START THE SERVER
 // ===================================================================
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
