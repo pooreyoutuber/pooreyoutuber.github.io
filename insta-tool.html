@@ -5,28 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PooreYouTuber AI Insta Caption Tool</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #4CAF50; }
-        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
-        .tab-button { padding: 10px 15px; cursor: pointer; border: none; background: #eee; border-radius: 5px 5px 0 0; margin-right: 5px; }
-        .tab-button.active { background: #4CAF50; color: white; }
-        .tab-content { padding: 15px; border: 1px solid #ddd; border-top: none; }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        input[type="text"], select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background-color: #4CAF50; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; width: 100%; }
-        button:hover { background-color: #45a049; }
-        .loading { text-align: center; color: #4CAF50; margin-top: 15px; display: none; }
-        .results-box { margin-top: 25px; padding: 15px; background: #e9f5e9; border: 1px solid #4CAF50; border-radius: 4px; }
-        .caption-item { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; white-space: pre-wrap; word-wrap: break-word; }
-        /* Style for the Edit Form */
-        .edit-controls { margin-top: 15px; }
+        /* Instagram-Inspired Colors */
+        :root {
+            --insta-purple: #C13584;
+            --insta-pink: #E1306C;
+            --insta-blue: #405DE6;
+            --primary-color: var(--insta-pink);
+            --secondary-color: var(--insta-purple);
+            --background-light: #fafafa;
+            --card-bg: #fff;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background-light); 
+            color: #1c1e21; 
+            margin: 0; 
+            padding: 20px 0; 
+        }
+        .container { 
+            max-width: 650px; 
+            margin: auto; 
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        }
+        h1 { 
+            text-align: center; 
+            color: var(--insta-purple); 
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        /* Tabs Styling */
+        .tabs { 
+            display: flex; 
+            border-bottom: 3px solid var(--insta-purple); 
+            margin-bottom: 20px; 
+        }
+        .tab-button { 
+            flex-grow: 1;
+            padding: 12px 15px; 
+            cursor: pointer; 
+            border: none; 
+            background: #f0f0f0; 
+            border-radius: 8px 8px 0 0; 
+            margin-right: 2px;
+            font-weight: bold;
+            transition: background 0.3s, color 0.3s;
+        }
+        .tab-button.active { 
+            background: var(--insta-pink); 
+            color: white; 
+            border-bottom: 3px solid var(--insta-pink);
+        }
+
+        /* Form Elements */
+        label { 
+            display: block; 
+            margin-top: 15px; 
+            font-weight: 600; 
+            color: #333;
+        }
+        input[type="text"], select, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 14px;
+        }
+        button[type="submit"] { 
+            background: linear-gradient(45deg, var(--insta-purple), var(--insta-pink));
+            color: white; 
+            padding: 14px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            margin-top: 25px; 
+            width: 100%; 
+            transition: opacity 0.3s;
+        }
+        button[type="submit"]:hover { 
+            opacity: 0.9; 
+        }
+
+        /* Results & Loading */
+        .loading { 
+            text-align: center; 
+            color: var(--primary-color); 
+            margin-top: 15px; 
+            display: none; 
+            font-weight: bold;
+        }
+        .results-box { 
+            margin-top: 25px; 
+            padding: 15px; 
+            background: #ffe3e3; 
+            border: 1px solid var(--insta-pink); 
+            border-radius: 8px; 
+        }
+        .caption-item { 
+            background: var(--card-bg); 
+            padding: 12px; 
+            border: 1px solid #eee; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--insta-blue);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+        }
+        .copied-msg {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>AI Instagram Caption Tool</h1>
+    <h1>✨ AI Insta Caption Creator</h1>
 
     <div class="tabs">
         <button class="tab-button active" onclick="showTab('generate')">Caption Generate</button>
@@ -34,27 +160,25 @@
     </div>
 
     <div id="generate" class="tab-content">
-        <h2>Generate New Captions</h2>
         <form id="generateForm">
             <label for="reelTitle">Reel Topic/Title:</label>
             <input type="text" id="reelTitle" placeholder="e.g., How to fix WordPress error 404" required>
 
             <label for="style">Caption Style:</label>
             <select id="style">
-                <option value="Catchy and Funny">Catchy and Funny</option>
+                <option value="Catchy and Funny">Catchy and Funny (Recommended)</option>
                 <option value="Motivational and Inspiring">Motivational and Inspiring</option>
                 <option value="Detailed and Informative">Detailed and Informative</option>
                 <option value="Sarcastic and Witty">Sarcastic and Witty</option>
             </select>
 
-            <button type="submit">Generate Captions</button>
+            <button type="submit">Generate 10 Viral Captions</button>
         </form>
-        <div id="generateLoading" class="loading">Loading... Please wait for AI generation.</div>
+        <div id="generateLoading" class="loading">Generating... Please wait while the AI crafts your captions.</div>
         <div id="generateResults" class="results-box"></div>
     </div>
 
     <div id="edit" class="tab-content" style="display:none;">
-        <h2>Edit Existing Caption</h2>
         <form id="editForm">
             <label for="originalCaption">Original Caption & Hashtags:</label>
             <textarea id="originalCaption" rows="5" placeholder="Paste the caption you want to edit here..." required></textarea>
@@ -62,24 +186,46 @@
             <label for="requestedChange">Requested Change:</label>
             <input type="text" id="requestedChange" placeholder="e.g., Make it shorter and add an emoji, or Change the tone to professional" required>
 
-            <button type="submit">Edit Caption</button>
+            <button type="submit">Revise and Edit Caption</button>
         </form>
-        <div id="editLoading" class="loading">Loading... AI is revising your caption.</div>
+        <div id="editLoading" class="loading">Revising... AI is updating your caption.</div>
         <div id="editResults" class="results-box"></div>
     </div>
 
 </div>
 
+<div id="copiedMessage" class="copied-msg">✅ Copied to clipboard!</div>
+
+
 <script>
     // --------------------------------------------------------------------------------
     // --- IMPORTANT: RENDER API URL ---
-    // Change this URL if your Render service address changes.
-    // Your current Render URL: https://pooreyoutuber-github-io.onrender.com
+    // Make sure your Backend Server (package.json and index.js) is correctly deployed 
+    // at this address. Your current Render URL is: https://pooreyoutuber-github-io.onrender.com
     // --------------------------------------------------------------------------------
     const BASE_API_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
     const GENERATE_ENDPOINT = `${BASE_API_URL}/api/caption-generate`;
     const EDIT_ENDPOINT = `${BASE_API_URL}/api/caption-edit`;
 
+
+    // --- UTILITY FUNCTIONS ---
+
+    function showCopiedMessage() {
+        const msg = document.getElementById('copiedMessage');
+        msg.style.display = 'block';
+        setTimeout(() => {
+            msg.style.display = 'none';
+        }, 1500);
+    }
+
+    function copyContent(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showCopiedMessage();
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+            alert('Failed to copy. Please copy manually.');
+        });
+    }
 
     // --- TAB SWITCHING LOGIC ---
     function showTab(tabId) {
@@ -118,20 +264,35 @@
 
             if (response.ok && data.captions) {
                 let html = '<h3>Generated Captions:</h3>';
-                data.captions.forEach(item => {
-                    // The backend should return caption and 5 hashtags separated by a newline
-                    html += `<div class="caption-item">${item.caption}</div>`;
+                data.captions.forEach((item, index) => {
+                    // Item.caption contains the text and hashtags, separated by a newline
+                    html += `
+                        <div class="caption-item" id="caption-${index}">
+                            ${item.caption}
+                            <button class="copy-btn" onclick="copyCaption(${index})">Copy</button>
+                        </div>
+                    `;
                 });
                 resultsDiv.innerHTML = html;
             } else {
-                resultsDiv.innerHTML = `<p style="color: red;">Error: ${data.error || 'Could not generate captions. Check server logs.'}</p>`;
+                resultsDiv.innerHTML = `<p style="color: var(--insta-pink);">Error: ${data.error || 'Could not generate captions. Check server logs.'}</p>`;
             }
         } catch (error) {
-            resultsDiv.innerHTML = `<p style="color: red;">Network Error: The API server might be sleeping or unreachable. Please try again or check the Render logs.</p>`;
+            resultsDiv.innerHTML = `<p style="color: var(--insta-pink);">Network Error: The API server might be sleeping or unreachable. Please try again or check the Render logs.</p>`;
         } finally {
             loadingDiv.style.display = 'none';
         }
     });
+    
+    // Global function to be called by the generated copy buttons
+    window.copyCaption = function(index) {
+        const itemDiv = document.getElementById(`caption-${index}`);
+        // Remove the button before copying the text content
+        const button = itemDiv.querySelector('.copy-btn');
+        const textToCopy = itemDiv.textContent.replace(button.textContent, '').trim(); 
+        copyContent(textToCopy);
+    };
+
 
     // --- 2. CAPTION EDITING LOGIC ---
     document.getElementById('editForm').addEventListener('submit', async function(e) {
@@ -155,18 +316,32 @@
 
             if (response.ok && data.editedCaption) {
                 let html = '<h3>Edited Caption:</h3>';
-                // The backend returns a single string with caption and hashtags
-                html += `<div class="caption-item">${data.editedCaption}</div>`;
+                const editedText = data.editedCaption;
+                
+                html += `
+                    <div class="caption-item" id="edited-result">
+                        ${editedText}
+                        <button class="copy-btn" onclick="copyEdited()">Copy</button>
+                    </div>
+                `;
                 resultsDiv.innerHTML = html;
             } else {
-                resultsDiv.innerHTML = `<p style="color: red;">Error: ${data.error || 'Could not edit caption. Check server logs.'}</p>`;
+                resultsDiv.innerHTML = `<p style="color: var(--insta-pink);">Error: ${data.error || 'Could not edit caption. Check server logs.'}</p>`;
             }
         } catch (error) {
-            resultsDiv.innerHTML = `<p style="color: red;">Network Error: The API server might be sleeping or unreachable. Please try again or check the Render logs.</p>`;
+            resultsDiv.innerHTML = `<p style="color: var(--insta-pink);">Network Error: The API server might be sleeping or unreachable. Please try again or check the Render logs.</p>`;
         } finally {
             loadingDiv.style.display = 'none';
         }
     });
+
+    // Global function to copy edited caption
+    window.copyEdited = function() {
+        const itemDiv = document.getElementById('edited-result');
+        const button = itemDiv.querySelector('.copy-btn');
+        const textToCopy = itemDiv.textContent.replace(button.textContent, '').trim(); 
+        copyContent(textToCopy);
+    };
 
 </script>
 </body>
