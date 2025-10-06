@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -85,14 +85,12 @@
 </div>
 
 <script>
-    // ⚠️ IMPORTANT: We use a relative path /api/gemini/generate, assuming your
-    // frontend and backend are deployed in a way that allows direct communication.
-    // If your backend service is running on a different domain, use the full URL.
-    const CAPTION_API_ENDPOINT = '/api/gemini/generate'; 
+    // ✅ CAPTION_API_ENDPOINT को आपके Render Web Service के URL से सेट किया गया है।
+    const RENDER_API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com';
+    const CAPTION_API_ENDPOINT = RENDER_API_BASE_URL + '/api/gemini/generate'; 
 
     async function generateCaptions() {
-        const reelTitle = document.getElementById('reel-title').value.trim()
-        const CAPTION_API_ENDPOINT = 'YOUR_BACKEND_SERVICE_URL/api/gemini/generate'; 
+        const reelTitle = document.getElementById('reel-title').value.trim();
         const generateBtn = document.getElementById('generate-btn');
         const loadingMessage = document.getElementById('loading-message');
         const resultsArea = document.getElementById('results-area');
@@ -118,7 +116,7 @@
 
             if (!response.ok) {
                  const errorText = await response.text();
-                 throw new Error(`Server error (${response.status}). Check server logs or if API Key is set.`);
+                 throw new Error(`Server error (${response.status}). Check server logs for API details.`);
             }
 
             const data = await response.json();
@@ -151,7 +149,7 @@
 
         } catch (error) {
             console.error("API Error:", error);
-            alert(`Error: ${error.message}. Please check console for details.`);
+            alert(`Error: ${error.message}. Please check console and ensure the API is running at ${CAPTION_API_ENDPOINT}`);
         } finally {
             generateBtn.disabled = false;
             generateBtn.textContent = 'Generate Top 10 Captions';
@@ -171,5 +169,3 @@
 
 </body>
 </html>
-
-                
