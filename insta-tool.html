@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -200,8 +199,7 @@
 <script>
     // --------------------------------------------------------------------------------
     // --- IMPORTANT: RENDER API URL ---
-    // Make sure your Backend Server (package.json and index.js) is correctly deployed 
-    // at this address. Your current Render URL is: https://pooreyoutuber-github-io.onrender.com
+    // This MUST match your live Render service address.
     // --------------------------------------------------------------------------------
     const BASE_API_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
     const GENERATE_ENDPOINT = `${BASE_API_URL}/api/caption-generate`;
@@ -219,6 +217,7 @@
     }
 
     function copyContent(text) {
+        // Copy to clipboard using the modern API
         navigator.clipboard.writeText(text).then(() => {
             showCopiedMessage();
         }).catch(err => {
@@ -287,7 +286,7 @@
     // Global function to be called by the generated copy buttons
     window.copyCaption = function(index) {
         const itemDiv = document.getElementById(`caption-${index}`);
-        // Remove the button before copying the text content
+        // To copy only the text inside the div, we get textContent and remove the button's text ('Copy')
         const button = itemDiv.querySelector('.copy-btn');
         const textToCopy = itemDiv.textContent.replace(button.textContent, '').trim(); 
         copyContent(textToCopy);
