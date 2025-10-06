@@ -1,7 +1,7 @@
-// index.js (FINAL COMPLETE CODE for Combined Service)
+// index.js (FINAL COMPLETE CODE - ALL FIXES INCLUDED)
 
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenAI } = require('@google/genai'); // Correct dependency import
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
@@ -14,12 +14,11 @@ const PORT = process.env.PORT || 10000;
 // ===================================================================
 let GEMINI_KEY;
 try {
-    // Attempt to read the key from the Secret File path /etc/secrets/gemini
-    // This handles the Secret File method used by you
-    GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim();
+    // Reading the key from the file named 'gemini' in /etc/secrets/ 
+    GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback to Environment Variable or failure
+    // Fallback to Environment Variable
     GEMINI_KEY = process.env.GEMINI_API_KEY;
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded successfully from Environment Variable.");
@@ -35,13 +34,14 @@ const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 // --- MIDDLEWARE & HEALTH CHECK ---
 // ===================================================================
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', // Your frontend URL
+    origin: 'https://pooreyoutuber.github.io', // Your Frontend URL
     methods: ['GET', 'POST'],
     credentials: true
 }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
+    // Health check endpoint (Server wake-up)
     res.status(200).send('PooreYouTuber Combined API is running!');
 });
 
@@ -77,7 +77,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         });
 
         if (response.status === 204) { 
-            // 🌟 IMPROVED LOGGING FOR GREEN TICK (Visible Success) 🌟
+            // SUCCESS LOGGING for Green Tick
             console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Client ID: ${payload.client_id.substring(0, 5)}...`);
             return { success: true };
         } else {
@@ -92,11 +92,9 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 }
 
 function generateViewPlan(totalViews, pages) {
-    // This logic ensures the view plan is created correctly based on percentages
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
     
-    // Check for near 100% since floating point math can cause issues
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
         return [];
@@ -105,7 +103,7 @@ function generateViewPlan(totalViews, pages) {
     pages.forEach(page => {
         const viewsForPage = Math.round(totalViews * (page.percent / 100));
         for (let i = 0; i < viewsForPage; i++) {
-            if (page.url) { // Ensure URL is provided
+            if (page.url) { 
                 viewPlan.push(page.url);
             }
         }
@@ -125,7 +123,7 @@ app.post('/boost-mp', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
     }
     
-    const viewPlan = generateViewPlan(parseInt(views), pages.filter(p => p.percent > 0)); // Filter out 0% entries
+    const viewPlan = generateViewPlan(parseInt(views), pages.filter(p => p.percent > 0)); 
     if (viewPlan.length === 0) {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
@@ -146,10 +144,8 @@ app.post('/boost-mp', async (req, res) => {
             const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
             const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
 
-            // 1. session_start
             await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
-            // 2. page_view (The main view event)
             const pageViewPayload = {
                 client_id: CLIENT_ID,
                 user_properties: commonUserProperties, 
@@ -158,10 +154,8 @@ app.post('/boost-mp', async (req, res) => {
             const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
             if (pageViewResult.success) successfulViews++;
 
-            // 3. user_engagement
             await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
 
-            // Delay for realistic traffic
             await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
         }
         console.log(`--- WEBSITE BOOST FINISHED. Total success: ${successfulViews}/${totalViews} ---`);
@@ -174,7 +168,6 @@ app.post('/boost-mp', async (req, res) => {
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     
-    // Check if key was successfully loaded
     if (!GEMINI_KEY) {
         console.error('Gemini API call failed because key is missing.');
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing or invalid on the server.' });
@@ -212,14 +205,4 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
-        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}... Please check the Gemini API dashboard.` });
-    }
-});
-
-
-// ===================================================================
-// START THE SERVER
-// ===================================================================
-app.listen(PORT, () => {
-    console.log(`Combined API Server listening on port ${PORT}.`);
-});
+        res.status(500).json({ error: `AI Generation Failed. Reason: ${error
