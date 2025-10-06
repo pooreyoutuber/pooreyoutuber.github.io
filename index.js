@@ -28,7 +28,7 @@ try {
 }
 
 // Gemini Client Initialization
-const ai = new GoogleGenAI({ apiKey: GEMINI }); 
+const ai = new GoogleGenAI({ apiKey: GEMINI_KEY }); 
 
 // ===================================================================
 // --- MIDDLEWARE & HEALTH CHECK ---
