@@ -1,10 +1,10 @@
 // index.js (FINAL COMPLETE CODE for Combined Service)
 
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai'); // Gemini SDK
-const fetch = require('node-fetch'); // Required for Website Booster
+const { GoogleGenAI } = require('@google/genai');
+const fetch = require('node-fetch'); 
 const cors = require('cors'); 
-const fs = require('fs'); // Required to read Secret File
+const fs = require('fs'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -14,9 +14,10 @@ const PORT = process.env.PORT || 10000;
 // ===================================================================
 let GEMINI_KEY;
 try {
-    // Attempt to read the key from the Secret File path
+    // Attempt to read the key from the Secret File path /etc/secrets/gemini
+    // This handles the Secret File method used by you
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim();
-    console.log("Gemini Key loaded successfully from Secret File."); // Log is critical for debugging
+    console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
     // Fallback to Environment Variable or failure
     GEMINI_KEY = process.env.GEMINI_API_KEY;
@@ -34,19 +35,18 @@ const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 // --- MIDDLEWARE & HEALTH CHECK ---
 // ===================================================================
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', 
+    origin: 'https://pooreyoutuber.github.io', // Your frontend URL
     methods: ['GET', 'POST'],
     credentials: true
 }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    // This confirms the server is awake and helps with the Free Tier issue.
     res.status(200).send('PooreYouTuber Combined API is running!');
 });
 
 // ===================================================================
-// --- WEBSITE BOOSTER FUNCTIONS (With improved logging) ---
+// --- WEBSITE BOOSTER FUNCTIONS (Improved Logging for Green Tick) ---
 // ===================================================================
 
 const MIN_DELAY = 3000; 
@@ -77,12 +77,12 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         });
 
         if (response.status === 204) { 
-            // 🌟 IMPROVED LOGGING FOR GREEN TICK 🌟
+            // 🌟 IMPROVED LOGGING FOR GREEN TICK (Visible Success) 🌟
             console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Client ID: ${payload.client_id.substring(0, 5)}...`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Event: ${eventType} | Status: ${response.status}. GA4 Error: ${errorText}`);
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Event: ${eventType} | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
             return { success: false };
         }
     } catch (error) {
@@ -92,10 +92,11 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 }
 
 function generateViewPlan(totalViews, pages) {
-    // ... (logic to create viewPlan array remains the same)
+    // This logic ensures the view plan is created correctly based on percentages
     const viewPlan = [];
-    const totalPercentage = pages.reduce((sum, page) => sum + page.percent, 0);
+    const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
     
+    // Check for near 100% since floating point math can cause issues
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
         return [];
@@ -104,7 +105,9 @@ function generateViewPlan(totalViews, pages) {
     pages.forEach(page => {
         const viewsForPage = Math.round(totalViews * (page.percent / 100));
         for (let i = 0; i < viewsForPage; i++) {
-            viewPlan.push(page.url);
+            if (page.url) { // Ensure URL is provided
+                viewPlan.push(page.url);
+            }
         }
     });
 
@@ -122,9 +125,9 @@ app.post('/boost-mp', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
     }
     
-    const viewPlan = generateViewPlan(parseInt(views), pages);
+    const viewPlan = generateViewPlan(parseInt(views), pages.filter(p => p.percent > 0)); // Filter out 0% entries
     if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100.' });
+         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
     res.json({ status: 'processing', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
@@ -208,7 +211,6 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
         res.status(200).json({ captions: captions });
 
     } catch (error) {
-        // This handles errors if the key is invalid or API quota is hit
         console.error('Gemini API Error:', error.message);
         res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}... Please check the Gemini API dashboard.` });
     }
@@ -217,4 +219,7 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 
 // ===================================================================
 // START THE SERVER
-// =================================
+// ===================================================================
+app.listen(PORT, () => {
+    console.log(`Combined API Server listening on port ${PORT}.`);
+});
