@@ -1,4 +1,4 @@
-// index.js (FINAL COMPLETE CODE - Dependency, Key Path, and Caption Edit Added)
+// index.js (Yeh code FINAL aur 100% sahi hai)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); // Correct dependency import
