@@ -258,7 +258,8 @@
                 
                 const responseData = await response.json();
 
-                if (responseData.status === 'processing' || responseData.status === 'ok') {
+                // 🌟 FIX: Added 'accepted' status to display success message 
+                if (responseData.status === 'processing' || responseData.status === 'ok' || responseData.status === 'accepted') {
                     showMessage('success', `✨ Success! Request for ${data.views} views accepted. **Results expected within 24-48 hours.** You can close this browser now.`, true);
                 } else {
                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
