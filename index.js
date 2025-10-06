@@ -1,4 +1,4 @@
-// index.js (FINAL COMPLETE CODE with HUMAN-LIKE SIMULATION)
+// index.js (FINAL CODE with Hardcoded 18-Country Logic and Human-Like Simulation)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -45,15 +45,15 @@ app.get('/', (req, res) => {
 });
 
 // HUMAN-LIKE DELAY PARAMETERS (Highly Random)
-const MIN_VIEW_DELAY = 5000; // Minimum 5 seconds delay between two full user sessions
-const MAX_VIEW_DELAY = 25000; // Maximum 25 seconds delay
+const MIN_VIEW_DELAY = 5000; 
+const MAX_VIEW_DELAY = 25000; 
 
 function getRandomDelay() {
     return Math.random() * (MAX_VIEW_DELAY - MIN_VIEW_DELAY) + MIN_VIEW_DELAY; 
 }
 
 function getRandomEngagementTime() {
-    // Session time between 45 seconds (45,000 ms) to 180 seconds (3 minutes - 180,000 ms)
+    // Session time between 45 seconds to 180 seconds (3 minutes)
     const MIN_ENG = 45000;
     const MAX_ENG = 180000;
     return Math.floor(Math.random() * (MAX_ENG - MIN_ENG) + MIN_ENG);
@@ -91,9 +91,10 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
     
-    // Check for 100% total
+    // Check for 100% total (Allow small float tolerance for 100%)
     const totalPercentage = items.reduce((sum, item) => sum + (item.percent || 0), 0);
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
+        // This should not happen with the hardcoded list, but check for safety.
         console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
         return [];
     }
@@ -115,7 +116,7 @@ function generateCompensatedPlan(totalViews, items) {
         viewsToAllocate[i].views++;
     }
 
-    // Now, build the final plan (maintain the original order from the input form)
+    // Now, build the final plan (maintain the original order for sequential flow)
     viewsToAllocate.sort((a, b) => {
         const indexA = items.findIndex(item => (item.url || item.code) === a.id);
         const indexB = items.findIndex(item => (item.url || item.code) === b.id);
@@ -141,28 +142,39 @@ function generateCompensatedPlan(totalViews, items) {
 // 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - SEQUENCE-BASED Multi-Country Logic
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
-    const { ga_id, api_key, views, pages, countries } = req.body; 
+    const { ga_id, api_key, views, pages } = req.body; 
+
+    // --- 🚨 HARDCODED 18 COUNTRY DISTRIBUTION LIST (User Request) ---
+    const HARDCODED_COUNTRIES = [
+        { code: 'US', percent: 22 }, { code: 'AU', percent: 10 }, { code: 'CH', percent: 8 }, 
+        { code: 'NO', percent: 7 }, { code: 'NZ', percent: 6 }, { code: 'CA', percent: 6 }, 
+        { code: 'DE', percent: 5 }, { code: 'DK', percent: 5 }, { code: 'GB', percent: 5 }, 
+        { code: 'NL', percent: 4 }, { code: 'FI', percent: 3 }, { code: 'SE', percent: 3 }, 
+        { code: 'AT', percent: 3 }, { code: 'BE', percent: 2 }, { code: 'FR', percent: 2 }, 
+        { code: 'SG', percent: 2 }, { code: 'JP', percent: 1.5 }, { code: 'KR', percent: 1.5 }
+    ];
+    // ------------------------------------------------------------------
 
     // --- Validation ---
-    if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0 || !Array.isArray(countries) || countries.length === 0) {
-        return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), Page data, OR Country distribution data.' });
+    if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0) {
+        return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
     }
     
-    // Check 100% distribution for both pages and countries
+    // Check 100% distribution for pages
     const pageTotalPercent = pages.reduce((sum, p) => sum + (p.percent || 0), 0);
-    const countryTotalPercent = countries.reduce((sum, c) => sum + (c.percent || 0), 0);
     
     if (pageTotalPercent < 99.9 || pageTotalPercent > 100.1) {
-         return res.status(400).json({ status: 'error', message: `Page URL distribution must total 100%, but it is ${pageTotalPercent}%.` });
-    }
-    if (countryTotalPercent < 99.9 || countryTotalPercent > 100.1) {
-         return res.status(400).json({ status: 'error', message: `Country distribution must total 100%, but it is ${countryTotalPercent}%.` });
+         return res.status(400).json({ status: 'error', message: `Page URL distribution must total 100%, but it is ${pageTotalPercent.toFixed(1)}%.` });
     }
 
     // --- Plan Generation (Compensated and Sequential) ---
     const totalViews = parseInt(views);
+    
+    // Generate page plan from frontend data
     const finalPageUrls = generateCompensatedPlan(totalViews, pages.filter(p => p.percent > 0)); 
-    const countryPlan = generateCompensatedPlan(totalViews, countries.filter(c => c.percent > 0));
+    
+    // Generate country plan from hardcoded data
+    const countryPlan = generateCompensatedPlan(totalViews, HARDCODED_COUNTRIES);
     
     // Combine Page URL and Country Code into a final plan
     const maxPlanLength = Math.min(finalPageUrls.length, countryPlan.length);
@@ -170,22 +182,22 @@ app.post('/boost-mp', async (req, res) => {
     for (let i = 0; i < maxPlanLength; i++) {
         finalCombinedPlan.push({ 
             url: finalPageUrls[i], 
-            country_code: countryPlan[i] 
+            country_code: countryPlan[i] // This uses the hardcoded country plan
         });
     }
 
     // --- Async Processing (Immediate Response) ---
     res.json({ 
         status: 'accepted', 
-        message: `Request for ${finalCombinedPlan.length} human-like views accepted. Results expected within 24-48 hours.`
+        message: `Request for ${finalCombinedPlan.length} human-like views accepted. Traffic will be distributed across 18 countries (server-side). Results expected within 24-48 hours.`
     });
 
     // Start views generation asynchronously
     (async () => {
         const totalViewsCount = finalCombinedPlan.length;
-        console.log(`[BOOSTER START] Starting Human-Like View generation for ${totalViewsCount} views...`);
+        console.log(`[BOOSTER START] Starting Human-Like View generation for ${totalViewsCount} views. Target 18 countries.`);
 
-        // Process views sequentially (Ensures one view finishes before the next starts)
+        // Process views sequentially 
         for (let i = 0; i < finalCombinedPlan.length; i++) {
             const plan = finalCombinedPlan[i];
             const viewId = i + 1;
@@ -193,7 +205,7 @@ app.post('/boost-mp', async (req, res) => {
             // Generate human-like parameters for this single user session
             const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
             const SESSION_ID = Date.now(); 
-            const engagementTime = getRandomEngagementTime(); // Highly randomized time (45s to 3 mins)
+            const engagementTime = getRandomEngagementTime(); 
             
             const commonUserProperties = { 
                 geo: { value: plan.country_code } 
@@ -213,16 +225,14 @@ app.post('/boost-mp', async (req, res) => {
             const pageViewPayload = {
                 client_id: CLIENT_ID,
                 user_properties: commonUserProperties, 
-                // CRITICAL: We pass the randomized engagementTime here
                 events: [{ name: 'page_view', params: { page_location: plan.url, page_title: `PROJECT_PAGE_${viewId}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
             };
             await sendData(ga_id, api_key, pageViewPayload, viewId, 'page_view');
 
             // --- Real User Delay (Simulate scrolling/reading) ---
-            // This small, random delay makes the event timings look real, not instantaneous.
             await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000)); 
 
-            // 3. user_engagement event (Final event to close the session)
+            // 3. user_engagement event 
             await sendData(ga_id, api_key, { 
                 client_id: CLIENT_ID, 
                 user_properties: commonUserProperties, 
@@ -230,7 +240,6 @@ app.post('/boost-mp', async (req, res) => {
             }, viewId, 'user_engagement');
 
             // 4. MAIN DELAY before the NEXT country's view starts
-            // This is the session-to-session gap (5s to 25s)
             await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
         }
         
@@ -339,4 +348,4 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-    
+                         
