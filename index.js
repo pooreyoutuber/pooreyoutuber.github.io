@@ -1,19 +1,37 @@
-// index.js (FINAL STABLE & PROXY-FREE CODE for Render)
+// index.js (FINAL COMBINED CODE for Single Render Service)
 
 const express = require('express');
-const fetch = require('node-fetch');
+const { GoogleGenAI } = require('@google/genai'); // Gemini SDK
+const fetch = require('node-fetch'); // Required for Website Booster
 const cors = require('cors'); 
 
 const app = express();
-const PORT = process.env.PORT || 10000; 
+const PORT = process.env.PORT || 10000;
 
-// Middleware
-app.use(cors()); 
-app.use(express.json()); 
+// Gemini Client Initialization
+// Ensure GEMINI_API_KEY is set in Render secrets
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); 
 
-// --- Constants & Helper Functions ---
-const MIN_DELAY = 3000; // 3 seconds
-const MAX_DELAY = 12000; // 12 seconds
+// Middleware Setup
+// Configure CORS to allow your GitHub Pages frontend (https://pooreyoutuber.github.io)
+app.use(cors({
+    origin: 'https://pooreyoutuber.github.io', 
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
+app.use(express.json());
+
+// Basic Health Check Endpoint
+app.get('/', (req, res) => {
+    res.status(200).send('PooreYouTuber Combined API is running: Website Booster & Insta Caption Generator!');
+});
+
+// ===================================================================
+// --- HELPER FUNCTIONS FOR WEBSITE BOOSTER ---
+// ===================================================================
+
+const MIN_DELAY = 3000; 
+const MAX_DELAY = 12000; 
 
 const geoLocations = [
     { country: "United States", region: "California" },
@@ -35,9 +53,6 @@ function getRandomGeo() {
     return geoLocations[Math.floor(Math.random() * geoLocations.length)];
 }
 
-// ----------------------------------------------------
-// Core Logic: Sending Data to GA4 (Measurement Protocol)
-// ----------------------------------------------------
 async function sendData(gaId, apiSecret, payload, currentViewId) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const eventName = payload.events[0].name;
@@ -55,7 +70,9 @@ async function sendData(gaId, apiSecret, payload, currentViewId) {
             }
             return { success: true };
         } else {
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Check API Secret/GA ID.`);
+            // Log full response body for debugging failed GA4 hits
+            const errorText = await response.text(); 
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText}`);
             return { success: false };
         }
     } catch (error) {
@@ -64,15 +81,11 @@ async function sendData(gaId, apiSecret, payload, currentViewId) {
     }
 }
 
-
-// --- Views को Pages में विभाजित करें ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
-    
-    // Percentage validation
     const totalPercentage = pages.reduce((sum, page) => sum + page.percent, 0);
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
-        console.error(`Distribution Failed: Total percentage is not 100.`);
+        console.error("Distribution Failed: Total percentage is not 100.");
         return [];
     }
     
@@ -84,11 +97,12 @@ function generateViewPlan(totalViews, pages) {
     });
 
     viewPlan.sort(() => Math.random() - 0.5);
-    
     return viewPlan;
 }
 
-// --- API Endpoint: /boost-mp ---
+// ===================================================================
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp)
+// ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages } = req.body; 
 
@@ -102,7 +116,7 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100.' });
     }
 
-    // Acknowledge the request immediately (Allows user to close browser)
+    // Acknowledge the request immediately
     res.json({ status: 'processing', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
 
     // Background Processing 
@@ -112,19 +126,16 @@ app.post('/boost-mp', async (req, res) => {
 
         for (let i = 0; i < totalViews; i++) {
             const targetUrl = viewPlan[i]; 
-
             const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
             const SESSION_ID = Date.now(); 
             const geo = getRandomGeo();
-            const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-
+            const engagementTime = 30000 + Math.floor(Math.random() * 90000); // 30s to 120s
             const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
 
             // 1. Session Start
-            const sessionStartPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] };
-            await sendData(ga_id, api_key, sessionStartPayload, i + 1);
+            await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1);
 
-            // 2. Page View 
+            // 2. Page View (with Engagement Time)
             const pageViewPayload = {
                 client_id: CLIENT_ID,
                 user_properties: commonUserProperties, 
@@ -134,22 +145,31 @@ app.post('/boost-mp', async (req, res) => {
             if (pageViewResult.success) successfulViews++;
 
             // 3. User Engagement
-            const engagementPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] };
-            await sendData(ga_id, api_key, engagementPayload, i + 1);
+            await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1);
 
             // Delay for realistic traffic
             await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
         }
-        console.log(`--- BOOST FINISHED. Total success: ${successfulViews}/${totalViews} ---`);
+        console.log(`--- WEBSITE BOOST FINISHED. Total success: ${successfulViews}/${totalViews} ---`);
     })();
 });
 
-// Default route for health check
-app.get('/', (req, res) => {
-    res.send({ status: 'ok', message: 'Traffic Booster API is running.' });
-});
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Traffic Booster API running and ready to accept commands on port ${PORT}.`);
-});
+// ===================================================================
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
+// ===================================================================
+app.post('/api/caption-generate', async (req, res) => { 
+    
+    // Check if API Key is configured
+    if (!process.env.GEMINI_API_KEY) {
+        console.error('FATAL: GEMINI_API_KEY is not set.');
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
+    }
+    
+    const { reelTitle, style } = req.body;
+
+    if (!reelTitle) {
+        return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
+    }
+    
+    const prompt = `Generate 10 unique, trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". Each caption must be followed by 3-5 relevant, high-reach hashtags
