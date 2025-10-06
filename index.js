@@ -9,14 +9,14 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- GEMINI KEY CONFIGURATION (Server Startup Fix) ---
+// --- GEMINI KEY CONFIGURATION (Render Secret File) ---
 let GEMINI_KEY;
 try {
-    // Reads key from Render Secret File
+    // Reads key from Render Secret File at /etc/secrets/gemini
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback
+    // Fallback if secret file fails
     GEMINI_KEY = process.env.GEMINI_API_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable.");
@@ -63,7 +63,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         });
 
         if (response.status === 204) { 
-            // Log the country code for verification
             console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Country: ${payload.user_properties.geo.value}`);
             return { success: true };
         } else {
@@ -142,7 +141,7 @@ app.post('/boost-mp', async (req, res) => {
     for (let i = 0; i < finalPageUrls.length; i++) {
         finalCombinedPlan.push({ 
             url: finalPageUrls[i], 
-            country_code: countryPlan[i] // This is the country code string
+            country_code: countryPlan[i] 
         });
     }
     
@@ -303,4 +302,4 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-                                                                                                                       
+                    
