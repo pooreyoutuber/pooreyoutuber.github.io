@@ -1,171 +1,161 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram AI Caption Generator | Trending Reels Captions</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>✨ AI Instagram Caption Generator Tool</title>
     <style>
-        :root {
-            --insta-pink: #E1306C; --insta-purple: #C13584; --insta-orange: #F56040;
-            --bg-dark: #121212; --card-dark: #1E1E1E; --text-light: #FFFFFF;
-            --input-bg: #333333;
-        }
-        body {
-            font-family: 'Roboto', sans-serif; background-color: var(--bg-dark);
-            color: var(--text-light); margin: 0; padding: 0; display: flex;
-            justify-content: center; align-items: center; min-height: 100vh;
-            padding: 20px; box-sizing: border-box;
-        }
-        .container {
-            width: 100%; max-width: 700px; background-color: var(--card-dark);
-            border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); padding: 30px;
-        }
-        header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--input-bg); padding-bottom: 15px; }
-        header h1 {
-            font-size: 2em; background: linear-gradient(45deg, var(--insta-pink), var(--insta-orange), var(--insta-purple));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; margin: 0;
-        }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #AAAAAA; }
-        input[type="text"] {
-            width: 100%; padding: 12px; border: none; border-radius: 8px;
-            background-color: var(--input-bg); color: var(--text-light); box-sizing: border-box;
-            font-size: 1em; transition: border 0.3s;
-        }
-        input[type="text"]:focus { outline: none; border: 2px solid var(--insta-pink); }
-        button {
-            width: 100%; padding: 15px; border: none; border-radius: 8px;
-            font-size: 1.1em; font-weight: bold; color: var(--text-light);
-            background: linear-gradient(to right, var(--insta-pink), var(--insta-purple));
-            cursor: pointer; transition: opacity 0.3s, transform 0.1s;
-        }
-        button:hover:not(:disabled) { opacity: 0.9; }
-        button:disabled { background: #555555; cursor: not-allowed; }
-        .results-container { margin-top: 30px; padding-top: 20px; border-top: 1px dashed var(--input-bg); }
-        .caption-list { list-style: none; padding: 0; }
-        .caption-item {
-            background-color: var(--input-bg); margin-bottom: 15px; padding: 15px;
-            border-radius: 10px; position: relative; word-wrap: break-word; white-space: pre-wrap;
-        }
-        .copy-btn {
-            background-color: var(--insta-orange); color: var(--text-light); border: none;
-            padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em;
-            margin-top: 10px; display: block; float: right;
-        }
-        .loading { text-align: center; font-size: 1.2em; color: var(--insta-pink); display: none; margin: 20px 0; }
+        /* CSS styles from previous example for clean look */
+        :root { --bg-color: #f4f6f9; --card-bg: #fff; --text-color: #222; --youtube-red: #FF0000; --youtube-dark-red: #CC0000; --border-color: #ddd; }
+        body { font-family: Arial, sans-serif; background: var(--bg-color); color: var(--text-color); padding: 20px; }
+        .container { max-width: 800px; margin: auto; padding: 20px; text-align: center; }
+        h1 { color: var(--youtube-red); font-size: 2em; }
+        .tool-card { background: var(--card-bg); border-radius: 12px; padding: 30px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); margin-top: 20px; text-align: left; }
+        label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        button { background: var(--youtube-red); color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 25px; font-size: 1.1em; transition: background-color 0.3s; }
+        button:hover:not(:disabled) { background: var(--youtube-dark-red); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #message { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; text-align: center; display: none; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #e2f4ff; color: #004085; border: 1px solid #cce5ff; }
+        #results-container { margin-top: 30px; }
+        .caption-item { background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--youtube-red); position: relative; }
+        .caption-item p { margin: 0; white-space: pre-wrap; font-size: 0.95em; line-height: 1.5; }
+        .copy-btn { background: #0b78d1; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600; margin-top: 10px; transition: background 0.3s; }
+        .copy-btn:hover { background: #0056b3; }
+        @media (max-width: 600px) { .tool-card { padding: 20px; } h1 { font-size: 1.8em; } }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>✨ AI Instagram Caption Generator</h1>
+        <p>Generate 10 trending, Hindi/English mix captions with relevant hashtags for your next viral reel using Google's Gemini AI.</p>
+        
+        <div class="tool-card">
+            <form id="captionForm">
+                <label for="reelTitle">Reel Topic / Title (e.g., "Delhi Street Food Vlogs", "Workout Motivation")</label>
+                <input type="text" id="reelTitle" placeholder="Enter your reel's topic or title..." required>
 
-<div class="container">
-    <header>
-        <h1>🔥 AI Reels Caption Generator</h1>
-        <p>Get trending, high-reach, and viral captions in one click!</p>
-    </header>
+                <label for="style">Caption Style</label>
+                <select id="style">
+                    <option value="Catchy and Funny">Catchy and Funny (Recommended)</option>
+                    <option value="Inspirational and Motivational">Inspirational and Motivational</option>
+                    <option value="Informative and Educational">Informative and Educational</option>
+                    <option value="Sarcastic and Witty">Sarcastic and Witty</option>
+                    <option value="Emotional and Relatable">Emotional and Relatable</option>
+                </select>
 
-    <div class="form-section">
-        <div class="form-group">
-            <label for="reel-title">Reel Topic/Title:</label>
-            <input type="text" id="reel-title" placeholder="e.g., Best Travel Spots, Quick Recipe, My Daily Routine">
-        </div>
+                <button type="submit" id="generateBtn">Generate 10 Viral Captions</button>
+            </form>
 
-        <button id="generate-btn" onclick="generateCaptions()">Generate Top 10 Captions</button>
-    </div>
-
-    <div class="loading" id="loading-message">
-        <p>✨ AI is crafting the best captions for you... Please wait.</p>
-    </div>
-
-    <div class="results-container" id="results-area" style="display: none;">
-        <h2>📝 Generated Captions</h2>
-        <ul class="caption-list" id="caption-list">
-            </ul>
-    </div>
-</div>
-
-<script>
-    // ✅ CAPTION_API_ENDPOINT को आपके Render Web Service के URL से सेट किया गया है।
-    const RENDER_API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com';
-    const CAPTION_API_ENDPOINT = RENDER_API_BASE_URL + '/api/gemini/generate'; 
-
-    async function generateCaptions() {
-        const reelTitle = document.getElementById('reel-title').value.trim();
-        const generateBtn = document.getElementById('generate-btn');
-        const loadingMessage = document.getElementById('loading-message');
-        const resultsArea = document.getElementById('results-area');
-        const captionList = document.getElementById('caption-list');
-
-        if (reelTitle === "") {
-            alert("Please enter the topic or title of your Reel.");
-            return;
-        }
-
-        generateBtn.disabled = true;
-        generateBtn.textContent = 'Generating...';
-        loadingMessage.style.display = 'block';
-        resultsArea.style.display = 'none';
-        captionList.innerHTML = '';
-
-        try {
-            const response = await fetch(CAPTION_API_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reelTitle: reelTitle }),
-            });
-
-            if (!response.ok) {
-                 const errorText = await response.text();
-                 throw new Error(`Server error (${response.status}). Check server logs for API details.`);
-            }
-
-            const data = await response.json();
-            let captions = data.captions; 
-
-            if (!captions || captions.length === 0) {
-                 throw new Error("AI did not return any captions. Try a different title.");
-            }
+            <div id="message" class="info"></div>
             
-            captionList.innerHTML = '';
+            <div id="results-container">
+                <h2>Generated Captions (Hindi/English Mix)</h2>
+                <div id="captions-list">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🚨 IMPORTANT: Replace 'YOUR_NEW_INSTA_API_RENDER_URL' with the actual URL of your new Insta Tool Render Service.
+        // Example: https://insta-caption-poore.onrender.com/api/caption-generate
+        const RENDER_API_ENDPOINT = 'YOUR_NEW_INSTA_API_RENDER_URL/api/caption-generate'; 
+
+        const form = document.getElementById('captionForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const messageDiv = document.getElementById('message');
+        const captionsList = document.getElementById('captions-list');
+        const resultsContainer = document.getElementById('results-container');
+        
+        resultsContainer.style.display = 'none';
+
+        function showMessage(type, message) {
+            messageDiv.className = type;
+            messageDiv.innerHTML = message;
+            messageDiv.style.display = 'block';
+        }
+
+        function setButtonState(enabled, text) {
+            generateBtn.disabled = !enabled;
+            generateBtn.textContent = text;
+        }
+
+        function renderCaptions(captions) {
+            captionsList.innerHTML = '';
+            resultsContainer.style.display = 'block';
+
             captions.forEach((item, index) => {
-                const listItem = document.createElement('li');
-                listItem.className = 'caption-item';
-                const formattedCaption = `${index + 1}. ${item.caption.trim()}`;
-                const captionText = document.createElement('div');
-                captionText.innerText = formattedCaption;
-                captionText.style.marginBottom = '10px';
+                const div = document.createElement('div');
+                div.className = 'caption-item';
+                const captionText = item.caption || "Caption could not be generated.";
                 
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'copy-btn';
-                copyBtn.textContent = 'Copy';
-                copyBtn.onclick = (e) => { e.preventDefault(); copyToClipboard(formattedCaption, copyBtn); };
-                
-                listItem.appendChild(captionText);
-                listItem.appendChild(copyBtn);
-                captionList.appendChild(listItem);
+                div.innerHTML = `
+                    <p><strong>#${index + 1}</strong>: ${captionText}</p>
+                    <button class="copy-btn" data-caption="${captionText}">Copy</button>
+                `;
+                captionsList.appendChild(div);
             });
-
-            resultsArea.style.display = 'block';
-
-        } catch (error) {
-            console.error("API Error:", error);
-            alert(`Error: ${error.message}. Please check console and ensure the API is running at ${CAPTION_API_ENDPOINT}`);
-        } finally {
-            generateBtn.disabled = false;
-            generateBtn.textContent = 'Generate Top 10 Captions';
-            loadingMessage.style.display = 'none';
-        }
-    }
-
-    function copyToClipboard(text, button) {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => {
-                button.textContent = '✅ Copied!';
-                setTimeout(() => { button.textContent = 'Copy'; }, 2000);
+            
+            // Attach copy event listeners
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const textToCopy = e.target.getAttribute('data-caption');
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        e.target.textContent = 'Copied! ✅';
+                        setTimeout(() => {
+                            e.target.textContent = 'Copy';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Copy failed:', err);
+                        alert('Failed to copy text. Please copy manually.');
+                    });
+                });
             });
         }
-    }
-</script>
 
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const reelTitle = document.getElementById('reelTitle').value.trim();
+            const style = document.getElementById('style').value;
+
+            if (!reelTitle) {
+                showMessage('error', '❌ Please enter a topic or title for your reel.');
+                return;
+            }
+
+            setButtonState(false, 'Generating... Please wait (up to 30 seconds)');
+            showMessage('info', '⏳ Request sent to AI. Generating 10 viral captions...');
+            captionsList.innerHTML = '';
+            resultsContainer.style.display = 'none';
+
+            try {
+                const response = await fetch(RENDER_API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reelTitle, style })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || `Server Error: ${response.status}`);
+                }
+                
+                renderCaptions(data.captions);
+                showMessage('success', `✅ Success! 10 viral captions generated for "${reelTitle}".`);
+
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                showMessage('error', `❌ Generation Failed: ${error.message}. Please check your Gemini API key and server logs.`);
+            } finally {
+                setButtonState(true, 'Generate 10 Viral Captions');
+            }
+        });
+    </script>
 </body>
 </html>
