@@ -1,4 +1,4 @@
-// index.js (FINAL COMPLETE CODE with Multi-Country Booster)
+// index.js (FINAL COMPLETE CODE with HUMAN-LIKE SIMULATION)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -44,11 +44,19 @@ app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Combined API is running!');
 });
 
-const MIN_DELAY = 3000; 
-const MAX_DELAY = 12000; 
+// HUMAN-LIKE DELAY PARAMETERS (Highly Random)
+const MIN_VIEW_DELAY = 5000; // Minimum 5 seconds delay between two full user sessions
+const MAX_VIEW_DELAY = 25000; // Maximum 25 seconds delay
 
 function getRandomDelay() {
-    return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
+    return Math.random() * (MAX_VIEW_DELAY - MIN_VIEW_DELAY) + MIN_VIEW_DELAY; 
+}
+
+function getRandomEngagementTime() {
+    // Session time between 45 seconds (45,000 ms) to 180 seconds (3 minutes - 180,000 ms)
+    const MIN_ENG = 45000;
+    const MAX_ENG = 180000;
+    return Math.floor(Math.random() * (MAX_ENG - MIN_ENG) + MIN_ENG);
 }
 
 // Helper function definitions
@@ -77,36 +85,60 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 }
 
 /**
- * Generates a plan array from items based on their percentage distribution.
- * Returns an array of item identifiers (url or code).
+ * Generates an item plan (e.g., countries or pages) based on percentage, 
+ * ensuring the total items equals totalViews by compensating for rounding errors.
  */
-function generateViewPlan(totalViews, items) {
+function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
-    const totalPercentage = items.reduce((sum, item) => sum + (item.percent || 0), 0);
     
-    // Safety check for 100% total
+    // Check for 100% total
+    const totalPercentage = items.reduce((sum, item) => sum + (item.percent || 0), 0);
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
         return [];
     }
-    
-    items.forEach(item => {
-        const viewsForItem = Math.round(totalViews * (item.percent / 100));
-        for (let i = 0; i < viewsForItem; i++) {
-            if (item.url || item.code) { 
-                // Push item.url (for pages) or item.code (for countries)
-                viewPlan.push(item.url || item.code); 
-            }
-        }
+
+    const viewsToAllocate = items.map(item => ({
+        id: item.url || item.code,
+        views: Math.floor(totalViews * (item.percent / 100)), // Start with floor
+        remainder: (totalViews * (item.percent / 100)) % 1 // Calculate remainder
+    }));
+
+    // Calculate sum of rounded views and difference (views needed to reach totalViews)
+    let sumOfViews = viewsToAllocate.reduce((sum, item) => sum + item.views, 0);
+    let difference = totalViews - sumOfViews; 
+
+    // Sort by remainder descending and add the difference views back (compensation)
+    viewsToAllocate.sort((a, b) => b.remainder - a.remainder);
+
+    for (let i = 0; i < difference; i++) {
+        viewsToAllocate[i].views++;
+    }
+
+    // Now, build the final plan (maintain the original order from the input form)
+    viewsToAllocate.sort((a, b) => {
+        const indexA = items.findIndex(item => (item.url || item.code) === a.id);
+        const indexB = items.findIndex(item => (item.url || item.code) === b.id);
+        return indexA - indexB;
     });
 
-    viewPlan.sort(() => Math.random() - 0.5); // Shuffle the plan
+    viewsToAllocate.forEach(item => {
+        for (let i = 0; i < item.views; i++) {
+            viewPlan.push(item.id);
+        }
+    });
+    
+    // Final check for plan size
+    if (viewPlan.length !== totalViews) {
+        console.error(`Plan size mismatch: Expected ${totalViews}, Got ${viewPlan.length}`);
+    }
+
     return viewPlan;
 }
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Multi-Country Logic
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - SEQUENCE-BASED Multi-Country Logic
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, countries } = req.body; 
@@ -127,77 +159,82 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: `Country distribution must total 100%, but it is ${countryTotalPercent}%.` });
     }
 
-    // --- Plan Generation ---
+    // --- Plan Generation (Compensated and Sequential) ---
     const totalViews = parseInt(views);
-    
-    // finalPageUrls: array of [url1, url2, url1, ...]
-    const finalPageUrls = generateViewPlan(totalViews, pages.filter(p => p.percent > 0)); 
-    
-    // countryPlan: array of [US, IN, US, ...]
-    const countryPlan = generateViewPlan(totalViews, countries.filter(c => c.percent > 0));
+    const finalPageUrls = generateCompensatedPlan(totalViews, pages.filter(p => p.percent > 0)); 
+    const countryPlan = generateCompensatedPlan(totalViews, countries.filter(c => c.percent > 0));
     
     // Combine Page URL and Country Code into a final plan
+    const maxPlanLength = Math.min(finalPageUrls.length, countryPlan.length);
     let finalCombinedPlan = [];
-    for (let i = 0; i < finalPageUrls.length; i++) {
+    for (let i = 0; i < maxPlanLength; i++) {
         finalCombinedPlan.push({ 
             url: finalPageUrls[i], 
             country_code: countryPlan[i] 
         });
     }
-    
+
     // --- Async Processing (Immediate Response) ---
     res.json({ 
         status: 'accepted', 
-        message: `Request for ${finalCombinedPlan.length} views distributed across ${countries.length} countries accepted. Results expected within 24-48 hours.`
+        message: `Request for ${finalCombinedPlan.length} human-like views accepted. Results expected within 24-48 hours.`
     });
 
     // Start views generation asynchronously
     (async () => {
         const totalViewsCount = finalCombinedPlan.length;
-        console.log(`[BOOSTER START] Starting for ${totalViewsCount} views...`);
+        console.log(`[BOOSTER START] Starting Human-Like View generation for ${totalViewsCount} views...`);
 
-        const viewPromises = finalCombinedPlan.map((plan, i) => {
-            return (async () => {
-                const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-                const SESSION_ID = Date.now(); 
-                const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-                
-                // Use the dynamically selected country code for geo property
-                const commonUserProperties = { 
-                    geo: { 
-                        value: plan.country_code 
-                    } 
-                };
-                
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); // Initial spread delay
+        // Process views sequentially (Ensures one view finishes before the next starts)
+        for (let i = 0; i < finalCombinedPlan.length; i++) {
+            const plan = finalCombinedPlan[i];
+            const viewId = i + 1;
+            
+            // Generate human-like parameters for this single user session
+            const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+            const SESSION_ID = Date.now(); 
+            const engagementTime = getRandomEngagementTime(); // Highly randomized time (45s to 3 mins)
+            
+            const commonUserProperties = { 
+                geo: { value: plan.country_code } 
+            };
+            
+            // 1. session_start event
+            await sendData(ga_id, api_key, { 
+                client_id: CLIENT_ID, 
+                user_properties: commonUserProperties, 
+                events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] 
+            }, viewId, 'session_start');
 
-                // 1. session_start event
-                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
+            // --- Real User Delay (Simulate time to load/think) ---
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000)); 
 
-                // 2. page_view event
-                const pageViewPayload = {
-                    client_id: CLIENT_ID,
-                    user_properties: commonUserProperties, 
-                    events: [{ name: 'page_view', params: { page_location: plan.url, page_title: `PROJECT_PAGE_${i + 1}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
-                };
-                await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
+            // 2. page_view event
+            const pageViewPayload = {
+                client_id: CLIENT_ID,
+                user_properties: commonUserProperties, 
+                // CRITICAL: We pass the randomized engagementTime here
+                events: [{ name: 'page_view', params: { page_location: plan.url, page_title: `PROJECT_PAGE_${viewId}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
+            };
+            await sendData(ga_id, api_key, pageViewPayload, viewId, 'page_view');
 
-                // 3. user_engagement event
-                const engagementResult = await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
+            // --- Real User Delay (Simulate scrolling/reading) ---
+            // This small, random delay makes the event timings look real, not instantaneous.
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000)); 
 
-                // 4. Final delay before next view starts
-                await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-                
-                return engagementResult.success;
-            })();
-        });
+            // 3. user_engagement event (Final event to close the session)
+            await sendData(ga_id, api_key, { 
+                client_id: CLIENT_ID, 
+                user_properties: commonUserProperties, 
+                events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] 
+            }, viewId, 'user_engagement');
 
-        Promise.all(viewPromises).then(results => {
-            const finalSuccessCount = results.filter(r => r).length;
-            console.log(`[BOOSTER FINISH] Total success: ${finalSuccessCount}/${totalViewsCount}`);
-        }).catch(err => {
-            console.error(`[BOOSTER CRITICAL] An error occurred during view processing: ${err.message}`);
-        });
+            // 4. MAIN DELAY before the NEXT country's view starts
+            // This is the session-to-session gap (5s to 25s)
+            await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
+        }
+        
+        console.log(`[BOOSTER FINISH] All ${totalViewsCount} human-like views dispatched.`);
 
     })();
 });
@@ -207,7 +244,7 @@ app.post('/boost-mp', async (req, res) => {
 // 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
-    
+    // ... (This section remains unchanged) ...
     if (!GEMINI_KEY) {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
@@ -252,7 +289,7 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 // 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
-    
+    // ... (This section remains unchanged) ...
     if (!GEMINI_KEY) {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
@@ -302,4 +339,4 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-                    
+    
