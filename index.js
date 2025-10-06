@@ -1,4 +1,4 @@
-// index.js (FINAL COMPLETE CODE - ALL FIXES INCLUDED)
+// index.js (FINAL COMPLETE CODE - Dependency, Key Path, and Caption Edit Added)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); // Correct dependency import
@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Combined API is running!');
 });
 
-// =================================================0
+// ===================================================================
 // --- WEBSITE BOOSTER FUNCTIONS (Improved Logging for Green Tick) ---
 // ===================================================================
 
@@ -169,7 +169,6 @@ app.post('/boost-mp', async (req, res) => {
 app.post('/api/caption-generate', async (req, res) => { 
     
     if (!GEMINI_KEY) {
-        console.error('Gemini API call failed because key is missing.');
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing or invalid on the server.' });
     }
     
@@ -179,7 +178,7 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
     
-    // 🚀 IMPROVED PROMPT FOR VIRAL TAGS 🚀
+    // Prompt for viral tags
     const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
@@ -206,6 +205,53 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
     } catch (error) {
         console.error('Gemini API Error:', error.message);
         res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}... Please check the Gemini API dashboard or if the server key is invalid.` });
+    }
+});
+
+
+// ===================================================================
+// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit) - NEW FEATURE
+// ===================================================================
+app.post('/api/caption-edit', async (req, res) => {
+    if (!GEMINI_KEY) {
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
+    }
+
+    const { originalCaption, requestedChange } = req.body;
+
+    if (!originalCaption || !requestedChange) {
+        return res.status(400).json({ error: 'Original caption and requested change are required.' });
+    }
+
+    const prompt = `Rewrite and edit the following original caption based on the requested change. The output should be only the final, edited caption and its hashtags.
+
+Original Caption: "${originalCaption}"
+Requested Change: "${requestedChange}"
+
+--- CRITICAL INSTRUCTION ---
+The final output MUST be a single JSON object with a key called 'editedCaption'. The caption should be highly engaging for Instagram Reels. If the original caption included hashtags, ensure the edited caption has 5 relevant and trending hashtags, separated from the text by a new line.`;
+    
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "object",
+                    properties: { editedCaption: { type: "string" } },
+                    required: ["editedCaption"]
+                },
+                temperature: 0.7,
+            },
+        });
+
+        const result = JSON.parse(response.text.trim());
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error('Gemini API Error (Edit):', error.message);
+        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
 
