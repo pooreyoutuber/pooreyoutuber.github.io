@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 10000;
 // ===================================================================
 let GEMINI_KEY;
 try {
-    // Reading the key from the file named 'gemini' in /etc/secrets/ 
+    // Key path is correct for your secret file
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
@@ -28,7 +28,7 @@ try {
 }
 
 // Gemini Client Initialization
-const ai = new GoogleGenAI({ apiKey: GEMINI_KEY }); 
+const ai = new GoogleGenAI({ apiKey: GEMINI }); 
 
 // ===================================================================
 // --- MIDDLEWARE & HEALTH CHECK ---
@@ -205,4 +205,14 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
-        res.status(500).json({ error: `AI Generation Failed. Reason: ${error
+        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}... Please check the Gemini API dashboard or if the server key is invalid.` });
+    }
+});
+
+
+// ===================================================================
+// START THE SERVER
+// ===================================================================
+app.listen(PORT, () => {
+    console.log(`Combined API Server listening on port ${PORT}.`);
+});
