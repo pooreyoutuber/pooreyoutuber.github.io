@@ -1,7 +1,7 @@
-// index.js (Yeh code FINAL aur 100% sahi hai)
+// index.js (FINAL COMPLETE CODE)
 
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai'); // Correct dependency import
+const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
@@ -9,30 +9,19 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// ===================================================================
-// --- GEMINI KEY CONFIGURATION (Reads from Secret File 'gemini') ---
-// ===================================================================
+// --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
-    // Key path: /etc/secrets/gemini (matching your file name)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
-    console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback to Environment Variable
     GEMINI_KEY = process.env.GEMINI_API_KEY;
-    if (GEMINI_KEY) {
-        console.log("Gemini Key loaded successfully from Environment Variable.");
-    } else {
+    if (!GEMINI_KEY) {
         console.error("FATAL: Gemini Key could not be loaded. Insta Caption Tool will fail.");
     }
 }
-
-// Gemini Client Initialization
 const ai = new GoogleGenAI({ apiKey: GEMINI_KEY }); 
 
-// ===================================================================
-// --- MIDDLEWARE & HEALTH CHECK ---
-// ===================================================================
+// --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', // Your Frontend URL
     methods: ['GET', 'POST'],
@@ -41,13 +30,8 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    // Health check endpoint (Server wake-up)
     res.status(200).send('PooreYouTuber Combined API is running!');
 });
-
-// ===================================================================
-// --- WEBSITE BOOSTER FUNCTIONS (Improved Logging for Green Tick) ---
-// ===================================================================
 
 const MIN_DELAY = 3000; 
 const MAX_DELAY = 12000; 
@@ -61,12 +45,12 @@ const geoLocations = [
 function getRandomDelay() {
     return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
 }
-
 function getRandomGeo() {
     return geoLocations[Math.floor(Math.random() * geoLocations.length)];
 }
 
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
+    // ... (sendData and generateViewPlan functions remain unchanged) ...
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
     try {
@@ -77,16 +61,15 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         });
 
         if (response.status === 204) { 
-            // SUCCESS LOGGING for Green Tick
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Client ID: ${payload.client_id.substring(0, 5)}...`);
+            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType}`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Event: ${eventType} | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
             return { success: false };
         }
     } catch (error) {
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Event: ${eventType} | Connection Failed: ${error.message}`);
+        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
         return { success: false };
     }
 }
@@ -113,8 +96,9 @@ function generateViewPlan(totalViews, pages) {
     return viewPlan;
 }
 
+
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp)
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Improved Concurrency
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages } = req.body; 
@@ -128,37 +112,51 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    res.json({ status: 'processing', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
+    // Immediately respond to the client (Critical for Free Tier)
+    res.json({ 
+        status: 'accepted', 
+        message: `Request for ${viewPlan.length} views accepted. Processing started in the background.`
+    });
 
-    // Background Processing 
+    // Start views generation asynchronously
     (async () => {
-        let successfulViews = 0;
         const totalViews = viewPlan.length;
-        console.log(`Starting Website Booster for ${totalViews} views...`);
+        console.log(`[BOOSTER START] Starting for ${totalViews} views...`);
 
-        for (let i = 0; i < totalViews; i++) {
-            const targetUrl = viewPlan[i]; 
-            const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-            const SESSION_ID = Date.now(); 
-            const geo = getRandomGeo();
-            const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-            const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
+        const viewPromises = viewPlan.map((targetUrl, i) => {
+            return (async () => {
+                const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+                const SESSION_ID = Date.now(); 
+                const geo = getRandomGeo();
+                const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
+                const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
+                
+                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); // Initial spread delay
 
-            await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
+                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
-            const pageViewPayload = {
-                client_id: CLIENT_ID,
-                user_properties: commonUserProperties, 
-                events: [{ name: 'page_view', params: { page_location: targetUrl, page_title: `PROJECT_PAGE_${i + 1}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
-            };
-            const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
-            if (pageViewResult.success) successfulViews++;
+                const pageViewPayload = {
+                    client_id: CLIENT_ID,
+                    user_properties: commonUserProperties, 
+                    events: [{ name: 'page_view', params: { page_location: targetUrl, page_title: `PROJECT_PAGE_${i + 1}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
+                };
+                const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
 
-            await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
+                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
 
-            await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-        }
-        console.log(`--- WEBSITE BOOST FINISHED. Total success: ${successfulViews}/${totalViews} ---`);
+                await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
+                
+                return pageViewResult.success;
+            })();
+        });
+
+        Promise.all(viewPromises).then(results => {
+            const finalSuccessCount = results.filter(r => r).length;
+            console.log(`[BOOSTER FINISH] Total success: ${finalSuccessCount}/${totalViews}`);
+        }).catch(err => {
+            console.error(`[BOOSTER CRITICAL] An error occurred during view processing: ${err.message}`);
+        });
+
     })();
 });
 
@@ -169,7 +167,7 @@ app.post('/boost-mp', async (req, res) => {
 app.post('/api/caption-generate', async (req, res) => { 
     
     if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing or invalid on the server.' });
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
     
     const { reelTitle, style } = req.body;
@@ -178,11 +176,11 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
     
-    // Prompt for viral tags
+    // Updated Prompt for Viral, Export, and View Increase Tags
     const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
-For each caption, provide exactly 5 trending, high-reach, and relevant hashtags. These hashtags must be separated from the caption by a new line. Do not use generic tags like #reels or #instagram. Focus only on niche-specific and fast-trending tags to maximize virality. The final output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
+For each caption, provide exactly 5 trending, high-reach, and relevant hashtags. Include **latest viral Instagram marketing terms** like **#viralreel, #exportviews, #viewincrease, #reelsmarketing** only if they are relevant to the topic. Focus mainly on niche-specific and fast-trending tags to maximize virality. The final output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
 
 
     try {
@@ -204,15 +202,17 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
-        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}... Please check the Gemini API dashboard or if the server key is invalid.` });
+        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
 
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit) - NEW FEATURE
+// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
+    
+    // ... (Caption Edit Endpoint remains unchanged) ...
     if (!GEMINI_KEY) {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
@@ -262,3 +262,4 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
+            
