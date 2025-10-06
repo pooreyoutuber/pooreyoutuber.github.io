@@ -70,7 +70,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId) {
             }
             return { success: true };
         } else {
-            // Log full response body for debugging failed GA4 hits
             const errorText = await response.text(); 
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText}`);
             return { success: false };
@@ -172,4 +171,37 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
     
-    const prompt = `Generate 10 unique, trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". Each caption must be followed by 3-5 relevant, high-reach hashtags
+    const prompt = `Generate 10 unique, trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". Each caption must be followed by 3-5 relevant, high-reach hashtags on a new line. The output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "array",
+                    items: { type: "object", properties: { caption: { type: "string" } }, required: ["caption"] }
+                },
+                temperature: 0.8,
+            },
+        });
+
+        // The response text is a JSON string, which we parse
+        const captions = JSON.parse(response.text.trim());
+        res.status(200).json({ captions: captions });
+
+    } catch (error) {
+        console.error('Gemini API Error:', error.message);
+        // Return 500 error if Gemini fails (e.g., rate limit, invalid key)
+        res.status(500).json({ error: 'Failed to generate captions. Please check server logs or Gemini API Key status.' });
+    }
+});
+
+
+// ===================================================================
+// START THE SERVER
+// ===================================================================
+app.listen(PORT, () => {
+    console.log(`Combined API Server listening on port ${PORT}.`);
+});
