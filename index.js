@@ -1,90 +1,155 @@
-const express = require('express');
-const { GoogleGenAI } = require('@google/genai');
-const cors = require('cors');
+// index.js (FINAL STABLE & PROXY-FREE CODE for Render)
 
-// Load environment variables (dotenv is primarily for local testing)
-require('dotenv').config();
+const express = require('express');
+const fetch = require('node-fetch');
+const cors = require('cors'); 
 
 const app = express();
-const port = process.env.PORT || 3000;
-
-// Initialize the GoogleGenAI client
-// It automatically uses the GEMINI_API_KEY from Render environment variables.
-if (!process.env.GEMINI_API_KEY) {
-    console.error("FATAL: GEMINI_API_KEY is not set in environment variables.");
-    // In a production app, you might crash the process here.
-}
-const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+const PORT = process.env.PORT || 10000; 
 
 // Middleware
-// CORS Configuration: ONLY allows requests from your specific frontend domain for security
-app.use(cors({
-    origin: 'https://pooreyoutuber-github-io.onrender.com', 
-    methods: ['POST'],
-}));
-app.use(express.json());
+app.use(cors()); 
+app.use(express.json()); 
+
+// --- Constants & Helper Functions ---
+const MIN_DELAY = 3000; // 3 seconds
+const MAX_DELAY = 12000; // 12 seconds
+
+const geoLocations = [
+    { country: "United States", region: "California" },
+    { country: "India", region: "Maharashtra" },
+    { country: "Germany", region: "Bavaria" },
+    { country: "Japan", region: "Tokyo" },
+    { country: "United Kingdom", region: "England" },
+    { country: "Canada", region: "Ontario" },
+    { country: "Brazil", region: "Sao Paulo" },
+    { country: "France", region: "Paris" },
+    { country: "Mexico", region: "Mexico City" },
+];
+
+function getRandomDelay() {
+    return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
+}
+
+function getRandomGeo() {
+    return geoLocations[Math.floor(Math.random() * geoLocations.length)];
+}
 
 // ----------------------------------------------------
-// Health Check Endpoint
+// Core Logic: Sending Data to GA4 (Measurement Protocol)
 // ----------------------------------------------------
-app.get('/', (req, res) => {
-    res.status(200).send('Caption Generator API is running successfully!');
-});
-
-
-// ----------------------------------------------------
-// Main Caption Generation Endpoint
-// ----------------------------------------------------
-app.post('/api/generate', async (req, res) => {
-    const { reelTitle } = req.body;
-
-    if (!reelTitle) {
-        return res.status(400).json({ error: 'Reel title is required.' });
-    }
-
-    // Detailed prompt instructing Gemini on format and content
-    const prompt = `Generate 10 trending, catchy, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". Each caption must be followed by 3-5 relevant, high-reach hashtags on a new line. The output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
+async function sendData(gaId, apiSecret, payload, currentViewId) {
+    const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
+    const eventName = payload.events[0].name;
 
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                // Force the model to return a valid JSON structure
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "array",
-                    items: {
-                        type: "object",
-                        properties: {
-                            caption: {
-                                type: "string",
-                                description: "A catchy Instagram reel caption with relevant hashtags."
-                            }
-                        },
-                        required: ["caption"]
-                    }
-                },
-                temperature: 0.8, // Slightly higher temperature for creative captions
-            },
+        const response = await fetch(gaEndpoint, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'application/json' }
         });
 
-        // The response text is a JSON string, which we parse
-        const captions = JSON.parse(response.text.trim());
-        
-        // Return the captions array to the frontend
-        res.status(200).json({ captions: captions });
-
+        if (response.status === 204) { 
+            if (eventName === 'page_view') {
+                console.log(`[View ${currentViewId}] SUCCESS ✅ | URL: ${payload.events[0].params.page_location}`);
+            }
+            return { success: true };
+        } else {
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Check API Secret/GA ID.`);
+            return { success: false };
+        }
     } catch (error) {
-        console.error('Gemini API Error:', error.message);
-        // Send a generic error message back to the frontend
-        res.status(500).json({ 
-            error: 'Failed to generate captions. Check the server logs for details.',
-        });
+        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
+        return { success: false };
     }
+}
+
+
+// --- Views को Pages में विभाजित करें ---
+function generateViewPlan(totalViews, pages) {
+    const viewPlan = [];
+    
+    // Percentage validation
+    const totalPercentage = pages.reduce((sum, page) => sum + page.percent, 0);
+    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
+        console.error(`Distribution Failed: Total percentage is not 100.`);
+        return [];
+    }
+    
+    pages.forEach(page => {
+        const viewsForPage = Math.round(totalViews * (page.percent / 100));
+        for (let i = 0; i < viewsForPage; i++) {
+            viewPlan.push(page.url);
+        }
+    });
+
+    viewPlan.sort(() => Math.random() - 0.5);
+    
+    return viewPlan;
+}
+
+// --- API Endpoint: /boost-mp ---
+app.post('/boost-mp', async (req, res) => {
+    const { ga_id, api_key, views, pages } = req.body; 
+
+    // Validation
+    if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0) {
+        return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
+    }
+    
+    const viewPlan = generateViewPlan(parseInt(views), pages);
+    if (viewPlan.length === 0) {
+         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100.' });
+    }
+
+    // Acknowledge the request immediately (Allows user to close browser)
+    res.json({ status: 'processing', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
+
+    // Background Processing 
+    (async () => {
+        let successfulViews = 0;
+        const totalViews = viewPlan.length;
+
+        for (let i = 0; i < totalViews; i++) {
+            const targetUrl = viewPlan[i]; 
+
+            const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+            const SESSION_ID = Date.now(); 
+            const geo = getRandomGeo();
+            const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
+
+            const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
+
+            // 1. Session Start
+            const sessionStartPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] };
+            await sendData(ga_id, api_key, sessionStartPayload, i + 1);
+
+            // 2. Page View 
+            const pageViewPayload = {
+                client_id: CLIENT_ID,
+                user_properties: commonUserProperties, 
+                events: [{ name: 'page_view', params: { page_location: targetUrl, page_title: `PROJECT_PAGE_${i + 1}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
+            };
+            const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1);
+            if (pageViewResult.success) successfulViews++;
+
+            // 3. User Engagement
+            const engagementPayload = { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] };
+            await sendData(ga_id, api_key, engagementPayload, i + 1);
+
+            // Delay for realistic traffic
+            await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
+        }
+        console.log(`--- BOOST FINISHED. Total success: ${successfulViews}/${totalViews} ---`);
+    })();
+});
+
+// Default route for health check
+app.get('/', (req, res) => {
+    res.send({ status: 'ok', message: 'Traffic Booster API is running.' });
 });
 
 // Start the server
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Traffic Booster API running and ready to accept commands on port ${PORT}.`);
 });
