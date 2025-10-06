@@ -5,15 +5,16 @@ const { GoogleGenAI } = require('@google/genai');
 const cors = require('cors'); 
 
 const app = express();
-const PORT = process.env.PORT || 10000; // Render will use its own PORT env variable
+const PORT = process.env.PORT || 10000; 
 
 // Gemini Client Initialization
 // Ensure GEMINI_API_KEY is set in this new Render service's secrets.
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // Middleware Setup
+// Yahaan aap apni GitHub Pages URL daalenge
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', // Your frontend URL
+    origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
     credentials: true
 }));
@@ -26,7 +27,8 @@ app.get('/', (req, res) => {
 
 
 // --- Insta Caption Generator Endpoint ---
-app.post('/api/caption-generate', async (req, res) => { // Endpoint changed to /api/caption-generate
+// Yahaan humne URL /api/caption-generate rakha hai
+app.post('/api/caption-generate', async (req, res) => { 
     
     if (!process.env.GEMINI_API_KEY) {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
