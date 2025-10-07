@@ -139,10 +139,41 @@
     <script>
         // 🚨 FINAL CORRECT API URL - CONFIRMED
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_v8'; // Final storage key
+        const STORAGE_KEY = 'booster_details_v9_final'; // Final storage key
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
         const totalPercentSpan = document.getElementById('totalPercent');
         const MAX_RETRIES = 5; // 1 initial attempt + 5 retries = 6 total attempts
+        const RETRY_DELAY = 10000; // 10 seconds delay
+        
+        const pageInputs = [1, 2, 3, 4, 5].map(i => ({
+            url: document.getElementById(`url${i}`),
+            percent: document.getElementById(`percent${i}`)
+        }));
+
+        // --- Local Storage Functions ---
+        function loadSavedDetails() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    document.getElementById('gaid').value = data.gaid || '';
+                    document.getElementById('apikey').value = data.apikey || '';
+                    document.getElementById('views').value = data.views || '100';
+                    
+                    data.pages.forEach((page, index) => {
+                        if (index < 5) {
+                            pageInputs[index].url.value = page.url || '';
+                            pageInputs[index].percent.value = page.percent || '0';
+                        }
+                    });
+
+                } catch (e) { /* Error ignored */ }
+                updateDisplayTotal();
+            }
+        }
+
+        function saveDetails(gaid, apikey, views, pages) {
+            const data = { gaid, apikey
