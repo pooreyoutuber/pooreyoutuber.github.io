@@ -137,7 +137,7 @@
     </div>
     
     <script>
-        // 🚨 FINAL RENDER API URL - FIX APPLIED HERE
+        // 🚨 FINAL VERIFIED RENDER API URL
         const RENDER_API_URL = 'https://pooreyoutuber.onrender.com/boost-mp'; 
         const STORAGE_KEY = 'booster_details_v6'; 
         
@@ -246,15 +246,17 @@
             saveDetails(gaId, apiKey, viewsCount, pages); 
             const payload = { ga_id: gaId, api_key: apiKey, views: viewsCount, pages: pages };
             
-            submitData(payload, 2); 
+            // Start submission with max retries to ensure server wakes up
+            submitData(payload, 3); 
         });
 
         async function submitData(data, retriesLeft) {
             submitBtn.disabled = true;
             
-            if (retriesLeft < 2) {
-                submitBtn.textContent = `⚠️ Pinging server... Retrying in 5 seconds...`;
-                showMessage('info', `⚠️ Server is waking up. Retrying in 5 seconds...`, false);
+            if (retriesLeft < 3) {
+                // Wait for 5 seconds before retrying to give Render server time to wake up
+                submitBtn.textContent = `⚠️ Server not awake. Retrying in 5 seconds...`;
+                showMessage('info', `⚠️ Server not awake. Retrying in 5 seconds...`, false);
                 await new Promise(resolve => setTimeout(resolve, 5000));
             } else {
                 submitBtn.textContent = '✅ Request initiated. Checking server status...';
@@ -281,7 +283,7 @@
                 }
 
             } catch (error) {
-                if (retriesLeft > 0) {
+                if (retriesLeft > 1) { // Changed condition to ensure 3 total attempts
                     return submitData(data, retriesLeft - 1);
                 } else {
                     showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your API service is LIVE and the URL is correct.`, true);
