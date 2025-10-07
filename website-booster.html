@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -53,7 +53,7 @@
 <body>
     <div class="header">
         <h2>🚀 Traffic Booster (Final Deployment)</h2>
-        <p>Traffic will be distributed over 48 hours from 15+ countries.</p>
+        <p>Traffic will be distributed over 48 hours with simulated engagement.</p>
     </div>
     
     <div class="container">
@@ -68,6 +68,8 @@
             
             <input type="hidden" id="deliveryTime" value="48">
             <input type="hidden" id="countryCount" value="15">
+            <input type="hidden" id="minEngagementTime" value="2000">
+            <input type="hidden" id="maxEngagementTime" value="3000">
             
             <div class="page-entry-group">
                 <label style="color: #007bff;">3. Distribute Traffic Across Pages (Total must be 100%):</label>
@@ -114,9 +116,8 @@
 
         <div class="info-card">
             <h3>🚨 IMPORTANT WARNING: Adsense/Ad Policy</h3>
-            <p class="policy-warning">Is tool se generate kiya gaya traffic hamesha **Invalid Traffic** maana jaayega.</p>
-            <p>Agar aap **Adsense** waale pages ko boost karte hain, toh aapka account **hamesha ke liye ban** ho sakta hai.</p>
-            <p>Ise sirf **Google Analytics reports** mein views badhaane ke liye istemaal karein, **Ad revenue** ke liye nahi.</p>
+            <p class="policy-warning">Yeh tool sirf **GA4 engagement metrics** ko behtar dikhaane ke liye hai.</p>
+            <p>Adsense is traffic ko **fake** maanta hai. Ise **Adsense waale pages par istemaal na karein**.</p>
         </div>
     </div>
     
@@ -127,7 +128,7 @@
         
         // 🚨 FINAL RENDER API URL
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_final_v6_clean'; 
+        const STORAGE_KEY = 'booster_details_final_v7_engagement'; 
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
@@ -208,6 +209,9 @@
             // New Parameters
             const deliveryTime = parseInt(document.getElementById('deliveryTime').value);
             const countryCount = parseInt(document.getElementById('countryCount').value);
+            // Engagement time parameters
+            const minEngTime = parseInt(document.getElementById('minEngagementTime').value);
+            const maxEngTime = parseInt(document.getElementById('maxEngagementTime').value);
             
             if (!referrerUrl || viewsCount < 1) {
                 showMessage('error', '❌ Error: Traffic Source URL and Total Views are required.', true);
@@ -251,7 +255,7 @@
 
             saveDetails(referrerUrl, viewsCount, pages); 
             
-            // Final Payload with Delivery Time and Country Count instructions
+            // Final Payload with ALL instructions
             const payload = { 
                 ga_id: gaId, 
                 api_key: apiKey, 
@@ -259,7 +263,10 @@
                 pages: pages,
                 referrer_url: referrerUrl,
                 delivery_time_hours: deliveryTime, 
-                target_country_count: countryCount 
+                target_country_count: countryCount,
+                // NEW: Engagement parameters
+                min_engagement_msec: minEngTime,
+                max_engagement_msec: maxEngTime
             };
             
             submitData(payload, MAX_RETRIES); 
@@ -308,7 +315,7 @@
                          successMessage = successMessage.replace('❌ API Error: ', '');
                      }
                      
-                     showMessage('success', `✨ Success! ${successMessage} **Traffic will be delivered over 48 hours from 15+ countries. You can close this browser now.**`, true);
+                     showMessage('success', `✨ Success! ${successMessage} **Traffic will be delivered over 48 hours with simulated ${data.min_engagement_msec/1000} to ${data.max_engagement_msec/1000} second engagement. You can close this browser now.**`, true);
                 } else {
                      showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
                 }
