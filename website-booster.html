@@ -20,7 +20,17 @@
         .page-entry-group { border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #f9f9f9; }
         .page-entry { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; background-color: #fff; }
-        .page-entry input[type="number"] { width: 40px; flex-grow: 0; margin-bottom: 0; text-align: center; background-color: #eef4ff; }
+        
+        /* --- FIX FOR SMALL PERCENTAGE BOX --- */
+        .page-entry input[type="number"] { 
+            width: 45px; 
+            flex-grow: 0; 
+            margin-bottom: 0; 
+            text-align: center; 
+            background-color: #eef4ff; 
+            padding: 10px 5px; 
+        }
+        
         .percent-label { font-weight: bold; width: 25px; color: #5cb85c; }
         .total-percent-display { text-align: right; margin-top: 10px; font-weight: bold; font-size: 1.1em; }
         
@@ -115,37 +125,35 @@
             <h3>🔑 GA4 Key Retrieval Guide:</h3>
             <ul class="key-guide">
                 <li>**Google Analytics ID (G-XXXXX):** Go to your GA4 dashboard, navigate to **Admin** $\rightarrow$ **Data Streams**. Click on your Web stream, and the ID (e.g., G-A1B2C3D4E5) will be displayed at the top.</li>
-                <li>**API Secret (Measurement Protocol Key):** From the same **Data Streams** page, scroll down to **Measurement Protocol API Secrets**. Click "Create" to generate a new secret and copy the key (e.g., XXXXXXXXXXXXX). "NOTE: Results will only appear correctly in the 'Traffic Country' report after creating a Custom Dimension in your GA4 Admin panel."
-
-Aur neeche Custom Dimension ke teen steps bata dein (jo aapne kiye the):
-
-Admin → Custom definitions
-
-Create Event Scope dimension.
-
-Event parameter: country_code (manually type karein).
-
-Dimension Name: Traffic Country.</li>
+                <li>**API Secret (Measurement Protocol Key):** From the same **Data Streams** page, scroll down to **Measurement Protocol API Secrets**. Click "Create" to generate a new secret and copy the key (e.g., XXXXXXXXXXXXX).</li>
+                <li style="color: #d9534f; margin-top: 15px;">**✨ Required: Custom Dimension Setup (For Country Data)**: To see traffic by country instead of "(not set)", you must create an **Event** scoped Custom Dimension with:
+                    <ul>
+                        <li>**Dimension Name:** `Traffic Country`</li>
+                        <li>**Event parameter:** **`country_code`** (manually type this in)</li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>
     
     <script>
-        // 🚨 FINAL RENDER API URL - DYNAMICALLY SET
+        // 🚨 FINAL CORRECT API URL - CONFIRMED
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_v6'; // Updated storage key for new structure
+        const STORAGE_KEY = 'booster_details_v10_final'; // Final storage key
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
         const totalPercentSpan = document.getElementById('totalPercent');
+        const MAX_RETRIES = 5; // 1 initial attempt + 5 retries = 6 total attempts
+        const RETRY_DELAY = 10000; // 10 seconds delay
         
         const pageInputs = [1, 2, 3, 4, 5].map(i => ({
             url: document.getElementById(`url${i}`),
             percent: document.getElementById(`percent${i}`)
         }));
 
-        // --- Local Storage Functions ---
+        // --- Local Storage Functions (No Change) ---
         function loadSavedDetails() {
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (savedData) {
@@ -172,11 +180,13 @@ Dimension Name: Traffic Country.</li>
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
-        // --- UI Functions ---
+        // --- UI Functions (No Change) ---
         function updateDisplayTotal() {
             let total = 0;
             document.querySelectorAll('.page-percent').forEach(input => {
-                total += parseInt(input.value) || 0;
+                const val = parseInt(input.value) || 0; 
+                total += val;
+                input.value = val;
             });
             totalPercentSpan.textContent = total;
             totalPercentSpan.style.color = total === 100 ? '#5cb85c' : '#d9534f';
@@ -195,7 +205,7 @@ Dimension Name: Traffic Country.</li>
             }
         }
 
-        // --- Main Submission Logic ---
+        // --- Main Submission Logic (Fixed) ---
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             
@@ -215,22 +225,29 @@ Dimension Name: Traffic Country.</li>
             }
             
             let pages = [];
-            // Collect all pages with URL and percentage > 0
+            let isValid = true;
+
             pageInputs.forEach(input => {
                 const url = input.url.value.trim();
-                const percent = parseInt(input.percent.value) || 0;
+                const percent = parseInt(input.percent.value) || 0; 
+
                 if (url && percent > 0) {
-                    // Basic URL validation: requires 'http' to ensure a complete URL is passed to the API
-                    if (!url.startsWith('http')) {
-                        showMessage('error', '❌ Error: All page URLs must start with http:// or https://', true);
-                        pages = null; // Mark as invalid
+                    try {
+                        new URL(url);
+                    } catch (e) {
+                        showMessage('error', `❌ Error: Page URL "${url}" is invalid. It must be a complete URL (e.g., https://example.com/page)`, true);
+                        isValid = false;
                         return;
                     }
                     pages.push({ url: url, percent: percent });
+                } else if (url && percent === 0) {
+                     showMessage('error', `❌ Error: Page URL "${url}" has 0% distribution. Please fix or clear the URL.`, true);
+                     isValid = false;
+                     return;
                 }
             });
 
-            if (!pages) return; // Exit if URL validation failed
+            if (!isValid) return; 
 
             if (pages.length === 0) {
                  showMessage('error', '❌ Error: At least one Page URL (Page 1) with a percentage > 0 must be filled.', true);
@@ -240,53 +257,61 @@ Dimension Name: Traffic Country.</li>
             saveDetails(gaId, apiKey, viewsCount, pages); 
             const payload = { ga_id: gaId, api_key: apiKey, views: viewsCount, pages: pages };
             
-            submitData(payload, 2); 
+            submitData(payload, MAX_RETRIES); 
         });
 
         async function submitData(data, retriesLeft) {
             submitBtn.disabled = true;
             
-            if (retriesLeft < 2) {
-                submitBtn.textContent = `⚠️ Pinging server... Retrying in 5 seconds...`;
-                showMessage('info', `⚠️ Server is waking up. Retrying in 5 seconds...`, false);
-                await new Promise(resolve => setTimeout(resolve, 5000));
+            const attemptsMade = MAX_RETRIES - retriesLeft + 1;
+            const totalAttempts = MAX_RETRIES + 1;
+            const delayInSeconds = RETRY_DELAY / 1000;
+
+            if (attemptsMade > 1) {
+                submitBtn.textContent = `⚠️ Server not awake. Retrying in ${delayInSeconds}s... (Attempt ${attemptsMade} of ${totalAttempts})`;
+                showMessage('info', `⚠️ Server not awake. Retrying in ${delayInSeconds} seconds...`, false);
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
             } else {
-                submitBtn.textContent = '✅ Request initiated. Checking server status...';
+                submitBtn.textContent = `✅ Request initiated. Checking server status... (Attempt 1 of ${totalAttempts})`;
                 showMessage('info', '✅ Request initiated. Checking server status...', false);
             }
             
+            let response;
+            let responseText = '';
+
             try {
-                const response = await fetch(RENDER_API_URL, {
+                // 1. Fetch the response
+                response = await fetch(RENDER_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
+                // 2. Read the response body as plain text
+                responseText = await response.text();
+
+                // 3. Handle temporary server errors (Render spin-up)
+                if (response.status === 503 || response.status === 504 || response.status === 502) {
+                     throw new Error('5XX Temporary Server Error. Retrying...');
+                }
+
+                // 4. Check for success message in the raw text (FIX FOR SERVER RETURNING HTML)
+                if (responseText.includes('views accepted') || responseText.includes('status":"processing"')) {
+                    // Extract the message part from the server's HTML/mixed response
+                    const successMessage = responseText.includes('views accepted') 
+                        ? responseText.substring(responseText.indexOf('Request for'), responseText.indexOf('hours.') + 6)
+                        : `Request for ${data.views} views accepted. **Results expected within 24-48 hours.**`;
+
+                    showMessage('success', `✨ Success! ${successMessage} You can close this browser now.`, true);
+                    return; // Exit successfully
                 }
                 
-                const responseData = await response.json();
-
-                if (responseData.status === 'processing' || responseData.status === 'ok') {
-                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. **Results expected within 24-48 hours.** You can close this browser now.`, true);
-                } else {
-                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
+                // 5. If response is not OK and didn't contain the custom success message, throw error
+                if (!response.ok) {
+                    throw new Error(`HTTP Error ${response.status}: Server responded with an error.`);
                 }
+                
+                // 6. If it's OK status, try to parse JSON normally (for good server responses)
+                const responseData = JSON.parse(responseText);
 
-            } catch (error) {
-                if (retriesLeft > 0) {
-                    return submitData(data, retriesLeft - 1);
-                } else {
-                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your API service is LIVE and the URL is correct.`, true);
-                }
-            } 
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-             loadSavedDetails();
-             updateDisplayTotal();
-        });
-    </script>
-</body>
-</html>
+                if (responseData.status
