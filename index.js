@@ -1,7 +1,6 @@
-  // index.js (FINAL CODE with ALL FIXES)
+// index.js (FINAL CODE with SCROLL/ENHANCED ENGAGEMENT FIXES)
 
 const express = require('express');
-// GoogleGenAI library is kept for the Insta Caption feature, but removed from /boost-mp logic
 const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
@@ -10,14 +9,12 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- GEMINI KEY CONFIGURATION (Render Secret File) ---
+// --- GEMINI KEY CONFIGURATION (Kept for other API functionality) ---
 let GEMINI_KEY;
 try {
-    // Reads key from Render Secret File at /etc/secrets/gemini
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback if secret file fails
     GEMINI_KEY = process.env.GEMINI_API_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable.");
@@ -30,7 +27,6 @@ let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
-    // Dummy AI object to prevent crashes if key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -47,7 +43,7 @@ app.get('/', (req, res) => {
 });
 
 // --- HUMAN-LIKE DELAY & ENGAGEMENT PARAMETERS ---
-// Delay between sending two different sessions (views) to simulate distribution over time
+// Delay between sending two different sessions (views)
 const MIN_VIEW_DELAY = 5000; // 5 seconds
 const MAX_VIEW_DELAY = 25000; // 25 seconds
 function getRandomDelay() {
@@ -55,7 +51,7 @@ function getRandomDelay() {
 }
 
 function getRandomEngagementTime() {
-    // Engagement time (time on page) between 45 seconds to 180 seconds (3 minutes)
+    // Engagement time between 45 seconds to 180 seconds (3 minutes)
     const MIN_ENG = 45000;
     const MAX_ENG = 180000;
     return Math.floor(Math.random() * (MAX_ENG - MIN_ENG) + MIN_ENG);
@@ -73,12 +69,10 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         });
 
         if (response.status === 204) { 
-            // Successfully sent
             const countrySent = payload.events[0].params.country_code || 'N/A';
             console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Client: ${payload.client_id.substring(0, 5)}... | Country: ${countrySent}`);
             return { success: true };
         } else {
-            // Log full error for debugging
             const errorText = await response.text(); 
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 100)}...`);
             return { success: false };
@@ -89,7 +83,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Compensation function to ensure percentages equal total views (Corrected from previous versions)
+// Compensation function to ensure percentages equal total views
 function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
     if (items.length === 0 || totalViews < 1) return [];
@@ -124,10 +118,9 @@ function generateCompensatedPlan(totalViews, items) {
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     // Frontend sends all data in the body
-    const { ga_id, api_key, views, pages, referrer_url, min_engagement_msec, max_engagement_msec } = req.body; 
+    const { ga_id, api_key, views, pages, referrer_url } = req.body; 
 
     // --- HARDCODED 18 COUNTRY DISTRIBUTION LIST (Weighted for realism) ---
-    // Note: Percentages must total 100
     const HARDCODED_COUNTRIES = [
         { code: 'US', percent: 22 }, { code: 'IN', percent: 12 }, { code: 'AU', percent: 8 }, 
         { code: 'CA', percent: 7 }, { code: 'GB', percent: 6 }, { code: 'DE', percent: 5 }, 
@@ -179,24 +172,21 @@ app.post('/boost-mp', async (req, res) => {
         const totalViewsCount = finalCombinedPlan.length;
         console.log(`[BOOSTER START] Starting Human-Like View generation for ${totalViewsCount} views. Target 18 countries.`);
         
-        // This is where the 24-48 hour logic is simulated by delaying each view
         let successfulViews = 0;
 
         for (let i = 0; i < finalCombinedPlan.length; i++) {
             const plan = finalCombinedPlan[i];
             const viewId = i + 1;
             
-            // Unique Client ID (simulating a new user) - More secure than using real names
             const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
             const SESSION_ID = Date.now(); 
-            // Random engagement time within the human-like range (45s to 3 mins)
             const engagementTime = getRandomEngagementTime(); 
             
-            // Common properties (referrer is sent in params of events)
+            // Common properties for all events in this session
             const commonEventParams = {
                 session_id: SESSION_ID,
                 country_code: plan.country_code, // Use event params for country
-                page_referrer: referrer_url
+                page_referrer: referrer_url // Referrer URL for the session
             };
             
             // 1. session_start event 
@@ -209,12 +199,11 @@ app.post('/boost-mp', async (req, res) => {
             }, viewId, 'session_start');
             
             if (!success) {
-                // If session_start fails, skip to next view
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 continue;
             }
 
-            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000)); // Short delay
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500)); // Short delay
 
             // 2. page_view event 
             success = await sendData(ga_id, api_key, {
@@ -224,16 +213,31 @@ app.post('/boost-mp', async (req, res) => {
                     params: { 
                         ...commonEventParams,
                         page_location: plan.url, 
-                        page_title: `PROJECT_PAGE_${viewId}`, // Dynamic page title
+                        page_title: `PROJECT_PAGE_${viewId}`, 
                         engagement_time_msec: engagementTime,
-                        _et: engagementTime // Engagement Time sent twice for robustness
+                        _et: engagementTime
                     } 
                 }]
             }, viewId, 'page_view');
 
-            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000)); // Short delay
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500)); // Short delay
 
-            // 3. user_engagement event (to confirm high engagement)
+            // 3. SCROLL event (Simulates user scrolling to the end of the page)
+            success = await sendData(ga_id, api_key, { 
+                client_id: CLIENT_ID, 
+                events: [{ 
+                    name: 'scroll', 
+                    params: { 
+                        ...commonEventParams,
+                        page_location: plan.url,
+                        percent_scrolled: 90 // Simulates reaching the bottom
+                    } 
+                }] 
+            }, viewId, 'scroll');
+            
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500)); // Short delay
+
+            // 4. user_engagement event (Final event to confirm the total session time)
             success = await sendData(ga_id, api_key, { 
                 client_id: CLIENT_ID, 
                 events: [{ 
@@ -250,7 +254,7 @@ app.post('/boost-mp', async (req, res) => {
                 successfulViews++;
             }
 
-            // 4. MAIN DELAY (Simulates 24-48 hour distribution)
+            // 5. MAIN DELAY (Simulates 24-48 hour distribution)
             await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
         }
         
