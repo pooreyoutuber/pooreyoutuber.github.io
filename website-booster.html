@@ -20,14 +20,22 @@
         .page-entry-group { border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #f9f9f9; }
         .page-entry { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; background-color: #fff; }
-        .page-entry input[type="number"] { width: 40px; flex-grow: 0; margin-bottom: 0; text-align: center; background-color: #eef4ff; }
+        
+        /* FIX: Percentage Input Size Increased */
+        .page-entry input[type="number"] { 
+            width: 60px; /* Increased size */
+            flex-grow: 0; 
+            margin-bottom: 0; 
+            text-align: center; 
+            background-color: #eef4ff;
+        }
         .percent-label { font-weight: bold; width: 25px; color: #5cb85c; }
         .total-percent-display { text-align: right; margin-top: 10px; font-weight: bold; font-size: 1.1em; }
         
         /* Button Styling */
         button { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 1em; transition: background-color 0.3s; }
         button:hover { background-color: #0056b3; }
-        button:disabled { background-color: #adb5bd; cursor: not-allowed; } /* Added disabled style */
+        button:disabled { background-color: #adb5bd; cursor: not-allowed; } 
 
         /* Message Box Styling */
         #message { margin-top: 20px; padding: 12px; border-radius: 5px; font-weight: bold; text-align: center; border: 1px solid transparent; }
@@ -66,7 +74,7 @@
                 <label style="color: #007bff;">4. Distribute Traffic Across Pages (Total must be 100%):</label>
                 
                 <div class="page-entry">
-                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required)" required autocomplete="off">
+                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required) - Must start with https://" required autocomplete="off">
                     <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
                     <span class="percent-label">%</span>
                 </div>
@@ -106,17 +114,13 @@
         <div id="message"></div>
 
         <div class="info-card">
-            <h3>How This Tool Helps You (Summary):</h3>
-            <p style="font-size: 0.9em; line-height: 1.5;">
-                This **Website Traffic Booster Tool** utilizes the Google Analytics 4 (GA4) Measurement Protocol to accurately simulate realistic, high-engagement user sessions on your website. Instead of simple pings, it creates sophisticated traffic that includes randomized details like **geographic location**, **session start events**, and **user engagement time (30 to 120 seconds)**. This process is crucial because it ensures the generated traffic not only increases your **total page views** but also significantly improves your **average engagement time**—a key metric for SEO and performance analysis. By distributing the traffic (1-500 views per request) across multiple pages with custom percentages, you can target specific content, making the overall traffic pattern appear more organic and valuable in your GA4 reports. The process runs on a stable server in the background, which means once you submit the request, you can safely close your browser. **Results are typically reflected in your GA4 dashboard within 24 to 48 hours** as Google processes the API data.
-            </p>
-        </div>
-
-        <div class="info-card">
-            <h3>🔑 GA4 Key Retrieval Guide:</h3>
+            <h3>🔑 GA4 Key Retrieval & Custom Dimension Guide:</h3>
             <ul class="key-guide">
-                <li>**Google Analytics ID (G-XXXXX):** Go to your GA4 dashboard, navigate to **Admin** $\rightarrow$ **Data Streams**. Click on your Web stream, and the ID (e.g., G-A1B2C3D4E5) will be displayed at the top.</li>
-                <li>**API Secret (Measurement Protocol Key):** From the same **Data Streams** page, scroll down to **Measurement Protocol API Secrets**. Click "Create" to generate a new secret and copy the key (e.g., XXXXXXXXXXXXX).</li>
+                <li>**Google Analytics ID (G-XXXXX):** Go to **Admin** $\rightarrow$ **Data Streams**. Click on your Web stream, copy the ID (e.g., G-A1B2C3D4E5).</li>
+                <li>**API Secret:** From the same **Data Streams** page, scroll down to **Measurement Protocol API Secrets**. Generate and copy the key.</li>
+                <li style="color: #d9534f; font-weight: bold;">**Custom Dimension (IMPORTANT for Country Report):**</li>
+                <li style="margin-left: 10px;">Go to **Admin** $\rightarrow$ **Custom definitions**.</li>
+                <li style="margin-left: 10px;">Create a new **Custom Dimension** with: **Name: `Traffic Country`**, **Scope: `Event`**, and **User Property: `country_code`**. (Iske bina country report mein 'not set' aayega).</li>
             </ul>
         </div>
     </div>
@@ -124,14 +128,14 @@
     <script>
         // 🚨 FINAL RENDER API URL - DYNAMICALLY SET
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_v6_final'; // Updated storage key
+        const STORAGE_KEY = 'booster_details_v6_final'; // Final storage key
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
         const totalPercentSpan = document.getElementById('totalPercent');
         
-        // --- ADDED RETRY CONSTANTS ---
+        // --- RETRY CONSTANTS (Increased for stability) ---
         const MAX_RETRIES = 5; // 5 Retries + 1 Initial Attempt = 6 Total Attempts
         const RETRY_DELAY = 10000; // 10 seconds delay
         
@@ -167,16 +171,16 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
-        // --- UI Functions (FIXED updateDisplayTotal) ---
+        // --- UI Functions (FIXED Total Color) ---
         function updateDisplayTotal() {
             let total = 0;
             document.querySelectorAll('.page-percent').forEach(input => {
                 const val = parseInt(input.value) || 0;
                 total += val;
-                input.value = val; // Ensure empty boxes become '0'
+                input.value = val;
             });
             totalPercentSpan.textContent = total;
-            // CRITICAL FIX: Ensure color is GREEN only when total is 100
+            // FIX: Ensure color is GREEN only when total is 100
             totalPercentSpan.style.color = total === 100 ? '#5cb85c' : '#d9534f';
             return total;
         }
@@ -215,7 +219,7 @@
             let pages = [];
             let isValid = true;
             
-            // CRITICAL FIX: Clear URL validation with specific error messages
+            // CRITICAL FIX: URL validation with specific error messages
             pageInputs.forEach((input, index) => {
                 const url = input.url.value.trim();
                 const percent = parseInt(input.percent.value) || 0;
@@ -247,10 +251,10 @@
             saveDetails(gaId, apiKey, viewsCount, pages); 
             const payload = { ga_id: gaId, api_key: apiKey, views: viewsCount, pages: pages };
             
-            submitData(payload, MAX_RETRIES); // Use MAX_RETRIES constant
+            submitData(payload, MAX_RETRIES); 
         });
 
-        // --- Server Submission Logic (FIXED RETRY LOGIC) ---
+        // --- Server Submission Logic (FIXED RETRY & MESSAGE LOGIC) ---
         async function submitData(data, retriesLeft) {
             submitBtn.disabled = true;
             
@@ -286,34 +290,5 @@
                 }
                 
                 const responseData = await response.json();
-
-                if (responseData.status === 'processing' || responseData.status === 'ok') {
-                    // Success message
-                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. **Results expected within 24-48 hours.** You can close this browser now.`, true);
-                } else {
-                    // Handles the "0 views accepted" or other API logic errors
-                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error.'}. Check your inputs.`, true);
-                }
-
-            } catch (error) {
-                // Retry logic on connection failure (Failed to fetch) or temporary server error (5xx)
-                if (retriesLeft > 0 && (error.message.includes('Failed to fetch') || error.message.includes('Server Error'))) { 
-                    return submitData(data, retriesLeft - 1);
-                } else {
-                    // Final error after all retries fail
-                    const finalErrorMessage = error.message.includes('Failed to fetch') 
-                        ? `❌ Final Connection Error (${totalAttempts} attempts failed). Server is unreachable or offline.` 
-                        : `❌ Error: ${error.message}`;
-
-                    showMessage('error', finalErrorMessage, true);
-                }
-            } 
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-             loadSavedDetails();
-             updateDisplayTotal();
-        });
-    </script>
-</body>
-</html>
+                
+                // FINAL FIX: Check if the message contains 'accepted' (Success)
