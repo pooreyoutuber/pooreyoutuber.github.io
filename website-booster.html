@@ -47,19 +47,21 @@
         .info-card { background-color: #f0f3f8; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #d9534f; font-size: 0.9em;}
         .info-card h3 { color: #d9534f; margin-top: 0; font-size: 1.1em; }
         .policy-warning { color: #721c24; font-weight: bold; margin-bottom: 10px; }
-
     </style>
 </head>
 <body>
     <div class="header">
         <h2>🚀 Traffic Booster (Final Deployment)</h2>
-        <p>Traffic will be distributed over 48 hours with simulated engagement.</p>
+        <p>Traffic will be distributed over 48 hours with simulated engagement and unique users.</p>
     </div>
     
     <div class="container">
         
         <form id="boosterForm">
             
+            <label for="geminiKey">0. Your Gemini API Key:</label>
+            <input type="text" id="geminiKey" placeholder="Paste your Google Gemini API Key here" required autocomplete="off">
+
             <label for="referrerUrl">1. Traffic Source URL (Search/Video/Referrer):</label>
             <input type="text" id="referrerUrl" placeholder="e.g., https://google.com/search?q=mywebsite" required autocomplete="off">
             
@@ -67,7 +69,8 @@
             <input type="number" id="views" value="100" min="1" max="500" required autocomplete="off">
             
             <input type="hidden" id="deliveryTime" value="48">
-            <input type="hidden" id="countryCount" value="15">
+            <input type="hidden" id="countryCount" value="18">
+            <input type="hidden" id="useGeminiForName" value="true"> 
             <input type="hidden" id="minEngagementTime" value="2000">
             <input type="hidden" id="maxEngagementTime" value="3000">
             
@@ -116,60 +119,36 @@
 
         <div class="info-card">
             <h3>🚨 IMPORTANT WARNING: Adsense/Ad Policy</h3>
-            <p class="policy-warning">Yeh tool sirf **GA4 engagement metrics** ko behtar dikhaane ke liye hai.</p>
-            <p>Adsense is traffic ko **fake** maanta hai. Ise **Adsense waale pages par istemaal na karein**.</p>
+            <p class="policy-warning">Adsense is traffic ko **fake** maanta hai. Ise **Adsense waale pages par istemaal na karein**.</p>
         </div>
     </div>
     
     <script>
-        // 🚨 HARDCODED GA4 KEYS - AS REQUESTED 
+        // HARDCODED GA4 KEYS 
         const GA_ID = "G-ZPMC525FGT";
         const API_KEY = "pSaScGPuTWa95eOdSkbV7w";
         
-        // 🚨 FINAL RENDER API URL
+        // FINAL RENDER API URL (Assumed to be the same)
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_final_v7_engagement'; 
+        const STORAGE_KEY = 'booster_details_final_v8_gemini'; 
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
         const totalPercentSpan = document.getElementById('totalPercent');
         
+        // ... (Rest of the helper functions: loadSavedDetails, saveDetails, updateDisplayTotal, showMessage) ...
+        // Note: The rest of the JS code is identical to the previous version but simplified for conciseness here.
+        
         // --- RETRY CONSTANTS ---
         const MAX_RETRIES = 5; 
         const RETRY_DELAY = 10000; 
-        
+
         const pageInputs = [1, 2, 3, 4, 5].map(i => ({
             url: document.getElementById(`url${i}`),
             percent: document.getElementById(`percent${i}`)
         }));
 
-        // --- Local Storage Functions (Adapted) ---
-        function loadSavedDetails() {
-            const savedData = localStorage.getItem(STORAGE_KEY);
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    document.getElementById('referrerUrl').value = data.referrerUrl || '';
-                    document.getElementById('views').value = data.views || '100';
-                    
-                    data.pages.forEach((page, index) => {
-                        if (index < 5) {
-                            pageInputs[index].url.value = page.url || '';
-                            pageInputs[index].percent.value = page.percent || '0';
-                        }
-                    });
-
-                } catch (e) { /* Error ignored */ }
-                updateDisplayTotal();
-            }
-        }
-
-        function saveDetails(referrerUrl, views, pages) {
-            const data = { referrerUrl, views, pages };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-        
         function updateDisplayTotal() {
             let total = 0;
             document.querySelectorAll('.page-percent').forEach(input => {
@@ -185,7 +164,6 @@
             input.addEventListener('input', updateDisplayTotal);
         });
 
-
         function showMessage(type, message, reenable) {
             messageDiv.className = type;
             messageDiv.innerHTML = message;
@@ -194,27 +172,43 @@
                 submitBtn.textContent = 'Generate Traffic and Close Browser';
             }
         }
+        
+        function saveDetails(geminiKey, referrerUrl, views, pages) {
+            const data = { geminiKey, referrerUrl, views, pages };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadSavedDetails() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    document.getElementById('geminiKey').value = data.geminiKey || '';
+                    document.getElementById('referrerUrl').value = data.referrerUrl || '';
+                    document.getElementById('views').value = data.views || '100';
+                    
+                    data.pages.forEach((page, index) => {
+                        if (index < 5) {
+                            pageInputs[index].url.value = page.url || '';
+                            pageInputs[index].percent.value = page.percent || '0';
+                        }
+                    });
+
+                } catch (e) { /* Error ignored */ }
+                updateDisplayTotal();
+            }
+        }
 
         // --- Main Submission Logic ---
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             
-            // Keys are now fetched from constants
-            const gaId = GA_ID;
-            const apiKey = API_KEY;
-
+            const geminiKey = document.getElementById('geminiKey').value.trim();
             const referrerUrl = document.getElementById('referrerUrl').value.trim();
             let viewsCount = parseInt(document.getElementById('views').value);
             
-            // New Parameters
-            const deliveryTime = parseInt(document.getElementById('deliveryTime').value);
-            const countryCount = parseInt(document.getElementById('countryCount').value);
-            // Engagement time parameters
-            const minEngTime = parseInt(document.getElementById('minEngagementTime').value);
-            const maxEngTime = parseInt(document.getElementById('maxEngagementTime').value);
-            
-            if (!referrerUrl || viewsCount < 1) {
-                showMessage('error', '❌ Error: Traffic Source URL and Total Views are required.', true);
+            if (!geminiKey || !referrerUrl || viewsCount < 1) {
+                showMessage('error', '❌ Error: Gemini Key, Traffic Source URL, and Total Views are required.', true);
                 return;
             }
 
@@ -230,48 +224,48 @@
             pageInputs.forEach((input, index) => {
                 const url = input.url.value.trim();
                 const percent = parseInt(input.percent.value) || 0;
-                const pageNumber = index + 1;
-
                 if (url && percent > 0) {
                     if (!url.startsWith('http')) {
-                        showMessage('error', `❌ Error on Page ${pageNumber}: URL must start with **https://** or **http://** (e.g., https://example.com/page).`, true);
+                        showMessage('error', `❌ Error on Page ${index+1}: URL must start with **https://** or **http://** (e.g., https://example.com/page).`, true);
                         isValid = false;
                         return;
                     }
                     pages.push({ url: url, percent: percent });
                 } else if (url && percent === 0) {
-                     showMessage('error', `❌ Error on Page ${pageNumber}: URL **"${url}"** has **0%** distribution. Please remove the URL or assign a percentage > 0.`, true);
+                     showMessage('error', `❌ Error on Page ${index+1}: URL **"${url}"** has **0%** distribution. Please remove the URL or assign a percentage > 0.`, true);
                      isValid = false;
                      return;
                 }
             });
 
             if (!isValid) return; 
-
             if (pages.length === 0) {
                  showMessage('error', '❌ Error: At least one Page URL (Page 1) with a percentage > 0 must be filled.', true);
                  return;
             }
 
-            saveDetails(referrerUrl, viewsCount, pages); 
+            saveDetails(geminiKey, referrerUrl, viewsCount, pages); 
             
             // Final Payload with ALL instructions
             const payload = { 
-                ga_id: gaId, 
-                api_key: apiKey, 
+                ga_id: GA_ID, 
+                api_key: API_KEY, 
+                // NEW GEMINI KEY FOR SERVER
+                gemini_key: geminiKey,
                 views: viewsCount, 
                 pages: pages,
                 referrer_url: referrerUrl,
-                delivery_time_hours: deliveryTime, 
-                target_country_count: countryCount,
-                // NEW: Engagement parameters
-                min_engagement_msec: minEngTime,
-                max_engagement_msec: maxEngTime
+                // Server Instructions from hidden fields
+                delivery_time_hours: parseInt(document.getElementById('deliveryTime').value), 
+                target_country_count: parseInt(document.getElementById('countryCount').value),
+                use_gemini_for_name: document.getElementById('useGeminiForName').value === 'true', 
+                min_engagement_msec: parseInt(document.getElementById('minEngagementTime').value),
+                max_engagement_msec: parseInt(document.getElementById('maxEngagementTime').value)
             };
             
             submitData(payload, MAX_RETRIES); 
         });
-
+        
         // --- Server Submission Logic (Fixed Message Cleanup) ---
         async function submitData(data, retriesLeft) {
             submitBtn.disabled = true;
@@ -306,16 +300,12 @@
                 
                 const responseData = await response.json();
                 
-                // Final Fix for Success Message Cleanup:
                 if (responseData.status === 'processing' || responseData.status === 'ok' || (responseData.message && responseData.message.includes('accepted'))) {
-                     
                      let successMessage = responseData.message || `Request for ${data.views} views accepted.`;
-                     
                      if (successMessage.startsWith('❌ API Error: ')) {
                          successMessage = successMessage.replace('❌ API Error: ', '');
                      }
-                     
-                     showMessage('success', `✨ Success! ${successMessage} **Traffic will be delivered over 48 hours with simulated ${data.min_engagement_msec/1000} to ${data.max_engagement_msec/1000} second engagement. You can close this browser now.**`, true);
+                     showMessage('success', `✨ Success! ${successMessage} **Traffic will be delivered over ${data.delivery_time_hours} hours with unique users from ${data.target_country_count}+ countries. You can close this browser now.**`, true);
                 } else {
                      showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
                 }
