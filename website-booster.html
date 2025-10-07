@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Website Traffic Booster (Super Simplified)</title>
+    <title> Website Traffic Booster (Professional)</title>
     <style>
         /* Base Styles and Responsiveness */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
@@ -34,8 +34,8 @@
         .total-percent-display { text-align: right; margin-top: 10px; font-weight: bold; font-size: 1.1em; }
         
         /* Button Styling */
-        button { background-color: #d9534f; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 1em; transition: background-color 0.3s; }
-        button:hover { background-color: #c9302c; }
+        button { background-color: #198754; /* Green for go */ color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 1em; transition: background-color 0.3s; }
+        button:hover { background-color: #157347; }
         button:disabled { background-color: #adb5bd; cursor: not-allowed; } 
 
         /* Message Box Styling */
@@ -44,24 +44,21 @@
         .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
         
-        .info-card { background-color: #f0f3f8; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #d9534f; font-size: 0.9em;}
-        .info-card h3 { color: #d9534f; margin-top: 0; font-size: 1.1em; }
-        .policy-warning { color: #721c24; font-weight: bold; margin-bottom: 10px; }
+        .info-card { background-color: #f0f3f8; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #007bff; font-size: 0.9em;}
+        .info-card h3 { color: #007bff; margin-top: 0; font-size: 1.1em; }
+        
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>🚀 Traffic Booster (Final Deployment)</h2>
-        <p>Traffic will be distributed over 48 hours with simulated engagement and unique users.</p>
+        <h2>🚀 Website Traffic Booster</h2>
+        <p>Generate highly realistic, high-engagement traffic for GA4 reporting.</p>
     </div>
     
     <div class="container">
         
         <form id="boosterForm">
             
-            <label for="geminiKey">0. Your Gemini API Key:</label>
-            <input type="text" id="geminiKey" placeholder="Paste your Google Gemini API Key here" required autocomplete="off">
-
             <label for="referrerUrl">1. Traffic Source URL (Search/Video/Referrer):</label>
             <input type="text" id="referrerUrl" placeholder="e.g., https://google.com/search?q=mywebsite" required autocomplete="off">
             
@@ -70,9 +67,8 @@
             
             <input type="hidden" id="deliveryTime" value="48">
             <input type="hidden" id="countryCount" value="18">
-            <input type="hidden" id="useGeminiForName" value="true"> 
-            <input type="hidden" id="minEngagementTime" value="2000">
-            <input type="hidden" id="maxEngagementTime" value="3000">
+            <input type="hidden" id="minEngagementTime" value="45000"> 
+            <input type="hidden" id="maxEngagementTime" value="180000">
             
             <div class="page-entry-group">
                 <label style="color: #007bff;">3. Distribute Traffic Across Pages (Total must be 100%):</label>
@@ -112,38 +108,35 @@
                 </p>
             </div>
             
-            <button type="submit" id="submitBtn">Generate Traffic and Close Browser</button>
+            <button type="submit" id="submitBtn">Generate Traffic</button>
         </form>
         
         <div id="message"></div>
 
         <div class="info-card">
-            <h3>🚨 IMPORTANT WARNING: Adsense/Ad Policy</h3>
-            <p class="policy-warning">Adsense is traffic ko **fake** maanta hai. Ise **Adsense waale pages par istemaal na karein**.</p>
+            <h3>📈 Results & Traffic Simulation</h3>
+            <p>Your request will be processed immediately. The traffic will be **naturally dispersed** over **24-48 hours** to ensure organic-looking growth. All users simulate **realistic scrolling and high engagement** from **18 different countries**.</p>
         </div>
     </div>
     
     <script>
-        // HARDCODED GA4 KEYS 
+        // HARDCODED GA4 KEYS (As per previous request)
         const GA_ID = "G-ZPMC525FGT";
         const API_KEY = "pSaScGPuTWa95eOdSkbV7w";
         
-        // FINAL RENDER API URL (Assumed to be the same)
+        // FINAL RENDER API URL 
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_final_v8_gemini'; 
+        const STORAGE_KEY = 'booster_details_final_v9_clean'; 
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
         const totalPercentSpan = document.getElementById('totalPercent');
         
-        // ... (Rest of the helper functions: loadSavedDetails, saveDetails, updateDisplayTotal, showMessage) ...
-        // Note: The rest of the JS code is identical to the previous version but simplified for conciseness here.
-        
         // --- RETRY CONSTANTS ---
         const MAX_RETRIES = 5; 
         const RETRY_DELAY = 10000; 
-
+        
         const pageInputs = [1, 2, 3, 4, 5].map(i => ({
             url: document.getElementById(`url${i}`),
             percent: document.getElementById(`percent${i}`)
@@ -169,12 +162,12 @@
             messageDiv.innerHTML = message;
             if (reenable) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Generate Traffic and Close Browser';
+                submitBtn.textContent = 'Generate Traffic';
             }
         }
         
-        function saveDetails(geminiKey, referrerUrl, views, pages) {
-            const data = { geminiKey, referrerUrl, views, pages };
+        function saveDetails(referrerUrl, views, pages) {
+            const data = { referrerUrl, views, pages };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
@@ -183,7 +176,6 @@
             if (savedData) {
                 try {
                     const data = JSON.parse(savedData);
-                    document.getElementById('geminiKey').value = data.geminiKey || '';
                     document.getElementById('referrerUrl').value = data.referrerUrl || '';
                     document.getElementById('views').value = data.views || '100';
                     
@@ -203,12 +195,11 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             
-            const geminiKey = document.getElementById('geminiKey').value.trim();
             const referrerUrl = document.getElementById('referrerUrl').value.trim();
             let viewsCount = parseInt(document.getElementById('views').value);
             
-            if (!geminiKey || !referrerUrl || viewsCount < 1) {
-                showMessage('error', '❌ Error: Gemini Key, Traffic Source URL, and Total Views are required.', true);
+            if (!referrerUrl || viewsCount < 1) {
+                showMessage('error', '❌ Error: Traffic Source URL and Total Views are required.', true);
                 return;
             }
 
@@ -244,21 +235,18 @@
                  return;
             }
 
-            saveDetails(geminiKey, referrerUrl, viewsCount, pages); 
+            saveDetails(referrerUrl, viewsCount, pages); 
             
             // Final Payload with ALL instructions
             const payload = { 
                 ga_id: GA_ID, 
                 api_key: API_KEY, 
-                // NEW GEMINI KEY FOR SERVER
-                gemini_key: geminiKey,
                 views: viewsCount, 
                 pages: pages,
                 referrer_url: referrerUrl,
                 // Server Instructions from hidden fields
                 delivery_time_hours: parseInt(document.getElementById('deliveryTime').value), 
                 target_country_count: parseInt(document.getElementById('countryCount').value),
-                use_gemini_for_name: document.getElementById('useGeminiForName').value === 'true', 
                 min_engagement_msec: parseInt(document.getElementById('minEngagementTime').value),
                 max_engagement_msec: parseInt(document.getElementById('maxEngagementTime').value)
             };
@@ -275,11 +263,11 @@
             const delayInSeconds = RETRY_DELAY / 1000;
 
             if (attemptsMade > 1) {
-                submitBtn.textContent = `⚠️ Server not awake. Retrying in ${delayInSeconds}s... (Attempt ${attemptsMade} of ${totalAttempts})`;
-                showMessage('info', `⚠️ Server not awake. Retrying in ${delayInSeconds} seconds...`, false);
+                submitBtn.textContent = `⚠️ Server Retrying... (${attemptsMade}/${totalAttempts})`;
+                showMessage('info', `⚠️ Server connection issue. Retrying in ${delayInSeconds} seconds...`, false);
                 await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
             } else {
-                submitBtn.textContent = `✅ Request initiated. Checking server status... (Attempt 1 of ${totalAttempts})`;
+                submitBtn.textContent = `✅ Initiating Request...`;
                 showMessage('info', '✅ Request initiated. Checking server status...', false);
             }
             
@@ -300,14 +288,12 @@
                 
                 const responseData = await response.json();
                 
-                if (responseData.status === 'processing' || responseData.status === 'ok' || (responseData.message && responseData.message.includes('accepted'))) {
-                     let successMessage = responseData.message || `Request for ${data.views} views accepted.`;
-                     if (successMessage.startsWith('❌ API Error: ')) {
-                         successMessage = successMessage.replace('❌ API Error: ', '');
-                     }
-                     showMessage('success', `✨ Success! ${successMessage} **Traffic will be delivered over ${data.delivery_time_hours} hours with unique users from ${data.target_country_count}+ countries. You can close this browser now.**`, true);
+                if (responseData.status === 'accepted' || responseData.status === 'processing' || responseData.status === 'ok') {
+                     // NEW PROFESSIONAL SUCCESS MESSAGE
+                     const successMessage = `**SUCCESS!** Your request for **${data.views} highly-engaged views** has been accepted. Results will appear gradually in your GA4 report over the next **${data.delivery_time_hours} hours** from **18+ countries**.`;
+                     showMessage('success', successMessage, true);
                 } else {
-                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
+                     showMessage('error', `❌ Error: ${responseData.message || 'Unknown error. Please try again.'}.`, true);
                 }
 
             } catch (error) {
@@ -316,8 +302,8 @@
                 } else {
                     const totalAttempts = MAX_RETRIES + 1;
                     const finalErrorMessage = error.message.includes('Failed to fetch') 
-                        ? `❌ Final Connection Error (${totalAttempts} attempts failed). Server is unreachable or offline.` 
-                        : `❌ Error: ${error.message}`;
+                        ? `❌ Connection Failed (${totalAttempts} attempts). Server is offline or unreachable.` 
+                        : `❌ Final Error: ${error.message}`;
 
                     showMessage('error', finalErrorMessage, true);
                 }
