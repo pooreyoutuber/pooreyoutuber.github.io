@@ -116,4 +116,33 @@
 
         <div class="info-card">
             <h3>How This Tool Helps You (Summary):</h3>
-            <p style="font-size: 0.9em; line-height: 1.5
+            <p style="font-size: 0.9em; line-height: 1.5;">
+                This **Website Traffic Booster Tool** utilizes the Google Analytics 4 (GA4) Measurement Protocol to accurately simulate realistic, high-engagement user sessions on your website. Instead of simple pings, it creates sophisticated traffic that includes randomized details like **geographic location**, **session start events**, and **user engagement time (30 to 120 seconds)**. This process is crucial because it ensures the generated traffic not only increases your **total page views** but also significantly improves your **average engagement time**—a key metric for SEO and performance analysis. By distributing the traffic (1-500 views per request) across multiple pages with custom percentages, you can target specific content, making the overall traffic pattern appear more organic and valuable in your GA4 reports. The process runs on a stable server in the background, which means once you submit the request, you can safely close your browser. **Results are typically reflected in your GA4 dashboard within 24 to 48 hours** as Google processes the API data.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>🔑 GA4 Key Retrieval Guide:</h3>
+            <ul class="key-guide">
+                <li>**Google Analytics ID (G-XXXXX):** Go to your GA4 dashboard, navigate to **Admin** $\rightarrow$ **Data Streams**. Click on your Web stream, and the ID (e.g., G-A1B2C3D4E5) will be displayed at the top.</li>
+                <li>**API Secret (Measurement Protocol Key):** From the same **Data Streams** page, scroll down to **Measurement Protocol API Secrets**. Click "Create" to generate a new secret and copy the key (e.g., XXXXXXXXXXXXX).</li>
+                <li style="color: #d9534f; margin-top: 15px;">**✨ Required: Custom Dimension Setup (For Country Data)**: To see traffic by country instead of "(not set)", you must create an **Event** scoped Custom Dimension with:
+                    <ul>
+                        <li>**Dimension Name:** `Traffic Country`</li>
+                        <li>**Event parameter:** **`country_code`** (manually type this in)</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // 🚨 FINAL CORRECT API URL - CONFIRMED
+        const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
+        const STORAGE_KEY = 'booster_details_v8'; // Final storage key
+        
+        const form = document.getElementById('boosterForm');
+        const messageDiv = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const totalPercentSpan = document.getElementById('totalPercent');
+        const MAX_RETRIES = 5; // 1 initial attempt + 5 retries = 6 total attempts
