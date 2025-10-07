@@ -21,7 +21,7 @@
         .page-entry { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; background-color: #fff; }
         
-        /* FIX: Percentage Input Size Increased (60px) */
+        /* Percentage Input Size Increased (60px) */
         .page-entry input[type="number"] { 
             width: 60px; 
             flex-grow: 0; 
@@ -124,7 +124,7 @@
                 <li>**2. API Secret (Key):** Yeh server ko data bhejte samay authentication deta hai.</li>
                 <li style="margin-left: 10px;">*Kahan Milega:* **Data Streams** ke page par neeche jaakar **Measurement Protocol API Secrets** se create aur copy karein.</li>
                 
-                <li>**3. Page URLs:** Har URL **`https://`** se shuru hona chahiye, jaisa ki address bar mein dikhta hai (e.g., `https://example.com/page1`).</li>
+                <li>**3. Page URLs:** Har URL **`https://`** ya **`http://`** se shuru hona chahiye, jaisa ki address bar mein dikhta hai (e.g., `https://example.com/page1`).</li>
 
                 <li style="font-weight: bold; color: #007bff; margin-top: 15px; margin-bottom: 10px;">✅ **Custom Dimension Setup (Aapke Reports ke liye Zaroori):**</li>
                 
@@ -277,4 +277,71 @@
 
             if (attemptsMade > 1) {
                 // Server wakeup status message
-                submitBtn.textContent = `⚠️ Server not awake. Retrying in ${delayInSeconds}s... (Attempt ${
+                submitBtn.textContent = `⚠️ Server not awake. Retrying in ${delayInSeconds}s... (Attempt ${attemptsMade} of ${totalAttempts})`;
+                showMessage('info', `⚠️ Server not awake. Retrying in ${delayInSeconds} seconds...`, false);
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+            } else {
+                // Initial status message
+                submitBtn.textContent = `✅ Request initiated. Checking server status... (Attempt 1 of ${totalAttempts})`;
+                showMessage('info', '✅ Request initiated. Checking server status...', false);
+            }
+            
+            try {
+                const response = await fetch(RENDER_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                // If server is up but returns an error status (like 502/503), retry it.
+                if (response.status >= 500 && retriesLeft > 0) {
+                     throw new Error('Temporary Server Error. Retrying...');
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+                
+                const responseData = await response.json();
+                
+                // **✅ FINAL FIX FOR SUCCESS/ERROR MESSAGE CLEANUP:**
+                // Check if response is a success (status 'ok', 'processing', OR message contains 'accepted')
+                if (responseData.status === 'processing' || responseData.status === 'ok' || (responseData.message && responseData.message.includes('accepted'))) {
+                     
+                     let successMessage = responseData.message || `Request for ${data.views} views accepted. Traffic distribution initiated.`;
+                     
+                     // CRITICAL CHANGE: If the message starts with the error prefix, remove it.
+                     if (successMessage.startsWith('❌ API Error: ')) {
+                         successMessage = successMessage.replace('❌ API Error: ', '');
+                     }
+                     // --------------------------------------------------------
+
+                     showMessage('success', `✨ Success! ${successMessage} **You can close this browser now.**`, true);
+                } else {
+                     // Failure message (original error)
+                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
+                }
+
+            } catch (error) {
+                // Retry logic on connection failure (Failed to fetch) or temporary server error (5xx)
+                if (retriesLeft > 0 && (error.message.includes('Failed to fetch') || error.message.includes('Server Error'))) { 
+                    return submitData(data, retriesLeft - 1);
+                } else {
+                    // Final error after all retries fail
+                    const totalAttempts = MAX_RETRIES + 1;
+                    const finalErrorMessage = error.message.includes('Failed to fetch') 
+                        ? `❌ Final Connection Error (${totalAttempts} attempts failed). Server is unreachable or offline.` 
+                        : `❌ Error: ${error.message}`;
+
+                    showMessage('error', finalErrorMessage, true);
+                }
+            } 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+             loadSavedDetails();
+             updateDisplayTotal();
+        });
+    </script>
+</body>
+</html>
