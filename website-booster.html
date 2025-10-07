@@ -74,7 +74,7 @@
                 <label style="color: #007bff;">4. Distribute Traffic Across Pages (Total must be 100%):</label>
                 
                 <div class="page-entry">
-                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required) - Must start with https://" required autocomplete="off">
+                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required) - e.g., https://example.com/blog/page" required autocomplete="off">
                     <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
                     <span class="percent-label">%</span>
                 </div>
@@ -114,32 +114,26 @@
         <div id="message"></div>
 
         <div class="info-card">
-            <h3>🔑 GA4 Key Retrieval & Custom Dimension Guide:</h3>
+            <h3>📖 User Guide: Keys, URLs, aur Settings</h3>
             <ul class="key-guide">
-                <li>**Google Analytics ID (G-XXXXX):** Go to **Admin** $\rightarrow$ **Data Streams**. Click on your Web stream, copy the ID (e.g., G-A1B2C3D4E5).</li>
-                <li>**API Secret:** From the same **Data Streams** page, scroll down to **Measurement Protocol API Secrets**. Generate and copy the key.</li>
-                <li style="color: #d9534f; font-weight: bold;">**Custom Dimension (IMPORTANT for Country Report):**</li>
-                <li style="margin-left: 10px;">Go to **Admin** $\rightarrow$ **Custom definitions**.</li>
-                <li style="margin-left: 10px;">Create a new **Custom Dimension*Step-by-Step Configuration
-Follow these steps within your Google Analytics 4 property:
+                <li style="font-weight: bold; color: #d9534f; margin-bottom: 10px;">🛑 **Zaroori Inputs (Required Fields):**</li>
+                
+                <li>**1. Google Analytics ID (G-XXXXX):** Yeh ID aapki GA4 property ko pehchanti hai.</li>
+                <li style="margin-left: 10px;">*Kahan Milega:* GA4 **Admin** $\rightarrow$ **Data Streams**. Web stream par click karein aur ID copy karein.</li>
+                
+                <li>**2. API Secret (Key):** Yeh server ko data bhejte samay authentication deta hai.</li>
+                <li style="margin-left: 10px;">*Kahan Milega:* **Data Streams** ke page par neeche jaakar **Measurement Protocol API Secrets** se create aur copy karein.</li>
+                
+                <li>**3. Page URLs:** Har URL **`https://`** se shuru hona chahiye, jaisa ki address bar mein dikhta hai (e.g., `https://example.com/page1`).</li>
 
-Navigate to Admin: Click the Admin gear icon ⚙️ in the bottom-left corner of your GA4 interface.
-
-Go to Data Display Settings: In the middle column (Property settings), find and click on Custom definitions.
-
-Create Custom Dimension: Click the "Create custom dimensions" button.
-
-Enter Details: Fill out the fields exactly as follows:
-
-Field	Value	Notes
-Dimension name	Traffic Country	This is the user-friendly name that will appear in your reports.
-Scope	Event	This is vital. It tells GA4 that this dimension applies to individual events (like a page view).
-Event parameter	country_code	This must exactly match the parameter name sent by the traffic booster server.
-
-Export to Sheets
-Save: Click the Save button.
-
-Once saved, the Traffic Country dimension will be created. It may take up to 24 hours for this setting to take full effect and for the data to begin appearing in your standard reports. After this period, you will be able to filter and analyze the traffic by country..</li>
+                <li style="font-weight: bold; color: #007bff; margin-top: 15px; margin-bottom: 10px;">✅ **Custom Dimension Setup (Aapke Reports ke liye Zaroori):**</li>
+                
+                <li style="color: #d9534f; font-weight: bold;">**Traffic Country Dimension (IMPORTANT):**</li>
+                <li style="margin-left: 10px;">GA4 **Admin** $\rightarrow$ **Custom definitions** mein jaakar ek naya **Custom Dimension** banayein.</li>
+                <li style="margin-left: 10px;">**Name:** `Traffic Country`</li>
+                <li style="margin-left: 10px;">**Scope:** `Event`</li>
+                <li style="margin-left: 10px;">**Event parameter:** `country_code`</li>
+                <li style="margin-left: 10px; font-style: italic;">(Is setting ke bina, country data aapke reports mein **'not set'** dikhayega).</li>
             </ul>
         </div>
     </div>
@@ -283,71 +277,4 @@ Once saved, the Traffic Country dimension will be created. It may take up to 24 
 
             if (attemptsMade > 1) {
                 // Server wakeup status message
-                submitBtn.textContent = `⚠️ Server not awake. Retrying in ${delayInSeconds}s... (Attempt ${attemptsMade} of ${totalAttempts})`;
-                showMessage('info', `⚠️ Server not awake. Retrying in ${delayInSeconds} seconds...`, false);
-                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-            } else {
-                // Initial status message
-                submitBtn.textContent = `✅ Request initiated. Checking server status... (Attempt 1 of ${totalAttempts})`;
-                showMessage('info', '✅ Request initiated. Checking server status...', false);
-            }
-            
-            try {
-                const response = await fetch(RENDER_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                // If server is up but returns an error status (like 502/503), retry it.
-                if (response.status >= 500 && retriesLeft > 0) {
-                     throw new Error('Temporary Server Error. Retrying...');
-                }
-
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-                
-                const responseData = await response.json();
-                
-                // **✅ FINAL FIX FOR SUCCESS/ERROR MESSAGE:**
-                // Check for explicit success status OR the success message content "accepted"
-                if (responseData.status === 'processing' || responseData.status === 'ok' || (responseData.message && responseData.message.includes('accepted'))) {
-                     // Success message (Agar message mein "❌ API Error:" shuruat mein hai, toh use hata dein.)
-                     let successMessage = responseData.message || `Request for ${data.views} views accepted. Traffic distribution initiated.`;
-                     
-                     // CRITICAL CHANGE: REMOVING THE FALSE ERROR PREFIX
-                     if (successMessage.startsWith('❌ API Error: ')) {
-                         successMessage = successMessage.replace('❌ API Error: ', '');
-                     }
-                     // --------------------------------------------------------
-
-                     showMessage('success', `✨ Success! ${successMessage} **You can close this browser now.**`, true);
-                } else {
-                     // Failure message (original error)
-                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
-                }
-
-            } catch (error) {
-                // Retry logic on connection failure (Failed to fetch) or temporary server error (5xx)
-                if (retriesLeft > 0 && (error.message.includes('Failed to fetch') || error.message.includes('Server Error'))) { 
-                    return submitData(data, retriesLeft - 1);
-                } else {
-                    // Final error after all retries fail
-                    const totalAttempts = MAX_RETRIES + 1;
-                    const finalErrorMessage = error.message.includes('Failed to fetch') 
-                        ? `❌ Final Connection Error (${totalAttempts} attempts failed). Server is unreachable or offline.` 
-                        : `❌ Error: ${error.message}`;
-
-                    showMessage('error', finalErrorMessage, true);
-                }
-            } 
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-             loadSavedDetails();
-             updateDisplayTotal();
-        });
-    </script>
-</body>
-</html>
+                submitBtn.textContent = `⚠️ Server not awake. Retrying in ${delayInSeconds}s... (Attempt ${
