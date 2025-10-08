@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - STABILITY OPTIMIZATION FOR RENDER)
+// index.js (FINAL CODE - STABILITY AND REAL USER SCROLL FIX)
 
 const express = require('express');
 const cors = require('cors'); 
@@ -15,17 +15,18 @@ const MAX_VIEWS_PER_RUN = 400;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 app.set('trust proxy', 1);
 
-// **OPTIMIZED PUPPETEER ARGS for Stability on Render**
+// **Puppeteer Arguments Optimized for Render/Low Memory**
 const PUPPETEER_ARGS = [
     '--disable-gpu',
     '--disable-setuid-sandbox',
     '--no-sandbox', 
-    '--single-process', // CRITICAL for low-memory hosts
+    '--single-process', 
     '--no-zygote',
-    '--disable-dev-shm-usage',
-    '--user-data-dir=/tmp/user_data', // Use /tmp for temporary data
+    '--disable-dev-shm-usage', // Essential for Render
+    '--user-data-dir=/tmp/user_data',
     '--ignore-certificate-errors',
     '--enable-features=NetworkService,NetworkServiceInProcess',
+    '--disk-cache-dir=/tmp/cache', // Use /tmp for cache
 ];
 
 // ⭐ PROXY LIST (Use your provided list)
@@ -55,6 +56,7 @@ function getRandomUserAgent() {
 }
 
 function generateCompensatedPlan(totalViews, items) {
+    // (Helper function logic is unchanged)
     const viewPlan = [];
     if (items.length === 0 || totalViews < 1) return [];
     
@@ -66,7 +68,7 @@ function generateCompensatedPlan(totalViews, items) {
         return { url: item.url, views: Math.floor(exactViews), remainder: exactViews % 1 };
     });
 
-    let sumOfViews = normalizedItems.reduce((sum, item) => sum + item.views, 0);
+    let sumOfViews = normalizedItems.reduce((sum, item => sum + item.views), 0);
     let difference = totalViews - sumOfViews; 
 
     normalizedItems.sort((a, b) => b.remainder - a.remainder);
@@ -85,7 +87,6 @@ function generateCompensatedPlan(totalViews, items) {
 }
 
 // --- 2. CORS FIX ---
-// Allowing your GitHub Pages frontend to communicate with Render
 const allowedOrigins = ['https://pooreyoutuber.github.io', 'http://localhost:8000'];
 
 app.use(cors({
@@ -155,6 +156,8 @@ app.post('/boost-real', async (req, res) => {
             const loadsForSlot = finalUrlPlan.slice(startIndex, startIndex + loadsPerSlot);
             startIndex += loadsForSlot.length;
             if (loadsForSlot.length > 0) {
+                // IMPORTANT: We reduce the parallel slots by dividing the total number of loads 
+                // across the 20 slots to control memory better.
                 slotTasks.push(runSlotTask(slotIndex + 1, loadsForSlot));
             }
         }
@@ -193,58 +196,59 @@ async function runSlotTask(slotId, urlList) {
                 args: proxyArgs, 
                 executablePath: await chromium.executablePath(), 
                 headless: chromium.headless,
-                timeout: 60000, // Browser Launch Timeout
+                timeout: 60000, 
             });
             
             let page = await browser.newPage();
             
-            // Set 1920x1080 for high resolution user agent
+            // Set high resolution and User Agent
             await page.setViewport({ width: 1920, height: 1080 }); 
             await page.setUserAgent(getRandomUserAgent());
-            
-            // Set Referer to simulate natural Google search traffic
             await page.setExtraHTTPHeaders({'Referer': 'https://www.google.com/'});
             
             // --- 3. Page Navigate (Load) ---
             await page.goto(targetURL, { 
-                waitUntil: 'domcontentloaded', // Use domcontentloaded for faster loading (memory saving)
-                timeout: 60000 
+                waitUntil: 'networkidle2', // Use 'networkidle2' for better page loading stability
+                timeout: 90000 // Increased navigation timeout
             });
             
             // --- 4. Engagement (Scroll & Random Wait: 4s-7s) ---
             const engagementTime = Math.floor(Math.random() * (7000 - 4000) + 4000); 
             
-            // Wait a little before scroll to ensure page content loads
-            await new Promise(resolve => setTimeout(resolve, 1000)); 
+            // Wait for 2 seconds to allow dynamic content (like lazy-loaded content) to appear
+            await new Promise(resolve => setTimeout(resolve, 2000)); 
 
+            // **SCROLL FIX:** Scroll using the window object to ensure compatibility
             const scrollHeight = await page.evaluate(() => {
-                // Check if page is loaded and has scrollable content
+                // Get the maximum scroll height from both body and document element
                 return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight); 
             });
             
-            if (scrollHeight > 1000) { // Scroll only if content is large enough
+            if (scrollHeight > 1000) { 
                 const scrollPercent = Math.random() * (0.95 - 0.5) + 0.5;
                 const targetScroll = Math.min(scrollHeight * scrollPercent, scrollHeight - 100);
                 
                 await page.evaluate((targetScroll) => {
-                    window.scrollBy(0, targetScroll);
+                    // Smoothly scroll to the target position
+                    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
                 }, targetScroll);
+
+                // Wait for scroll animation to complete (approx 500ms)
+                await new Promise(resolve => setTimeout(resolve, 500)); 
             } else {
-                 console.log(`[Load ${loadId}] WARNING: Low scroll height (${scrollHeight}).`);
+                 console.log(`[Load ${loadId}] WARNING: Low scroll height (${scrollHeight}). Staying for ${Math.round(engagementTime/1000)}s.`);
             }
 
+            // Final engagement wait time
             await new Promise(resolve => setTimeout(resolve, engagementTime)); 
             
             loadsCompleted++;
 
         } catch (pageError) {
             console.error(`[Load ${loadId}] FAILURE ❌ | Error: ${pageError.message.substring(0, 100)}...`);
-            // Add a check to detect memory/CPU failures
-            if (pageError.message.includes('launch the browser') || pageError.message.includes('No such process')) {
-                console.error(`[Load ${loadId}] TROUBLESHOOTING: Render memory/CPU issue. Consider reducing MAX_VIEWS_PER_RUN or simplifying the page load.`);
-            }
         } finally {
             if (browser) {
+                // Use browser.close() to ensure all resources are released.
                 await browser.close();
             }
         }
@@ -259,9 +263,10 @@ async function runSlotTask(slotId, urlList) {
 
 
 // ===================================================================
-// 5. START THE SERVER 
+// 6. START THE SERVER 
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
+                    
             
