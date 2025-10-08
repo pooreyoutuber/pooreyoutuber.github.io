@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - SEARCH CONSOLE BOOSTER EDITION)
+                        // index.js (FINAL CODE - SEARCH CONSOLE BOOSTER EDITION with Data Safety Check)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -82,8 +82,6 @@ app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Puppeteer API (Search Console Booster) is running! 🚀');
 });
 
-// Note: generateCompensatedPlan logic is optimized for {id: url/code, views: X, remainder: Y} structure.
-// For Search Booster, 'url' will be the Target URL (plan.url) and 'code' will be the Country Code (plan.country_code)
 
 function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
@@ -166,7 +164,6 @@ app.post('/boost-mp', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Views (1-400) or valid Page data missing.' });
     }
     
-    // pages array mein ab url (Target URL) aur search_query dono aane chahiye.
     const finalPageUrls = generateCompensatedPlan(totalViews, pages.filter(p => p.percent > 0)); 
     const countryPlan = generateCompensatedPlan(totalViews, HARDCODED_COUNTRIES);
     const maxPlanLength = Math.min(finalPageUrls.length, countryPlan.length);
@@ -176,7 +173,11 @@ app.post('/boost-mp', async (req, res) => {
     for (let i = 0; i < maxPlanLength; i++) {
         // Find the original page object to get the search_query
         const originalPage = pages.find(p => p.url === finalPageUrls[i]);
-        const search_query = originalPage ? originalPage.search_query : 'website-booster'; // Fallback query
+        
+        // ⭐ DATA SAFETY CHECK: search_query missing ya empty hone par default set karein
+        const search_query = originalPage && originalPage.search_query && originalPage.search_query.trim() !== '' 
+                             ? originalPage.search_query 
+                             : 'pooreyoutuber website booster'; // Default fallback query
 
         finalCombinedPlan.push({ 
             url: finalPageUrls[i], 
@@ -250,7 +251,7 @@ app.post('/boost-mp', async (req, res) => {
                     });
                     
                     // ===============================================================
-                    // ⭐ NEW SEARCH CONSOLE LOGIC ⭐
+                    // ⭐ SEARCH CONSOLE LOGIC ⭐
                     // ===============================================================
                     const searchQuery = plan.search_query;
                     const targetURL = plan.url;
@@ -260,11 +261,12 @@ app.post('/boost-mp', async (req, res) => {
 
                     // 1. Google Search Page par jaana (networkidle0 fix applied)
                     try {
+                        // CRITICAL FIX: Google Search Page load hone ke liye networkidle0 aur 60s timeout
                         await page.goto(googleURL, { waitUntil: 'networkidle0', timeout: 60000 }); 
                         console.log(`[View ${viewId}] Google Search page loaded.`);
                     } catch (navError) {
                          if (navError.name === 'TimeoutError') {
-                            console.warn(`[View ${viewId}] WARNING: Google Search Navigation Timeout (60s) exceeded.`);
+                            console.warn(`[View ${viewId}] WARNING: Google Search Navigation Timeout (60s) exceeded. Proceeding with search.`);
                         } else {
                             throw navError; 
                         }
@@ -274,10 +276,12 @@ app.post('/boost-mp', async (req, res) => {
                     await new Promise(resolve => setTimeout(resolve, 3000));
                     
                     // 2. Apni website ka link dhundhna aur click karna
-                    // Ismein hum a[href] ko target karte hain jo target URL contains karta ho.
-                    const selector = `a[href*="${targetURL.replace('https://', '').replace('http://', '').split('/')[0]}"]`;
+                    // Hostname nikalna taaki query URL mein a[href*="example.com"] jaisa use ho
+                    const targetHost = new URL(targetURL).hostname.replace('www.', '');
+
+                    // Selector jo 'targetHost' contain karta hai
+                    const selector = `a[href*="${targetHost}"]`;
                     
-                    let foundLink = false;
                     let clickSuccessful = false;
                     
                     try {
@@ -286,8 +290,15 @@ app.post('/boost-mp', async (req, res) => {
                             const linkElement = await page.$(selector);
                             if (linkElement) {
                                 console.log(`[View ${viewId}] 2. Found Target Link! Clicking...`);
-                                await page.click(selector);
+                                
+                                // Click and wait for navigation
+                                await Promise.all([
+                                    page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 }), 
+                                    page.click(selector)
+                                ]);
+                                
                                 clickSuccessful = true;
+                                console.log(`[View ${viewId}] 3. Landed on Target URL: ${targetURL}`);
                                 break;
                             }
                             // Agar link nahi mila, toh thoda scroll karein
@@ -295,16 +306,13 @@ app.post('/boost-mp', async (req, res) => {
                             await new Promise(resolve => setTimeout(resolve, 1500));
                         }
 
-                        if (clickSuccessful) {
-                            // 3. Target URL par load hone ka wait
-                            await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 });
-                            console.log(`[View ${viewId}] 3. Landed on Target URL: ${targetURL}`);
-                        } else {
-                            console.warn(`[View ${viewId}] WARNING: Target link (${targetURL}) not found on search results.`);
+                        if (!clickSuccessful) {
+                            console.warn(`[View ${viewId}] WARNING: Target link (${targetURL}) not found on search results. Engagement on search page.`);
                         }
 
                     } catch (e) {
-                        console.warn(`[View ${viewId}] Search/Click Error: ${e.message.substring(0, 50)}... Proceeding with engagement on current page.`);
+                        // Agar click ya navigation timeout ho jaye
+                        console.warn(`[View ${viewId}] Search/Click/Navigation Error: ${e.message.substring(0, 50)}... Proceeding with engagement on current page.`);
                         clickSuccessful = false;
                     }
 
@@ -330,6 +338,7 @@ app.post('/boost-mp', async (req, res) => {
                         
                         console.log(`[View ${viewId}] Scroll simulated (90%). Staying for ${Math.round(engagementTime/1000)}s.`);
                     } else {
+                        // Aapka log yahan dikha raha tha: WARNING: No scroll (scrollHeight 0 or body missing).
                         console.warn(`[View ${viewId}] WARNING: No scroll (scrollHeight 0 or body missing). Staying for ${Math.round(engagementTime/1000)}s.`);
                     }
 
