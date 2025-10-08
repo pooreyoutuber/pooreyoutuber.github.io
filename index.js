@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - Optimized and FIXED for Scroll Errors)
+// index.js (FINAL CODE - Optimized and Fixed for Errors)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -44,7 +44,7 @@ const PUPPETEER_ARGS = [
     '--single-process', 
 ];
 
-// ⭐ PROXY LIST (No Change)
+// ⭐ PROXY LIST 
 const PROXY_LIST = [
     "http://45.3.49.4:3129", "http://209.50.164.165:3129", "http://216.26.232.247:3129",
     "http://65.111.3.145:3129", "http://209.50.168.254:3129", "http://104.207.63.195:3129", 
@@ -55,14 +55,14 @@ const PROXY_LIST = [
     "http://104.207.44.84:3129", "http://104.207.40.98:3129"
 ];
 
-// ⭐ getRandomProxy function (No Change)
+// ⭐ getRandomProxy function 
 function getRandomProxy() {
     if (PROXY_LIST.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * PROXY_LIST.length);
     return PROXY_LIST[randomIndex];
 }
 
-// --- MIDDLEWARE & UTILITIES (No Change) ---
+// --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
@@ -74,7 +74,7 @@ app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Puppeteer API (Render Optimized) is running! 🌐');
 });
 
-// --- UTILITY FUNCTIONS (No Change) ---
+// --- UTILITY FUNCTIONS ---
 function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
     if (items.length === 0 || totalViews < 1) return [];
@@ -103,7 +103,7 @@ function generateCompensatedPlan(totalViews, items) {
     return viewPlan;
 }
 
-// --- GUARANTEED DELIVERY TIME PARAMETERS (No Change) ---
+// --- GUARANTEED DELIVERY TIME PARAMETERS ---
 const MIN_TOTAL_MS = 24 * 60 * 60 * 1000; 
 const MAX_TOTAL_MS = 48 * 60 * 60 * 1000; 
 const MIN_VIEW_DELAY = 10000; 
@@ -115,7 +115,7 @@ const MAX_VIEW_DELAY = 25000;
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     
-    // --- RATE LIMITING & VIEW LIMIT (No Change) ---
+    // --- RATE LIMITING & VIEW LIMIT ---
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const now = Date.now();
     let clientData = rateLimitMap.get(clientIp) || { count: 0, lastReset: now };
@@ -141,7 +141,7 @@ app.post('/boost-mp', async (req, res) => {
 
     const { pages, referrer_url } = req.body; 
 
-    // --- Hardcoded Country Distribution List (No Change) ---
+    // --- Hardcoded Country Distribution List ---
     const HARDCODED_COUNTRIES = [
         { code: 'US', percent: 22 }, { code: 'IN', percent: 12 }, { code: 'AU', percent: 8 }, 
         { code: 'CA', percent: 7 }, { code: 'GB', percent: 6 }, { code: 'DE', percent: 5 }, 
@@ -155,7 +155,6 @@ app.post('/boost-mp', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Views (1-400) or valid Page data missing.' });
     }
     
-    // ... (Plan Generation logic - No Change)
     const finalPageUrls = generateCompensatedPlan(totalViews, pages.filter(p => p.percent > 0)); 
     const countryPlan = generateCompensatedPlan(totalViews, HARDCODED_COUNTRIES);
     const maxPlanLength = Math.min(finalPageUrls.length, countryPlan.length);
@@ -182,7 +181,7 @@ app.post('/boost-mp', async (req, res) => {
         const totalViewsCount = finalCombinedPlan.length;
         console.log(`[PUPPETEER START] Starting REAL Browser View generation for ${totalViewsCount} views on Render with Proxies.`);
         
-        // --- GUARANTEED 24-48 HOUR DELIVERY (No Change) ---
+        // --- GUARANTEED 24-48 HOUR DELIVERY ---
         const targetDuration = Math.random() * (MAX_TOTAL_MS - MIN_TOTAL_MS) + MIN_TOTAL_MS;
         const requiredFixedDelayPerView = Math.floor(targetDuration / totalViewsCount);
         
@@ -194,7 +193,7 @@ app.post('/boost-mp', async (req, res) => {
                 const plan = finalCombinedPlan[i];
                 const viewId = i + 1;
                 
-                // ⭐ FIX 3: Har view shuru hone se pehle chota sa random wait
+                // ⭐ FIX 3: Har view shuru hone se pehle chota sa random wait (Timing Fix)
                 const preLaunchDelay = Math.floor(Math.random() * (2000 - 500) + 500); // 0.5s se 2s
                 await new Promise(resolve => setTimeout(resolve, preLaunchDelay));
 
@@ -208,7 +207,7 @@ app.post('/boost-mp', async (req, res) => {
                 let browser; 
                 
                 try {
-                    // Puppeteer Launch with Proxy (No Change in this block)
+                    // Puppeteer Launch with Proxy
                     const ipPort = proxyUrl.replace('http://', ''); 
                     
                     const proxyArgs = [
@@ -226,7 +225,7 @@ app.post('/boost-mp', async (req, res) => {
                     
                     page = await browser.newPage();
                     
-                    // --- 1. Set Real Browser Context (No Change) ---
+                    // --- 1. Set Real Browser Context ---
                     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
                     await page.setUserAgent(userAgent);
                     await page.setViewport({ width: 1366, height: 768 });
@@ -237,13 +236,29 @@ app.post('/boost-mp', async (req, res) => {
                     // Navigate
                     console.log(`[View ${viewId}] Navigating to: ${plan.url}`);
                     
-                    // ⭐ FIX 1: Waiting for 'networkidle0' (Page Load Fix)
-                    await page.goto(plan.url, { waitUntil: 'networkidle0', timeout: 60000 }); 
+                    try {
+                        // ⭐ FIX 1: 'domcontentloaded' aur kam timeout (Unstable Proxy Fix)
+                        await page.goto(plan.url, { waitUntil: 'domcontentloaded', timeout: 45000 }); 
+                        
+                    } catch (navError) {
+                        // ⭐ FIX 2: Navigation Timeout ko ignore karein aur aage badhein
+                        if (navError.name === 'TimeoutError') {
+                            console.warn(`[View ${viewId}] WARNING: Navigation Timeout (45s) exceeded. Proceeding with engagement.`);
+                        } else {
+                            // Koi aur connection error ho toh use aage ke catch block mein jaane dein
+                            throw navError; 
+                        }
+                    }
+                    
+                    // ⭐ FIX 1 (Part 2): Post-load sleep for stability
+                    const postLoadDelay = Math.floor(Math.random() * (5000 - 3000) + 3000); 
+                    await new Promise(resolve => setTimeout(resolve, postLoadDelay));
+                    
                     
                     // --- 2. Simulate Human Interaction (Scroll) ---
                     const engagementTime = Math.floor(Math.random() * (180000 - 45000) + 45000); 
                     
-                    // ⭐ FIX 2: Scroll Logic ko Safe Banaya
+                    // ⭐ FIX 2: Scroll Logic ko Safe Banaya (Scroll Error Fix)
                     await page.waitForSelector('body', { timeout: 10000 }); 
                     
                     const scrollHeight = await page.evaluate(() => {
@@ -262,8 +277,8 @@ app.post('/boost-mp', async (req, res) => {
                     } else {
                         console.log(`[View ${viewId}] No scroll (scrollHeight 0). Staying for ${Math.round(engagementTime/1000)}s.`);
                     }
-                    
-                    // Wait for the simulated engagement time (keeps the session active)
+
+                    // Wait for the simulated engagement time
                     await new Promise(resolve => setTimeout(resolve, engagementTime)); 
                     
                     // --- 3. Close the session ---
@@ -272,6 +287,7 @@ app.post('/boost-mp', async (req, res) => {
                     console.log(`[View ${viewId}] SUCCESS ✅ | Session closed.`);
 
                 } catch (pageError) {
+                    // Ab yahan sirf woh errors aayenge jo connection/browser level ke hain
                     console.error(`[View ${viewId}] FAILURE ❌ | Proxy ${proxyUrl} | Error: ${pageError.message.substring(0, 100)}...`);
                 } finally {
                     // Har view ke baad browser band karna zaroori hai
@@ -280,7 +296,7 @@ app.post('/boost-mp', async (req, res) => {
                     }
                 }
 
-                // --- 4. MAIN DELAY (No Change) ---
+                // --- 4. MAIN DELAY ---
                 const totalDelay = requiredFixedDelayPerView + (Math.random() * (MAX_VIEW_DELAY - MIN_VIEW_DELAY) + MIN_VIEW_DELAY);
                 console.log(`[Delay] Waiting for ${Math.round(totalDelay/1000)}s before next view.`);
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
@@ -297,7 +313,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT (No Change)
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -326,7 +342,7 @@ app.post('/api/caption-generate', async (req, res) => {
 
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (No Change)
+// 3. AI INSTA CAPTION EDITOR ENDPOINT 
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
       res.status(500).json({ error: 'AI endpoint is active but simplified code block is not included for brevity.' });
@@ -334,7 +350,7 @@ app.post('/api/caption-edit', async (req, res) => {
 
 
 // ===================================================================
-// START THE SERVER (No Change)
+// START THE SERVER 
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
