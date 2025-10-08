@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - DOUBLE SEARCH GSC BOOSTER EDITION)
+// index.js (FINAL CODE - DOUBLE SEARCH GSC BOOSTER EDITION - WITH ALL FIXES)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -159,13 +159,12 @@ app.post('/boost-mp', async (req, res) => {
     // Final Combined Plan creation with search_query included
     let finalCombinedPlan = [];
     for (let i = 0; i < maxPlanLength; i++) {
-        // Find the original page object to get the search_query
         const originalPage = pages.find(p => p.url === finalPageUrls[i]);
         
-        // ⭐ DATA SAFETY CHECK: search_query missing ya empty hone par default set karein
+        // ⭐ DATA SAFETY CHECK: search_query missing/empty hone par default set karein (FIX for "undefined" issue)
         const search_query = originalPage && originalPage.search_query && originalPage.search_query.trim() !== '' 
                              ? originalPage.search_query 
-                             : 'pooreyoutuber website booster'; // Default fallback query
+                             : 'pooreyoutuber website booster'; 
 
         finalCombinedPlan.push({ 
             url: finalPageUrls[i], 
@@ -198,7 +197,7 @@ app.post('/boost-mp', async (req, res) => {
         try {
             for (let i = 0; i < finalCombinedPlan.length; i++) {
                 const plan = finalCombinedPlan[i];
-                const sessionId = i + 1; // Session ID (har session mein do search hongi)
+                const sessionId = i + 1; 
                 
                 const preLaunchDelay = Math.floor(Math.random() * (2000 - 500) + 500); 
                 await new Promise(resolve => setTimeout(resolve, preLaunchDelay));
@@ -250,12 +249,12 @@ app.post('/boost-mp', async (req, res) => {
                         const targetURL = plan.url;
                         const googleURL = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
                         
-                        // TargetHost nikalna
                         let targetHost;
                         try {
                             targetHost = new URL(targetURL).hostname.replace('www.', '');
                         } catch (e) {
-                            targetHost = targetURL.substring(0, targetURL.indexOf('/') > 0 ? targetURL.indexOf('/') : targetURL.length); // Fallback for invalid URL
+                            // Fallback in case URL parsing fails
+                            targetHost = targetURL.substring(0, targetURL.indexOf('/') > 0 ? targetURL.indexOf('/') : targetURL.length); 
                         }
                         
                         const selector = `a[href*="${targetHost}"]`;
@@ -265,7 +264,7 @@ app.post('/boost-mp', async (req, res) => {
                         // 1. Google Search Page par jaana
                         try {
                             console.log(`[Session ${sessionId}] [Hit ${searchAttempt}] Searching Google for: "${searchQuery}"`);
-                            // networkidle0 tak wait karein
+                            // Networkidle0 tak wait karein, timeout ko catch karein
                             await page.goto(googleURL, { waitUntil: 'networkidle0', timeout: 60000 }); 
                             await new Promise(resolve => setTimeout(resolve, 3000)); // Wait for results to render
                         } catch (navError) {
@@ -283,8 +282,8 @@ app.post('/boost-mp', async (req, res) => {
                                 if (linkElement) {
                                     console.log(`[Session ${sessionId}] [Hit ${searchAttempt}] Found Target Link! Clicking...`);
                                     
-                                    // Click aur navigation ka wait saath mein
-                                    await Promise.all([
+                                    // Click aur navigation ka wait saath mein (Timeout handling ke saath)
+                                    await Promise.race([
                                         page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 }), 
                                         page.click(selector)
                                     ]);
@@ -303,12 +302,13 @@ app.post('/boost-mp', async (req, res) => {
                             }
 
                         } catch (e) {
+                            // Navigation/Click timeout ya error
                             console.warn(`[Session ${sessionId}] [Hit ${searchAttempt}] Search/Click/Navigation Error: ${e.message.substring(0, 50)}... Engagement on current page.`);
                             clickSuccessful = false;
                         }
 
                         // 3. Engagement (Scroll and Wait)
-                        // Pehli baar kam wait (3-10 sec), dusri baar zyada wait (45-120 sec)
+                        // Hit 1: 3-10 sec, Hit 2: 45-120 sec
                         const engagementTime = searchAttempt === 1 
                                                ? Math.floor(Math.random() * (10000 - 3000) + 3000) 
                                                : Math.floor(Math.random() * (120000 - 45000) + 45000); 
@@ -330,7 +330,8 @@ app.post('/boost-mp', async (req, res) => {
                             
                             console.log(`[Session ${sessionId}] [Hit ${searchAttempt}] Scroll simulated (90%). Staying for ${Math.round(engagementTime/1000)}s.`);
                         } else {
-                            console.warn(`[Session ${sessionId}] [Hit ${searchAttempt}] WARNING: No scroll. Staying for ${Math.round(engagementTime/1000)}s.`);
+                            // ScrollHeight 0 warning fix
+                            console.warn(`[Session ${sessionId}] [Hit ${searchAttempt}] WARNING: No scroll (ScrollHeight 0). Staying for ${Math.round(engagementTime/1000)}s.`);
                         }
 
                         // Wait for the simulated engagement time
@@ -360,7 +361,6 @@ app.post('/boost-mp', async (req, res) => {
                 } catch (pageError) {
                     console.error(`[Session ${sessionId}] FAILURE ❌ | Proxy ${proxyUrl} | Error: ${pageError.message.substring(0, 100)}...`);
                 } finally {
-                    // Har session ke baad browser band karna zaroori hai
                     if (browser) {
                         await browser.close();
                     }
@@ -421,7 +421,7 @@ app.post('/api/caption-edit', async (req, res) => {
 
 // ===================================================================
 // START THE SERVER (No Change)
-// ===================================================================
+//===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
