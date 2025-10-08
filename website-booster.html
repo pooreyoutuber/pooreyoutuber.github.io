@@ -3,362 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌐 Traffic Booster</title>
+    <title>Real User Traffic Booster</title>
     <style>
-        /* BASE & MOBILE OPTIMIZATION */
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f0f3f8; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 10px 5px; /* Padding kam kiya */
-            color: #333; 
-            font-size: 14px; /* Base font size chota kiya */
-        }
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h2 { 
-            color: #007bff; 
-            margin: 0; 
-            font-size: 1.5em; /* Heading chota kiya */
-            font-weight: 700; 
-        }
-        .header p { color: #888; margin-top: 5px; font-size: 0.9em; }
-        
-        .container { 
-            background-color: #ffffff; 
-            padding: 20px; /* Padding kam kiya */
-            border-radius: 10px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-            width: 95%; /* Mobile par zyada jagah lega */
-            max-width: 450px; /* Max-width kam kiya */
-            margin-bottom: 15px; 
-            border: 1px solid #e0e0e0; 
-        }
-        
-        /* INPUT & LABELS */
-        label { display: block; text-align: left; margin-bottom: 4px; font-weight: bold; font-size: 0.9em; color: #555; }
-        input[type="text"], input[type="number"] { 
-            width: 100%; 
-            padding: 8px; /* Input padding kam kiya */
-            margin-bottom: 15px; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
-            box-sizing: border-box; 
-            font-size: 0.9em; 
-        }
-
-        /* PAGE DISTRIBUTION */
-        .page-entry-group { border: 1px solid #e0e0e0; padding: 10px; border-radius: 6px; margin-bottom: 15px; background-color: #f9f9f9; }
-        .page-entry { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-        .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; background-color: #fff; }
-        
-        .page-entry input[type="number"] { 
-            width: 50px; /* Number input aur chota kiya */
-            flex-grow: 0; 
-            margin-bottom: 0; 
-            text-align: center; 
-            background-color: #eef4ff;
-        }
-        .percent-label { font-weight: bold; width: 20px; color: #5cb85c; font-size: 0.9em; }
-        .total-percent-display { text-align: right; margin-top: 5px; font-weight: bold; font-size: 1em; }
-        
-        /* BUTTONS & MESSAGES */
-        button { background-color: #198754; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; font-size: 1em; transition: background-color 0.3s; }
-        button:hover { background-color: #157347; }
-        
-        #message { margin-top: 15px; padding: 10px; border-radius: 4px; font-weight: bold; text-align: center; border: 1px solid transparent; font-size: 0.9em; }
-        .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
-        .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        .info { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
-        
-        .info-card { background-color: #f0f3f8; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #007bff; font-size: 0.85em;}
-        .info-card h3 { color: #007bff; margin-top: 0; font-size: 1em; }
-        
-        /* MEDIA QUERY FOR DESKTOP */
-        @media (min-width: 600px) {
-            body { font-size: 16px; padding: 20px 10px; }
-            .container { max-width: 500px; }
-        }
+        body { font-family: 'Arial', sans-serif; background-color: #f4f7f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        h1 { text-align: center; color: #007bff; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="number"], input[type="text"], input[type="url"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .page-entry { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .page-entry input[type="url"] { flex-grow: 3; }
+        .page-entry input[type="number"] { flex-grow: 1; max-width: 80px; text-align: right; }
+        .add-btn, .remove-btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .add-btn { background-color: #28a745; color: white; }
+        .remove-btn { background-color: #dc3545; color: white; }
+        #submitBtn { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; transition: background-color 0.3s; margin-top: 20px; }
+        #submitBtn:hover { background-color: #0056b3; }
+        .message-box { margin-top: 20px; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        #status-area { margin-top: 20px; padding: 15px; border: 1px dashed #007bff; border-radius: 6px; text-align: center; background-color: #e6f7ff; }
+        .small-text { font-size: 0.8em; color: #666; margin-top: 10px; }
+        .note { color: orange; font-weight: normal; font-size: 0.9em;}
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>🚀 Website Traffic Booster</h2>
-        <p>Generate highly realistic, high-engagement traffic for GA4 reporting.</p>
-    </div>
-    
     <div class="container">
+        <h1>🚀 Real User Traffic Booster</h1>
         
-        <form id="boosterForm">
-            
-            <label for="referrerUrl">1. Traffic Source URL (Search/Video/Referrer):</label>
-            <input type="text" id="referrerUrl" placeholder="e.g., https://google.com/search?q=mywebsite" required autocomplete="off">
-            
-            <label for="views">2. Total Views to Generate (Max 400):</label>
-            <input type="number" id="views" value="100" min="1" max="400" required autocomplete="off">
-            
-            <input type="hidden" id="deliveryTime" value="48">
-            <input type="hidden" id="countryCount" value="18">
-            <input type="hidden" id="minEngagementTime" value="45000"> 
-            <input type="hidden" id="maxEngagementTime" value="180000">
-            
-            <div class="page-entry-group">
-                <label style="color: #007bff;">3. Distribute Traffic Across Pages (Total must be 100%):</label>
-                
-                <div class="page-entry">
-                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required)" required autocomplete="off" value="https://pooreyoutuber.github.io/website-booster.html">
-                    <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <div class="page-entry">
-                    <input type="text" id="url2" class="page-url" placeholder="Page 2 URL (Optional)">
-                    <input type="number" id="percent2" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-
-                <div class="page-entry">
-                    <input type="text" id="url3" class="page-url" placeholder="Page 3 URL (Optional)">
-                    <input type="number" id="percent3" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-
-                <div class="page-entry">
-                    <input type="text" id="url4" class="page-url" placeholder="Page 4 URL (Optional)">
-                    <input type="number" id="percent4" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <div class="page-entry">
-                    <input type="text" id="url5" class="page-url" placeholder="Page 5 URL (Optional)">
-                    <input type="number" id="percent5" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <p class="total-percent-display">
-                    Total Distribution: <span id="totalPercent" style="color:#5cb85c;">100</span>%
-                </p>
-            </div>
-            
-            <button type="submit" id="submitBtn">Generate Traffic</button>
-        </form>
-        
-        <div id="message"></div>
-
-        <div class="info-card">
-            <h3>📈 Results & Traffic Simulation</h3>
-            <p>Your request will be processed immediately. The traffic will be **naturally dispersed** over **24-48 hours** to ensure organic-looking growth. All users simulate **realistic scrolling and high engagement**.</p>
+        <div class="form-group">
+            <label for="apiUrl">API Server URL: <span class="note">(Render Service URL)</span></label>
+            <input type="url" id="apiUrl" value="https://YOUR-RENDER-SERVICE-URL.onrender.com" required>
         </div>
+
+        <div class="form-group">
+            <label for="totalViews">Total Views (Max 400):</label>
+            <input type="number" id="totalViews" min="1" max="400" value="100" required>
+        </div>
+
+        <h2>Website Pages & Allocation (%)</h2>
+        <div id="pages-container">
+            <div class="page-entry">
+                <input type="url" class="page-url" placeholder="Page URL (e.g., https://yoursite.com/page1)" required>
+                <input type="number" class="page-percent" placeholder="%" min="0" max="100" value="100" required>
+                <button type="button" class="remove-btn" onclick="removePageEntry(this)">➖</button>
+            </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addPageEntry()">➕ Add Another Page</button>
+        <div class="small-text">Note: Total percentage will be automatically adjusted (normalized) on the backend.</div>
+
+        <button id="submitBtn">Generate Traffic</button>
+
+        <div id="message" class="message-box" style="display:none;"></div>
+        
+        <div id="status-area">
+            <h3>📈 Current Status</h3>
+            <p>Total Views Requested: <span id="reqViews">0</span></p>
+            <p>Slots Running: <span id="reqSlots">0</span></p>
+            <p class="small-text">Status updates are not real-time. Traffic will be completed in the next 24-48 hours. Check Google Analytics/Search Console.</p>
+        </div>
+
     </div>
-    
+
     <script>
-        // HARDCODED GA4 KEYS 
-        const GA_ID = "G-ZPMC525FGT";
-        const API_KEY = "pSaScGPuTWa95eOdSkbV7w";
-        
-        // FINAL RENDER API URL (Ensure this is correct)
-        const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_final_v11_mobile'; 
-        
-        const form = document.getElementById('boosterForm');
-        const messageDiv = document.getElementById('message');
-        const submitBtn = document.getElementById('submitBtn');
-        const totalPercentSpan = document.getElementById('totalPercent');
-        
-        // --- RETRY CONSTANTS ---
-        const MAX_RETRIES = 5; 
-        const RETRY_DELAY = 10000; 
-        
-        const pageInputs = [1, 2, 3, 4, 5].map(i => ({
-            url: document.getElementById(`url${i}`),
-            percent: document.getElementById(`percent${i}`)
-        }));
+        const API_ENDPOINT = '/boost-real'; // The new backend endpoint
 
-        function updateDisplayTotal() {
-            let total = 0;
-            document.querySelectorAll('.page-percent').forEach(input => {
-                const val = parseInt(input.value) || 0;
-                total += val;
-                input.value = val;
-            });
-            totalPercentSpan.textContent = total;
-            totalPercentSpan.style.color = total === 100 ? '#5cb85c' : '#d9534f';
-            return total;
+        function addPageEntry(url = '', percent = 0) {
+            const container = document.getElementById('pages-container');
+            const entry = document.createElement('div');
+            entry.className = 'page-entry';
+            entry.innerHTML = `
+                <input type="url" class="page-url" placeholder="Page URL (e.g., https://yoursite.com/page2)" value="${url}" required>
+                <input type="number" class="page-percent" placeholder="%" min="0" max="100" value="${percent > 0 ? percent : ''}" required>
+                <button type="button" class="remove-btn" onclick="removePageEntry(this)">➖</button>
+            `;
+            container.appendChild(entry);
         }
-        document.querySelectorAll('.page-percent').forEach(input => {
-            input.addEventListener('input', updateDisplayTotal);
-        });
 
-        function showMessage(type, message, reenable) {
-            messageDiv.className = type;
-            messageDiv.innerHTML = message;
-            if (reenable) {
+        function removePageEntry(button) {
+            const container = document.getElementById('pages-container');
+            const entry = button.parentNode;
+            if (container.children.length > 1) {
+                container.removeChild(entry);
+            } else {
+                alert("You must have at least one page entry.");
+            }
+        }
+
+        async function handleSubmit() {
+            const submitBtn = document.getElementById('submitBtn');
+            const messageBox = document.getElementById('message');
+            messageBox.style.display = 'none';
+            messageBox.className = 'message-box';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing... Please wait';
+
+            try {
+                const totalViews = parseInt(document.getElementById('totalViews').value);
+                const apiUrlBase = document.getElementById('apiUrl').value.trim().replace(/\/$/, ""); // Remove trailing slash
+                
+                // Collect Page Data
+                const pages = [];
+                const pageEntries = document.querySelectorAll('.page-entry');
+                let totalPercent = 0;
+
+                pageEntries.forEach(entry => {
+                    const url = entry.querySelector('.page-url').value.trim();
+                    const percent = parseInt(entry.querySelector('.page-percent').value);
+
+                    if (url && percent > 0) {
+                        pages.push({ url, percent });
+                        totalPercent += percent;
+                    }
+                });
+
+                if (totalViews <= 0 || totalViews > 400) {
+                    throw new Error("Total Views must be between 1 and 400.");
+                }
+                if (pages.length === 0) {
+                    throw new Error("Please enter at least one valid page URL with a percentage greater than 0.");
+                }
+
+                // API Call
+                const response = await fetch(apiUrlBase + API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        views: totalViews,
+                        pages: pages
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageBox.textContent = data.message;
+                    messageBox.classList.add('success');
+                    
+                    // Update Status Area
+                    document.getElementById('reqViews').textContent = data.total_loads || totalViews;
+                    document.getElementById('reqSlots').textContent = data.slots || 20;
+
+                } else {
+                    throw new Error(data.message || 'Server error occurred.');
+                }
+
+            } catch (error) {
+                messageBox.textContent = `Error: ${error.message}`;
+                messageBox.classList.add('error');
+                document.getElementById('reqViews').textContent = 0;
+                document.getElementById('reqSlots').textContent = 0;
+            } finally {
+                messageBox.style.display = 'block';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Generate Traffic';
             }
         }
-        
-        function saveDetails(referrerUrl, views, pages) {
-            const data = { referrerUrl, views, pages };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
 
-        function loadSavedDetails() {
-            const savedData = localStorage.getItem(STORAGE_KEY);
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    document.getElementById('referrerUrl').value = data.referrerUrl || '';
-                    document.getElementById('views').value = data.views || '100';
-                    
-                    data.pages.forEach((page, index) => {
-                        if (index < 5) {
-                            pageInputs[index].url.value = page.url || '';
-                            pageInputs[index].percent.value = page.percent || '0';
-                        }
-                    });
+        document.getElementById('submitBtn').addEventListener('click', handleSubmit);
 
-                } catch (e) { /* Error ignored */ }
-                updateDisplayTotal();
+        // Initial setup
+        window.onload = () => {
+            // Remove the default empty entry if any
+            const container = document.getElementById('pages-container');
+            if (container.children.length > 1) {
+                container.children[0].remove();
             }
-        }
-
-        // --- Main Submission Logic ---
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            const referrerUrl = document.getElementById('referrerUrl').value.trim();
-            let viewsCount = parseInt(document.getElementById('views').value);
-            
-            // ⭐ Max Views check for client-side (Max 400)
-            if (viewsCount > 400) {
-                 showMessage('error', `❌ Error: Adhiktam 400 views hi anumat hain.`, true);
-                 return;
+            // Add one default entry for easy start
+            if (container.children.length === 0) {
+                addPageEntry('', 100);
             }
-            if (!referrerUrl || viewsCount < 1) {
-                showMessage('error', '❌ Error: Traffic Source URL and Total Views are required.', true);
-                return;
-            }
-
-            const totalPercent = updateDisplayTotal();
-            if (totalPercent !== 100) {
-                showMessage('error', `❌ Error: Total distribution must be 100%, but it is ${totalPercent}%.`, true);
-                return;
-            }
-            
-            let pages = [];
-            let isValid = true;
-            
-            pageInputs.forEach((input, index) => {
-                const url = input.url.value.trim();
-                const percent = parseInt(input.percent.value) || 0;
-                if (url && percent > 0) {
-                    if (!url.startsWith('http')) {
-                        showMessage('error', `❌ Error on Page ${index+1}: URL must start with **https://** or **http://** (e.g., https://example.com/page).`, true);
-                        isValid = false;
-                        return;
-                    }
-                    pages.push({ url: url, percent: percent });
-                } else if (url && percent === 0) {
-                     showMessage('error', `❌ Error on Page ${index+1}: URL **"${url}"** has **0%** distribution. Please remove the URL or assign a percentage > 0.`, true);
-                     isValid = false;
-                     return;
-                }
-            });
-
-            if (!isValid) return; 
-            if (pages.length === 0) {
-                 showMessage('error', '❌ Error: At least one Page URL (Page 1) with a percentage > 0 must be filled.', true);
-                 return;
-            }
-
-            saveDetails(referrerUrl, viewsCount, pages); 
-            
-            // Final Payload with ALL instructions
-            const payload = { 
-                ga_id: GA_ID, 
-                api_key: API_KEY, 
-                views: viewsCount, 
-                pages: pages,
-                referrer_url: referrerUrl,
-                delivery_time_hours: parseInt(document.getElementById('deliveryTime').value), 
-                target_country_count: parseInt(document.getElementById('countryCount').value),
-                min_engagement_msec: parseInt(document.getElementById('minEngagementTime').value),
-                max_engagement_msec: parseInt(document.getElementById('maxEngagementTime').value)
-            };
-            
-            submitData(payload, MAX_RETRIES); 
-        });
-        
-        // --- Server Submission Logic (BUG FIX implemented here) ---
-        async function submitData(data, retriesLeft) {
-            submitBtn.disabled = true;
-            
-            const attemptsMade = MAX_RETRIES - retriesLeft + 1;
-            const totalAttempts = MAX_RETRIES + 1;
-            const delayInSeconds = RETRY_DELAY / 1000;
-
-            if (attemptsMade > 1) {
-                submitBtn.textContent = `⚠️ Server Retrying... (${attemptsMade}/${totalAttempts})`;
-                showMessage('info', `⚠️ Server connection issue. Retrying in ${delayInSeconds} seconds...`, false);
-                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-            } else {
-                submitBtn.textContent = `✅ Initiating Request...`;
-                showMessage('info', '✅ Request initiated. Checking server status...', false);
-            }
-            
-            try {
-                const response = await fetch(RENDER_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                // ⭐ BUG FIX: Response data ko yahan parse karo
-                const responseData = await response.json();
-                
-                if (response.status >= 500 && retriesLeft > 0) {
-                     throw new Error('Temporary Server Error. Retrying...');
-                }
-
-                if (!response.ok) {
-                    // Check for 429 Rate Limit error specifically, which might have a custom message
-                    if (response.status === 429) {
-                        throw new Error(`Rate Limit Exceeded: ${responseData.message}`);
-                    }
-                    
-                    // Throw a standard error with the server's response message if available
-                    throw new Error(`HTTP Error: ${response.status} - ${responseData.message || 'Bad Request/Validation Error'}`);
-                }
-                
-                // Success block
-                if (responseData.status === 'accepted' || responseData.status === 'processing' || responseData.status === 'ok') {
-                     const successMessage = `**SUCCESS!** Your request for **${data.views} highly-engaged views** has been accepted. Results will appear gradually in your GA4 report over the next **${data.delivery_time_hours} hours** from **18+ countries**.`;
-                     showMessage('success', successMessage, true);
-                } else {
-                     showMessage('error', `❌ Error: ${responseData.message || 'Unknown error. Please try again.'}.`, true);
-                }
-
-            } catch (error) {
-                if (retriesLeft > 0 && (error.message.includes('Failed to fetch') || error.message.includes('Server Error'))) { 
-                    return submitData(data, retriesLeft - 1);
-                } else {
-                    const finalErrorMessage = error.message.includes('Failed to fetch') 
-                        ? `❌ Connection Failed. Server is offline or unreachable.` 
-                        : `❌ Final Error: ${error.message}`;
-
-                    showMessage('error', finalErrorMessage, true);
-                }
-            } 
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-             loadSavedDetails();
-             updateDisplayTotal();
-        });
+        };
     </script>
 </body>
 </html>
