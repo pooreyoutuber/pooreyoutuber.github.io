@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - MAXIMUM RELIABILITY & BODY SELECTOR FIX)
+// index.js (FINAL CODE - MAXIMUM RELIABILITY & GA TRACKING FIX)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -56,7 +56,7 @@ const PROXY_LIST = [
     "http://45.3.55.246:3129",    // Germany 
     "http://45.3.53.142:3129",    // Brazil
     "http://154.213.160.98:3129", // France
-    "http://45.3.44.176:3129",    // Spain
+    "http://45.3.44.176:3129:3129",    // Spain
     "http://104.207.60.243:3129", // Canada
     "http://104.207.52.73:3129",  // United Kingdom
     "http://216.26.253.178:3129", // France
@@ -245,8 +245,8 @@ app.post('/boost-mp', async (req, res) => {
                     console.log(`[View ${viewId}] Navigating to: ${plan.url}`);
                     
                     try {
-                        // Navigation Timeout 60s
-                        await page.goto(plan.url, { waitUntil: 'domcontentloaded', timeout: 60000 }); 
+                        // ⭐ CRITICAL FIX 1: 'domcontentloaded' se 'networkidle0' kiya
+                        await page.goto(plan.url, { waitUntil: 'networkidle0', timeout: 60000 }); 
                         
                     } catch (navError) {
                         // Navigation Timeout ko ignore karein
@@ -258,16 +258,14 @@ app.post('/boost-mp', async (req, res) => {
                         }
                     }
                     
-                    // FIX: Post-load sleep for stability (Yeh "body" load hone ka substitute hai)
-                    const postLoadDelay = Math.floor(Math.random() * (5000 - 3000) + 3000); 
+                    // FIX: Post-load sleep for stability 
+                    // ⭐ CRITICAL FIX 2: Delay ko 10 seconds tak badhaya (GA script ko execute hone ke liye)
+                    const postLoadDelay = Math.floor(Math.random() * (10000 - 5000) + 5000); 
                     await new Promise(resolve => setTimeout(resolve, postLoadDelay));
                     
                     
                     // --- 2. Simulate Human Interaction (Scroll) ---
                     const engagementTime = Math.floor(Math.random() * (120000 - 45000) + 45000); 
-                    
-                    // ⭐ CRITICAL FIX: page.waitForSelector('body') HATA DIYA GAYA HAI.
-                    // Hum body ki height ko check kar ke scroll karenge. Agar 0 hai, to skip.
                     
                     const scrollHeight = await page.evaluate(() => {
                         // Yeh code try karega body ki scroll height nikaalne ki. Agar body nahi hai, toh 0.
