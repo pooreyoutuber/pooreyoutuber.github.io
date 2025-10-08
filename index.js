@@ -56,7 +56,7 @@ const PROXY_LIST = [
     "http://45.3.55.246:3129",    // Germany 
     "http://45.3.53.142:3129",    // Brazil
     "http://154.213.160.98:3129", // France
-    "http://45.3.44.176:3129:3129",    // Spain
+    "http://45.3.44.176:3129",    // Spain
     "http://104.207.60.243:3129", // Canada
     "http://104.207.52.73:3129",  // United Kingdom
     "http://216.26.253.178:3129", // France
@@ -245,7 +245,8 @@ app.post('/boost-mp', async (req, res) => {
                     console.log(`[View ${viewId}] Navigating to: ${plan.url}`);
                     
                     try {
-                        // ⭐ CRITICAL FIX 1: 'domcontentloaded' se 'networkidle0' kiya
+                        // ⭐ CRITICAL FIX 1: 'domcontentloaded' se 'networkidle0' kiya (GA Tracking ke liye)
+                        // Navigation Timeout 60s
                         await page.goto(plan.url, { waitUntil: 'networkidle0', timeout: 60000 }); 
                         
                     } catch (navError) {
@@ -266,6 +267,8 @@ app.post('/boost-mp', async (req, res) => {
                     
                     // --- 2. Simulate Human Interaction (Scroll) ---
                     const engagementTime = Math.floor(Math.random() * (120000 - 45000) + 45000); 
+                    
+                    // CRITICAL FIX: page.waitForSelector('body') HATA DIYA GAYA HAI. (Pichli galti theek ki gayi)
                     
                     const scrollHeight = await page.evaluate(() => {
                         // Yeh code try karega body ki scroll height nikaalne ki. Agar body nahi hai, toh 0.
