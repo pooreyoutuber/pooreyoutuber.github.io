@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - MAXIMUM STABILITY + ALL FIXES APPLIED)
+// index.js (FINAL CODE - MAXIMUM RELIABILITY & CLEANED PROXY LIST)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -16,8 +16,6 @@ const rateLimitMap = new Map();
 const MAX_REQUESTS_PER_DAY = 4;
 const MAX_VIEWS_PER_RUN = 400; 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-// Middleware to trust proxy headers 
 app.set('trust proxy', 1);
 
 // --- GEMINI KEY CONFIGURATION (No Change) ---
@@ -44,7 +42,7 @@ const PUPPETEER_ARGS = [
     '--single-process', 
 ];
 
-// ⭐ PROXY LIST (UPDATED WITH NEW COUNTRIES)
+// ⭐ PROXY LIST (UPDATED AND CLEANED - Unstable proxies removed)
 const PROXY_LIST = [
     "http://104.207.63.195:3129", // France
     "http://104.207.61.3:3129",   // Canada
@@ -56,7 +54,7 @@ const PROXY_LIST = [
     "http://216.26.254.110:3129", // France
     "http://45.3.42.225:3129",    // United Kingdom
     "http://45.3.55.246:3129",    // Germany 
-    "http://65.111.29.210:3129", // France
+    // "http://65.111.29.210:3129", // Removed (Failed on last attempt)
     "http://45.3.53.142:3129",    // Brazil
     "http://154.213.160.98:3129", // France
     "http://45.3.44.176:3129",    // Spain
@@ -64,7 +62,7 @@ const PROXY_LIST = [
     "http://104.207.52.73:3129",  // United Kingdom
     "http://216.26.253.178:3129", // France
     "http://154.213.166.61:3129", // Germany
-    "http://65.111.30.12:3129",   // France
+    // "http://65.111.30.12:3129", // Removed (Likely unstable)
     "http://45.3.45.87:3129"      // Italy
 ];
 
@@ -87,7 +85,6 @@ app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Puppeteer API (Render Optimized) is running! 🌐');
 });
 
-// --- UTILITY FUNCTIONS (No Change) ---
 function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
     if (items.length === 0 || totalViews < 1) return [];
@@ -206,7 +203,7 @@ app.post('/boost-mp', async (req, res) => {
                 const plan = finalCombinedPlan[i];
                 const viewId = i + 1;
                 
-                // FIX: Har view shuru hone se pehle chota sa random wait (Timing Fix)
+                // FIX: Har view shuru hone se pehle chota sa random wait
                 const preLaunchDelay = Math.floor(Math.random() * (2000 - 500) + 500); 
                 await new Promise(resolve => setTimeout(resolve, preLaunchDelay));
 
@@ -268,9 +265,10 @@ app.post('/boost-mp', async (req, res) => {
                     
                     
                     // --- 2. Simulate Human Interaction (Scroll) ---
-                    const engagementTime = Math.floor(Math.random() * (180000 - 45000) + 45000); 
+                    // ⭐ FIX: Engagement upper limit 180s se 120s kiya (Stability)
+                    const engagementTime = Math.floor(Math.random() * (120000 - 45000) + 45000); 
                     
-                    // ⭐ CRITICAL FIX: 'body' selector ka wait 5s se 15s kiya (Slow Proxy Chance)
+                    // FIX: 'body' selector wait 15s (Slow Proxy Chance)
                     await page.waitForSelector('body', { timeout: 15000 }); 
                     
                     const scrollHeight = await page.evaluate(() => {
