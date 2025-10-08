@@ -1,9 +1,7 @@
-// index.js (FINAL CODE - PROFESSIONAL UI VERSION with Correct CORS)
+// index.js (FINAL CODE - STABILITY OPTIMIZATION FOR RENDER)
 
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai'); 
 const cors = require('cors'); 
-const fs = require('fs'); 
 const puppeteer = require('puppeteer-core'); 
 const chromium = require('@sparticuz/chromium'); 
 
@@ -17,26 +15,17 @@ const MAX_VIEWS_PER_RUN = 400;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 app.set('trust proxy', 1);
 
-// Optional: Gemini Key (Keep it for other tools)
-let GEMINI_KEY;
-try {
-    GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
-} catch (e) {
-    GEMINI_KEY = process.env.GEMINI_API_KEY; 
-}
-let ai;
-if (GEMINI_KEY) {
-    ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-} else {
-    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
-}
-
-// Puppeteer Arguments for Render/Chromium
+// **OPTIMIZED PUPPETEER ARGS for Stability on Render**
 const PUPPETEER_ARGS = [
-    ...chromium.args, 
-    '--no-sandbox', 
+    '--disable-gpu',
     '--disable-setuid-sandbox',
-    '--single-process', 
+    '--no-sandbox', 
+    '--single-process', // CRITICAL for low-memory hosts
+    '--no-zygote',
+    '--disable-dev-shm-usage',
+    '--user-data-dir=/tmp/user_data', // Use /tmp for temporary data
+    '--ignore-certificate-errors',
+    '--enable-features=NetworkService,NetworkServiceInProcess',
 ];
 
 // ⭐ PROXY LIST (Use your provided list)
@@ -45,18 +34,16 @@ const PROXY_LIST = [
     "http://216.26.254.100:3129", "http://104.207.57.162:3129", "http://209.50.188.66:3129",
     "http://65.111.24.172:3129", "http://216.26.254.110:3129", "http://45.3.42.225:3129",
     "http://45.3.55.246:3129", "http://45.3.53.142:3129", "http://154.213.160.98:3129",
-    "http://45.3.44.176:139", "http://104.207.60.243:3129", "http://104.207.52.73:3129",
+    "http://45.3.44.176:3129", "http://104.207.60.243:3129", "http://104.207.52.73:3129",
     "http://216.26.253.178:3129", "http://154.213.166.61:3129", "http://45.3.45.87:3129"
 ];
 
-// Random User Agents
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
 ];
-
 
 function getRandomProxy() {
     if (PROXY_LIST.length === 0) return null;
@@ -98,21 +85,14 @@ function generateCompensatedPlan(totalViews, items) {
 }
 
 // --- 2. CORS FIX ---
-// Specifically allowing your frontend's GitHub Pages URL
-const allowedOrigins = [
-    'https://pooreyoutuber.github.io', 
-    'http://localhost:8000',           
-];
+// Allowing your GitHub Pages frontend to communicate with Render
+const allowedOrigins = ['https://pooreyoutuber.github.io', 'http://localhost:8000'];
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            // NOTE: If the URL is dynamic, you might need a broader approach, 
-            // but for security, specific is best.
-            console.log(`CORS blocked request from: ${origin}`);
             callback(new Error('Not allowed by CORS'), false); 
         }
     },
@@ -213,35 +193,44 @@ async function runSlotTask(slotId, urlList) {
                 args: proxyArgs, 
                 executablePath: await chromium.executablePath(), 
                 headless: chromium.headless,
+                timeout: 60000, // Browser Launch Timeout
             });
             
             let page = await browser.newPage();
             
-            // --- 2. Set Random User Agent and Headers ---
-            const userAgent = getRandomUserAgent();
-            await page.setUserAgent(userAgent);
-            await page.setViewport({ width: 1366, height: 768 });
-            await page.setExtraHTTPHeaders({
-                'Referer': 'https://www.google.com/', 
-            });
+            // Set 1920x1080 for high resolution user agent
+            await page.setViewport({ width: 1920, height: 1080 }); 
+            await page.setUserAgent(getRandomUserAgent());
+            
+            // Set Referer to simulate natural Google search traffic
+            await page.setExtraHTTPHeaders({'Referer': 'https://www.google.com/'});
             
             // --- 3. Page Navigate (Load) ---
-            await page.goto(targetURL, { waitUntil: 'networkidle0', timeout: 60000 });
+            await page.goto(targetURL, { 
+                waitUntil: 'domcontentloaded', // Use domcontentloaded for faster loading (memory saving)
+                timeout: 60000 
+            });
             
             // --- 4. Engagement (Scroll & Random Wait: 4s-7s) ---
             const engagementTime = Math.floor(Math.random() * (7000 - 4000) + 4000); 
             
+            // Wait a little before scroll to ensure page content loads
+            await new Promise(resolve => setTimeout(resolve, 1000)); 
+
             const scrollHeight = await page.evaluate(() => {
-                return document.body ? document.body.scrollHeight : 0; 
+                // Check if page is loaded and has scrollable content
+                return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight); 
             });
             
-            if (scrollHeight > 0) {
+            if (scrollHeight > 1000) { // Scroll only if content is large enough
                 const scrollPercent = Math.random() * (0.95 - 0.5) + 0.5;
-                const targetScroll = Math.min(scrollHeight * scrollPercent, scrollHeight - 10);
+                const targetScroll = Math.min(scrollHeight * scrollPercent, scrollHeight - 100);
                 
                 await page.evaluate((targetScroll) => {
                     window.scrollBy(0, targetScroll);
                 }, targetScroll);
+            } else {
+                 console.log(`[Load ${loadId}] WARNING: Low scroll height (${scrollHeight}).`);
             }
 
             await new Promise(resolve => setTimeout(resolve, engagementTime)); 
@@ -250,6 +239,10 @@ async function runSlotTask(slotId, urlList) {
 
         } catch (pageError) {
             console.error(`[Load ${loadId}] FAILURE ❌ | Error: ${pageError.message.substring(0, 100)}...`);
+            // Add a check to detect memory/CPU failures
+            if (pageError.message.includes('launch the browser') || pageError.message.includes('No such process')) {
+                console.error(`[Load ${loadId}] TROUBLESHOOTING: Render memory/CPU issue. Consider reducing MAX_VIEWS_PER_RUN or simplifying the page load.`);
+            }
         } finally {
             if (browser) {
                 await browser.close();
@@ -266,8 +259,9 @@ async function runSlotTask(slotId, urlList) {
 
 
 // ===================================================================
-// 6. START THE SERVER 
+// 5. START THE SERVER 
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
+            
