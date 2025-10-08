@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - MAXIMUM RELIABILITY & GA TRACKING FIX)
+// index.js (FINAL CODE - SEARCH CONSOLE BOOSTER EDITION)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -11,14 +11,14 @@ const chromium = require('@sparticuz/chromium');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- RATE LIMITING CONFIGURATION (No Change) ---
+// --- RATE LIMITING CONFIGURATION ---
 const rateLimitMap = new Map();
 const MAX_REQUESTS_PER_DAY = 4;
 const MAX_VIEWS_PER_RUN = 400; 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 app.set('trust proxy', 1);
 
-// --- GEMINI KEY CONFIGURATION (No Change) ---
+// --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
@@ -34,7 +34,7 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- PUPPETEER CONFIGURATION (No Change) ---
+// --- PUPPETEER CONFIGURATION ---
 const PUPPETEER_ARGS = [
     ...chromium.args, 
     '--no-sandbox', 
@@ -42,7 +42,7 @@ const PUPPETEER_ARGS = [
     '--single-process', 
 ];
 
-// ⭐ PROXY LIST (CLEANED - Unstable proxies removed)
+// ⭐ PROXY LIST (Optimized List)
 const PROXY_LIST = [
     "http://104.207.63.195:3129", // France
     "http://104.207.61.3:3129",   // Canada
@@ -64,14 +64,13 @@ const PROXY_LIST = [
     "http://45.3.45.87:3129"      // Italy
 ];
 
-// ⭐ getRandomProxy function (No Change)
 function getRandomProxy() {
     if (PROXY_LIST.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * PROXY_LIST.length);
     return PROXY_LIST[randomIndex];
 }
 
-// --- MIDDLEWARE & UTILITIES (No Change) ---
+// --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
@@ -80,13 +79,17 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Puppeteer API (Render Optimized) is running! 🌐');
+    res.status(200).send('PooreYouTuber Puppeteer API (Search Console Booster) is running! 🚀');
 });
+
+// Note: generateCompensatedPlan logic is optimized for {id: url/code, views: X, remainder: Y} structure.
+// For Search Booster, 'url' will be the Target URL (plan.url) and 'code' will be the Country Code (plan.country_code)
 
 function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
     if (items.length === 0 || totalViews < 1) return [];
     
+    // Yahan hum man rahe hain ki items ka structure {id: url/code, percent: X} hai.
     const viewsToAllocate = items.map(item => ({
         id: item.url || item.code,
         views: Math.floor(totalViews * (item.percent / 100)), 
@@ -111,7 +114,7 @@ function generateCompensatedPlan(totalViews, items) {
     return viewPlan;
 }
 
-// --- GUARANTEED DELIVERY TIME PARAMETERS (No Change) ---
+// --- GUARANTEED DELIVERY TIME PARAMETERS ---
 const MIN_TOTAL_MS = 24 * 60 * 60 * 1000; 
 const MAX_TOTAL_MS = 48 * 60 * 60 * 1000; 
 const MIN_VIEW_DELAY = 10000; 
@@ -119,11 +122,11 @@ const MAX_VIEW_DELAY = 25000;
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (PUPPETEER LOGIC)
+// 1. WEBSITE BOOSTER ENDPOINT (SEARCH CONSOLE LOGIC)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     
-    // --- RATE LIMITING & VIEW LIMIT (No Change) ---
+    // --- RATE LIMITING & VIEW LIMIT ---
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const now = Date.now();
     let clientData = rateLimitMap.get(clientIp) || { count: 0, lastReset: now };
@@ -149,7 +152,7 @@ app.post('/boost-mp', async (req, res) => {
 
     const { pages, referrer_url } = req.body; 
 
-    // --- Hardcoded Country Distribution List (No Change) ---
+    // --- Hardcoded Country Distribution List ---
     const HARDCODED_COUNTRIES = [
         { code: 'US', percent: 22 }, { code: 'IN', percent: 12 }, { code: 'AU', percent: 8 }, 
         { code: 'CA', percent: 7 }, { code: 'GB', percent: 6 }, { code: 'DE', percent: 5 }, 
@@ -163,14 +166,22 @@ app.post('/boost-mp', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Views (1-400) or valid Page data missing.' });
     }
     
+    // pages array mein ab url (Target URL) aur search_query dono aane chahiye.
     const finalPageUrls = generateCompensatedPlan(totalViews, pages.filter(p => p.percent > 0)); 
     const countryPlan = generateCompensatedPlan(totalViews, HARDCODED_COUNTRIES);
     const maxPlanLength = Math.min(finalPageUrls.length, countryPlan.length);
+    
+    // Final Combined Plan creation with search_query included
     let finalCombinedPlan = [];
     for (let i = 0; i < maxPlanLength; i++) {
+        // Find the original page object to get the search_query
+        const originalPage = pages.find(p => p.url === finalPageUrls[i]);
+        const search_query = originalPage ? originalPage.search_query : 'website-booster'; // Fallback query
+
         finalCombinedPlan.push({ 
             url: finalPageUrls[i], 
-            country_code: countryPlan[i] 
+            country_code: countryPlan[i],
+            search_query: search_query
         });
     }
 
@@ -178,36 +189,34 @@ app.post('/boost-mp', async (req, res) => {
            return res.status(400).json({ status: 'error', message: `Anumat views ki sankhya 0 hai. Kripya jaanchein.` });
     }
 
-    // --- Async Processing (Immediate Response - No Change) ---
+    // --- Async Processing (Immediate Response) ---
     res.json({ 
         status: 'accepted', 
-        message: `✅ Aapki ${finalCombinedPlan.length} REAL browser views ki request sweekar kar li gayi hai. Traffic 24-48 ghanton mein poora hoga. (Proxies ON)`
+        message: `✅ Aapki ${finalCombinedPlan.length} REAL Search Clicks ki request sweekar kar li gayi hai. Traffic 24-48 ghanton mein poora hoga. (Search Console Booster ON)`
     });
 
     // Start views generation asynchronously
     (async () => {
         const totalViewsCount = finalCombinedPlan.length;
-        console.log(`[PUPPETEER START] Starting REAL Browser View generation for ${totalViewsCount} views on Render with Proxies.`);
+        console.log(`[GSC START] Starting Search Console Booster for ${totalViewsCount} Clicks.`);
         
-        // --- GUARANTEED 24-48 HOUR DELIVERY (No Change) ---
+        // --- GUARANTEED 24-48 HOUR DELIVERY ---
         const targetDuration = Math.random() * (MAX_TOTAL_MS - MIN_TOTAL_MS) + MIN_TOTAL_MS;
         const requiredFixedDelayPerView = Math.floor(targetDuration / totalViewsCount);
         
         let successfulViews = 0;
 
         try {
-            // Loop ke andar browser launch/close hoga
             for (let i = 0; i < finalCombinedPlan.length; i++) {
                 const plan = finalCombinedPlan[i];
                 const viewId = i + 1;
                 
-                // FIX: Har view shuru hone se pehle chota sa random wait
                 const preLaunchDelay = Math.floor(Math.random() * (2000 - 500) + 500); 
                 await new Promise(resolve => setTimeout(resolve, preLaunchDelay));
 
                 const proxyUrl = getRandomProxy(); 
                 if (!proxyUrl) {
-                    console.error("[PROXY ERROR] Proxy list is empty. Skipping view.");
+                    console.error(`[View ${viewId}] [PROXY ERROR] Proxy list is empty. Skipping view.`);
                     continue; 
                 }
                 
@@ -215,7 +224,6 @@ app.post('/boost-mp', async (req, res) => {
                 let browser; 
                 
                 try {
-                    // Puppeteer Launch with Proxy (No Change)
                     const ipPort = proxyUrl.replace('http://', ''); 
                     
                     const proxyArgs = [
@@ -241,37 +249,75 @@ app.post('/boost-mp', async (req, res) => {
                         'Referer': referrer_url
                     });
                     
-                    // Navigate
-                    console.log(`[View ${viewId}] Navigating to: ${plan.url}`);
-                    
+                    // ===============================================================
+                    // ⭐ NEW SEARCH CONSOLE LOGIC ⭐
+                    // ===============================================================
+                    const searchQuery = plan.search_query;
+                    const targetURL = plan.url;
+                    const googleURL = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+
+                    console.log(`[View ${viewId}] 1. Searching Google for: "${searchQuery}"`);
+
+                    // 1. Google Search Page par jaana (networkidle0 fix applied)
                     try {
-                        // ⭐ CRITICAL FIX 1: 'domcontentloaded' se 'networkidle0' kiya (GA Tracking ke liye)
-                        // Navigation Timeout 60s
-                        await page.goto(plan.url, { waitUntil: 'networkidle0', timeout: 60000 }); 
-                        
+                        await page.goto(googleURL, { waitUntil: 'networkidle0', timeout: 60000 }); 
+                        console.log(`[View ${viewId}] Google Search page loaded.`);
                     } catch (navError) {
-                        // Navigation Timeout ko ignore karein
-                        if (navError.name === 'TimeoutError') {
-                            console.warn(`[View ${viewId}] WARNING: Navigation Timeout (60s) exceeded. Proceeding with engagement.`);
+                         if (navError.name === 'TimeoutError') {
+                            console.warn(`[View ${viewId}] WARNING: Google Search Navigation Timeout (60s) exceeded.`);
                         } else {
-                            // Agar koi aur hard error hai toh throw karo
                             throw navError; 
                         }
                     }
                     
-                    // FIX: Post-load sleep for stability 
-                    // ⭐ CRITICAL FIX 2: Delay ko 10 seconds tak badhaya (GA script ko execute hone ke liye)
+                    // Thoda wait taaki search results load ho sakein
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    
+                    // 2. Apni website ka link dhundhna aur click karna
+                    // Ismein hum a[href] ko target karte hain jo target URL contains karta ho.
+                    const selector = `a[href*="${targetURL.replace('https://', '').replace('http://', '').split('/')[0]}"]`;
+                    
+                    let foundLink = false;
+                    let clickSuccessful = false;
+                    
+                    try {
+                        // Max 2 scrolls (first page aur thoda niche)
+                        for (let j = 0; j < 2; j++) {
+                            const linkElement = await page.$(selector);
+                            if (linkElement) {
+                                console.log(`[View ${viewId}] 2. Found Target Link! Clicking...`);
+                                await page.click(selector);
+                                clickSuccessful = true;
+                                break;
+                            }
+                            // Agar link nahi mila, toh thoda scroll karein
+                            await page.evaluate(() => window.scrollBy(0, window.innerHeight * 0.7));
+                            await new Promise(resolve => setTimeout(resolve, 1500));
+                        }
+
+                        if (clickSuccessful) {
+                            // 3. Target URL par load hone ka wait
+                            await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 });
+                            console.log(`[View ${viewId}] 3. Landed on Target URL: ${targetURL}`);
+                        } else {
+                            console.warn(`[View ${viewId}] WARNING: Target link (${targetURL}) not found on search results.`);
+                        }
+
+                    } catch (e) {
+                        console.warn(`[View ${viewId}] Search/Click Error: ${e.message.substring(0, 50)}... Proceeding with engagement on current page.`);
+                        clickSuccessful = false;
+                    }
+
+
+                    // 4. Engagement (Scroll and Wait)
+                    const engagementTime = Math.floor(Math.random() * (120000 - 45000) + 45000); 
+                    
+                    // Post-load sleep for stability (GA code execute ho sake)
                     const postLoadDelay = Math.floor(Math.random() * (10000 - 5000) + 5000); 
                     await new Promise(resolve => setTimeout(resolve, postLoadDelay));
                     
-                    
-                    // --- 2. Simulate Human Interaction (Scroll) ---
-                    const engagementTime = Math.floor(Math.random() * (120000 - 45000) + 45000); 
-                    
-                    // CRITICAL FIX: page.waitForSelector('body') HATA DIYA GAYA HAI. (Pichli galti theek ki gayi)
-                    
+                    // Scroll simulation
                     const scrollHeight = await page.evaluate(() => {
-                        // Yeh code try karega body ki scroll height nikaalne ki. Agar body nahi hai, toh 0.
                         return document.body ? document.body.scrollHeight : 0; 
                     });
                     
@@ -284,20 +330,18 @@ app.post('/boost-mp', async (req, res) => {
                         
                         console.log(`[View ${viewId}] Scroll simulated (90%). Staying for ${Math.round(engagementTime/1000)}s.`);
                     } else {
-                        // Is baar, agar body load nahi hui, toh yeh hard error nahi dega, balki skip kar dega.
                         console.warn(`[View ${viewId}] WARNING: No scroll (scrollHeight 0 or body missing). Staying for ${Math.round(engagementTime/1000)}s.`);
                     }
 
                     // Wait for the simulated engagement time
                     await new Promise(resolve => setTimeout(resolve, engagementTime)); 
                     
-                    // --- 3. Close the session ---
+                    // 5. Close the session
                     await page.close();
                     successfulViews++;
                     console.log(`[View ${viewId}] SUCCESS ✅ | Session closed.`);
 
                 } catch (pageError) {
-                    // This catch block handles connection errors
                     console.error(`[View ${viewId}] FAILURE ❌ | Proxy ${proxyUrl} | Error: ${pageError.message.substring(0, 100)}...`);
                 } finally {
                     // Har view ke baad browser band karna zaroori hai
@@ -306,7 +350,7 @@ app.post('/boost-mp', async (req, res) => {
                     }
                 }
 
-                // --- 4. MAIN DELAY (No Change) ---
+                // --- 4. MAIN DELAY ---
                 const totalDelay = requiredFixedDelayPerView + (Math.random() * (MAX_VIEW_DELAY - MIN_VIEW_DELAY) + MIN_VIEW_DELAY);
                 console.log(`[Delay] Waiting for ${Math.round(totalDelay/1000)}s before next view.`);
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
@@ -316,7 +360,7 @@ app.post('/boost-mp', async (req, res) => {
             console.error(`[PUPPETEER CRITICAL ERROR] Main process failed: ${mainError.message}`);
         }
         
-        console.log(`[BOOSTER FINISH] All ${totalViewsCount} views attempted. Successfully recorded: ${successfulViews}.`);
+        console.log(`[BOOSTER FINISH] All ${totalViewsCount} clicks attempted. Successfully recorded: ${successfulViews}.`);
 
     })();
 });
@@ -365,4 +409,3 @@ app.post('/api/caption-edit', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-            
