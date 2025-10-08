@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+                <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -217,7 +217,7 @@
     </div>
 
     <script>
-        // ⭐ API URL HARDCODED HERE (from your input) ⭐
+        // ⭐ API URL HARDCODED HERE (YOUR RENDER URL) ⭐
         const API_URL_BASE = "https://pooreyoutuber-github-io.onrender.com"; 
         const API_ENDPOINT = '/boost-real'; 
 
@@ -238,7 +238,7 @@
             const entry = document.createElement('div');
             entry.className = 'page-entry';
             entry.innerHTML = `
-                <input type="url" class="page-url" placeholder="Page URL (e.g., /about.html)" value="${url}">
+                <input type="url" class="page-url" placeholder="Page URL (e.g., /about.html or full URL)" value="${url}">
                 <input type="number" class="page-percent" placeholder="%" min="0" max="100" value="${percent}" title="Percentage of traffic for this page">
                 <button type="button" class="remove-btn" onclick="removePageEntry(this)">➖</button>
             `;
@@ -281,8 +281,12 @@
                         pages.push({ url, percent });
                     } else if (url && !url.startsWith('http')) {
                         // Handle relative paths (e.g., /about) by prepending the main domain
-                        const baseUrl = new URL(mainUrl).origin;
-                        if (percent > 0) pages.push({ url: baseUrl + url, percent: percent });
+                        try {
+                            const baseUrl = new URL(mainUrl).origin;
+                            if (percent > 0) pages.push({ url: baseUrl + url, percent: percent });
+                        } catch (e) {
+                             // Ignore invalid relative URL if main URL is not valid URL
+                        }
                     }
                 });
                 
@@ -302,9 +306,8 @@
                     messageBox.textContent = data.message;
                     messageBox.classList.add('success');
                     
-                    // Update Local Storage and UI 
                     totalRequestedViews = data.total_loads || totalViews;
-                    viewsCompleted = 0; // Reset completed count for new request
+                    viewsCompleted = 0; 
                     localStorage.setItem('totalRequestedViews', totalRequestedViews);
                     localStorage.setItem('viewsCompleted', viewsCompleted); 
                     
@@ -329,22 +332,8 @@
         window.onload = () => {
              updateStatusUI();
              // Add a single default optional page entry
-             addPageEntry('', '');
+             addPageEntry('/about.html', '10'); // Example default
         };
-        
-        // --- Dummy Progress Simulation (For UI demonstration only) ---
-        // You can uncomment this to show a slow increase in "Completed Views"
-        /*
-        function simulateProgress() {
-            if (totalRequestedViews > 0 && viewsCompleted < totalRequestedViews) {
-                const increment = Math.ceil(totalRequestedViews / 100); 
-                viewsCompleted = Math.min(totalRequestedViews, viewsCompleted + increment);
-                localStorage.setItem('viewsCompleted', viewsCompleted);
-                updateStatusUI();
-            }
-        }
-        setInterval(simulateProgress, 10000); 
-        */
 
     </script>
 </body>
