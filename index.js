@@ -1,4 +1,4 @@
-                        // index.js (FINAL CODE - SEARCH CONSOLE BOOSTER EDITION with Data Safety Check)
+// index.js (FINAL CODE - DOUBLE SEARCH GSC BOOSTER EDITION)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -31,6 +31,7 @@ if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
     console.warn("WARNING: Gemini Key missing. Insta Caption Tool will fail.");
+    // Dummy AI object if key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -44,24 +45,12 @@ const PUPPETEER_ARGS = [
 
 // ⭐ PROXY LIST (Optimized List)
 const PROXY_LIST = [
-    "http://104.207.63.195:3129", // France
-    "http://104.207.61.3:3129",   // Canada
-    "http://104.207.60.58:3129",   // Canada
-    "http://216.26.254.100:3129", // France
-    "http://104.207.57.162:3129", // Germany
-    "http://209.50.188.66:3129",   // Canada
-    "http://65.111.24.172:3129", // Germany
-    "http://216.26.254.110:3129", // France
-    "http://45.3.42.225:3129",    // United Kingdom
-    "http://45.3.55.246:3129",    // Germany 
-    "http://45.3.53.142:3129",    // Brazil
-    "http://154.213.160.98:3129", // France
-    "http://45.3.44.176:3129",    // Spain
-    "http://104.207.60.243:3129", // Canada
-    "http://104.207.52.73:3129",  // United Kingdom
-    "http://216.26.253.178:3129", // France
-    "http://154.213.166.61:3129", // Germany
-    "http://45.3.45.87:3129"      // Italy
+    "http://104.207.63.195:3129", "http://104.207.61.3:3129", "http://104.207.60.58:3129",
+    "http://216.26.254.100:3129", "http://104.207.57.162:3129", "http://209.50.188.66:3129",
+    "http://65.111.24.172:3129", "http://216.26.254.110:3129", "http://45.3.42.225:3129",
+    "http://45.3.55.246:3129", "http://45.3.53.142:3129", "http://154.213.160.98:3129",
+    "http://45.3.44.176:3129", "http://104.207.60.243:3129", "http://104.207.52.73:3129",
+    "http://216.26.253.178:3129", "http://154.213.166.61:3129", "http://45.3.45.87:3129"
 ];
 
 function getRandomProxy() {
@@ -87,7 +76,6 @@ function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
     if (items.length === 0 || totalViews < 1) return [];
     
-    // Yahan hum man rahe hain ki items ka structure {id: url/code, percent: X} hai.
     const viewsToAllocate = items.map(item => ({
         id: item.url || item.code,
         views: Math.floor(totalViews * (item.percent / 100)), 
@@ -120,7 +108,7 @@ const MAX_VIEW_DELAY = 25000;
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (SEARCH CONSOLE LOGIC)
+// 1. WEBSITE BOOSTER ENDPOINT (SEARCH CONSOLE DOUBLE-HIT LOGIC)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     
@@ -193,31 +181,31 @@ app.post('/boost-mp', async (req, res) => {
     // --- Async Processing (Immediate Response) ---
     res.json({ 
         status: 'accepted', 
-        message: `✅ Aapki ${finalCombinedPlan.length} REAL Search Clicks ki request sweekar kar li gayi hai. Traffic 24-48 ghanton mein poora hoga. (Search Console Booster ON)`
+        message: `✅ Aapki ${finalCombinedPlan.length} REAL Double-Search Clicks ki request sweekar kar li gayi hai. Traffic 24-48 ghanton mein poora hoga. (Double-Hit ON)`
     });
 
     // Start views generation asynchronously
     (async () => {
         const totalViewsCount = finalCombinedPlan.length;
-        console.log(`[GSC START] Starting Search Console Booster for ${totalViewsCount} Clicks.`);
+        console.log(`[GSC START] Starting Search Console Booster for ${totalViewsCount} Double-Hit Sessions.`);
         
         // --- GUARANTEED 24-48 HOUR DELIVERY ---
         const targetDuration = Math.random() * (MAX_TOTAL_MS - MIN_TOTAL_MS) + MIN_TOTAL_MS;
         const requiredFixedDelayPerView = Math.floor(targetDuration / totalViewsCount);
         
-        let successfulViews = 0;
+        let successfulSessions = 0;
 
         try {
             for (let i = 0; i < finalCombinedPlan.length; i++) {
                 const plan = finalCombinedPlan[i];
-                const viewId = i + 1;
+                const sessionId = i + 1; // Session ID (har session mein do search hongi)
                 
                 const preLaunchDelay = Math.floor(Math.random() * (2000 - 500) + 500); 
                 await new Promise(resolve => setTimeout(resolve, preLaunchDelay));
 
                 const proxyUrl = getRandomProxy(); 
                 if (!proxyUrl) {
-                    console.error(`[View ${viewId}] [PROXY ERROR] Proxy list is empty. Skipping view.`);
+                    console.error(`[Session ${sessionId}] [PROXY ERROR] Proxy list is empty. Skipping session.`);
                     continue; 
                 }
                 
@@ -238,11 +226,11 @@ app.post('/boost-mp', async (req, res) => {
                         headless: chromium.headless,
                     });
                     
-                    console.log(`[View ${viewId}] Launching browser with Proxy: ${proxyUrl}`);
+                    console.log(`[Session ${sessionId}] Launching browser with Proxy: ${proxyUrl}`);
                     
                     page = await browser.newPage();
                     
-                    // --- 1. Set Real Browser Context (No Change) ---
+                    // --- Set Real Browser Context ---
                     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
                     await page.setUserAgent(userAgent);
                     await page.setViewport({ width: 1366, height: 768 });
@@ -251,109 +239,128 @@ app.post('/boost-mp', async (req, res) => {
                     });
                     
                     // ===============================================================
-                    // ⭐ SEARCH CONSOLE LOGIC ⭐
+                    // ⭐ DOUBLE SEARCH LOOP ⭐
                     // ===============================================================
-                    const searchQuery = plan.search_query;
-                    const targetURL = plan.url;
-                    const googleURL = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
-
-                    console.log(`[View ${viewId}] 1. Searching Google for: "${searchQuery}"`);
-
-                    // 1. Google Search Page par jaana (networkidle0 fix applied)
-                    try {
-                        // CRITICAL FIX: Google Search Page load hone ke liye networkidle0 aur 60s timeout
-                        await page.goto(googleURL, { waitUntil: 'networkidle0', timeout: 60000 }); 
-                        console.log(`[View ${viewId}] Google Search page loaded.`);
-                    } catch (navError) {
-                         if (navError.name === 'TimeoutError') {
-                            console.warn(`[View ${viewId}] WARNING: Google Search Navigation Timeout (60s) exceeded. Proceeding with search.`);
-                        } else {
-                            throw navError; 
+                    
+                    for(let searchAttempt = 1; searchAttempt <= 2; searchAttempt++) {
+                        
+                        console.log(`[Session ${sessionId}] [Hit ${searchAttempt}] Starting search process.`);
+                        
+                        const searchQuery = plan.search_query;
+                        const targetURL = plan.url;
+                        const googleURL = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+                        
+                        // TargetHost nikalna
+                        let targetHost;
+                        try {
+                            targetHost = new URL(targetURL).hostname.replace('www.', '');
+                        } catch (e) {
+                            targetHost = targetURL.substring(0, targetURL.indexOf('/') > 0 ? targetURL.indexOf('/') : targetURL.length); // Fallback for invalid URL
                         }
-                    }
-                    
-                    // Thoda wait taaki search results load ho sakein
-                    await new Promise(resolve => setTimeout(resolve, 3000));
-                    
-                    // 2. Apni website ka link dhundhna aur click karna
-                    // Hostname nikalna taaki query URL mein a[href*="example.com"] jaisa use ho
-                    const targetHost = new URL(targetURL).hostname.replace('www.', '');
+                        
+                        const selector = `a[href*="${targetHost}"]`;
+                        
+                        let clickSuccessful = false;
 
-                    // Selector jo 'targetHost' contain karta hai
-                    const selector = `a[href*="${targetHost}"]`;
-                    
-                    let clickSuccessful = false;
-                    
-                    try {
-                        // Max 2 scrolls (first page aur thoda niche)
-                        for (let j = 0; j < 2; j++) {
-                            const linkElement = await page.$(selector);
-                            if (linkElement) {
-                                console.log(`[View ${viewId}] 2. Found Target Link! Clicking...`);
-                                
-                                // Click and wait for navigation
-                                await Promise.all([
-                                    page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 }), 
-                                    page.click(selector)
-                                ]);
-                                
-                                clickSuccessful = true;
-                                console.log(`[View ${viewId}] 3. Landed on Target URL: ${targetURL}`);
-                                break;
+                        // 1. Google Search Page par jaana
+                        try {
+                            console.log(`[Session ${sessionId}] [Hit ${searchAttempt}] Searching Google for: "${searchQuery}"`);
+                            // networkidle0 tak wait karein
+                            await page.goto(googleURL, { waitUntil: 'networkidle0', timeout: 60000 }); 
+                            await new Promise(resolve => setTimeout(resolve, 3000)); // Wait for results to render
+                        } catch (navError) {
+                            if (navError.name === 'TimeoutError') {
+                                console.warn(`[Session ${sessionId}] [Hit ${searchAttempt}] WARNING: Search Navigation Timeout (60s) exceeded. Proceeding.`);
+                            } else {
+                                throw navError; 
                             }
-                            // Agar link nahi mila, toh thoda scroll karein
-                            await page.evaluate(() => window.scrollBy(0, window.innerHeight * 0.7));
-                            await new Promise(resolve => setTimeout(resolve, 1500));
+                        }
+                        
+                        // 2. Apni website ka link dhundhna aur click karna
+                        try {
+                            for (let j = 0; j < 2; j++) {
+                                const linkElement = await page.$(selector);
+                                if (linkElement) {
+                                    console.log(`[Session ${sessionId}] [Hit ${searchAttempt}] Found Target Link! Clicking...`);
+                                    
+                                    // Click aur navigation ka wait saath mein
+                                    await Promise.all([
+                                        page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 }), 
+                                        page.click(selector)
+                                    ]);
+                                    
+                                    clickSuccessful = true;
+                                    console.log(`[Session ${sessionId}] [Hit ${searchAttempt}] Landed on Target URL: ${targetURL}`);
+                                    break;
+                                }
+                                // Agar link nahi mila, toh thoda scroll karein
+                                await page.evaluate(() => window.scrollBy(0, window.innerHeight * 0.7));
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                            }
+
+                            if (!clickSuccessful) {
+                                console.warn(`[Session ${sessionId}] [Hit ${searchAttempt}] WARNING: Target link not found on search results. Engagement on search page.`);
+                            }
+
+                        } catch (e) {
+                            console.warn(`[Session ${sessionId}] [Hit ${searchAttempt}] Search/Click/Navigation Error: ${e.message.substring(0, 50)}... Engagement on current page.`);
+                            clickSuccessful = false;
                         }
 
-                        if (!clickSuccessful) {
-                            console.warn(`[View ${viewId}] WARNING: Target link (${targetURL}) not found on search results. Engagement on search page.`);
+                        // 3. Engagement (Scroll and Wait)
+                        // Pehli baar kam wait (3-10 sec), dusri baar zyada wait (45-120 sec)
+                        const engagementTime = searchAttempt === 1 
+                                               ? Math.floor(Math.random() * (10000 - 3000) + 3000) 
+                                               : Math.floor(Math.random() * (120000 - 45000) + 45000); 
+                        
+                        // Post-load sleep for GA code execution
+                        const postLoadDelay = Math.floor(Math.random() * (5000 - 2000) + 2000);
+                        await new Promise(resolve => setTimeout(resolve, postLoadDelay));
+                        
+                        // Scroll simulation
+                        const scrollHeight = await page.evaluate(() => {
+                            return document.body ? document.body.scrollHeight : 0; 
+                        });
+                        
+                        if (scrollHeight > 0) {
+                            const targetScroll = Math.min(scrollHeight * 0.95, scrollHeight - 10);
+                            await page.evaluate((targetScroll) => {
+                                window.scrollBy(0, targetScroll);
+                            }, targetScroll);
+                            
+                            console.log(`[Session ${sessionId}] [Hit ${searchAttempt}] Scroll simulated (90%). Staying for ${Math.round(engagementTime/1000)}s.`);
+                        } else {
+                            console.warn(`[Session ${sessionId}] [Hit ${searchAttempt}] WARNING: No scroll. Staying for ${Math.round(engagementTime/1000)}s.`);
                         }
 
-                    } catch (e) {
-                        // Agar click ya navigation timeout ho jaye
-                        console.warn(`[View ${viewId}] Search/Click/Navigation Error: ${e.message.substring(0, 50)}... Proceeding with engagement on current page.`);
-                        clickSuccessful = false;
-                    }
+                        // Wait for the simulated engagement time
+                        await new Promise(resolve => setTimeout(resolve, engagementTime)); 
 
-
-                    // 4. Engagement (Scroll and Wait)
-                    const engagementTime = Math.floor(Math.random() * (120000 - 45000) + 45000); 
-                    
-                    // Post-load sleep for stability (GA code execute ho sake)
-                    const postLoadDelay = Math.floor(Math.random() * (10000 - 5000) + 5000); 
-                    await new Promise(resolve => setTimeout(resolve, postLoadDelay));
-                    
-                    // Scroll simulation
-                    const scrollHeight = await page.evaluate(() => {
-                        return document.body ? document.body.scrollHeight : 0; 
-                    });
-                    
-                    if (scrollHeight > 0) {
-                        const targetScroll = Math.min(scrollHeight * 0.95, scrollHeight - 10);
+                        // Agar pehli search successful nahi hui toh dusri search attempt skip kar dein
+                        if (searchAttempt === 1 && !clickSuccessful) {
+                             console.warn(`[Session ${sessionId}] [Hit 1] Click failed, skipping Hit 2.`);
+                             break; 
+                        }
                         
-                        await page.evaluate((targetScroll) => {
-                            window.scrollBy(0, targetScroll);
-                        }, targetScroll);
+                        // Agar pehli hit successful thi, toh dusri hit se pehle Google par wapas jaana
+                        if (searchAttempt === 1 && clickSuccessful) {
+                            console.log(`[Session ${sessionId}] [Hit 1] Success. Navigating back to search for Hit 2.`);
+                            
+                            // Ek chota sa break dusri search se pehle
+                            await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 5000 + 2000)));
+                        }
                         
-                        console.log(`[View ${viewId}] Scroll simulated (90%). Staying for ${Math.round(engagementTime/1000)}s.`);
-                    } else {
-                        // Aapka log yahan dikha raha tha: WARNING: No scroll (scrollHeight 0 or body missing).
-                        console.warn(`[View ${viewId}] WARNING: No scroll (scrollHeight 0 or body missing). Staying for ${Math.round(engagementTime/1000)}s.`);
-                    }
-
-                    // Wait for the simulated engagement time
-                    await new Promise(resolve => setTimeout(resolve, engagementTime)); 
+                    } // ⭐ DOUBLE SEARCH LOOP ENDS HERE ⭐
                     
                     // 5. Close the session
                     await page.close();
-                    successfulViews++;
-                    console.log(`[View ${viewId}] SUCCESS ✅ | Session closed.`);
+                    successfulSessions++;
+                    console.log(`[Session ${sessionId}] SUCCESS ✅ | Session closed.`);
 
                 } catch (pageError) {
-                    console.error(`[View ${viewId}] FAILURE ❌ | Proxy ${proxyUrl} | Error: ${pageError.message.substring(0, 100)}...`);
+                    console.error(`[Session ${sessionId}] FAILURE ❌ | Proxy ${proxyUrl} | Error: ${pageError.message.substring(0, 100)}...`);
                 } finally {
-                    // Har view ke baad browser band karna zaroori hai
+                    // Har session ke baad browser band karna zaroori hai
                     if (browser) {
                         await browser.close();
                     }
@@ -361,7 +368,7 @@ app.post('/boost-mp', async (req, res) => {
 
                 // --- 4. MAIN DELAY ---
                 const totalDelay = requiredFixedDelayPerView + (Math.random() * (MAX_VIEW_DELAY - MIN_VIEW_DELAY) + MIN_VIEW_DELAY);
-                console.log(`[Delay] Waiting for ${Math.round(totalDelay/1000)}s before next view.`);
+                console.log(`[Delay] Waiting for ${Math.round(totalDelay/1000)}s before next session.`);
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
             } // End of loop
 
@@ -369,7 +376,7 @@ app.post('/boost-mp', async (req, res) => {
             console.error(`[PUPPETEER CRITICAL ERROR] Main process failed: ${mainError.message}`);
         }
         
-        console.log(`[BOOSTER FINISH] All ${totalViewsCount} clicks attempted. Successfully recorded: ${successfulViews}.`);
+        console.log(`[BOOSTER FINISH] All ${totalViewsCount} sessions attempted. Successfully recorded: ${successfulSessions}.`);
 
     })();
 });
