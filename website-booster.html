@@ -3,91 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real User Traffic Booster</title>
+    <title>Website Booster Free Tool</title>
     <style>
+        /* General Styles */
         body { font-family: 'Arial', sans-serif; background-color: #f4f7f9; color: #333; margin: 0; padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-        h1 { text-align: center; color: #007bff; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="number"], input[type="text"], input[type="url"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        h1 { text-align: center; color: #007bff; margin-bottom: 20px; font-size: 2em; }
+        
+        /* Input & Form */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="number"], input[type="url"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        
+        /* Page Allocation (Optional) */
+        .page-entry-label { margin-top: 15px; font-size: 1.1em; color: #007bff; }
+        #pages-container { border: 1px dashed #ccc; padding: 10px; border-radius: 8px; margin-top: 10px; }
         .page-entry { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .page-entry input[type="url"] { flex-grow: 3; }
-        .page-entry input[type="number"] { flex-grow: 1; max-width: 80px; text-align: right; }
+        .page-entry input[type="number"] { flex-grow: 1; max-width: 80px; text-align: center; }
         .add-btn, .remove-btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .add-btn { background-color: #28a745; color: white; }
-        .remove-btn { background-color: #dc3545; color: white; }
-        #submitBtn { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; transition: background-color 0.3s; margin-top: 20px; }
-        #submitBtn:hover { background-color: #0056b3; }
-        .message-box { margin-top: 20px; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; }
+        .add-btn { background-color: #28a745; color: white; margin-top: 5px; }
+        .remove-btn { background-color: #dc3545; color: white; font-size: 0.9em; }
+        
+        /* Submit Button */
+        #submitBtn { width: 100%; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 1.2em; cursor: pointer; transition: background-color 0.3s; margin-top: 25px; }
+        #submitBtn:hover:not(:disabled) { background-color: #0056b3; }
+        #submitBtn:disabled { background-color: #adb5bd; cursor: not-allowed; }
+
+        /* Status & Message */
+        .message-box { margin-top: 20px; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        #status-area { margin-top: 20px; padding: 15px; border: 1px dashed #007bff; border-radius: 6px; text-align: center; background-color: #e6f7ff; }
-        .small-text { font-size: 0.8em; color: #666; margin-top: 10px; }
-        .note { color: orange; font-weight: normal; font-size: 0.9em;}
+
+        #status-area { margin-top: 30px; padding: 20px; border: 2px solid #007bff; border-radius: 10px; text-align: center; background-color: #e6f7ff; }
+        #status-area h3 { color: #007bff; margin-top: 0; }
+        .status-line { font-size: 1.1em; margin: 10px 0; }
+        .status-value { font-size: 1.3em; font-weight: bold; color: #28a745; }
+        .slot-info { font-size: 0.9em; color: #6c757d; margin-top: 15px; }
+        
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            .page-entry { flex-direction: column; align-items: stretch; }
+            .page-entry input[type="url"], .page-entry input[type="number"] { margin-bottom: 5px; }
+            .page-entry input[type="number"] { max-width: none; text-align: left; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Real User Traffic Booster</h1>
+        <h1>Website Booster Free Tool 🚀</h1>
         
         <div class="form-group">
-            <label for="apiUrl">API Server URL: <span class="note">(Render Service URL)</span></label>
-            <input type="url" id="apiUrl" value="https://YOUR-RENDER-SERVICE-URL.onrender.com" required>
+            <label for="mainUrl">🌐 Main Website URL:</label>
+            <input type="url" id="mainUrl" placeholder="https://example.com/main-page" required>
         </div>
 
         <div class="form-group">
-            <label for="totalViews">Total Views (Max 400):</label>
+            <label for="totalViews">🔢 Total Views (Max 400):</label>
             <input type="number" id="totalViews" min="1" max="400" value="100" required>
         </div>
 
-        <h2>Website Pages & Allocation (%)</h2>
-        <div id="pages-container">
-            <div class="page-entry">
-                <input type="url" class="page-url" placeholder="Page URL (e.g., https://yoursite.com/page1)" required>
-                <input type="number" class="page-percent" placeholder="%" min="0" max="100" value="100" required>
-                <button type="button" class="remove-btn" onclick="removePageEntry(this)">➖</button>
-            </div>
+        <div class="form-group">
+            <label class="page-entry-label">Optional: Add Other Pages for Traffic Distribution (%)</label>
+            <div id="pages-container">
+                </div>
+            <button type="button" class="add-btn" onclick="addPageEntry()">➕ Add Another Page</button>
+            <div class="small-text" style="color:#dc3545; font-size:0.9em; margin-top:10px;">Note: Total Percentage does not need to equal 100%. The system will normalize.</div>
         </div>
-        <button type="button" class="add-btn" onclick="addPageEntry()">➕ Add Another Page</button>
-        <div class="small-text">Note: Total percentage will be automatically adjusted (normalized) on the backend.</div>
 
         <button id="submitBtn">Generate Traffic</button>
 
         <div id="message" class="message-box" style="display:none;"></div>
         
         <div id="status-area">
-            <h3>📈 Current Status</h3>
-            <p>Total Views Requested: <span id="reqViews">0</span></p>
-            <p>Slots Running: <span id="reqSlots">0</span></p>
-            <p class="small-text">Status updates are not real-time. Traffic will be completed in the next 24-48 hours. Check Google Analytics/Search Console.</p>
+            <h3>📈 Traffic Status</h3>
+            <div class="status-line">Total Views Request: <span id="reqViews" class="status-value">0</span></div>
+            <div class="status-line">Views Completed/Earned: <span id="completedViews" class="status-value">0</span></div>
+            <div class="status-line">Views Left/Pending: <span id="leftViews" class="status-value">0</span></div>
+            
+            <p class="slot-info">Your request is running across 20 parallel slots in the backend. Traffic will complete in 24-48 hours. This view count is an estimate.</p>
         </div>
 
     </div>
 
     <script>
-        const API_ENDPOINT = '/boost-real'; // The new backend endpoint
+        // ⭐ IMPORTANT: HARDCODE YOUR RENDER API URL HERE ⭐
+        const API_URL_BASE = "https://YOUR-RENDER-SERVICE-URL.onrender.com"; 
+        const API_ENDPOINT = '/boost-real'; 
 
-        function addPageEntry(url = '', percent = 0) {
+        // Initial Status Values (Stored in localStorage for persistence)
+        let totalRequestedViews = parseInt(localStorage.getItem('totalRequestedViews')) || 0;
+        let viewsCompleted = parseInt(localStorage.getItem('viewsCompleted')) || 0;
+        
+        function updateStatusUI() {
+            const leftViews = Math.max(0, totalRequestedViews - viewsCompleted);
+            
+            document.getElementById('reqViews').textContent = totalRequestedViews;
+            document.getElementById('completedViews').textContent = viewsCompleted;
+            document.getElementById('leftViews').textContent = leftViews;
+        }
+
+        function addPageEntry(url = '', percent = '') {
             const container = document.getElementById('pages-container');
             const entry = document.createElement('div');
             entry.className = 'page-entry';
             entry.innerHTML = `
-                <input type="url" class="page-url" placeholder="Page URL (e.g., https://yoursite.com/page2)" value="${url}" required>
-                <input type="number" class="page-percent" placeholder="%" min="0" max="100" value="${percent > 0 ? percent : ''}" required>
+                <input type="url" class="page-url" placeholder="Optional Page URL" value="${url}">
+                <input type="number" class="page-percent" placeholder="%" min="0" max="100" value="${percent}" title="Percentage of traffic for this page">
                 <button type="button" class="remove-btn" onclick="removePageEntry(this)">➖</button>
             `;
             container.appendChild(entry);
         }
 
         function removePageEntry(button) {
-            const container = document.getElementById('pages-container');
             const entry = button.parentNode;
-            if (container.children.length > 1) {
-                container.removeChild(entry);
-            } else {
-                alert("You must have at least one page entry.");
-            }
+            entry.remove();
         }
 
         async function handleSubmit() {
@@ -96,40 +127,36 @@
             messageBox.style.display = 'none';
             messageBox.className = 'message-box';
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing... Please wait';
+            submitBtn.textContent = 'Processing Request...';
 
             try {
+                const mainUrl = document.getElementById('mainUrl').value.trim();
                 const totalViews = parseInt(document.getElementById('totalViews').value);
-                const apiUrlBase = document.getElementById('apiUrl').value.trim().replace(/\/$/, ""); // Remove trailing slash
                 
-                // Collect Page Data
-                const pages = [];
+                if (!mainUrl || !mainUrl.startsWith('http')) {
+                    throw new Error("Please enter a valid main website URL (starting with http/https).");
+                }
+                if (totalViews <= 0 || totalViews > 400) {
+                    throw new Error("Total Views must be between 1 and 400.");
+                }
+
+                // 1. Collect Page Data
+                const pages = [{ url: mainUrl, percent: 100 }]; // Main URL always gets 100% base
                 const pageEntries = document.querySelectorAll('.page-entry');
-                let totalPercent = 0;
 
                 pageEntries.forEach(entry => {
                     const url = entry.querySelector('.page-url').value.trim();
                     const percent = parseInt(entry.querySelector('.page-percent').value);
 
-                    if (url && percent > 0) {
+                    if (url && url.startsWith('http') && percent > 0) {
                         pages.push({ url, percent });
-                        totalPercent += percent;
                     }
                 });
-
-                if (totalViews <= 0 || totalViews > 400) {
-                    throw new Error("Total Views must be between 1 and 400.");
-                }
-                if (pages.length === 0) {
-                    throw new Error("Please enter at least one valid page URL with a percentage greater than 0.");
-                }
-
-                // API Call
-                const response = await fetch(apiUrlBase + API_ENDPOINT, {
+                
+                // 2. API Call
+                const response = await fetch(API_URL_BASE + API_ENDPOINT, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         views: totalViews,
                         pages: pages
@@ -142,9 +169,13 @@
                     messageBox.textContent = data.message;
                     messageBox.classList.add('success');
                     
-                    // Update Status Area
-                    document.getElementById('reqViews').textContent = data.total_loads || totalViews;
-                    document.getElementById('reqSlots').textContent = data.slots || 20;
+                    // Update Local Storage and UI (Estimate)
+                    totalRequestedViews = data.total_loads || totalViews;
+                    viewsCompleted = 0; // Reset completed count for new request (optional)
+                    localStorage.setItem('totalRequestedViews', totalRequestedViews);
+                    localStorage.setItem('viewsCompleted', viewsCompleted); 
+                    
+                    updateStatusUI();
 
                 } else {
                     throw new Error(data.message || 'Server error occurred.');
@@ -153,29 +184,33 @@
             } catch (error) {
                 messageBox.textContent = `Error: ${error.message}`;
                 messageBox.classList.add('error');
-                document.getElementById('reqViews').textContent = 0;
-                document.getElementById('reqSlots').textContent = 0;
             } finally {
                 messageBox.style.display = 'block';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Generate Traffic';
             }
         }
-
+        
+        // --- Initialization ---
         document.getElementById('submitBtn').addEventListener('click', handleSubmit);
-
-        // Initial setup
         window.onload = () => {
-            // Remove the default empty entry if any
-            const container = document.getElementById('pages-container');
-            if (container.children.length > 1) {
-                container.children[0].remove();
-            }
-            // Add one default entry for easy start
-            if (container.children.length === 0) {
-                addPageEntry('', 100);
-            }
+             // Default entry: Main URL is handled separately, so only show optional fields here
+             updateStatusUI();
         };
+
+        // Function to simulate progress (optional/dummy)
+        // Note: Real progress tracking requires a database, this is just for UI demonstration
+        function simulateProgress() {
+            if (totalRequestedViews > 0 && viewsCompleted < totalRequestedViews) {
+                // Simulate slow, realistic progress
+                const increment = Math.ceil(totalRequestedViews / 100); 
+                viewsCompleted = Math.min(totalRequestedViews, viewsCompleted + increment);
+                localStorage.setItem('viewsCompleted', viewsCompleted);
+                updateStatusUI();
+            }
+        }
+        // setInterval(simulateProgress, 5000); // Uncomment this line to show simulated progress on the UI
+
     </script>
 </body>
 </html>
