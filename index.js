@@ -5,9 +5,7 @@ const { GoogleGenAI } = require('@google/genai');
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// ⭐ CHANGE 1: Using puppeteer-core for the main library
 const puppeteer = require('puppeteer-core'); 
-// ⭐ CHANGE 2: Using the optimized Chromium package for Render/Serverless
 const chromium = require('@sparticuz/chromium'); 
 
 const app = express();
@@ -16,7 +14,7 @@ const PORT = process.env.PORT || 10000;
 // --- RATE LIMITING CONFIGURATION ---
 const rateLimitMap = new Map();
 const MAX_REQUESTS_PER_DAY = 4;
-const MAX_VIEWS_PER_RUN = 400; // New limit requested by user
+const MAX_VIEWS_PER_RUN = 400; 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 // Middleware to trust proxy headers (CRUCIAL for Render.com to get the correct user IP)
@@ -25,10 +23,8 @@ app.set('trust proxy', 1);
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
-    // Attempt to load from secret file (Render secret mount)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
 } catch (e) {
-    // Fallback to environment variable
     GEMINI_KEY = process.env.GEMINI_API_KEY; 
 }
 
@@ -42,11 +38,42 @@ if (GEMINI_KEY) {
 
 // --- PUPPETEER CONFIGURATION for Render/Chromium ---
 const PUPPETEER_ARGS = [
-    ...chromium.args, // Use optimized args from the chromium package
+    ...chromium.args, 
     '--no-sandbox', 
     '--disable-setuid-sandbox',
     '--single-process', 
 ];
+
+// ⭐ CHANGE 1: PROXY LIST ADDED (Aapke diye gaye proxies)
+const PROXY_LIST = [
+    "http://45.3.49.4:3129",
+    "http://209.50.164.165:3129",
+    "http://216.26.232.247:3129",
+    "http://65.111.3.145:3129",
+    "http://209.50.168.254:3129",
+    "http://104.207.63.195:3129", // France
+    "http://65.111.2.236:3129",
+    "http://104.207.61.3:3129", // Canada
+    "http://104.207.60.58:3129", // Canada
+    "http://209.50.166.110:3129",
+    "http://209.50.170.93:3129",
+    "http://216.26.254.100:3129", // France
+    "http://209.50.164.168:3129",
+    "http://104.207.57.162:3129", // Germany
+    "http://65.111.15.170:3129",
+    "http://209.50.170.126:3129",
+    "http://209.50.188.66:3129", // Canada
+    "http://65.111.6.214:3129",
+    "http://104.207.44.84:3129",
+    "http://104.207.40.98:3129"
+];
+
+// ⭐ CHANGE 2: getRandomProxy function
+function getRandomProxy() {
+    if (PROXY_LIST.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * PROXY_LIST.length);
+    return PROXY_LIST[randomIndex];
+}
 
 // --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
@@ -64,7 +91,7 @@ app.get('/', (req, res) => {
 function generateCompensatedPlan(totalViews, items) {
     const viewPlan = [];
     if (items.length === 0 || totalViews < 1) return [];
-    // ... (Compensation logic remains the same)
+    
     const viewsToAllocate = items.map(item => ({
         id: item.url || item.code,
         views: Math.floor(totalViews * (item.percent / 100)), 
@@ -121,8 +148,8 @@ app.post('/boost-mp', async (req, res) => {
 
     // --- NEW: Limit Views to MAX_VIEWS_PER_RUN ---
     if (totalViews > MAX_VIEWS_PER_RUN) {
-         console.warn(`VIEW LIMIT: Blocked request for ${totalViews} views.`);
-         return res.status(400).json({ status: 'error', message: `❌ Adhiktam 400 views hi anumat hain. Kripya views ki sankhya kam karein.` });
+           console.warn(`VIEW LIMIT: Blocked request for ${totalViews} views.`);
+           return res.status(400).json({ status: 'error', message: `❌ Adhiktam 400 views hi anumat hain. Kripya views ki sankhya kam karein.` });
     }
 
     clientData.count += 1;
@@ -154,51 +181,69 @@ app.post('/boost-mp', async (req, res) => {
     for (let i = 0; i < maxPlanLength; i++) {
         finalCombinedPlan.push({ 
             url: finalPageUrls[i], 
-            country_code: countryPlan[i]
+            country_code: countryPlan[i] // Not strictly used with proxy, but kept for future reference
         });
     }
 
     if (finalCombinedPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: `Anumat views ki sankhya 0 hai. Kripya jaanchein.` });
+           return res.status(400).json({ status: 'error', message: `Anumat views ki sankhya 0 hai. Kripya jaanchein.` });
     }
 
     // --- Async Processing (Immediate Response) ---
     res.json({ 
         status: 'accepted', 
-        message: `✅ Aapki ${finalCombinedPlan.length} REAL browser views ki request sweekar kar li gayi hai. Traffic 24-48 ghanton mein poora hoga.`
+        message: `✅ Aapki ${finalCombinedPlan.length} REAL browser views ki request sweekar kar li gayi hai. Traffic 24-48 ghanton mein poora hoga. (Proxies ON)`
     });
 
     // Start views generation asynchronously
     (async () => {
         const totalViewsCount = finalCombinedPlan.length;
-        console.log(`[PUPPETEER START] Starting REAL Browser View generation for ${totalViewsCount} views on Render.`);
+        console.log(`[PUPPETEER START] Starting REAL Browser View generation for ${totalViewsCount} views on Render with Proxies.`);
         
         // --- FEATURE 2: GUARANTEED 24-48 HOUR DELIVERY ---
         const targetDuration = Math.random() * (MAX_TOTAL_MS - MIN_TOTAL_MS) + MIN_TOTAL_MS;
         const requiredFixedDelayPerView = Math.floor(targetDuration / totalViewsCount);
         
         let successfulViews = 0;
-        let browser;
+        // ⭐ NOTE: 'browser' ko loop ke bahar define karne ki zaroorat nahi hai.
 
         try {
-            // Launch Headless Browser using the optimized path and args
-            browser = await puppeteer.launch({
-                args: PUPPETEER_ARGS,
-                executablePath: await chromium.executablePath(), // Get the executable path
-                headless: chromium.headless,
-            });
-            console.log("Puppeteer Browser launched successfully on Render.");
-
+            // Loop ke andar browser launch/close hoga
             for (let i = 0; i < finalCombinedPlan.length; i++) {
                 const plan = finalCombinedPlan[i];
                 const viewId = i + 1;
                 
+                const proxyUrl = getRandomProxy(); // Random proxy chuna
+                if (!proxyUrl) {
+                    console.error("[PROXY ERROR] Proxy list is empty. Skipping view.");
+                    continue; 
+                }
+                
                 let page;
+                let browser; // Har loop iteration mein naya browser/proxy session
+                
                 try {
+                    // ⭐ CHANGE 3.1: Puppeteer Launch mein Proxy Argument Jodein
+                    const ipPort = proxyUrl.replace('http://', ''); 
+                    
+                    const proxyArgs = [
+                        ...PUPPETEER_ARGS,
+                        `--proxy-server=${ipPort}` 
+                    ];
+                    
+                    browser = await puppeteer.launch({
+                        args: proxyArgs, // Naye proxy arguments use kiye
+                        executablePath: await chromium.executablePath(), 
+                        headless: chromium.headless,
+                    });
+                    
+                    console.log(`[View ${viewId}] Launching browser with Proxy: ${proxyUrl}`);
+                    
                     page = await browser.newPage();
                     
+                    // Kyunki aapke proxies mein authentication nahi hai, page.authenticate() ki zaroorat nahi hai.
+                    
                     // --- 1. Set Real Browser Context ---
-                    // User Agent is set to look like a real Chrome browser
                     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
                     await page.setUserAgent(userAgent);
                     await page.setViewport({ width: 1366, height: 768 });
@@ -208,12 +253,11 @@ app.post('/boost-mp', async (req, res) => {
                     
                     // Navigate (This sends the real GA4 page_view event)
                     console.log(`[View ${viewId}] Navigating to: ${plan.url}`);
-                    await page.goto(plan.url, { waitUntil: 'domcontentloaded', timeout: 45000 }); // Increased timeout for Render
+                    await page.goto(plan.url, { waitUntil: 'domcontentloaded', timeout: 45000 }); 
                     
                     // --- 2. Simulate Human Interaction (Scroll) ---
                     const engagementTime = Math.floor(Math.random() * (180000 - 45000) + 45000); 
                     
-                    // Scrolling naturally triggers the GA4 'scroll' event
                     const scrollHeight = await page.evaluate(() => document.body.scrollHeight);
                     const targetScroll = Math.min(scrollHeight * 0.95, scrollHeight - 10);
                     
@@ -232,9 +276,11 @@ app.post('/boost-mp', async (req, res) => {
                     console.log(`[View ${viewId}] SUCCESS ✅ | Session closed.`);
 
                 } catch (pageError) {
-                    console.error(`[View ${viewId}] FAILURE ❌ | Page Error: ${pageError.message.substring(0, 100)}...`);
-                    if (page && !page.isClosed()) {
-                         await page.close();
+                    console.error(`[View ${viewId}] FAILURE ❌ | Proxy ${proxyUrl} | Error: ${pageError.message.substring(0, 100)}...`);
+                } finally {
+                    // ⭐ CHANGE 3.2: Har view ke baad browser band karna zaroori hai
+                    if (browser) {
+                        await browser.close();
                     }
                 }
 
@@ -242,15 +288,10 @@ app.post('/boost-mp', async (req, res) => {
                 const totalDelay = requiredFixedDelayPerView + (Math.random() * (MAX_VIEW_DELAY - MIN_VIEW_DELAY) + MIN_VIEW_DELAY);
                 console.log(`[Delay] Waiting for ${Math.round(totalDelay/1000)}s before next view.`);
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
-            }
+            } // End of loop
 
         } catch (mainError) {
-            console.error(`[PUPPETEER CRITICAL ERROR] Main browser process failed: ${mainError.message}`);
-        } finally {
-            if (browser) {
-                await browser.close();
-                console.log("Puppeteer Browser shut down.");
-            }
+            console.error(`[PUPPETEER CRITICAL ERROR] Main process failed: ${mainError.message}`);
         }
         
         console.log(`[BOOSTER FINISH] All ${totalViewsCount} views attempted. Successfully recorded: ${successfulViews}.`);
@@ -292,7 +333,7 @@ app.post('/api/caption-generate', async (req, res) => {
 // 3. AI INSTA CAPTION EDITOR ENDPOINT 
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
-     res.status(500).json({ error: 'AI endpoint is active but simplified code block is not included for brevity.' });
+      res.status(500).json({ error: 'AI endpoint is active but simplified code block is not included for brevity.' });
 });
 
 
