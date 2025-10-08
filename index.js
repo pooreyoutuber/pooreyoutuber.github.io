@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - MAXIMUM STABILITY + NEW PROXY LIST)
+// index.js (FINAL CODE - MAXIMUM STABILITY + ALL FIXES APPLIED)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -44,7 +44,7 @@ const PUPPETEER_ARGS = [
     '--single-process', 
 ];
 
-// ⭐ PROXY LIST (UPDATED WITH NEW LIST)
+// ⭐ PROXY LIST (UPDATED WITH NEW COUNTRIES)
 const PROXY_LIST = [
     "http://104.207.63.195:3129", // France
     "http://104.207.61.3:3129",   // Canada
@@ -250,7 +250,7 @@ app.post('/boost-mp', async (req, res) => {
                     console.log(`[View ${viewId}] Navigating to: ${plan.url}`);
                     
                     try {
-                        // FIX: Navigation Timeout ko 60s tak badhaya
+                        // FIX: Navigation Timeout 60s
                         await page.goto(plan.url, { waitUntil: 'domcontentloaded', timeout: 60000 }); 
                         
                     } catch (navError) {
@@ -270,8 +270,8 @@ app.post('/boost-mp', async (req, res) => {
                     // --- 2. Simulate Human Interaction (Scroll) ---
                     const engagementTime = Math.floor(Math.random() * (180000 - 45000) + 45000); 
                     
-                    // ⭐ FIX: 'body' selector ka wait 10s se 5s kiya (Fail Fast for Dead Proxies)
-                    await page.waitForSelector('body', { timeout: 5000 }); 
+                    // ⭐ CRITICAL FIX: 'body' selector ka wait 5s se 15s kiya (Slow Proxy Chance)
+                    await page.waitForSelector('body', { timeout: 15000 }); 
                     
                     const scrollHeight = await page.evaluate(() => {
                         return document.body ? document.body.scrollHeight : 0; 
@@ -298,7 +298,7 @@ app.post('/boost-mp', async (req, res) => {
                     console.log(`[View ${viewId}] SUCCESS ✅ | Session closed.`);
 
                 } catch (pageError) {
-                    // This catch block handles connection errors and 'Waiting for selector `body`' errors
+                    // This catch block handles all connection errors, including 'Waiting for selector `body`'
                     console.error(`[View ${viewId}] FAILURE ❌ | Proxy ${proxyUrl} | Error: ${pageError.message.substring(0, 100)}...`);
                 } finally {
                     // Har view ke baad browser band karna zaroori hai
