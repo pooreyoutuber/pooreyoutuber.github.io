@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simplified Traffic Booster (Render Safe)</title>
+    <title>High-Quality Traffic Booster - Final</title>
     <style>
         /* Base and Layout */
         body { 
@@ -24,11 +24,11 @@
             padding: 35px; 
             border-radius: 15px; 
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); 
-            border-top: 5px solid #2980b9; 
+            border-top: 5px solid #3498db; 
         }
         h1 { 
             text-align: center; 
-            color: #2980b9; 
+            color: #3498db; 
             margin-bottom: 30px; 
             font-size: 2.2em;
             font-weight: 700;
@@ -52,7 +52,6 @@
             border-radius: 8px; 
             box-sizing: border-box; 
             font-size: 1em;
-            transition: border-color 0.3s;
         }
         input:focus {
             border-color: #3498db;
@@ -66,12 +65,6 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-top: 10px;
-        }
-        .optional-grid label {
-            font-size: 0.95em;
-            font-weight: 500;
-            margin-bottom: 5px;
-            color: #7f8c8d;
         }
         .optional-grid input {
             padding: 8px 10px;
@@ -102,16 +95,16 @@
         #status-area { 
             margin-top: 35px; 
             padding: 20px; 
-            border: 1px solid #2980b9; 
+            border: 1px solid #3498db; 
             border-radius: 10px; 
             text-align: center; 
             background-color: #f3f6ff;
         }
         #status-area h3 { 
-            color: #2980b9; 
+            color: #3498db; 
             margin-top: 0; 
             font-size: 1.4em;
-            border-bottom: 2px solid #2980b9;
+            border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
         }
         .status-line { 
@@ -129,10 +122,11 @@
             color: #2ecc71; 
         }
         .slot-info { 
-            font-size: 0.9em; 
-            color: #7f8c8d; 
+            font-size: 1.0em; 
+            color: #2980b9; 
             margin-top: 15px; 
             padding-top: 10px;
+            font-weight: bold;
             border-top: 1px dashed #bdc3c7;
         }
     </style>
@@ -147,24 +141,24 @@
         </div>
 
         <div class="form-group">
-            <label for="totalViews">🔢 Total Traffic Loads (Max 20 for Free Tier Stability):</label>
-            <input type="number" id="totalViews" min="1" max="20" value="10" required>
+            <label for="totalViews">🔢 Total Traffic Loads (Max 20 for Stability):</label>
+            <input type="number" id="totalViews" min="1" max="20" value="20" required>
         </div>
 
         <div class="form-group">
-            <label for="refreshDelay">⏱️ Page Refresh Delay (Seconds: 3-6 recommended):</label>
-            <input type="number" id="refreshDelay" min="3" max="10" value="5" required>
+            <label for="refreshDelay">⏱️ Refresh/View Delay (Seconds: 5-8 recommended):</label>
+            <input type="number" id="refreshDelay" min="5" max="15" value="7" required>
         </div>
 
         <div class="form-group">
-            <label>🔗 Optional Sub-Pages (Relative URLs or Full URLs):</label>
+            <label>🔗 Optional Sub-Pages (Up to 4):</label>
             <div class="optional-grid">
-                <input type="url" id="page2" class="sub-page" placeholder="Optional Page 2 URL">
-                <input type="url" id="page3" class="sub-page" placeholder="Optional Page 3 URL">
-                <input type="url" id="page4" class="sub-page" placeholder="Optional Page 4 URL">
-                <input type="url" id="page5" class="sub-page" placeholder="Optional Page 5 URL">
+                <input type="url" id="page2" class="sub-page" placeholder="Page 2 URL">
+                <input type="url" id="page3" class="sub-page" placeholder="Page 3 URL">
+                <input type="url" id="page4" class="sub-page" placeholder="Page 4 URL">
+                <input type="url" id="page5" class="sub-page" placeholder="Page 5 URL">
             </div>
-            <div class="small-text" style="color:#e67e22; font-size:0.9em; margin-top:10px;">Note: Traffic will be distributed equally among entered URLs.</div>
+            <div class="small-text" style="color:#e67e22; font-size:0.9em; margin-top:10px;">Note: Traffic will be equally distributed among the URLs you provide.</div>
         </div>
 
         <button id="submitBtn">Generate Traffic</button>
@@ -177,7 +171,7 @@
             <div class="status-line"><span class="status-label">Views Completed (Approx.):</span> <span id="completedViews" class="status-value">0</span></div>
             <div class="status-line"><span class="status-label">Views Left (Pending):</span> <span id="leftViews" class="status-value">0</span></div>
             
-            <p class="slot-info">**20 Virtual Slots** are running **Sequentially** (one-by-one) for stable performance on Render. Traffic simulates **Real User Scroll + 8-9 sec Ads View**.</p>
+            <p class="slot-info">🚀 20 Slots Active: Each uses a unique Proxy/UA & ensures 7-9 sec Ads View Time + Scroll.</p>
         </div>
 
     </div>
@@ -187,7 +181,7 @@
         const API_URL_BASE = "https://pooreyoutuber-github-io.onrender.com"; 
         const API_ENDPOINT = '/boost-real'; 
 
-        // Initial Status Values (Stored in localStorage for persistence)
+        // Initial Status Values 
         let totalRequestedViews = parseInt(localStorage.getItem('totalRequestedViews')) || 0;
         let viewsCompleted = parseInt(localStorage.getItem('viewsCompleted')) || 0;
         
@@ -209,7 +203,8 @@
             try {
                 const mainUrl = document.getElementById('mainUrl').value.trim();
                 const totalViews = parseInt(document.getElementById('totalViews').value);
-                const refreshDelay = parseInt(document.getElementById('refreshDelay').value) * 1000; // Convert to MS
+                // Refresh delay in milliseconds
+                const refreshDelay = parseInt(document.getElementById('refreshDelay').value) * 1000; 
                 
                 if (!mainUrl || !mainUrl.startsWith('http')) {
                     throw new Error("❌ Please enter a valid main website URL (starting with http/https).");
@@ -217,40 +212,28 @@
                 if (totalViews <= 0 || totalViews > 20) {
                     throw new Error("❌ Total Views must be between 1 and 20 for Render stability.");
                 }
-                if (refreshDelay < 3000 || refreshDelay > 10000) {
-                    throw new Error("❌ Refresh Delay must be between 3 and 10 seconds.");
+                if (refreshDelay < 5000 || refreshDelay > 15000) {
+                    throw new Error("❌ Refresh Delay must be between 5 and 15 seconds.");
                 }
 
                 // 1. Collect URL Data
                 const allUrls = [mainUrl];
                 document.querySelectorAll('.sub-page').forEach(input => {
                     const url = input.value.trim();
-                    if (url) {
-                        // Handle relative URLs
-                        if (!url.startsWith('http')) {
-                             try {
-                                const baseUrl = new URL(mainUrl).origin;
-                                allUrls.push(baseUrl + url);
-                            } catch (e) {
-                                allUrls.push(url); // Push as is if base URL fails, API will handle it.
-                            }
-                        } else {
-                            allUrls.push(url);
-                        }
-                    }
+                    if (url) allUrls.push(url);
                 });
 
-                // Unique URLs only, for equal distribution
+                // Unique URLs only
                 const uniqueUrls = [...new Set(allUrls)];
                 
-                // 2. API Call (Sending URLs list and Refresh Delay)
+                // 2. API Call 
                 const response = await fetch(API_URL_BASE + API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         views: totalViews,
-                        urls: uniqueUrls, // List of URLs
-                        refreshDelay: refreshDelay // New parameter
+                        urls: uniqueUrls, 
+                        refreshDelay: refreshDelay 
                     })
                 });
 
