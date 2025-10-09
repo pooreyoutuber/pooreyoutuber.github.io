@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - SIMPLIFIED UI & ADS VIEW LOGIC)
+// index.js (FINAL CODE - MOST STABLE, SEQUENTIAL, AND ADS-OPTIMIZED)
 
 const express = require('express');
 const cors = require('cors'); 
@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 10000;
 // --- 1. CONFIGURATION & UTILITIES ---
 const rateLimitMap = new Map();
 const MAX_REQUESTS_PER_DAY = 4;
-const MAX_VIEWS_PER_RUN = 20; // Hard-limited for Free Tier stability
+const MAX_VIEWS_PER_RUN = 20; 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 app.set('trust proxy', 1);
 
@@ -20,9 +20,9 @@ const PUPPETEER_ARGS = [
     '--disable-gpu',
     '--disable-setuid-sandbox',
     '--no-sandbox', 
-    '--single-process', 
+    '--single-process', // CRITICAL for low-memory hosts
     '--no-zygote',
-    '--disable-dev-shm-usage', 
+    '--disable-dev-shm-usage', // Essential for Render
     '--user-data-dir=/tmp/user_data',
     '--ignore-certificate-errors',
     '--window-size=1920,1080'
@@ -38,7 +38,7 @@ const PROXY_LIST = [
     "http://216.26.253.178:3129", "http://154.213.166.61:3129", "http://45.3.45.87:3129"
 ];
 
-// USER AGENTS (Simplifying back to a single list)
+// USER AGENTS (Random selection for variety)
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
@@ -60,7 +60,7 @@ function generateUrlPlan(totalViews, urls) {
     const plan = [];
     if (urls.length === 0 || totalViews < 1) return [];
     
-    // Distribute views as equally as possible
+    // Distribute views as equally as possible among the provided URLs
     for(let i = 0; i < totalViews; i++) {
         const urlIndex = i % urls.length;
         plan.push(urls[urlIndex]);
@@ -92,10 +92,6 @@ app.get('/', (req, res) => {
 });
 
 
-// --- TIME CONSTANTS (Using static values now for simplicity) ---
-const MIN_TOTAL_MS = 24 * 60 * 60 * 1000; 
-const MAX_TOTAL_MS = 48 * 60 * 60 * 1000; 
-
 // ===================================================================
 // 3. REAL USER DIRECT TRAFFIC ENDPOINT: /boost-real - SEQUENTIAL MODE
 // ===================================================================
@@ -112,9 +108,9 @@ app.post('/boost-real', async (req, res) => {
     }
     
     const totalViews = parseInt(req.body.views) || 0; 
-    const urls = req.body.urls; // Array of URLs
-    const refreshDelay = parseInt(req.body.refreshDelay) || 5000; // New parameter
-    const totalSlots = 20; 
+    const urls = req.body.urls; 
+    const refreshDelay = parseInt(req.body.refreshDelay) || 5000; 
+    const totalSlots = 20; // Fixed number of slots
 
     if (totalViews < 1 || totalViews > MAX_VIEWS_PER_RUN || !Array.isArray(urls) || urls.length === 0) {
            return res.status(400).json({ status: 'error', message: `Invalid views (1-${MAX_VIEWS_PER_RUN}) or valid URL data missing.` });
@@ -134,7 +130,7 @@ app.post('/boost-real', async (req, res) => {
         slots: totalSlots
     });
 
-    // ⭐ SEQUENTIAL EXECUTION LOGIC ⭐
+    // ⭐ SEQUENTIAL EXECUTION LOGIC: Slots will run one after the other.
     (async () => {
         let startIndex = 0;
         for(let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
@@ -151,14 +147,11 @@ app.post('/boost-real', async (req, res) => {
 });
 
 // ===================================================================
-// 4. SLOT RUNNER FUNCTION (Core Puppeteer Logic) - REFRESH & ADS VIEW FIX
+// 4. SLOT RUNNER FUNCTION (Core Puppeteer Logic) - ROBUST SCROLL/DELAY
 // ===================================================================
 async function runSlotTask(slotId, urlList, refreshDelay) {
     const totalLoads = urlList.length;
     let loadsCompleted = 0;
-    
-    // Calculate delay based on total time, refreshDelay is now the engagement time
-    const requiredFixedDelayPerLoad = Math.floor(refreshDelay / totalLoads) + 1000; // 1 second extra buffer
     
     const chromiumExecutable = await chromium.executablePath(); 
 
@@ -187,36 +180,49 @@ async function runSlotTask(slotId, urlList, refreshDelay) {
             
             let page = await browser.newPage();
             
+            // ⭐ Unique User Agent for every load
             await page.setUserAgent(getRandomUserAgent());
             await page.setViewport({ width: 1920, height: 1080 }); 
             await page.setExtraHTTPHeaders({'Referer': 'https://www.google.com/'});
             
             // --- 3. Page Navigate (Load) ---
             await page.goto(targetURL, { 
-                waitUntil: 'domcontentloaded', 
-                timeout: 120000 
+                waitUntil: 'domcontentloaded', // Fast load signal
+                timeout: 120000 // Long timeout for slow proxies
             });
             
             // --- 4. Engagement (Ads View Time + Scroll) ---
             
-            // ⭐ ADS VIEW TIME: 8 to 9 seconds (Guaranteed view time for Adsense)
-            const adsViewTime = Math.floor(Math.random() * (9000 - 8000) + 8000); 
+            // ⭐ ADS VIEW TIME: 7 to 9 seconds
+            const adsViewTime = Math.floor(Math.random() * (9000 - 7000) + 7000); 
+            
+            // Wait for ads view time
             await new Promise(resolve => setTimeout(resolve, adsViewTime)); 
 
-            // SCROLL FIX
-            const scrollHeight = await page.evaluate(() => {
-                return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight); 
-            });
+            // ⭐ SCROLL LOGIC: Multiple scrolls (2-4 times)
+            const numScrolls = Math.floor(Math.random() * 3) + 2; // 2 to 4 scrolls
             
-            if (scrollHeight > 1000) { 
-                const scrollPercent = Math.random() * (0.95 - 0.5) + 0.5; 
-                const targetScroll = Math.min(scrollHeight * scrollPercent, scrollHeight - 100);
+            for (let s = 0; s < numScrolls; s++) {
+                 // SCROLL HEIGHT CALCULATION: Robust check to avoid "null" error
+                const scrollHeight = await page.evaluate(() => {
+                    return Math.max(
+                        document.body ? document.body.scrollHeight : 0, 
+                        document.documentElement ? document.documentElement.scrollHeight : 0
+                    ); 
+                });
                 
-                await page.evaluate((targetScroll) => {
-                    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-                }, targetScroll);
+                if (scrollHeight > 1000) { 
+                    // Scroll 50% to 95% of the page
+                    const scrollPercent = Math.random() * (0.95 - 0.5) + 0.5; 
+                    const targetScroll = Math.min(scrollHeight * scrollPercent, scrollHeight - 100);
+                    
+                    await page.evaluate((targetScroll) => {
+                        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                    }, targetScroll);
 
-                await new Promise(resolve => setTimeout(resolve, 500)); 
+                    // Wait 500ms before scrolling again (real user behavior)
+                    await new Promise(resolve => setTimeout(resolve, 500)); 
+                }
             }
             
             loadsCompleted++;
@@ -226,6 +232,7 @@ async function runSlotTask(slotId, urlList, refreshDelay) {
         } finally {
             if (browser) {
                 try {
+                    // Browser close karke memory release karo
                     await browser.close();
                 } catch(e) {
                     console.error(`[Load ${loadId}] WARNING: Error closing browser: ${e.message}`);
@@ -234,7 +241,7 @@ async function runSlotTask(slotId, urlList, refreshDelay) {
         }
         
         // --- 5. MAIN DELAY (Refresh Delay logic) ---
-        // Total delay is (Refresh Delay + any buffer) before the next load starts
+        // Wait for the user defined refresh delay before the next sequential load
         const totalDelay = refreshDelay;
         await new Promise(resolve => setTimeout(resolve, totalDelay));
     }
