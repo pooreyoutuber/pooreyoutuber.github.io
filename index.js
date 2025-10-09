@@ -15,21 +15,20 @@ const MAX_VIEWS_PER_RUN = 400;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 app.set('trust proxy', 1);
 
-// **Puppeteer Arguments Optimized for Render/Low Memory**
+// **OPTIMIZED PUPPETEER ARGS for Stability on Render**
 const PUPPETEER_ARGS = [
     '--disable-gpu',
     '--disable-setuid-sandbox',
     '--no-sandbox', 
-    '--single-process', 
+    '--single-process', // CRITICAL for low-memory hosts
     '--no-zygote',
     '--disable-dev-shm-usage', // Essential for Render
     '--user-data-dir=/tmp/user_data',
     '--ignore-certificate-errors',
-    '--enable-features=NetworkService,NetworkServiceInProcess',
-    '--disk-cache-dir=/tmp/cache', // Use /tmp for cache
+    ''
 ];
 
-// ⭐ PROXY LIST (Use your provided list)
+// ⭐ PROXY LIST (Used for unique IP/Location)
 const PROXY_LIST = [
     "http://104.207.63.195:3129", "http://104.207.61.3:3129", "http://104.207.60.58:3129",
     "http://216.26.254.100:3129", "http://104.207.57.162:3129", "http://209.50.188.66:3129",
@@ -39,6 +38,7 @@ const PROXY_LIST = [
     "http://216.26.253.178:3129", "http://154.213.166.61:3129", "http://45.3.45.87:3129"
 ];
 
+// USER AGENTS (Used for unique Browser/Device simulation)
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
@@ -56,7 +56,6 @@ function getRandomUserAgent() {
 }
 
 function generateCompensatedPlan(totalViews, items) {
-    // (Helper function logic is unchanged)
     const viewPlan = [];
     if (items.length === 0 || totalViews < 1) return [];
     
@@ -68,7 +67,7 @@ function generateCompensatedPlan(totalViews, items) {
         return { url: item.url, views: Math.floor(exactViews), remainder: exactViews % 1 };
     });
 
-    let sumOfViews = normalizedItems.reduce((sum, item => sum + item.views), 0);
+    let sumOfViews = normalizedItems.reduce((sum, item) => sum + item.views, 0);
     let difference = totalViews - sumOfViews; 
 
     normalizedItems.sort((a, b) => b.remainder - a.remainder);
@@ -87,6 +86,7 @@ function generateCompensatedPlan(totalViews, items) {
 }
 
 // --- 2. CORS FIX ---
+// Allowing your GitHub Pages frontend to communicate with Render
 const allowedOrigins = ['https://pooreyoutuber.github.io', 'http://localhost:8000'];
 
 app.use(cors({
@@ -94,6 +94,7 @@ app.use(cors({
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.error('CORS blocked request from:', origin);
             callback(new Error('Not allowed by CORS'), false); 
         }
     },
@@ -156,8 +157,6 @@ app.post('/boost-real', async (req, res) => {
             const loadsForSlot = finalUrlPlan.slice(startIndex, startIndex + loadsPerSlot);
             startIndex += loadsForSlot.length;
             if (loadsForSlot.length > 0) {
-                // IMPORTANT: We reduce the parallel slots by dividing the total number of loads 
-                // across the 20 slots to control memory better.
                 slotTasks.push(runSlotTask(slotIndex + 1, loadsForSlot));
             }
         }
@@ -208,38 +207,34 @@ async function runSlotTask(slotId, urlList) {
             
             // --- 3. Page Navigate (Load) ---
             await page.goto(targetURL, { 
-                waitUntil: 'networkidle2', // Use 'networkidle2' for better page loading stability
-                timeout: 90000 // Increased navigation timeout
+                waitUntil: 'networkidle2', // Wait for page to stop making connections
+                timeout: 90000 
             });
             
             // --- 4. Engagement (Scroll & Random Wait: 4s-7s) ---
             const engagementTime = Math.floor(Math.random() * (7000 - 4000) + 4000); 
             
-            // Wait for 2 seconds to allow dynamic content (like lazy-loaded content) to appear
-            await new Promise(resolve => setTimeout(resolve, 2000)); 
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for content load
 
-            // **SCROLL FIX:** Scroll using the window object to ensure compatibility
+            // SCROLL FIX
             const scrollHeight = await page.evaluate(() => {
-                // Get the maximum scroll height from both body and document element
+                // Correct way to get the full scrollable height
                 return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight); 
             });
             
             if (scrollHeight > 1000) { 
-                const scrollPercent = Math.random() * (0.95 - 0.5) + 0.5;
+                const scrollPercent = Math.random() * (0.95 - 0.5) + 0.5; // Scroll 50%-95%
                 const targetScroll = Math.min(scrollHeight * scrollPercent, scrollHeight - 100);
                 
                 await page.evaluate((targetScroll) => {
-                    // Smoothly scroll to the target position
                     window.scrollTo({ top: targetScroll, behavior: 'smooth' });
                 }, targetScroll);
 
-                // Wait for scroll animation to complete (approx 500ms)
-                await new Promise(resolve => setTimeout(resolve, 500)); 
+                await new Promise(resolve => setTimeout(resolve, 500)); // Wait for scroll animation
             } else {
-                 console.log(`[Load ${loadId}] WARNING: Low scroll height (${scrollHeight}). Staying for ${Math.round(engagementTime/1000)}s.`);
+                 console.log(`[Load ${loadId}] WARNING: Low scroll height (${scrollHeight}).`);
             }
 
-            // Final engagement wait time
             await new Promise(resolve => setTimeout(resolve, engagementTime)); 
             
             loadsCompleted++;
@@ -248,7 +243,6 @@ async function runSlotTask(slotId, urlList) {
             console.error(`[Load ${loadId}] FAILURE ❌ | Error: ${pageError.message.substring(0, 100)}...`);
         } finally {
             if (browser) {
-                // Use browser.close() to ensure all resources are released.
                 await browser.close();
             }
         }
@@ -268,5 +262,3 @@ async function runSlotTask(slotId, urlList) {
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-                    
-            
