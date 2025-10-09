@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - MOST STABLE, SEQUENTIAL, AND ADS-OPTIMIZED)
+// index.js (FINAL CODE - MOST STABLE, SEQUENTIAL, AND ADS-OPTIMIZED - PROXY FIXED)
 
 const express = require('express');
 const cors = require('cors'); 
@@ -28,14 +28,33 @@ const PUPPETEER_ARGS = [
     '--window-size=1920,1080'
 ];
 
-// ⭐ PROXY LIST (Used for unique IP/Location)
+// ⭐ PROXY LIST (Used for unique IP/Location) - REPLACED WITH FRESHER LIST
+// NOTE: Free proxies are highly unstable and may fail again.
 const PROXY_LIST = [
-    "http://104.207.63.195:3129", "http://104.207.61.3:3129", "http://104.207.60.58:3129",
-    "http://216.26.254.100:3129", "http://104.207.57.162:3129", "http://209.50.188.66:3129",
-    "http://65.111.24.172:3129", "http://216.26.254.110:3129", "http://45.3.42.225:3129",
-    "http://45.3.55.246:246", "http://45.3.53.142:3129", "http://154.213.160.98:3129",
-    "http://45.3.44.176:3129", "http://104.207.60.243:3129", "http://104.207.52.73:3129",
-    "http://216.26.253.178:3129", "http://154.213.166.61:3129", "http://45.3.45.87:3129"
+    // --- FRESHER LIST TO BYPASS CONNECTION FAILED ERROR ---
+    "http://143.244.52.174:8080", 
+    "http://157.245.244.92:3128", 
+    "http://143.244.52.173:8080", 
+    "http://143.244.52.175:8080", 
+    "http://167.99.129.215:3128",
+    "http://143.244.52.176:8080", 
+    "http://137.184.184.237:3128",
+    "http://143.244.52.177:8080", 
+    "http://137.184.183.197:3128",
+    "http://137.184.183.199:3128",
+    "http://165.22.92.203:3128",
+    "http://157.245.242.172:3128",
+    "http://137.184.183.196:3128",
+    "http://137.184.183.198:3128",
+    "http://157.245.242.173:3128",
+    // --- Secondary List ---
+    "http://45.3.44.176:3129",
+    "http://104.207.60.243:3129", 
+    "http://216.26.253.178:3129", 
+    "http://154.213.166.61:3129", 
+    "http://45.3.45.87:3129",
+    "http://104.207.63.195:3129", 
+    "http://104.207.61.3:3129" 
 ];
 
 // USER AGENTS (Random selection for variety)
@@ -163,7 +182,10 @@ async function runSlotTask(slotId, urlList, refreshDelay) {
         try {
             // --- 1. Browser launch with NEW Proxy/User Agent ---
             const proxyUrl = getRandomProxy();
-            if (!proxyUrl) throw new Error('Proxy list empty.');
+            if (!proxyUrl) {
+                console.error(`[Load ${loadId}] FAILURE ❌ | Error: Proxy list empty. Skipping load.`);
+                continue; // Skip this load if proxy list is empty
+            }
             
             const ipPort = proxyUrl.replace('http://', ''); 
             const proxyArgs = [
@@ -175,7 +197,7 @@ async function runSlotTask(slotId, urlList, refreshDelay) {
                 args: proxyArgs, 
                 executablePath: chromiumExecutable, 
                 headless: chromium.headless,
-                timeout: 60000, 
+                timeout: 60000, // 60 seconds launch timeout
             });
             
             let page = await browser.newPage();
@@ -187,8 +209,8 @@ async function runSlotTask(slotId, urlList, refreshDelay) {
             
             // --- 3. Page Navigate (Load) ---
             await page.goto(targetURL, { 
-                waitUntil: 'domcontentloaded', // Fast load signal
-                timeout: 120000 // Long timeout for slow proxies
+                waitUntil: 'domcontentloaded', // Wait until the basic HTML is loaded
+                timeout: 120000 // 120 seconds navigation timeout
             });
             
             // --- 4. Engagement (Ads View Time + Scroll) ---
@@ -228,7 +250,13 @@ async function runSlotTask(slotId, urlList, refreshDelay) {
             loadsCompleted++;
 
         } catch (pageError) {
-            console.error(`[Load ${loadId}] FAILURE ❌ | Error: ${pageError.message.substring(0, 100)}...`);
+            // Log the proxy failure clearly
+            if (pageError.message.includes('ERR_PROXY_CONNECTION_FAILED')) {
+                 console.error(`[Load ${loadId}] FAILURE ❌ | Proxy Failed (${proxyUrl}). Error: ${pageError.message.substring(0, 100)}...`);
+            } else {
+                 console.error(`[Load ${loadId}] FAILURE ❌ | Error: ${pageError.message.substring(0, 100)}...`);
+            }
+            
         } finally {
             if (browser) {
                 try {
