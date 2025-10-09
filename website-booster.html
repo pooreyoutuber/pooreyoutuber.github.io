@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,7 +15,7 @@
             min-height: 100vh;
         }
         .container { 
-            max-width: 800px; /* Reduced max-width for cleaner look */
+            max-width: 800px; 
             margin: 0 auto;
             background: #ffffff; 
             padding: 25px; 
@@ -66,7 +66,7 @@
             cursor: pointer; 
             transition: background-color 0.3s; 
             flex-shrink: 0; 
-            height: 40px; /* Align with input fields */
+            height: 40px; 
         }
         #submitBtn:hover:not(:disabled) { background-color: #27ae60; }
         #submitBtn:disabled { background-color: #95a5a6; cursor: not-allowed; }
@@ -110,7 +110,7 @@
         /* Slots Grid (Minimalist) */
         #slots-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 columns of slots */
+            grid-template-columns: repeat(4, 1fr); 
             gap: 10px;
         }
         .slot {
@@ -144,12 +144,12 @@
                 <label for="refreshDelay">⏱️ View Duration (Sec):</label>
                 <input type="number" id="refreshDelay" min="7" max="15" value="9" required>
             </div>
-            <button id="submitBtn">Start 20 Slots</button>
+            <button id="submitBtn">Start 8 Slots</button>
         </div>
 
         <div class="status-box">
             <div class="status-line">
-                <span class="status-text">Total Loads Attempted: <span id="completedCount">0</span> / 20</span>
+                <span class="status-text">Total Loads Attempted: <span id="completedCount">0</span> / 8 (Loop <span id="loopCount">1</span>)</span>
                 <span class="status-text" id="statusMessage">Ready to start.</span>
             </div>
             <div class="progress-bar">
@@ -168,7 +168,11 @@
         // ⭐ API URL HARDCODED HERE (YOUR RENDER URL) ⭐
         const API_URL_BASE = "https://pooreyoutuber-github-io.onrender.com"; // CHANGE THIS
         const API_ENDPOINT = '/run-slot'; 
-        const TOTAL_SLOTS = 20;
+        
+        // --- CONFIGURATION ---
+        const TOTAL_SLOTS = 8; // Slot count set to 8
+        const REFRESH_INTERVAL_SEC = 10; // Auto-refresh delay after 8 slots finish
+        // ---------------------
 
         const DOM = {
             mainUrl: document.getElementById('mainUrl'),
@@ -178,12 +182,17 @@
             completedCount: document.getElementById('completedCount'),
             progressBarFill: document.getElementById('progressBarFill'),
             message: document.getElementById('message'),
-            statusMessage: document.getElementById('statusMessage')
+            statusMessage: document.getElementById('statusMessage'),
+            loopCount: document.getElementById('loopCount')
         };
 
         const state = {
-            completedSlots: 0, // Successful loads
-            totalAttempted: 0, // Total attempts (Success + Error)
+            completedSlots: 0, 
+            totalAttempted: 0, 
+            currentLoop: 0, // Loop counter
+            isLooping: false,
+            url: '',
+            durationMs: 0
         };
         
         // --- 1. UI Initialization ---
@@ -200,12 +209,14 @@
         
         function updateStatusUI(statusText) {
             DOM.completedCount.textContent = state.totalAttempted;
+            DOM.loopCount.textContent = state.currentLoop;
+
             const percentage = (state.totalAttempted / TOTAL_SLOTS) * 100;
             DOM.progressBarFill.style.width = `${percentage}%`;
             DOM.progressBarFill.textContent = `${Math.round(percentage)}%`;
             DOM.statusMessage.textContent = statusText;
         }
-
+        
         // --- 2. Slot Execution Function ---
         async function runSingleSlot(slotId, url, durationMs) {
             const slotElement = document.getElementById(`slot-${slotId}`);
@@ -221,7 +232,7 @@
                         url: url,
                         duration: durationMs 
                     }),
-                    signal: AbortSignal.timeout(90000) // 90 seconds timeout for request
+                    signal: AbortSignal.timeout(90000) 
                 });
 
                 state.totalAttempted++;
@@ -233,31 +244,61 @@
                     slotElement.textContent = `#${slotId}: SUCCESS ✅`;
                     state.completedSlots++;
                 } else {
-                    // Log details to console for troubleshooting, but keep UI clean
                     console.error(`Slot #${slotId} Backend Error: ${data.message || 'Unknown server error.'}. Proxy: ${data.proxy || 'N/A'}. UA: ${data.userAgent || 'N/A'}`);
                     throw new Error(data.message || 'Load failed.');
                 }
             } catch (error) {
-                // If the request fails (Network/Timeout) or backend returns error
                 slotElement.className = 'slot error';
                 slotElement.textContent = `#${slotId}: FAILED ❌`;
             } finally {
-                // Check if all slots have finished (regardless of success/failure)
-                updateStatusUI(`Running: ${state.totalAttempted} / 20 attempts`);
+                updateStatusUI(`Running: ${state.totalAttempted} / ${TOTAL_SLOTS} attempts`);
 
-                if (state.totalAttempted === TOTAL_SLOTS) {
+                if (state.totalAttempted === TOTAL_SLOTS && state.isLooping) {
+                    DOM.submitBtn.disabled = true;
+                    DOM.submitBtn.textContent = `Restarting in ${REFRESH_INTERVAL_SEC}s...`;
+                    DOM.message.textContent = `Loop ${state.currentLoop} Finished: ${state.completedSlots} successful loads.`;
+                    updateStatusUI(`Finished. Success: ${state.completedSlots}`);
+                    
+                    // --- AUTO-REFRESH LOGIC ---
+                    setTimeout(startLoop, REFRESH_INTERVAL_SEC * 1000);
+                } else if (state.totalAttempted === TOTAL_SLOTS && !state.isLooping) {
+                    // Manual stop if looping is not enabled
                     DOM.submitBtn.disabled = false;
-                    DOM.submitBtn.textContent = 'Start 20 Slots (Restart)';
+                    DOM.submitBtn.textContent = 'Start 8 Slots (Restart)';
                     DOM.message.textContent = `Process Finished: ${state.completedSlots} successful loads out of ${TOTAL_SLOTS} attempted.`;
                     updateStatusUI(`Finished. Success: ${state.completedSlots}`);
                 }
             }
         }
 
-        // --- 3. Main Handler ---
+        // --- 3. Main Loop Starter ---
+        function startLoop() {
+            // Reset State and UI
+            state.completedSlots = 0;
+            state.totalAttempted = 0;
+            state.currentLoop++;
+            
+            updateStatusUI(`Starting Loop ${state.currentLoop}...`);
+            DOM.message.textContent = '';
+            
+            DOM.submitBtn.disabled = true;
+            DOM.submitBtn.textContent = `Running Loop ${state.currentLoop}...`;
+            
+            generateSlotsUI();
+            
+            // Run all slots with a small delay for stability
+            for (let i = 1; i <= TOTAL_SLOTS; i++) {
+                setTimeout(() => {
+                    runSingleSlot(i, state.url, state.durationMs);
+                }, i * 150); // Increased delay for Render stability
+            }
+        }
+
+
+        // --- 4. Handle Submission (First Click) ---
         function handleSubmit() {
             const mainUrl = DOM.mainUrl.value.trim();
-            const refreshDelay = parseInt(DOM.refreshDelay.value); 
+            const refreshDelay = parseInt(DOM.refreshDelay.value); // Seconds
             const durationMs = refreshDelay * 1000;
 
             if (!mainUrl || !mainUrl.startsWith('http')) {
@@ -269,23 +310,12 @@
                 return;
             }
             
-            // Reset State and UI
-            state.completedSlots = 0;
-            state.totalAttempted = 0;
-            updateStatusUI('Starting all 20 slots...');
-            DOM.message.textContent = '';
-            DOM.submitBtn.disabled = true;
-            DOM.submitBtn.textContent = 'Running 20 Slots...';
+            // Set global state
+            state.url = mainUrl;
+            state.durationMs = durationMs;
+            state.isLooping = true; // Enable auto-loop
             
-            generateSlotsUI();
-            
-            // Run all 20 slots SIMULTANEOUSLY
-            for (let i = 1; i <= TOTAL_SLOTS; i++) {
-                // A small delay between each call can help prevent immediate resource saturation errors (like ETXTBSY)
-                setTimeout(() => {
-                    runSingleSlot(i, mainUrl, durationMs);
-                }, i * 50); // 50ms interval between starting calls
-            }
+            startLoop();
         }
 
         // --- Initialization ---
