@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>20-Slot Traffic Booster (Final UI)</title>
+    <title>High-Quality Traffic Booster (Simple UI)</title>
     <style>
-        /* Base Styling */
+        /* Base Styling - Modern and Clean */
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background-color: #f0f4f8; 
@@ -15,31 +15,38 @@
             min-height: 100vh;
         }
         .container { 
-            max-width: 1000px; 
+            max-width: 800px; /* Reduced max-width for cleaner look */
             margin: 0 auto;
             background: #ffffff; 
             padding: 25px; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+            border-radius: 12px; 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
         }
         h1 { 
             text-align: center; 
             color: #3498db; 
             margin-bottom: 25px; 
-            font-size: 2.5em;
+            font-size: 2em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
         }
 
         /* Input Area */
         .input-area {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
-            align-items: center;
+            margin-bottom: 25px;
+            align-items: flex-end;
             flex-wrap: wrap;
         }
         .form-group {
             flex-grow: 1;
-            min-width: 150px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
         }
         input[type="url"], input[type="number"] { 
             width: 100%; 
@@ -47,9 +54,10 @@
             border: 1px solid #bdc3c7; 
             border-radius: 6px; 
             box-sizing: border-box; 
+            font-size: 1em;
         }
         #submitBtn { 
-            padding: 10px 25px; 
+            padding: 10px 20px; 
             background-color: #2ecc71; 
             color: white; 
             border: none; 
@@ -57,103 +65,80 @@
             font-size: 1em; 
             cursor: pointer; 
             transition: background-color 0.3s; 
-            flex-shrink: 0; /* Prevents button from shrinking */
+            flex-shrink: 0; 
+            height: 40px; /* Align with input fields */
         }
         #submitBtn:hover:not(:disabled) { background-color: #27ae60; }
         #submitBtn:disabled { background-color: #95a5a6; cursor: not-allowed; }
 
         /* Status & Progress */
-        .status-header {
+        .status-box {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #bdc3c7;
+        }
+        .status-line {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 2px solid #3498db;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
-        .status-header h3 {
-            margin: 0;
-            color: #3498db;
-            font-size: 1.3em;
+        .status-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #34495e;
         }
         .progress-bar {
-            background-color: #ecf0f1;
+            background-color: #dce1e7;
             border-radius: 5px;
             overflow: hidden;
-            width: 70%;
             height: 20px;
-            margin-left: 20px;
         }
         .progress-fill {
             height: 100%;
-            background-color: #2ecc71;
-            transition: width 0.3s;
+            background-color: #3498db;
+            transition: width 0.4s;
             text-align: center;
             color: white;
             font-size: 0.9em;
             line-height: 20px;
+            font-weight: bold;
         }
 
-        /* Slots Grid */
+        /* Slots Grid (Minimalist) */
         #slots-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns of slots */
+            gap: 10px;
         }
         .slot {
-            background-color: #ecf0f1;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            border-left: 5px solid #3498db; /* Initial Blue */
-            transition: border-left 0.5s;
-        }
-        .slot-title {
-            font-weight: 700;
-            color: #3498db;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .slot-status {
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
             font-size: 0.9em;
-            color: #7f8c8d;
-            min-height: 18px;
-        }
-        .slot-detail {
-            font-size: 0.8em;
-            margin-top: 5px;
-            word-wrap: break-word;
-            line-height: 1.4;
-        }
-        .slot-proxy, .slot-ua {
             font-weight: 500;
-            color: #34495e;
-        }
-        .slot-ua {
-            font-size: 0.7em; /* Smaller font for long UA string */
+            background-color: #dce1e7;
+            color: #7f8c8d;
+            border: 1px solid #bdc3c7;
         }
 
-        /* Status Colors */
-        .slot.running { border-left-color: #f39c12; } 
-        .slot.complete { border-left-color: #2ecc71; } 
-        .slot.error { border-left-color: #e74c3c; } 
-        .slot-title .status-indicator { font-weight: bold; margin-left: 10px; }
-        .slot.running .status-indicator { color: #f39c12; }
-        .slot.complete .status-indicator { color: #2ecc71; }
-        .slot.error .status-indicator { color: #e74c3c; }
+        /* Status Colors for Slots */
+        .slot.running { background-color: #f1c40f; color: #fff; border-color: #f39c12; } 
+        .slot.complete { background-color: #2ecc71; color: #fff; border-color: #27ae60; } 
+        .slot.error { background-color: #e74c3c; color: #fff; border-color: #c0392b; } 
 
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>20-Slot Multi-Traffic Controller 🚀</h1>
+        <h1>High-Quality Traffic Booster ✨</h1>
         
         <div class="input-area">
             <div class="form-group" style="flex-grow: 3;">
                 <label for="mainUrl">🌐 Website URL:</label>
-                <input type="url" id="mainUrl" placeholder="https://yourwebsite.com" value="https://pooreyoutuber.github.io/website-booster.html" required>
+                <input type="url" id="mainUrl" placeholder="https://yourwebsite.com" required>
             </div>
             <div class="form-group" style="flex-grow: 1;">
                 <label for="refreshDelay">⏱️ View Duration (Sec):</label>
@@ -162,16 +147,17 @@
             <button id="submitBtn">Start 20 Slots</button>
         </div>
 
-        <div class="status-header">
-            <h3>Total Slots: <span id="completedCount">0</span> / 20 Completed</h3>
+        <div class="status-box">
+            <div class="status-line">
+                <span class="status-text">Total Loads Attempted: <span id="completedCount">0</span> / 20</span>
+                <span class="status-text" id="statusMessage">Ready to start.</span>
+            </div>
             <div class="progress-bar">
                 <div id="progressBarFill" class="progress-fill" style="width: 0%;">0%</div>
             </div>
         </div>
 
         <div id="message" style="text-align: center; margin-bottom: 15px; color: #e74c3c; font-weight: bold;"></div>
-        <div id="rate-limit-info" style="text-align: center; margin-bottom: 15px; color: #2980b9; font-size: 0.9em;">**Note:** All 20 slots run simultaneously. Failure means Proxy is likely dead.</div>
-
 
         <div id="slots-container">
             </div>
@@ -180,8 +166,7 @@
 
     <script>
         // ⭐ API URL HARDCODED HERE (YOUR RENDER URL) ⭐
-        // REPLACE THIS WITH YOUR ACTUAL RENDER URL
-        const API_URL_BASE = "https://pooreyoutuber-github-io.onrender.com"; 
+        const API_URL_BASE = "https://pooreyoutuber-github-io.onrender.com"; // CHANGE THIS
         const API_ENDPOINT = '/run-slot'; 
         const TOTAL_SLOTS = 20;
 
@@ -192,13 +177,13 @@
             slotsContainer: document.getElementById('slots-container'),
             completedCount: document.getElementById('completedCount'),
             progressBarFill: document.getElementById('progressBarFill'),
-            message: document.getElementById('message')
+            message: document.getElementById('message'),
+            statusMessage: document.getElementById('statusMessage')
         };
 
         const state = {
-            runningSlots: 0,
-            completedSlots: 0,
-            totalAttempted: 0
+            completedSlots: 0, // Successful loads
+            totalAttempted: 0, // Total attempts (Success + Error)
         };
         
         // --- 1. UI Initialization ---
@@ -208,37 +193,26 @@
                 const slot = document.createElement('div');
                 slot.id = `slot-${i}`;
                 slot.className = 'slot';
-                slot.innerHTML = `
-                    <div class="slot-title">Slot #${i}: <span class="status-indicator">READY</span></div>
-                    <div class="slot-status">Waiting for command...</div>
-                    <div class="slot-detail">Proxy: <span class="slot-proxy">N/A</span></div>
-                    <div class="slot-detail">UA (Gemini): <span class="slot-ua">N/A</span></div>
-                `;
+                slot.textContent = `#${i}: Ready`;
                 DOM.slotsContainer.appendChild(slot);
             }
         }
         
-        function updateProgressBar() {
-            const percentage = (state.completedSlots / TOTAL_SLOTS) * 100;
+        function updateStatusUI(statusText) {
             DOM.completedCount.textContent = state.totalAttempted;
+            const percentage = (state.totalAttempted / TOTAL_SLOTS) * 100;
             DOM.progressBarFill.style.width = `${percentage}%`;
             DOM.progressBarFill.textContent = `${Math.round(percentage)}%`;
+            DOM.statusMessage.textContent = statusText;
         }
 
-        // --- 2. Slot Execution Function (Runs Simultaneously) ---
+        // --- 2. Slot Execution Function ---
         async function runSingleSlot(slotId, url, durationMs) {
             const slotElement = document.getElementById(`slot-${slotId}`);
-            const titleElement = slotElement.querySelector('.slot-title');
-            const statusElement = slotElement.querySelector('.slot-status');
-            const proxyElement = slotElement.querySelector('.slot-proxy');
-            const uaElement = slotElement.querySelector('.slot-ua');
 
             slotElement.className = 'slot running';
-            titleElement.querySelector('.status-indicator').textContent = 'LAUNCHING...';
-            statusElement.textContent = 'Contacting backend (Proxy/UA generation)...';
+            slotElement.textContent = `#${slotId}: Running...`;
             
-            state.runningSlots++;
-
             try {
                 const response = await fetch(API_URL_BASE + API_ENDPOINT, {
                     method: 'POST',
@@ -246,37 +220,36 @@
                     body: JSON.stringify({
                         url: url,
                         duration: durationMs 
-                    })
+                    }),
+                    signal: AbortSignal.timeout(90000) // 90 seconds timeout for request
                 });
 
-                const data = await response.json();
                 state.totalAttempted++;
 
-                // Update details even if there's an error (to show proxy/UA used)
-                proxyElement.textContent = data.proxy || 'N/A';
-                uaElement.textContent = data.userAgent || 'N/A';
+                const data = await response.json();
                 
                 if (response.ok && data.status === 'success') {
                     slotElement.className = 'slot complete';
-                    titleElement.querySelector('.status-indicator').textContent = 'SUCCESS ✅';
-                    statusElement.textContent = `Load complete (${(durationMs / 1000)}s view).`;
+                    slotElement.textContent = `#${slotId}: SUCCESS ✅`;
                     state.completedSlots++;
                 } else {
-                    throw new Error(data.message || 'Server error occurred.');
+                    // Log details to console for troubleshooting, but keep UI clean
+                    console.error(`Slot #${slotId} Backend Error: ${data.message || 'Unknown server error.'}. Proxy: ${data.proxy || 'N/A'}. UA: ${data.userAgent || 'N/A'}`);
+                    throw new Error(data.message || 'Load failed.');
                 }
             } catch (error) {
+                // If the request fails (Network/Timeout) or backend returns error
                 slotElement.className = 'slot error';
-                titleElement.querySelector('.status-indicator').textContent = 'FAILED ❌';
-                statusElement.textContent = `Error: ${error.message.substring(0, 50)}...`;
+                slotElement.textContent = `#${slotId}: FAILED ❌`;
             } finally {
-                state.runningSlots--;
-                updateProgressBar();
+                // Check if all slots have finished (regardless of success/failure)
+                updateStatusUI(`Running: ${state.totalAttempted} / 20 attempts`);
 
-                // If all 20 slots have been attempted, re-enable button
                 if (state.totalAttempted === TOTAL_SLOTS) {
                     DOM.submitBtn.disabled = false;
                     DOM.submitBtn.textContent = 'Start 20 Slots (Restart)';
                     DOM.message.textContent = `Process Finished: ${state.completedSlots} successful loads out of ${TOTAL_SLOTS} attempted.`;
+                    updateStatusUI(`Finished. Success: ${state.completedSlots}`);
                 }
             }
         }
@@ -284,7 +257,7 @@
         // --- 3. Main Handler ---
         function handleSubmit() {
             const mainUrl = DOM.mainUrl.value.trim();
-            const refreshDelay = parseInt(DOM.refreshDelay.value); // Seconds
+            const refreshDelay = parseInt(DOM.refreshDelay.value); 
             const durationMs = refreshDelay * 1000;
 
             if (!mainUrl || !mainUrl.startsWith('http')) {
@@ -298,26 +271,27 @@
             
             // Reset State and UI
             state.completedSlots = 0;
-            state.runningSlots = 0;
             state.totalAttempted = 0;
-            updateProgressBar();
+            updateStatusUI('Starting all 20 slots...');
             DOM.message.textContent = '';
             DOM.submitBtn.disabled = true;
             DOM.submitBtn.textContent = 'Running 20 Slots...';
             
-            // Re-initialize UI slots to 'READY'
             generateSlotsUI();
             
             // Run all 20 slots SIMULTANEOUSLY
             for (let i = 1; i <= TOTAL_SLOTS; i++) {
-                runSingleSlot(i, mainUrl, durationMs);
+                // A small delay between each call can help prevent immediate resource saturation errors (like ETXTBSY)
+                setTimeout(() => {
+                    runSingleSlot(i, mainUrl, durationMs);
+                }, i * 50); // 50ms interval between starting calls
             }
         }
 
         // --- Initialization ---
         DOM.submitBtn.addEventListener('click', handleSubmit);
         generateSlotsUI();
-        updateProgressBar();
+        updateStatusUI('Ready to start.');
     </script>
 </body>
 </html>
