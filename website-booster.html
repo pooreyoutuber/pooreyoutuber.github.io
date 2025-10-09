@@ -5,8 +5,178 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>High-Quality Traffic Booster</title>
     <style>
-        /* (The professional CSS code from the previous response remains here) */
-        /* ... */
+        /* Base and Layout */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #eef2f7; 
+            color: #2c3e50; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 700px; 
+            width: 100%;
+            background: #ffffff; 
+            padding: 35px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); 
+            border-top: 5px solid #3498db;
+        }
+        h1 { 
+            text-align: center; 
+            color: #3498db; 
+            margin-bottom: 30px; 
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        
+        /* Form Elements */
+        .form-group { 
+            margin-bottom: 25px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #34495e;
+            font-size: 1.05em;
+        }
+        input[type="number"], input[type="url"] { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 1px solid #bdc3c7; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+        /* Page Allocation */
+        .page-entry-label { 
+            margin-top: 15px; 
+            font-size: 1.1em; 
+            color: #2980b9; 
+        }
+        #pages-container { 
+            border: 1px solid #ecf0f1; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+            background-color: #f8f9fa;
+        }
+        .page-entry { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 10px; 
+        }
+        .page-entry input[type="url"] { flex-grow: 3; }
+        .page-entry input[type="number"] { flex-grow: 1; max-width: 70px; text-align: center; padding: 10px; }
+        .add-btn, .remove-btn { 
+            padding: 8px 10px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: background-color 0.3s;
+        }
+        .add-btn { 
+            background-color: #2ecc71; 
+            color: white; 
+            margin-top: 5px; 
+        }
+        .add-btn:hover { background-color: #27ae60; }
+        .remove-btn { 
+            background-color: #e74c3c; 
+            color: white; 
+            font-size: 0.9em; 
+        }
+        .remove-btn:hover { background-color: #c0392b; }
+        
+        /* Submit Button */
+        #submitBtn { 
+            width: 100%; 
+            padding: 15px; 
+            background-color: #3498db; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1.2em; 
+            font-weight: 700;
+            cursor: pointer; 
+            transition: background-color 0.3s; 
+            margin-top: 30px; 
+        }
+        #submitBtn:hover:not(:disabled) { background-color: #2980b9; }
+        #submitBtn:disabled { background-color: #95a5a6; cursor: not-allowed; }
+
+        /* Status & Message */
+        .message-box { 
+            margin-top: 25px; 
+            padding: 18px; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-weight: 600; 
+            font-size: 1.1em;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        #status-area { 
+            margin-top: 35px; 
+            padding: 20px; 
+            border: 1px solid #3498db; 
+            border-radius: 10px; 
+            text-align: center; 
+            background-color: #f3f6ff;
+        }
+        #status-area h3 { 
+            color: #3498db; 
+            margin-top: 0; 
+            font-size: 1.4em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .status-line { 
+            font-size: 1.1em; 
+            margin: 12px 0; 
+            display: flex;
+            justify-content: space-between;
+        }
+        .status-label {
+            font-weight: 500;
+        }
+        .status-value { 
+            font-size: 1.3em; 
+            font-weight: 700; 
+            color: #2ecc71; 
+        }
+        .slot-info { 
+            font-size: 0.9em; 
+            color: #7f8c8d; 
+            margin-top: 15px; 
+            padding-top: 10px;
+            border-top: 1px dashed #bdc3c7;
+        }
+        
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .container { padding: 20px; border-radius: 0; }
+            .page-entry { flex-direction: column; align-items: stretch; }
+            .page-entry input { margin-bottom: 8px; }
+            .page-entry input[type="number"] { max-width: 100%; text-align: left; }
+            .status-line { flex-direction: column; align-items: flex-start; }
+            .status-value { margin-top: 5px; }
+        }
     </style>
 </head>
 <body>
@@ -98,8 +268,8 @@
                     throw new Error("❌ Total Views must be between 1 and 400.");
                 }
 
-                // 1. Collect Page Data: Main URL always gets 100% base
-                const pages = [{ url: mainUrl, percent: 100 }]; 
+                // 1. Collect Page Data
+                const pages = [{ url: mainUrl, percent: 100 }]; // Main URL base
                 const pageEntries = document.querySelectorAll('.page-entry');
 
                 pageEntries.forEach(entry => {
@@ -112,7 +282,7 @@
                         try {
                             const baseUrl = new URL(mainUrl).origin;
                             if (percent > 0) pages.push({ url: baseUrl + url, percent: percent });
-                        } catch (e) { } // Ignore invalid relative URL
+                        } catch (e) { } 
                     }
                 });
                 
@@ -144,7 +314,8 @@
                 }
 
             } catch (error) {
-                messageBox.textContent = `Error: ${error.message}`;
+                // This catches "Failed to fetch" (network/CORS) and server-side errors
+                messageBox.textContent = `Error: ${error.message}. Is your Render service awake and URL correct?`;
                 messageBox.classList.add('error');
             } finally {
                 messageBox.style.display = 'block';
@@ -163,4 +334,3 @@
     </script>
 </body>
 </html>
-
