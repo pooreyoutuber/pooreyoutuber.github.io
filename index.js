@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - STABILITY AND REAL USER SCROLL FIX)
+// index.js (FINAL CODE - OPTIMIZED FOR RENDER STABILITY AND REAL USER SCROLL)
 
 const express = require('express');
 const cors = require('cors'); 
@@ -25,7 +25,7 @@ const PUPPETEER_ARGS = [
     '--disable-dev-shm-usage', // Essential for Render
     '--user-data-dir=/tmp/user_data',
     '--ignore-certificate-errors',
-    ''
+    '--window-size=1920,1080' // Default viewport size
 ];
 
 // ⭐ PROXY LIST (Used for unique IP/Location)
@@ -166,7 +166,7 @@ app.post('/boost-real', async (req, res) => {
 });
 
 // ===================================================================
-// 4. SLOT RUNNER FUNCTION (Core Puppeteer Logic)
+// 4. SLOT RUNNER FUNCTION (Core Puppeteer Logic) - OPTIMIZED LAUNCH
 // ===================================================================
 async function runSlotTask(slotId, urlList) {
     const totalLoads = urlList.length;
@@ -175,6 +175,9 @@ async function runSlotTask(slotId, urlList) {
     const targetDuration = Math.random() * (MAX_TOTAL_MS - MIN_TOTAL_MS) + MIN_TOTAL_MS;
     const requiredFixedDelayPerLoad = Math.floor(targetDuration / totalLoads);
     
+    // Chromium executable path ko pehle hi fetch kar lete hain
+    const chromiumExecutable = await chromium.executablePath(); 
+
     for (let i = 0; i < totalLoads; i++) {
         const loadId = `${slotId}-${i + 1}`;
         const targetURL = urlList[i];
@@ -191,9 +194,10 @@ async function runSlotTask(slotId, urlList) {
                 `--proxy-server=${ipPort}` 
             ];
 
+            // ⭐ OPTIMIZED LAUNCH CONFIGURATION for Render Low Memory ⭐
             browser = await puppeteer.launch({
                 args: proxyArgs, 
-                executablePath: await chromium.executablePath(), 
+                executablePath: chromiumExecutable, // Path explicitly set for stability
                 headless: chromium.headless,
                 timeout: 60000, 
             });
@@ -207,32 +211,28 @@ async function runSlotTask(slotId, urlList) {
             
             // --- 3. Page Navigate (Load) ---
             await page.goto(targetURL, { 
-                waitUntil: 'networkidle2', // Wait for page to stop making connections
+                waitUntil: 'networkidle2', 
                 timeout: 90000 
             });
             
             // --- 4. Engagement (Scroll & Random Wait: 4s-7s) ---
             const engagementTime = Math.floor(Math.random() * (7000 - 4000) + 4000); 
-            
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for content load
+            await new Promise(resolve => setTimeout(resolve, 2000)); 
 
-            // SCROLL FIX
+            // SCROLL FIX: Real user-like scrolling
             const scrollHeight = await page.evaluate(() => {
-                // Correct way to get the full scrollable height
                 return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight); 
             });
             
             if (scrollHeight > 1000) { 
-                const scrollPercent = Math.random() * (0.95 - 0.5) + 0.5; // Scroll 50%-95%
+                const scrollPercent = Math.random() * (0.95 - 0.5) + 0.5; 
                 const targetScroll = Math.min(scrollHeight * scrollPercent, scrollHeight - 100);
                 
                 await page.evaluate((targetScroll) => {
                     window.scrollTo({ top: targetScroll, behavior: 'smooth' });
                 }, targetScroll);
 
-                await new Promise(resolve => setTimeout(resolve, 500)); // Wait for scroll animation
-            } else {
-                 console.log(`[Load ${loadId}] WARNING: Low scroll height (${scrollHeight}).`);
+                await new Promise(resolve => setTimeout(resolve, 500)); 
             }
 
             await new Promise(resolve => setTimeout(resolve, engagementTime)); 
@@ -243,7 +243,12 @@ async function runSlotTask(slotId, urlList) {
             console.error(`[Load ${loadId}] FAILURE ❌ | Error: ${pageError.message.substring(0, 100)}...`);
         } finally {
             if (browser) {
-                await browser.close();
+                // Browser ko gracefully close karein, taaki memory release ho
+                try {
+                    await browser.close();
+                } catch(e) {
+                    console.error(`[Load ${loadId}] WARNING: Error closing browser: ${e.message}`);
+                }
             }
         }
         
