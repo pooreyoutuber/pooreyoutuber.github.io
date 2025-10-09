@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - OPTIMIZED FOR RENDER STABILITY AND REAL USER SCROLL)
+// index.js (FINAL CODE - SEQUENTIAL MODE FOR RENDER STABILITY)
 
 const express = require('express');
 const cors = require('cors'); 
@@ -25,7 +25,7 @@ const PUPPETEER_ARGS = [
     '--disable-dev-shm-usage', // Essential for Render
     '--user-data-dir=/tmp/user_data',
     '--ignore-certificate-errors',
-    '--window-size=1920,1080' // Default viewport size
+    '--window-size=1920,1080'
 ];
 
 // ⭐ PROXY LIST (Used for unique IP/Location)
@@ -114,7 +114,7 @@ const MIN_TOTAL_MS = 24 * 60 * 60 * 1000;
 const MAX_TOTAL_MS = 48 * 60 * 60 * 1000; 
 
 // ===================================================================
-// 3. REAL USER DIRECT TRAFFIC ENDPOINT: /boost-real
+// 3. REAL USER DIRECT TRAFFIC ENDPOINT: /boost-real - SEQUENTIAL MODE
 // ===================================================================
 app.post('/boost-real', async (req, res) => {
     
@@ -145,23 +145,24 @@ app.post('/boost-real', async (req, res) => {
     
     res.json({ 
         status: 'accepted', 
-        message: `✅ Aapki ${finalUrlPlan.length} Real User Page Loads ki request sweekar kar li gayi hai. Traffic 24-48 ghanton mein poora hoga.`,
+        message: `✅ Aapki ${finalUrlPlan.length} Real User Page Loads ki request sweekar kar li gayi hai. Traffic 24-48 ghanton mein poora hoga. (Sequential Mode: Optimized for Render)`,
         total_loads: finalUrlPlan.length,
         slots: totalSlots
     });
 
+    // ⭐ SEQUENTIAL EXECUTION LOGIC: Slots will run one after the other.
     (async () => {
-        const slotTasks = [];
         let startIndex = 0;
         for(let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
             const loadsForSlot = finalUrlPlan.slice(startIndex, startIndex + loadsPerSlot);
             startIndex += loadsForSlot.length;
+            
             if (loadsForSlot.length > 0) {
-                slotTasks.push(runSlotTask(slotIndex + 1, loadsForSlot));
+                // Har slot ko sequentially chalao (wait for each slot to finish)
+                await runSlotTask(slotIndex + 1, loadsForSlot);
             }
         }
-        await Promise.allSettled(slotTasks);
-        console.log(`[BOOSTER FINISH] All sessions attempted.`);
+        console.log(`[BOOSTER FINISH] All sessions attempted sequentially.`);
     })();
 });
 
@@ -267,3 +268,4 @@ async function runSlotTask(slotId, urlList) {
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
+            
