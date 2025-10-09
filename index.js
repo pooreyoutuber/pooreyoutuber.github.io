@@ -1,4 +1,4 @@
-// index.js (FINAL CODE: SIMULTANEOUS, PROXY, GEMINI UA)
+// index.js (FINAL CODE: OPTIMIZED FOR RENDER, PROXY, GEMINI UA)
 
 const express = require('express');
 const cors = require('cors'); 
@@ -11,17 +11,19 @@ const PORT = process.env.PORT || 10000;
 
 // --- 1. CONFIGURATION & UTILITIES ---
 
-// ** Puppeteer Args **
+// ** Puppeteer Args - Optimized for low-resource environments (Render Free Tier) **
 const PUPPETEER_ARGS = [
     '--disable-gpu',
     '--disable-setuid-sandbox',
     '--no-sandbox', 
     '--single-process', 
     '--no-zygote',
-    '--disable-dev-shm-usage', 
+    '--disable-dev-shm-usage', // Critical for Render
+    '--shm-size=128mb', // Explicitly setting a smaller shared memory size
     '--user-data-dir=/tmp/user_data',
     '--ignore-certificate-errors',
-    '--window-size=1920,1080'
+    '--window-size=1920,1080',
+    '--disable-web-security' // Sometimes helps with navigation
 ];
 
 // ⭐ GEMINI SETUP: Key from Environment Variables (Render)
@@ -31,6 +33,7 @@ if (GEMINI_API_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
     console.log("Gemini API initialized for generating unique User Agents.");
 } else {
+    // If key is missing, logs a warning and uses fallback UAs
     console.warn("WARNING: GEMINI_API_KEY not found. Using a small hardcoded User Agent list.");
 }
 
@@ -56,7 +59,6 @@ const PROXY_LIST = [
     "http://103.111.168.132:3128", "http://103.111.168.133:3128", "http://103.111.168.134:3128"
 ];
 
-// Fallback User Agents if Gemini fails or Key is missing
 const FALLBACK_USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
@@ -68,9 +70,6 @@ function getRandomProxy() {
     return PROXY_LIST[Math.floor(Math.random() * PROXY_LIST.length)];
 }
 
-/**
- * Generates a realistic User Agent string using Gemini API or falls back.
- */
 async function getRandomUserAgent() {
     if (!ai) {
         return FALLBACK_USER_AGENTS[Math.floor(Math.random() * FALLBACK_USER_AGENTS.length)];
@@ -94,7 +93,7 @@ async function getRandomUserAgent() {
         }
 
     } catch (error) {
-        console.error("Gemini UA generation failed, falling back:", error.message.substring(0, 50));
+        console.error(`Gemini UA generation failed, falling back: ${error.message.substring(0, 50)}...`);
         return FALLBACK_USER_AGENTS[Math.floor(Math.random() * FALLBACK_USER_AGENTS.length)];
     }
 }
@@ -134,7 +133,6 @@ app.post('/run-slot', async (req, res) => {
     let proxyUsed = '';
     let userAgentUsed = '';
 
-    // Check input validity
     if (!targetURL || !targetURL.startsWith('http')) {
         return res.status(400).json({ status: 'error', message: 'Invalid URL provided.' });
     }
@@ -160,7 +158,7 @@ app.post('/run-slot', async (req, res) => {
             args: proxyArgs, 
             executablePath: chromiumExecutable, 
             headless: chromium.headless,
-            timeout: 30000, 
+            timeout: 35000, // Increased launch timeout slightly
         });
         
         let page = await browser.newPage();
@@ -198,7 +196,6 @@ app.post('/run-slot', async (req, res) => {
 
                 await new Promise(resolve => setTimeout(resolve, scrollDelay)); 
             } else {
-                // If the page is short, wait the remaining time
                 await new Promise(resolve => setTimeout(resolve, totalEngagementTime - (scrollDelay * s)));
                 break;
             }
@@ -207,12 +204,16 @@ app.post('/run-slot', async (req, res) => {
         res.json({ 
             status: 'success', 
             message: `View complete for ${targetURL}`,
-            proxy: proxyUsed,
-            userAgent: userAgentUsed 
+            proxy: proxyUsed, // Sent back but NOT displayed on Frontend
+            userAgent: userAgentUsed // Sent back but NOT displayed on Frontend
         });
 
     } catch (pageError) {
-        console.error(`[SLOT ERROR] Proxy: ${proxyUsed}. Error: ${pageError.message.substring(0, 100)}...`);
+        if (pageError.message.includes('ETXTBSY')) {
+            console.error(`[CRITICAL ERROR]: Spawn ETXTBSY. Too many simultaneous processes. This is a Render resource issue.`);
+        } else {
+            console.error(`[SLOT ERROR] Proxy: ${proxyUsed}. Error: ${pageError.message.substring(0, 100)}...`);
+        }
         
         res.status(500).json({ 
             status: 'error', 
@@ -224,6 +225,7 @@ app.post('/run-slot', async (req, res) => {
     } finally {
         if (browser) {
             try {
+                // IMPORTANT: Close the browser to free up resources immediately
                 await browser.close();
             } catch(e) {
                 console.error(`[CLEANUP WARNING]: Error closing browser: ${e.message}`);
