@@ -1,4 +1,4 @@
-// index.js (FINAL CODE: OPTIMIZED SCROLL AND 8-SLOT STABILITY)
+// index.js (FINAL CODE: PROXY REMOVED FOR STABILITY)
 
 const express = require('express');
 const cors = require('cors'); 
@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 10000;
 
 // --- 1. CONFIGURATION & UTILITIES ---
 
-// ** Puppeteer Args - Optimized for low-resource environments (Render Free Tier) **
+// ** Puppeteer Args - Optimized for stability **
 const PUPPETEER_ARGS = [
     '--disable-gpu',
     '--disable-setuid-sandbox',
@@ -24,6 +24,7 @@ const PUPPETEER_ARGS = [
     '--ignore-certificate-errors',
     '--window-size=1920,1080',
     '--disable-web-security' 
+    // PROXY ARGUMENTS REMOVED HERE
 ];
 
 // ⭐ GEMINI SETUP: Key from Environment Variables (Render)
@@ -35,27 +36,7 @@ if (GEMINI_API_KEY) {
     console.warn("WARNING: GEMINI_API_KEY not found. Using a small hardcoded User Agent list.");
 }
 
-// ⭐ PROXY LIST (Used for unique IP/Location) ⭐
-// (Proxy list remains the same for diversity)
-const PROXY_LIST = [
-    "http://143.244.52.174:8080", "http://157.245.244.92:3128", "http://143.244.52.173:8080", 
-    "http://143.244.52.175:8080", "http://167.99.129.215:3128", "http://143.244.52.176:8080", 
-    "http://137.184.184.237:3128", "http://143.244.52.177:8080", "http://137.184.183.197:3128",
-    "http://137.184.183.199:3128", "http://165.22.92.203:3128", "http://157.245.242.172:3128",
-    "http://137.184.183.196:3128", "http://137.184.183.198:3128", "http://157.245.242.173:3128",
-    "http://45.3.44.176:3129", "http://104.207.60.243:3129", "http://216.26.253.178:3129", 
-    "http://154.213.166.61:3129", "http://45.3.45.87:3129", "http://104.207.63.195:3129", 
-    "http://104.207.61.3:3129", "http://103.111.168.106:3128", "http://103.111.168.108:3128",
-    "http://103.111.168.107:3128", "http://103.111.168.109:3128", "http://103.111.168.110:3128",
-    "http://103.111.168.111:3128", "http://103.111.168.112:3128", "http://103.111.168.113:3128",
-    "http://103.111.168.114:3128", "http://103.111.168.115:3128", "http://103.111.168.116:3128",
-    "http://103.111.168.117:3128", "http://103.111.168.118:3128", "http://103.111.168.119:3128",
-    "http://103.111.168.120:3128", "http://103.111.168.121:3128", "http://103.111.168.122:3128",
-    "http://103.111.168.123:3128", "http://103.111.168.124:3128", "http://103.111.168.125:3128",
-    "http://103.111.168.126:3128", "http://103.111.168.127:3128", "http://103.111.168.128:3128",
-    "http://103.111.168.129:3128", "http://103.111.168.130:3128", "http://103.111.168.131:3128",
-    "http://103.111.168.132:3128", "http://103.111.168.133:3128", "http://103.111.168.134:3128"
-];
+// ⭐ PROXY LIST REMOVED - Using Render's own IP for stability.
 
 const FALLBACK_USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -63,10 +44,7 @@ const FALLBACK_USER_AGENTS = [
     'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
 ]; 
 
-function getRandomProxy() {
-    if (PROXY_LIST.length === 0) return null;
-    return PROXY_LIST[Math.floor(Math.random() * PROXY_LIST.length)];
-}
+// getRandomProxy function removed
 
 async function getRandomUserAgent() {
     if (!ai) {
@@ -122,7 +100,6 @@ app.post('/run-slot', async (req, res) => {
     const targetURL = req.body.url;
     const durationMs = parseInt(req.body.duration) || 9000; 
     let browser = null;
-    let proxyUsed = '';
     let userAgentUsed = '';
 
     if (!targetURL || !targetURL.startsWith('http')) {
@@ -130,24 +107,14 @@ app.post('/run-slot', async (req, res) => {
     }
 
     try {
-        // --- 1. Get Proxy/UA ---
-        const proxyUrl = getRandomProxy();
-        if (!proxyUrl) throw new Error('Proxy list is empty.');
-        
-        proxyUsed = proxyUrl;
+        // --- 1. Get UA ---
         userAgentUsed = await getRandomUserAgent(); 
-
-        const ipPort = proxyUrl.replace('http://', ''); 
-        const proxyArgs = [
-            ...PUPPETEER_ARGS,
-            `--proxy-server=${ipPort}` 
-        ];
 
         const chromiumExecutable = await chromium.executablePath(); 
 
-        // --- 2. Launch Browser ---
+        // --- 2. Launch Browser (WITHOUT PROXY) ---
         browser = await puppeteer.launch({
-            args: proxyArgs, 
+            args: PUPPETEER_ARGS, // Now only includes stability arguments
             executablePath: chromiumExecutable, 
             headless: chromium.headless,
             timeout: 35000, 
@@ -165,12 +132,11 @@ app.post('/run-slot', async (req, res) => {
             timeout: 60000 
         });
         
-        // --- 4. Engagement (Improved Scroll Logic) ---
+        // --- 4. Engagement (Improved Scroll Logic - UNCHANGED) ---
         const totalEngagementTime = durationMs; 
-        const scrollPoints = 3; // Scroll 3 times (Top -> Middle -> Bottom or similar)
+        const scrollPoints = 3; 
         const scrollDelay = Math.floor(totalEngagementTime / scrollPoints); 
         
-        // Get the total scroll height of the page
         const scrollHeight = await page.evaluate(() => {
             return Math.max(
                 document.body ? document.body.scrollHeight : 0, 
@@ -200,28 +166,27 @@ app.post('/run-slot', async (req, res) => {
             await new Promise(resolve => setTimeout(resolve, scrollDelay)); 
 
         } else {
-            // If the page is short, just wait the full duration
             await new Promise(resolve => setTimeout(resolve, totalEngagementTime));
         }
         
         res.json({ 
             status: 'success', 
             message: `View complete for ${targetURL}`,
-            proxy: proxyUsed,
+            proxy: 'N/A (Direct Load)', // Proxy information removed
             userAgent: userAgentUsed 
         });
 
     } catch (pageError) {
         if (pageError.message.includes('ETXTBSY')) {
-            console.error(`[CRITICAL ERROR]: Spawn ETXTBSY. Render resource issue. (Proxy: ${proxyUsed})`);
+            console.error(`[CRITICAL ERROR]: Spawn ETXTBSY. Render resource issue. (Direct Load)`);
         } else {
-            console.error(`[SLOT ERROR] Proxy: ${proxyUsed}. Error: ${pageError.message.substring(0, 100)}...`);
+            console.error(`[SLOT ERROR] Error: ${pageError.message.substring(0, 100)}...`);
         }
         
         res.status(500).json({ 
             status: 'error', 
             message: `Load Failed: ${pageError.message.substring(0, 50)}`,
-            proxy: proxyUsed || 'N/A',
+            proxy: 'N/A (Direct Load)',
             userAgent: userAgentUsed || 'N/A (Error)'
         });
         
