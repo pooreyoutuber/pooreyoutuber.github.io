@@ -1,327 +1,77 @@
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PooreYouTuber AI Insta Caption Tool</title>
+    <title>3. AI Instagram Caption Generator</title>
     <style>
-        /* Instagram-Inspired Colors */
-        :root {
-            --insta-purple: #C13584;
-            --insta-pink: #E1306C;
-            --insta-blue: #405DE6;
-            --primary-color: var(--insta-pink);
-            --secondary-color: var(--insta-purple);
-            --background-light: #fafafa;
-            --card-bg: #fff;
-        }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--background-light); 
-            color: #1c1e21; 
-            margin: 0; 
-            padding: 20px 0; 
-        }
-        .container { 
-            max-width: 650px; 
-            margin: auto; 
-            background: var(--card-bg); 
-            padding: 25px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-        }
-        h1 { 
-            text-align: center; 
-            color: var(--insta-purple); 
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        .tabs { 
-            display: flex; 
-            border-bottom: 3px solid var(--insta-purple); 
-            margin-bottom: 20px; 
-        }
-        .tab-button { 
-            flex-grow: 1;
-            padding: 12px 15px; 
-            cursor: pointer; 
-            border: none; 
-            background: #f0f0f0; 
-            border-radius: 8px 8px 0 0; 
-            margin-right: 2px;
-            font-weight: bold;
-            transition: background 0.3s, color 0.3s;
-        }
-        .tab-button.active { 
-            background: var(--insta-pink); 
-            color: white; 
-            border-bottom: 3px solid var(--insta-pink);
-        }
-        label { 
-            display: block; 
-            margin-top: 15px; 
-            font-weight: 600; 
-            color: #333;
-        }
-        input[type="text"], select, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            margin-top: 8px; 
-            border: 1px solid #ccc; 
-            border-radius: 6px; 
-            box-sizing: border-box; 
-            font-size: 14px;
-        }
-        button[type="submit"] { 
-            background: linear-gradient(45deg, var(--insta-purple), var(--insta-pink));
-            color: white; 
-            padding: 14px 20px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 16px; 
-            margin-top: 25px; 
-            width: 100%; 
-            transition: opacity 0.3s;
-        }
-        button[type="submit"]:hover { 
-            opacity: 0.9; 
-        }
-        .loading { 
-            text-align: center; 
-            color: var(--primary-color); 
-            margin-top: 15px; 
-            display: none; 
-            font-weight: bold;
-        }
-        .results-box { 
-            margin-top: 25px; 
-            padding: 15px; 
-            background: #ffe3e3; 
-            border: 1px solid var(--insta-pink); 
-            border-radius: 8px; 
-        }
-        .caption-item { 
-            background: var(--card-bg); 
-            padding: 12px; 
-            border: 1px solid #eee; 
-            border-radius: 6px; 
-            margin-bottom: 15px; 
-            white-space: pre-wrap; 
-            word-wrap: break-word; 
-            position: relative;
-        }
-        .copy-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: var(--insta-blue);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        .copy-btn:hover {
-            opacity: 1;
-        }
-        .copied-msg {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
+        /* ... (Simple CSS for a clean form goes here) ... */
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>✨ AI Insta Caption Creator</h1>
-
-    <div class="tabs">
-        <button class="tab-button active" onclick="showTab('generate')">Caption Generate</button>
-        <button class="tab-button" onclick="showTab('edit')">Caption Edit</button>
-    </div>
-
-    <div id="generate" class="tab-content">
-        <form id="generateForm">
-            <label for="reelTitle">Reel Topic/Title:</label>
-            <input type="text" id="reelTitle" placeholder="e.g., How to fix WordPress error 404" required>
-
-            <label for="style">Caption Style:</label>
-            <select id="style">
-                <option value="Catchy and Funny">Catchy and Funny (Recommended)</option>
-                <option value="Motivational and Inspiring">Motivational and Inspiring</option>
-                <option value="Detailed and Informative">Detailed and Informative</option>
-                <option value="Sarcastic and Witty">Sarcastic and Witty</option>
-            </select>
-
-            <button type="submit">Generate 10 Viral Captions</button>
+    <div class="container">
+        <h1>✨ AI Instagram Caption Generator</h1>
+        
+        <form id="caption-form">
+            <div class="form-group">
+                <label for="topic">Topic / Photo Description:</label>
+                <input type="text" id="topic" placeholder="e.g., A funny video about a cat" required>
+            </div>
+            <div class="form-group">
+                <label for="style">Caption Style:</label>
+                <input type="text" id="style" placeholder="e.g., Humorous and short, or Motivational and long" required>
+            </div>
+            <button type="submit" id="generateBtn">Generate Captions</button>
         </form>
-        <div id="generateLoading" class="loading">Generating... Please wait while the AI crafts your captions.</div>
-        <div id="generateResults" class="results-box"></div>
+
+        <div id="results" style="margin-top: 30px;">
+            <h2>Generated Captions:</h2>
+            <pre id="caption-output" style="white-space: pre-wrap; padding: 15px; background: #eee; border-radius: 8px;">Click 'Generate Captions' to see results here.</pre>
+        </div>
     </div>
 
-    <div id="edit" class="tab-content" style="display:none;">
-        <form id="editForm">
-            <label for="originalCaption">Original Caption & Hashtags:</label>
-            <textarea id="originalCaption" rows="5" placeholder="Paste the caption you want to edit here..." required></textarea>
+    <script>
+        // ⭐ API URL for Caption Tool ⭐
+        const API_URL_CAPTION = "https://pooreyoutuber-github-io.onrender.com/api/caption"; 
+        const captionForm = document.getElementById('caption-form');
+        const captionOutput = document.getElementById('caption-output');
+        const generateBtn = document.getElementById('generateBtn');
 
-            <label for="requestedChange">Requested Change:</label>
-            <input type="text" id="requestedChange" placeholder="e.g., Make it shorter and add an emoji, or Change the tone to professional" required>
+        captionForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const topic = document.getElementById('topic').value.trim();
+            const style = document.getElementById('style').value.trim();
 
-            <button type="submit">Revise and Edit Caption</button>
-        </form>
-        <div id="editLoading" class="loading">Revising... AI is updating your caption.</div>
-        <div id="editResults" class="results-box"></div>
-    </div>
+            if (!topic || !style) {
+                alert('Please enter both Topic and Style.');
+                return;
+            }
 
-</div>
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating... Please wait.';
+            captionOutput.textContent = 'Processing request...';
 
-<div id="copiedMessage" class="copied-msg">✅ Copied to clipboard!</div>
-
-
-<script>
-    // --- IMPORTANT: RENDER API URL ---
-    const BASE_API_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
-    const GENERATE_ENDPOINT = `${BASE_API_URL}/api/caption-generate`;
-    const EDIT_ENDPOINT = `${BASE_API_URL}/api/caption-edit`;
-
-
-    // --- UTILITY FUNCTIONS ---
-    function showCopiedMessage() {
-        const msg = document.getElementById('copiedMessage');
-        msg.style.display = 'block';
-        setTimeout(() => { msg.style.display = 'none'; }, 1500);
-    }
-
-    function copyContent(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            showCopiedMessage();
-        }).catch(err => {
-            console.error('Could not copy text: ', err);
-            alert('Failed to copy. Please copy manually.');
-        });
-    }
-
-    // --- TAB SWITCHING LOGIC ---
-    function showTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(tab => { tab.style.display = 'none'; });
-        document.querySelectorAll('.tab-button').forEach(btn => { btn.classList.remove('active'); });
-
-        document.getElementById(tabId).style.display = 'block';
-        document.querySelector(`.tab-button[onclick*='${tabId}']`).classList.add('active');
-    }
-    showTab('generate');
-
-    // --- 1. CAPTION GENERATION LOGIC ---
-    document.getElementById('generateForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const reelTitle = document.getElementById('reelTitle').value;
-        const style = document.getElementById('style').value;
-        const resultsDiv = document.getElementById('generateResults');
-        const loadingDiv = document.getElementById('generateLoading');
-
-        resultsDiv.innerHTML = '';
-        loadingDiv.style.display = 'block';
-
-        try {
-            const response = await fetch(GENERATE_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reelTitle, style })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.captions) {
-                let html = '<h3>Generated Captions:</h3>';
-                data.captions.forEach((item, index) => {
-                    html += `
-                        <div class="caption-item" id="caption-${index}">
-                            ${item.caption}
-                            <button class="copy-btn" onclick="copyCaption(${index})">Copy</button>
-                        </div>
-                    `;
+            try {
+                const response = await fetch(API_URL_CAPTION, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic, style })
                 });
-                resultsDiv.innerHTML = html;
-            } else {
-                resultsDiv.innerHTML = `<p style="color: var(--insta-pink);">Error: ${data.error || 'Could not generate captions. Check server logs.'}</p>`;
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    captionOutput.textContent = result.caption;
+                } else {
+                    captionOutput.textContent = `Error: ${result.message || 'Server did not return a valid caption.'}`;
+                }
+            } catch (error) {
+                captionOutput.textContent = `Network Error: Could not connect to the API.`;
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Captions';
             }
-        } catch (error) {
-            resultsDiv.innerHTML = `<p style="color: var(--insta-pink);">Network Error: The API server might be sleeping or unreachable. Please try again or check the Render logs.</p>`;
-        } finally {
-            loadingDiv.style.display = 'none';
-        }
-    });
-    
-    window.copyCaption = function(index) {
-        const itemDiv = document.getElementById(`caption-${index}`);
-        const button = itemDiv.querySelector('.copy-btn');
-        const textToCopy = itemDiv.textContent.replace(button.textContent, '').trim(); 
-        copyContent(textToCopy);
-    };
-
-
-    // --- 2. CAPTION EDITING LOGIC ---
-    document.getElementById('editForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const originalCaption = document.getElementById('originalCaption').value;
-        const requestedChange = document.getElementById('requestedChange').value;
-        const resultsDiv = document.getElementById('editResults');
-        const loadingDiv = document.getElementById('editLoading');
-
-        resultsDiv.innerHTML = '';
-        loadingDiv.style.display = 'block';
-
-        try {
-            const response = await fetch(EDIT_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ originalCaption, requestedChange })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.editedCaption) {
-                let html = '<h3>Edited Caption:</h3>';
-                const editedText = data.editedCaption;
-                
-                html += `
-                    <div class="caption-item" id="edited-result">
-                        ${editedText}
-                        <button class="copy-btn" onclick="copyEdited()">Copy</button>
-                    </div>
-                `;
-                resultsDiv.innerHTML = html;
-            } else {
-                resultsDiv.innerHTML = `<p style="color: var(--insta-pink);">Error: ${data.error || 'Could not edit caption. Check server logs.'}</p>`;
-            }
-        } catch (error) {
-            resultsDiv.innerHTML = `<p style="color: var(--insta-pink);">Network Error: The API server might be sleeping or unreachable. Please try again or check the Render logs.</p>`;
-        } finally {
-            loadingDiv.style.display = 'none';
-        }
-    });
-
-    window.copyEdited = function() {
-        const itemDiv = document.getElementById('edited-result');
-        const button = itemDiv.querySelector('.copy-btn');
-        const textToCopy = itemDiv.textContent.replace(button.textContent, '').trim(); 
-        copyContent(textToCopy);
-    };
-
-</script>
+        });
+    </script>
 </body>
 </html>
