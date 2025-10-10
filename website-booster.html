@@ -1,4 +1,4 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -165,13 +165,14 @@
     </div>
 
     <script>
-        // ⭐ API URL HARDCODED HERE (YOUR RENDER URL) ⭐
-        const API_URL_BASE = "https://nodejs-sutharmanish404.replit.app"; // CHANGE THIS
+        // ⭐ API URL HARDCODED HERE (YOUR REPLIT URL) ⭐
+        // THIS IS THE CORRECT URL BASED ON YOUR LATEST SUCCESSFUL REPLIT LOG:
+        const API_URL_BASE = "https://nodejs-sutharmanish404.replit.app"; 
         const API_ENDPOINT = '/run-slot'; 
         
         // --- CONFIGURATION ---
-        const TOTAL_SLOTS = 8; // Slot count set to 8
-        const REFRESH_INTERVAL_SEC = 10; // Auto-refresh delay after 8 slots finish
+        const TOTAL_SLOTS = 8; 
+        const REFRESH_INTERVAL_SEC = 10; 
         // ---------------------
 
         const DOM = {
@@ -189,7 +190,7 @@
         const state = {
             completedSlots: 0, 
             totalAttempted: 0, 
-            currentLoop: 0, // Loop counter
+            currentLoop: 0, 
             isLooping: false,
             url: '',
             durationMs: 0
@@ -225,6 +226,7 @@
             slotElement.textContent = `#${slotId}: Running...`;
             
             try {
+                // Fetch call to your Replit API
                 const response = await fetch(API_URL_BASE + API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -232,24 +234,42 @@
                         url: url,
                         duration: durationMs 
                     }),
+                    // 90s timeout for Replit response
                     signal: AbortSignal.timeout(90000) 
                 });
 
                 state.totalAttempted++;
 
+                // Check if the server is down or returns a non-JSON error
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`HTTP Error ${response.status}: ${errorText.substring(0, 100)}...`);
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
-                if (response.ok && data.status === 'success') {
+                if (data.status === 'success') {
                     slotElement.className = 'slot complete';
                     slotElement.textContent = `#${slotId}: SUCCESS ✅`;
                     state.completedSlots++;
                 } else {
-                    console.error(`Slot #${slotId} Backend Error: ${data.message || 'Unknown server error.'}. Proxy: ${data.proxy || 'N/A'}. UA: ${data.userAgent || 'N/A'}`);
+                    console.error(`Slot #${slotId} Backend Error: ${data.message || 'Unknown server error.'}. UA: ${data.userAgent || 'N/A'}`);
                     throw new Error(data.message || 'Load failed.');
                 }
             } catch (error) {
                 slotElement.className = 'slot error';
-                slotElement.textContent = `#${slotId}: FAILED ❌`;
+                // Display a shorter, user-friendly error
+                let errorMsg;
+                if (error.name === 'AbortError') {
+                    errorMsg = 'TIMEOUT ⏱️';
+                } else if (error.message.includes('Server returned status 5')) {
+                    errorMsg = 'SERVER ERROR 5XX';
+                } else {
+                    errorMsg = 'FAILED ❌';
+                }
+                slotElement.textContent = `#${slotId}: ${errorMsg}`;
+                console.error(`Slot #${slotId} Frontend Catch:`, error.message);
             } finally {
                 updateStatusUI(`Running: ${state.totalAttempted} / ${TOTAL_SLOTS} attempts`);
 
@@ -290,7 +310,7 @@
             for (let i = 1; i <= TOTAL_SLOTS; i++) {
                 setTimeout(() => {
                     runSingleSlot(i, state.url, state.durationMs);
-                }, i * 150); // Increased delay for Render stability
+                }, i * 250); // Increased delay for stability
             }
         }
 
