@@ -4,22 +4,20 @@ const express = require('express');
 const cors = require('cors'); 
 const puppeteer = require('puppeteer-core'); 
 const { GoogleGenAI } = require('@google/genai'); 
+const { createRequire } = require('module');
+const customRequire = createRequire(__filename);
 
 // --- CONFIGURATION ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
+const PORT = process.env.PORT || 10000; // RENDER DEFAULT PORT
+const MAX_CONCURRENT_SLOTS = 2; 
+const DELAY_BETWEEN_VIEWS_MS = 1000; 
 
-// RENDER DEFAULT PORT: Render aksar 10000 use karta hai
-const PORT = process.env.PORT || 10000; 
-
-const MAX_CONCURRENT_SLOTS = 2; // Sirf 2 Slots Parallel
-const DELAY_BETWEEN_VIEWS_MS = 1000; // Parallel hone ke kaaran delay kam kar diya gaya hai
-
-// --- PROXY CONFIGURATION (Aapki requirement ke hisaab se) ---
+// ⭐ PROXY LIST - APNE PROXY YAHAN DAALEIN ⭐
 const PROXY_LIST = [
-    null, // Slot 1: Direct connection
-    // 'http://your.proxy.com:8080', // Slot 2: Proxy 1
-    // 'http://another.proxy.com:8080' // Slot 3 (Agar aap max slots badhate hain)
-    // PROXIES ADD KAREIN
+    null, // Slot 1: Direct connection (ya koi proxy)
+    // 'http://user:pass@ip:port', 
+    // 'http://another.proxy.com:8080' 
 ]; 
 
 // Puppeteer arguments (CRITICAL FIX for environment)
@@ -100,7 +98,7 @@ async function runSlot(taskItem) {
     console.log(`[SLOT ${activeSlots}/${MAX_CONCURRENT_SLOTS}] Launching view ${viewIndex + 1}...`);
 
     try {
-        // Render needs this specific executable path for puppeteer-core
+        // RENDER FIX: Puppeteer ko chrome binary ka path chahiye
         browser = await puppeteer.launch({
             args: launchArgs, 
             headless: true, 
@@ -135,7 +133,6 @@ async function runSlot(taskItem) {
         if (browser) await browser.close();
         activeSlots--;
         console.log(`[SLOT] View ${viewIndex + 1} finished. Active slots: ${activeSlots}`);
-        // Slot complete, check queue again after a short delay
         setTimeout(processQueue, 100); 
     }
 }
@@ -165,7 +162,6 @@ app.post('/submit-task', async (req, res) => {
 
     const durationMs = duration * 1000;
     
-    // Total views ko alag-alag task items mein tod dein
     for (let i = 0; i < totalViews; i++) {
         requestQueue.push({ 
             url, 
@@ -176,9 +172,8 @@ app.post('/submit-task', async (req, res) => {
 
     processQueue();
     
-    // Estimated time calculation
     const viewsPerSlot = Math.ceil(totalViews / MAX_CONCURRENT_SLOTS);
-    const totalTimeEstimate = viewsPerSlot * (durationMs + 5000); // 5s buffer
+    const totalTimeEstimate = viewsPerSlot * (durationMs + 5000); 
 
     res.json({
         status: 'queued',
