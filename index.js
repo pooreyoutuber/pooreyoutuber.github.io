@@ -1,33 +1,18 @@
-// index.js (Final 2-Slot Concurrent System for Render)
+// index.js (Backend: Proxy/UA Provider for Frontend)
 
 const express = require('express');
 const cors = require('cors'); 
-const puppeteer = require('puppeteer-core'); 
 const { GoogleGenAI } = require('@google/genai'); 
 
 // --- CONFIGURATION ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 const PORT = process.env.PORT || 10000; // RENDER DEFAULT PORT
-const MAX_CONCURRENT_SLOTS = 2; 
-const DELAY_BETWEEN_VIEWS_MS = 1000; 
 
-// ⭐ PROXY LIST - APNE PROXY YAHAN DAALEIN ⭐
+// ⭐ PROXY LIST (Frontend mein direct proxy apply karna mushkil hai, yeh sirf jankari ke liye hai) ⭐
 const PROXY_LIST = [
-    null, // Slot 1: Direct connection 
-    // 'http://user:pass@ip:port', 
+    null, // Direct connection (Default)
+    // Aap yahan HTTPS proxies daal sakte hain, lekin unhe browser extension se hi apply karna padega.
 ]; 
-
-// Puppeteer arguments (CRITICAL FIX for environment)
-const PUPPETEER_ARGS = [
-    '--no-sandbox', 
-    '--disable-setuid-sandbox',
-    '--disable-gpu',
-    '--disable-dev-shm-usage',
-    '--single-process',
-    '--no-zygote',
-    '--incognito',
-    '--disable-features=site-isolation-trials', // New hack for render stability
-];
 
 // Fallback User Agents
 const FALLBACK_UAS = [
@@ -35,14 +20,6 @@ const FALLBACK_UAS = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15',
     'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.143 Mobile Safari/537.36'
 ];
-
-// --- QUEUE SYSTEM ---
-const requestQueue = []; 
-let activeSlots = 0;
-
-const app = express();
-app.use(cors()); 
-app.use(express.json());
 
 let ai;
 if (GEMINI_API_KEY) {
@@ -52,8 +29,16 @@ if (GEMINI_API_KEY) {
     console.warn("WARNING: GEMINI_API_KEY not found. Using small hardcoded User Agents list.");
 }
 
+const app = express();
+// CORS enable kiya gaya hai taki aapki HTML file is API ko call kar sake
+app.use(cors({
+    origin: '*', // Sabhi origins ko allow karta hai
+    methods: 'GET,POST'
+})); 
+app.use(express.json());
 
-// --- Dynamic UA Generator ---
+
+// --- Dynamic UA Generator (Gemini se UA generate karne ka logic) ---
 async function generateUserAgent() {
     if (!ai) return FALLBACK_UAS[Math.floor(Math.random() * FALLBACK_UAS.length)];
     
@@ -68,10 +53,7 @@ async function generateUserAgent() {
                 maxOutputTokens: 200
             }
         });
-        let userAgent = response.text.trim();
-        if (userAgent.startsWith('`') || userAgent.startsWith('"')) {
-            userAgent = userAgent.replace(/^[`"]|[`"]$/g, '');
-        }
+        let userAgent = response.text.trim().replace(/^[`"]|[`"]$/g, '');
         return userAgent;
     } catch (error) {
         console.error("Gemini UA generation failed, using fallback.");
@@ -80,119 +62,29 @@ async function generateUserAgent() {
 }
 
 
-// --- CORE PUPPETEER LOGIC ---
-async function runSlot(taskItem) {
-    const { url, duration, viewIndex } = taskItem;
-    let browser;
-    let page;
+// --- API ENDPOINT (Provide Configuration to Client) ---
+app.get('/get-config', async (req, res) => {
+    // Note: Frontend JS User Agent nahi badal sakta, yeh server se report hoga.
+    // Lekin hum server-side UA fetch karke client ko bhejte hain.
     
-    const proxy = PROXY_LIST[viewIndex % PROXY_LIST.length];
-    const launchArgs = [...PUPPETEER_ARGS];
-    if (proxy) launchArgs.push(`--proxy-server=${proxy}`);
-
     const userAgent = await generateUserAgent();
-    
-    activeSlots++;
-    console.log(`[SLOT ${activeSlots}/${MAX_CONCURRENT_SLOTS}] Launching view ${viewIndex + 1}...`);
-
-    try {
-        // FINAL RENDER FIX: executablePath ko null set kiya gaya hai.
-        // Puppeteer ko khud se Chrome binary dhundhne ki koshish karne denge.
-        browser = await puppeteer.launch({
-            args: launchArgs, 
-            headless: true, 
-            executablePath: null, // Final attempt to resolve the path issue
-            product: 'chrome', // Suggest using Chrome/Chromium product
-            ignoreDefaultArgs: ['--enable-automation'], // Helps in headless environments
-            timeout: 35000, 
-        });
-
-        page = await browser.newPage();
-        await page.setUserAgent(userAgent);
-        page.setDefaultNavigationTimeout(duration + 10000); 
-
-        console.log(`[VIEW ${viewIndex + 1}] Navigating to ${url}. Proxy: ${proxy || 'Direct'}`);
-
-        const startTime = Date.now();
-        await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-        const loadTime = Date.now() - startTime;
-        const remainingTime = duration - loadTime;
-
-        if (remainingTime > 1000) {
-            console.log(`[VIEW ${viewIndex + 1}] Viewing for ${Math.round(remainingTime/1000)}s.`);
-            await new Promise(resolve => setTimeout(resolve, remainingTime));
-        }
-
-        return { status: 'success', duration: Math.round((Date.now() - startTime) / 1000) };
-
-    } catch (error) {
-        console.error(`[VIEW ${viewIndex + 1} ERROR] Failed to load/view: ${error.message.substring(0, 80)}`);
-        return { status: 'error', error: error.message };
-    } finally {
-        if (page) await page.close();
-        if (browser) await browser.close();
-        activeSlots--;
-        console.log(`[SLOT] View ${viewIndex + 1} finished. Active slots: ${activeSlots}`);
-        setTimeout(processQueue, 100); 
-    }
-}
-
-
-// --- ASYNCHRONOUS QUEUE PROCESSOR (Concurrency handler) ---
-async function processQueue() {
-    while (activeSlots < MAX_CONCURRENT_SLOTS && requestQueue.length > 0) {
-        const nextTask = requestQueue.shift();
-        
-        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_VIEWS_MS));
-        
-        runSlot(nextTask).catch(err => {
-            console.error("Critical runSlot error:", err);
-        });
-    }
-}
-
-
-// --- API ENDPOINT (Task Submission) ---
-app.post('/submit-task', async (req, res) => {
-    const { url, duration, totalViews } = req.body;
-    
-    if (!url || typeof duration !== 'number' || typeof totalViews !== 'number' || totalViews < 1 || totalViews > 100) {
-        return res.status(400).json({ status: 'error', message: 'Invalid input. URL, duration (7-15 sec), and totalViews (max 100) required.' });
-    }
-
-    const durationMs = duration * 1000;
-    
-    for (let i = 0; i < totalViews; i++) {
-        requestQueue.push({ 
-            url, 
-            duration: durationMs, 
-            viewIndex: i, 
-        });
-    }
-
-    processQueue();
-    
-    const viewsPerSlot = Math.ceil(totalViews / MAX_CONCURRENT_SLOTS);
-    const totalTimeEstimate = viewsPerSlot * (durationMs + 5000); 
+    const proxy = PROXY_LIST[Math.floor(Math.random() * PROXY_LIST.length)];
 
     res.json({
-        status: 'queued',
-        message: `${totalViews} views accepted. Processing with ${MAX_CONCURRENT_SLOTS} slots.`,
-        queueLength: requestQueue.length,
-        estimatedTime: `Approx. ${Math.round(totalTimeEstimate / 60000)} minutes.`
+        status: 'success',
+        config: {
+            // Hum User Agent bhejh rahe hain, jise client display kar sake
+            userAgent: userAgent, 
+            proxy: proxy,
+            maxSlots: 2,
+            minDuration: 5, // 5 seconds (random pattern ki shuruwat)
+            maxDuration: 8  // 8 seconds (random pattern ki aakhri limit)
+        }
     });
 });
 
 
 // --- SERVER START ---
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Traffic Booster API Server listening on port ${PORT}.`);
-    console.log(`Concurrent Slot System Initialized. Max Slots: ${MAX_CONCURRENT_SLOTS}.`);
-    
-    setInterval(() => {
-        if (requestQueue.length > 0 && activeSlots < MAX_CONCURRENT_SLOTS) {
-            processQueue();
-        }
-    }, 10000); 
+    console.log(`Config Provider API Server listening on port ${PORT}.`);
 });
