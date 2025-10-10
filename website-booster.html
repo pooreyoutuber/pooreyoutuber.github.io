@@ -72,20 +72,11 @@
             align-items: center;
             gap: 5px;
         }
-        #startBtn { 
-            background-color: var(--success-color); 
-            color: white; 
-        }
+        #startBtn { background-color: var(--success-color); color: white; }
         #startBtn:hover:not(:disabled) { background-color: #1e7e34; }
-        #stopBtn { 
-            background-color: var(--danger-color); 
-            color: white; 
-        }
+        #stopBtn { background-color: var(--danger-color); color: white; }
         #stopBtn:hover:not(:disabled) { background-color: #bd2130; }
-        #startBtn:disabled, #stopBtn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        #startBtn:disabled, #stopBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         /* Status Bar */
         #apiStatus {
@@ -99,10 +90,7 @@
         }
 
         /* Slots Layout */
-        .slots-container { 
-            display: flex; 
-            gap: 20px; 
-        }
+        .slots-container { display: flex; gap: 20px; }
         .slot { 
             flex: 1; 
             border: 2px solid var(--border-color); 
@@ -128,22 +116,15 @@
         .status-text { 
             margin-top: 10px; 
             font-size: 0.85em; 
-            color: var(--secondary-text);
+            color: var(--text-color);
             word-wrap: break-word;
         }
         
         /* Responsive */
         @media (max-width: 768px) {
-            .slots-container {
-                flex-direction: column;
-            }
-            .form-area {
-                flex-direction: column;
-            }
-            #startBtn, #stopBtn {
-                width: 100%;
-                justify-content: center;
-            }
+            .slots-container { flex-direction: column; }
+            .form-area { flex-direction: column; }
+            #startBtn, #stopBtn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -183,8 +164,7 @@
     </div>
 
     <script>
-        // ⭐ API URL for Booster Config Tool (Render API) ⭐
-        // Ensure your index.js is running as a Web Service on this URL path!
+        // ⭐ API URL for Booster Config Tool (Must include /api/booster/config) ⭐
         const API_URL_CONFIG = "https://pooreyoutuber-github-io.onrender.com/api/booster/config"; 
         
         const slots = [
@@ -199,40 +179,44 @@
         async function fetchConfig() {
             const apiStatusElement = document.getElementById('apiStatus');
             apiStatusElement.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Connecting to API server...`;
-            apiStatusElement.style.backgroundColor = '#ffc107'; // Warning yellow
+            apiStatusElement.style.backgroundColor = '#ffc107'; 
+            apiStatusElement.style.color = '#856404';
 
             try {
                 const response = await fetch(API_URL_CONFIG);
                 
-                // Check if response is JSON (Network Error Fix)
+                // Crucial Check: Fixes the '<' error when server is sleeping
                 const contentType = response.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("Server did not return JSON. Check if your index.js is running as a Web Service.");
+                    throw new Error("Server did not return JSON. (Server is likely sleeping or unreachable.)");
                 }
 
                 const data = await response.json();
 
-                if (response.ok && data.status === 'success') {
+                if (response.ok && data.status === 'success' && data.config) {
                     config = data.config;
-                    apiStatusElement.innerHTML = `✅ **Config Loaded.** Slots: ${config.maxSlots}. Server UA: <b>${config.userAgent.substring(0, 30)}...</b>`;
-                    apiStatusElement.style.backgroundColor = '#d4edda'; // Success green
+                    // Fix for 'Cannot read properties of undefined (reading 'trim...')
+                    const userAgentDisplay = config.userAgent ? config.userAgent.substring(0, 30) + '...' : 'N/A';
+                    
+                    apiStatusElement.innerHTML = `✅ **Config Loaded.** Slots: ${config.maxSlots}. Server UA: <b>${userAgentDisplay}</b>`;
+                    apiStatusElement.style.backgroundColor = '#d4edda'; 
                     apiStatusElement.style.color = '#155724';
                     document.getElementById('startBtn').disabled = false;
                 } else {
-                    apiStatusElement.innerHTML = `❌ **Error:** ${data.message || 'Failed to get config.'}`;
-                    apiStatusElement.style.backgroundColor = '#f8d7da'; // Danger red
+                    apiStatusElement.innerHTML = `❌ **Error:** ${data.message || 'Failed to get config or config data missing.'}`;
+                    apiStatusElement.style.backgroundColor = '#f8d7da'; 
                     apiStatusElement.style.color = '#721c24';
                 }
             } catch (error) {
-                apiStatusElement.innerHTML = `❌ **Network Error:** API unreachable. (${error.message.substring(0, 50)}...)`;
-                apiStatusElement.style.backgroundColor = '#f8d7da'; // Danger red
+                // Catches the Network/Sleep/JSON parsing error gracefully
+                apiStatusElement.innerHTML = `❌ **Network Error:** API unreachable or server is sleeping. (${error.message.substring(0, 50)}...)`;
+                apiStatusElement.style.backgroundColor = '#f8d7da'; 
                 apiStatusElement.style.color = '#721c24';
                 console.error("Config fetch error:", error);
             }
         }
 
         function generateRandomDuration() {
-            // Generates a random time (in milliseconds) between minDuration and maxDuration (from server config)
             if (!config) return 7000; 
             const duration = Math.floor(Math.random() * (config.maxDuration - config.minDuration + 1)) + config.minDuration;
             return duration * 1000; 
@@ -254,13 +238,12 @@
             
             slot.status.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Loading <b>${url.substring(0, 30)}...</b> | Refresh in ${durationSec}s.`;
             
-            // Set iFrame source to load the URL
             slot.iframe.src = url;
 
             slot.timer = setTimeout(() => {
                 if (isRunning) {
                     slot.status.innerHTML = `<i class="fas fa-sync-alt"></i> Refreshed. Rerunning slot...`;
-                    startSlot(slot); // Recursive call for continuous traffic
+                    startSlot(slot); 
                 }
             }, durationMs);
         }
@@ -281,7 +264,10 @@
 
         function handleStart() {
             const url = document.getElementById('targetUrl').value.trim();
-            if (!url || !config) return;
+            if (!url || !config) {
+                alert("Configuration not loaded or URL is empty. Please check API status.");
+                return;
+            }
 
             isRunning = true;
             document.getElementById('startBtn').disabled = true;
@@ -297,7 +283,6 @@
         document.getElementById('startBtn').addEventListener('click', handleStart);
         document.getElementById('stopBtn').addEventListener('click', stopTraffic);
         
-        // Initial configuration fetch
         document.addEventListener('DOMContentLoaded', fetchConfig);
     </script>
 </body>
