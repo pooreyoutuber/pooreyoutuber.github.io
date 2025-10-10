@@ -3,14 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3. AI Instagram Caption Generator</title>
+    <title>3. AI Instagram Caption Generator | PooreYouTuber</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
-        /* ... (Simple CSS for a clean form goes here) ... */
+        /* Professional and Clean UI based on the Booster Tool */
+        :root {
+            --primary-color: #9c27b0; /* Deep Purple for creativity/AI theme */
+            --primary-hover: #7b1fa2;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #343a40;
+            --border-color: #ced4da;
+            --output-bg: #f3f3f3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 26px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        /* Form Styles */
+        .form-group { margin-bottom: 20px; }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            font-size: 14px; 
+            color: var(--primary-color);
+        }
+        input[type="text"] {
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid var(--border-color);
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            background: #fff; 
+            font-size: 16px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        input[type="text"]:focus {
+             border-color: var(--primary-color);
+             box-shadow: 0 0 0 0.2rem rgba(156, 39, 176, 0.25); /* Focus effect */
+        }
+        
+        #generateBtn {
+            width: 100%;
+            background: var(--primary-color); 
+            color: white; 
+            border: none;
+            padding: 12px 20px; 
+            border-radius: 4px; 
+            cursor: pointer;
+            font-size: 16px; 
+            font-weight: bold; 
+            transition: background 0.2s;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        #generateBtn:hover:not(:disabled) { background: var(--primary-hover); }
+        #generateBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: var(--primary-color);
+        }
+        
+        /* Results Area */
+        #results {
+            margin-top: 35px; 
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+        }
+        #results h2 {
+            font-size: 20px;
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+        #caption-output {
+            white-space: pre-wrap; 
+            padding: 18px; 
+            background: var(--output-bg); 
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            min-height: 150px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1a1a1a;
+        }
+
+        .api-status {
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Status Colors */
+        .status-success { background-color: #d4edda; color: #155724; }
+        .status-error { background-color: #f8d7da; color: #721c24; }
+        .status-loading { background-color: #fff3cd; color: #856404; }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>✨ AI Instagram Caption Generator</h1>
+        <h1>✨ AI Instagram Caption Generator (Powered by Gemini)</h1>
+
+        <div id="apiStatus" class="api-status status-success" style="display:none;"></div>
         
         <form id="caption-form">
             <div class="form-group">
@@ -18,38 +145,61 @@
                 <input type="text" id="topic" placeholder="e.g., A funny video about a cat" required>
             </div>
             <div class="form-group">
-                <label for="style">Caption Style:</label>
+                <label for="style">Caption Style (Tone and Length):</label>
                 <input type="text" id="style" placeholder="e.g., Humorous and short, or Motivational and long" required>
             </div>
-            <button type="submit" id="generateBtn">Generate Captions</button>
+            <button type="submit" id="generateBtn">
+                <i class="fas fa-magic"></i> Generate Captions
+            </button>
         </form>
 
-        <div id="results" style="margin-top: 30px;">
-            <h2>Generated Captions:</h2>
-            <pre id="caption-output" style="white-space: pre-wrap; padding: 15px; background: #eee; border-radius: 8px;">Click 'Generate Captions' to see results here.</pre>
+        <div id="results">
+            <h2>Generated Output:</h2>
+            <pre id="caption-output">Input your details and hit 'Generate' to see creative captions, emojis, and hashtags here.</pre>
         </div>
     </div>
 
     <script>
-        // ⭐ API URL for Caption Tool ⭐
+        // ⭐ API URL for Caption Tool (CHECK THIS) ⭐
         const API_URL_CAPTION = "https://pooreyoutuber-github-io.onrender.com/api/caption"; 
+        
         const captionForm = document.getElementById('caption-form');
         const captionOutput = document.getElementById('caption-output');
         const generateBtn = document.getElementById('generateBtn');
+        const apiStatus = document.getElementById('apiStatus');
 
+        // --- Status Reporter Function ---
+        function reportStatus(message, type) {
+            apiStatus.style.display = 'block';
+            apiStatus.className = 'api-status';
+            
+            if (type === 'loading') {
+                apiStatus.classList.add('status-loading');
+                apiStatus.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${message}`;
+            } else if (type === 'success') {
+                apiStatus.classList.add('status-success');
+                apiStatus.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            } else if (type === 'error') {
+                apiStatus.classList.add('status-error');
+                apiStatus.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
+            }
+        }
+        
+        // --- Main Logic ---
         captionForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const topic = document.getElementById('topic').value.trim();
             const style = document.getElementById('style').value.trim();
 
             if (!topic || !style) {
-                alert('Please enter both Topic and Style.');
+                alert('Please enter both Topic/Description and Style.');
                 return;
             }
 
             generateBtn.disabled = true;
-            generateBtn.textContent = 'Generating... Please wait.';
-            captionOutput.textContent = 'Processing request...';
+            generateBtn.innerHTML = '<i class="fas fa-hourglass-half fa-spin"></i> Generating...';
+            captionOutput.textContent = 'Processing request... Please wait for the AI response.';
+            reportStatus('Sending request to Gemini API...', 'loading');
 
             try {
                 const response = await fetch(API_URL_CAPTION, {
@@ -58,18 +208,30 @@
                     body: JSON.stringify({ topic, style })
                 });
 
+                // Check for non-JSON or server sleep issue (fixes the '<' error)
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("API server did not return JSON. Check your Render logs or if the service is awake.");
+                }
+
                 const result = await response.json();
 
                 if (response.ok && result.status === 'success') {
-                    captionOutput.textContent = result.caption;
+                    captionOutput.textContent = result.caption.trim();
+                    reportStatus('Captions Generated Successfully!', 'success');
                 } else {
-                    captionOutput.textContent = `Error: ${result.message || 'Server did not return a valid caption.'}`;
+                    // Handle API-side error messages
+                    const errorMessage = result.message || 'Server error occurred during generation.';
+                    captionOutput.textContent = `❌ Generation Failed: ${errorMessage}`;
+                    reportStatus(`Generation Failed: ${errorMessage.substring(0, 50)}...`, 'error');
                 }
             } catch (error) {
-                captionOutput.textContent = `Network Error: Could not connect to the API.`;
+                // Handle network errors
+                captionOutput.textContent = `❌ Network/API Error: ${error.message}`;
+                reportStatus(`Network Error: API unreachable or server is sleeping. (${error.message.substring(0, 50)}...)`, 'error');
             } finally {
                 generateBtn.disabled = false;
-                generateBtn.textContent = 'Generate Captions';
+                generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Captions';
             }
         });
     </script>
