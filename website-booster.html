@@ -3,37 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2. Website Traffic Booster (2-Slot)</title>
-    <style> /* ... (Your CSS for booster tool goes here) ... */ </style>
+    <title>2. Website Traffic Booster (2-Slot) | PooreYouTuber</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Professional and Clean UI */
+        :root {
+            --primary-color: #007bff; /* Primary Blue for professional feel */
+            --primary-hover: #0056b3;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #343a40;
+            --border-color: #ced4da;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 26px;
+        }
+
+        /* Input and Button Area */
+        .form-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: #f1f1f1;
+        }
+        #targetUrl {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            font-size: 16px;
+        }
+        #startBtn, #stopBtn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        #startBtn { 
+            background-color: var(--success-color); 
+            color: white; 
+        }
+        #startBtn:hover:not(:disabled) { background-color: #1e7e34; }
+        #stopBtn { 
+            background-color: var(--danger-color); 
+            color: white; 
+        }
+        #stopBtn:hover:not(:disabled) { background-color: #bd2130; }
+        #startBtn:disabled, #stopBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Status Bar */
+        #apiStatus {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            text-align: center;
+            background-color: #e9ecef;
+            color: var(--text-color);
+        }
+
+        /* Slots Layout */
+        .slots-container { 
+            display: flex; 
+            gap: 20px; 
+        }
+        .slot { 
+            flex: 1; 
+            border: 2px solid var(--border-color); 
+            border-radius: 4px; 
+            padding: 15px;
+            background-color: var(--card-bg);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .slot-title { 
+            font-weight: 700; 
+            margin-bottom: 10px; 
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+        .slot iframe { 
+            width: 100%; 
+            height: 300px; 
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            background-color: #fff;
+        }
+        .status-text { 
+            margin-top: 10px; 
+            font-size: 0.85em; 
+            color: var(--secondary-text);
+            word-wrap: break-word;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slots-container {
+                flex-direction: column;
+            }
+            .form-area {
+                flex-direction: column;
+            }
+            #startBtn, #stopBtn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>🌐 Client-Side Traffic Generator (2-Slot)</h1>
         
         <div class="form-area">
-            <input type="url" id="targetUrl" placeholder="Enter Target Website URL" required>
-            <button id="startBtn" disabled>START TRAFFIC (2 Slots)</button>
-            <button id="stopBtn" disabled>STOP</button>
+            <input type="url" id="targetUrl" placeholder="Enter Target Website URL (e.g., https://example.com)" required>
+            <button id="startBtn" disabled>
+                <i class="fas fa-play"></i> START TRAFFIC
+            </button>
+            <button id="stopBtn" disabled>
+                <i class="fas fa-stop"></i> STOP
+            </button>
         </div>
 
-        <div id="apiStatus">Connecting to Render server for config...</div>
+        <div id="apiStatus">
+            <i class="fas fa-spinner fa-spin"></i> Connecting to API server for config...
+        </div>
 
         <div class="slots-container">
             <div class="slot" id="slot1">
-                <div class="slot-title">Slot 1</div>
+                <div class="slot-title">Slot 1 Browser Instance</div>
                 <iframe id="iframe1" src="about:blank"></iframe>
                 <div class="status-text" id="status1">Ready.</div>
             </div>
             <div class="slot" id="slot2">
-                <div class="slot-title">Slot 2</div>
+                <div class="slot-title">Slot 2 Browser Instance</div>
                 <iframe id="iframe2" src="about:blank"></iframe>
                 <div class="status-text" id="status2">Ready.</div>
             </div>
         </div>
+        <p style="text-align: center; margin-top: 25px; font-size: 0.8em; color: #6c757d;">
+            *Traffic is generated from your local browser, using configuration (User Agent & Duration) from the server.
+        </p>
     </div>
 
     <script>
-        // ⭐ API URL for Booster Config Tool ⭐
+        // ⭐ API URL for Booster Config Tool (Render API) ⭐
+        // Ensure your index.js is running as a Web Service on this URL path!
         const API_URL_CONFIG = "https://pooreyoutuber-github-io.onrender.com/api/booster/config"; 
         
         const slots = [
@@ -44,40 +195,72 @@
         let config = null;
         let isRunning = false;
         
+        // --- API Configuration Fetch ---
         async function fetchConfig() {
+            const apiStatusElement = document.getElementById('apiStatus');
+            apiStatusElement.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Connecting to API server...`;
+            apiStatusElement.style.backgroundColor = '#ffc107'; // Warning yellow
+
             try {
                 const response = await fetch(API_URL_CONFIG);
+                
+                // Check if response is JSON (Network Error Fix)
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Server did not return JSON. Check if your index.js is running as a Web Service.");
+                }
+
                 const data = await response.json();
-                if (data.status === 'success') {
+
+                if (response.ok && data.status === 'success') {
                     config = data.config;
-                    document.getElementById('apiStatus').innerHTML = `✅ Config Loaded. Server UA: <b>${config.userAgent.substring(0, 30)}...</b>`;
+                    apiStatusElement.innerHTML = `✅ **Config Loaded.** Slots: ${config.maxSlots}. Server UA: <b>${config.userAgent.substring(0, 30)}...</b>`;
+                    apiStatusElement.style.backgroundColor = '#d4edda'; // Success green
+                    apiStatusElement.style.color = '#155724';
                     document.getElementById('startBtn').disabled = false;
                 } else {
-                    document.getElementById('apiStatus').textContent = "❌ Error fetching config from server.";
+                    apiStatusElement.innerHTML = `❌ **Error:** ${data.message || 'Failed to get config.'}`;
+                    apiStatusElement.style.backgroundColor = '#f8d7da'; // Danger red
+                    apiStatusElement.style.color = '#721c24';
                 }
             } catch (error) {
-                document.getElementById('apiStatus').textContent = `❌ Network Error. Is API running?`;
+                apiStatusElement.innerHTML = `❌ **Network Error:** API unreachable. (${error.message.substring(0, 50)}...)`;
+                apiStatusElement.style.backgroundColor = '#f8d7da'; // Danger red
+                apiStatusElement.style.color = '#721c24';
+                console.error("Config fetch error:", error);
             }
         }
 
         function generateRandomDuration() {
+            // Generates a random time (in milliseconds) between minDuration and maxDuration (from server config)
+            if (!config) return 7000; 
             const duration = Math.floor(Math.random() * (config.maxDuration - config.minDuration + 1)) + config.minDuration;
             return duration * 1000; 
         }
 
+        // --- Slot Control Logic ---
         function startSlot(slot) {
             if (!isRunning) return;
 
             const url = document.getElementById('targetUrl').value.trim();
-            const durationMs = generateRandomDuration();
-            const durationSec = Math.round(durationMs / 1000);
             
-            slot.status.textContent = `Loading... Next Refresh in ${durationSec}s.`;
+            if (!url.startsWith('http')) {
+                slot.status.innerHTML = `<span style="color:var(--danger-color);"><i class="fas fa-exclamation-triangle"></i> Invalid URL. Use http:// or https://</span>`;
+                return;
+            }
+
+            const durationMs = generateRandomDuration();
+            const durationSec = (durationMs / 1000).toFixed(1);
+            
+            slot.status.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Loading <b>${url.substring(0, 30)}...</b> | Refresh in ${durationSec}s.`;
+            
+            // Set iFrame source to load the URL
             slot.iframe.src = url;
 
             slot.timer = setTimeout(() => {
                 if (isRunning) {
-                    startSlot(slot); 
+                    slot.status.innerHTML = `<i class="fas fa-sync-alt"></i> Refreshed. Rerunning slot...`;
+                    startSlot(slot); // Recursive call for continuous traffic
                 }
             }, durationMs);
         }
@@ -87,10 +270,13 @@
             slots.forEach(slot => {
                 if (slot.timer) clearTimeout(slot.timer);
                 slot.iframe.src = "about:blank";
-                slot.status.textContent = "Stopped.";
+                slot.status.textContent = "Stopped. Click START to resume.";
             });
             document.getElementById('startBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
+            document.getElementById('apiStatus').innerHTML = `⏸️ Traffic Stopped.`;
+            document.getElementById('apiStatus').style.backgroundColor = '#e2e6ea';
+            document.getElementById('apiStatus').style.color = var(--text-color);
         }
 
         function handleStart() {
@@ -102,12 +288,17 @@
             document.getElementById('stopBtn').disabled = false;
 
             slots.forEach(startSlot);
-            document.getElementById('apiStatus').textContent = `🟢 Traffic Started (2 Slots) on: ${url}`;
+            document.getElementById('apiStatus').innerHTML = `🚀 **Traffic Started (2 Slots)** on: <b>${url}</b>`;
+            document.getElementById('apiStatus').style.backgroundColor = '#c3e6cb';
+            document.getElementById('apiStatus').style.color = '#155724';
         }
         
+        // --- Event Listeners and Init ---
         document.getElementById('startBtn').addEventListener('click', handleStart);
         document.getElementById('stopBtn').addEventListener('click', stopTraffic);
-        fetchConfig();
+        
+        // Initial configuration fetch
+        document.addEventListener('DOMContentLoaded', fetchConfig);
     </script>
 </body>
 </html>
