@@ -5,14 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>1. Article Submission Tool | PooreYouTuber</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style> /* ... (Your CSS from the previous response goes here for brevity) ... */ </style>
+    
+    <style>
+        /* Modern, Clean UI based on YouTube/Material Design */
+        :root {
+            --youtube-red: #FF0000;
+            --youtube-dark-red: #CC0000;
+            --primary-text: #212121;
+            --secondary-text: #707070;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--primary-text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--youtube-red);
+            text-align: center;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 28px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .disclaimer {
+            background: #fff3f3; 
+            color: #d32f2f; 
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            border-left: 3px solid var(--youtube-red);
+            font-size: 14px;
+        }
+
+        /* Form Styles */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
+        input[type="text"], textarea {
+            width: 100%; padding: 10px; border: 1px solid var(--border-color);
+            border-radius: 2px; box-sizing: border-box; 
+            background: #fff; color: var(--primary-text);
+            font-size: 16px;
+        }
+        textarea { resize: vertical; min-height: 120px; }
+        button[type="submit"] {
+            background: var(--youtube-red); color: white; border: none;
+            padding: 10px 20px; border-radius: 2px; cursor: pointer;
+            font-size: 14px; font-weight: bold; transition: background 0.2s;
+            text-transform: uppercase;
+        }
+        button[type="submit"]:hover { background: var(--youtube-dark-red); }
+        
+        /* Articles List Styles */
+        #article-list-container {
+            margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color);
+        }
+        #article-list-container h2 {
+            font-size: 22px;
+            color: var(--primary-text);
+            margin-bottom: 15px;
+        }
+
+        .article-card {
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color);
+            padding: 15px; margin-bottom: 15px; border-radius: 4px;
+            display: flex; 
+            align-items: flex-start;
+        }
+        
+        .article-number {
+            font-size: 1.2em; font-weight: bold; color: var(--youtube-red);
+            margin-right: 15px; min-width: 25px; text-align: right;
+            line-height: 1.5;
+        }
+        
+        .article-content-wrapper { flex-grow: 1; }
+
+        .article-card h3 { 
+            color: var(--primary-text); 
+            margin-top: 0; 
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .article-card p { 
+            white-space: pre-wrap; 
+            font-size: 14px;
+            color: var(--primary-text);
+        }
+        .article-meta { 
+            font-size: 0.8em; 
+            color: var(--secondary-text); 
+            margin-bottom: 10px; 
+        }
+
+        /* Action Buttons */
+        .article-actions {
+            margin-top: 10px;
+            padding-top: 5px;
+            display: flex;
+            gap: 10px;
+        }
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>🖊️ Article Submission Tool (Permanent Server Storage)</h1>
+        <h1>🖊️ Article Submission Tool (Server Storage)</h1>
+
         <div class="disclaimer">
-            **IMPORTANT NOTICE:** Articles are saved **permanently on the server** (File System). Clear history will NOT lose data. Use the Delete Key carefully.
+            **API Status:** <span id="apiStatus">Checking...</span> | Articles are saved **permanently** on the Render server.
         </div>
+
         <form id="article-form">
             <h2>Submit Your Article</h2>
             <div class="form-group">
@@ -31,7 +164,7 @@
         </form>
 
         <div id="article-list-container">
-            <h2>Latest Articles (Server)</h2>
+            <h2>Latest Articles</h2>
             <div id="articles-list">
                 <p id="no-articles-msg">Loading articles...</p>
             </div>
@@ -39,20 +172,35 @@
     </div>
 
     <script>
-        // ⭐ API URL for Article Tool ⭐
+        // ⭐ API URL for Article Tool (CHECK THIS) ⭐
         const API_URL = "https://pooreyoutuber-github-io.onrender.com/api/articles"; 
+        
         const articleForm = document.getElementById('article-form');
         const articlesListDiv = document.getElementById('articles-list');
+        const apiStatus = document.getElementById('apiStatus');
 
-        // --- CORE FUNCTIONS ---
+        // --- STATUS & FETCH FUNCTIONS ---
+        function updateStatus(message, color = 'var(--secondary-text)') {
+            apiStatus.textContent = message;
+            apiStatus.style.color = color;
+        }
+
         async function fetchArticles() {
+            updateStatus('Fetching articles...', '#f39c12');
             try {
                 const response = await fetch(API_URL);
-                return response.ok ? await response.json() : [];
-            } catch (error) { return []; }
+                if (!response.ok) throw new Error('API server returned error.');
+                updateStatus('Connected to Server', '#2ecc71');
+                return await response.json();
+            } catch (error) {
+                updateStatus('Error: Server unreachable or bad response.', '#e74c3c');
+                console.error("Fetch Error:", error);
+                return [];
+            }
         }
 
         async function postArticle(articleData) {
+            updateStatus('Publishing...', '#3498db');
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -60,17 +208,20 @@
                     body: JSON.stringify(articleData)
                 });
                 if (!response.ok) throw new Error('Failed to publish article');
+                updateStatus('Article Published!', '#2ecc71');
                 return true;
             } catch (error) {
+                updateStatus('Error during publish.', '#e74c3c');
                 alert(`Error publishing article: ${error.message}`);
                 return false;
             }
         }
         
         async function deleteArticle(articleId) {
-            const deleteKey = prompt("⚠️ CONFIRM DELETE: Enter Owner Delete Key:");
+            const deleteKey = prompt("⚠️ CONFIRM DELETE: Please enter your Owner Delete Key:");
             if (!deleteKey) return;
             
+            updateStatus('Deleting...', '#e74c3c');
             try {
                 const response = await fetch(`${API_URL}/${articleId}`, {
                     method: 'DELETE',
@@ -79,28 +230,38 @@
                 });
 
                 const result = await response.json();
-                alert(response.ok ? result.message : `Deletion Failed: ${result.message}`);
-                if (response.ok) renderArticles();
+
+                if (response.ok) {
+                    alert(result.message);
+                    updateStatus('Article Deleted!', '#e74c3c');
+                    renderArticles(); 
+                } else {
+                    alert(`Deletion Failed: ${result.message}`);
+                    updateStatus(`Deletion Failed: ${result.message.substring(0, 30)}...`, '#e74c3c');
+                }
 
             } catch (error) {
+                updateStatus('Network Error during deletion.', '#e74c3c');
                 alert(`Network Error during deletion: ${error.message}`);
             }
         }
 
+
+        // --- RENDER LOGIC ---
         function renderArticles() {
-            articlesListDiv.innerHTML = '<p id="no-articles-msg">Loading articles...</p>';
+            articlesListDiv.innerHTML = '<p style="text-align:center;">Loading articles...</p>';
             fetchArticles().then(articles => {
                 articlesListDiv.innerHTML = ''; 
                 if (articles.length === 0) {
-                    articlesListDiv.innerHTML = '<p id="no-articles-msg">No articles found on the server. Submit one!</p>';
+                    articlesListDiv.innerHTML = '<p style="text-align:center; color: var(--secondary-text);">No articles found on the server. Submit one!</p>';
                     return;
                 }
 
                 articles.forEach((article, index) => {
-                    // ... (Card HTML generation using article data and deleteArticle function) ...
                     const articleCard = document.createElement('div');
                     articleCard.className = 'article-card';
                     const date = new Date(article.timestamp).toLocaleString();
+                    
                     articleCard.innerHTML = `
                         <div class="article-number">#${index + 1}</div>
                         <div class="article-content-wrapper">
@@ -110,7 +271,7 @@
                             </div>
                             <p>${article.content}</p>
                             <div class="article-actions">
-                                <button class="action-button delete-button" onclick="deleteArticle('${article.id}')">
+                                <button class="delete-button" onclick="deleteArticle('${article.id}')">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
                             </div>
@@ -121,25 +282,28 @@
             });
         }
 
+        // Handle form submission
         articleForm.addEventListener('submit', async function(e) {
             e.preventDefault(); 
             const author = document.getElementById('author-name').value.trim();
             const title = document.getElementById('article-title').value.trim();
             const content = document.getElementById('article-content').value.trim();
 
+            if (!author || !title || !content) {
+                alert('Please fill out all fields.');
+                return;
+            }
+
             if (await postArticle({ author, title, content })) {
                 articleForm.reset();
                 renderArticles();
-                alert('Article Published Successfully on Server!');
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-             // applySavedTheme(); // Theme function here if you included the CSS
-             renderArticles();
-        });
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', renderArticles);
         
-        window.deleteArticle = deleteArticle; // Make function globally accessible
+        window.deleteArticle = deleteArticle; // Expose globally
     </script>
 </body>
 </html>
