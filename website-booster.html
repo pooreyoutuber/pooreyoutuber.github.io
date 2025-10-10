@@ -110,6 +110,7 @@
         /* Slots Grid (Minimalist) */
         #slots-container {
             display: grid;
+            /* Grid ko 4 slots ke liye update kiya gaya hai */
             grid-template-columns: repeat(4, 1fr); 
             gap: 10px;
         }
@@ -144,12 +145,12 @@
                 <label for="refreshDelay">⏱️ View Duration (Sec):</label>
                 <input type="number" id="refreshDelay" min="7" max="15" value="9" required>
             </div>
-            <button id="submitBtn">Start 8 Slots</button>
+            <button id="submitBtn">Start 4 Slots</button>
         </div>
 
         <div class="status-box">
             <div class="status-line">
-                <span class="status-text">Total Loads Attempted: <span id="completedCount">0</span> / 8 (Loop <span id="loopCount">1</span>)</span>
+                <span class="status-text">Total Loads Attempted: <span id="completedCount">0</span> / 4 (Loop <span id="loopCount">1</span>)</span>
                 <span class="status-text" id="statusMessage">Ready to start.</span>
             </div>
             <div class="progress-bar">
@@ -166,12 +167,13 @@
 
     <script>
         // ⭐ API URL HARDCODED HERE (YOUR REPLIT URL) ⭐
-        // THIS IS THE CORRECT URL BASED ON YOUR LATEST SUCCESSFUL REPLIT LOG:
+        // Replit URL: https://nodejs-sutharmanish404.replit.app
         const API_URL_BASE = "https://nodejs-sutharmanish404.replit.app"; 
         const API_ENDPOINT = '/run-slot'; 
         
         // --- CONFIGURATION ---
-        const TOTAL_SLOTS = 8; 
+        // SLOT COUNT UPDATED TO 4
+        const TOTAL_SLOTS = 4; 
         const REFRESH_INTERVAL_SEC = 10; 
         // ---------------------
 
@@ -284,7 +286,8 @@
                 } else if (state.totalAttempted === TOTAL_SLOTS && !state.isLooping) {
                     // Manual stop if looping is not enabled
                     DOM.submitBtn.disabled = false;
-                    DOM.submitBtn.textContent = 'Start 8 Slots (Restart)';
+                    // Button text updated
+                    DOM.submitBtn.textContent = 'Start 4 Slots (Restart)';
                     DOM.message.textContent = `Process Finished: ${state.completedSlots} successful loads out of ${TOTAL_SLOTS} attempted.`;
                     updateStatusUI(`Finished. Success: ${state.completedSlots}`);
                 }
@@ -310,7 +313,7 @@
             for (let i = 1; i <= TOTAL_SLOTS; i++) {
                 setTimeout(() => {
                     runSingleSlot(i, state.url, state.durationMs);
-                }, i * 250); // Increased delay for stability
+                }, i * 250); 
             }
         }
 
