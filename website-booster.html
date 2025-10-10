@@ -9,7 +9,7 @@
     <style>
         /* Professional and Clean UI */
         :root {
-            --primary-color: #007bff; /* Primary Blue for professional feel */
+            --primary-color: #007bff; 
             --primary-hover: #0056b3;
             --success-color: #28a745;
             --danger-color: #dc3545;
@@ -185,7 +185,7 @@
             try {
                 const response = await fetch(API_URL_CONFIG);
                 
-                // Crucial Check: Fixes the '<' error when server is sleeping
+                // 1. Crucial Check: Fixes the '<' error when server is sleeping
                 const contentType = response.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) {
                     throw new Error("Server did not return JSON. (Server is likely sleeping or unreachable.)");
@@ -193,9 +193,11 @@
 
                 const data = await response.json();
 
+                // 2. Fix for 'Cannot read properties of undefined' when config is null/missing
                 if (response.ok && data.status === 'success' && data.config) {
                     config = data.config;
-                    // Fix for 'Cannot read properties of undefined (reading 'trim...')
+                    
+                    // Safely display User Agent, using ternary operator for robustness
                     const userAgentDisplay = config.userAgent ? config.userAgent.substring(0, 30) + '...' : 'N/A';
                     
                     apiStatusElement.innerHTML = `✅ **Config Loaded.** Slots: ${config.maxSlots}. Server UA: <b>${userAgentDisplay}</b>`;
@@ -209,20 +211,25 @@
                 }
             } catch (error) {
                 // Catches the Network/Sleep/JSON parsing error gracefully
-                apiStatusElement.innerHTML = `❌ **Network Error:** API unreachable or server is sleeping. (${error.message.substring(0, 50)}...)`;
+                let errorMessage = error.message;
+                // Custom error message for the specific 'trim' bug if it reappears
+                if (errorMessage.includes("Cannot read properties of undefined")) {
+                     errorMessage = "Server responded partially (likely waking up). Please try refreshing in 10 seconds.";
+                }
+                apiStatusElement.innerHTML = `❌ **Network Error:** ${errorMessage.substring(0, 60)}...`;
                 apiStatusElement.style.backgroundColor = '#f8d7da'; 
                 apiStatusElement.style.color = '#721c24';
                 console.error("Config fetch error:", error);
             }
         }
-
+        
+        // --- Rest of the Traffic Logic remains the same (Corrected previously) ---
         function generateRandomDuration() {
-            if (!config) return 7000; 
+            if (!config || !config.maxDuration || !config.minDuration) return 7000; 
             const duration = Math.floor(Math.random() * (config.maxDuration - config.minDuration + 1)) + config.minDuration;
             return duration * 1000; 
         }
 
-        // --- Slot Control Logic ---
         function startSlot(slot) {
             if (!isRunning) return;
 
@@ -231,6 +238,10 @@
             if (!url.startsWith('http')) {
                 slot.status.innerHTML = `<span style="color:var(--danger-color);"><i class="fas fa-exclamation-triangle"></i> Invalid URL. Use http:// or https://</span>`;
                 return;
+            }
+            if (!config) {
+                 slot.status.innerHTML = `<span style="color:var(--danger-color);"><i class="fas fa-times-circle"></i> Configuration Missing.</span>`;
+                 return;
             }
 
             const durationMs = generateRandomDuration();
@@ -259,7 +270,7 @@
             document.getElementById('stopBtn').disabled = true;
             document.getElementById('apiStatus').innerHTML = `⏸️ Traffic Stopped.`;
             document.getElementById('apiStatus').style.backgroundColor = '#e2e6ea';
-            document.getElementById('apiStatus').style.color = var(--text-color);
+            document.getElementById('apiStatus').style.color = 'var(--text-color)';
         }
 
         function handleStart() {
