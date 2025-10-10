@@ -6,30 +6,123 @@
     <title>High-Quality Traffic Queue Submitter (2-Slot Render)</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* (Styling code is the same as before, no changes needed) */
-        body { font-family: 'Poppins', sans-serif; background-color: #eef2f7; color: #2c3e50; margin: 0; padding: 20px 10px; min-height: 100vh; }
-        .container { max-width: 700px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
-        h1 { text-align: center; color: #34495e; margin-bottom: 30px; font-size: 1.8em; font-weight: 700; }
-        .input-area { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { margin-bottom: 8px; font-weight: 600; color: #34495e; font-size: 0.95em; }
-        input[type="url"], input[type="number"] { padding: 12px 10px; border: 1px solid #dcdfe6; border-radius: 8px; box-sizing: border-box; font-size: 1em; transition: border-color 0.3s, box-shadow 0.3s; }
-        input:focus { border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); outline: none; }
-        #submitBtn { grid-column: 1 / -1; padding: 15px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: background-color 0.3s, transform 0.1s; }
-        #submitBtn:hover:not(:disabled) { background-color: #2980b9; }
-        #submitBtn:active:not(:disabled) { transform: scale(0.99); }
-        #submitBtn:disabled { background-color: #95a5a6; cursor: not-allowed; }
-        .status-box { background-color: #ecf0f1; padding: 20px; border-radius: 10px; margin-top: 25px; border-left: 5px solid #3498db; }
-        #statusMessage { font-size: 1.1em; font-weight: 600; color: #2c3e50; }
-        #message { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #bdc3c7; font-size: 1em; }
+        /* Base Styling & Responsiveness */
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: #eef2f7; 
+            color: #2c3e50; 
+            margin: 0; 
+            padding: 20px 10px; 
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 700px; 
+            margin: 0 auto;
+            background: #ffffff; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+        }
+        h1 { 
+            text-align: center; 
+            color: #34495e; 
+            margin-bottom: 30px; 
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+        .input-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+            font-size: 0.95em;
+        }
+        input[type="url"], input[type="number"] { 
+            padding: 12px 10px; 
+            border: 1px solid #dcdfe6; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        #submitBtn { 
+            grid-column: 1 / -1; 
+            padding: 15px; 
+            background-color: #3498db; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1.1em; 
+            font-weight: 600;
+            cursor: pointer; 
+            transition: background-color 0.3s, transform 0.1s; 
+        }
+        #submitBtn:hover:not(:disabled) { 
+            background-color: #2980b9; 
+        }
+        #submitBtn:active:not(:disabled) {
+            transform: scale(0.99);
+        }
+        #submitBtn:disabled { 
+            background-color: #95a5a6; 
+            cursor: not-allowed; 
+        }
+
+        /* Status & Message Area */
+        .status-box {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border-left: 5px solid #3498db;
+        }
+        #statusMessage {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        #message {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #bdc3c7;
+            font-size: 1em;
+        }
         .success-msg { color: #27ae60; }
         .error-msg { color: #e74c3c; }
+
+        /* PC Layout Adjustments */
         @media (min-width: 600px) {
-            .input-area { grid-template-columns: 2fr 1fr 1fr; }
-            #submitBtn { grid-column: auto; align-self: end; height: 48px; }
-            .form-group:nth-child(1) { grid-column: 1 / 2; }
-            .form-group:nth-child(2) { grid-column: 2 / 3; }
-            .form-group:nth-child(3) { grid-column: 3 / 4; }
+            .input-area {
+                grid-template-columns: 2fr 1fr 1fr; 
+            }
+            #submitBtn {
+                grid-column: auto;
+                align-self: end;
+                height: 48px; 
+            }
+            .form-group:nth-child(1) {
+                grid-column: 1 / 2;
+            }
+            .form-group:nth-child(2) {
+                grid-column: 2 / 3;
+            }
+            .form-group:nth-child(3) {
+                grid-column: 3 / 4;
+            }
         }
     </style>
 </head>
@@ -64,15 +157,8 @@
 
     <script>
         // ⭐ API URL HARDCODED HERE (YOUR RENDER URL) ⭐
-        // RENDER URL KO YAHAN UPDATE KAREIN!
-        const API_URL_BASE = "<script>
-    // ⭐ API URL HARDCODED HERE (YOUR RENDER URL) ⭐
-    // YAHAN AAPKA NAYA AUR SAHI RENDER URL HAI
-    const API_URL_BASE = "https://pooreyoutuber-github-io.onrender.com"; 
-    const API_ENDPOINT = '/submit-task'; 
-    
-    // (Baki ka sara JavaScript code wahi rahega)
-</script>"; 
+        // FINAL AND CORRECT RENDER URL:
+        const API_URL_BASE = "https://pooreyoutuber-github-io.onrender.com"; 
         const API_ENDPOINT = '/submit-task'; 
         
         const DOM = {
@@ -94,14 +180,15 @@
             const duration = parseInt(DOM.viewDuration.value); 
             const totalViews = parseInt(DOM.totalViews.value); 
             
+            // Input Validation
             if (!url || !url.startsWith('http')) { updateMessage("❌ Error: Please enter a valid URL.", true); return; }
             if (isNaN(duration) || duration < 7 || duration > 15) { updateMessage("❌ Error: View Duration must be between 7 and 15 seconds.", true); return; }
             if (isNaN(totalViews) || totalViews < 1 || totalViews > 100) { updateMessage("❌ Error: Total Views must be between 1 and 100.", true); return; }
-            if (API_URL_BASE === "YOUR_RENDER_URL_HERE") { updateMessage("❌ Error: Please update API_URL_BASE in the HTML script tag with your actual Render URL.", true); return; }
             
+            // UI State Change (Disable button)
             DOM.submitBtn.disabled = true;
             DOM.submitBtn.textContent = 'Submitting... Please Wait';
-            updateMessage("Sending request to the server queue...", false);
+            updateMessage("Sending request to the Render server queue...", false);
             DOM.statusMessage.textContent = 'Processing request...';
             
             try {
@@ -109,29 +196,35 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: url, duration: duration, totalViews: totalViews }),
+                    // 30 second timeout
                     signal: AbortSignal.timeout(30000) 
                 });
 
                 const data = await response.json();
                 
                 if (response.ok && data.status === 'queued') {
+                    // Success: Task Accepted
                     DOM.statusMessage.textContent = `✅ Task Accepted! ${data.message}`;
                     updateMessage(`Estimated completion time: ${data.estimatedTime}. Check Render logs for progress.`, false);
                 } else {
+                    // Backend Error
                     DOM.statusMessage.textContent = '❌ Submission Failed.';
                     updateMessage(`Server Error: ${data.message || 'Unknown error. Check Render logs.'}`, true);
                 }
             } catch (error) {
+                // Network or Timeout Error
                 let errorMsg = error.name === 'AbortError' ? 'Connection Timeout: Server took too long to respond.' : error.message;
                 DOM.statusMessage.textContent = '❌ Submission Failed.';
                 updateMessage(`Network/System Error: ${errorMsg}. Please ensure the Render server is running and the URL is correct.`, true);
                 console.error("Submission Error:", error);
             } finally {
+                // Re-enable button
                 DOM.submitBtn.textContent = 'Submit Another Task';
                 DOM.submitBtn.disabled = false;
             }
         }
 
+        // Initialization
         DOM.submitBtn.addEventListener('click', handleSubmit);
         DOM.statusMessage.textContent = 'System Ready. Enter details above.';
     </script>
