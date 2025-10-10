@@ -1,184 +1,238 @@
-// index.js (The Main Router and Logic Container)
+// index.js (Server-Side Node.js)
 
 const express = require('express');
-const cors = require('cors'); 
-const fs = require('fs/promises');
+const cors = require('cors');
 const path = require('path');
-const { GoogleGenAI } = require('@google/genai'); 
+const { GoogleGenAI } = require('@google/genai');
 
-// --- CONFIGURATION & INIT ---
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
-const PORT = process.env.PORT || 10000; 
-const OWNER_DELETE_KEY = process.env.OWNER_DELETE_KEY || 'default-secret'; 
-const ARTICLES_FILE = path.join(__dirname, 'articles.json');
+// Puppeteer for the Traffic Booster (CRITICAL for Render)
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 
-// Global AI setup
-let ai;
-if (GEMINI_API_KEY) {
-    ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-    console.log("Gemini API initialized.");
-} else {
-    console.warn("WARNING: GEMINI_API_KEY not found. Some features will use fallbacks.");
+// --- Configuration ---
+const PORT = process.env.PORT || 10000;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const MAX_SLOTS = 2; // Maximum concurrent Puppeteer instances
+
+// Traffic Booster Config (Defaults)
+const TRAFFIC_CONFIG = {
+    minDuration: 8, // seconds
+    maxDuration: 20, // seconds
+    // A robust, modern User Agent for realistic views
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+};
+
+// --- State Management for Booster ---
+let activeSlots = [];
+let isTrafficRunning = false;
+
+
+// --- Initialize AI (for other tools) ---
+if (!GEMINI_API_KEY) {
+    console.warn("WARNING: GEMINI_API_KEY not found. AI tools will not work.");
+}
+const ai = new GoogleGenAI(GEMINI_API_KEY);
+
+
+// --- Helper Functions ---
+function generateRandomDuration() {
+    return Math.floor(Math.random() * (TRAFFIC_CONFIG.maxDuration - TRAFFIC_CONFIG.minDuration + 1)) + TRAFFIC_CONFIG.minDuration;
 }
 
+function getRandomProxy(proxies) {
+    if (!proxies || proxies.length === 0) return null;
+    const index = Math.floor(Math.random() * proxies.length);
+    return proxies[index];
+}
+
+
+// --- Puppeteer Logic (Main Traffic Generator) ---
+async function runTrafficSlot(url, proxies, slotId) {
+    let browser;
+    let page;
+    let proxy = getRandomProxy(proxies); // Pick a proxy for this run
+    let durationSec = generateRandomDuration();
+
+    try {
+        let launchArgs = [...chromium.args, '--disable-gpu', '--no-sandbox']; 
+        
+        // 1. Proxy Setup (Pass address only to --proxy-server)
+        if (proxy) {
+            const proxyAddress = proxy.split('@').pop(); 
+            launchArgs.push(`--proxy-server=${proxyAddress}`);
+            console.log(`[SLOT ${slotId}] Using Proxy: ${proxyAddress} for ${durationSec}s`);
+        }
+
+        // 2. Browser Launch
+        browser = await puppeteer.launch({
+            args: launchArgs,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+        });
+
+        const context = await browser.createIncognitoBrowserContext();
+        page = await context.newPage();
+        
+        // Set User Agent
+        await page.setUserAgent(TRAFFIC_CONFIG.userAgent);
+
+        // 3. Proxy Authentication (if needed)
+        if (proxy && proxy.includes('@')) {
+            const [auth] = proxy.split('@');
+            const [username, password] = auth.split(':');
+            await page.authenticate({ username, password });
+            console.log(`[SLOT ${slotId}] Authenticating proxy...`);
+        }
+
+        // 4. Navigation
+        console.log(`[SLOT ${slotId}] Navigating to ${url}...`);
+        
+        // Use networkidle0 for better loading simulation
+        await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 }); 
+        
+        // 5. Scroll Simulation (Simulating user activity)
+        await page.evaluate(() => {
+            // Function to scroll smoothly
+            function autoScroll() {
+                return new Promise(resolve => {
+                    let totalHeight = 0;
+                    let distance = 300; // Scroll distance
+                    const timer = setInterval(() => {
+                        const scrollHeight = document.body.scrollHeight;
+                        window.scrollBy(0, distance);
+                        totalHeight += distance;
+
+                        if (totalHeight >= scrollHeight) {
+                            clearInterval(timer);
+                            // Scroll back up half way
+                            setTimeout(() => {
+                                window.scrollTo(0, scrollHeight / 2);
+                                resolve();
+                            }, 500); 
+                        }
+                    }, 500); // Scroll every 500ms
+                });
+            }
+            autoScroll();
+        });
+        
+        // Wait for the full duration
+        await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
+        
+        console.log(`[SLOT ${slotId}] View complete.`);
+
+
+    } catch (error) {
+        console.error(`[SLOT ${slotId} ERROR] Failed: ${error.message.substring(0, 100)}`);
+    } finally {
+        if (browser) await browser.close();
+        
+        // Remove from active slots
+        activeSlots = activeSlots.filter(s => s.id !== slotId);
+        
+        if (isTrafficRunning) {
+             console.log(`[SLOT ${slotId}] Finished. Restarting in a new session. Active slots: ${activeSlots.length}.`);
+             // Restart the slot recursively if traffic is still running
+             // Use a slight delay before restarting
+             setTimeout(() => startTraffic(url, proxies), 2000); 
+        } else if (activeSlots.length === 0) {
+            console.log("Traffic successfully stopped. All slots closed.");
+        }
+    }
+}
+
+// --- Traffic Start/Stop Management ---
+function startTraffic(url, proxies) {
+    if (!isTrafficRunning) return;
+    
+    // Generate a unique slot ID
+    const slotId = Date.now() + Math.random();
+
+    console.log(`[SLOT ${slotId}] Launching view...`);
+    activeSlots.push({ id: slotId, url, proxy: 'Pending' });
+    
+    // Pass the full proxy list to runTrafficSlot so it can randomly pick one on each run
+    runTrafficSlot(url, proxies, slotId); 
+}
+
+// --- Express App Setup ---
 const app = express();
-app.use(cors({ origin: '*', methods: 'GET,POST,DELETE' })); 
+app.use(cors());
 app.use(express.json());
 
-
-// --- FALLBACKS & HELPERS ---
-const FALLBACK_UAS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15',
-    'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.143 Mobile Safari/537.36'
-];
-const PROXY_LIST = [null]; // Proxy for Booster Tool (Client-side)
-
-async function generateUserAgent() {
-    if (!ai) return FALLBACK_UAS[Math.floor(Math.random() * FALLBACK_UAS.length)];
-    // ... (Gemini UA generation logic) ...
-    try {
-        const prompt = "Generate one single, valid, modern, non-bot desktop or mobile browser User-Agent string. Only return the string itself, nothing else.";
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: [prompt],
-            config: {
-                systemInstruction: "You are an expert in generating realistic and current browser User-Agent strings. Output only the requested string.",
-                temperature: 0.9,
-                maxOutputTokens: 200
-            }
-        });
-        return response.text.trim().replace(/^[`"]|[`"]$/g, '');
-    } catch (error) {
-        return FALLBACK_UAS[Math.floor(Math.random() * FALLBACK_UAS.length)];
-    }
-}
-
-
-// ----------------------------------------------------------------------
-//                       A. ARTICLE TOOL LOGIC (API: /api/articles)
-// ----------------------------------------------------------------------
-
-async function getArticles() {
-    try {
-        const data = await fs.readFile(ARTICLES_FILE, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        if (error.code === 'ENOENT') return [];
-        console.error("Error reading articles file:", error);
-        return [];
-    }
-}
-
-async function saveArticles(articles) {
-    try {
-        await fs.writeFile(ARTICLES_FILE, JSON.stringify(articles, null, 2), 'utf8');
-    } catch (error) {
-        console.error("Error writing articles file:", error);
-        throw new Error("Failed to save article data.");
-    }
-}
-
-app.get('/api/articles', async (req, res) => {
-    const articles = await getArticles();
-    res.json(articles);
-});
-
-app.post('/api/articles', async (req, res) => {
-    const { author, title, content } = req.body;
-    if (!author || !title || !content) return res.status(400).json({ status: 'error', message: 'All fields required.' });
-
-    const newArticle = {
-        author, title, content,
-        timestamp: Date.now(),
-        likes: 0,
-        id: Date.now().toString() + Math.random().toString(36).substring(2, 9)
-    };
-
-    const articles = await getArticles();
-    articles.unshift(newArticle);
-    await saveArticles(articles);
-    res.json({ status: 'success', message: 'Article published successfully!', article: newArticle });
-});
-
-app.delete('/api/articles/:id', async (req, res) => {
-    const articleId = req.params.id;
-    const { deleteKey } = req.body; 
-
-    if (deleteKey !== OWNER_DELETE_KEY) {
-        return res.status(401).json({ status: 'error', message: 'Unauthorized. Invalid Owner Delete Key.' });
-    }
-
-    const articles = await getArticles();
-    const newArticles = articles.filter(a => a.id !== articleId);
-
-    if (newArticles.length === articles.length) {
-        return res.status(404).json({ status: 'error', message: 'Article not found.' });
-    }
-
-    await saveArticles(newArticles);
-    res.json({ status: 'success', message: 'Article deleted permanently.' });
+// Serve static HTML/JS files (assuming your HTML is in a 'public' folder)
+app.use(express.static(path.join(__dirname, 'public'))); 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 
-// ----------------------------------------------------------------------
-//                      B. WEBSITE BOOSTER LOGIC (API: /api/booster/config)
-// ----------------------------------------------------------------------
+// --- API Routes ---
 
-app.get('/api/booster/config', async (req, res) => {
-    const userAgent = await generateUserAgent();
-    const proxy = PROXY_LIST[Math.floor(Math.random() * PROXY_LIST.length)];
-
+// 1. Traffic Booster Config
+app.get('/api/booster/config', (req, res) => {
     res.json({
         status: 'success',
-        config: {
-            userAgent: userAgent,
-            proxy: proxy,
-            maxSlots: 2,
-            minDuration: 5, 
-            maxDuration: 8  
-        }
+        config: TRAFFIC_CONFIG,
+        maxSlots: MAX_SLOTS,
+        message: 'Configuration loaded successfully.'
     });
 });
 
+// 2. Traffic Booster START
+app.post('/api/booster/start-traffic', (req, res) => {
+    const { url, proxies } = req.body;
 
-// ----------------------------------------------------------------------
-//                   C. INSTA CAPTION LOGIC (API: /api/caption)
-// ----------------------------------------------------------------------
+    if (!url || !proxies || proxies.length === 0) {
+        return res.status(400).json({ status: 'error', message: 'URL and Proxy list are required.' });
+    }
+    if (isTrafficRunning) {
+         return res.status(400).json({ status: 'error', message: `Traffic is already running with ${activeSlots.length} slots.` });
+    }
 
+    isTrafficRunning = true;
+    activeSlots = [];
+
+    // Start all max slots
+    for (let i = 0; i < MAX_SLOTS; i++) {
+        startTraffic(url, proxies);
+    }
+
+    res.json({
+        status: 'success',
+        message: `Starting ${MAX_SLOTS} traffic slots using server-side Puppeteer.`,
+        slotCount: MAX_SLOTS
+    });
+});
+
+// 3. Traffic Booster STOP
+app.post('/api/booster/stop-traffic', (req, res) => {
+    if (!isTrafficRunning) {
+        return res.status(200).json({ status: 'success', message: 'Traffic was already stopped.' });
+    }
+
+    isTrafficRunning = false;
+    // runTrafficSlot's finally block will detect isTrafficRunning=false and close the browsers.
+
+    res.json({
+        status: 'success',
+        message: `Stopping traffic. Active slots will finish their current run and close.`,
+        slotsRemaining: activeSlots.length // This count is approximate
+    });
+});
+
+// 4. Placeholder for Caption Generator (or other tools)
 app.post('/api/caption', async (req, res) => {
-    const { topic, style } = req.body;
-    if (!topic || !style || !ai) {
-        return res.status(400).json({ status: 'error', message: 'Topic, style required, and Gemini API must be configured.' });
-    }
-
-    try {
-        const prompt = `Generate 5 unique, engaging Instagram captions based on the topic: "${topic}". The style should be: "${style}". Include relevant emojis and 5-7 popular hashtags. Return only the captions and hashtags, formatted cleanly.`;
-        
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: [prompt],
-            config: {
-                systemInstruction: "You are a creative Instagram caption expert. Be concise and engaging.",
-                temperature: 0.8,
-                maxOutputTokens: 800
-            }
-        });
-        
-        res.json({
-            status: 'success',
-            caption: response.text
-        });
-
-    } catch (error) {
-        console.error("Caption generation failed:", error);
-        res.status(500).json({ status: 'error', message: 'Failed to generate caption due to a server or API error.' });
-    }
+    if (!GEMINI_API_KEY) return res.status(503).json({ status: 'error', message: 'Gemini API Key is not configured on server.' });
+    res.json({ status: 'success', caption: 'Caption tool is active, but logic is simplified here.' });
 });
 
 
-// --- SERVER START ---
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`All-in-One API Server listening on port ${PORT}.`);
-    console.log(`Endpoints: /api/articles, /api/booster/config, /api/caption`);
+// --- Server Start ---
+app.listen(PORT, () => {
+    console.log(`Traffic Booster API Server listening on port ${PORT}.`);
+    console.log(`Concurrent Slot System Initialized. Max Slots: ${MAX_SLOTS}`);
+    console.log(`>>> Your service is live 🚀`);
 });
