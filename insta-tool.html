@@ -7,12 +7,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
-        /* Professional and Clean UI based on the Booster Tool */
+        /* Professional and Clean UI */
         :root {
             --primary-color: #9c27b0; /* Deep Purple for creativity/AI theme */
             --primary-hover: #7b1fa2;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
             --text-color: #343a40;
@@ -65,10 +63,6 @@
             font-size: 16px;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        input[type="text"]:focus {
-             border-color: var(--primary-color);
-             box-shadow: 0 0 0 0.2rem rgba(156, 39, 176, 0.25); /* Focus effect */
-        }
         
         #generateBtn {
             width: 100%;
@@ -118,19 +112,11 @@
             color: #1a1a1a;
         }
 
-        .api-status {
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 4px;
-            font-weight: 500;
-            text-align: center;
-        }
-
         /* Status Colors */
+        .api-status { padding: 10px; margin-top: 15px; border-radius: 4px; font-weight: 500; text-align: center; }
         .status-success { background-color: #d4edda; color: #155724; }
         .status-error { background-color: #f8d7da; color: #721c24; }
         .status-loading { background-color: #fff3cd; color: #856404; }
-
     </style>
 </head>
 <body>
@@ -160,7 +146,7 @@
     </div>
 
     <script>
-        // ⭐ API URL for Caption Tool (CHECK THIS) ⭐
+        // ⭐ API URL for Caption Tool (Must include /api/caption) ⭐
         const API_URL_CAPTION = "https://pooreyoutuber-github-io.onrender.com/api/caption"; 
         
         const captionForm = document.getElementById('caption-form');
@@ -208,10 +194,10 @@
                     body: JSON.stringify({ topic, style })
                 });
 
-                // Check for non-JSON or server sleep issue (fixes the '<' error)
+                // Crucial Check: Fixes the '<' error when server is sleeping
                 const contentType = response.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("API server did not return JSON. Check your Render logs or if the service is awake.");
+                    throw new Error("Server did not return JSON. (Server is likely sleeping or unreachable.)");
                 }
 
                 const result = await response.json();
@@ -220,13 +206,11 @@
                     captionOutput.textContent = result.caption.trim();
                     reportStatus('Captions Generated Successfully!', 'success');
                 } else {
-                    // Handle API-side error messages
                     const errorMessage = result.message || 'Server error occurred during generation.';
                     captionOutput.textContent = `❌ Generation Failed: ${errorMessage}`;
                     reportStatus(`Generation Failed: ${errorMessage.substring(0, 50)}...`, 'error');
                 }
             } catch (error) {
-                // Handle network errors
                 captionOutput.textContent = `❌ Network/API Error: ${error.message}`;
                 reportStatus(`Network Error: API unreachable or server is sleeping. (${error.message.substring(0, 50)}...)`, 'error');
             } finally {
