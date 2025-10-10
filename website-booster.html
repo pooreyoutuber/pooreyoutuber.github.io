@@ -158,7 +158,7 @@
 
     <script>
         // ⭐ API URL HARDCODED HERE (YOUR REPLIT URL) ⭐
-        // REPLACE THIS URL with your actual Replit URL if it changes!
+        // This URL matches the one you confirmed based on your Replit project name.
         const API_URL_BASE = "https://nodejs-website-booster-sutharmanish404.replit.app"; 
         const API_ENDPOINT = '/submit-task'; 
         
@@ -221,20 +221,21 @@
                     // Success: Task Accepted
                     DOM.statusMessage.textContent = `✅ Task Accepted! Your task is ${data.queueLength} in the queue.`;
                     updateMessage(
-                        `Estimated completion: ${data.message.split('Estimated time: ')[1] || 'Check Replit logs for details.'}.`, 
+                        `Processing in background. Estimated completion time: ${data.estimatedTime}. Check Replit logs for real-time progress.`, 
                         false
                     );
                     DOM.submitBtn.textContent = 'Submit Another Task';
                 } else {
                     // Backend Error
                     DOM.statusMessage.textContent = '❌ Submission Failed.';
+                    // This handles cases where the server sends a 400/500 response
                     updateMessage(`Server Error: ${data.message || 'Unknown error. Check Replit logs.'}`, true);
                 }
             } catch (error) {
-                // Network or Timeout Error
+                // Network or Timeout Error (The "Failed to fetch" you were getting)
                 let errorMsg = error.name === 'AbortError' ? 'Connection Timeout: Server took too long to respond.' : error.message;
                 DOM.statusMessage.textContent = '❌ Submission Failed.';
-                updateMessage(`Network/System Error: ${errorMsg}`, true);
+                updateMessage(`Network/System Error: ${errorMsg}. Please ensure the Replit server is running and the URL is correct.`, true);
                 console.error("Submission Error:", error);
             } finally {
                 // Re-enable button
