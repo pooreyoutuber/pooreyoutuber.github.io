@@ -1,15 +1,35 @@
-// index.js (2-Slot Concurrent System for Render)
+// index.js (Final Universal Code for Render/Replit)
 
 const express = require('express');
 const cors = require('cors'); 
 const puppeteer = require('puppeteer-core'); 
 const { GoogleGenAI } = require('@google/genai'); 
-const { createRequire } = require('module');
-const customRequire = createRequire(__filename);
+// const { createRequire } = require('module'); // Not needed for simple use
+// const customRequire = createRequire(__filename); // Not needed for simple use
 
-// --- CONFIGURATION ---
+// --- PLATFORM CONFIGURATION ---
+
+// Set the Port dynamically: Render uses 10000. Replit might use 3000 or other.
+const PORT = process.env.PORT || 10000; 
+
+// Determine Chrome Executable Path based on Environment
+const getExecutablePath = () => {
+    // 1. Check for official Puppeteer environment variable (for Docker/Render standard images)
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+        return process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+    
+    // 2. Fallback for common Linux environments (like Render base/Docker)
+    if (PORT === 10000) {
+        return '/usr/bin/google-chrome'; 
+    }
+    
+    // 3. Fallback for Puppeteer's default logic (might work on Replit if manually installed)
+    return undefined; 
+};
+
+// --- CORE CONFIGURATION ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
-const PORT = process.env.PORT || 10000; // RENDER DEFAULT PORT
 const MAX_CONCURRENT_SLOTS = 2; 
 const DELAY_BETWEEN_VIEWS_MS = 1000; 
 
@@ -38,7 +58,7 @@ const FALLBACK_UAS = [
     'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.143 Mobile Safari/537.36'
 ];
 
-// --- QUEUE SYSTEM ---
+// --- QUEUE SYSTEM & APP SETUP ---
 const requestQueue = []; 
 let activeSlots = 0;
 
@@ -55,10 +75,10 @@ if (GEMINI_API_KEY) {
 }
 
 
-// --- Dynamic UA Generator ---
+// --- Dynamic UA Generator (Same as before) ---
 async function generateUserAgent() {
     if (!ai) return FALLBACK_UAS[Math.floor(Math.random() * FALLBACK_UAS.length)];
-    
+    // ... (UA generation logic)
     try {
         const prompt = "Generate one single, valid, modern, non-bot desktop or mobile browser User-Agent string. Only return the string itself, nothing else.";
         const response = await ai.models.generateContent({
@@ -98,11 +118,11 @@ async function runSlot(taskItem) {
     console.log(`[SLOT ${activeSlots}/${MAX_CONCURRENT_SLOTS}] Launching view ${viewIndex + 1}...`);
 
     try {
-        // RENDER FIX: Puppeteer ko chrome binary ka path chahiye
+        // Use the dynamic executable path
         browser = await puppeteer.launch({
             args: launchArgs, 
             headless: true, 
-            executablePath: '/usr/bin/google-chrome', 
+            executablePath: getExecutablePath(), 
             timeout: 35000, 
         });
 
@@ -138,7 +158,7 @@ async function runSlot(taskItem) {
 }
 
 
-// --- ASYNCHRONOUS QUEUE PROCESSOR (Concurrency handler) ---
+// --- ASYNCHRONOUS QUEUE PROCESSOR (Same as before) ---
 async function processQueue() {
     while (activeSlots < MAX_CONCURRENT_SLOTS && requestQueue.length > 0) {
         const nextTask = requestQueue.shift();
@@ -152,7 +172,7 @@ async function processQueue() {
 }
 
 
-// --- API ENDPOINT (Task Submission) ---
+// --- API ENDPOINT (Same as before) ---
 app.post('/submit-task', async (req, res) => {
     const { url, duration, totalViews } = req.body;
     
@@ -185,6 +205,7 @@ app.post('/submit-task', async (req, res) => {
 
 
 // --- SERVER START ---
+// Listen on the dynamic PORT
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Traffic Booster API Server listening on port ${PORT}.`);
     console.log(`Concurrent Slot System Initialized. Max Slots: ${MAX_CONCURRENT_SLOTS}.`);
