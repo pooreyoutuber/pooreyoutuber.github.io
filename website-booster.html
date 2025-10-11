@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2. Website Traffic Booster (Server-Proxy Ready) | PooreYouTuber</title>
+    <title>Server-Side Website Booster (2-Slot Proxy)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
@@ -13,7 +13,7 @@
             --danger-color: #dc3545;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
-            --text-color: #343a40;
+            --text-color: #343a30;
             --border-color: #ced4da;
         }
 
@@ -35,14 +35,15 @@
         
         .server-status { margin-top: 20px; padding: 15px; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; }
         .server-status h2 { font-size: 18px; margin-bottom: 10px; color: var(--primary-color); }
-        #server-log { white-space: pre-wrap; font-family: monospace; font-size: 12px; min-height: 150px; background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-y: auto; }
+        
+        #server-log { white-space: pre-wrap; font-family: monospace; font-size: 12px; min-height: 250px; background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-y: auto; }
         .slot-display { text-align: center; margin-top: 10px; color: #6c757d; font-size: 0.9em; }
 
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Server-Side Traffic Generator (Automatic Proxies)</h1>
+        <h1>🚀 Server-Side Website Booster (2 Slots)</h1>
         
         <div id="apiStatus">
             <i class="fas fa-spinner fa-spin"></i> Connecting to API server for config...
@@ -53,14 +54,14 @@
             
             <div class="button-group">
                 <button id="startBtn" disabled>
-                    <i class="fas fa-play"></i> START TRAFFIC (Server)
+                    <i class="fas fa-play"></i> START TRAFFIC (2 Slots)
                 </button>
                 <button id="stopBtn" disabled>
                     <i class="fas fa-stop"></i> STOP ALL
                 </button>
             </div>
             <div class="slot-display">
-                *Traffic will be generated on the server using **2 simultaneous browser slots**.
+                *Traffic will be generated on the server using **2 simultaneous browser slots** with rotating proxies.
             </div>
         </div>
 
@@ -70,13 +71,14 @@
         </div>
         
         <p style="text-align: center; margin-top: 15px; font-size: 0.8em; color: var(--danger-color);">
-            *Proxies are **hardcoded** in the server code and used automatically.
+            *Proxies are **hardcoded** in the server code.
         </p>
     </div>
 
     <script>
         // *** Apni Render service ka URL yahaan dalna na bhoolen ***
-        const API_BASE_URL = "https://pooreyoutuber-github-io.onrender.com/api/booster"; 
+        // Example: https://pooreyoutuber-github-io.onrender.com/api/booster
+        const API_BASE_URL = "YOUR_RENDER_SERVICE_URL/api/booster"; 
         
         const statusElement = document.getElementById('apiStatus');
         const startBtn = document.getElementById('startBtn');
@@ -93,7 +95,7 @@
 
         function appendLog(message, isError = false) {
             const now = new Date().toLocaleTimeString();
-            serverLog.innerHTML += `<span style="color: ${isError ? 'red' : 'green'};">[${now}]</span> ${message}\n`;
+            serverLog.innerHTML += `<span style="color: ${isError ? 'red' : 'green'}; font-weight: bold;">[${now}]</span> ${message}\n`;
             serverLog.scrollTop = serverLog.scrollHeight; 
         }
 
@@ -133,7 +135,6 @@
             appendLog(`Command sent: Starting traffic to ${url} using hardcoded proxies.`);
 
             try {
-                // Only send the URL, the server has the proxies
                 const response = await fetch(`${API_BASE_URL}/start-traffic`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -143,11 +144,10 @@
                 const result = await response.json();
 
                 if (response.ok && result.status === 'success') {
-                    updateStatus(`✅ Traffic Started Successfully! Check log.`, 'success');
+                    updateStatus(`✅ Traffic Started Successfully! Check server log below.`, 'success');
                     appendLog(`Server started ${result.slotCount} traffic slots successfully!`, false);
-                    appendLog(`Server Response: ${result.message}`);
+                    appendLog(`Server Message: ${result.message}`);
                 } else {
-                    // Agar server se error aaye, toh woh result.message mein hoga
                     throw new Error(result.message || 'Server failed to start traffic.');
                 }
             } catch (error) {
@@ -176,7 +176,7 @@
 
                 if (response.ok && result.status === 'success') {
                     updateStatus(`⏸️ Traffic Stopped. Server is idle.`, 'success');
-                    appendLog(`Server stopped all slots.`, false);
+                    appendLog(`Server stopped all slots. Slots remaining: ${result.slotsRemaining}`, false);
                 } else {
                     throw new Error(result.message || 'Server failed to stop traffic.');
                 }
