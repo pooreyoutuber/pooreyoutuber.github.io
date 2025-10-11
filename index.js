@@ -1,4 +1,4 @@
-// index.js (Server-Side Node.js)
+// index.js (Final and Correct Server Code for Render)
 
 const express = require('express');
 const cors = require('cors');
@@ -8,12 +8,11 @@ const path = require('path');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
-// --- Hardcoded Proxy List ---
-// PROXY_CREDENTIALS ko empty rakha gaya hai (IP Authentication ke liye)
-const PROXY_CREDENTIALS = ""; 
+// --- Hardcoded Proxy List (Using IP Authentication as per Render's need) ---
+const PROXY_CREDENTIALS = ""; // Empty for IP-based authentication
 
 const RAW_PROXIES = [
-    // All 100 proxies from your file (proxyscrape_premium_http_proxies.txt)
+    // 100+ Proxies from your proxyscrape_premium_http_proxies.txt file
     '45.3.49.4:3129', '209.50.164.165:3129', '216.26.232.247:3129', '65.111.3.145:3129', '209.50.168.254:3129', 
     '104.207.63.195:3129', '65.111.2.236:3129', '104.207.61.3:3129', '104.207.60.58:3129', '209.50.166.110:3129', 
     '209.50.170.93:3129', '216.26.254.100:3129', '209.50.164.168:3129', '104.207.57.162:3129', '65.111.15.170:3129', 
@@ -73,14 +72,14 @@ async function runTrafficSlot(url, slotId) {
     let durationSec = generateRandomDuration();
 
     try {
-        // --- 1. Launch Arguments (CRITICAL RENDER FIX) ---
+        // --- 1. Launch Arguments (CRITICAL RENDER FIXES) ---
         let launchArgs = [
             ...chromium.args, 
             '--disable-gpu', 
             '--no-sandbox', 
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
-            '--single-process' // Added to fix ETXTBSY/Chromium issues
+            '--single-process' // Fixes ETXTBSY errors on Render
         ]; 
         
         if (proxy) {
@@ -89,7 +88,7 @@ async function runTrafficSlot(url, slotId) {
             console.log(`[SLOT ${slotId}] Using Proxy: ${proxyAddress} for ${durationSec}s`);
         }
 
-        // --- 2. Browser Launch (CRITICAL RENDER FIX) ---
+        // --- 2. Browser Launch ---
         browser = await puppeteer.launch({
             args: launchArgs,
             defaultViewport: chromium.defaultViewport,
@@ -98,12 +97,12 @@ async function runTrafficSlot(url, slotId) {
             ignoreHTTPSErrors: true,
         });
 
-        // FIX: Replaced createIncognitoBrowserContext with browser.newPage()
+        // FIX: Replaced createIncognitoBrowserContext with newPage()
         page = await browser.newPage();
         
         await page.setUserAgent(TRAFFIC_CONFIG.userAgent);
 
-        // --- 3. Proxy Authentication (if needed) ---
+        // --- 3. Proxy Authentication (Only needed if PROXY_CREDENTIALS is not empty) ---
         if (proxy && proxy.includes('@')) {
             const [auth] = proxy.split('@');
             const [username, password] = auth.split(':');
@@ -111,12 +110,13 @@ async function runTrafficSlot(url, slotId) {
             console.log(`[SLOT ${slotId}] Authenticating proxy...`);
         }
 
-        // --- 4. Navigation (Timeout is high: 45s to avoid Navigation timeout exceeded) ---
+        // --- 4. Navigation (High Timeout to fix Navigation timeout exceeded) ---
         console.log(`[SLOT ${slotId}] Navigating to ${url}...`);
         
+        // Timeout is set to 45 seconds
         await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 }); 
         
-        // --- 5. User Activity Simulation ---
+        // --- 5. User Activity Simulation (Scrolling) ---
         await page.evaluate(() => {
             return new Promise(resolve => {
                 let totalHeight = 0;
@@ -134,6 +134,7 @@ async function runTrafficSlot(url, slotId) {
             });
         });
         
+        // Wait for the specified duration
         await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
         
         console.log(`[SLOT ${slotId}] View complete.`);
@@ -178,11 +179,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static HTML/JS files 
-app.use(express.static(path.join(__dirname, 'public'))); 
+// FIX: Serving the file directly from the root directory (__dirname)
 app.get('/', (req, res) => {
-    // FIX: Serving the correct file name: website-booster.html
-    res.sendFile(path.join(__dirname, 'public', 'website-booster.html')); 
+    res.sendFile(path.join(__dirname, 'website-booster.html')); 
 });
 
 
