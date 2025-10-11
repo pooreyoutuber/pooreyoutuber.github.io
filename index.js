@@ -3,19 +3,19 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-// const { GoogleGenAI } = require('@google/genai'); // AI library abhi disabled rakhte hain, aapke logs mein iski vajah se bhi errors aaye the.
 
 // Puppeteer for the Traffic Booster (CRITICAL for Render)
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
-// --- Hardcoded Proxy List (From User's Uploaded proxyscrape_premium_http_proxies.txt) ---
-// *** ZAROORI: Agar aapki Proxyscrape proxies ko username/password chahiye,
+// --- Hardcoded Proxy List ---
+// *** ZAROORI: Agar aapki Proxyscrape proxies ko username/password chahiye, 
 // toh 'user:pass@' ko apne asal credentials se replace karein. 
-// Agar authentication IP based hai (jaisa free trial mein hota hai), toh isko ' ' rakhein.
+// Agar authentication IP based hai, toh isko ' ' rakhein.
 const PROXY_CREDENTIALS = "user:pass@"; // Yahaan BADLEIN agar zaroori ho
 
 const RAW_PROXIES = [
+    // ... (All 100+ proxies from proxyscrape_premium_http_proxies.txt)
     '45.3.49.4:3129', '209.50.164.165:3129', '216.26.232.247:3129', '65.111.3.145:3129', '209.50.168.254:3129', 
     '104.207.63.195:3129', '65.111.2.236:3129', '104.207.61.3:3129', '104.207.60.58:3129', '209.50.166.110:3129', 
     '209.50.170.93:3129', '216.26.254.100:3129', '209.50.164.168:3129', '104.207.57.162:3129', '65.111.15.170:3129', 
@@ -81,7 +81,8 @@ async function runTrafficSlot(url, slotId) {
             '--disable-gpu', 
             '--no-sandbox', 
             '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage'
+            '--disable-dev-shm-usage',
+            '--single-process' // New: Added to fix ETXTBSY/Chromium issues on some Render instances
         ]; 
         
         if (proxy) {
@@ -94,13 +95,14 @@ async function runTrafficSlot(url, slotId) {
         browser = await puppeteer.launch({
             args: launchArgs,
             defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(), // Yahaan Puppeteer ka executable path define kiya gaya hai
+            executablePath: await chromium.executablePath(), 
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
 
-        const context = await browser.createIncognitoBrowserContext();
-        page = await context.newPage();
+        // **FIX: Changed createIncognitoBrowserContext to browser.newPage()**
+        // Since we are not using a shared context, a simple newPage is sufficient.
+        page = await browser.newPage();
         
         await page.setUserAgent(TRAFFIC_CONFIG.userAgent);
 
@@ -157,7 +159,7 @@ async function runTrafficSlot(url, slotId) {
     }
 }
 
-// --- Traffic Start/Stop Management ---
+// --- Traffic Start/Stop Management (No change needed here) ---
 function startTraffic(url) {
     if (!isTrafficRunning) return;
     if (HARDCODED_PROXIES.length === 0) {
@@ -174,7 +176,7 @@ function startTraffic(url) {
     runTrafficSlot(url, slotId); 
 }
 
-// --- Express App Setup ---
+// --- Express App Setup & API Routes (No change needed here) ---
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -184,9 +186,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'booster_tool.html')); 
 });
-
-
-// --- API Routes ---
 
 // 1. Traffic Booster Config
 app.get('/api/booster/config', (req, res) => {
@@ -199,7 +198,7 @@ app.get('/api/booster/config', (req, res) => {
     });
 });
 
-// 2. Traffic Booster START (Ab sirf URL chahiye)
+// 2. Traffic Booster START (Sare checks sahi hain)
 app.post('/api/booster/start-traffic', (req, res) => {
     const { url } = req.body;
 
