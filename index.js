@@ -3,17 +3,17 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { GoogleGenAI } = require('@google/genai');
+// const { GoogleGenAI } = require('@google/genai'); // AI library abhi disabled rakhte hain, aapke logs mein iski vajah se bhi errors aaye the.
 
 // Puppeteer for the Traffic Booster (CRITICAL for Render)
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
 // --- Hardcoded Proxy List (From User's Uploaded proxyscrape_premium_http_proxies.txt) ---
-// *** CRITICAL: If your Proxyscrape proxies require authentication, 
-// replace 'user:pass' with your actual username and password. 
-// Otherwise, set it to an empty string: const PROXY_CREDENTIALS = ""; ***
-const PROXY_CREDENTIALS = "user:pass@"; 
+// *** ZAROORI: Agar aapki Proxyscrape proxies ko username/password chahiye,
+// toh 'user:pass@' ko apne asal credentials se replace karein. 
+// Agar authentication IP based hai (jaisa free trial mein hota hai), toh isko ' ' rakhein.
+const PROXY_CREDENTIALS = "user:pass@"; // Yahaan BADLEIN agar zaroori ho
 
 const RAW_PROXIES = [
     '45.3.49.4:3129', '209.50.164.165:3129', '216.26.232.247:3129', '65.111.3.145:3129', '209.50.168.254:3129', 
@@ -43,26 +43,17 @@ const HARDCODED_PROXIES = RAW_PROXIES.map(p => PROXY_CREDENTIALS + p);
 
 // --- Configuration ---
 const PORT = process.env.PORT || 10000;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
-const MAX_SLOTS = 2; // Maximum concurrent Puppeteer instances
+const MAX_SLOTS = 2; 
 
-// Traffic Booster Config (Defaults)
 const TRAFFIC_CONFIG = {
-    minDuration: 8, // seconds
-    maxDuration: 20, // seconds
+    minDuration: 8, 
+    maxDuration: 20, 
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
 };
 
-// --- State Management for Booster ---
+// --- State Management ---
 let activeSlots = [];
 let isTrafficRunning = false;
-
-// --- Initialize AI (for other tools) ---
-if (!GEMINI_API_KEY) {
-    console.warn("WARNING: GEMINI_API_KEY not found. Using small hardcoded User Agents list.");
-}
-const ai = new GoogleGenAI(GEMINI_API_KEY);
-
 
 // --- Helper Functions ---
 function generateRandomDuration() {
@@ -80,11 +71,11 @@ function getRandomProxy() {
 async function runTrafficSlot(url, slotId) {
     let browser;
     let page;
-    let proxy = getRandomProxy(); // Pick a random proxy from the hardcoded list
+    let proxy = getRandomProxy(); 
     let durationSec = generateRandomDuration();
 
     try {
-        // Chromium arguments for Render compatibility and anti-detection
+        // --- 1. Launch Arguments (RENDER FIX) ---
         let launchArgs = [
             ...chromium.args, 
             '--disable-gpu', 
@@ -93,18 +84,17 @@ async function runTrafficSlot(url, slotId) {
             '--disable-dev-shm-usage'
         ]; 
         
-        // 1. Proxy Setup (Pass address only to --proxy-server)
         if (proxy) {
             const proxyAddress = proxy.split('@').pop(); 
             launchArgs.push(`--proxy-server=${proxyAddress}`);
             console.log(`[SLOT ${slotId}] Using Proxy: ${proxyAddress} for ${durationSec}s`);
         }
 
-        // 2. Browser Launch
+        // --- 2. Browser Launch (CRITICAL RENDER FIX) ---
         browser = await puppeteer.launch({
             args: launchArgs,
             defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(), // RENDER FIX
+            executablePath: await chromium.executablePath(), // Yahaan Puppeteer ka executable path define kiya gaya hai
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
@@ -112,10 +102,9 @@ async function runTrafficSlot(url, slotId) {
         const context = await browser.createIncognitoBrowserContext();
         page = await context.newPage();
         
-        // Set User Agent
         await page.setUserAgent(TRAFFIC_CONFIG.userAgent);
 
-        // 3. Proxy Authentication (if needed)
+        // --- 3. Proxy Authentication (if needed) ---
         if (proxy && proxy.includes('@')) {
             const [auth] = proxy.split('@');
             const [username, password] = auth.split(':');
@@ -123,12 +112,12 @@ async function runTrafficSlot(url, slotId) {
             console.log(`[SLOT ${slotId}] Authenticating proxy...`);
         }
 
-        // 4. Navigation
+        // --- 4. Navigation ---
         console.log(`[SLOT ${slotId}] Navigating to ${url}...`);
         
         await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 }); 
         
-        // 5. Scroll Simulation (Simulating user activity: scroll down then halfway up)
+        // --- 5. User Activity Simulation ---
         await page.evaluate(() => {
             return new Promise(resolve => {
                 let totalHeight = 0;
@@ -140,28 +129,22 @@ async function runTrafficSlot(url, slotId) {
 
                     if (totalHeight >= scrollHeight) {
                         clearInterval(timer);
-                        // Scroll back up halfway
-                        setTimeout(() => {
-                            window.scrollTo(0, scrollHeight / 2);
-                            resolve();
-                        }, 500); 
+                        setTimeout(() => { window.scrollTo(0, scrollHeight / 2); resolve(); }, 500); 
                     }
                 }, 500); 
             });
         });
         
-        // Wait for the full duration
         await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
         
         console.log(`[SLOT ${slotId}] View complete.`);
 
 
     } catch (error) {
-        console.error(`[SLOT ${slotId} ERROR] Failed: ${error.message.substring(0, 100)}`);
+        console.error(`[SLOT ${slotId} ERROR] Failed to load/view: ${error.message.substring(0, 100)}`);
     } finally {
         if (browser) await browser.close();
         
-        // Remove from active slots
         activeSlots = activeSlots.filter(s => s.id !== slotId);
         
         if (isTrafficRunning) {
@@ -178,7 +161,7 @@ async function runTrafficSlot(url, slotId) {
 function startTraffic(url) {
     if (!isTrafficRunning) return;
     if (HARDCODED_PROXIES.length === 0) {
-        console.error("Cannot start traffic: No proxies found in hardcoded list.");
+        console.error("Cannot start traffic: No proxies found.");
         isTrafficRunning = false;
         return;
     }
@@ -199,7 +182,6 @@ app.use(express.json());
 // Serve static HTML/JS files 
 app.use(express.static(path.join(__dirname, 'public'))); 
 app.get('/', (req, res) => {
-    // Ensuring the correct HTML file is served
     res.sendFile(path.join(__dirname, 'public', 'booster_tool.html')); 
 });
 
@@ -212,16 +194,15 @@ app.get('/api/booster/config', (req, res) => {
         status: 'success',
         config: TRAFFIC_CONFIG,
         maxSlots: MAX_SLOTS,
-        proxyCount: HARDCODED_PROXIES.length, // Send proxy count to UI
+        proxyCount: HARDCODED_PROXIES.length,
         message: 'Configuration loaded successfully.'
     });
 });
 
-// 2. Traffic Booster START
+// 2. Traffic Booster START (Ab sirf URL chahiye)
 app.post('/api/booster/start-traffic', (req, res) => {
     const { url } = req.body;
 
-    // We only check for URL now, not proxies, because they are hardcoded
     if (!url) {
         return res.status(400).json({ status: 'error', message: 'Target URL is required.' });
     }
@@ -233,4 +214,39 @@ app.post('/api/booster/start-traffic', (req, res) => {
     }
 
     isTrafficRunning = true;
-    activeSlots
+    activeSlots = [];
+
+    for (let i = 0; i < MAX_SLOTS; i++) {
+        startTraffic(url);
+    }
+
+    res.json({
+        status: 'success',
+        message: `Starting ${MAX_SLOTS} traffic slots using server-side Puppeteer and random proxies.`,
+        slotCount: MAX_SLOTS
+    });
+});
+
+// 3. Traffic Booster STOP
+app.post('/api/booster/stop-traffic', (req, res) => {
+    if (!isTrafficRunning) {
+        return res.status(200).json({ status: 'success', message: 'Traffic was already stopped.' });
+    }
+
+    isTrafficRunning = false;
+
+    res.json({
+        status: 'success',
+        message: `Stopping traffic. Active slots will finish their current run and close.`,
+        slotsRemaining: activeSlots.length
+    });
+});
+
+
+// --- Server Start ---
+app.listen(PORT, () => {
+    console.log(`Traffic Booster API Server listening on port ${PORT}.`);
+    console.log(`Concurrent Slot System Initialized. Max Slots: ${MAX_SLOTS}`);
+    console.log(`Hardcoded Proxies Loaded: ${HARDCODED_PROXIES.length}`);
+    console.log(`>>> Your service is live 🚀`);
+});
