@@ -14,7 +14,6 @@ const PORT = process.env.PORT || 10000;
 let GEMINI_KEY;
 try {
     // Correct path for Secret Files on Render
-    // (Agar aap Render Secrets use karte hain, toh yeh chalega)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
@@ -142,7 +141,6 @@ app.post('/boost-mp', async (req, res) => {
     }
 
     // Immediately respond with 'accepted'
-    // This allows the client (browser) to close immediately without waiting for all 500 views to process
     res.json({ 
         status: 'accepted', 
         message: `Request for ${viewPlan.length} views accepted. Processing started in the background.`
