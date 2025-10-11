@@ -8,14 +8,12 @@ const path = require('path');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
-// --- Hardcoded Proxy List ---
-// *** ZAROORI: Agar aapki Proxyscrape proxies ko username/password chahiye, 
-// toh 'user:pass@' ko apne asal credentials se replace karein. 
-// Agar authentication IP based hai, toh isko ' ' rakhein.
-const PROXY_CREDENTIALS = "user:pass@"; // Yahaan BADLEIN agar zaroori ho
+// --- Hardcoded Proxy List (From User's Uploaded proxyscrape_premium_http_proxies.txt) ---
+// ** FIX: PROXY_CREDENTIALS ko empty rakha gaya hai (IP Authentication ke liye) **
+const PROXY_CREDENTIALS = ""; 
 
 const RAW_PROXIES = [
-    // ... (All 100+ proxies from proxyscrape_premium_http_proxies.txt)
+    // All 100 proxies from your file (proxyscrape_premium_http_proxies.txt)
     '45.3.49.4:3129', '209.50.164.165:3129', '216.26.232.247:3129', '65.111.3.145:3129', '209.50.168.254:3129', 
     '104.207.63.195:3129', '65.111.2.236:3129', '104.207.61.3:3129', '104.207.60.58:3129', '209.50.166.110:3129', 
     '209.50.170.93:3129', '216.26.254.100:3129', '209.50.164.168:3129', '104.207.57.162:3129', '65.111.15.170:3129', 
@@ -43,7 +41,7 @@ const HARDCODED_PROXIES = RAW_PROXIES.map(p => PROXY_CREDENTIALS + p);
 
 // --- Configuration ---
 const PORT = process.env.PORT || 10000;
-const MAX_SLOTS = 2; 
+const MAX_SLOTS = 2; // Fixed 2 concurrent slots
 
 const TRAFFIC_CONFIG = {
     minDuration: 8, 
@@ -75,14 +73,14 @@ async function runTrafficSlot(url, slotId) {
     let durationSec = generateRandomDuration();
 
     try {
-        // --- 1. Launch Arguments (RENDER FIX) ---
+        // --- 1. Launch Arguments (CRITICAL RENDER FIX) ---
         let launchArgs = [
             ...chromium.args, 
             '--disable-gpu', 
             '--no-sandbox', 
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
-            '--single-process' // New: Added to fix ETXTBSY/Chromium issues on some Render instances
+            '--single-process' // Added to fix ETXTBSY/Chromium issues
         ]; 
         
         if (proxy) {
@@ -95,13 +93,12 @@ async function runTrafficSlot(url, slotId) {
         browser = await puppeteer.launch({
             args: launchArgs,
             defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(), 
+            executablePath: await chromium.executablePath(), // Puppeteer path fix
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
 
-        // **FIX: Changed createIncognitoBrowserContext to browser.newPage()**
-        // Since we are not using a shared context, a simple newPage is sufficient.
+        // ** FIX: createIncognitoBrowserContext error solve **
         page = await browser.newPage();
         
         await page.setUserAgent(TRAFFIC_CONFIG.userAgent);
@@ -114,7 +111,7 @@ async function runTrafficSlot(url, slotId) {
             console.log(`[SLOT ${slotId}] Authenticating proxy...`);
         }
 
-        // --- 4. Navigation ---
+        // --- 4. Navigation (Timeout is high: 45s) ---
         console.log(`[SLOT ${slotId}] Navigating to ${url}...`);
         
         await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 }); 
@@ -159,7 +156,7 @@ async function runTrafficSlot(url, slotId) {
     }
 }
 
-// --- Traffic Start/Stop Management (No change needed here) ---
+// --- Traffic Start/Stop Management ---
 function startTraffic(url) {
     if (!isTrafficRunning) return;
     if (HARDCODED_PROXIES.length === 0) {
@@ -176,7 +173,7 @@ function startTraffic(url) {
     runTrafficSlot(url, slotId); 
 }
 
-// --- Express App Setup & API Routes (No change needed here) ---
+// --- Express App Setup & API Routes ---
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -184,8 +181,10 @@ app.use(express.json());
 // Serve static HTML/JS files 
 app.use(express.static(path.join(__dirname, 'public'))); 
 app.get('/', (req, res) => {
+    // boosgter_tool.html is the client-side interface
     res.sendFile(path.join(__dirname, 'public', 'booster_tool.html')); 
 });
+
 
 // 1. Traffic Booster Config
 app.get('/api/booster/config', (req, res) => {
@@ -198,7 +197,7 @@ app.get('/api/booster/config', (req, res) => {
     });
 });
 
-// 2. Traffic Booster START (Sare checks sahi hain)
+// 2. Traffic Booster START 
 app.post('/api/booster/start-traffic', (req, res) => {
     const { url } = req.body;
 
