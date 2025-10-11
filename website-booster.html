@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO Traffic Booster (Simplified)</title>
+    <title>Client-Side Multi-Viewer (Final)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
@@ -11,7 +11,6 @@
             --primary-color: #007bff; 
             --success-color: #28a745;
             --danger-color: #dc3545;
-            --warning-color: #ffc107;
             --bg-color: #f0f3f8;
             --card-bg: #ffffff;
             --text-color: #333;
@@ -19,181 +18,248 @@
             --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 40px 10px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;}
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px 10px; }
         
-        .container { 
-            background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow); 
-            padding: 30px; width: 100%; max-width: 550px; 
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow); }
         
-        h1 { color: var(--primary-color); text-align: center; margin-bottom: 5px; font-weight: 700; font-size: 2.2em; }
-        .subtitle { text-align: center; color: #6c757d; margin-bottom: 30px; font-size: 1.1em; }
+        h1 { color: var(--primary-color); text-align: center; margin-bottom: 20px; font-weight: 700; font-size: 2em; }
 
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: var(--text-color); }
-        input[type="url"] { 
-            width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 6px; 
-            font-size: 16px; box-sizing: border-box; transition: border-color 0.2s; 
+        .top-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .top-bar input[type="url"] { 
+            flex-grow: 1; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 6px; 
+            font-size: 16px; transition: border-color 0.2s; 
         }
-        input[type="url"]:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); }
-
-        .input-group-btn { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 16px; transition: background-color 0.2s; }
-        .btn-start { background-color: var(--success-color); color: white; flex-grow: 1; }
-        .btn-stop { background-color: var(--danger-color); color: white; width: 120px; }
+        .top-bar input[type="url"]:focus { border-color: var(--primary-color); outline: none; }
+        .top-bar button { padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 16px; transition: background-color 0.2s; }
+        .btn-start { background-color: var(--success-color); color: white; }
+        .btn-stop { background-color: var(--danger-color); color: white; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Status Styling */
-        #apiStatus { padding: 15px; margin-bottom: 25px; border-radius: 6px; font-weight: 500; text-align: center; }
-        .status-loading { background-color: #f7e8c3; color: #856404; border: 1px solid #ffeb3c; } 
-        .status-success { background-color: #d4edda; color: #155724; border: 1px solid var(--success-color); }
-        .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid var(--danger-color); }
-        .status-warning { background-color: #fff3cd; color: #856404; border: 1px solid var(--warning-color); }
+        #slotContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+            gap: 20px;
+            margin-top: 20px;
+        }
 
-        .note-box { margin-top: 30px; padding: 15px; background-color: #e9f7ff; border: 1px solid #bce8f1; border-radius: 6px; color: #31708f; font-size: 0.9em;}
-        .note-box strong { color: var(--primary-color); }
+        .slot-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            height: 350px; /* Fixed height for consistent look */
+        }
+        
+        .slot-header {
+            background-color: #e9ecef;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slot-iframe {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+        }
+        
+        .status-message {
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .status-success { background-color: #d4edda; color: #155724; }
+        .status-info { background-color: #e9f7ff; color: #31708f; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 PRO Traffic Booster</h1>
-        <p class="subtitle">Continuous, Country-Wise Traffic Generator (Puppeteer & Proxies).</p>
-        
-        <div id="apiStatus" class="status-loading">
-            <i class="fas fa-sync-alt fa-spin"></i> Connecting to API server...
+        <h1>🚀 Client-Side Multi-Viewer Tool (Final)</h1>
+        <div class="status-message status-info" id="globalStatus">
+             <i class="fas fa-info-circle"></i> Enter URL and click START to open 5 view slots.
         </div>
 
-        <div class="form-group">
-            <label for="targetUrl"><i class="fas fa-link"></i> Target Website/Video URL (Required)</label>
-            <input type="url" id="targetUrl" placeholder="Example: https://yourwebsite.com" required>
-        </div>
-
-        <div class="input-group-btn">
-            <button id="startBtn" class="btn btn-start" disabled><i class="fas fa-play-circle"></i> START TRAFFIC (1 Continuous Slot)</button>
+        <div class="top-bar">
+            <input type="url" id="targetUrl" placeholder="Enter Target Website/Video URL (e.g., https://yourwebsite.com)" required>
+            <input type="number" id="slotCount" value="5" min="1" max="8" style="width: 80px; text-align: center;">
+            <button id="startBtn" class="btn btn-start"><i class="fas fa-play-circle"></i> START TRAFFIC</button>
             <button id="stopBtn" class="btn btn-stop" disabled><i class="fas fa-stop-circle"></i> STOP</button>
         </div>
-        
-         <div class="note-box">
-            <strong><i class="fas fa-check-circle"></i> Status:</strong> Traffic generation is handled **server-side** in the background using **Puppeteer and rotating proxies**. Views will reflect in your analytics with different countries/regions.
-        </div>
+
+        <div id="slotContainer"></div>
     </div>
 
     <script>
         // --- Configuration ---
-        // Your Render URL for the API endpoints
-        const RENDER_DOMAIN = 'https://pooreyoutuber-github-io.onrender.com';
-        const API_BASE_URL = RENDER_DOMAIN + "/api/booster"; 
-        
+        const DEFAULT_SLOT_COUNT = 5;
+        const MIN_REFRESH_TIME_SEC = 20; // 20 seconds minimum refresh time
+        const MAX_REFRESH_TIME_SEC = 60; // 60 seconds maximum refresh time
+
         // --- Elements ---
-        const statusElement = document.getElementById('apiStatus');
+        const slotContainer = document.getElementById('slotContainer');
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
         const targetUrlInput = document.getElementById('targetUrl');
+        const slotCountInput = document.getElementById('slotCount');
+        const globalStatus = document.getElementById('globalStatus');
 
-        let isTrafficRunning = false;
-        let configSlotsPerUser = 1;
+        // --- State Variables ---
+        let runningSlots = [];
+        let isRunning = false;
         
         // --- Utility Functions ---
-        function updateStatus(message, type) {
-            statusElement.innerHTML = message;
-            statusElement.className = ''; 
-            statusElement.classList.add('status-' + type);
+        function generateRandomRefreshTime() {
+            return (Math.floor(Math.random() * (MAX_REFRESH_TIME_SEC - MIN_REFRESH_TIME_SEC + 1)) + MIN_REFRESH_TIME_SEC) * 1000;
         }
-        
-        // --- API Calls ---
-        async function fetchConfig() {
-            updateStatus(`<i class="fas fa-sync-alt fa-spin"></i> Connecting to API server...`, 'loading');
-            try {
-                const response = await fetch(`${API_BASE_URL}/config`);
-                
-                if (!response.ok) {
-                    const text = await response.text();
-                    if (text.trim().startsWith('<')) {
-                         throw new Error(`Server returned HTML error (${response.status} ${response.statusText}). Render service is likely sleeping.`);
-                    }
-                    throw new Error(`Server Error: ${response.status} ${response.statusText}`);
-                }
-                
-                const data = await response.json();
 
-                if (data.status === 'success') {
-                    configSlotsPerUser = data.slotsPerUser;
-                    updateStatus(`✅ Config Loaded. Proxies: ${data.proxyCount}. Server Slots: ${configSlotsPerUser}.`, 'success');
-                    startBtn.disabled = false;
-                    startBtn.innerHTML = `<i class="fas fa-play-circle"></i> START TRAFFIC (${configSlotsPerUser} Continuous Slot)`;
-                } else {
-                    throw new Error(data.message || 'Failed to load configuration.');
-                }
-            } catch (error) {
-                updateStatus(`❌ Connection Error: ${error.message.substring(0, 90)}...`, 'error');
-            }
+        function updateGlobalStatus(message, type) {
+            globalStatus.className = `status-message status-${type}`;
+            globalStatus.innerHTML = message;
         }
-        
-        async function handleStart() {
-            const url = targetUrlInput.value.trim();
 
-            if (!url || !url.startsWith('http')) { 
-                alert("Please enter a valid URL starting with http:// or https://"); 
-                return; 
-            }
+        // --- Main Slot Logic ---
+        function createSlot(index, url) {
+            const slotId = `slot-${index}`;
+            const refreshTime = generateRandomRefreshTime();
+            let refreshTimer;
 
-            startBtn.disabled = true;
-            stopBtn.disabled = true;
-            updateStatus(`<i class="fas fa-rocket fa-spin"></i> Sending START command...`, 'loading');
+            // 1. Create UI elements
+            const card = document.createElement('div');
+            card.className = 'slot-card';
+            card.id = slotId;
+
+            const header = document.createElement('div');
+            header.className = 'slot-header';
+            header.innerHTML = `<span>Slot ${index}</span><span id="status-${index}">Loading...</span>`;
+
+            const iframe = document.createElement('iframe');
+            iframe.className = 'slot-iframe';
+            // Sandbox is important to prevent cross-site scripting, but can block some sites. 
+            // We'll keep it simple for basic viewing:
+            iframe.setAttribute('src', url);
             
-            try {
-                const response = await fetch(`${API_BASE_URL}/start-traffic`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url }) 
-                });
+            card.appendChild(header);
+            card.appendChild(iframe);
+            slotContainer.appendChild(card);
+            
+            const statusSpan = document.getElementById(`status-${index}`);
 
-                const result = await response.json();
-
-                if (result.status === 'success' || result.status === 'warning') {
-                    isTrafficRunning = true;
-                    updateStatus(`✅ Traffic Running! ${result.message}`, result.status);
-                    stopBtn.disabled = false;
-                } else {
-                    throw new Error(result.message || 'Server failed to start traffic.');
-                }
-            } catch (error) {
-                updateStatus(`❌ Start Error: ${error.message.substring(0, 70)}...`, 'error');
-            } finally {
-                 if (!isTrafficRunning) startBtn.disabled = false;
+            // 2. Refresh Logic
+            function startRefreshTimer() {
+                // Clear any existing timer
+                if (refreshTimer) clearTimeout(refreshTimer);
+                
+                const nextRefresh = generateRandomRefreshTime();
+                const nextRefreshSec = Math.ceil(nextRefresh / 1000);
+                
+                statusSpan.textContent = `Refreshing in ${nextRefreshSec}s...`;
+                
+                refreshTimer = setTimeout(() => {
+                    if (isRunning) {
+                        statusSpan.textContent = 'Refreshing...';
+                        iframe.src = url; // Re-navigate to refresh
+                        // Restart the timer after refresh is initiated
+                        startRefreshTimer(); 
+                    }
+                }, nextRefresh);
             }
+            
+            // 3. IFrame load event (Optional: for cleaner status)
+            iframe.onload = () => {
+                statusSpan.textContent = 'Loaded!';
+                // Automatically start scrolling to simulate activity
+                try {
+                    // This attempt will likely fail on cross-origin iframes (YouTube, external sites)
+                    // but is required for 'real user interaction' as requested.
+                    iframe.contentWindow.scrollTo(0, 500); 
+                    // To handle the 'real user scrolling' part, the user must manually scroll the iframe.
+                } catch (e) {
+                    // console.warn('Could not auto-scroll iframe:', e.message);
+                }
+            };
+
+            // 4. Start the timer immediately
+            startRefreshTimer();
+            
+            // 5. Return the slot control object
+            return {
+                id: slotId,
+                timer: refreshTimer,
+                stop: function() {
+                    if (refreshTimer) clearTimeout(refreshTimer);
+                    statusSpan.textContent = 'Stopped';
+                },
+                remove: function() {
+                    this.stop();
+                    card.remove();
+                }
+            };
         }
 
-        async function handleStop() {
+        function startTraffic() {
+            const url = targetUrlInput.value.trim();
+            const slotCount = parseInt(slotCountInput.value);
+
+            if (!url || !url.startsWith('http')) {
+                updateGlobalStatus('<i class="fas fa-exclamation-triangle"></i> Please enter a valid URL starting with http:// or https://', 'error');
+                return;
+            }
+            
+            if (isRunning) return; 
+
+            // Cleanup previous run
+            stopTraffic(); 
+
+            isRunning = true;
             startBtn.disabled = true;
-            stopBtn.disabled = true;
-            updateStatus(`<i class="fas fa-hourglass-half"></i> Sending STOP command...`, 'loading');
+            stopBtn.disabled = false;
+            targetUrlInput.disabled = true;
+            slotCountInput.disabled = true;
+            slotContainer.innerHTML = ''; // Clear container
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/stop-traffic`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+            updateGlobalStatus(`✅ Traffic Started on ${slotCount} continuous slots. They will randomly refresh every ${MIN_REFRESH_TIME_SEC}-${MAX_REFRESH_TIME_SEC} seconds.`, 'success');
 
-                const result = await response.json();
-
-                if (response.ok && result.status === 'success') {
-                    isTrafficRunning = false;
-                    updateStatus(`⏸️ Traffic Stopped. ${result.message}`, 'success');
-                } else {
-                    throw new Error(result.message || 'Server failed to stop traffic.');
-                }
-            } catch (error) {
-                updateStatus(`❌ Stop Error: ${error.message.substring(0, 70)}...`, 'error');
-            } finally {
-                 startBtn.disabled = false;
+            // Create and run all slots
+            for (let i = 1; i <= slotCount; i++) {
+                runningSlots.push(createSlot(i, url));
             }
         }
-        
+
+        function stopTraffic() {
+            isRunning = false;
+            runningSlots.forEach(slot => slot.remove());
+            runningSlots = [];
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            targetUrlInput.disabled = false;
+            slotCountInput.disabled = false;
+            
+            updateGlobalStatus('<i class="fas fa-stop-circle"></i> Traffic Stopped. Enter new URL to restart.', 'info');
+        }
+
         // --- Event Listeners and Init ---
-        startBtn.addEventListener('click', handleStart);
-        stopBtn.addEventListener('click', handleStop);
-        document.addEventListener('DOMContentLoaded', fetchConfig);
+        startBtn.addEventListener('click', startTraffic);
+        stopBtn.addEventListener('click', stopTraffic);
+        slotCountInput.addEventListener('input', (e) => {
+             // Ensure value is within bounds
+             let val = parseInt(e.target.value);
+             if (val < 1) e.target.value = 1;
+             if (val > 8) e.target.value = 8;
+        });
+
+        // Initial state
+        document.addEventListener('DOMContentLoaded', () => {
+             slotCountInput.value = DEFAULT_SLOT_COUNT;
+        });
     </script>
 </body>
 </html>
