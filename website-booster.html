@@ -18,13 +18,12 @@
         }
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 30px; }
-        .container { max-width: 700px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
         h1 { color: var(--primary-color); text-align: center; margin-bottom: 25px; font-size: 26px; }
 
         .form-area { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-color); border-radius: 4px; background-color: #f1f1f1; }
         
         #targetUrl { padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box; }
-        #proxyList { height: 100px; resize: vertical; font-size: 14px; font-family: monospace; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; }
         
         .button-group { display: flex; gap: 10px; }
         #startBtn, #stopBtn { flex: 1; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -43,7 +42,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Server-Side Traffic Generator (Proxy Ready)</h1>
+        <h1>🚀 Server-Side Traffic Generator (Automatic Proxies)</h1>
         
         <div id="apiStatus">
             <i class="fas fa-spinner fa-spin"></i> Connecting to API server for config...
@@ -51,7 +50,6 @@
         
         <div class="form-area">
             <input type="url" id="targetUrl" placeholder="Enter Target Website URL (e.g., https://example.com)" required>
-            <textarea id="proxyList" placeholder="Paste Proxies here (one per line, format: ip:port or user:pass@ip:port)" rows="5"></textarea>
             
             <div class="button-group">
                 <button id="startBtn" disabled>
@@ -72,12 +70,12 @@
         </div>
         
         <p style="text-align: center; margin-top: 15px; font-size: 0.8em; color: var(--danger-color);">
-            *Traffic is now generated from your **Render Server** using **Proxies**.
+            *Proxies are **hardcoded** in the server code and used automatically.
         </p>
     </div>
 
     <script>
-        // API URL (Render Service URL)
+        // Use your Render Service URL here
         const API_BASE_URL = "https://pooreyoutuber-github-io.onrender.com/api/booster"; 
         
         const statusElement = document.getElementById('apiStatus');
@@ -111,7 +109,7 @@
 
                 if (response.ok && data.status === 'success') {
                     const ua = data.config.userAgent.substring(0, 30);
-                    updateStatus(`✅ Config Loaded. Server UA: ${ua}... (Max Slots: ${data.maxSlots})`, 'success');
+                    updateStatus(`✅ Config Loaded. Server UA: ${ua}... (Proxies: ${data.proxyCount})`, 'success');
                     startBtn.disabled = false;
                 } else {
                     throw new Error(data.message || 'Failed to load configuration.');
@@ -123,11 +121,8 @@
         
         async function handleStart() {
             const url = document.getElementById('targetUrl').value.trim();
-            const proxyText = document.getElementById('proxyList').value.trim();
-            const proxies = proxyText.split('\n').map(p => p.trim()).filter(p => p.length > 0);
 
             if (!url) { alert("Please enter the Target Website URL."); return; }
-            if (proxies.length === 0) { alert("Please paste at least one proxy."); return; }
             if (!url.startsWith('http')) { alert("URL must start with http:// or https://"); return; }
 
 
@@ -135,13 +130,14 @@
             startBtn.disabled = true;
             stopBtn.disabled = false;
             updateStatus(`<i class="fas fa-rocket fa-spin"></i> Sending START command to Server...`, 'loading');
-            appendLog(`Command sent: Starting traffic to ${url} with ${proxies.length} proxies.`);
+            appendLog(`Command sent: Starting traffic to ${url} using hardcoded proxies.`);
 
             try {
+                // Only send the URL, the server has the proxies
                 const response = await fetch(`${API_BASE_URL}/start-traffic`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, proxies }) 
+                    body: JSON.stringify({ url }) 
                 });
 
                 const result = await response.json();
