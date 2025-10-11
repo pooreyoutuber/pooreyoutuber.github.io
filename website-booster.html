@@ -76,9 +76,8 @@
     </div>
 
     <script>
-        // *** Apni Render service ka URL yahaan dalna na bhoolen ***
-        // Example: https://pooreyoutuber-github-io.onrender.com/api/booster
-        const API_BASE_URL = "https://pooreyoutuber-github-io.onrender.com"; 
+        // *** FIX: Correct API path added ***
+        const API_BASE_URL = "https://pooreyoutuber-github-io.onrender.com/api/booster"; 
         
         const statusElement = document.getElementById('apiStatus');
         const startBtn = document.getElementById('startBtn');
@@ -103,10 +102,19 @@
         async function fetchConfig() {
             updateStatus(`<i class="fas fa-spinner fa-spin"></i> Connecting to API server for config...`, 'loading');
             try {
+                // Fetching from the correct endpoint: /api/booster/config
                 const response = await fetch(`${API_BASE_URL}/config`);
                 
                 if (response.status === 503) throw new Error("Server is sleeping. Wait 15s and refresh.");
                 
+                // CRITICAL: Check if response is NOT JSON (e.g., HTML error page)
+                if (response.headers.get('content-type') && !response.headers.get('content-type').includes('application/json')) {
+                     const text = await response.text();
+                     if (text.trim().startsWith('<')) {
+                        throw new Error(`Server returned HTML instead of JSON. Server is likely not running or starting.`);
+                     }
+                }
+
                 const data = await response.json();
 
                 if (response.ok && data.status === 'success') {
