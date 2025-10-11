@@ -1,276 +1,347 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO Country Traffic Booster</title>
+    <title> Website Traffic Booster Tool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+
     <style>
-        :root {
-            --primary-color: #007bff; 
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --warning-color: #ffc107;
-            --bg-color: #f0f3f8;
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --border-color: #e0e0e0;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        /* Base Styles and Responsiveness */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { color: #d9534f; margin: 0; font-size: 1.8em; font-weight: 700; }
+        
+        .container { background-color: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e0e0e0; }
+        
+        /* Input & Form Styling */
+        label { display: block; text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: #555; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
+
+        /* Page Distribution */
+        .page-entry-group { border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #f9f9f9; }
+        .page-entry { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; background-color: #fff; }
+        .page-entry input[type="number"] { width: 40px; flex-grow: 0; margin-bottom: 0; text-align: center; background-color: #eef4ff; }
+        .percent-label { font-weight: bold; width: 25px; color: #5cb85c; }
+        .total-percent-display { text-align: right; margin-top: 10px; font-weight: bold; font-size: 1.1em; }
+        
+        /* Button Styling */
+        button { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 1em; transition: background-color 0.3s; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Message Box Styling */
+        #message { margin-top: 20px; padding: 12px; border-radius: 5px; font-weight: bold; text-align: center; border: 1px solid transparent; }
+        .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+
+        /* Status Window */
+        #status-window {
+            margin-top: 20px; padding: 15px; border-radius: 8px; background-color: #e6f7ff; 
+            border: 1px solid #91d5ff; color: #0050b3; font-weight: 600; text-align: center;
+            display: none; /* Initially hidden */
         }
-
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 40px 10px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;}
-        
-        .container { 
-            background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow); 
-            padding: 30px; width: 100%; max-width: 600px; 
+        .progress-text {
+            display: block; margin-top: 5px; font-size: 1.2em; color: #002766;
         }
-        
-        h1 { color: var(--primary-color); text-align: center; margin-bottom: 5px; font-weight: 700; font-size: 2.2em; }
-        .subtitle { text-align: center; color: #6c757d; margin-bottom: 30px; font-size: 1.1em; }
-
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: var(--text-color); }
-        input[type="url"] { 
-            width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 6px; 
-            font-size: 16px; box-sizing: border-box; transition: border-color 0.2s; 
-        }
-        
-        .input-group-btn { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 16px; transition: background-color 0.2s; }
-        .btn-start { background-color: var(--success-color); color: white; flex-grow: 1; }
-        .btn-stop { background-color: var(--danger-color); color: white; width: 120px; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* Status Styling */
-        #apiStatus { padding: 15px; margin-bottom: 25px; border-radius: 6px; font-weight: 500; text-align: center; }
-        .status-loading { background-color: #f7e8c3; color: #856404; border: 1px solid #ffeb3c; } 
-        .status-success { background-color: #d4edda; color: #155724; border: 1px solid var(--success-color); }
-        .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid var(--danger-color); }
-        .status-warning { background-color: #fff3cd; color: #856404; border: 1px solid var(--warning-color); }
-
-        /* Live Log Window */
-        .log-window { margin-top: 25px; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
-        .log-header { background-color: var(--primary-color); color: white; padding: 10px 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
-        .log-list { max-height: 250px; overflow-y: auto; background-color: #fcfcfc; list-style: none; padding: 0; margin: 0; font-size: 0.85em; }
-        .log-item { padding: 5px 15px; border-bottom: 1px dotted #eee; }
-        .log-item:last-child { border-bottom: none; }
-        
-        .log-success { color: var(--success-color); }
-        .log-error { color: var(--danger-color); font-weight: bold; }
-        .log-warning { color: var(--warning-color); }
-        .log-info { color: #555; }
-
-        .log-time { color: #999; margin-right: 10px; font-weight: normal; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 PRO Country Traffic Booster</h1>
-        <p class="subtitle">Continuous, Country-Wise Traffic Generator (Puppeteer & Proxies).</p>
-        
-        <div id="apiStatus" class="status-loading">
-            <i class="fas fa-sync-alt fa-spin"></i> Connecting to API server...
-        </div>
-
-        <div class="form-group">
-            <label for="targetUrl"><i class="fas fa-link"></i> Target Website/Video URL (Required)</label>
-            <input type="url" id="targetUrl" placeholder="Example: https://yourwebsite.com" required>
-        </div>
-
-        <div class="input-group-btn">
-            <button id="startBtn" class="btn btn-start" disabled><i class="fas fa-play-circle"></i> START PROXY TRAFFIC</button>
-            <button id="stopBtn" class="btn btn-stop" disabled><i class="fas fa-stop-circle"></i> STOP</button>
-        </div>
-        
-        <div class="log-window">
-            <div class="log-header">
-                <span>Live Activity Log </span>
-                <span id="viewSummary">Total Views: 0 | Active Slots: 0</span>
-            </div>
-            <ul id="logList" class="log-list">
-                <li class="log-item log-info">Waiting for server configuration...</li>
-            </ul>
-        </div>
+    <div class="header">
+        <h2>🚀 Website Traffic Booster Tool</h2>
+        <p style="color: #888; margin-top: 5px;">Increase your page views and engagement metrics.</p>
     </div>
+    
+    <div class="container">
+        
+        <form id="boosterForm">
+            
+            <label for="gaid">1. Google Analytics ID (G-XXXXX):</label>
+            <input type="text" id="gaid" placeholder="Enter your GA4 Measurement ID" required autocomplete="off">
+            
+            <label for="apikey">2. API Secret (Measurement Protocol Key):</label>
+            <input type="text" id="apikey" placeholder="Enter your GA4 API Secret" required autocomplete="off">
+            
+            <label for="views">3. Total Views to Generate (Max 500):</label>
+            <input type="number" id="views" value="100" min="1" max="500" required autocomplete="off">
+            
+            <div class="page-entry-group">
+                <label style="color: #007bff;"><i class="fas fa-sitemap"></i> 4. Distribute Traffic Across Pages (Total must be 100%):</label>
+                
+                <div class="page-entry">
+                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required)" required autocomplete="off">
+                    <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
+                    <span class="percent-label">%</span>
+                </div>
+                
+                <div class="page-entry">
+                    <input type="text" id="url2" class="page-url" placeholder="Page 2 URL (Optional)">
+                    <input type="number" id="percent2" class="page-percent" value="0" min="0" max="100" required>
+                    <span class="percent-label">%</span>
+                </div>
 
+                <div class="page-entry">
+                    <input type="text" id="url3" class="page-url" placeholder="Page 3 URL (Optional)">
+                    <input type="number" id="percent3" class="page-percent" value="0" min="0" max="100" required>
+                    <span class="percent-label">%</span>
+                </div>
+
+                <div class="page-entry">
+                    <input type="text" id="url4" class="page-url" placeholder="Page 4 URL (Optional)">
+                    <input type="number" id="percent4" class="page-percent" value="0" min="0" max="100" required>
+                    <span class="percent-label">%</span>
+                </div>
+                
+                <div class="page-entry">
+                    <input type="text" id="url5" class="page-url" placeholder="Page 5 URL (Optional)">
+                    <input type="number" id="percent5" class="page-percent" value="0" min="0" max="100" required>
+                    <span class="percent-label">%</span>
+                </div>
+                
+                <p class="total-percent-display">
+                    Total Distribution: <span id="totalPercent" style="color:#d9534f;">100</span>%
+                </p>
+            </div>
+            
+            <button type="submit" id="submitBtn"><i class="fas fa-play"></i> START TRAFFIC GENERATION</button>
+        </form>
+
+        <div id="status-window" style="display: none;">
+            <p style="margin-bottom: 5px;"><i class="fas fa-chart-line fa-spin"></i> **LIVE JOB STATUS**</p>
+            <span class="progress-text">Sent: <span id="viewsSent">0</span> / Total: <span id="viewsTotal">0</span></span>
+            <span class="progress-text" style="font-size: 0.9em; font-weight: normal; color: #0050b3;">Remaining: <span id="viewsRemaining">0</span></span>
+            <p style="margin-top: 5px; font-size: 0.85em;">Target URL: <span id="targetUrlDisplay">N/A</span></p>
+            <button id="stopBtn" style="background-color: #dc3545; width: 100px; padding: 8px; margin-top: 10px;">
+                <i class="fas fa-stop"></i> STOP (Not Implemented)
+            </button>
+        </div>
+        
+        <div id="message"></div>
+
+        <div class="info-card">
+            </div>
+
+        <div class="info-card">
+            </div>
+    </div>
+    
     <script>
-        // --- Configuration ---
-        // IMPORTANT: Replace this with your actual Render URL if it changes.
+        // 🚨 FINAL RENDER API URL - DYNAMICALLY SET
         const RENDER_DOMAIN = 'https://pooreyoutuber-github-io.onrender.com';
-        const API_BASE_URL = RENDER_DOMAIN + "/api/booster"; 
-        const STATUS_POLL_INTERVAL = 5000; // Poll every 5 seconds
+        const RENDER_API_URL = RENDER_DOMAIN + '/boost-mp'; 
+        const STATUS_API_URL = RENDER_DOMAIN + '/boost-mp/status';
+        const STORAGE_KEY = 'booster_details_v7'; 
+        const POLL_INTERVAL = 5000; // Poll server every 5 seconds
+        
+        const form = document.getElementById('boosterForm');
+        const messageDiv = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const totalPercentSpan = document.getElementById('totalPercent');
+        const statusWindow = document.getElementById('status-window');
+        
+        // Status elements
+        const viewsSentSpan = document.getElementById('viewsSent');
+        const viewsTotalSpan = document.getElementById('viewsTotal');
+        const viewsRemainingSpan = document.getElementById('viewsRemaining');
+        const targetUrlDisplay = document.getElementById('targetUrlDisplay');
 
-        // --- Elements ---
-        const statusElement = document.getElementById('apiStatus');
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const targetUrlInput = document.getElementById('targetUrl');
-        const logList = document.getElementById('logList');
-        const viewSummary = document.getElementById('viewSummary');
+        const pageInputs = [1, 2, 3, 4, 5].map(i => ({
+            url: document.getElementById(`url${i}`),
+            percent: document.getElementById(`percent${i}`)
+        }));
 
-        let isTrafficRunning = false;
-        let configSlotsPerUser = 1;
         let pollTimer = null;
-        
-        // --- Utility Functions ---
-        function updateStatus(message, type) {
-            statusElement.innerHTML = message;
-            statusElement.className = ''; 
-            statusElement.classList.add('status-' + type);
+
+
+        // --- Live Status Functions ---
+        function startStatusPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            statusWindow.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Job Running...';
+
+            pollTimer = setInterval(fetchStatus, POLL_INTERVAL);
+            fetchStatus(); // Fetch immediately
         }
-        
-        function formatLogEntry(entry) {
-            let icon = '';
-            switch (entry.type) {
-                case 'success': icon = '✅'; break;
-                case 'error': icon = '❌'; break;
-                case 'warning': icon = '⚠️'; break;
-                default: icon = '➡️';
+
+        function stopStatusPolling(messageType) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'START TRAFFIC GENERATION';
+            
+            // Wait 10 seconds before hiding window to show final count
+            setTimeout(() => {
+                if (!pollTimer) statusWindow.style.display = 'none';
+            }, 10000);
+
+            if (messageType) {
+                 showMessage(messageType, `✨ JOB FINISHED! Total views sent: ${viewsSentSpan.textContent}. Results expected in GA4 within 24-48 hours.`, true);
             }
-            return `<li class="log-item log-${entry.type}"><span class="log-time">${entry.timestamp}</span> ${icon} ${entry.message}</li>`;
         }
 
-        function clearPollTimer() {
-             if (pollTimer) {
-                clearInterval(pollTimer);
-                pollTimer = null;
-             }
-        }
-        
-        // --- API Calls ---
-
-        async function fetchConfig() {
-            updateStatus(`<i class="fas fa-sync-alt fa-spin"></i> Connecting to API server...`, 'loading');
+        async function fetchStatus() {
             try {
-                const response = await fetch(`${API_BASE_URL}/config`);
-                
-                if (!response.ok) {
-                    throw new Error(`Server returned HTTP error (${response.status}).`);
-                }
-                
+                const response = await fetch(STATUS_API_URL);
                 const data = await response.json();
 
-                if (data.status === 'success') {
-                    configSlotsPerUser = data.slotsPerUser;
-                    updateStatus(`✅ Config Loaded. Proxies: ${data.proxyCount}. Server Slots: ${configSlotsPerUser}.`, 'success');
-                    startBtn.disabled = false;
-                    startBtn.innerHTML = `<i class="fas fa-play-circle"></i> START PROXY TRAFFIC (${configSlotsPerUser} Continuous Slot)`;
-                } else {
-                    throw new Error(data.message || 'Failed to load configuration.');
+                if (data.status === 'processing') {
+                    viewsSentSpan.textContent = data.viewsSent;
+                    viewsTotalSpan.textContent = data.totalRequested;
+                    viewsRemainingSpan.textContent = data.viewsRemaining;
+                    targetUrlDisplay.textContent = data.targetUrl.substring(0, 40) + '...';
+                } else if (data.status === 'idle' && data.totalRequested > 0) {
+                    // Job finished
+                    stopStatusPolling('success');
+                } else if (data.status === 'idle' && !pollTimer) {
+                    // Initial idle state, do nothing
+                    statusWindow.style.display = 'none';
                 }
+
             } catch (error) {
-                updateStatus(`❌ Connection Error: ${error.message.substring(0, 90)}... Render service might be sleeping.`, 'error');
+                // If polling fails repeatedly, something is wrong with the server
+                // stopStatusPolling('error'); 
             }
         }
-        
-        async function fetchStatus() {
-            if (!isTrafficRunning) {
-                clearPollTimer();
+
+
+        // --- Local Storage & UI Functions (Same as before) ---
+        function loadSavedDetails() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    document.getElementById('gaid').value = data.gaid || '';
+                    document.getElementById('apikey').value = data.apikey || '';
+                    document.getElementById('views').value = data.views || '100';
+                    data.pages.forEach((page, index) => {
+                        if (index < 5) {
+                            pageInputs[index].url.value = page.url || '';
+                            pageInputs[index].percent.value = page.percent || '0';
+                        }
+                    });
+                } catch (e) { /* Error ignored */ }
+                updateDisplayTotal();
+            }
+        }
+
+        function saveDetails(gaid, apikey, views, pages) {
+            const data = { gaid, apikey, views, pages };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function updateDisplayTotal() {
+            let total = 0;
+            document.querySelectorAll('.page-percent').forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            totalPercentSpan.textContent = total;
+            totalPercentSpan.style.color = total === 100 ? '#5cb85c' : '#d9534f';
+            return total;
+        }
+        document.querySelectorAll('.page-percent').forEach(input => {
+            input.addEventListener('input', updateDisplayTotal);
+        });
+
+        function showMessage(type, message, reenable) {
+            messageDiv.className = type;
+            messageDiv.innerHTML = message;
+            if (reenable) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '<i class="fas fa-play"></i> START TRAFFIC GENERATION';
+            }
+        }
+
+        // --- Main Submission Logic (Modified to call startStatusPolling) ---
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // ... (Validation logic remains the same) ...
+            const gaId = document.getElementById('gaid').value.trim();
+            const apiKey = document.getElementById('apikey').value.trim();
+            let viewsCount = parseInt(document.getElementById('views').value);
+            
+            if (!gaId || !apiKey || viewsCount < 1) {
+                showMessage('error', '❌ Error: GA Keys, API Secret, and Total Views are required.', true);
                 return;
             }
-            try {
-                const response = await fetch(`${API_BASE_URL}/status`);
-                const data = await response.json();
 
-                if (data.status === 'success') {
-                    // Update Summary
-                    viewSummary.innerHTML = `Total Views: ${data.totalSuccessViews} | Active Slots: ${data.currentActiveSlots.length}`;
-                    
-                    // Update Log
-                    logList.innerHTML = '';
-                    data.log.forEach(entry => {
-                        logList.innerHTML += formatLogEntry(entry);
-                    });
-                    
-                    // Scroll to the top to show newest entries first
-                    logList.scrollTop = 0; 
-
-                } else {
-                    updateStatus(`⚠️ Status Error: ${data.message || 'Server error occurred during status check.'}`, 'warning');
+            const totalPercent = updateDisplayTotal();
+            if (totalPercent !== 100) {
+                showMessage('error', `❌ Error: Total distribution must be 100%, but it is ${totalPercent}%.`, true);
+                return;
+            }
+            
+            let pages = [];
+            pageInputs.forEach(input => {
+                const url = input.url.value.trim();
+                const percent = parseInt(input.percent.value) || 0;
+                if (url && percent > 0) {
+                    if (!url.startsWith('http')) {
+                        showMessage('error', '❌ Error: All page URLs must start with http:// or https://', true);
+                        pages = null; 
+                        return;
+                    }
+                    pages.push({ url: url, percent: percent });
                 }
-            } catch (error) {
-                // Silent catch for background polling
-            }
-        }
+            });
 
-        async function handleStart() {
-            const url = targetUrlInput.value.trim();
+            if (!pages) return; 
 
-            if (!url || !url.startsWith('http')) { 
-                alert("Please enter a valid URL starting with http:// or https://"); 
-                return; 
+            if (pages.length === 0) {
+                 showMessage('error', '❌ Error: At least one Page URL (Page 1) with a percentage > 0 must be filled.', true);
+                 return;
             }
 
-            // UI feedback
-            startBtn.disabled = true;
-            stopBtn.disabled = true;
-            logList.innerHTML = '<li class="log-item log-info"><i class="fas fa-hourglass-half fa-spin"></i> Waiting for server to confirm session...</li>';
-            viewSummary.innerHTML = 'Total Views: 0 | Active Slots: 0';
-            updateStatus(`<i class="fas fa-rocket fa-spin"></i> Sending START command...`, 'loading');
+            saveDetails(gaId, apiKey, viewsCount, pages); 
+            const payload = { ga_id: gaId, api_key: apiKey, views: viewsCount, pages: pages };
+            
+            submitData(payload, 2); 
+        });
+
+        async function submitData(data, retriesLeft) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = `✅ Request initiated. Checking server status...`;
+            showMessage('info', '✅ Request initiated. Checking server status...', false);
             
             try {
-                const response = await fetch(`${API_BASE_URL}/start-traffic`, {
+                const response = await fetch(RENDER_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url }) 
+                    body: JSON.stringify(data)
                 });
-
-                const result = await response.json();
-
-                if (result.status === 'success' || result.status === 'warning') {
-                    isTrafficRunning = true;
-                    updateStatus(`✅ Traffic Running! ${result.message}`, result.status);
-                    stopBtn.disabled = false;
-                    
-                    // Start the polling interval
-                    clearPollTimer();
-                    pollTimer = setInterval(fetchStatus, STATUS_POLL_INTERVAL);
-                    fetchStatus(); // Initial status fetch immediately
-                } else {
-                    throw new Error(result.message || 'Server failed to start traffic.');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
                 }
+                
+                const responseData = await response.json();
+
+                if (responseData.status === 'accepted') { 
+                    // Success! Start the live counter
+                    showMessage('info', `✨ Success! ${responseData.message} **Live status is starting below.**`, true);
+                    startStatusPolling(); // <-- CRITICAL: Start the counter
+                } else {
+                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
+                }
+
             } catch (error) {
-                updateStatus(`❌ Start Error: ${error.message.substring(0, 70)}...`, 'error');
-            } finally {
-                 if (!isTrafficRunning) startBtn.disabled = false;
-            }
+                if (retriesLeft > 0) {
+                    return submitData(data, retriesLeft - 1);
+                } else {
+                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your API service is LIVE and the URL is correct.`, true);
+                }
+            } 
         }
 
-        async function handleStop() {
-            startBtn.disabled = true;
-            stopBtn.disabled = true;
-            clearPollTimer(); // Stop fetching status
-            updateStatus(`<i class="fas fa-hourglass-half"></i> Sending STOP command...`, 'loading');
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/stop-traffic`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.status === 'success') {
-                    isTrafficRunning = false;
-                    updateStatus(`⏸️ Traffic Stopped. ${result.message}`, 'success');
-                    // Add stop message to log
-                    const stopMsg = { timestamp: new Date().toLocaleTimeString('en-IN', { hour12: false }), message: 'Session forcefully stopped by user.', type: 'info' };
-                    logList.innerHTML = formatLogEntry(stopMsg) + logList.innerHTML;
-                } else {
-                    throw new Error(result.message || 'Server failed to stop traffic.');
-                }
-            } catch (error) {
-                updateStatus(`❌ Stop Error: ${error.message.substring(0, 70)}...`, 'error');
-            } finally {
-                 startBtn.disabled = false;
-            }
-        }
-        
-        // --- Event Listeners and Init ---
-        startBtn.addEventListener('click', handleStart);
-        stopBtn.addEventListener('click', handleStop);
-        document.addEventListener('DOMContentLoaded', fetchConfig); // Load config on page load
+        document.addEventListener('DOMContentLoaded', () => {
+             loadSavedDetails();
+             updateDisplayTotal();
+             // Check if a job is already running on page load
+             fetchStatus(); 
+        });
     </script>
 </body>
 </html>
