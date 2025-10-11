@@ -8,139 +8,154 @@
     
     <style>
         :root {
-            --primary-color: #007bff; 
+            --primary-color: #dc3545; 
             --success-color: #28a745;
             --danger-color: #dc3545;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
             --text-color: #343a30;
             --border-color: #ced4da;
+            --slot-bg: #e9ecef;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 30px; }
-        .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
         h1 { color: var(--primary-color); text-align: center; margin-bottom: 25px; font-size: 26px; }
 
-        .form-area { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-color); border-radius: 4px; background-color: #f1f1f1; }
-        
-        #targetUrl { padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; box-sizing: border-box; }
-        
-        .button-group { display: flex; gap: 10px; }
-        #startBtn, #stopBtn { flex: 1; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        #targetUrl { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 16px; }
+        #startBtn, #stopBtn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background-color 0.2s; }
         #startBtn { background-color: var(--success-color); color: white; }
         #stopBtn { background-color: var(--danger-color); color: white; }
         #startBtn:disabled, #stopBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        #apiStatus { padding: 10px; margin-bottom: 20px; border-radius: 4px; font-weight: 500; text-align: center; background-color: #e9ecef; color: var(--text-color); }
+        #apiStatus { padding: 10px; margin-bottom: 20px; border-radius: 4px; font-weight: 500; text-align: center; background-color: #fff3cd; color: #856404; }
         
-        .server-status { margin-top: 20px; padding: 15px; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; }
-        .server-status h2 { font-size: 18px; margin-bottom: 10px; color: var(--primary-color); }
+        .slots-container { display: flex; gap: 20px; margin-bottom: 20px; }
+        .slot-instance { flex: 1; border: 2px solid var(--border-color); border-radius: 4px; padding: 10px; min-height: 250px; background: var(--slot-bg); text-align: center; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+        .slot-instance h3 { color: var(--primary-color); margin-top: 0; font-size: 1.1em; }
+        .slot-content { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 1.2em; font-weight: bold; color: #6c757d; }
         
-        #server-log { white-space: pre-wrap; font-family: monospace; font-size: 12px; min-height: 250px; background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-y: auto; }
-        .slot-display { text-align: center; margin-top: 10px; color: #6c757d; font-size: 0.9em; }
+        .active-status { background-color: #d4edda; color: var(--success-color); border: 2px solid var(--success-color); }
+        .active-status .slot-content { color: var(--success-color); }
+
+        .log-area { margin-top: 20px; padding: 15px; border: 1px dashed var(--border-color); border-radius: 4px; background: #fff; }
+        .log-area h2 { font-size: 18px; margin-bottom: 10px; color: #6c757d; }
+        #server-log { white-space: pre-wrap; font-family: monospace; font-size: 12px; min-height: 150px; background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-y: auto; }
 
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Server-Side Website Booster (2 Slots)</h1>
+        <h1>🚀 Server-Side Traffic Booster (2-Slots)</h1>
         
         <div id="apiStatus">
             <i class="fas fa-spinner fa-spin"></i> Connecting to API server for config...
         </div>
         
-        <div class="form-area">
+        <div class="input-group">
             <input type="url" id="targetUrl" placeholder="Enter Target Website URL (e.g., https://example.com)" required>
-            
-            <div class="button-group">
-                <button id="startBtn" disabled>
-                    <i class="fas fa-play"></i> START TRAFFIC (2 Slots)
-                </button>
-                <button id="stopBtn" disabled>
-                    <i class="fas fa-stop"></i> STOP ALL
-                </button>
-            </div>
-            <div class="slot-display">
-                *Traffic will be generated on the server using **2 simultaneous browser slots** with rotating proxies.
-            </div>
+            <button id="startBtn" disabled><i class="fas fa-play"></i> START TRAFFIC</button>
+            <button id="stopBtn" disabled><i class="fas fa-stop"></i> STOP</button>
         </div>
 
-        <div class="server-status">
-            <h2>Server Activity Log:</h2>
-            <pre id="server-log">Waiting for START command...</pre>
+        <div class="slots-container">
+            <div id="slot1" class="slot-instance">
+                <h3>Slot 1 (Proxy User Agent)</h3>
+                <div class="slot-content">Waiting for Start Command...</div>
+            </div>
+            <div id="slot2" class="slot-instance">
+                <h3>Slot 2 (Proxy User Agent)</h3>
+                <div class="slot-content">Waiting for Start Command...</div>
+            </div>
         </div>
         
-        <p style="text-align: center; margin-top: 15px; font-size: 0.8em; color: var(--danger-color);">
-            *Proxies are **hardcoded** in the server code.
-        </p>
+        <div class="log-area">
+            <h2>Server Activity Log (Realtime Status):</h2>
+            <pre id="server-log">Server logs will show successful proxy connections and views...</pre>
+        </div>
+        <p style="text-align: center; margin-top: 15px; font-size: 0.9em; color: var(--primary-color);">
+            *Note: Views are generated **Server-Side** using **Proxies** and will appear in Google Analytics as **Country Views**.</p>
     </div>
 
     <script>
-        // *** FIX: Correct API path added ***
         const API_BASE_URL = "https://pooreyoutuber-github-io.onrender.com/api/booster"; 
         
         const statusElement = document.getElementById('apiStatus');
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
+        const targetUrlInput = document.getElementById('targetUrl');
         const serverLog = document.getElementById('server-log');
-        let isRunning = false;
+        const slot1 = document.getElementById('slot1');
+        const slot2 = document.getElementById('slot2');
 
-        // --- Utility Functions ---
         function updateStatus(message, type) {
+            const bg = type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : type === 'loading' ? '#fff3cd' : '#e9ecef';
+            const color = type === 'success' ? '#155724' : type === 'error' ? '#721c24' : type === 'loading' ? '#856404' : '#343a40';
             statusElement.innerHTML = message;
-            statusElement.style.backgroundColor = type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : type === 'loading' ? '#fff3cd' : '#e9ecef';
-            statusElement.style.color = type === 'success' ? '#155724' : type === 'error' ? '#721c24' : type === 'loading' ? '#856404' : '#343a40';
+            statusElement.style.backgroundColor = bg;
+            statusElement.style.color = color;
         }
 
+        function updateSlotDisplay(message, isActive) {
+            const slots = [slot1, slot2];
+            slots.forEach(slot => {
+                slot.querySelector('.slot-content').innerHTML = message;
+                if (isActive) {
+                    slot.classList.add('active-status');
+                } else {
+                    slot.classList.remove('active-status');
+                }
+            });
+        }
+        
         function appendLog(message, isError = false) {
             const now = new Date().toLocaleTimeString();
             serverLog.innerHTML += `<span style="color: ${isError ? 'red' : 'green'}; font-weight: bold;">[${now}]</span> ${message}\n`;
             serverLog.scrollTop = serverLog.scrollHeight; 
         }
 
-        // --- API Calls ---
         async function fetchConfig() {
             updateStatus(`<i class="fas fa-spinner fa-spin"></i> Connecting to API server for config...`, 'loading');
             try {
-                // Fetching from the correct endpoint: /api/booster/config
                 const response = await fetch(`${API_BASE_URL}/config`);
                 
                 if (response.status === 503) throw new Error("Server is sleeping. Wait 15s and refresh.");
                 
-                // CRITICAL: Check if response is NOT JSON (e.g., HTML error page)
-                if (response.headers.get('content-type') && !response.headers.get('content-type').includes('application/json')) {
-                     const text = await response.text();
-                     if (text.trim().startsWith('<')) {
-                        throw new Error(`Server returned HTML instead of JSON. Server is likely not running or starting.`);
-                     }
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Server returned non-JSON content. Is the server running?`);
                 }
 
                 const data = await response.json();
 
                 if (response.ok && data.status === 'success') {
                     const ua = data.config.userAgent.substring(0, 30);
-                    updateStatus(`✅ Config Loaded. Server UA: ${ua}... (Proxies: ${data.proxyCount})`, 'success');
+                    updateStatus(`✅ Config Loaded. Slots: ${data.maxSlots}. Server UA: ${ua}... (Proxies: ${data.proxyCount})`, 'success');
                     startBtn.disabled = false;
                 } else {
                     throw new Error(data.message || 'Failed to load configuration.');
                 }
             } catch (error) {
                 updateStatus(`❌ Network Error: ${error.message}`, 'error');
+                updateSlotDisplay(`Error: Server Connection Failed.`, false);
             }
         }
         
         async function handleStart() {
-            const url = document.getElementById('targetUrl').value.trim();
+            const url = targetUrlInput.value.trim();
 
-            if (!url) { alert("Please enter the Target Website URL."); return; }
-            if (!url.startsWith('http')) { alert("URL must start with http:// or https://"); return; }
+            if (!url || !url.startsWith('http')) { 
+                alert("Please enter a valid URL starting with http:// or https://"); 
+                return; 
+            }
 
-
-            isRunning = true;
             startBtn.disabled = true;
             stopBtn.disabled = false;
             updateStatus(`<i class="fas fa-rocket fa-spin"></i> Sending START command to Server...`, 'loading');
-            appendLog(`Command sent: Starting traffic to ${url} using hardcoded proxies.`);
+            appendLog(`Command sent: Starting traffic to ${url}`);
+            updateSlotDisplay(`<i class="fas fa-bolt fa-spin"></i> TRAFFIC ACTIVE on: ${new URL(url).hostname}`, true);
+
 
             try {
                 const response = await fetch(`${API_BASE_URL}/start-traffic`, {
@@ -152,23 +167,21 @@
                 const result = await response.json();
 
                 if (response.ok && result.status === 'success') {
-                    updateStatus(`✅ Traffic Started Successfully! Check server log below.`, 'success');
-                    appendLog(`Server started ${result.slotCount} traffic slots successfully!`, false);
-                    appendLog(`Server Message: ${result.message}`);
+                    updateStatus(`✅ Traffic Started Successfully! Server is generating views.`, 'success');
+                    appendLog(`Server started ${result.slotCount} traffic slots.`, false);
                 } else {
                     throw new Error(result.message || 'Server failed to start traffic.');
                 }
             } catch (error) {
                 updateStatus(`❌ Start Error: ${error.message.substring(0, 70)}...`, 'error');
-                appendLog(`Error: ${error.message}`, true);
-                isRunning = false;
+                appendLog(`Error starting traffic: ${error.message}`, true);
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
+                updateSlotDisplay(`TRAFFIC FAILED. Check logs.`, false);
             }
         }
 
         async function handleStop() {
-            isRunning = false;
             startBtn.disabled = true;
             stopBtn.disabled = true;
             updateStatus(`<i class="fas fa-hourglass-half"></i> Sending STOP command...`, 'loading');
@@ -184,7 +197,8 @@
 
                 if (response.ok && result.status === 'success') {
                     updateStatus(`⏸️ Traffic Stopped. Server is idle.`, 'success');
-                    appendLog(`Server stopped all slots. Slots remaining: ${result.slotsRemaining}`, false);
+                    appendLog(`Server stopped all slots.`, false);
+                    updateSlotDisplay(`Waiting for Start Command...`, false);
                 } else {
                     throw new Error(result.message || 'Server failed to stop traffic.');
                 }
@@ -196,7 +210,6 @@
             }
         }
         
-        // --- Event Listeners and Init ---
         startBtn.addEventListener('click', handleStart);
         stopBtn.addEventListener('click', handleStop);
         document.addEventListener('DOMContentLoaded', fetchConfig);
