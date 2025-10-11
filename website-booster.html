@@ -74,13 +74,15 @@
         </div>
         
          <div class="note-box">
-            <strong><i class="fas fa-check-circle"></i> Status:</strong> Traffic generation is handled **server-side** using **rotating proxies**. The views will reflect in your **Google Analytics/YouTube Studio** with different countries/regions. You can close this window after starting the session.
+            <strong><i class="fas fa-check-circle"></i> Status:</strong> Traffic generation is handled **server-side** using **rotating proxies** (Proxy is set in `index.js`). Views will reflect in Google Analytics/YouTube Studio with **Country-Wise** data.
         </div>
     </div>
 
     <script>
         // --- Configuration ---
-        const API_BASE_URL = "/api/booster"; 
+        // FINAL CRITICAL FIX: ABSOLUTE RENDER URL ADDED (Client-side)
+        const RENDER_DOMAIN = 'https://pooreyoutuber-github-io.onrender.com';
+        const API_BASE_URL = RENDER_DOMAIN + "/api/booster"; 
         
         // --- Elements ---
         const statusElement = document.getElementById('apiStatus');
@@ -106,7 +108,6 @@
                 
                 if (!response.ok) {
                     const text = await response.text();
-                    // CRITICAL FIX for "Unexpected token <" (Render sleeping error)
                     if (text.trim().startsWith('<')) {
                          throw new Error(`Server returned HTML error (${response.status} ${response.statusText}). Render service is likely sleeping.`);
                     }
