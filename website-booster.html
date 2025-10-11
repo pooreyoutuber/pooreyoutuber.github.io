@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Website Traffic Booster Tool</title>
+    <title>Website Traffic Booster Tool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
@@ -41,17 +41,26 @@
         #status-window {
             margin-top: 20px; padding: 15px; border-radius: 8px; background-color: #e6f7ff; 
             border: 1px solid #91d5ff; color: #0050b3; font-weight: 600; text-align: center;
-            display: none; /* Initially hidden */
+            /* display: none; */ /* Use JS to hide/show */
         }
         .progress-text {
             display: block; margin-top: 5px; font-size: 1.2em; color: #002766;
         }
+
+        /* Info Boxes */
+        .info-box {
+            margin-top: 15px; padding: 15px; border-radius: 8px; background-color: #f4f6f9;
+            border: 1px solid #e0e0e0; font-size: 0.9em; text-align: left;
+        }
+        .info-box h4 { margin-top: 0; color: #007bff; font-size: 1.1em; }
+        .info-box ul { padding-left: 20px; margin-bottom: 0; }
+        .info-box li { margin-bottom: 5px; }
     </style>
 </head>
 <body>
     <div class="header">
         <h2>🚀 Website Traffic Booster Tool</h2>
-        <p style="color: #888; margin-top: 5px;">Increase your page views and engagement metrics.</p>
+        <p style="color: #888; margin-top: 5px;">Increase your page views and engagement metrics across 15+ countries.</p>
     </div>
     
     <div class="container">
@@ -71,31 +80,31 @@
                 <label style="color: #007bff;"><i class="fas fa-sitemap"></i> 4. Distribute Traffic Across Pages (Total must be 100%):</label>
                 
                 <div class="page-entry">
-                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required)" required autocomplete="off">
+                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required: https://...)" required autocomplete="off">
                     <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
                     <span class="percent-label">%</span>
                 </div>
                 
                 <div class="page-entry">
-                    <input type="text" id="url2" class="page-url" placeholder="Page 2 URL (Optional)">
+                    <input type="text" id="url2" class="page-url" placeholder="Page 2 URL (Optional: https://...)">
                     <input type="number" id="percent2" class="page-percent" value="0" min="0" max="100" required>
                     <span class="percent-label">%</span>
                 </div>
 
                 <div class="page-entry">
-                    <input type="text" id="url3" class="page-url" placeholder="Page 3 URL (Optional)">
+                    <input type="text" id="url3" class="page-url" placeholder="Page 3 URL (Optional: https://...)">
                     <input type="number" id="percent3" class="page-percent" value="0" min="0" max="100" required>
                     <span class="percent-label">%</span>
                 </div>
 
                 <div class="page-entry">
-                    <input type="text" id="url4" class="page-url" placeholder="Page 4 URL (Optional)">
+                    <input type="text" id="url4" class="page-url" placeholder="Page 4 URL (Optional: https://...)">
                     <input type="number" id="percent4" class="page-percent" value="0" min="0" max="100" required>
                     <span class="percent-label">%</span>
                 </div>
                 
                 <div class="page-entry">
-                    <input type="text" id="url5" class="page-url" placeholder="Page 5 URL (Optional)">
+                    <input type="text" id="url5" class="page-url" placeholder="Page 5 URL (Optional: https://...)">
                     <input type="number" id="percent5" class="page-percent" value="0" min="0" max="100" required>
                     <span class="percent-label">%</span>
                 </div>
@@ -108,106 +117,45 @@
             <button type="submit" id="submitBtn"><i class="fas fa-play"></i> START TRAFFIC GENERATION</button>
         </form>
 
-        <div id="status-window" style="display: none;">
-            <p style="margin-bottom: 5px;"><i class="fas fa-chart-line fa-spin"></i> **LIVE JOB STATUS**</p>
-            <span class="progress-text">Sent: <span id="viewsSent">0</span> / Total: <span id="viewsTotal">0</span></span>
-            <span class="progress-text" style="font-size: 0.9em; font-weight: normal; color: #0050b3;">Remaining: <span id="viewsRemaining">0</span></span>
-            <p style="margin-top: 5px; font-size: 0.85em;">Target URL: <span id="targetUrlDisplay">N/A</span></p>
-            <button id="stopBtn" style="background-color: #dc3545; width: 100px; padding: 8px; margin-top: 10px;">
-                <i class="fas fa-stop"></i> STOP (Not Implemented)
-            </button>
-        </div>
-        
         <div id="message"></div>
 
-        <div class="info-card">
-            </div>
-
-        <div class="info-card">
-            </div>
+        <div class="info-box">
+            <h4>💡 Important Instructions</h4>
+            <ul>
+                <li>**Reliability:** This tool uses the **GA4 Measurement Protocol**, jo **proxy aur browser errors** se **free** hai.</li>
+                <li>**Real-Type Views:** Har view 30-120 seconds ka **engagement time** aur **session start** ke saath record hota hai.</li>
+                <li>**Country Views:** Views **15 alag-alag countries** (US, IN, CA, UK, etc.) se aayenge.</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h4>🔑 Key Setup Guide</h4>
+            <ul>
+                <li>**Measurement ID (G-XXXXX):** Aapke GA4 property settings se milega.</li>
+                <li>**API Secret:** GA4 mein **Data Streams** settings mein jaakar generate karein.</li>
+                <li>**URL Format:** Sabhi URLs **`https://`** se shuru hone chahiye.</li>
+            </ul>
+        </div>
     </div>
     
     <script>
-        // 🚨 FINAL RENDER API URL - DYNAMICALLY SET
-        const RENDER_DOMAIN = 'https://pooreyoutuber-github-io.onrender.com';
+        // 🚨 CRITICAL: RENDER API URL - Yeh URL check karein.
+        // Agar aapne Render par service ka naam badla hai, toh yeh domain badalna hoga.
+        const RENDER_DOMAIN = 'https://pooreyoutuber-github-io.onrender.com'; 
         const RENDER_API_URL = RENDER_DOMAIN + '/boost-mp'; 
-        const STATUS_API_URL = RENDER_DOMAIN + '/boost-mp/status';
-        const STORAGE_KEY = 'booster_details_v7'; 
-        const POLL_INTERVAL = 5000; // Poll server every 5 seconds
+        const STORAGE_KEY = 'booster_details_v8'; 
         
         const form = document.getElementById('boosterForm');
         const messageDiv = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
         const totalPercentSpan = document.getElementById('totalPercent');
-        const statusWindow = document.getElementById('status-window');
-        
-        // Status elements
-        const viewsSentSpan = document.getElementById('viewsSent');
-        const viewsTotalSpan = document.getElementById('viewsTotal');
-        const viewsRemainingSpan = document.getElementById('viewsRemaining');
-        const targetUrlDisplay = document.getElementById('targetUrlDisplay');
 
         const pageInputs = [1, 2, 3, 4, 5].map(i => ({
             url: document.getElementById(`url${i}`),
             percent: document.getElementById(`percent${i}`)
         }));
 
-        let pollTimer = null;
-
-
-        // --- Live Status Functions ---
-        function startStatusPolling() {
-            if (pollTimer) clearInterval(pollTimer);
-            statusWindow.style.display = 'block';
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Job Running...';
-
-            pollTimer = setInterval(fetchStatus, POLL_INTERVAL);
-            fetchStatus(); // Fetch immediately
-        }
-
-        function stopStatusPolling(messageType) {
-            clearInterval(pollTimer);
-            pollTimer = null;
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'START TRAFFIC GENERATION';
-            
-            // Wait 10 seconds before hiding window to show final count
-            setTimeout(() => {
-                if (!pollTimer) statusWindow.style.display = 'none';
-            }, 10000);
-
-            if (messageType) {
-                 showMessage(messageType, `✨ JOB FINISHED! Total views sent: ${viewsSentSpan.textContent}. Results expected in GA4 within 24-48 hours.`, true);
-            }
-        }
-
-        async function fetchStatus() {
-            try {
-                const response = await fetch(STATUS_API_URL);
-                const data = await response.json();
-
-                if (data.status === 'processing') {
-                    viewsSentSpan.textContent = data.viewsSent;
-                    viewsTotalSpan.textContent = data.totalRequested;
-                    viewsRemainingSpan.textContent = data.viewsRemaining;
-                    targetUrlDisplay.textContent = data.targetUrl.substring(0, 40) + '...';
-                } else if (data.status === 'idle' && data.totalRequested > 0) {
-                    // Job finished
-                    stopStatusPolling('success');
-                } else if (data.status === 'idle' && !pollTimer) {
-                    // Initial idle state, do nothing
-                    statusWindow.style.display = 'none';
-                }
-
-            } catch (error) {
-                // If polling fails repeatedly, something is wrong with the server
-                // stopStatusPolling('error'); 
-            }
-        }
-
-
-        // --- Local Storage & UI Functions (Same as before) ---
+        // --- Local Storage & UI Functions ---
         function loadSavedDetails() {
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (savedData) {
@@ -254,11 +202,10 @@
             }
         }
 
-        // --- Main Submission Logic (Modified to call startStatusPolling) ---
+        // --- Main Submission Logic ---
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             
-            // ... (Validation logic remains the same) ...
             const gaId = document.getElementById('gaid').value.trim();
             const apiKey = document.getElementById('apikey').value.trim();
             let viewsCount = parseInt(document.getElementById('views').value);
@@ -275,20 +222,24 @@
             }
             
             let pages = [];
+            let isValid = true;
+            
             pageInputs.forEach(input => {
                 const url = input.url.value.trim();
                 const percent = parseInt(input.percent.value) || 0;
+                
                 if (url && percent > 0) {
+                    // Check for https protocol
                     if (!url.startsWith('http')) {
                         showMessage('error', '❌ Error: All page URLs must start with http:// or https://', true);
-                        pages = null; 
+                        isValid = false; 
                         return;
                     }
                     pages.push({ url: url, percent: percent });
                 }
             });
 
-            if (!pages) return; 
+            if (!isValid) return; 
 
             if (pages.length === 0) {
                  showMessage('error', '❌ Error: At least one Page URL (Page 1) with a percentage > 0 must be filled.', true);
@@ -303,8 +254,8 @@
 
         async function submitData(data, retriesLeft) {
             submitBtn.disabled = true;
-            submitBtn.textContent = `✅ Request initiated. Checking server status...`;
-            showMessage('info', '✅ Request initiated. Checking server status...', false);
+            submitBtn.textContent = `<i class="fas fa-sync fa-spin"></i> Processing... Please wait (Server is working in the background)`;
+            showMessage('info', '✅ Request initiated. Server views generate kar raha hai. Yeh background mein chalta rahega.', false);
             
             try {
                 const response = await fetch(RENDER_API_URL, {
@@ -320,18 +271,19 @@
                 const responseData = await response.json();
 
                 if (responseData.status === 'accepted') { 
-                    // Success! Start the live counter
-                    showMessage('info', `✨ Success! ${responseData.message} **Live status is starting below.**`, true);
-                    startStatusPolling(); // <-- CRITICAL: Start the counter
+                    // Success! Server ne job le li hai.
+                    showMessage('success', `✨ Success! ${responseData.message} **Aap browser band kar sakte hain. Results 24-48 hours mein GA4 mein dikhenge.**`, true);
                 } else {
                     showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
                 }
 
             } catch (error) {
                 if (retriesLeft > 0) {
+                    showMessage('info', `Connection timeout. Retrying (${retriesLeft} left)...`, false);
+                    await new Promise(r => setTimeout(r, 2000));
                     return submitData(data, retriesLeft - 1);
                 } else {
-                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your API service is LIVE and the URL is correct.`, true);
+                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your **Render service LIVE** hai aur **URL (pooreyoutuber-github-io.onrender.com) sahi hai**.`, true);
                 }
             } 
         }
@@ -339,8 +291,6 @@
         document.addEventListener('DOMContentLoaded', () => {
              loadSavedDetails();
              updateDisplayTotal();
-             // Check if a job is already running on page load
-             fetchStatus(); 
         });
     </script>
 </body>
