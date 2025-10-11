@@ -10,11 +10,10 @@ const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
 // --- Hardcoded Proxy List (From User's Uploaded proxyscrape_premium_http_proxies.txt) ---
-// Note: Proxyscrape list format is IP:Port (e.g., 45.3.49.4:3129). 
-// Since your screenshots show IP Authentication Slots (meaning user:pass), 
-// I'm assuming a generic authentication placeholder for each one.
-// *** You MUST replace 'user:pass' with your actual username and password if required by Proxyscrape ***
-const PROXY_CREDENTIALS = "user:pass@"; // Change this if your proxies are not authenticated
+// *** CRITICAL: If your Proxyscrape proxies require authentication, 
+// replace 'user:pass' with your actual username and password. 
+// Otherwise, set it to an empty string: const PROXY_CREDENTIALS = ""; ***
+const PROXY_CREDENTIALS = "user:pass@"; 
 
 const RAW_PROXIES = [
     '45.3.49.4:3129', '209.50.164.165:3129', '216.26.232.247:3129', '65.111.3.145:3129', '209.50.168.254:3129', 
@@ -39,13 +38,12 @@ const RAW_PROXIES = [
     '216.26.241.226:3129', '104.207.46.76:3129', '216.26.240.92:3129', '216.26.251.165:3129', '45.3.47.110:3129'
 ];
 
-// If proxies are authenticated, prepend credentials, otherwise use raw IP:Port
 const HARDCODED_PROXIES = RAW_PROXIES.map(p => PROXY_CREDENTIALS + p);
 
 
 // --- Configuration ---
 const PORT = process.env.PORT || 10000;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Environment variable se aayega
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 const MAX_SLOTS = 2; // Maximum concurrent Puppeteer instances
 
 // Traffic Booster Config (Defaults)
@@ -201,7 +199,7 @@ app.use(express.json());
 // Serve static HTML/JS files 
 app.use(express.static(path.join(__dirname, 'public'))); 
 app.get('/', (req, res) => {
-    // Assuming booster_tool.html is in the public folder and you use index.html as main
+    // Ensuring the correct HTML file is served
     res.sendFile(path.join(__dirname, 'public', 'booster_tool.html')); 
 });
 
@@ -223,6 +221,7 @@ app.get('/api/booster/config', (req, res) => {
 app.post('/api/booster/start-traffic', (req, res) => {
     const { url } = req.body;
 
+    // We only check for URL now, not proxies, because they are hardcoded
     if (!url) {
         return res.status(400).json({ status: 'error', message: 'Target URL is required.' });
     }
@@ -234,46 +233,4 @@ app.post('/api/booster/start-traffic', (req, res) => {
     }
 
     isTrafficRunning = true;
-    activeSlots = [];
-
-    // Start all max slots
-    for (let i = 0; i < MAX_SLOTS; i++) {
-        startTraffic(url);
-    }
-
-    res.json({
-        status: 'success',
-        message: `Starting ${MAX_SLOTS} traffic slots using server-side Puppeteer and random proxies.`,
-        slotCount: MAX_SLOTS
-    });
-});
-
-// 3. Traffic Booster STOP
-app.post('/api/booster/stop-traffic', (req, res) => {
-    if (!isTrafficRunning) {
-        return res.status(200).json({ status: 'success', message: 'Traffic was already stopped.' });
-    }
-
-    isTrafficRunning = false;
-
-    res.json({
-        status: 'success',
-        message: `Stopping traffic. Active slots will finish their current run and close.`,
-        slotsRemaining: activeSlots.length
-    });
-});
-
-// 4. Placeholder for Caption Generator (or other tools)
-app.post('/api/caption', async (req, res) => {
-    if (!GEMINI_API_KEY) return res.status(503).json({ status: 'error', message: 'Gemini API Key is not configured on server.' });
-    res.json({ status: 'success', caption: 'Caption tool is active, but logic is simplified here.' });
-});
-
-
-// --- Server Start ---
-app.listen(PORT, () => {
-    console.log(`Traffic Booster API Server listening on port ${PORT}.`);
-    console.log(`Concurrent Slot System Initialized. Max Slots: ${MAX_SLOTS}`);
-    console.log(`Hardcoded Proxies Loaded: ${HARDCODED_PROXIES.length}`);
-    console.log(`>>> Your service is live 🚀`);
-});
+    activeSlots
