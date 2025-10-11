@@ -8,8 +8,8 @@ const path = require('path');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
-// --- Hardcoded Proxy List (From User's Uploaded proxyscrape_premium_http_proxies.txt) ---
-// ** FIX: PROXY_CREDENTIALS ko empty rakha gaya hai (IP Authentication ke liye) **
+// --- Hardcoded Proxy List ---
+// PROXY_CREDENTIALS ko empty rakha gaya hai (IP Authentication ke liye)
 const PROXY_CREDENTIALS = ""; 
 
 const RAW_PROXIES = [
@@ -98,7 +98,7 @@ async function runTrafficSlot(url, slotId) {
             ignoreHTTPSErrors: true,
         });
 
-        // ** FIX: createIncognitoBrowserContext error solve **
+        // FIX: Replaced createIncognitoBrowserContext with browser.newPage()
         page = await browser.newPage();
         
         await page.setUserAgent(TRAFFIC_CONFIG.userAgent);
@@ -111,7 +111,7 @@ async function runTrafficSlot(url, slotId) {
             console.log(`[SLOT ${slotId}] Authenticating proxy...`);
         }
 
-        // --- 4. Navigation (Timeout is high: 45s) ---
+        // --- 4. Navigation (Timeout is high: 45s to avoid Navigation timeout exceeded) ---
         console.log(`[SLOT ${slotId}] Navigating to ${url}...`);
         
         await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 }); 
@@ -181,8 +181,8 @@ app.use(express.json());
 // Serve static HTML/JS files 
 app.use(express.static(path.join(__dirname, 'public'))); 
 app.get('/', (req, res) => {
-    // boosgter_tool.html is the client-side interface
-    res.sendFile(path.join(__dirname, 'public', 'booster_tool.html')); 
+    // FIX: Serving the correct file name: website-booster.html
+    res.sendFile(path.join(__dirname, 'public', 'website-booster.html')); 
 });
 
 
@@ -220,7 +220,7 @@ app.post('/api/booster/start-traffic', (req, res) => {
 
     res.json({
         status: 'success',
-        message: `Starting ${MAX_SLOTS} traffic slots using server-side Puppeteer and random proxies.`,
+        message: `Starting ${MAX_SLOTS} traffic slots using server-side Puppeteer and random proxies. Check server logs for activity.`,
         slotCount: MAX_SLOTS
     });
 });
