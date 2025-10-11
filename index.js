@@ -1,4 +1,4 @@
-// index.js (FINAL STABLE PUPPETEER CODE WITH PROXIES)
+// index.js (FINAL STABLE PUPPETEER CODE WITH PROXY & RENDER FIXES)
 
 const express = require('express');
 const cors = require('cors');
@@ -8,19 +8,20 @@ const chromium = require('@sparticuz/chromium');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
-const MAX_SERVER_SLOTS = 20; 
+
+// Render Free Tier par heavy concurrency avoid karne ke liye
+const MAX_SERVER_SLOTS = 5; // Server load kam kiya
 const SLOTS_PER_USER = 1; 
 let activeSlots = []; 
 
 const TRAFFIC_CONFIG = {
-    minDuration: 5, 
-    maxDuration: 20, 
-    navigationTimeout: 60000, 
+    minDuration: 10,  // Minimum time badhaya
+    maxDuration: 40,  // Maximum time badhaya
+    navigationTimeout: 60000, // Timeout badhaya (60 seconds)
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
 };
 
-
-// --- Hardcoded Proxy List (100+ Proxies) ---
+// --- Proxy List (Same 100+ Proxies) ---
 const PROXY_CREDENTIALS = ""; 
 const RAW_PROXIES = [
     '45.3.49.4:3129', '209.50.164.165:3129', '216.26.232.247:3129', '65.111.3.145:3129', '209.50.168.254:3129', 
@@ -48,7 +49,7 @@ const RAW_PROXIES = [
 const HARDCODED_PROXIES = RAW_PROXIES.map(p => PROXY_CREDENTIALS + p);
 
 
-// --- Helper Functions (runTrafficSlot, startSlotSession, etc.) ---
+// --- Helper Functions ---
 function generateRandomDuration() {
     return Math.floor(Math.random() * (TRAFFIC_CONFIG.maxDuration - TRAFFIC_CONFIG.minDuration + 1)) + TRAFFIC_CONFIG.minDuration;
 }
@@ -60,6 +61,7 @@ function getRandomProxy() {
 }
 
 function getUserId(req) {
+    // Simple way to identify user session
     return req.headers['x-forwarded-for'] || req.socket.remoteAddress || `USER-${Date.now()}`; 
 }
 
@@ -68,19 +70,17 @@ async function runTrafficSlot(url, slotId, userId) {
     let browser;
     let proxy = getRandomProxy(); 
     let durationSec = generateRandomDuration();
-
-    if (activeSlots.length >= MAX_SERVER_SLOTS) {
-        console.warn(`[SERVER LIMIT] Slot ${slotId} for User ${userId} denied. Server is full.`);
-        return; 
-    }
+    let slotInfo = { id: slotId, url, userId };
     
-    activeSlots.push({ id: slotId, url, userId });
+    // Add slot to active list
+    activeSlots.push(slotInfo);
 
     try {
         let launchArgs = [
             ...chromium.args, 
             '--disable-gpu', '--no-sandbox', '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage','--single-process' 
+            '--disable-dev-shm-usage', 
+            '--single-process' // ETXTBSY fix
         ]; 
         
         if (proxy) {
@@ -92,12 +92,15 @@ async function runTrafficSlot(url, slotId, userId) {
         }
 
         browser = await puppeteer.launch({
-            args: launchArgs, defaultViewport: chromium.defaultViewport,
+            args: launchArgs, 
+            defaultViewport: chromium.defaultViewport,
             executablePath: await chromium.executablePath(), 
-            headless: chromium.headless, ignoreHTTPSErrors: true,
+            headless: chromium.headless, 
+            ignoreHTTPSErrors: true,
         });
-
-        let page = await browser.newPage();
+        
+        // FIX: Using regular newPage() instead of createIncognitoBrowserContext()
+        let page = await browser.newPage(); 
         await page.setUserAgent(TRAFFIC_CONFIG.userAgent);
         
         if (proxy && proxy.includes('@')) {
@@ -110,9 +113,10 @@ async function runTrafficSlot(url, slotId, userId) {
         
         await page.goto(url, { 
             waitUntil: 'domcontentloaded', 
-            timeout: TRAFFIC_CONFIG.navigationTimeout 
+            timeout: TRAFFIC_CONFIG.navigationTimeout // Increased timeout
         }); 
 
+        // Simulate scrolling
         await page.evaluate(() => {
             return new Promise(resolve => {
                 let totalHeight = 0;
@@ -121,6 +125,7 @@ async function runTrafficSlot(url, slotId, userId) {
                     const scrollHeight = document.body.scrollHeight;
                     window.scrollBy(0, distance);
                     totalHeight += distance;
+                    // Stop scrolling if we reached the bottom
                     if (totalHeight >= scrollHeight) {
                         clearInterval(timer);
                         setTimeout(resolve, 500);
@@ -129,36 +134,42 @@ async function runTrafficSlot(url, slotId, userId) {
             });
         });
         
+        // Wait for the specified duration
         await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
         
-        console.log(`[USER ${userId} | SLOT ${slotId}] View complete. SUCCESS.`);
+        console.log(`[USER ${userId} | SLOT ${slotId}] View complete. SUCCESS. Time: ${durationSec}s`);
 
     } catch (error) {
-        console.error(`[USER ${userId} | SLOT ${slotId} VIEW FAILED] ERROR: ${error.message.substring(0, 100)}. Proxy/Timeout issue likely.`);
+        console.error(`[USER ${userId} | SLOT ${slotId} VIEW FAILED] ERROR: ${error.message.substring(0, 100)}. Proxy/Timeout/Navigation issue.`);
     } finally {
         if (browser) {
             try { await browser.close(); } catch (e) { console.error(`[USER ${userId} | CLOSING ERROR] Failed to close browser: ${e.message.substring(0, 50)}`); }
         }
         
+        // Remove slot from active list
         activeSlots = activeSlots.filter(s => s.id !== slotId);
+        
         const sessionActive = activeSlots.some(s => s.userId === userId);
-
+        
         if (sessionActive && activeSlots.length < MAX_SERVER_SLOTS) {
              console.log(`[USER ${userId} | SLOT ${slotId}] Restarting in 2s. Total active: ${activeSlots.length}.`);
+             // Restart the slot session
              setTimeout(() => startSlotSession(url, userId), 2000); 
         } else {
-             console.log(`[USER ${userId} | SLOT ${slotId}] Session stop condition met. Total active: ${activeSlots.length}.`);
+             console.log(`[USER ${userId} | SLOT ${slotId}] Session stop condition met or Server is full. Total active: ${activeSlots.length}.`);
         }
     }
 }
 
 function startSlotSession(url, userId) {
     const userSlots = activeSlots.filter(s => s.userId === userId).length;
-
+    
     if (userSlots < SLOTS_PER_USER && activeSlots.length < MAX_SERVER_SLOTS) {
         const slotId = Date.now() + Math.random();
+        // Run slot without adding to activeSlots here, it's added inside runTrafficSlot
         runTrafficSlot(url, slotId, userId);
     } 
+    // Note: If userSlots >= SLOTS_PER_USER, the current running slot will restart itself in its 'finally' block.
 }
 
 
@@ -166,9 +177,11 @@ function startSlotSession(url, userId) {
 app.use(cors());
 app.use(express.json());
 
-// Serving the HTML file
+// Serving the HTML file (only for the main URL, if needed)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'website-booster.html')); 
+    // Ye line hata di kyunki client code dusri jagah hosted hai
+    // res.sendFile(path.join(__dirname, 'website-booster.html')); 
+    res.send('Traffic Booster API is running. Use the client from pooreyoutuber.github.io');
 });
 
 // 1. Traffic Booster Config
@@ -200,6 +213,7 @@ app.post('/api/booster/start-traffic', (req, res) => {
         message = `Server is at maximum capacity (${MAX_SERVER_SLOTS} slots). Please try again later.`;
         status = 'warning';
     } else {
+        // Start the initial session
         startSlotSession(url, userId);
         userSlotsRunning = SLOTS_PER_USER;
         message = `Starting your continuous view session on ${SLOTS_PER_USER} slot.`;
@@ -217,12 +231,13 @@ app.post('/api/booster/start-traffic', (req, res) => {
 // 3. Traffic Booster STOP
 app.post('/api/booster/stop-traffic', (req, res) => {
     const userId = getUserId(req);
-    activeSlots = activeSlots.filter(s => s.userId !== userId);
+    // Filters out all slots belonging to this user ID
+    activeSlots = activeSlots.filter(s => s.userId !== userId); 
     console.log(`[USER ${userId}] Stop command received. Removing session. Total active: ${activeSlots.length}.`);
 
     res.json({
         status: 'success',
-        message: `Your traffic session is stopped. Active slot will close after current view completes.`,
+        message: `Your traffic session is stopped. Active slot will close after current view completes (or after 2s).`,
         slotsRunning: activeSlots.length,
         maxSlots: MAX_SERVER_SLOTS
     });
