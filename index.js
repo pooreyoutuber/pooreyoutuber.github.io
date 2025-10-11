@@ -3,14 +3,11 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
-// Puppeteer for the Traffic Booster (CRITICAL for Render)
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
-// --- Hardcoded Proxy List (Using IP Authentication as per Render's need) ---
-const PROXY_CREDENTIALS = ""; // Empty for IP-based authentication
-
+// --- Hardcoded Proxy List (100+ Proxies) ---
+const PROXY_CREDENTIALS = ""; 
 const RAW_PROXIES = [
     // 100+ Proxies from your proxyscrape_premium_http_proxies.txt file
     '45.3.49.4:3129', '209.50.164.165:3129', '216.26.232.247:3129', '65.111.3.145:3129', '209.50.168.254:3129', 
@@ -40,10 +37,11 @@ const HARDCODED_PROXIES = RAW_PROXIES.map(p => PROXY_CREDENTIALS + p);
 
 // --- Configuration ---
 const PORT = process.env.PORT || 10000;
-const MAX_SLOTS = 2; // Fixed 2 concurrent slots
+const MAX_SLOTS = 2; // Each user who opens the link and starts traffic will launch 2 slots.
 
 const TRAFFIC_CONFIG = {
-    minDuration: 8, 
+    // Duration set to 5-20 seconds (as requested for quick refresh)
+    minDuration: 5, 
     maxDuration: 20, 
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
 };
@@ -92,17 +90,17 @@ async function runTrafficSlot(url, slotId) {
         browser = await puppeteer.launch({
             args: launchArgs,
             defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(), // Puppeteer path fix
+            executablePath: await chromium.executablePath(), 
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
 
-        // FIX: Replaced createIncognitoBrowserContext with newPage()
+        // FIX: Directly using browser.newPage() (Fixes createIncognitoBrowserContext error)
         page = await browser.newPage();
         
         await page.setUserAgent(TRAFFIC_CONFIG.userAgent);
 
-        // --- 3. Proxy Authentication (Only needed if PROXY_CREDENTIALS is not empty) ---
+        // --- 3. Proxy Authentication ---
         if (proxy && proxy.includes('@')) {
             const [auth] = proxy.split('@');
             const [username, password] = auth.split(':');
@@ -110,11 +108,11 @@ async function runTrafficSlot(url, slotId) {
             console.log(`[SLOT ${slotId}] Authenticating proxy...`);
         }
 
-        // --- 4. Navigation (High Timeout to fix Navigation timeout exceeded) ---
+        // --- 4. Navigation (CRITICAL FIX: Increased Timeout to 60 seconds) ---
         console.log(`[SLOT ${slotId}] Navigating to ${url}...`);
         
-        // Timeout is set to 45 seconds
-        await page.goto(url, { waitUntil: 'networkidle0', timeout: 45000 }); 
+        // Timeout is increased to 60 seconds (60000 ms) to handle slow proxies.
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }); 
         
         // --- 5. User Activity Simulation (Scrolling) ---
         await page.evaluate(() => {
@@ -134,7 +132,7 @@ async function runTrafficSlot(url, slotId) {
             });
         });
         
-        // Wait for the specified duration
+        // Wait for the specified duration (5-20 seconds)
         await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
         
         console.log(`[SLOT ${slotId}] View complete.`);
@@ -149,7 +147,7 @@ async function runTrafficSlot(url, slotId) {
         
         if (isTrafficRunning) {
              console.log(`[SLOT ${slotId}] Finished. Restarting in a new session. Active slots: ${activeSlots.length}.`);
-             // Restart the slot recursively
+             // Restart the slot recursively (Auto-Refresh/New View)
              setTimeout(() => startTraffic(url), 2000); 
         } else if (activeSlots.length === 0) {
             console.log("Traffic successfully stopped. All slots closed.");
@@ -179,7 +177,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// FIX: Serving the file directly from the root directory (__dirname)
+// Serving the file directly from the root directory (__dirname)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'website-booster.html')); 
 });
@@ -204,6 +202,8 @@ app.post('/api/booster/start-traffic', (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Target URL is required.' });
     }
     if (isTrafficRunning) {
+         // Agar traffic already chal raha hai, to ise naya traffic shuru karne se roke.
+         // Agar aap chahte hain ki ek hi user baar baar start kar paye, to yeh check hata de.
          return res.status(400).json({ status: 'error', message: `Traffic is already running with ${activeSlots.length} slots.` });
     }
     if (HARDCODED_PROXIES.length === 0) {
@@ -213,6 +213,7 @@ app.post('/api/booster/start-traffic', (req, res) => {
     isTrafficRunning = true;
     activeSlots = [];
 
+    // Launches 2 slots
     for (let i = 0; i < MAX_SLOTS; i++) {
         startTraffic(url);
     }
