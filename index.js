@@ -1,4 +1,4 @@
-// index.js (FINAL PURE ESM CODE - Use with "type": "module" in package.json)
+// index.js (FINAL PURE ESM & CRASH-PROOF STARTUP)
 
 import express from 'express';
 import { GoogleGenAI } from '@google/genai'; 
@@ -7,10 +7,9 @@ import fs from 'fs';
 // Node.js v18+ built-in 'fetch' is used globally.
 
 const app = express();
-// Render uses process.env.PORT
 const PORT = process.env.PORT || 10000; 
 
-// --- GEMINI KEY CONFIGURATION ---
+// --- GEMINI KEY CONFIGURATION (NON-BLOCKING/SAFE STARTUP) ---
 let GEMINI_KEY;
 try {
     // Attempt to read the secret file path specified by Render
@@ -22,8 +21,8 @@ try {
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable.");
     } else {
-        // If neither is found, we log an error but allow the server to start (to avoid crash)
-        console.error("FATAL: Gemini Key could not be loaded. Insta Caption Tool endpoints will fail.");
+        // CRUCIAL: Log error, but DO NOT CRASH the process. Allow it to start on PORT.
+        console.error("WARNING: Gemini Key could not be loaded. AI endpoints will not function.");
     }
 }
 
@@ -33,7 +32,6 @@ if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
     // Dummy object to prevent crash if AI endpoints are called without a key
-    // This allows the server to start successfully.
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -46,12 +44,12 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/', (req, res) => {
+    // This endpoint must work if the server is running.
     res.status(200).send('PooreYouTuber Combined API is running! (GA4 Booster & AI)');
 });
 
 const MIN_DELAY = 3000; 
 const MAX_DELAY = 12000; 
-// --- 15 DIVERSE COUNTRY LOCATIONS ---
 const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
@@ -80,7 +78,6 @@ function getRandomGeo() {
 
 // Helper: Sends data to GA4 Measurement Protocol
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
-    // Built-in global fetch is used
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
     try {
@@ -107,7 +104,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 // Helper: Generates a plan of which URL gets which view
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
-    // FIX: Correct arrow function syntax (already fixed, but ensuring it's here)
     const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
     
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
@@ -130,7 +126,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Concurrency
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages } = req.body; 
@@ -161,17 +157,13 @@ app.post('/boost-mp', async (req, res) => {
                 const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
                 const SESSION_ID = Date.now(); 
                 const geo = getRandomGeo();
-                // Real-type engagement time: 30 seconds to 120 seconds (1 minute)
                 const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
                 const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
                 
-                // Initial spread delay to prevent all requests hitting at once
                 await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); 
 
-                // 1. Session Start Event (Crucial for GA4 Session metrics)
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
-                // 2. Page View Event (Primary view count)
                 const pageViewPayload = {
                     client_id: CLIENT_ID,
                     user_properties: commonUserProperties, 
@@ -182,17 +174,14 @@ app.post('/boost-mp', async (req, res) => {
                     successfulViews++;
                 }
 
-                // 3. User Engagement Event (Ensures low bounce rate and high average engagement time)
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
 
-                // Delay for next view to mimic natural user behavior
                 await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
                 
                 return pageViewResult.success;
             })();
         });
 
-        // Wait for all views to complete
         Promise.all(viewPromises).then(results => {
             console.log(`[BOOSTER FINISH] Job Ended. Total successful page_views: ${successfulViews}/${totalViews}`);
         }).catch(err => {
@@ -209,16 +198,16 @@ app.post('/boost-mp', async (req, res) => {
 app.post('/api/caption-generate', async (req, res) => { 
     
     if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing. Check logs.' });
     }
-    
+    // ... (Rest of AI Generation logic remains the same)
+
     const { reelTitle, style } = req.body;
 
     if (!reelTitle) {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
     
-    // Prompt for Viral, Export, and View Increase Tags
     const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
@@ -255,8 +244,10 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 app.post('/api/caption-edit', async (req, res) => {
     
     if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing. Check logs.' });
     }
+
+    // ... (Rest of AI Editing logic remains the same)
 
     const { originalCaption, requestedChange } = req.body;
 
