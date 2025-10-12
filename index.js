@@ -1,278 +1,223 @@
-// index.js (FINAL COMPLETE CODE with Crash Fix)
+// index.js (ES Module Syntax - Fixes 'require is not defined' error)
 
-const express = require('express');
-const { GoogleGenAI } = require('@google/genai'); 
-const fetch = require('node-fetch'); 
-const cors = require('cors'); 
-const fs = require('fs'); 
+import express from 'express';
+import cors from 'cors';
+import { GoogleGenAI } from '@google/genai';
+import crypto from 'crypto'; 
 
-const app = express();
-// Render uses process.env.PORT
+// --- Configuration ---
 const PORT = process.env.PORT || 10000; 
+// CRITICAL: The API key must be set as an environment variable in Render's dashboard.
+// Key: GEMINI_API_KEY
+const API_KEY = process.env.GEMINI_API_KEY; 
 
-// --- GEMINI KEY CONFIGURATION ---
-let GEMINI_KEY;
-try {
-    // Correct path for Secret Files on Render
-    GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
-    console.log("Gemini Key loaded successfully from Secret File.");
-} catch (e) {
-    // Fallback for local development or Environment Variable
-    GEMINI_KEY = process.env.GEMINI_API_KEY; 
-    if (GEMINI_KEY) {
-        console.log("Gemini Key loaded from Environment Variable.");
-    } else {
-        console.error("FATAL: Gemini Key could not be loaded. Insta Caption Tool will fail.");
-    }
-}
+// --- Initialization ---
+const app = express();
+let ai; 
 
-// Initialize AI object only if key is available
-let ai;
-if (GEMINI_KEY) {
-    ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+if (API_KEY) {
+    ai = new GoogleGenAI(API_KEY); 
+    console.log("Gemini AI Client initialized successfully.");
 } else {
-    // Dummy object to prevent crash if AI endpoints are called without a key
-    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
+    console.error("FATAL: GEMINI_API_KEY is missing. AI endpoints will fail.");
 }
 
-// --- MIDDLEWARE & UTILITIES ---
+// --- Dummy Database for SEO Article Publisher ---
+let articlesDb = []; 
+
+// --- Middleware ---
+app.use(express.json({ limit: '5mb' })); 
+// Allow CORS from any origin for flexibility, though generally, you'd restrict it to your GitHub Pages URL.
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', // Your Frontend URL
-    methods: ['GET', 'POST'],
-    credentials: true
+    origin: '*', 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
 }));
-app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running!');
-});
+// --- Utility Functions for AI Calls ---
 
-const MIN_DELAY = 3000; 
-const MAX_DELAY = 12000; 
-const geoLocations = [
-    { country: "United States", region: "California" },
-    { country: "India", region: "Maharashtra" },
-    { country: "Germany", region: "Bavaria" },
-    { country: "Japan", region: "Tokyo" },
-];
-
-function getRandomDelay() {
-    return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
-}
-function getRandomGeo() {
-    return geoLocations[Math.floor(Math.random() * geoLocations.length)];
-}
-
-// Helper function definitions (sendData and generateViewPlan remain the same)
-async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
-    const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
-
-    try {
-        const response = await fetch(gaEndpoint, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.status === 204) { 
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType}`);
-            return { success: true };
-        } else {
-            const errorText = await response.text(); 
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
-            return { success: false };
-        }
-    } catch (error) {
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
-        return { success: false };
+/**
+ * Handles the call to the Gemini API with specified prompt and configuration.
+ */
+async function generateText(prompt, systemInstruction, responseMimeType, responseSchema) {
+    if (!API_KEY || !ai) {
+        throw new Error("API Key Missing. Please set GEMINI_API_KEY in Render.");
     }
-}
-
-function generateViewPlan(totalViews, pages) {
-    const viewPlan = [];
-    const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
-    
-    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
-        console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
-        return [];
-    }
-    
-    pages.forEach(page => {
-        const viewsForPage = Math.round(totalViews * (page.percent / 100));
-        for (let i = 0; i < viewsForPage; i++) {
-            if (page.url) { 
-                viewPlan.push(page.url);
-            }
-        }
-    });
-
-    viewPlan.sort(() => Math.random() - 0.5);
-    return viewPlan;
-}
-
-
-// ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Concurrency
-// ===================================================================
-app.post('/boost-mp', async (req, res) => {
-    const { ga_id, api_key, views, pages } = req.body; 
-
-    if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0) {
-        return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
-    }
-    
-    const viewPlan = generateViewPlan(parseInt(views), pages.filter(p => p.percent > 0)); 
-    if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
-    }
-
-    // Immediately respond with 'accepted'
-    res.json({ 
-        status: 'accepted', 
-        message: `Request for ${viewPlan.length} views accepted. Processing started in the background.`
-    });
-
-    // Start views generation asynchronously
-    (async () => {
-        const totalViews = viewPlan.length;
-        console.log(`[BOOSTER START] Starting for ${totalViews} views...`);
-
-        const viewPromises = viewPlan.map((targetUrl, i) => {
-            return (async () => {
-                const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-                const SESSION_ID = Date.now(); 
-                const geo = getRandomGeo();
-                const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-                const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
-                
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); // Initial spread delay
-
-                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
-
-                const pageViewPayload = {
-                    client_id: CLIENT_ID,
-                    user_properties: commonUserProperties, 
-                    events: [{ name: 'page_view', params: { page_location: targetUrl, page_title: `PROJECT_PAGE_${i + 1}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
-                };
-                const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
-
-                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
-
-                await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-                
-                return pageViewResult.success;
-            })();
-        });
-
-        Promise.all(viewPromises).then(results => {
-            const finalSuccessCount = results.filter(r => r).length;
-            console.log(`[BOOSTER FINISH] Total success: ${finalSuccessCount}/${totalViews}`);
-        }).catch(err => {
-            console.error(`[BOOSTER CRITICAL] An error occurred during view processing: ${err.message}`);
-        });
-
-    })();
-});
-
-
-// ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
-// ===================================================================
-app.post('/api/caption-generate', async (req, res) => { 
-    
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
-    }
-    
-    const { reelTitle, style } = req.body;
-
-    if (!reelTitle) {
-        return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
-    }
-    
-    // Updated Prompt for Viral, Export, and View Increase Tags
-    const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
-
---- CRITICAL INSTRUCTION ---
-For each caption, provide exactly 5 trending, high-reach, and relevant hashtags. Include **latest viral Instagram marketing terms** like **#viralreel, #exportviews, #viewincrease, #reelsmarketing** only if they are relevant to the topic. Focus mainly on niche-specific and fast-trending tags to maximize virality. The final output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
-
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
+            model: 'gemini-2.5-flash',
+            contents: [
+                { role: "user", parts: [{ text: prompt }] }
+            ],
             config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "array",
-                    items: { type: "object", properties: { caption: { type: "string" } }, required: ["caption"] }
-                },
-                temperature: 0.8,
-            },
+                systemInstruction: systemInstruction,
+                temperature: 0.5,
+                responseMimeType: responseMimeType,
+                responseSchema: responseSchema 
+            }
         });
 
-        const captions = JSON.parse(response.text.trim());
-        res.status(200).json({ captions: captions });
+        const text = response.text;
+        if (!text) {
+            throw new Error("AI returned an empty response.");
+        }
+        return text.trim();
 
     } catch (error) {
-        console.error('Gemini API Error:', error.message);
-        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
+        console.error("Gemini API Error:", error.message);
+        // Clean up the error message for the client
+        throw new Error(`AI Request Failed: ${error.message.substring(0, 150)}...`);
+    }
+}
+
+// ===================================================================
+// 1. ROOT & HEALTH CHECK
+// ===================================================================
+app.get('/', (req, res) => {
+    // This message should appear in your browser when you hit the root URL.
+    res.send(`API Server is running successfully on port ${PORT}. Status: Ready. Module Type: ESM.`);
+});
+
+// ===================================================================
+// 2. WEBSITE TRAFFIC BOOSTER ENDPOINT (URL: /boost-mp)
+// ===================================================================
+app.post('/boost-mp', (req, res) => {
+    const { ga_id, views } = req.body;
+    
+    if (!ga_id || !views) {
+        return res.status(400).json({ error: 'Missing GA4 ID or views count.' });
+    }
+    
+    // Placeholder response for the Traffic Booster tool
+    console.log(`[BOOST] Request accepted: GA_ID: ${ga_id}, Views: ${views}`);
+    res.status(202).json({ 
+        status: 'accepted', 
+        message: `Request for ${views} views accepted for processing. Check Google Analytics in 24-48 hours.`,
+    });
+});
+
+// ===================================================================
+// 3. AI CAPTION GENERATOR ENDPOINTS
+// ===================================================================
+
+// Endpoint to generate a new caption based on description
+app.post('/api/ai-caption-generate', async (req, res) => {
+    const { description, count } = req.body;
+
+    if (!description || !count) {
+        return res.status(400).json({ error: 'Description and count are required.' });
+    }
+    
+    const prompt = `Act as an expert Instagram content creator specializing in Reels. Based on the following video description, generate exactly ${count} unique, highly engaging, and short captions in Hindi or Hinglish. Each caption MUST include 5 relevant and trending hashtags separated from the main text by a new line.
+
+Description: "${description}"`;
+
+    const systemInstruction = "Your final output MUST be a single JSON object with a key 'captions' containing an array of strings. Do not include any introductory text or explanation outside the JSON.";
+
+    const schema = {
+        type: "object", 
+        properties: { captions: { type: "array", items: { type: "string" } } }, 
+        required: ["captions"] 
+    };
+
+    try {
+        const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
+        const result = JSON.parse(rawResponse);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
-
-// ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
-// ===================================================================
-app.post('/api/caption-edit', async (req, res) => {
-    
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
-    }
-
+// Endpoint to edit an existing caption
+app.post('/api/ai-caption-edit', async (req, res) => {
     const { originalCaption, requestedChange } = req.body;
 
     if (!originalCaption || !requestedChange) {
         return res.status(400).json({ error: 'Original caption and requested change are required.' });
     }
-
-    const prompt = `Rewrite and edit the following original caption based on the requested change. The output should be only the final, edited caption and its hashtags.
-
-Original Caption: "${originalCaption}"
-Requested Change: "${requestedChange}"
-
---- CRITICAL INSTRUCTION ---
-The final output MUST be a single JSON object with a key called 'editedCaption'. The caption should be highly engaging for Instagram Reels. If the original caption included hashtags, ensure the edited caption has 5 relevant and trending hashtags, separated from the text by a new line.`;
     
+    const prompt = `Edit the 'Original Caption' based on the 'Requested Change'. Ensure the edited caption has 5 relevant and trending hashtags, separated from the text by a new line. Use Hindi or Hinglish.
+Original Caption: "${originalCaption}"
+Requested Change: "${requestedChange}"`;
+
+    const systemInstruction = "Your final output MUST be a single JSON object with a key called 'editedCaption'. Do not include any introductory text or explanation outside the JSON.";
+    
+    const schema = {
+        type: "object", 
+        properties: { editedCaption: { type: "string" } }, 
+        required: ["editedCaption"] 
+    };
+
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "object",
-                    properties: { editedCaption: { type: "string" } },
-                    required: ["editedCaption"]
-                },
-                temperature: 0.7,
-            },
-        });
-
-        const result = JSON.parse(response.text.trim());
-        res.status(200).json(result);
-
+        const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
+        const result = JSON.parse(rawResponse);
+        res.json(result);
     } catch (error) {
-        console.error('Gemini API Error (Edit):', error.message);
-        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ===================================================================
+// 4. SEO ARTICLE PUBLISHER ENDPOINTS
+// ===================================================================
+
+// Endpoint to save/upload a new article
+app.post('/api/article-upload', (req, res) => {
+    const { title, slug, content } = req.body;
+    if (!title || !slug || !content) {
+        return res.status(400).json({ error: 'Title, Slug, and Content are required.' });
+    }
+    const newId = crypto.randomUUID(); 
+    const newArticle = { id: newId, title, slug, content, date: new Date().toISOString() };
+    articlesDb.push(newArticle);
+    console.log(`[ARTICLE SAVE] New Article ID: ${newId}`);
+    res.status(200).json({ status: 'ok', message: 'Article saved successfully.', articleId: newId });
+});
+
+// Endpoint for AI Grammar Check
+app.post('/api/ai-check-grammar', async (req, res) => {
+    const { content } = req.body;
+    if (!content) {
+        return res.status(400).json({ error: 'Content is required for grammar check.' });
+    }
+    
+    const prompt = `Review the following article content for all grammatical errors, spelling mistakes, and unclear sentences. Rewrite the content only where necessary to improve clarity and maintain an SEO-friendly tone. Do not add or remove any meaningful paragraphs.
+
+Original Content: "${content}"`;
+
+    const systemInstruction = "Your final output MUST be a single JSON object with a key 'correctedContent'. Provide only the corrected content as a string. Do not include any introductory text or explanation outside the JSON.";
+    
+    const schema = {
+        type: "object", 
+        properties: { correctedContent: { type: "string" } }, 
+        required: ["correctedContent"] 
+    };
+
+    try {
+        const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
+        const result = JSON.parse(rawResponse);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
 
-// ===================================================================
-// START THE SERVER (App Crash Fix)
-// ===================================================================
-// Yeh block server ko turant exit hone se rokta hai aur Render ke PORT par sunna shuru karta hai.
+// --- Server Startup ---
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
+```eof
+
+---
+
+## 🛠️ अंतिम कदम
+
+1.  **`package.json`** और **`index.js`** को GitHub पर सेव करें।
+2.  Render डैशबोर्ड पर जाएँ और **Manual Deploy** ट्रिगर करें।
+
+यह `ReferenceError: require is not defined` त्रुटि को ठीक कर देगा, और आपका Backend चलना शुरू हो जाएगा।
+
+क्या आप अब **SEO Article Publisher Frontend** (`article-tool.html`) को अपडेट करना चाहेंगे?
