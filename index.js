@@ -1,10 +1,10 @@
-// index.js (FINAL STABLE CODE - GA4 Booster & AI Caption Generator with 15 Countries)
+// index.js (FINAL STABLE ESM CODE - GA4 Booster & AI Caption Generator)
 
-const express = require('express');
-const { GoogleGenAI } = require('@google/genai'); 
-const fetch = require('node-fetch'); 
-const cors = require('cors'); 
-const fs = require('fs'); 
+import express from 'express';
+import { GoogleGenAI } from '@google/genai'; 
+import cors from 'cors'; 
+import fs from 'fs'; 
+// Note: Node.js v18+ mein built-in 'fetch' use kiya gaya hai.
 
 const app = express();
 // Render uses process.env.PORT
@@ -37,7 +37,7 @@ if (GEMINI_KEY) {
 
 // --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', // Aapka Frontend URL
+    origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
     credentials: true
 }));
@@ -47,8 +47,8 @@ app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Combined API is running! (GA4 Booster & AI)');
 });
 
-const MIN_DELAY = 3000; // 3 seconds
-const MAX_DELAY = 12000; // 12 seconds
+const MIN_DELAY = 3000; 
+const MAX_DELAY = 12000; 
 // --- 15 DIVERSE COUNTRY LOCATIONS ---
 const geoLocations = [
     { country: "United States", region: "California" },
@@ -78,6 +78,7 @@ function getRandomGeo() {
 
 // Helper: Sends data to GA4 Measurement Protocol
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
+    // Built-in global fetch is used
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
     try {
@@ -104,7 +105,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 // Helper: Generates a plan of which URL gets which view
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
-    const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
+    const totalPercentage = pages.reduce((sum, page => sum + (page.percent || 0), 0);
     
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
