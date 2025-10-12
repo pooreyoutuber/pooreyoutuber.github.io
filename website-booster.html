@@ -37,16 +37,6 @@
         .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
         .info { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
 
-        /* Status Window */
-        #status-window {
-            margin-top: 20px; padding: 15px; border-radius: 8px; background-color: #e6f7ff; 
-            border: 1px solid #91d5ff; color: #0050b3; font-weight: 600; text-align: center;
-            /* display: none; */ /* Use JS to hide/show */
-        }
-        .progress-text {
-            display: block; margin-top: 5px; font-size: 1.2em; color: #002766;
-        }
-
         /* Info Boxes */
         .info-box {
             margin-top: 15px; padding: 15px; border-radius: 8px; background-color: #f4f6f9;
@@ -139,8 +129,7 @@
     </div>
     
     <script>
-        // 🚨 CRITICAL: RENDER API URL - Yeh URL check karein.
-        // Agar aapne Render par service ka naam badla hai, toh yeh domain badalna hoga.
+        // 🚨 CRITICAL: RENDER API URL - Yeh URL aapke service ke domain ke anusaar badal sakta hai.
         const RENDER_DOMAIN = 'https://pooreyoutuber-github-io.onrender.com'; 
         const RENDER_API_URL = RENDER_DOMAIN + '/boost-mp'; 
         const STORAGE_KEY = 'booster_details_v8'; 
@@ -229,7 +218,7 @@
                 const percent = parseInt(input.percent.value) || 0;
                 
                 if (url && percent > 0) {
-                    // Check for https protocol
+                    // Check for http protocol
                     if (!url.startsWith('http')) {
                         showMessage('error', '❌ Error: All page URLs must start with http:// or https://', true);
                         isValid = false; 
@@ -283,7 +272,7 @@
                     await new Promise(r => setTimeout(r, 2000));
                     return submitData(data, retriesLeft - 1);
                 } else {
-                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your **Render service LIVE** hai aur **URL (pooreyoutuber-github-io.onrender.com) sahi hai**.`, true);
+                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your **Render service LIVE** hai aur **URL (${RENDER_DOMAIN}) sahi hai**.`, true);
                 }
             } 
         }
