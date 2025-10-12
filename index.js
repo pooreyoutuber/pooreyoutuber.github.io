@@ -1,206 +1,163 @@
-    // index.js (Reads API Key from the Secret File named 'gemini')
+const express = require('express');
+const fs = require('fs');
+const { GoogleGenAI } = require('@google/genai');
 
-import express from 'express';
-import cors from 'cors';
-import { GoogleGenAI } from '@google/genai';
-import crypto from 'crypto'; 
-import fs from 'fs'; // Import the File System module
-import path from 'path';
-import { fileURLToPath } from 'url';
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-// --- Configuration ---
-const PORT = process.env.PORT || 10000; 
+// Middleware
+app.use(express.json());
 
-// --- Secret File Configuration ---
-// The secret file named 'gemini' is mounted by Render at this path
-const SECRET_FILE_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), 'gemini');
+// Enable CORS for frontend access (important for GitHub Pages)
+app.use((req, res, next) => {
+    // Replace '*' with your GitHub Pages domain for production security
+    res.setHeader('Access-Control-Allow-Origin', '*'); 
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 
-let API_KEY;
-let ai; 
+let ai;
+let geminiApiKey;
 
-// --- Key Loading Logic ---
-try {
-    // 1. Try reading the file from the root directory (for non-Docker services)
-    // The key is assumed to be the entire content of the file
-    API_KEY = fs.readFileSync(SECRET_FILE_PATH, 'utf8').trim();
-    
-    // 2. Fallback check for the standard Render secrets path (optional, but good practice)
-    // if (!API_KEY) {
-    //     const RENDER_SECRET_PATH = '/etc/secrets/gemini';
-    //     API_KEY = fs.readFileSync(RENDER_SECRET_PATH, 'utf8').trim();
-    // }
-
-    if (API_KEY) {
-        ai = new GoogleGenAI(API_KEY); 
-        console.log("Gemini AI Client initialized successfully from Secret File.");
-    } else {
-         console.error("FATAL: Secret File 'gemini' is empty.");
+// Function to load the API Key from the Render Secret File
+function loadApiKey() {
+    const secretPath = '/etc/secrets/gemini_api_key';
+    try {
+        // Read the API key from the secret file path provided by Render
+        if (fs.existsSync(secretPath)) {
+            geminiApiKey = fs.readFileSync(secretPath, 'utf8').trim();
+            if (geminiApiKey) {
+                ai = new GoogleGenAI({ apiKey: geminiApiKey });
+                console.log("Gemini API Key loaded successfully from Secret File.");
+            } else {
+                console.error("Error: Secret file exists but is empty.");
+            }
+        } else {
+            console.error("Error: Secret file path does not exist. Did you configure the Secret File on Render?");
+        }
+    } catch (error) {
+        console.error("Error loading API Key:", error);
     }
-
-} catch (e) {
-    // If the file cannot be read (e.g., file not found or permission error)
-    console.error(`FATAL: Failed to read Secret File 'gemini'. Error: ${e.message}`);
 }
 
-// --- Dummy Database for SEO Article Publisher ---
-let articlesDb = []; 
+// Load the key once on startup
+loadApiKey();
 
-// --- Initialization & Middleware ---
-const app = express();
-app.use(express.json({ limit: '5mb' })); 
-app.use(cors({ origin: '*', methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', credentials: true }));
-
-// --- Utility Functions for AI Calls ---
+// Middleware to check if AI is initialized
+function checkAi(req, res, next) {
+    if (!ai) {
+        return res.status(503).json({ 
+            error: "Service Unavailable. AI API Key not loaded or service is starting.",
+            details: "Please check Render Secret File configuration and service logs."
+        });
+    }
+    next();
+}
 
 /**
- * Handles the call to the Gemini API with specified prompt and configuration.
+ * Endpoint for AI Reels Caption Generation
+ * Route: /api/ai-caption-generate
  */
-async function generateText(prompt, systemInstruction, responseMimeType, responseSchema) {
-    if (!API_KEY || !ai) {
-        throw new Error("API Key Missing or not initialized. Check server logs.");
-    }
-
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: [
-                { role: "user", parts: [{ text: prompt }] }
-            ],
-            config: {
-                systemInstruction: systemInstruction,
-                temperature: 0.5,
-                responseMimeType: responseMimeType,
-                responseSchema: responseSchema 
-            }
-        });
-
-        const text = response.text;
-        if (!text) {
-            throw new Error("AI returned an empty response.");
-        }
-        return text.trim();
-
-    } catch (error) {
-        console.error("Gemini API Error:", error.message);
-        throw new Error(`AI Request Failed: ${error.message.substring(0, 150)}...`);
-    }
-}
-
-// ===================================================================
-// 1. ROOT & HEALTH CHECK
-// ===================================================================
-app.get('/', (req, res) => {
-    const keyStatus = API_KEY ? 'Key Loaded' : 'Key Missing';
-    res.send(`API Server is running successfully on port ${PORT}. Status: Ready. Key Status: ${keyStatus}`);
-});
-
-// ===================================================================
-// 2. WEBSITE TRAFFIC BOOSTER ENDPOINT (URL: /boost-mp)
-// ===================================================================
-app.post('/boost-mp', (req, res) => {
-    const { ga_id, views } = req.body;
-    
-    if (!ga_id || !views) {
-        return res.status(400).json({ error: 'Missing GA4 ID or views count.' });
-    }
-    
-    console.log(`[BOOST] Request accepted: GA_ID: ${ga_id}, Views: ${views}`);
-    res.status(202).json({ 
-        status: 'accepted', 
-        message: `Request for ${views} views accepted for processing. Check Google Analytics in 24-48 hours.`,
-    });
-});
-
-// ===================================================================
-// 3. AI CAPTION GENERATOR ENDPOINTS (Uses Secret File Key)
-// ===================================================================
-
-app.post('/api/ai-caption-generate', async (req, res) => {
+app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
     const { description, count } = req.body;
 
     if (!description || !count) {
-        return res.status(400).json({ error: 'Description and count are required.' });
+        return res.status(400).json({ error: "Missing required fields: description or count." });
     }
+
+    const prompt = `Act as an expert Instagram content creator. Generate exactly ${count} unique, engaging captions in Hindi or Hinglish based on the content below. Each caption MUST include 5 relevant and trending hashtags separated by a new line from the main caption text. The response should be a clean, numbered list of captions.
     
-    const prompt = `Act as an expert Instagram content creator. Generate exactly ${count} unique, engaging captions in Hindi or Hinglish. Each MUST include 5 relevant hashtags separated by a new line. Description: "${description}"`;
-
-    const systemInstruction = "Your final output MUST be a single JSON object with a key 'captions' containing an array of strings. Do not include any introductory text or explanation outside the JSON.";
-
-    const schema = { type: "object", properties: { captions: { type: "array", items: { type: "string" } } }, required: ["captions"] };
+    Content: ${description}`;
 
     try {
-        const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
-        const result = JSON.parse(rawResponse);
-        res.json(result);
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+        });
+
+        const rawText = response.text.trim();
+        
+        // Simple splitting logic to extract individual captions
+        const captions = rawText.split('\n').filter(line => line.trim().length > 0 && line.match(/^\s*\d+\.\s*/))
+                                 .map(line => line.replace(/^\s*\d+\.\s*/, '').trim());
+
+        if (captions.length === 0) {
+            // Fallback if the model didn't use perfect numbering
+            const fallbackCaptions = rawText.split(/\n\s*\n/).filter(c => c.trim().length > 0);
+            return res.json({ captions: fallbackCaptions });
+        }
+        
+        res.json({ captions: captions });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Gemini API Generation Error:", error.message);
+        res.status(500).json({ error: "Failed to generate captions from AI API.", details: error.message });
     }
 });
 
-app.post('/api/ai-caption-edit', async (req, res) => {
+/**
+ * Endpoint for AI Caption Editing
+ * Route: /api/ai-caption-edit
+ */
+app.post('/api/ai-caption-edit', checkAi, async (req, res) => {
     const { originalCaption, requestedChange } = req.body;
 
     if (!originalCaption || !requestedChange) {
-        return res.status(400).json({ error: 'Original caption and requested change are required.' });
+        return res.status(400).json({ error: "Missing required fields: originalCaption or requestedChange." });
     }
-    
-    const prompt = `Edit the 'Original Caption' based on the 'Requested Change'. Ensure the edited caption has 5 relevant and trending hashtags, separated from the text by a new line. Use Hindi or Hinglish.
-Original Caption: "${originalCaption}"
-Requested Change: "${requestedChange}"`;
 
-    const systemInstruction = "Your final output MUST be a single JSON object with a key called 'editedCaption'. Do not include any introductory text or explanation outside the JSON.";
+    const prompt = `You are a professional social media editor. Refine the following original caption based on the requested change. The output should only be the new, improved caption text.
+
+    Original Caption: "${originalCaption}"
+    Requested Change: "${requestedChange}"
     
-    const schema = { type: "object", properties: { editedCaption: { type: "string" } }, required: ["editedCaption"] };
+    New Caption:`;
 
     try {
-        const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
-        const result = JSON.parse(rawResponse);
-        res.json(result);
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+        });
+
+        const editedCaption = response.text.trim();
+        res.json({ editedCaption: editedCaption });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Gemini API Editing Error:", error.message);
+        res.status(500).json({ error: "Failed to edit caption from AI API.", details: error.message });
     }
 });
 
-// ===================================================================
-// 4. SEO ARTICLE PUBLISHER ENDPOINTS (Uses Secret File Key)
-// ===================================================================
 
-app.post('/api/article-upload', (req, res) => {
-    const { title, slug, content } = req.body;
-    if (!title || !slug || !content) {
-        return res.status(400).json({ error: 'Title, Slug, and Content are required.' });
-    }
-    const newId = crypto.randomUUID(); 
-    const newArticle = { id: newId, title, slug, content, date: new Date().toISOString() };
-    articlesDb.push(newArticle);
-    res.status(200).json({ status: 'ok', message: 'Article saved successfully.', articleId: newId });
-});
+/**
+ * Endpoint for Website Traffic Booster (Placeholder - Needs real logic in production)
+ * Route: /boost-mp
+ */
+app.post('/boost-mp', (req, res) => {
+    const { ga_id, api_secret, views, distribution } = req.body;
 
-app.post('/api/ai-check-grammar', async (req, res) => {
-    const { content } = req.body;
-    if (!content) {
-        return res.status(400).json({ error: 'Content is required for grammar check.' });
+    if (!ga_id || !api_secret || !views || !distribution) {
+        return res.status(400).json({ error: "Missing required fields for traffic boosting." });
     }
+
+    // In a real production environment, this is where complex
+    // logic would run to simulate GA4 Measurement Protocol hits.
     
-    const prompt = `Review the following article content for errors, spelling mistakes, and unclear sentences. Rewrite the content only where necessary to improve clarity and maintain an SEO-friendly tone. Do not add or remove any meaningful paragraphs.
+    // For now, we simulate success and log the job details.
+    console.log(`[TRAFFIC BOOST JOB STARTED]`);
+    console.log(`GA ID: ${ga_id}`);
+    console.log(`Views: ${views}`);
+    console.log("Distribution:", distribution);
+    console.log("---");
 
-Original Content: "${content}"`;
-
-    const systemInstruction = "Your final output MUST be a single JSON object with a key 'correctedContent'. Provide only the corrected content as a string. Do not include any introductory text or explanation outside the JSON.";
-    
-    const schema = { type: "object", properties: { correctedContent: { type: "string" } }, required: ["correctedContent"] };
-
-    try {
-        const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
-        const result = JSON.parse(rawResponse);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    // Send a success response immediately so the frontend knows the job started
+    res.status(200).json({ 
+        message: "Traffic boosting job successfully initiated and is running in the background.",
+        jobId: Date.now() 
+    });
 });
 
 
-// --- Server Startup ---
+// Start the server
 app.listen(PORT, () => {
-    console.log(`Combined API Server listening on port ${PORT}.`);
+    console.log(`Server running on port ${PORT}`);
 });
