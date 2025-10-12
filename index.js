@@ -209,15 +209,3 @@ Original Content: "${content}"`;
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-```eof
-
----
-
-## 🛠️ अंतिम कदम
-
-1.  **`package.json`** और **`index.js`** को GitHub पर सेव करें।
-2.  Render डैशबोर्ड पर जाएँ और **Manual Deploy** ट्रिगर करें।
-
-यह `ReferenceError: require is not defined` त्रुटि को ठीक कर देगा, और आपका Backend चलना शुरू हो जाएगा।
-
-क्या आप अब **SEO Article Publisher Frontend** (`article-tool.html`) को अपडेट करना चाहेंगे?
