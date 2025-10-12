@@ -3,284 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Traffic Booster Tool</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <title>AI Instagram Caption Generator</title>
     <style>
-        /* Base Styles and Responsiveness */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff0f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
         .header { text-align: center; margin-bottom: 25px; }
-        .header h2 { color: #d9534f; margin: 0; font-size: 1.8em; font-weight: 700; }
+        .header h2 { color: #8a2be2; margin: 0; font-size: 1.8em; font-weight: 700; }
         
-        .container { background-color: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e0e0e0; }
+        .container { background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); width: 100%; max-width: 600px; margin-bottom: 20px; border: 2px solid #8a2be2; }
         
-        /* Input & Form Styling */
-        label { display: block; text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: #555; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
-
-        /* Page Distribution */
-        .page-entry-group { border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #f9f9f9; }
-        .page-entry { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; background-color: #fff; }
-        .page-entry input[type="number"] { width: 40px; flex-grow: 0; margin-bottom: 0; text-align: center; background-color: #eef4ff; }
-        .percent-label { font-weight: bold; width: 25px; color: #5cb85c; }
-        .total-percent-display { text-align: right; margin-top: 10px; font-weight: bold; font-size: 1.1em; }
+        label { display: block; text-align: left; margin-bottom: 8px; font-weight: bold; font-size: 1em; color: #555; }
+        input[type="text"], select, textarea { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        textarea { resize: vertical; min-height: 100px; }
         
-        /* Button Styling */
-        button { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 1em; transition: background-color 0.3s; }
-        button:hover { background-color: #0056b3; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .submit-btn { flex-grow: 1; background-color: #8a2be2; color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: bold; transition: background-color 0.3s; }
+        .submit-btn:hover { background-color: #6a1ba9; }
+        .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-        /* Message Box Styling */
-        #message { margin-top: 20px; padding: 12px; border-radius: 5px; font-weight: bold; text-align: center; border: 1px solid transparent; }
-        .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
-        .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        .info { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+        .result-container { margin-top: 30px; padding: 20px; border: 1px dashed #8a2be2; border-radius: 8px; background-color: #f8f0ff; }
+        .result-caption { margin-bottom: 15px; padding: 10px; background-color: #fff; border: 1px solid #eee; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+        .result-caption:hover { background-color: #f0f0f0; }
+        .result-caption strong { color: #8a2be2; }
+        .result-caption pre { white-space: pre-wrap; word-break: break-word; margin: 0; padding: 5px; font-size: 0.9em; }
 
-        /* Info Boxes */
-        .info-box {
-            margin-top: 15px; padding: 15px; border-radius: 8px; background-color: #f4f6f9;
-            border: 1px solid #e0e0e0; font-size: 0.9em; text-align: left;
-        }
-        .info-box h4 { margin-top: 0; color: #007bff; font-size: 1.1em; }
-        .info-box ul { padding-left: 20px; margin-bottom: 0; }
-        .info-box li { margin-bottom: 5px; }
+        /* Message & Loading */
+        .message-box { padding: 15px; margin-top: 20px; border-radius: 8px; font-weight: bold; text-align: center; }
+        .message-box.success { background-color: #e6ffe6; color: #3c763d; border: 1px solid #a3d9a3; }
+        .message-box.error { background-color: #ffcccc; color: #a94442; border: 1px solid #ff6666; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #8a2be2; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-left: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>🚀 Website Traffic Booster Tool</h2>
-        <p style="color: #888; margin-top: 5px;">Increase your page views and engagement metrics across 15+ countries.</p>
+        <h2>✨ AI Reels Caption Generator</h2>
+        <p>Use Gemini AI to generate viral captions.</p>
     </div>
-    
+
     <div class="container">
-        
-        <form id="boosterForm">
-            
-            <label for="gaid">1. Google Analytics ID (G-XXXXX):</label>
-            <input type="text" id="gaid" placeholder="Enter your GA4 Measurement ID" required autocomplete="off">
-            
-            <label for="apikey">2. API Secret (Measurement Protocol Key):</label>
-            <input type="text" id="apikey" placeholder="Enter your GA4 API Secret" required autocomplete="off">
-            
-            <label for="views">3. Total Views to Generate (Max 500):</label>
-            <input type="number" id="views" value="100" min="1" max="500" required autocomplete="off">
-            
-            <div class="page-entry-group">
-                <label style="color: #007bff;"><i class="fas fa-sitemap"></i> 4. Distribute Traffic Across Pages (Total must be 100%):</label>
-                
-                <div class="page-entry">
-                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required: https://...)" required autocomplete="off">
-                    <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <div class="page-entry">
-                    <input type="text" id="url2" class="page-url" placeholder="Page 2 URL (Optional: https://...)">
-                    <input type="number" id="percent2" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-
-                <div class="page-entry">
-                    <input type="text" id="url3" class="page-url" placeholder="Page 3 URL (Optional: https://...)">
-                    <input type="number" id="percent3" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-
-                <div class="page-entry">
-                    <input type="text" id="url4" class="page-url" placeholder="Page 4 URL (Optional: https://...)">
-                    <input type="number" id="percent4" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <div class="page-entry">
-                    <input type="text" id="url5" class="page-url" placeholder="Page 5 URL (Optional: https://...)">
-                    <input type="number" id="percent5" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <p class="total-percent-display">
-                    Total Distribution: <span id="totalPercent" style="color:#d9534f;">100</span>%
-                </p>
+        <div id="main-interface">
+            <div class="form-group">
+                <label for="reel-title">Reel Topic/Title (e.g., How to edit a video faster)</label>
+                <input type="text" id="reel-title" placeholder="What is your reel about?" required>
+            </div>
+            <div class="form-group">
+                <label for="style">Caption Style</label>
+                <select id="style">
+                    <option value="Catchy and Funny">Catchy and Funny</option>
+                    <option value="Motivational and Inspiring">Motivational and Inspiring</option>
+                    <option value="Informative and Educational">Informative and Educational</option>
+                    <option value="Short and Punchy">Short and Punchy</option>
+                    <option value="Engaging and Question-based">Engaging and Question-based</option>
+                </select>
             </div>
             
-            <button type="submit" id="submitBtn"><i class="fas fa-play"></i> START TRAFFIC GENERATION</button>
-        </form>
-
-        <div id="message"></div>
-
-        <div class="info-box">
-            <h4>💡 Important Instructions</h4>
-            <ul>
-                <li>**Reliability:** This tool uses the **GA4 Measurement Protocol**, jo **proxy aur browser errors** se **free** hai.</li>
-                <li>**Real-Type Views:** Har view 30-120 seconds ka **engagement time** aur **session start** ke saath record hota hai.</li>
-                <li>**Country Views:** Views **15 alag-alag countries** (US, IN, CA, UK, etc.) se aayenge.</li>
-            </ul>
+            <div id="message-container"></div>
+            
+            <div class="btn-group">
+                <button type="button" class="submit-btn" id="generate-btn" onclick="generateCaptions()">Generate Captions</button>
+            </div>
         </div>
-        
-        <div class="info-box">
-            <h4>🔑 Key Setup Guide</h4>
-            <ul>
-                <li>**Measurement ID (G-XXXXX):** Aapke GA4 property settings se milega.</li>
-                <li>**API Secret:** GA4 mein **Data Streams** settings mein jaakar generate karein.</li>
-                <li>**URL Format:** Sabhi URLs **`https://`** se shuru hone chahiye.</li>
-            </ul>
+
+        <div id="result-interface" style="display:none;">
+            <h3>Generated Captions (Click to Edit)</h3>
+            <div id="caption-results" class="result-container">
+                </div>
+            <div class="btn-group">
+                <button type="button" class="submit-btn" onclick="showMainInterface()">Go Back</button>
+            </div>
+        </div>
+
+        <div id="edit-interface" style="display:none;">
+            <h3>Edit Caption</h3>
+            <div class="form-group">
+                <label for="original-caption-text">Original Caption</label>
+                <textarea id="original-caption-text" readonly></textarea>
+            </div>
+            <div class="form-group">
+                <label for="requested-change">Requested Change (e.g., Make it shorter, add a call to action to follow)</label>
+                <input type="text" id="requested-change" placeholder="What changes do you want?">
+            </div>
+            <div id="edit-message-container"></div>
+            <div class="btn-group">
+                <button type="button" class="submit-btn" id="edit-btn" onclick="editCaption()">Apply Change</button>
+            </div>
+            <div class="btn-group">
+                 <button type="button" class="submit-btn" onclick="showResultInterface()">Back to Results</button>
+            </div>
         </div>
     </div>
-    
+
     <script>
-        // 🚨 CRITICAL: RENDER API URL - Yeh URL aapke service ke domain ke anusaar badal sakta hai.
-        const RENDER_DOMAIN = 'https://pooreyoutuber-github-io.onrender.com'; 
-        const RENDER_API_URL = RENDER_DOMAIN + '/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_v8'; 
+        // CRITICAL FIX: The live URL of the Render API service
+        const RENDER_API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com/api';
         
-        const form = document.getElementById('boosterForm');
-        const messageDiv = document.getElementById('message');
-        const submitBtn = document.getElementById('submitBtn');
-        const totalPercentSpan = document.getElementById('totalPercent');
+        const mainInterface = document.getElementById('main-interface');
+        const resultInterface = document.getElementById('result-interface');
+        const editInterface = document.getElementById('edit-interface');
+        const captionResults = document.getElementById('caption-results');
+        const generateBtn = document.getElementById('generate-btn');
+        const editBtn = document.getElementById('edit-btn');
+        const messageContainer = document.getElementById('message-container');
+        const editMessageContainer = document.getElementById('edit-message-container');
 
-        const pageInputs = [1, 2, 3, 4, 5].map(i => ({
-            url: document.getElementById(`url${i}`),
-            percent: document.getElementById(`percent${i}`)
-        }));
+        let currentCaptions = []; // Store the generated captions
 
-        // --- Local Storage & UI Functions ---
-        function loadSavedDetails() {
-            const savedData = localStorage.getItem(STORAGE_KEY);
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    document.getElementById('gaid').value = data.gaid || '';
-                    document.getElementById('apikey').value = data.apikey || '';
-                    document.getElementById('views').value = data.views || '100';
-                    data.pages.forEach((page, index) => {
-                        if (index < 5) {
-                            pageInputs[index].url.value = page.url || '';
-                            pageInputs[index].percent.value = page.percent || '0';
-                        }
-                    });
-                } catch (e) { /* Error ignored */ }
-                updateDisplayTotal();
-            }
+        // --- UI Control Functions ---
+        function showMessage(container, type, message, hideButton = false) {
+            const buttonToDisable = container === messageContainer ? generateBtn : editBtn;
+            container.innerHTML = `<div class="message-box ${type}"> ${message} ${!hideButton ? '<span class="loading-spinner"></span>' : ''} </div>`;
+            buttonToDisable.disabled = !hideButton;
+        }
+        
+        function clearMessages() {
+            messageContainer.innerHTML = '';
+            editMessageContainer.innerHTML = '';
+            generateBtn.disabled = false;
+            editBtn.disabled = false;
         }
 
-        function saveDetails(gaid, apikey, views, pages) {
-            const data = { gaid, apikey, views, pages };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        function showMainInterface() {
+            mainInterface.style.display = 'block';
+            resultInterface.style.display = 'none';
+            editInterface.style.display = 'none';
+            clearMessages();
         }
 
-        function updateDisplayTotal() {
-            let total = 0;
-            document.querySelectorAll('.page-percent').forEach(input => {
-                total += parseInt(input.value) || 0;
-            });
-            totalPercentSpan.textContent = total;
-            totalPercentSpan.style.color = total === 100 ? '#5cb85c' : '#d9534f';
-            return total;
-        }
-        document.querySelectorAll('.page-percent').forEach(input => {
-            input.addEventListener('input', updateDisplayTotal);
-        });
-
-        function showMessage(type, message, reenable) {
-            messageDiv.className = type;
-            messageDiv.innerHTML = message;
-            if (reenable) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '<i class="fas fa-play"></i> START TRAFFIC GENERATION';
-            }
+        function showResultInterface() {
+            mainInterface.style.display = 'none';
+            resultInterface.style.display = 'block';
+            editInterface.style.display = 'none';
+            clearMessages();
         }
 
-        // --- Main Submission Logic ---
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            const gaId = document.getElementById('gaid').value.trim();
-            const apiKey = document.getElementById('apikey').value.trim();
-            let viewsCount = parseInt(document.getElementById('views').value);
-            
-            if (!gaId || !apiKey || viewsCount < 1) {
-                showMessage('error', '❌ Error: GA Keys, API Secret, and Total Views are required.', true);
+        function showEditInterface(captionText) {
+            document.getElementById('original-caption-text').value = captionText;
+            document.getElementById('requested-change').value = ''; 
+            mainInterface.style.display = 'none';
+            resultInterface.style.display = 'none';
+            editInterface.style.display = 'block';
+            clearMessages();
+        }
+
+        // --- Core API Functions ---
+
+        async function generateCaptions() {
+            clearMessages();
+            const reelTitle = document.getElementById('reel-title').value.trim();
+            const style = document.getElementById('style').value;
+
+            if (!reelTitle) {
+                showMessage(messageContainer, 'error', '❌ Please enter a Reel Topic.', true);
                 return;
             }
 
-            const totalPercent = updateDisplayTotal();
-            if (totalPercent !== 100) {
-                showMessage('error', `❌ Error: Total distribution must be 100%, but it is ${totalPercent}%.`, true);
-                return;
-            }
-            
-            let pages = [];
-            let isValid = true;
-            
-            pageInputs.forEach(input => {
-                const url = input.url.value.trim();
-                const percent = parseInt(input.percent.value) || 0;
-                
-                if (url && percent > 0) {
-                    // Check for http protocol
-                    if (!url.startsWith('http')) {
-                        showMessage('error', '❌ Error: All page URLs must start with http:// or https://', true);
-                        isValid = false; 
-                        return;
-                    }
-                    pages.push({ url: url, percent: percent });
-                }
-            });
+            showMessage(messageContainer, 'success', 'Generating 10 viral captions with hashtags... (Max 15 seconds)', false);
 
-            if (!isValid) return; 
-
-            if (pages.length === 0) {
-                 showMessage('error', '❌ Error: At least one Page URL (Page 1) with a percentage > 0 must be filled.', true);
-                 return;
-            }
-
-            saveDetails(gaId, apiKey, viewsCount, pages); 
-            const payload = { ga_id: gaId, api_key: apiKey, views: viewsCount, pages: pages };
-            
-            submitData(payload, 2); 
-        });
-
-        async function submitData(data, retriesLeft) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = `<i class="fas fa-sync fa-spin"></i> Processing... Please wait (Server is working in the background)`;
-            showMessage('info', '✅ Request initiated. Server views generate kar raha hai. Yeh background mein chalta rahega.', false);
-            
             try {
-                const response = await fetch(RENDER_API_URL, {
+                const response = await fetch(`${RENDER_API_BASE_URL}/caption-generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ reelTitle, style })
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-                
-                const responseData = await response.json();
 
-                if (responseData.status === 'accepted') { 
-                    // Success! Server ne job le li hai.
-                    showMessage('success', `✨ Success! ${responseData.message} **Aap browser band kar sakte hain. Results 24-48 hours mein GA4 mein dikhenge.**`, true);
-                } else {
-                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || `HTTP Error: ${response.status}`);
                 }
+
+                currentCaptions = data.captions;
+                renderCaptions();
+                showResultInterface();
+                showMessage(messageContainer, 'success', '✅ Generation complete!', true);
 
             } catch (error) {
-                if (retriesLeft > 0) {
-                    showMessage('info', `Connection timeout. Retrying (${retriesLeft} left)...`, false);
-                    await new Promise(r => setTimeout(r, 2000));
-                    return submitData(data, retriesLeft - 1);
-                } else {
-                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your **Render service LIVE** hai aur **URL (${RENDER_DOMAIN}) sahi hai**.`, true);
-                }
-            } 
+                console.error("Caption Generation Error:", error);
+                showMessage(messageContainer, 'error', `❌ Generation Failed: ${error.message.substring(0, 70)}...`, true);
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-             loadSavedDetails();
-             updateDisplayTotal();
-        });
+        async function editCaption() {
+            clearMessages();
+            const originalCaption = document.getElementById('original-caption-text').value;
+            const requestedChange = document.getElementById('requested-change').value.trim();
+
+            if (!requestedChange) {
+                showMessage(editMessageContainer, 'error', '❌ Please enter the requested change.', true);
+                return;
+            }
+
+            showMessage(editMessageContainer, 'success', 'Applying changes... (Max 10 seconds)', false);
+
+            try {
+                const response = await fetch(`${RENDER_API_BASE_URL}/caption-edit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ originalCaption, requestedChange })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || `HTTP Error: ${response.status}`);
+                }
+
+                // Display the edited caption
+                document.getElementById('original-caption-text').value = data.editedCaption;
+                showMessage(editMessageContainer, 'success', '✅ Edit applied successfully!', true);
+                
+            } catch (error) {
+                console.error("Caption Editing Error:", error);
+                showMessage(editMessageContainer, 'error', `❌ Editing Failed: ${error.message.substring(0, 70)}...`, true);
+            }
+        }
+
+        // --- Rendering ---
+        function renderCaptions() {
+            captionResults.innerHTML = '';
+            currentCaptions.forEach((item, index) => {
+                const captionDiv = document.createElement('div');
+                captionDiv.className = 'result-caption';
+                captionDiv.innerHTML = `
+                    <strong>Caption ${index + 1}:</strong> 
+                    <pre>${item.caption}</pre>
+                `;
+                // Click handler to open the edit interface
+                captionDiv.onclick = () => showEditInterface(item.caption);
+                captionResults.appendChild(captionDiv);
+            });
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', showMainInterface);
+
     </script>
 </body>
 </html>
