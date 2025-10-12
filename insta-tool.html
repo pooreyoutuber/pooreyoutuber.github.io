@@ -3,221 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3. AI Instagram Caption Generator | PooreYouTuber</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <title>AI Instagram Caption Generator</title>
     <style>
-        /* Professional and Clean UI */
-        :root {
-            --primary-color: #9c27b0; /* Deep Purple for creativity/AI theme */
-            --primary-hover: #7b1fa2;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-color: #343a40;
-            --border-color: #ced4da;
-            --output-bg: #f3f3f3;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 30px;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 26px;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        /* Form Styles */
-        .form-group { margin-bottom: 20px; }
-        label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 600; 
-            font-size: 14px; 
-            color: var(--primary-color);
-        }
-        input[type="text"] {
-            width: 100%; 
-            padding: 10px; 
-            border: 1px solid var(--border-color);
-            border-radius: 4px; 
-            box-sizing: border-box; 
-            background: #fff; 
-            font-size: 16px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff0f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { color: #8a2be2; margin: 0; font-size: 1.8em; font-weight: 700; }
         
-        #generateBtn {
-            width: 100%;
-            background: var(--primary-color); 
-            color: white; 
-            border: none;
-            padding: 12px 20px; 
-            border-radius: 4px; 
-            cursor: pointer;
-            font-size: 16px; 
-            font-weight: bold; 
-            transition: background 0.2s;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        #generateBtn:hover:not(:disabled) { background: var(--primary-hover); }
-        #generateBtn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            background: var(--primary-color);
-        }
+        .container { background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); width: 100%; max-width: 600px; margin-bottom: 20px; border: 2px solid #8a2be2; }
         
-        /* Results Area */
-        #results {
-            margin-top: 35px; 
-            padding-top: 20px;
-            border-top: 1px dashed var(--border-color);
-        }
-        #results h2 {
-            font-size: 20px;
-            color: var(--text-color);
-            margin-bottom: 15px;
-        }
-        #caption-output {
-            white-space: pre-wrap; 
-            padding: 18px; 
-            background: var(--output-bg); 
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            min-height: 150px;
-            font-family: monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #1a1a1a;
-        }
+        label { display: block; text-align: left; margin-bottom: 8px; font-weight: bold; font-size: 1em; color: #555; }
+        input[type="text"], select, textarea { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        textarea { resize: vertical; min-height: 100px; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .submit-btn { flex-grow: 1; background-color: #8a2be2; color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: bold; transition: background-color 0.3s; }
+        .submit-btn:hover { background-color: #6a1ba9; }
+        .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-        /* Status Colors */
-        .api-status { padding: 10px; margin-top: 15px; border-radius: 4px; font-weight: 500; text-align: center; }
-        .status-success { background-color: #d4edda; color: #155724; }
-        .status-error { background-color: #f8d7da; color: #721c24; }
-        .status-loading { background-color: #fff3cd; color: #856404; }
+        .result-container { margin-top: 30px; padding: 20px; border: 1px dashed #8a2be2; border-radius: 8px; background-color: #f8f0ff; }
+        .result-caption { margin-bottom: 15px; padding: 10px; background-color: #fff; border: 1px solid #eee; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+        .result-caption:hover { background-color: #f0f0f0; }
+        .result-caption strong { color: #8a2be2; }
+        .result-caption pre { white-space: pre-wrap; word-break: break-word; margin: 0; padding: 5px; font-size: 0.9em; }
+
+        /* Message & Loading */
+        .message-box { padding: 15px; margin-top: 20px; border-radius: 8px; font-weight: bold; text-align: center; }
+        .message-box.success { background-color: #e6ffe6; color: #3c763d; border: 1px solid #a3d9a3; }
+        .message-box.error { background-color: #ffcccc; color: #a94442; border: 1px solid #ff6666; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #8a2be2; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-left: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h2>✨ AI Reels Caption Generator</h2>
+        <p>Use Gemini AI to generate viral captions.</p>
+    </div>
+
     <div class="container">
-        <h1>✨ AI Instagram Caption Generator (Powered by Gemini)</h1>
-
-        <div id="apiStatus" class="api-status status-success" style="display:none;"></div>
-        
-        <form id="caption-form">
+        <div id="main-interface">
             <div class="form-group">
-                <label for="topic">Topic / Photo Description:</label>
-                <input type="text" id="topic" placeholder="e.g., A funny video about a cat" required>
+                <label for="reel-title">Reel Topic/Title (e.g., How to edit a video faster)</label>
+                <input type="text" id="reel-title" placeholder="What is your reel about?" required>
             </div>
             <div class="form-group">
-                <label for="style">Caption Style (Tone and Length):</label>
-                <input type="text" id="style" placeholder="e.g., Humorous and short, or Motivational and long" required>
+                <label for="style">Caption Style</label>
+                <select id="style">
+                    <option value="Catchy and Funny">Catchy and Funny</option>
+                    <option value="Motivational and Inspiring">Motivational and Inspiring</option>
+                    <option value="Informative and Educational">Informative and Educational</option>
+                    <option value="Short and Punchy">Short and Punchy</option>
+                    <option value="Engaging and Question-based">Engaging and Question-based</option>
+                </select>
             </div>
-            <button type="submit" id="generateBtn">
-                <i class="fas fa-magic"></i> Generate Captions
-            </button>
-        </form>
+            
+            <div id="message-container"></div>
+            
+            <div class="btn-group">
+                <button type="button" class="submit-btn" id="generate-btn" onclick="generateCaptions()">Generate Captions</button>
+            </div>
+        </div>
 
-        <div id="results">
-            <h2>Generated Output:</h2>
-            <pre id="caption-output">Input your details and hit 'Generate' to see creative captions, emojis, and hashtags here.</pre>
+        <div id="result-interface" style="display:none;">
+            <h3>Generated Captions (Click to Edit)</h3>
+            <div id="caption-results" class="result-container">
+                </div>
+            <div class="btn-group">
+                <button type="button" class="submit-btn" onclick="showMainInterface()">Go Back</button>
+            </div>
+        </div>
+
+        <div id="edit-interface" style="display:none;">
+            <h3>Edit Caption</h3>
+            <div class="form-group">
+                <label for="original-caption-text">Original Caption</label>
+                <textarea id="original-caption-text" readonly></textarea>
+            </div>
+            <div class="form-group">
+                <label for="requested-change">Requested Change (e.g., Make it shorter, add a call to action to follow)</label>
+                <input type="text" id="requested-change" placeholder="What changes do you want?">
+            </div>
+            <div id="edit-message-container"></div>
+            <div class="btn-group">
+                <button type="button" class="submit-btn" id="edit-btn" onclick="editCaption()">Apply Change</button>
+            </div>
+            <div class="btn-group">
+                 <button type="button" class="submit-btn" onclick="showResultInterface()">Back to Results</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // ⭐ API URL for Caption Tool (Must include /api/caption) ⭐
-        const API_URL_CAPTION = "https://pooreyoutuber-github-io.onrender.com/api/caption"; 
+        // CRITICAL FIX: The live URL of the Render API service
+        const RENDER_API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com/api';
         
-        const captionForm = document.getElementById('caption-form');
-        const captionOutput = document.getElementById('caption-output');
-        const generateBtn = document.getElementById('generateBtn');
-        const apiStatus = document.getElementById('apiStatus');
+        const mainInterface = document.getElementById('main-interface');
+        const resultInterface = document.getElementById('result-interface');
+        const editInterface = document.getElementById('edit-interface');
+        const captionResults = document.getElementById('caption-results');
+        const generateBtn = document.getElementById('generate-btn');
+        const editBtn = document.getElementById('edit-btn');
+        const messageContainer = document.getElementById('message-container');
+        const editMessageContainer = document.getElementById('edit-message-container');
 
-        // --- Status Reporter Function ---
-        function reportStatus(message, type) {
-            apiStatus.style.display = 'block';
-            apiStatus.className = 'api-status';
-            
-            if (type === 'loading') {
-                apiStatus.classList.add('status-loading');
-                apiStatus.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${message}`;
-            } else if (type === 'success') {
-                apiStatus.classList.add('status-success');
-                apiStatus.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-            } else if (type === 'error') {
-                apiStatus.classList.add('status-error');
-                apiStatus.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
-            }
+        let currentCaptions = []; // Store the generated captions
+
+        // --- UI Control Functions ---
+        function showMessage(container, type, message, hideButton = false) {
+            const buttonToDisable = container === messageContainer ? generateBtn : editBtn;
+            container.innerHTML = `<div class="message-box ${type}"> ${message} ${!hideButton ? '<span class="loading-spinner"></span>' : ''} </div>`;
+            buttonToDisable.disabled = !hideButton;
         }
         
-        // --- Main Logic ---
-        captionForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const topic = document.getElementById('topic').value.trim();
-            const style = document.getElementById('style').value.trim();
+        function clearMessages() {
+            messageContainer.innerHTML = '';
+            editMessageContainer.innerHTML = '';
+            generateBtn.disabled = false;
+            editBtn.disabled = false;
+        }
 
-            if (!topic || !style) {
-                alert('Please enter both Topic/Description and Style.');
+        function showMainInterface() {
+            mainInterface.style.display = 'block';
+            resultInterface.style.display = 'none';
+            editInterface.style.display = 'none';
+            clearMessages();
+        }
+
+        function showResultInterface() {
+            mainInterface.style.display = 'none';
+            resultInterface.style.display = 'block';
+            editInterface.style.display = 'none';
+            clearMessages();
+        }
+
+        function showEditInterface(captionText) {
+            document.getElementById('original-caption-text').value = captionText;
+            document.getElementById('requested-change').value = ''; 
+            mainInterface.style.display = 'none';
+            resultInterface.style.display = 'none';
+            editInterface.style.display = 'block';
+            clearMessages();
+        }
+
+        // --- Core API Functions ---
+
+        async function generateCaptions() {
+            clearMessages();
+            const reelTitle = document.getElementById('reel-title').value.trim();
+            const style = document.getElementById('style').value;
+
+            if (!reelTitle) {
+                showMessage(messageContainer, 'error', '❌ Please enter a Reel Topic.', true);
                 return;
             }
 
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '<i class="fas fa-hourglass-half fa-spin"></i> Generating...';
-            captionOutput.textContent = 'Processing request... Please wait for the AI response.';
-            reportStatus('Sending request to Gemini API...', 'loading');
+            showMessage(messageContainer, 'success', 'Generating 10 viral captions with hashtags... (Max 15 seconds)', false);
 
             try {
-                const response = await fetch(API_URL_CAPTION, {
+                const response = await fetch(`${RENDER_API_BASE_URL}/caption-generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic, style })
+                    body: JSON.stringify({ reelTitle, style })
                 });
 
-                // Crucial Check: Fixes the '<' error when server is sleeping
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("Server did not return JSON. (Server is likely sleeping or unreachable.)");
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || `HTTP Error: ${response.status}`);
                 }
 
-                const result = await response.json();
+                currentCaptions = data.captions;
+                renderCaptions();
+                showResultInterface();
+                showMessage(messageContainer, 'success', '✅ Generation complete!', true);
 
-                if (response.ok && result.status === 'success') {
-                    captionOutput.textContent = result.caption.trim();
-                    reportStatus('Captions Generated Successfully!', 'success');
-                } else {
-                    const errorMessage = result.message || 'Server error occurred during generation.';
-                    captionOutput.textContent = `❌ Generation Failed: ${errorMessage}`;
-                    reportStatus(`Generation Failed: ${errorMessage.substring(0, 50)}...`, 'error');
-                }
             } catch (error) {
-                captionOutput.textContent = `❌ Network/API Error: ${error.message}`;
-                reportStatus(`Network Error: API unreachable or server is sleeping. (${error.message.substring(0, 50)}...)`, 'error');
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Captions';
+                console.error("Caption Generation Error:", error);
+                showMessage(messageContainer, 'error', `❌ Generation Failed: ${error.message.substring(0, 70)}...`, true);
             }
-        });
+        }
+
+        async function editCaption() {
+            clearMessages();
+            const originalCaption = document.getElementById('original-caption-text').value;
+            const requestedChange = document.getElementById('requested-change').value.trim();
+
+            if (!requestedChange) {
+                showMessage(editMessageContainer, 'error', '❌ Please enter the requested change.', true);
+                return;
+            }
+
+            showMessage(editMessageContainer, 'success', 'Applying changes... (Max 10 seconds)', false);
+
+            try {
+                const response = await fetch(`${RENDER_API_BASE_URL}/caption-edit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ originalCaption, requestedChange })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || `HTTP Error: ${response.status}`);
+                }
+
+                // Display the edited caption
+                document.getElementById('original-caption-text').value = data.editedCaption;
+                showMessage(editMessageContainer, 'success', '✅ Edit applied successfully!', true);
+                
+            } catch (error) {
+                console.error("Caption Editing Error:", error);
+                showMessage(editMessageContainer, 'error', `❌ Editing Failed: ${error.message.substring(0, 70)}...`, true);
+            }
+        }
+
+        // --- Rendering ---
+        function renderCaptions() {
+            captionResults.innerHTML = '';
+            currentCaptions.forEach((item, index) => {
+                const captionDiv = document.createElement('div');
+                captionDiv.className = 'result-caption';
+                captionDiv.innerHTML = `
+                    <strong>Caption ${index + 1}:</strong> 
+                    <pre>${item.caption}</pre>
+                `;
+                // Click handler to open the edit interface
+                captionDiv.onclick = () => showEditInterface(item.caption);
+                captionResults.appendChild(captionDiv);
+            });
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', showMainInterface);
+
     </script>
 </body>
 </html>
