@@ -3,396 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Traffic Booster Tool (GA4 MP)</title>
+    <title>Website Traffic Booster Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Base Styles and Responsiveness (Tailwind is used, but custom styles for list management) */
-        body { font-family: 'Inter', sans-serif; background-color: #f0f3f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
-        .header h2 { color: #d9534f; margin: 0; font-size: 1.8em; font-weight: 700; }
-        .container { background-color: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 550px; border: 1px solid #e0e0e0; }
-        
-        /* Input & Form Styling */
-        label { display: block; text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: #555; }
-        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
-        .form-group { margin-bottom: 20px; }
-
-        /* List Styling (Pages and Countries) */
-        .list-section { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background-color: #f9f9f9; max-height: 280px; overflow-y: auto; }
-        .list-item { display: flex; align-items: center; margin-bottom: 10px; padding: 8px; border-bottom: 1px dotted #eee; }
-        .list-item:last-child { border-bottom: none; }
-        .list-item input, .list-item select { margin-bottom: 0; padding: 6px; }
-        .list-item button { margin-left: 10px; background-color: #f0ad4e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s; }
-        .list-item button:hover { background-color: #ec971f; }
-        .item-input { flex-grow: 1; margin-right: 10px; }
-        .percent-input { width: 70px; text-align: center; }
-
-        /* Controls & Totals */
-        .add-btn { background-color: #5cb85c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1em; margin-top: 10px; width: 100%; transition: background-color 0.3s; }
-        .add-btn:hover { background-color: #449d44; }
-        
-        .submit-btn { background-color: #d9534f; color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-size: 1.1em; width: 100%; margin-top: 25px; font-weight: 600; transition: background-color 0.3s; }
-        .submit-btn:hover { background-color: #c9302c; }
-        .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
-
-        /* Message & Total Status */
-        .message-box { padding: 15px; margin-top: 20px; border-radius: 5px; font-weight: bold; text-align: center; }
-        .message-box.success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
-        .message-box.error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
-        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #d9534f; border-radius: 50%; width: 20px; height: 20px; animation: spin 2s linear infinite; display: inline-block; margin-left: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .total-percent { margin-top: 10px; font-weight: bold; padding: 10px; border-radius: 5px; }
-        .total-percent.valid { background-color: #e6ffe6; color: #2e8b57; border: 1px solid #a3d9a3; }
-        .total-percent.invalid { background-color: #ffcccc; color: #cc0000; border: 1px solid #ff6666; }
-        
-        /* Select Dropdown styling for better visibility */
-        .country-select { padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; background-color: white; appearance: none; /* Hide default arrow */ background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-5.4H18.6c-5%200-9.3%201.8-12.9%205.4-3.6%203.6-5.4%207.9-5.4%2012.9v160.8c0%205%201.8%209.3%205.4%2012.9s7.9%205.4%2012.9%205.4h255.2c5%200%209.3-1.8%2012.9-5.4s5.4-7.9%205.4-12.9V82.3c0-5-1.8-9.3-5.4-12.9z%22%2F%3E%3C%2Fsvg%3E'); /* Custom arrow */ background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 12px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
+        }
+        .container {
+            max-width: 640px;
+            margin: auto;
+            padding: 1rem;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            border: 1px solid #e5e7eb;
+        }
+        .input-group label {
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .input-group input[type="text"], 
+        .input-group input[type="number"] {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            transition: border-color 0.15s;
+        }
+        .input-group input:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        /* Custom styling for the percentage inputs */
+        .percentage-input {
+            width: 70px; /* fixed width for the percentage box */
+        }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h2>🌐 Website Traffic Booster</h2>
-        <p>GA4 Measurement Protocol - Views Generation</p>
-    </div>
+<body class="min-h-screen flex items-start justify-center py-10 bg-gray-50">
 
     <div class="container">
-        <form id="booster-form">
-            <!-- GA ID and API Key -->
-            <div class="form-group">
-                <label for="ga_id">GA4 Measurement ID (G-XXXXXXXXXX)</label>
-                <input type="text" id="ga_id" placeholder="e.g., G-XYZ1234567" required oninput="saveDetails()">
-            </div>
-            <div class="form-group">
-                <label for="api_key">Measurement API Secret Key</label>
-                <input type="text" id="api_key" placeholder="e.g., Your_API_Secret_Key" required oninput="saveDetails()">
-            </div>
-
-            <!-- Total Views -->
-            <div class="form-group">
-                <label for="views">Total Views to Generate (Max 500)</label>
-                <input type="number" id="views" min="1" max="500" value="50" required oninput="saveDetails()">
-            </div>
-
-            <!-- Page Distribution -->
-            <div class="form-group">
-                <label>Page URL Distribution (Total must be 100%)</label>
-                <div class="list-section" id="page-list">
-                    <!-- Dynamic page items will be added here -->
-                </div>
-                <div class="total-percent" id="page-total-percent">Page Total: 0%</div>
-                <button type="button" class="add-btn" onclick="addPageItem()">+ Add Page URL</button>
-            </div>
-
-            <div class="form-group">
-                <label>Country Distribution (Total must be 100%)</label>
-                <div class="list-section" id="country-list">
-                    <!-- Dynamic country items will be added here -->
-                </div>
-                <div class="total-percent" id="country-total-percent">Country Total: 0%</div>
-                <select id="country-selector" class="country-select item-input">
-                    <option value="">-- Select Country to Add --</option>
-                </select>
-                <button type="button" class="add-btn mt-3" onclick="addCountryFromSelector()">+ Add Country</button>
-            </div>
-
-
-            <div id="message-container"></div>
+        <div class="card">
             
-            <button type="submit" class="submit-btn" id="submit-btn" disabled>Submit & Start Boosting</button>
-        </form>
-    </div>
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold text-blue-600 mb-2">Website Traffic Booster Tool</h1>
+                <p class="text-gray-500">Increase your page views and engagement metrics.</p>
+            </header>
 
-    <div class="footer">
-        Disclaimer: Use responsibly and in compliance with Google Analytics Terms of Service.
+            <div class="bg-blue-50 p-4 rounded-lg text-blue-800 mb-6">
+                <p class="font-semibold mb-2">💡 Important Instructions</p>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    <li>This tool uses the GA4 Measurement Protocol, which helps prevent browser errors.</li>
+                    <li>Real-Type Views: Expect view sessions of 30-120 seconds with engagement data.</li>
+                    <li>**URL Format:** All URLs must start with `https://`.</li>
+                </ul>
+            </div>
+
+            <form id="traffic-form">
+                
+                <div class="input-group mb-4">
+                    <label for="ga-id" class="block text-sm mb-1">1. Google Analytics ID (G-XXXXX)</label>
+                    <input type="text" id="ga-id" placeholder="Enter your GA4 Measurement ID" required class="w-full">
+                </div>
+
+                <div class="input-group mb-4">
+                    <label for="api-secret" class="block text-sm mb-1">2. API Secret (Measurement Protocol Key)</label>
+                    <input type="text" id="api-secret" placeholder="Enter your GA4 API Secret" required class="w-full">
+                </div>
+
+                <div class="input-group mb-6">
+                    <label for="total-views" class="block text-sm mb-1">3. Total Views to Generate (Max 500)</label>
+                    <input type="number" id="total-views" value="100" min="1" max="500" required class="w-full">
+                </div>
+
+                <div class="mb-6 border-t pt-4">
+                    <label class="block text-base font-bold text-gray-800 mb-2">4. Distribute Traffic Across Pages (Total must be 100%)</label>
+                    
+                    <div id="distribution-container" class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <label for="url-1" class="text-sm w-24 flex-shrink-0">Page 1 URL (Required):</label>
+                            <input type="text" id="url-1" placeholder="https://..." required class="flex-grow">
+                            <input type="number" id="percent-1" value="100" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
+                            <span class="text-sm">%</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="url-2" class="text-sm w-24 flex-shrink-0">Page 2 URL (Optional):</label>
+                            <input type="text" id="url-2" placeholder="https://..." class="flex-grow">
+                            <input type="number" id="percent-2" value="0" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
+                            <span class="text-sm">%</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="url-3" class="text-sm w-24 flex-shrink-0">Page 3 URL (Optional):</label>
+                            <input type="text" id="url-3" placeholder="https://..." class="flex-grow">
+                            <input type="number" id="percent-3" value="0" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
+                            <span class="text-sm">%</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="url-4" class="text-sm w-24 flex-shrink-0">Page 4 URL (Optional):</label>
+                            <input type="text" id="url-4" placeholder="https://..." class="flex-grow">
+                            <input type="number" id="percent-4" value="0" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
+                            <span class="text-sm">%</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="url-5" class="text-sm w-24 flex-shrink-0">Page 5 URL (Optional):</label>
+                            <input type="text" id="url-5" placeholder="https://..." class="flex-grow">
+                            <input type="number" id="percent-5" value="0" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
+                            <span class="text-sm">%</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t flex justify-end items-center">
+                        <span class="font-bold text-gray-700 mr-2">Total Distribution:</span>
+                        <span id="total-percentage" class="font-extrabold text-lg text-blue-600">100</span>
+                        <span class="font-extrabold text-lg text-blue-600">%</span>
+                    </div>
+
+                </div>
+
+                <button type="submit" id="submit-button" class="w-full py-3 px-4 rounded-lg text-white font-semibold shadow-lg transition duration-300 ease-in-out bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                    START TRAFFIC GENERATION
+                </button>
+            </form>
+
+            <div id="status-message" class="mt-4 p-4 rounded-lg text-center hidden" role="alert"></div>
+
+            <div id="output-log" class="mt-6 bg-gray-800 text-green-400 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap h-40 overflow-y-auto">
+                Live Activity Log:
+            </div>
+            
+        </div>
     </div>
 
     <script>
-        // CRITICAL: The live URL of the Render API service (CONFIRMED)
-        const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp';
-        const form = document.getElementById('booster-form');
-        const pageList = document.getElementById('page-list');
-        const countryList = document.getElementById('country-list');
-        const submitBtn = document.getElementById('submit-btn');
-        const messageContainer = document.getElementById('message-container');
-        const pageTotalDisplay = document.getElementById('page-total-percent');
-        const countryTotalDisplay = document.getElementById('country-total-percent');
-        const countrySelector = document.getElementById('country-selector');
-        const STORAGE_KEY = 'ga4_booster_details_v2'; // Updated key for new structure
-        
-        // Predefined list of 15 major countries
-        const ALL_COUNTRIES = [
-            'India', 'United States', 'Brazil', 'Indonesia', 'Pakistan', 'Nigeria', 
-            'Germany', 'United Kingdom', 'France', 'Mexico', 'Canada', 'Australia', 
-            'Saudi Arabia', 'Japan', 'South Korea'
-        ];
+        // CRITICAL: Replace with your actual Render service URL
+        const API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
+        const form = document.getElementById('traffic-form');
+        const submitButton = document.getElementById('submit-button');
+        const totalPercentage = document.getElementById('total-percentage');
+        const statusMessage = document.getElementById('status-message');
+        const outputLog = document.getElementById('output-log');
 
-        // --- Utility Functions ---
-
-        function showMessage(type, message, isFinished = false) {
-            messageContainer.innerHTML = `<div class="message-box ${type}"> ${message} ${!isFinished ? '<span class="loading-spinner"></span>' : ''} </div>`;
-            submitBtn.disabled = !isFinished;
-        }
-        
-        function fillCountrySelector() {
-            ALL_COUNTRIES.forEach(country => {
-                const option = document.createElement('option');
-                option.value = country;
-                option.textContent = country;
-                countrySelector.appendChild(option);
-            });
-        }
-        
-        function updateDisplayTotal() {
-            // 1. Page Total Calculation
-            const pagePercents = Array.from(pageList.querySelectorAll('.percent-input'))
-                                      .map(input => parseFloat(input.value) || 0);
-            const pageTotal = pagePercents.reduce((sum, current) => sum + current, 0);
+        /** Logs messages to the live activity window. */
+        function logActivity(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            const logEntry = document.createElement('div');
             
-            pageTotalDisplay.textContent = `Page Total: ${pageTotal.toFixed(2)}%`;
+            let colorClass = 'text-green-400';
+            if (type === 'error') colorClass = 'text-red-400';
+            if (type === 'warn') colorClass = 'text-yellow-400';
 
-            const isPageTotalValid = pageTotal > 99.9 && pageTotal < 100.1 && pagePercents.length > 0;
-            pageTotalDisplay.className = 'total-percent ' + (isPageTotalValid ? 'valid' : 'invalid');
-
-            // 2. Country Total Calculation
-            const countryPercents = Array.from(countryList.querySelectorAll('.percent-input'))
-                                         .map(input => parseFloat(input.value) || 0);
-            const countryTotal = countryPercents.reduce((sum, current) => sum + current, 0);
+            logEntry.innerHTML = `<span class="text-gray-500">[${timestamp}]</span> <span class="${colorClass}">${message}</span>`;
             
-            countryTotalDisplay.textContent = `Country Total: ${countryTotal.toFixed(2)}%`;
-
-            const isCountryTotalValid = countryTotal > 99.9 && countryTotal < 100.1 && countryPercents.length > 0;
-            countryTotalDisplay.className = 'total-percent ' + (isCountryTotalValid ? 'valid' : 'invalid');
-            
-            // 3. Enable Submit Button only if BOTH are 100%
-            submitBtn.disabled = !(isPageTotalValid && isCountryTotalValid);
+            outputLog.appendChild(logEntry);
+            outputLog.scrollTop = outputLog.scrollHeight; 
         }
 
-        // --- Page Functions ---
-
-        function addPageItem(url = '', percent = 0) {
-            const item = document.createElement('div');
-            item.className = 'list-item page-item';
-            
-            item.innerHTML = `
-                <input type="text" class="item-input url-input" value="${url}" placeholder="https://example.com/page" required oninput="saveDetails()">
-                <input type="number" class="percent-input" value="${percent}" min="0" max="100" step="0.1" required oninput="updateDisplayTotal(); saveDetails()">
-                <span>%</span>
-                <button type="button" onclick="removeListItem(this)">Remove</button>
-            `;
-            
-            pageList.appendChild(item);
-            updateDisplayTotal();
-        }
-
-        // --- Country Functions ---
-        
-        function addCountryItem(name = 'India', percent = 0) {
-            const item = document.createElement('div');
-            item.className = 'list-item country-item';
-            
-            item.innerHTML = `
-                <div class="item-input font-semibold">${name}</div>
-                <input type="hidden" class="country-name" value="${name}">
-                <input type="number" class="percent-input" value="${percent}" min="0" max="100" step="0.1" required oninput="updateDisplayTotal(); saveDetails()">
-                <span>%</span>
-                <button type="button" onclick="removeListItem(this)">Remove</button>
-            `;
-            
-            countryList.appendChild(item);
-            updateDisplayTotal();
-        }
-
-        function addCountryFromSelector() {
-            const countryName = countrySelector.value;
-            if (!countryName) return;
-
-            // Prevent adding duplicates
-            const existingCountries = Array.from(countryList.querySelectorAll('.country-name')).map(input => input.value);
-            if (existingCountries.includes(countryName)) {
-                showMessage('error', `Country "${countryName}" is already added.`, true);
-                return;
+        /** Calculates and updates the total distribution percentage. */
+        function calculateTotal() {
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                const percentInput = document.getElementById(`percent-${i}`);
+                total += parseInt(percentInput.value) || 0;
             }
+            totalPercentage.textContent = total;
             
-            addCountryItem(countryName, 0);
-            countrySelector.value = ''; // Reset selector
-            updateDisplayTotal();
-            saveDetails();
-        }
-
-        // --- General List Management ---
-
-        function removeListItem(button) {
-            button.closest('.list-item').remove();
-            updateDisplayTotal();
-            saveDetails();
-            // Clear message if it was a duplicate error
-            messageContainer.innerHTML = '';
-        }
-
-        function getFormData() {
-            // Get Pages data
-            const pages = Array.from(pageList.querySelectorAll('.page-item')).map(item => {
-                const urlInput = item.querySelector('.url-input');
-                const percentInput = item.querySelector('.percent-input');
-                return {
-                    url: urlInput.value.trim(),
-                    percent: parseFloat(percentInput.value) || 0
-                };
-            }).filter(page => page.url && page.percent > 0);
-            
-            // Get Countries data
-            const countries = Array.from(countryList.querySelectorAll('.country-item')).map(item => {
-                const nameInput = item.querySelector('.country-name');
-                const percentInput = item.querySelector('.percent-input');
-                return {
-                    name: nameInput.value.trim(),
-                    percent: parseFloat(percentInput.value) || 0
-                };
-            }).filter(country => country.name && country.percent > 0);
-
-
-            return {
-                ga_id: document.getElementById('ga_id').value.trim(),
-                api_key: document.getElementById('api_key').value.trim(),
-                views: parseInt(document.getElementById('views').value),
-                pages: pages,
-                countries: countries // New field included here
-            };
-        }
-
-        // --- Local Storage Handling (Saves progress) ---
-
-        function saveDetails() {
-            const data = getFormData();
-            const saveData = {
-                ga_id: data.ga_id,
-                api_key: data.api_key,
-                views: data.views,
-                pages: data.pages,
-                countries: data.countries 
-            };
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
-            } catch (e) { console.error('Error saving to storage:', e); }
-        }
-
-        function loadSavedDetails() {
-            fillCountrySelector(); // Fill the selector first
-            
-            try {
-                const savedData = localStorage.getItem(STORAGE_KEY);
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    document.getElementById('ga_id').value = data.ga_id || '';
-                    document.getElementById('api_key').value = data.api_key || '';
-                    document.getElementById('views').value = data.views || 50;
-
-                    pageList.innerHTML = ''; 
-                    countryList.innerHTML = '';
-
-                    // Load Pages
-                    if (data.pages && data.pages.length > 0) {
-                        data.pages.forEach(page => addPageItem(page.url, page.percent));
-                    } else {
-                        addPageItem('https://example.com/page-1', 50);
-                        addPageItem('https://example.com/page-2', 50);
-                    }
-                    
-                    // Load Countries
-                    if (data.countries && data.countries.length > 0) {
-                        data.countries.forEach(country => addCountryItem(country.name, country.percent));
-                    } else {
-                        addCountryItem('India', 70);
-                        addCountryItem('United States', 30);
-                    }
-
-                } else {
-                    // Default setup if no saved data
-                    addPageItem('https://example.com/page-1', 50);
-                    addPageItem('https://example.com/page-2', 50);
-                    addCountryItem('India', 70);
-                    addCountryItem('United States', 30);
-                }
-            } catch (e) {
-                console.error('Error loading from storage:', e);
-                // Fallback to default if loading fails
-                pageList.innerHTML = '';
-                countryList.innerHTML = '';
-                addPageItem('https://example.com/page-1', 50);
-                addPageItem('https://example.com/page-2', 50);
-                addCountryItem('India', 70);
-                addCountryItem('United States', 30);
+            if (total !== 100) {
+                totalPercentage.classList.add('text-red-500');
+                totalPercentage.classList.remove('text-blue-600');
+            } else {
+                totalPercentage.classList.add('text-blue-600');
+                totalPercentage.classList.remove('text-red-500');
             }
         }
-        
-        // --- Submission Logic ---
 
+        /** Displays status to the user. */
+        function displayStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+            
+            if (type === 'error') {
+                statusMessage.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                statusMessage.classList.add('bg-green-100', 'text-green-700');
+            } else { // info/loading
+                statusMessage.classList.add('bg-blue-100', 'text-blue-700');
+            }
+        }
+
+        /** Event handler for form submission. */
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const data = getFormData();
-
-            // Perform final validation checks
-            if (submitBtn.disabled) {
-                 showMessage('error', '❌ Please ensure both Page URL Total and Country Total are exactly 100%.', true);
-                return;
-            }
-
-            if (!data.ga_id || !data.api_key || data.views < 1 || data.views > 500 || data.pages.length === 0 || data.countries.length === 0) {
-                showMessage('error', '❌ Please fill all required fields correctly. Views must be 1-500, and lists cannot be empty.', true);
+            
+            // 1. Validate total percentage
+            const total = parseInt(totalPercentage.textContent);
+            if (total !== 100) {
+                displayStatus('Error: Total distribution must be 100%. Current: ' + total + '%', 'error');
+                logActivity('Generation Failed: Distribution must be 100%.', 'error');
                 return;
             }
             
-            saveDetails(); 
-            showMessage('success', 'Sending request... Please wait. (Up to 15 seconds)', false);
-
-            await submitData(data, 3); 
-        });
-
-        async function submitData(data, retriesLeft) {
-            if (retriesLeft < 3) {
-                 showMessage('success', `Retry attempt ${4 - retriesLeft}. Checking server status...`, false);
+            // 2. Gather data
+            const gaId = document.getElementById('ga-id').value.trim();
+            const apiSecret = document.getElementById('api-secret').value.trim();
+            const totalViews = document.getElementById('total-views').value.trim();
+            
+            if (!gaId || !apiSecret || !totalViews) {
+                 displayStatus('Error: Please fill in all required fields (GA ID, API Secret, Views).', 'error');
+                 logActivity('Generation Failed: Missing required fields.', 'error');
+                 return;
             }
             
+            // 3. Construct URL Distribution Map (Only include entries with URLs)
+            const distribution = {};
+            let isValid = true;
+            for (let i = 1; i <= 5; i++) {
+                const url = document.getElementById(`url-${i}`).value.trim();
+                const percent = parseInt(document.getElementById(`percent-${i}`).value) || 0;
+                
+                if (url) {
+                    if (!url.startsWith('https://')) {
+                        displayStatus(`Error: URL ${i} must start with 'https://'`, 'error');
+                        logActivity(`URL ${i} validation failed.`, 'error');
+                        isValid = false;
+                        break;
+                    }
+                    distribution[url] = percent;
+                }
+            }
+
+            if (!isValid) return;
+
+            // 4. API Call
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+            displayStatus('Traffic generation request sent to server.', 'info');
+            logActivity('Sending request to Backend...', 'info');
+
             try {
-                const response = await fetch(RENDER_API_URL, {
+                const response = await fetch(`${API_BASE_URL}/boost-mp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ 
+                        ga_id: gaId, 
+                        api_secret: apiSecret, 
+                        views: parseInt(totalViews, 10),
+                        distribution: distribution
+                    })
                 });
-                
-                // If server is up but returns 400/500 due to bad data
-                if (response.status === 400 || response.status === 500) {
-                    const errorData = await response.json();
-                    throw new Error(`Server Rejected: ${errorData.message || errorData.error || 'Unknown server error.'}`);
-                }
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-                
-                const responseData = await response.json();
 
-                if (responseData.status === 'accepted') {
-                    // The backend now logs the country count as well
-                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. **Processing in background, results expected within 24-48 hours.** You can close this page now.`, true);
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayStatus('Success: Request accepted! Processing started.', 'success');
+                    logActivity(`[SERVER] Success: ${result.message}`, 'info');
+                    // Simulating the traffic slots starting
+                    logActivity(`[SLOT 1] Starting ${totalViews} views for GA ID ${gaId}...`, 'info');
+                    logActivity(`[SLOT 1] Processing will continue in the background.`, 'info');
                 } else {
-                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
+                    displayStatus(`Error: ${result.error || 'Backend failed to process request.'}`, 'error');
+                    logActivity(`[SERVER] Error: ${result.error || 'Unknown error.'}`, 'error');
                 }
 
             } catch (error) {
-                if (retriesLeft > 0) {
-                    await new Promise(resolve => setTimeout(resolve, 2000)); 
-                    return submitData(data, retriesLeft - 1);
-                } else {
-                    showMessage('error', `❌ Final Connection Error. Ensure the Render service is **running**. Error: ${error.message.substring(0, 80)}`, true);
-                }
-            } 
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-             loadSavedDetails();
-             updateDisplayTotal();
+                console.error("Fetch Error:", error);
+                displayStatus('Network Error: Could not reach the server. Check your Render URL.', 'error');
+                logActivity(`[NETWORK] Failed to connect: ${error.message}`, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'START TRAFFIC GENERATION';
+            }
         });
+
+        // Initialize total calculation on load
+        window.onload = calculateTotal;
+
     </script>
 </body>
 </html>
