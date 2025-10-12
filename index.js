@@ -1,7 +1,7 @@
-const express = require('express');
-const fs = require('fs');
-// GoogleGenAI is the correct class name for the latest official package
-const { GoogleGenAI } = require('@google/genai'); 
+// 1. IMPORT SYNTAX: 'require' की जगह 'import' का इस्तेमाल करें
+import express from 'express';
+import fs from 'fs';
+import { GoogleGenAI } from '@google/genai';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,8 +11,8 @@ app.use(express.json());
 
 // Enable CORS for frontend access (important for GitHub Pages)
 app.use((req, res, next) => {
-    // Replace '*' with your specific GitHub Pages URL for more security
-    res.setHeader('Access-Control-Allow-Origin', '*'); 
+    // Allows access from your GitHub Pages URL
+    res.setHeader('Access-Control-Allow-Origin', 'https://pooreyoutuber.github.io'); 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     next();
@@ -23,12 +23,12 @@ let geminiApiKey;
 
 // Function to load the API Key from the Render Secret File or Environment Variable
 function loadApiKey() {
-    // 1. Secret File Path (Matches user's config: filename 'gemini')
+    // CRITICAL: Paath must match your Secret File Name 'gemini'
     const secretPath = '/etc/secrets/gemini'; 
     
     try {
         if (fs.existsSync(secretPath)) {
-            // Read from Secret File (Priority 1)
+            // Priority 1: Read from Secret File
             geminiApiKey = fs.readFileSync(secretPath, 'utf8').trim();
             if (geminiApiKey) {
                 console.log("SUCCESS: Gemini API Key loaded from Secret File (/etc/secrets/gemini).");
@@ -37,7 +37,7 @@ function loadApiKey() {
             }
         } 
         
-        // 2. Fallback to Environment Variable (Priority 2)
+        // Priority 2: Fallback to Environment Variable
         if (!geminiApiKey && process.env.GEMINI_API_KEY) {
              geminiApiKey = process.env.GEMINI_API_KEY;
              console.log("SUCCESS: Gemini API Key loaded from Environment Variable (GEMINI_API_KEY).");
@@ -107,7 +107,6 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
         res.json({ captions: captions });
     } catch (error) {
         console.error("Gemini API Generation Error:", error.message);
-        // The frontend will catch 500 error
         res.status(500).json({ error: "AI Processing Failed. Possible reason: API rate limits or invalid input.", details: error.message });
     }
 });
@@ -159,7 +158,6 @@ app.post('/boost-mp', (req, res) => {
         return res.status(400).json({ error: "Missing required fields for traffic boosting." });
     }
     
-    // The frontend will display success once this 200 response is received.
     res.status(200).json({ 
         message: "Traffic boosting job successfully initiated and is running in the background.",
         jobId: Date.now() 
