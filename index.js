@@ -105,7 +105,8 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 // Helper: Generates a plan of which URL gets which view
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
-    const totalPercentage = pages.reduce((sum, page => sum + (page.percent || 0), 0);
+    // FIX: Arrow function syntax corrected from (sum, page => ...) to (sum, page) => ...
+    const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
     
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
