@@ -3,240 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Instagram Caption Generator</title>
+    <title>Website Traffic Booster Tool (GA4 MP)</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff0f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
+        /* Base Styles and Responsiveness */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
         .header { text-align: center; margin-bottom: 25px; }
-        .header h2 { color: #8a2be2; margin: 0; font-size: 1.8em; font-weight: 700; }
+        .header h2 { color: #d9534f; margin: 0; font-size: 1.8em; font-weight: 700; }
         
-        .container { background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); width: 100%; max-width: 600px; margin-bottom: 20px; border: 2px solid #8a2be2; }
+        .container { background-color: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e0e0e0; }
         
-        label { display: block; text-align: left; margin-bottom: 8px; font-weight: bold; font-size: 1em; color: #555; }
-        input[type="text"], select, textarea { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
-        textarea { resize: vertical; min-height: 100px; }
+        /* Input & Form Styling */
+        label { display: block; text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: #555; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
+        .form-group { margin-bottom: 15px; }
+
+        /* Page List Styling */
+        .page-list { border: 1px solid #ddd; padding: 15px; border-radius: 5px; background-color: #f9f9f9; max-height: 250px; overflow-y: auto; }
+        .page-item { display: flex; align-items: center; margin-bottom: 10px; padding: 8px; border-bottom: 1px dotted #eee; }
+        .page-item:last-child { border-bottom: none; }
+        .page-item input { margin-bottom: 0; }
+        .page-item button { margin-left: 10px; background-color: #f0ad4e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s; }
+        .page-item button:hover { background-color: #ec971f; }
+        .url-input { flex-grow: 1; margin-right: 10px; }
+        .percent-input { width: 60px; text-align: center; }
+
+        /* Controls */
+        .add-page-btn { background-color: #5cb85c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1em; margin-top: 10px; width: 100%; transition: background-color 0.3s; }
+        .add-page-btn:hover { background-color: #449d44; }
         
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .submit-btn { flex-grow: 1; background-color: #8a2be2; color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: bold; transition: background-color 0.3s; }
-        .submit-btn:hover { background-color: #6a1ba9; }
+        .submit-btn { background-color: #d9534f; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 1.1em; width: 100%; margin-top: 20px; transition: background-color 0.3s; }
+        .submit-btn:hover { background-color: #c9302c; }
         .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-        .result-container { margin-top: 30px; padding: 20px; border: 1px dashed #8a2be2; border-radius: 8px; background-color: #f8f0ff; }
-        .result-caption { margin-bottom: 15px; padding: 10px; background-color: #fff; border: 1px solid #eee; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
-        .result-caption:hover { background-color: #f0f0f0; }
-        .result-caption strong { color: #8a2be2; }
-        .result-caption pre { white-space: pre-wrap; word-break: break-word; margin: 0; padding: 5px; font-size: 0.9em; }
-
-        /* Message & Loading */
-        .message-box { padding: 15px; margin-top: 20px; border-radius: 8px; font-weight: bold; text-align: center; }
-        .message-box.success { background-color: #e6ffe6; color: #3c763d; border: 1px solid #a3d9a3; }
-        .message-box.error { background-color: #ffcccc; color: #a94442; border: 1px solid #ff6666; }
-        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #8a2be2; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-left: 10px; }
+        /* Message & Footer */
+        .message-box { padding: 15px; margin-top: 20px; border-radius: 5px; font-weight: bold; text-align: center; }
+        .message-box.success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        .message-box.error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #d9534f; border-radius: 50%; width: 20px; height: 20px; animation: spin 2s linear infinite; display: inline-block; margin-left: 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .footer { margin-top: 30px; font-size: 0.8em; color: #888; text-align: center; }
+
+        /* Total & Warning */
+        .total-percent { margin-top: 10px; font-weight: bold; padding: 10px; border-radius: 5px; }
+        .total-percent.valid { background-color: #e6ffe6; color: #2e8b57; border: 1px solid #a3d9a3; }
+        .total-percent.invalid { background-color: #ffcccc; color: #cc0000; border: 1px solid #ff6666; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>✨ AI Reels Caption Generator</h2>
-        <p>Use Gemini AI to generate viral captions.</p>
+        <h2>🌐 Website Traffic Booster</h2>
+        <p>GA4 Measurement Protocol - Views Generation</p>
     </div>
 
     <div class="container">
-        <div id="main-interface">
+        <form id="booster-form">
+            <!-- GA ID and API Key -->
             <div class="form-group">
-                <label for="reel-title">Reel Topic/Title (e.g., How to edit a video faster)</label>
-                <input type="text" id="reel-title" placeholder="What is your reel about?" required>
+                <label for="ga_id">GA4 Measurement ID (G-XXXXXXXXXX)</label>
+                <input type="text" id="ga_id" placeholder="e.g., G-XYZ1234567" required oninput="saveDetails()">
             </div>
             <div class="form-group">
-                <label for="style">Caption Style</label>
-                <select id="style">
-                    <option value="Catchy and Funny">Catchy and Funny</option>
-                    <option value="Motivational and Inspiring">Motivational and Inspiring</option>
-                    <option value="Informative and Educational">Informative and Educational</option>
-                    <option value="Short and Punchy">Short and Punchy</option>
-                    <option value="Engaging and Question-based">Engaging and Question-based</option>
-                </select>
+                <label for="api_key">Measurement API Secret Key</label>
+                <input type="text" id="api_key" placeholder="e.g., Your_API_Secret_Key" required oninput="saveDetails()">
             </div>
-            
+
+            <!-- Total Views -->
+            <div class="form-group">
+                <label for="views">Total Views to Generate (Max 500)</label>
+                <input type="number" id="views" min="1" max="500" value="50" required oninput="saveDetails()">
+            </div>
+
+            <!-- Page Distribution -->
+            <div class="form-group">
+                <label>Page URL Distribution (Total must be 100%)</label>
+                <div class="page-list" id="page-list">
+                    <!-- Dynamic page items will be added here -->
+                </div>
+                <div class="total-percent" id="total-percent">Total: 0%</div>
+                <button type="button" class="add-page-btn" onclick="addPageItem()">+ Add Page</button>
+            </div>
+
             <div id="message-container"></div>
             
-            <div class="btn-group">
-                <button type="button" class="submit-btn" id="generate-btn" onclick="generateCaptions()">Generate Captions</button>
-            </div>
-        </div>
+            <button type="submit" class="submit-btn" id="submit-btn" disabled>Submit & Start Boosting</button>
+        </form>
+    </div>
 
-        <div id="result-interface" style="display:none;">
-            <h3>Generated Captions (Click to Edit)</h3>
-            <div id="caption-results" class="result-container">
-                </div>
-            <div class="btn-group">
-                <button type="button" class="submit-btn" onclick="showMainInterface()">Go Back</button>
-            </div>
-        </div>
-
-        <div id="edit-interface" style="display:none;">
-            <h3>Edit Caption</h3>
-            <div class="form-group">
-                <label for="original-caption-text">Original Caption</label>
-                <textarea id="original-caption-text" readonly></textarea>
-            </div>
-            <div class="form-group">
-                <label for="requested-change">Requested Change (e.g., Make it shorter, add a call to action to follow)</label>
-                <input type="text" id="requested-change" placeholder="What changes do you want?">
-            </div>
-            <div id="edit-message-container"></div>
-            <div class="btn-group">
-                <button type="button" class="submit-btn" id="edit-btn" onclick="editCaption()">Apply Change</button>
-            </div>
-            <div class="btn-group">
-                 <button type="button" class="submit-btn" onclick="showResultInterface()">Back to Results</button>
-            </div>
-        </div>
+    <div class="footer">
+        Disclaimer: Use responsibly and in compliance with Google Analytics Terms of Service.
     </div>
 
     <script>
         // CRITICAL FIX: The live URL of the Render API service
-        const RENDER_API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com/api';
-        
-        const mainInterface = document.getElementById('main-interface');
-        const resultInterface = document.getElementById('result-interface');
-        const editInterface = document.getElementById('edit-interface');
-        const captionResults = document.getElementById('caption-results');
-        const generateBtn = document.getElementById('generate-btn');
-        const editBtn = document.getElementById('edit-btn');
+        const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp';
+        const form = document.getElementById('booster-form');
+        const pageList = document.getElementById('page-list');
+        const submitBtn = document.getElementById('submit-btn');
         const messageContainer = document.getElementById('message-container');
-        const editMessageContainer = document.getElementById('edit-message-container');
+        const totalPercentDisplay = document.getElementById('total-percent');
+        const STORAGE_KEY = 'ga4_booster_details';
+        
+        // --- Utility Functions ---
 
-        let currentCaptions = []; // Store the generated captions
+        function showMessage(type, message, hideButton = false) {
+            messageContainer.innerHTML = `<div class="message-box ${type}"> ${message} ${!hideButton ? '<span class="loading-spinner"></span>' : ''} </div>`;
+            submitBtn.disabled = !hideButton;
+        }
 
-        // --- UI Control Functions ---
-        function showMessage(container, type, message, hideButton = false) {
-            const buttonToDisable = container === messageContainer ? generateBtn : editBtn;
-            container.innerHTML = `<div class="message-box ${type}"> ${message} ${!hideButton ? '<span class="loading-spinner"></span>' : ''} </div>`;
-            buttonToDisable.disabled = !hideButton;
+        function updateDisplayTotal() {
+            const percents = Array.from(pageList.querySelectorAll('.percent-input')).map(input => parseFloat(input.value) || 0);
+            const total = percents.reduce((sum, current) => sum + current, 0);
+            
+            totalPercentDisplay.textContent = `Total: ${total.toFixed(2)}%`;
+
+            // Check if total is close enough to 100 (allowing for floating point errors)
+            if (total > 99.9 && total < 100.1) {
+                totalPercentDisplay.className = 'total-percent valid';
+                submitBtn.disabled = false;
+            } else {
+                totalPercentDisplay.className = 'total-percent invalid';
+                submitBtn.disabled = true;
+            }
+        }
+
+        function addPageItem(url = '', percent = 0) {
+            const item = document.createElement('div');
+            item.className = 'page-item';
+            
+            item.innerHTML = `
+                <input type="text" class="url-input" value="${url}" placeholder="https://example.com/page" required oninput="saveDetails()">
+                <input type="number" class="percent-input" value="${percent}" min="0" max="100" step="0.1" required oninput="updateDisplayTotal(); saveDetails()">
+                <span>%</span>
+                <button type="button" onclick="removePageItem(this)">Remove</button>
+            `;
+            
+            pageList.appendChild(item);
+            updateDisplayTotal();
+        }
+
+        function removePageItem(button) {
+            button.closest('.page-item').remove();
+            updateDisplayTotal();
+            saveDetails();
+        }
+
+        function getFormData() {
+            const pages = Array.from(pageList.querySelectorAll('.page-item')).map(item => {
+                const urlInput = item.querySelector('.url-input');
+                const percentInput = item.querySelector('.percent-input');
+                return {
+                    url: urlInput.value.trim(),
+                    percent: parseFloat(percentInput.value)
+                };
+            }).filter(page => page.url && page.percent > 0);
+
+            return {
+                ga_id: document.getElementById('ga_id').value.trim(),
+                api_key: document.getElementById('api_key').value.trim(),
+                views: parseInt(document.getElementById('views').value),
+                pages: pages
+            };
+        }
+
+        // --- Local Storage Handling ---
+
+        function saveDetails() {
+            const data = getFormData();
+            const saveData = {
+                ga_id: data.ga_id,
+                api_key: data.api_key,
+                views: data.views,
+                pages: data.pages 
+            };
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+            } catch (e) {
+                console.error("Could not save to local storage:", e);
+            }
+        }
+
+        function loadSavedDetails() {
+            try {
+                const savedData = localStorage.getItem(STORAGE_KEY);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    document.getElementById('ga_id').value = data.ga_id || '';
+                    document.getElementById('api_key').value = data.api_key || '';
+                    document.getElementById('views').value = data.views || 50;
+
+                    // Clear default page list
+                    pageList.innerHTML = ''; 
+
+                    if (data.pages && data.pages.length > 0) {
+                        data.pages.forEach(page => addPageItem(page.url, page.percent));
+                    } else {
+                        // Default pages if no history is found
+                        addPageItem('https://example.com/page-1', 50);
+                        addPageItem('https://example.com/page-2', 50);
+                    }
+                } else {
+                    // Initial setup if no data exists
+                    addPageItem('https://example.com/page-1', 50);
+                    addPageItem('https://example.com/page-2', 50);
+                }
+            } catch (e) {
+                console.error("Could not load from local storage:", e);
+                // Fallback to default if loading fails
+                addPageItem('https://example.com/page-1', 50);
+                addPageItem('https://example.com/page-2', 50);
+            }
         }
         
-        function clearMessages() {
-            messageContainer.innerHTML = '';
-            editMessageContainer.innerHTML = '';
-            generateBtn.disabled = false;
-            editBtn.disabled = false;
-        }
+        // --- Submission Logic ---
 
-        function showMainInterface() {
-            mainInterface.style.display = 'block';
-            resultInterface.style.display = 'none';
-            editInterface.style.display = 'none';
-            clearMessages();
-        }
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = getFormData();
 
-        function showResultInterface() {
-            mainInterface.style.display = 'none';
-            resultInterface.style.display = 'block';
-            editInterface.style.display = 'none';
-            clearMessages();
-        }
-
-        function showEditInterface(captionText) {
-            document.getElementById('original-caption-text').value = captionText;
-            document.getElementById('requested-change').value = ''; 
-            mainInterface.style.display = 'none';
-            resultInterface.style.display = 'none';
-            editInterface.style.display = 'block';
-            clearMessages();
-        }
-
-        // --- Core API Functions ---
-
-        async function generateCaptions() {
-            clearMessages();
-            const reelTitle = document.getElementById('reel-title').value.trim();
-            const style = document.getElementById('style').value;
-
-            if (!reelTitle) {
-                showMessage(messageContainer, 'error', '❌ Please enter a Reel Topic.', true);
+            if (!data.ga_id || !data.api_key || data.views < 1 || data.views > 500 || data.pages.length === 0) {
+                showMessage('error', '❌ Please fill all required fields correctly and ensure views are between 1-500.', true);
                 return;
             }
+            
+            saveDetails(); // Save valid details before submission
+            showMessage('success', 'Sending request... Please wait. (Up to 15 seconds)', false);
 
-            showMessage(messageContainer, 'success', 'Generating 10 viral captions with hashtags... (Max 15 seconds)', false);
+            // Start submission with max 3 retries
+            await submitData(data, 3); 
+        });
 
+        // Function to handle API submission with retry logic
+        async function submitData(data, retriesLeft) {
+            if (retriesLeft < 3) {
+                 showMessage('success', `Retry attempt ${4 - retriesLeft}. Checking server status...`, false);
+            }
+            
             try {
-                const response = await fetch(`${RENDER_API_BASE_URL}/caption-generate`, {
+                const response = await fetch(RENDER_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reelTitle, style })
+                    body: JSON.stringify(data)
                 });
-
-                const data = await response.json();
-
-                if (!response.ok || data.error) {
-                    throw new Error(data.error || `HTTP Error: ${response.status}`);
-                }
-
-                currentCaptions = data.captions;
-                renderCaptions();
-                showResultInterface();
-                showMessage(messageContainer, 'success', '✅ Generation complete!', true);
-
-            } catch (error) {
-                console.error("Caption Generation Error:", error);
-                showMessage(messageContainer, 'error', `❌ Generation Failed: ${error.message.substring(0, 70)}...`, true);
-            }
-        }
-
-        async function editCaption() {
-            clearMessages();
-            const originalCaption = document.getElementById('original-caption-text').value;
-            const requestedChange = document.getElementById('requested-change').value.trim();
-
-            if (!requestedChange) {
-                showMessage(editMessageContainer, 'error', '❌ Please enter the requested change.', true);
-                return;
-            }
-
-            showMessage(editMessageContainer, 'success', 'Applying changes... (Max 10 seconds)', false);
-
-            try {
-                const response = await fetch(`${RENDER_API_BASE_URL}/caption-edit`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ originalCaption, requestedChange })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || data.error) {
-                    throw new Error(data.error || `HTTP Error: ${response.status}`);
-                }
-
-                // Display the edited caption
-                document.getElementById('original-caption-text').value = data.editedCaption;
-                showMessage(editMessageContainer, 'success', '✅ Edit applied successfully!', true);
                 
+                // Server might return 400/500 if data is bad, but 200 if accepted.
+                if (response.status === 400 || response.status === 500) {
+                    const errorData = await response.json();
+                    throw new Error(`Server Rejected: ${errorData.message || errorData.error || 'Unknown server error.'}`);
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+                
+                const responseData = await response.json();
+
+                if (responseData.status === 'accepted') {
+                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. **Processing in background, results expected within 24-48 hours.** You can close this page now.`, true);
+                } else {
+                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
+                }
+
             } catch (error) {
-                console.error("Caption Editing Error:", error);
-                showMessage(editMessageContainer, 'error', `❌ Editing Failed: ${error.message.substring(0, 70)}...`, true);
-            }
+                if (retriesLeft > 0) {
+                    // Simple fixed delay before retry
+                    await new Promise(resolve => setTimeout(resolve, 2000)); 
+                    return submitData(data, retriesLeft - 1);
+                } else {
+                    showMessage('error', `❌ Final Connection Error. Please check your **API key and GA ID**. Error: ${error.message.substring(0, 80)}`, true);
+                }
+            } 
         }
 
-        // --- Rendering ---
-        function renderCaptions() {
-            captionResults.innerHTML = '';
-            currentCaptions.forEach((item, index) => {
-                const captionDiv = document.createElement('div');
-                captionDiv.className = 'result-caption';
-                captionDiv.innerHTML = `
-                    <strong>Caption ${index + 1}:</strong> 
-                    <pre>${item.caption}</pre>
-                `;
-                // Click handler to open the edit interface
-                captionDiv.onclick = () => showEditInterface(item.caption);
-                captionResults.appendChild(captionDiv);
-            });
-        }
-
-        // Initial load
-        document.addEventListener('DOMContentLoaded', showMainInterface);
-
+        document.addEventListener('DOMContentLoaded', () => {
+             loadSavedDetails();
+             updateDisplayTotal();
+        });
     </script>
 </body>
 </html>
