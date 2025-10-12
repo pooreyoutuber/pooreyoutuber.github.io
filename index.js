@@ -1,10 +1,10 @@
-// index.js (FINAL STABLE ESM CODE - GA4 Booster & AI Caption Generator)
+// index.js (FINAL PURE ESM CODE - Use with "type": "module" in package.json)
 
 import express from 'express';
 import { GoogleGenAI } from '@google/genai'; 
 import cors from 'cors'; 
 import fs from 'fs'; 
-// Note: Node.js v18+ mein built-in 'fetch' use kiya gaya hai.
+// Node.js v18+ built-in 'fetch' is used globally.
 
 const app = express();
 // Render uses process.env.PORT
@@ -13,16 +13,17 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
-    // Correct path for Secret Files on Render
+    // Attempt to read the secret file path specified by Render
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback for local development or Environment Variable
+    // Fallback for local development or if Render Secret File is missing
     GEMINI_KEY = process.env.GEMINI_API_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable.");
     } else {
-        console.error("FATAL: Gemini Key could not be loaded. Insta Caption Tool will fail.");
+        // If neither is found, we log an error but allow the server to start (to avoid crash)
+        console.error("FATAL: Gemini Key could not be loaded. Insta Caption Tool endpoints will fail.");
     }
 }
 
@@ -32,6 +33,7 @@ if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
     // Dummy object to prevent crash if AI endpoints are called without a key
+    // This allows the server to start successfully.
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -105,7 +107,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 // Helper: Generates a plan of which URL gets which view
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
-    // FIX: Arrow function syntax corrected from (sum, page => ...) to (sum, page) => ...
+    // FIX: Correct arrow function syntax (already fixed, but ensuring it's here)
     const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
     
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
