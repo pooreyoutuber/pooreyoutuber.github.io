@@ -58,7 +58,6 @@
 
     <div class="container">
         <form id="booster-form">
-            <!-- GA ID and API Key -->
             <div class="form-group">
                 <label for="ga_id">GA4 Measurement ID (G-XXXXXXXXXX)</label>
                 <input type="text" id="ga_id" placeholder="e.g., G-XYZ1234567" required oninput="saveDetails()">
@@ -68,18 +67,15 @@
                 <input type="text" id="api_key" placeholder="e.g., Your_API_Secret_Key" required oninput="saveDetails()">
             </div>
 
-            <!-- Total Views -->
             <div class="form-group">
                 <label for="views">Total Views to Generate (Max 500)</label>
                 <input type="number" id="views" min="1" max="500" value="50" required oninput="saveDetails()">
             </div>
 
-            <!-- Page Distribution -->
             <div class="form-group">
                 <label>Page URL Distribution (Total must be 100%)</label>
                 <div class="page-list" id="page-list">
-                    <!-- Dynamic page items will be added here -->
-                </div>
+                    </div>
                 <div class="total-percent" id="total-percent">Total: 0%</div>
                 <button type="button" class="add-page-btn" onclick="addPageItem()">+ Add Page</button>
             </div>
@@ -95,7 +91,7 @@
     </div>
 
     <script>
-        // CRITICAL FIX: The live URL of the Render API service
+        // CRITICAL: The live URL of the Render API service
         const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp';
         const form = document.getElementById('booster-form');
         const pageList = document.getElementById('page-list');
@@ -117,7 +113,7 @@
             
             totalPercentDisplay.textContent = `Total: ${total.toFixed(2)}%`;
 
-            // Check if total is close enough to 100 (allowing for floating point errors)
+            // Check if total is close enough to 100
             if (total > 99.9 && total < 100.1) {
                 totalPercentDisplay.className = 'total-percent valid';
                 submitBtn.disabled = false;
@@ -166,7 +162,7 @@
             };
         }
 
-        // --- Local Storage Handling ---
+        // --- Local Storage Handling (Saves progress) ---
 
         function saveDetails() {
             const data = getFormData();
@@ -178,9 +174,7 @@
             };
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
-            } catch (e) {
-                console.error("Could not save to local storage:", e);
-            }
+            } catch (e) { /* silent fail */ }
         }
 
         function loadSavedDetails() {
@@ -192,23 +186,19 @@
                     document.getElementById('api_key').value = data.api_key || '';
                     document.getElementById('views').value = data.views || 50;
 
-                    // Clear default page list
                     pageList.innerHTML = ''; 
 
                     if (data.pages && data.pages.length > 0) {
                         data.pages.forEach(page => addPageItem(page.url, page.percent));
                     } else {
-                        // Default pages if no history is found
                         addPageItem('https://example.com/page-1', 50);
                         addPageItem('https://example.com/page-2', 50);
                     }
                 } else {
-                    // Initial setup if no data exists
                     addPageItem('https://example.com/page-1', 50);
                     addPageItem('https://example.com/page-2', 50);
                 }
             } catch (e) {
-                console.error("Could not load from local storage:", e);
                 // Fallback to default if loading fails
                 addPageItem('https://example.com/page-1', 50);
                 addPageItem('https://example.com/page-2', 50);
@@ -226,14 +216,12 @@
                 return;
             }
             
-            saveDetails(); // Save valid details before submission
+            saveDetails(); 
             showMessage('success', 'Sending request... Please wait. (Up to 15 seconds)', false);
 
-            // Start submission with max 3 retries
             await submitData(data, 3); 
         });
 
-        // Function to handle API submission with retry logic
         async function submitData(data, retriesLeft) {
             if (retriesLeft < 3) {
                  showMessage('success', `Retry attempt ${4 - retriesLeft}. Checking server status...`, false);
@@ -246,7 +234,7 @@
                     body: JSON.stringify(data)
                 });
                 
-                // Server might return 400/500 if data is bad, but 200 if accepted.
+                // If server is up but returns 400/500 due to bad data
                 if (response.status === 400 || response.status === 500) {
                     const errorData = await response.json();
                     throw new Error(`Server Rejected: ${errorData.message || errorData.error || 'Unknown server error.'}`);
@@ -266,11 +254,10 @@
 
             } catch (error) {
                 if (retriesLeft > 0) {
-                    // Simple fixed delay before retry
                     await new Promise(resolve => setTimeout(resolve, 2000)); 
                     return submitData(data, retriesLeft - 1);
                 } else {
-                    showMessage('error', `❌ Final Connection Error. Please check your **API key and GA ID**. Error: ${error.message.substring(0, 80)}`, true);
+                    showMessage('error', `❌ Final Connection Error. Ensure the Render service is **running**. Error: ${error.message.substring(0, 80)}`, true);
                 }
             } 
         }
