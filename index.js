@@ -11,8 +11,7 @@ app.use(express.json());
 
 // Enable CORS for frontend access (important for GitHub Pages)
 app.use((req, res, next) => {
-    // Allows access from any origin (GitHub Pages). 
-    // You can replace '*' with your specific GitHub Pages URL for more security.
+    // Replace '*' with your specific GitHub Pages URL for more security
     res.setHeader('Access-Control-Allow-Origin', '*'); 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -22,24 +21,34 @@ app.use((req, res, next) => {
 let ai;
 let geminiApiKey;
 
-// Function to load the API Key from the Render Secret File
+// Function to load the API Key from the Render Secret File or Environment Variable
 function loadApiKey() {
-    const secretPath = '/etc/secrets/gemini_api_key';
+    // 1. Secret File Path (Matches user's config: filename 'gemini')
+    const secretPath = '/etc/secrets/gemini'; 
+    
     try {
-        // 1. Read the API key from the secret file path provided by Render
         if (fs.existsSync(secretPath)) {
+            // Read from Secret File (Priority 1)
             geminiApiKey = fs.readFileSync(secretPath, 'utf8').trim();
             if (geminiApiKey) {
-                // 2. Initialize the GoogleGenAI client
-                ai = new GoogleGenAI({ apiKey: geminiApiKey });
-                console.log("SUCCESS: Gemini API Key loaded successfully from Render Secret File.");
+                console.log("SUCCESS: Gemini API Key loaded from Secret File (/etc/secrets/gemini).");
             } else {
-                console.error("ERROR: Secret file exists but is empty. Please check your Render Secret content.");
+                console.error("ERROR: Secret file exists but is empty. Check its content.");
             }
-        } else {
-            // 3. This error indicates a configuration issue on Render
-            console.error("CRITICAL ERROR: Secret file path does not exist. Did you configure the Secret File on Render with the correct mount path (/etc/secrets/gemini_api_key)?");
+        } 
+        
+        // 2. Fallback to Environment Variable (Priority 2)
+        if (!geminiApiKey && process.env.GEMINI_API_KEY) {
+             geminiApiKey = process.env.GEMINI_API_KEY;
+             console.log("SUCCESS: Gemini API Key loaded from Environment Variable (GEMINI_API_KEY).");
         }
+
+        if (geminiApiKey) {
+            ai = new GoogleGenAI({ apiKey: geminiApiKey });
+        } else {
+            console.error("CRITICAL ERROR: GEMINI_API_KEY is missing. AI endpoints will fail.");
+        }
+
     } catch (error) {
         console.error("FATAL ERROR loading API Key:", error);
     }
@@ -54,7 +63,7 @@ function checkAi(req, res, next) {
         // 503 Service Unavailable: Indicates the service is not ready (due to missing key)
         return res.status(503).json({ 
             error: "Service Unavailable. AI API Key not loaded.",
-            details: "Render Secret File configuration (GEMINI_API_KEY) failed. Check Render logs for CRITICAL ERROR messages."
+            details: "Render Secret File configuration (gemini) failed. Check Render logs for CRITICAL ERROR messages."
         });
     }
     next();
@@ -80,20 +89,17 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
             model: "gemini-2.5-flash",
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             config: {
-                // Set temperature low for reliable, creative outputs
                 temperature: 0.7, 
             },
         });
 
         const rawText = response.text.trim();
         
-        // Robust splitting logic for numbered or plain list from AI
         const captions = rawText.split('\n').filter(line => line.trim().length > 0)
                                  .map(line => line.replace(/^\s*\d+\.\s*/, '').trim())
-                                 .filter(line => line.length > 5); // Filter out very short or empty lines
+                                 .filter(line => line.length > 5); 
 
         if (captions.length === 0) {
-             // If still zero, send the raw text chunked by double newlines as a fallback
             const fallbackCaptions = rawText.split(/\n\s*\n/).filter(c => c.trim().length > 0);
             return res.json({ captions: fallbackCaptions.length > 0 ? fallbackCaptions : [rawText] });
         }
@@ -101,6 +107,7 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
         res.json({ captions: captions });
     } catch (error) {
         console.error("Gemini API Generation Error:", error.message);
+        // The frontend will catch 500 error
         res.status(500).json({ error: "AI Processing Failed. Possible reason: API rate limits or invalid input.", details: error.message });
     }
 });
@@ -128,7 +135,7 @@ app.post('/api/ai-caption-edit', checkAi, async (req, res) => {
             model: "gemini-2.5-flash",
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             config: {
-                temperature: 0.3, // Lower temperature for direct editing
+                temperature: 0.3, 
             },
         });
 
@@ -152,7 +159,7 @@ app.post('/boost-mp', (req, res) => {
         return res.status(400).json({ error: "Missing required fields for traffic boosting." });
     }
     
-    // Success response indicates the job has been accepted by the Render server.
+    // The frontend will display success once this 200 response is received.
     res.status(200).json({ 
         message: "Traffic boosting job successfully initiated and is running in the background.",
         jobId: Date.now() 
