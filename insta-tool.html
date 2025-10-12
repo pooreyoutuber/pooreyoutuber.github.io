@@ -3,316 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Instagram Caption Generator</title>
+    <title>AI Reels Caption Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Instagram Theme: Pink/Purple Gradient (Similar to IG/Reels) */
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #f0f0f0; /* Light background */
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 20px 10px; 
-            color: #333; 
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
         }
-        .header { 
-            text-align: center; 
-            margin-bottom: 25px; 
+        .copy-button {
+            transition: background-color 0.15s ease, transform 0.1s ease;
         }
-        .header h2 { 
-            /* Pink/Purple Gradient for Heading */
-            background: linear-gradient(45deg, #ff007f, #8a2be2); 
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0; 
-            font-size: 2em; 
-            font-weight: 800; 
+        .copy-button:active {
+            transform: scale(0.98);
         }
-        
-        .container { 
-            background-color: #ffffff; 
-            padding: 30px; 
-            border-radius: 15px; 
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); 
-            width: 100%; 
-            max-width: 600px; 
-            margin-bottom: 20px; 
-            border: 2px solid #ff007f; /* Pink Border */
-        }
-        
-        label { 
-            display: block; 
-            text-align: left; 
-            margin-bottom: 8px; 
-            font-weight: bold; 
-            font-size: 1em; 
-            color: #555; 
-        }
-        input[type="text"], select { 
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 20px; 
-            border: 1px solid #ccc; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            font-size: 1em; 
-        }
-        
-        .btn-group { 
-            display: flex; 
-            gap: 10px; 
-            margin-top: 20px; 
-        }
-        .submit-btn { 
-            flex-grow: 1; 
-            background-color: #ff007f; /* Pink Button */
-            color: white; 
-            border: none; 
-            padding: 14px 20px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 1.1em; 
-            font-weight: bold; 
-            transition: background-color 0.3s, transform 0.1s; 
-        }
-        .submit-btn:hover { 
-            background-color: #e60072; 
-            transform: translateY(-1px);
-        }
-        .submit-btn:disabled { 
-            background-color: #cccccc; 
-            cursor: not-allowed; 
-        }
-
-        .result-container { 
-            margin-top: 30px; 
-            padding: 20px; 
-            border: 2px dashed #8a2be2; /* Purple Dash */
-            border-radius: 10px; 
-            background-color: #fff0f5; /* Light Pink Background */
-        }
-        .caption-item { 
-            margin-bottom: 15px; 
-            padding: 10px; 
-            background-color: #fff; 
-            border: 1px solid #eee; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-        .caption-text {
-            white-space: pre-wrap; 
-            word-break: break-word; 
-            margin: 5px 0 10px 0; 
-            padding: 0; 
-            font-size: 0.95em;
-            line-height: 1.4;
-        }
-        .caption-item strong { 
-            color: #ff007f; 
-        }
-        
-        /* Copy Button Styling */
-        .copy-btn {
-            background-color: #8a2be2; /* Purple */
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s;
-            float: right; /* Align right */
-            margin-top: -5px;
-        }
-        .copy-btn:hover {
-            background-color: #6a1ba9;
-        }
-
-        /* Message & Loading */
-        .message-box { 
-            padding: 15px; 
-            margin-top: 20px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            text-align: center; 
-        }
-        .message-box.success { 
-            background-color: #e6ffe6; 
-            color: #3c763d; 
-            border: 1px solid #a3d9a3; 
-        }
-        .message-box.error { 
-            background-color: #ffcccc; 
-            color: #a94442; 
-            border: 1px solid #ff6666; 
-        }
-        .loading-spinner { 
-            border: 4px solid #f3f3f3; 
-            border-top: 4px solid #ff007f; /* Pink Spinner */
-            border-radius: 50%; 
-            width: 20px; 
-            height: 20px; 
-            animation: spin 1s linear infinite; 
-            display: inline-block; 
-            margin-left: 10px; 
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h2>✨ AI Reels Caption Generator</h2>
-        <p>Generate 10 viral captions powered by Gemini AI.</p>
-    </div>
+<body class="p-4 sm:p-8 flex justify-center items-start min-h-screen">
 
-    <div class="container">
-        <div id="main-interface">
-            <div class="form-group">
-                <label for="reel-title">Reel Topic/Title (Example: How to edit a video faster)</label>
-                <input type="text" id="reel-title" placeholder="A brief description of your reel content" required>
-            </div>
-            <div class="form-group">
-                <label for="style">Caption Style</label>
-                <select id="style">
-                    <option value="Catchy and Funny">Catchy and Funny</option>
-                    <option value="Motivational and Inspiring">Motivational and Inspiring</option>
-                    <option value="Informative and Educational">Informative and Educational</option>
-                    <option value="Short and Punchy">Short and Punchy</option>
-                    <option value="Engaging and Question-based">Engaging and Question-based</option>
-                </select>
-            </div>
-            
-            <div id="message-container"></div>
-            
-            <div class="btn-group">
-                <button type="button" class="submit-btn" id="generate-btn" onclick="generateCaptions()">Generate 10 Captions</button>
-            </div>
-        </div>
+    <div class="w-full max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-pink-600 mb-2">✨ AI Reels Caption Generator</h1>
+            <p class="text-gray-600">Generate viral captions powered by Gemini AI.</p>
+        </header>
 
-        <div id="result-interface" style="display:none;">
-            <h3>Generated Captions</h3>
-            <div id="caption-results" class="result-container">
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100">
+            <div id="input-section">
+                <div class="mb-6">
+                    <label for="reel-topic" class="block text-sm font-medium text-gray-700 mb-2">Reel Topic/Title (Example: How to edit a video faster)</label>
+                    <input type="text" id="reel-topic" placeholder="Brief description of your reel content" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition duration-150" value="PUBG mobile gameplay highlights">
                 </div>
-            <div class="btn-group">
-                <button type="button" class="submit-btn" onclick="showMainInterface()">Go Back to Generator</button>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label for="caption-style" class="block text-sm font-medium text-gray-700 mb-2">Caption Style</label>
+                        <select id="caption-style" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition duration-150 appearance-none bg-white bg-no-repeat bg-right-2 bg-center-y">
+                            <option value="Catchy and Funny">Catchy and Funny</option>
+                            <option value="Informative and Educational">Informative and Educational</option>
+                            <option value="Motivational and Inspiring">Motivational and Inspiring</option>
+                            <option value="Question-based Engagement">Question-based Engagement</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="caption-count" class="block text-sm font-medium text-gray-700 mb-2">Number of Captions</label>
+                        <select id="caption-count" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition duration-150 appearance-none bg-white bg-no-repeat bg-right-2 bg-center-y">
+                            <option value="5">5 Captions</option>
+                            <option value="10" selected>10 Captions</option>
+                            <option value="15">15 Captions</option>
+                        </select>
+                    </div>
+                    <div></div>
+                </div>
+
+                <button id="generate-button" onclick="generateCaptions()" class="w-full py-3 px-4 rounded-lg text-white font-semibold shadow-lg transition duration-300 ease-in-out bg-pink-500 hover:bg-pink-600 focus:outline-none focus:ring-4 focus:ring-pink-300">
+                    Generate Captions
+                </button>
+            </div>
+            
+            <div id="status-message" class="mt-4 hidden p-3 rounded-lg text-center" role="alert"></div>
+
+            <div id="output-section" class="mt-8 hidden">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Generated Captions:</h2>
+                <div id="captions-list" class="space-y-6">
+                    </div>
             </div>
         </div>
+        
+        <div id="editor-container" class="mt-8 bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100 hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Caption Editor</h2>
+            <p class="text-gray-500 mb-4 text-sm">Select a caption above to quickly edit or refine it.</p>
+
+            <div class="mb-4">
+                <label for="editor-original" class="block text-sm font-medium text-gray-700 mb-2">Original Caption (Editing)</label>
+                <textarea id="editor-original" rows="3" readonly class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 resize-none"></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label for="editor-change" class="block text-sm font-medium text-gray-700 mb-2">Requested Change (e.g., "Add a call to action" or "Make it more professional")</label>
+                <input type="text" id="editor-change" placeholder="Enter your requested change here..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition duration-150">
+            </div>
+
+            <button onclick="editCaption()" class="w-full py-3 px-4 rounded-lg text-white font-semibold shadow-lg transition duration-300 ease-in-out bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                Refine Caption
+            </button>
+            
+            <div id="editor-status" class="mt-4 hidden p-3 rounded-lg text-center" role="alert"></div>
+            
+            <div id="edited-output" class="mt-6 hidden p-4 border border-indigo-200 bg-indigo-50 rounded-lg">
+                <h3 class="font-bold text-indigo-700 mb-2">Edited Caption:</h3>
+                <p id="edited-caption-text" class="whitespace-pre-wrap text-gray-800"></p>
+                <button onclick="copyToClipboard('edited-caption-text', this)" class="mt-3 py-1.5 px-3 text-sm bg-indigo-400 text-white rounded-md hover:bg-indigo-500 copy-button">
+                    Copy
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // CRITICAL FIX: The live URL of the Render API service (Confirmed)
-        const RENDER_API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com/api';
-        
-        const mainInterface = document.getElementById('main-interface');
-        const resultInterface = document.getElementById('result-interface');
-        const captionResults = document.getElementById('caption-results');
-        const generateBtn = document.getElementById('generate-btn');
-        const messageContainer = document.getElementById('message-container');
+        // CRITICAL: Replace with your actual Render service URL
+        const API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
 
-        let currentCaptions = []; 
+        const statusMessage = document.getElementById('status-message');
+        const generateButton = document.getElementById('generate-button');
+        const captionsList = document.getElementById('captions-list');
+        const outputSection = document.getElementById('output-section');
+        const editorContainer = document.getElementById('editor-container');
+        const editorStatus = document.getElementById('editor-status');
+        const editedOutput = document.getElementById('edited-output');
 
-        // --- UI Control Functions ---
-        function showMessage(container, type, message, hideButton = false) {
-            container.innerHTML = `<div class="message-box ${type}"> ${message} ${!hideButton ? '<span class="loading-spinner"></span>' : ''} </div>`;
-            generateBtn.disabled = !hideButton;
-        }
-        
-        function clearMessages() {
-            messageContainer.innerHTML = '';
-            generateBtn.disabled = false;
-        }
+        let currentOriginalCaption = ''; 
 
-        function showMainInterface() {
-            mainInterface.style.display = 'block';
-            resultInterface.style.display = 'none';
-            clearMessages();
-        }
-
-        function showResultInterface() {
-            mainInterface.style.display = 'none';
-            resultInterface.style.display = 'block';
-            clearMessages();
+        /** Displays status and hides output/editor. */
+        function displayStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+            outputSection.classList.add('hidden');
+            editorContainer.classList.add('hidden');
+            editedOutput.classList.add('hidden');
+            
+            if (type === 'error') {
+                statusMessage.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                statusMessage.classList.add('bg-green-100', 'text-green-700');
+            } else { // info/loading
+                statusMessage.classList.add('bg-blue-100', 'text-blue-700');
+            }
         }
 
-        function copyCaption(button, text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = button.textContent;
-                button.textContent = '✅ Copied!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 1500);
-            }).catch(err => {
-                alert('Copying to clipboard failed. Please copy manually.');
+        /** Clears status message. */
+        function clearStatus() {
+            statusMessage.classList.add('hidden');
+            statusMessage.textContent = '';
+        }
+
+        /** Copies text content to clipboard. */
+        function copyToClipboard(elementId, button) {
+            const textToCopy = document.getElementById(elementId).innerText || document.getElementById(elementId).value;
+            
+            const tempInput = document.createElement('textarea');
+            tempInput.value = textToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                button.textContent = 'Copied!';
+                setTimeout(() => { button.textContent = 'Copy'; }, 2000);
+            } catch (err) {
+                console.error('Could not copy text: ', err);
+                button.textContent = 'Failed to copy';
+            } finally {
+                document.body.removeChild(tempInput);
+            }
+        }
+
+        /** Event handler for selecting a caption to edit. */
+        function selectCaptionToEdit(captionText) {
+            document.getElementById('editor-original').value = captionText.trim();
+            document.getElementById('editor-change').value = '';
+            editedOutput.classList.add('hidden');
+            editorContainer.classList.remove('hidden');
+            editorContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /** Renders the list of generated captions. */
+        function renderCaptions(captionsArray) {
+            captionsList.innerHTML = '';
+            captionsArray.forEach((captionText, index) => {
+                const captionItem = document.createElement('div');
+                captionItem.className = 'p-4 border border-pink-200 bg-pink-50 rounded-lg shadow-sm';
+                
+                const formattedCaption = captionText.trim().replace(/\n/g, '<br>');
+
+                captionItem.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-pink-700">Caption ${index + 1}</h3>
+                        <div class="space-x-2">
+                            <button onclick="copyToClipboard('caption-text-${index}', this)" class="py-1 px-2 text-xs bg-pink-400 text-white rounded-md hover:bg-pink-500 copy-button">
+                                Copy
+                            </button>
+                            <button onclick="selectCaptionToEdit(document.getElementById('caption-text-${index}').innerText)" class="py-1 px-2 text-xs bg-gray-400 text-white rounded-md hover:bg-gray-500 copy-button">
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                    <p id="caption-text-${index}" class="text-gray-800 whitespace-pre-wrap">${formattedCaption}</p>
+                `;
+                captionsList.appendChild(captionItem);
             });
+            outputSection.classList.remove('hidden');
         }
 
-        // --- Core API Function ---
-
+        /** Main function to call the /api/ai-caption-generate endpoint. */
         async function generateCaptions() {
-            clearMessages();
-            const reelTitle = document.getElementById('reel-title').value.trim();
-            const style = document.getElementById('style').value;
+            const description = document.getElementById('reel-topic').value.trim();
+            const style = document.getElementById('caption-style').value;
+            const count = document.getElementById('caption-count').value;
 
-            if (!reelTitle) {
-                showMessage(messageContainer, 'error', '❌ Please enter a Reel Topic.', true);
+            if (!description) {
+                displayStatus('Please enter a topic or description for your reel.', 'error');
                 return;
             }
 
-            showMessage(messageContainer, 'success', 'Generating 10 viral captions with hashtags... (Max 15 seconds)', false);
+            generateButton.disabled = true;
+            generateButton.textContent = 'Generating... Please wait (30-60s)';
+            displayStatus('Generating captions...', 'info');
+            clearStatus(); 
+
+            const fullDescription = `Style: ${style}. Content: ${description}`;
 
             try {
-                // API Call to your Render Backend
-                const response = await fetch(`${RENDER_API_BASE_URL}/caption-generate`, {
+                const response = await fetch(`${API_BASE_URL}/api/ai-caption-generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reelTitle, style })
+                    body: JSON.stringify({ 
+                        description: fullDescription, 
+                        count: parseInt(count, 10) 
+                    })
                 });
 
-                // Handle server errors (e.g., 404, 500)
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP Error: ${response.status}. Detail: ${errorText.substring(0, 50)}...`);
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown server error.' }));
+                    throw new Error(`HTTP Error: ${response.status}. Detail: ${errorData.error || 'Check Backend logs for details.'}`);
                 }
 
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error);
+                const result = await response.json();
+                
+                if (result.captions && Array.isArray(result.captions)) {
+                    const cleanCaptions = result.captions.filter(c => c && c.trim().length > 0);
+                    renderCaptions(cleanCaptions);
+                    displayStatus('Captions generated successfully!', 'success');
+                } else {
+                    throw new Error('Invalid response format from AI: "captions" array missing.');
                 }
-
-                currentCaptions = data.captions;
-                renderCaptions();
-                showResultInterface();
-                showMessage(messageContainer, 'success', '✅ Generation complete!', true);
 
             } catch (error) {
-                console.error("Caption Generation Error:", error);
-                showMessage(messageContainer, 'error', `❌ Generation Failed. **Backend is down or key is missing**. Error: ${error.message.substring(0, 70)}...`, true);
+                console.error("Generation Error:", error);
+                displayStatus(`Generation Failed. **Backend is down or key is missing**. Error: ${error.message}`, 'error');
+            } finally {
+                generateButton.disabled = false;
+                generateButton.textContent = 'Generate Captions';
             }
         }
+        
+        /** Function to call the /api/ai-caption-edit endpoint. */
+        async function editCaption() {
+            const originalCaption = document.getElementById('editor-original').value.trim();
+            const requestedChange = document.getElementById('editor-change').value.trim();
+            const editButton = editorContainer.querySelector('button[onclick="editCaption()"]');
 
-        // --- Rendering ---
-        function renderCaptions() {
-            captionResults.innerHTML = '';
-            currentCaptions.forEach((item, index) => {
-                const captionDiv = document.createElement('div');
-                captionDiv.className = 'caption-item';
+            if (!originalCaption || !requestedChange) {
+                editorStatus.classList.remove('hidden');
+                editorStatus.classList.add('bg-red-100', 'text-red-700');
+                editorStatus.textContent = 'Please enter both the original caption and the requested change.';
+                return;
+            }
+            
+            editorStatus.classList.add('hidden'); 
+            editButton.disabled = true;
+            editButton.textContent = 'Refining...';
+            
+            editorStatus.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+            editorStatus.classList.add('bg-blue-100', 'text-blue-700');
+            editorStatus.textContent = 'Refining caption...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ai-caption-edit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        originalCaption: originalCaption, 
+                        requestedChange: requestedChange 
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown server error.' }));
+                    throw new Error(`HTTP Error: ${response.status}. Detail: ${errorData.error || 'Check Backend logs for details.'}`);
+                }
+
+                const result = await response.json();
                 
-                const captionText = item.caption || 'Caption not found.';
-                
-                captionDiv.innerHTML = `
-                    <button class="copy-btn" onclick="copyCaption(this, \`${captionText.replace(/`/g, '\\`')}\`)">Copy</button>
-                    <strong>Caption ${index + 1}:</strong> 
-                    <div class="caption-text">${captionText.replace(/\n/g, '<br>')}</div>
-                `;
-                captionResults.appendChild(captionDiv);
-            });
+                if (result.editedCaption) {
+                    document.getElementById('edited-caption-text').textContent = result.editedCaption;
+                    editedOutput.classList.remove('hidden');
+                    editorStatus.classList.remove('bg-blue-100', 'text-blue-700');
+                    editorStatus.classList.add('bg-green-100', 'text-green-700');
+                    editorStatus.textContent = 'Caption refined successfully!';
+                } else {
+                    throw new Error('Invalid response format from AI: "editedCaption" missing.');
+                }
+
+            } catch (error) {
+                console.error("Editing Error:", error);
+                editorStatus.classList.remove('bg-blue-100', 'text-blue-700');
+                editorStatus.classList.add('bg-red-100', 'text-red-700');
+                editorStatus.textContent = `Refinement Failed. Error: ${error.message}`;
+            } finally {
+                editButton.disabled = false;
+                editButton.textContent = 'Refine Caption';
+            }
         }
-
-        // Initial load
-        document.addEventListener('DOMContentLoaded', showMainInterface);
 
     </script>
 </body>
