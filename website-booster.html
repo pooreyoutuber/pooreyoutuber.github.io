@@ -93,7 +93,15 @@
                 </div>
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">5. Distribute Traffic Across Pages <span class="text-red-500 font-bold">(Total must be 100%)</span></label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="real-events-checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" checked>
+                        <span class="text-sm font-medium text-gray-700">Send **Real User Events** (Scroll, Session Start, etc.)</span>
+                    </label>
+                    <p class="text-xs text-gray-500 ml-6">Recommended: Makes your traffic look more realistic than just a page view.</p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">6. Distribute Traffic Across Pages <span class="text-red-500 font-bold">(Total must be 100%)</span></label>
                     <div id="distribution-container" class="space-y-3 p-4 border border-gray-200 rounded-lg">
                         <div class="flex items-center space-x-2">
                             <input type="url" id="url-1" placeholder="Page 1 URL (Required): https://" class="input-field w-3/4 p-2 border border-gray-300 rounded-lg" required value="https://pooreyoutuber.github.io/website-booster.html">
@@ -142,9 +150,14 @@
         const totalDistributionDisplay = document.getElementById('total-distribution');
         const distributionContainer = document.getElementById('distribution-container');
 
+        // Initialize total distribution display on load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTotalDistribution();
+            addLog('System ready. Enter details and click START.');
+        });
+        
         // --- Helper Functions ---
 
-        /** Updates the total percentage and checks for 100%. */
         function updateTotalDistribution() {
             let total = 0;
             for (let i = 1; i <= 3; i++) {
@@ -167,7 +180,6 @@
             }
         }
         
-        /** Displays a status message above the log. */
         function displayStatus(message, type = 'info') {
             statusMessage.textContent = message;
             statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
@@ -182,7 +194,6 @@
             statusMessage.classList.remove('hidden');
         }
 
-        /** Adds a message to the live log. */
         function addLog(message) {
             const now = new Date();
             const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
@@ -191,21 +202,18 @@
             logEntry.textContent = `[${timeString}] ${message}`;
             liveLog.appendChild(logEntry);
             
-            // Auto-scroll to the bottom
             liveLog.scrollTop = liveLog.scrollHeight;
         }
 
-        // Initialize total distribution display on load
-        updateTotalDistribution();
-
         // --- Main Function ---
 
-        /** Validates and sends the traffic generation request to the Render Backend. */
         async function startTrafficGeneration() {
             const gaId = document.getElementById('ga-id').value.trim();
             const apiSecret = document.getElementById('api-secret').value.trim();
             const totalViews = parseInt(document.getElementById('total-views').value, 10);
-            const country = document.getElementById('country').value; // Get selected country
+            const country = document.getElementById('country').value;
+            // NEW: Get the state of the checkbox
+            const realEvents = document.getElementById('real-events-checkbox').checked; 
 
             // 1. Basic Validation
             if (!gaId || !apiSecret || !totalViews) {
@@ -217,7 +225,7 @@
                 return;
             }
 
-            // 2. Distribution Validation and Data Collection
+            // 2. Distribution Validation and Data Collection (Same as before)
             let totalPercent = 0;
             const distribution = [];
             let firstUrlSet = false;
@@ -255,15 +263,17 @@
             startButton.textContent = 'Sending Request...';
             displayStatus('Sending request to Backend. Please wait...', 'info');
             addLog('Sending request to Backend...');
+            addLog(`Simulation Mode: ${realEvents ? 'Real Events' : 'Page View Only'}`);
 
             try {
-                // IMPORTANT: Sending the new 'country' data to the Backend
+                // IMPORTANT: Sending the new 'country' and 'real_events' data to the Backend
                 const requestBody = { 
                     ga_id: gaId, 
                     api_secret: apiSecret, 
                     views: totalViews, 
                     distribution: distribution,
-                    country: country // Added country here!
+                    country: country,
+                    real_events: realEvents // NEW: Include the flag
                 };
                 
                 const response = await fetch(`${API_BASE_URL}/boost-mp`, {
@@ -281,8 +291,8 @@
                 
                 // 4. Success Handling
                 displayStatus('Success: Request accepted! Processing started.', 'success');
-                addLog(`Success: Boosting job successfully initiated. (Target Country: ${country})`);
-                addLog(`INFO: Targeting ${totalViews} views for GA ID ${gaId}...`);
+                addLog(`Success: Boosting job initiated. Mode: ${result.simulation_mode}`);
+                addLog(`INFO: Targeting ${totalViews} views from ${country} for GA ID ${gaId}...`);
                 addLog('LOG: Processing will continue in the background.');
 
             } catch (error) {
@@ -294,12 +304,6 @@
                 startButton.textContent = 'START TRAFFIC GENERATION';
             }
         }
-        
-        // Initial setup
-        document.addEventListener('DOMContentLoaded', () => {
-            updateTotalDistribution();
-            addLog('System ready. Enter details and click START.');
-        });
     </script>
 </body>
 </html>
