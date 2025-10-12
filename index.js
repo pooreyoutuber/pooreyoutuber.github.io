@@ -1,38 +1,54 @@
-// index.js (ES Module Syntax - Fixes 'require is not defined' error)
+    // index.js (Reads API Key from the Secret File named 'gemini')
 
 import express from 'express';
 import cors from 'cors';
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto'; 
+import fs from 'fs'; // Import the File System module
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // --- Configuration ---
 const PORT = process.env.PORT || 10000; 
-// CRITICAL: The API key must be set as an environment variable in Render's dashboard.
-// Key: GEMINI_API_KEY
-const API_KEY = process.env.GEMINI_API_KEY; 
 
-// --- Initialization ---
-const app = express();
+// --- Secret File Configuration ---
+// The secret file named 'gemini' is mounted by Render at this path
+const SECRET_FILE_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), 'gemini');
+
+let API_KEY;
 let ai; 
 
-if (API_KEY) {
-    ai = new GoogleGenAI(API_KEY); 
-    console.log("Gemini AI Client initialized successfully.");
-} else {
-    console.error("FATAL: GEMINI_API_KEY is missing. AI endpoints will fail.");
+// --- Key Loading Logic ---
+try {
+    // 1. Try reading the file from the root directory (for non-Docker services)
+    // The key is assumed to be the entire content of the file
+    API_KEY = fs.readFileSync(SECRET_FILE_PATH, 'utf8').trim();
+    
+    // 2. Fallback check for the standard Render secrets path (optional, but good practice)
+    // if (!API_KEY) {
+    //     const RENDER_SECRET_PATH = '/etc/secrets/gemini';
+    //     API_KEY = fs.readFileSync(RENDER_SECRET_PATH, 'utf8').trim();
+    // }
+
+    if (API_KEY) {
+        ai = new GoogleGenAI(API_KEY); 
+        console.log("Gemini AI Client initialized successfully from Secret File.");
+    } else {
+         console.error("FATAL: Secret File 'gemini' is empty.");
+    }
+
+} catch (e) {
+    // If the file cannot be read (e.g., file not found or permission error)
+    console.error(`FATAL: Failed to read Secret File 'gemini'. Error: ${e.message}`);
 }
 
 // --- Dummy Database for SEO Article Publisher ---
 let articlesDb = []; 
 
-// --- Middleware ---
+// --- Initialization & Middleware ---
+const app = express();
 app.use(express.json({ limit: '5mb' })); 
-// Allow CORS from any origin for flexibility, though generally, you'd restrict it to your GitHub Pages URL.
-app.use(cors({
-    origin: '*', 
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-}));
+app.use(cors({ origin: '*', methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', credentials: true }));
 
 // --- Utility Functions for AI Calls ---
 
@@ -41,7 +57,7 @@ app.use(cors({
  */
 async function generateText(prompt, systemInstruction, responseMimeType, responseSchema) {
     if (!API_KEY || !ai) {
-        throw new Error("API Key Missing. Please set GEMINI_API_KEY in Render.");
+        throw new Error("API Key Missing or not initialized. Check server logs.");
     }
 
     try {
@@ -66,7 +82,6 @@ async function generateText(prompt, systemInstruction, responseMimeType, respons
 
     } catch (error) {
         console.error("Gemini API Error:", error.message);
-        // Clean up the error message for the client
         throw new Error(`AI Request Failed: ${error.message.substring(0, 150)}...`);
     }
 }
@@ -75,8 +90,8 @@ async function generateText(prompt, systemInstruction, responseMimeType, respons
 // 1. ROOT & HEALTH CHECK
 // ===================================================================
 app.get('/', (req, res) => {
-    // This message should appear in your browser when you hit the root URL.
-    res.send(`API Server is running successfully on port ${PORT}. Status: Ready. Module Type: ESM.`);
+    const keyStatus = API_KEY ? 'Key Loaded' : 'Key Missing';
+    res.send(`API Server is running successfully on port ${PORT}. Status: Ready. Key Status: ${keyStatus}`);
 });
 
 // ===================================================================
@@ -89,7 +104,6 @@ app.post('/boost-mp', (req, res) => {
         return res.status(400).json({ error: 'Missing GA4 ID or views count.' });
     }
     
-    // Placeholder response for the Traffic Booster tool
     console.log(`[BOOST] Request accepted: GA_ID: ${ga_id}, Views: ${views}`);
     res.status(202).json({ 
         status: 'accepted', 
@@ -98,10 +112,9 @@ app.post('/boost-mp', (req, res) => {
 });
 
 // ===================================================================
-// 3. AI CAPTION GENERATOR ENDPOINTS
+// 3. AI CAPTION GENERATOR ENDPOINTS (Uses Secret File Key)
 // ===================================================================
 
-// Endpoint to generate a new caption based on description
 app.post('/api/ai-caption-generate', async (req, res) => {
     const { description, count } = req.body;
 
@@ -109,17 +122,11 @@ app.post('/api/ai-caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Description and count are required.' });
     }
     
-    const prompt = `Act as an expert Instagram content creator specializing in Reels. Based on the following video description, generate exactly ${count} unique, highly engaging, and short captions in Hindi or Hinglish. Each caption MUST include 5 relevant and trending hashtags separated from the main text by a new line.
-
-Description: "${description}"`;
+    const prompt = `Act as an expert Instagram content creator. Generate exactly ${count} unique, engaging captions in Hindi or Hinglish. Each MUST include 5 relevant hashtags separated by a new line. Description: "${description}"`;
 
     const systemInstruction = "Your final output MUST be a single JSON object with a key 'captions' containing an array of strings. Do not include any introductory text or explanation outside the JSON.";
 
-    const schema = {
-        type: "object", 
-        properties: { captions: { type: "array", items: { type: "string" } } }, 
-        required: ["captions"] 
-    };
+    const schema = { type: "object", properties: { captions: { type: "array", items: { type: "string" } } }, required: ["captions"] };
 
     try {
         const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
@@ -130,7 +137,6 @@ Description: "${description}"`;
     }
 });
 
-// Endpoint to edit an existing caption
 app.post('/api/ai-caption-edit', async (req, res) => {
     const { originalCaption, requestedChange } = req.body;
 
@@ -144,11 +150,7 @@ Requested Change: "${requestedChange}"`;
 
     const systemInstruction = "Your final output MUST be a single JSON object with a key called 'editedCaption'. Do not include any introductory text or explanation outside the JSON.";
     
-    const schema = {
-        type: "object", 
-        properties: { editedCaption: { type: "string" } }, 
-        required: ["editedCaption"] 
-    };
+    const schema = { type: "object", properties: { editedCaption: { type: "string" } }, required: ["editedCaption"] };
 
     try {
         const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
@@ -160,10 +162,9 @@ Requested Change: "${requestedChange}"`;
 });
 
 // ===================================================================
-// 4. SEO ARTICLE PUBLISHER ENDPOINTS
+// 4. SEO ARTICLE PUBLISHER ENDPOINTS (Uses Secret File Key)
 // ===================================================================
 
-// Endpoint to save/upload a new article
 app.post('/api/article-upload', (req, res) => {
     const { title, slug, content } = req.body;
     if (!title || !slug || !content) {
@@ -172,28 +173,22 @@ app.post('/api/article-upload', (req, res) => {
     const newId = crypto.randomUUID(); 
     const newArticle = { id: newId, title, slug, content, date: new Date().toISOString() };
     articlesDb.push(newArticle);
-    console.log(`[ARTICLE SAVE] New Article ID: ${newId}`);
     res.status(200).json({ status: 'ok', message: 'Article saved successfully.', articleId: newId });
 });
 
-// Endpoint for AI Grammar Check
 app.post('/api/ai-check-grammar', async (req, res) => {
     const { content } = req.body;
     if (!content) {
         return res.status(400).json({ error: 'Content is required for grammar check.' });
     }
     
-    const prompt = `Review the following article content for all grammatical errors, spelling mistakes, and unclear sentences. Rewrite the content only where necessary to improve clarity and maintain an SEO-friendly tone. Do not add or remove any meaningful paragraphs.
+    const prompt = `Review the following article content for errors, spelling mistakes, and unclear sentences. Rewrite the content only where necessary to improve clarity and maintain an SEO-friendly tone. Do not add or remove any meaningful paragraphs.
 
 Original Content: "${content}"`;
 
     const systemInstruction = "Your final output MUST be a single JSON object with a key 'correctedContent'. Provide only the corrected content as a string. Do not include any introductory text or explanation outside the JSON.";
     
-    const schema = {
-        type: "object", 
-        properties: { correctedContent: { type: "string" } }, 
-        required: ["correctedContent"] 
-    };
+    const schema = { type: "object", properties: { correctedContent: { type: "string" } }, required: ["correctedContent"] };
 
     try {
         const rawResponse = await generateText(prompt, systemInstruction, "application/json", schema);
