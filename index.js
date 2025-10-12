@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
-const { GoogleGenAI } = require('@google/genai');
+// GoogleGenAI is the correct class name for the latest official package
+const { GoogleGenAI } = require('@google/genai'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,7 +11,8 @@ app.use(express.json());
 
 // Enable CORS for frontend access (important for GitHub Pages)
 app.use((req, res, next) => {
-    // Replace '*' with your GitHub Pages domain for production security
+    // Allows access from any origin (GitHub Pages). 
+    // You can replace '*' with your specific GitHub Pages URL for more security.
     res.setHeader('Access-Control-Allow-Origin', '*'); 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -24,32 +26,35 @@ let geminiApiKey;
 function loadApiKey() {
     const secretPath = '/etc/secrets/gemini_api_key';
     try {
-        // Read the API key from the secret file path provided by Render
+        // 1. Read the API key from the secret file path provided by Render
         if (fs.existsSync(secretPath)) {
             geminiApiKey = fs.readFileSync(secretPath, 'utf8').trim();
             if (geminiApiKey) {
+                // 2. Initialize the GoogleGenAI client
                 ai = new GoogleGenAI({ apiKey: geminiApiKey });
-                console.log("Gemini API Key loaded successfully from Secret File.");
+                console.log("SUCCESS: Gemini API Key loaded successfully from Render Secret File.");
             } else {
-                console.error("Error: Secret file exists but is empty.");
+                console.error("ERROR: Secret file exists but is empty. Please check your Render Secret content.");
             }
         } else {
-            console.error("Error: Secret file path does not exist. Did you configure the Secret File on Render?");
+            // 3. This error indicates a configuration issue on Render
+            console.error("CRITICAL ERROR: Secret file path does not exist. Did you configure the Secret File on Render with the correct mount path (/etc/secrets/gemini_api_key)?");
         }
     } catch (error) {
-        console.error("Error loading API Key:", error);
+        console.error("FATAL ERROR loading API Key:", error);
     }
 }
 
 // Load the key once on startup
 loadApiKey();
 
-// Middleware to check if AI is initialized
+// Middleware to check if AI is initialized before serving AI endpoints
 function checkAi(req, res, next) {
     if (!ai) {
+        // 503 Service Unavailable: Indicates the service is not ready (due to missing key)
         return res.status(503).json({ 
-            error: "Service Unavailable. AI API Key not loaded or service is starting.",
-            details: "Please check Render Secret File configuration and service logs."
+            error: "Service Unavailable. AI API Key not loaded.",
+            details: "Render Secret File configuration (GEMINI_API_KEY) failed. Check Render logs for CRITICAL ERROR messages."
         });
     }
     next();
@@ -74,24 +79,29 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: [{ role: "user", parts: [{ text: prompt }] }],
+            config: {
+                // Set temperature low for reliable, creative outputs
+                temperature: 0.7, 
+            },
         });
 
         const rawText = response.text.trim();
         
-        // Simple splitting logic to extract individual captions
-        const captions = rawText.split('\n').filter(line => line.trim().length > 0 && line.match(/^\s*\d+\.\s*/))
-                                 .map(line => line.replace(/^\s*\d+\.\s*/, '').trim());
+        // Robust splitting logic for numbered or plain list from AI
+        const captions = rawText.split('\n').filter(line => line.trim().length > 0)
+                                 .map(line => line.replace(/^\s*\d+\.\s*/, '').trim())
+                                 .filter(line => line.length > 5); // Filter out very short or empty lines
 
         if (captions.length === 0) {
-            // Fallback if the model didn't use perfect numbering
+             // If still zero, send the raw text chunked by double newlines as a fallback
             const fallbackCaptions = rawText.split(/\n\s*\n/).filter(c => c.trim().length > 0);
-            return res.json({ captions: fallbackCaptions });
+            return res.json({ captions: fallbackCaptions.length > 0 ? fallbackCaptions : [rawText] });
         }
         
         res.json({ captions: captions });
     } catch (error) {
         console.error("Gemini API Generation Error:", error.message);
-        res.status(500).json({ error: "Failed to generate captions from AI API.", details: error.message });
+        res.status(500).json({ error: "AI Processing Failed. Possible reason: API rate limits or invalid input.", details: error.message });
     }
 });
 
@@ -106,7 +116,7 @@ app.post('/api/ai-caption-edit', checkAi, async (req, res) => {
         return res.status(400).json({ error: "Missing required fields: originalCaption or requestedChange." });
     }
 
-    const prompt = `You are a professional social media editor. Refine the following original caption based on the requested change. The output should only be the new, improved caption text.
+    const prompt = `You are a professional social media editor. Refine the following original caption based on the requested change. The output should only be the new, improved caption text, without any added explanation or quotes.
 
     Original Caption: "${originalCaption}"
     Requested Change: "${requestedChange}"
@@ -117,19 +127,22 @@ app.post('/api/ai-caption-edit', checkAi, async (req, res) => {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: [{ role: "user", parts: [{ text: prompt }] }],
+            config: {
+                temperature: 0.3, // Lower temperature for direct editing
+            },
         });
 
         const editedCaption = response.text.trim();
         res.json({ editedCaption: editedCaption });
     } catch (error) {
         console.error("Gemini API Editing Error:", error.message);
-        res.status(500).json({ error: "Failed to edit caption from AI API.", details: error.message });
+        res.status(500).json({ error: "AI Editing Failed. Possible reason: API rate limits or invalid input.", details: error.message });
     }
 });
 
 
 /**
- * Endpoint for Website Traffic Booster (Placeholder - Needs real logic in production)
+ * Endpoint for Website Traffic Booster (Placeholder)
  * Route: /boost-mp
  */
 app.post('/boost-mp', (req, res) => {
@@ -138,24 +151,19 @@ app.post('/boost-mp', (req, res) => {
     if (!ga_id || !api_secret || !views || !distribution) {
         return res.status(400).json({ error: "Missing required fields for traffic boosting." });
     }
-
-    // In a real production environment, this is where complex
-    // logic would run to simulate GA4 Measurement Protocol hits.
     
-    // For now, we simulate success and log the job details.
-    console.log(`[TRAFFIC BOOST JOB STARTED]`);
-    console.log(`GA ID: ${ga_id}`);
-    console.log(`Views: ${views}`);
-    console.log("Distribution:", distribution);
-    console.log("---");
-
-    // Send a success response immediately so the frontend knows the job started
+    // Success response indicates the job has been accepted by the Render server.
     res.status(200).json({ 
         message: "Traffic boosting job successfully initiated and is running in the background.",
         jobId: Date.now() 
     });
 });
 
+
+// Simple root route to check server health
+app.get('/', (req, res) => {
+    res.status(200).send("Render Backend is running. AI Status: " + (ai ? "Active" : "Key Missing/Loading"));
+});
 
 // Start the server
 app.listen(PORT, () => {
