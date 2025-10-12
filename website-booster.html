@@ -6,182 +6,168 @@
     <title>Website Traffic Booster Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f4f7f9;
         }
-        .container {
-            max-width: 640px;
-            margin: auto;
-            padding: 1rem;
+        .primary-button {
+            background-color: #3b82f6;
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
-        .card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            padding: 2rem;
-            border: 1px solid #e5e7eb;
+        .primary-button:hover {
+            background-color: #2563eb;
         }
-        .input-group label {
-            font-weight: 600;
-            color: #4b5563;
+        .primary-button:active {
+            transform: scale(0.98);
         }
-        .input-group input[type="text"], 
-        .input-group input[type="number"] {
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            transition: border-color 0.15s;
+        .live-log-box {
+            background-color: #1f2937;
+            color: #10b981; 
+            border-left: 4px solid #10b981;
         }
-        .input-group input:focus {
+        .input-field:focus {
             border-color: #3b82f6;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-        }
-        /* Custom styling for the percentage inputs */
-        .percentage-input {
-            width: 70px; /* fixed width for the percentage box */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-start justify-center py-10 bg-gray-50">
+<body class="p-4 sm:p-8 flex justify-center items-start min-h-screen">
 
-    <div class="container">
-        <div class="card">
+    <div class="w-full max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-600 mb-2">Website Traffic Booster Tool</h1>
+            <p class="text-gray-600">Increase your page views and engagement metrics</p>
+        </header>
+
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100">
             
-            <header class="text-center mb-8">
-                <h1 class="text-3xl font-extrabold text-blue-600 mb-2">Website Traffic Booster Tool</h1>
-                <p class="text-gray-500">Increase your page views and engagement metrics.</p>
-            </header>
-
-            <div class="bg-blue-50 p-4 rounded-lg text-blue-800 mb-6">
-                <p class="font-semibold mb-2">💡 Important Instructions</p>
-                <ul class="list-disc list-inside text-sm space-y-1">
-                    <li>This tool uses the GA4 Measurement Protocol, which helps prevent browser errors.</li>
-                    <li>Real-Type Views: Expect view sessions of 30-120 seconds with engagement data.</li>
-                    <li>**URL Format:** All URLs must start with `https://`.</li>
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-lg">
+                <p class="font-bold text-yellow-800 mb-2">⚠️ Important Instructions</p>
+                <ul class="text-sm text-yellow-700 list-disc ml-5 space-y-1">
+                    <li>This tool uses the GA4 Measurement Protocol. **Real Type Views** are simulated.</li>
+                    <li>**All URLs** MUST start with `https://`.</li>
                 </ul>
             </div>
 
-            <form id="traffic-form">
+            <form id="traffic-form" onsubmit="event.preventDefault(); startTrafficGeneration()">
                 
-                <div class="input-group mb-4">
-                    <label for="ga-id" class="block text-sm mb-1">1. Google Analytics ID (G-XXXXX)</label>
-                    <input type="text" id="ga-id" placeholder="Enter your GA4 Measurement ID" required class="w-full">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="ga-id" class="block text-sm font-medium text-gray-700 mb-2">1. Google Analytics ID (G-XXXXX)</label>
+                        <input type="text" id="ga-id" placeholder="Enter your GA4 Measurement ID" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
+                    </div>
+                    <div>
+                        <label for="api-secret" class="block text-sm font-medium text-gray-700 mb-2">2. API Secret</label>
+                        <input type="text" id="api-secret" placeholder="Enter your GA4 API Secret" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
+                    </div>
                 </div>
 
-                <div class="input-group mb-4">
-                    <label for="api-secret" class="block text-sm mb-1">2. API Secret (Measurement Protocol Key)</label>
-                    <input type="text" id="api-secret" placeholder="Enter your GA4 API Secret" required class="w-full">
-                </div>
-
-                <div class="input-group mb-6">
-                    <label for="total-views" class="block text-sm mb-1">3. Total Views to Generate (Max 500)</label>
-                    <input type="number" id="total-views" value="100" min="1" max="500" required class="w-full">
-                </div>
-
-                <div class="mb-6 border-t pt-4">
-                    <label class="block text-base font-bold text-gray-800 mb-2">4. Distribute Traffic Across Pages (Total must be 100%)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="total-views" class="block text-sm font-medium text-gray-700 mb-2">3. Total Views to Generate (Max 500)</label>
+                        <input type="number" id="total-views" value="100" min="1" max="500" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
+                    </div>
                     
-                    <div id="distribution-container" class="space-y-3">
+                    <div>
+                        <label for="country" class="block text-sm font-medium text-gray-700 mb-2">4. Target Country</label>
+                        <select id="country" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150 appearance-none bg-white bg-no-repeat bg-right-2 bg-center-y">
+                            <option value="Global">Global (Mixed Traffic)</option>
+                            <option value="US">United States (US)</option>
+                            <option value="IN" selected>India (IN)</option>
+                            <option value="CA">Canada (CA)</option>
+                            <option value="GB">United Kingdom (GB)</option>
+                            <option value="AU">Australia (AU)</option>
+                            <option value="DE">Germany (DE)</option>
+                            <option value="FR">France (FR)</option>
+                            <option value="JP">Japan (JP)</option>
+                            <option value="BR">Brazil (BR)</option>
+                            <option value="SG">Singapore (SG)</option>
+                            <option value="AE">United Arab Emirates (AE)</option>
+                            <option value="ES">Spain (ES)</option>
+                            <option value="IT">Italy (IT)</option>
+                            <option value="MX">Mexico (MX)</option>
+                            <option value="NL">Netherlands (NL)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">5. Distribute Traffic Across Pages <span class="text-red-500 font-bold">(Total must be 100%)</span></label>
+                    <div id="distribution-container" class="space-y-3 p-4 border border-gray-200 rounded-lg">
                         <div class="flex items-center space-x-2">
-                            <label for="url-1" class="text-sm w-24 flex-shrink-0">Page 1 URL (Required):</label>
-                            <input type="text" id="url-1" placeholder="https://..." required class="flex-grow">
-                            <input type="number" id="percent-1" value="100" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
-                            <span class="text-sm">%</span>
+                            <input type="url" id="url-1" placeholder="Page 1 URL (Required): https://" class="input-field w-3/4 p-2 border border-gray-300 rounded-lg" required value="https://pooreyoutuber.github.io/website-booster.html">
+                            <input type="number" id="percent-1" value="100" min="0" max="100" class="input-field w-1/4 p-2 border border-gray-300 rounded-lg text-center" oninput="updateTotalDistribution()">
+                            <span class="text-gray-500">%</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <label for="url-2" class="text-sm w-24 flex-shrink-0">Page 2 URL (Optional):</label>
-                            <input type="text" id="url-2" placeholder="https://..." class="flex-grow">
-                            <input type="number" id="percent-2" value="0" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
-                            <span class="text-sm">%</span>
+                            <input type="url" id="url-2" placeholder="Page 2 URL (Optional): https://" class="input-field w-3/4 p-2 border border-gray-300 rounded-lg">
+                            <input type="number" id="percent-2" value="0" min="0" max="100" class="input-field w-1/4 p-2 border border-gray-300 rounded-lg text-center" oninput="updateTotalDistribution()">
+                            <span class="text-gray-500">%</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <label for="url-3" class="text-sm w-24 flex-shrink-0">Page 3 URL (Optional):</label>
-                            <input type="text" id="url-3" placeholder="https://..." class="flex-grow">
-                            <input type="number" id="percent-3" value="0" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
-                            <span class="text-sm">%</span>
+                            <input type="url" id="url-3" placeholder="Page 3 URL (Optional): https://" class="input-field w-3/4 p-2 border border-gray-300 rounded-lg">
+                            <input type="number" id="percent-3" value="0" min="0" max="100" class="input-field w-1/4 p-2 border border-gray-300 rounded-lg text-center" oninput="updateTotalDistribution()">
+                            <span class="text-gray-500">%</span>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <label for="url-4" class="text-sm w-24 flex-shrink-0">Page 4 URL (Optional):</label>
-                            <input type="text" id="url-4" placeholder="https://..." class="flex-grow">
-                            <input type="number" id="percent-4" value="0" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
-                            <span class="text-sm">%</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <label for="url-5" class="text-sm w-24 flex-shrink-0">Page 5 URL (Optional):</label>
-                            <input type="text" id="url-5" placeholder="https://..." class="flex-grow">
-                            <input type="number" id="percent-5" value="0" min="0" max="100" class="percentage-input text-right" oninput="calculateTotal()">
-                            <span class="text-sm">%</span>
+                        <div class="text-right pt-2 border-t mt-2">
+                            <span class="font-bold text-gray-700">Total Distribution: </span>
+                            <span id="total-distribution" class="font-bold text-red-500">100%</span>
                         </div>
                     </div>
-
-                    <div class="mt-4 pt-3 border-t flex justify-end items-center">
-                        <span class="font-bold text-gray-700 mr-2">Total Distribution:</span>
-                        <span id="total-percentage" class="font-extrabold text-lg text-blue-600">100</span>
-                        <span class="font-extrabold text-lg text-blue-600">%</span>
-                    </div>
-
                 </div>
 
-                <button type="submit" id="submit-button" class="w-full py-3 px-4 rounded-lg text-white font-semibold shadow-lg transition duration-300 ease-in-out bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                <button type="submit" id="start-button" class="w-full py-3 px-4 rounded-lg text-white font-semibold shadow-lg primary-button focus:outline-none focus:ring-4 focus:ring-blue-300">
                     START TRAFFIC GENERATION
                 </button>
             </form>
 
-            <div id="status-message" class="mt-4 p-4 rounded-lg text-center hidden" role="alert"></div>
+            <div id="status-message" class="mt-4 p-3 rounded-lg text-center hidden font-medium" role="alert"></div>
 
-            <div id="output-log" class="mt-6 bg-gray-800 text-green-400 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap h-40 overflow-y-auto">
-                Live Activity Log:
+            <div class="mt-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-2">Live Activity Log</h2>
+                <div id="live-log" class="live-log-box p-4 rounded-lg h-32 overflow-y-scroll text-sm space-y-1">
+                    </div>
             </div>
-            
         </div>
     </div>
 
     <script>
-        // CRITICAL: Replace with your actual Render service URL
+        // *** CRITICAL: YOUR RENDER BACKEND URL IS SET HERE ***
         const API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
-        const form = document.getElementById('traffic-form');
-        const submitButton = document.getElementById('submit-button');
-        const totalPercentage = document.getElementById('total-percentage');
+
         const statusMessage = document.getElementById('status-message');
-        const outputLog = document.getElementById('output-log');
+        const startButton = document.getElementById('start-button');
+        const liveLog = document.getElementById('live-log');
+        const totalDistributionDisplay = document.getElementById('total-distribution');
+        const distributionContainer = document.getElementById('distribution-container');
 
-        /** Logs messages to the live activity window. */
-        function logActivity(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-            const logEntry = document.createElement('div');
-            
-            let colorClass = 'text-green-400';
-            if (type === 'error') colorClass = 'text-red-400';
-            if (type === 'warn') colorClass = 'text-yellow-400';
+        // --- Helper Functions ---
 
-            logEntry.innerHTML = `<span class="text-gray-500">[${timestamp}]</span> <span class="${colorClass}">${message}</span>`;
-            
-            outputLog.appendChild(logEntry);
-            outputLog.scrollTop = outputLog.scrollHeight; 
-        }
-
-        /** Calculates and updates the total distribution percentage. */
-        function calculateTotal() {
+        /** Updates the total percentage and checks for 100%. */
+        function updateTotalDistribution() {
             let total = 0;
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= 3; i++) {
                 const percentInput = document.getElementById(`percent-${i}`);
-                total += parseInt(percentInput.value) || 0;
+                total += parseInt(percentInput.value || 0);
             }
-            totalPercentage.textContent = total;
             
-            if (total !== 100) {
-                totalPercentage.classList.add('text-red-500');
-                totalPercentage.classList.remove('text-blue-600');
+            totalDistributionDisplay.textContent = `${total}%`;
+            
+            if (total === 100) {
+                totalDistributionDisplay.classList.remove('text-red-500');
+                totalDistributionDisplay.classList.add('text-green-500');
+                distributionContainer.classList.remove('border-red-400');
+                distributionContainer.classList.add('border-gray-200');
             } else {
-                totalPercentage.classList.add('text-blue-600');
-                totalPercentage.classList.remove('text-red-500');
+                totalDistributionDisplay.classList.remove('text-green-500');
+                totalDistributionDisplay.classList.add('text-red-500');
+                distributionContainer.classList.add('border-red-400');
+                distributionContainer.classList.remove('border-gray-200');
             }
         }
-
-        /** Displays status to the user. */
+        
+        /** Displays a status message above the log. */
         function displayStatus(message, type = 'info') {
             statusMessage.textContent = message;
             statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
@@ -190,98 +176,130 @@
                 statusMessage.classList.add('bg-red-100', 'text-red-700');
             } else if (type === 'success') {
                 statusMessage.classList.add('bg-green-100', 'text-green-700');
-            } else { // info/loading
+            } else {
                 statusMessage.classList.add('bg-blue-100', 'text-blue-700');
             }
+            statusMessage.classList.remove('hidden');
         }
 
-        /** Event handler for form submission. */
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        /** Adds a message to the live log. */
+        function addLog(message) {
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
             
-            // 1. Validate total percentage
-            const total = parseInt(totalPercentage.textContent);
-            if (total !== 100) {
-                displayStatus('Error: Total distribution must be 100%. Current: ' + total + '%', 'error');
-                logActivity('Generation Failed: Distribution must be 100%.', 'error');
-                return;
-            }
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${timeString}] ${message}`;
+            liveLog.appendChild(logEntry);
             
-            // 2. Gather data
+            // Auto-scroll to the bottom
+            liveLog.scrollTop = liveLog.scrollHeight;
+        }
+
+        // Initialize total distribution display on load
+        updateTotalDistribution();
+
+        // --- Main Function ---
+
+        /** Validates and sends the traffic generation request to the Render Backend. */
+        async function startTrafficGeneration() {
             const gaId = document.getElementById('ga-id').value.trim();
             const apiSecret = document.getElementById('api-secret').value.trim();
-            const totalViews = document.getElementById('total-views').value.trim();
-            
+            const totalViews = parseInt(document.getElementById('total-views').value, 10);
+            const country = document.getElementById('country').value; // Get selected country
+
+            // 1. Basic Validation
             if (!gaId || !apiSecret || !totalViews) {
-                 displayStatus('Error: Please fill in all required fields (GA ID, API Secret, Views).', 'error');
-                 logActivity('Generation Failed: Missing required fields.', 'error');
-                 return;
+                displayStatus('Error: Please fill in GA ID, API Secret, and Total Views.', 'error');
+                return;
             }
-            
-            // 3. Construct URL Distribution Map (Only include entries with URLs)
-            const distribution = {};
-            let isValid = true;
-            for (let i = 1; i <= 5; i++) {
+            if (totalViews < 1 || totalViews > 500) {
+                displayStatus('Error: Total views must be between 1 and 500.', 'error');
+                return;
+            }
+
+            // 2. Distribution Validation and Data Collection
+            let totalPercent = 0;
+            const distribution = [];
+            let firstUrlSet = false;
+
+            for (let i = 1; i <= 3; i++) {
                 const url = document.getElementById(`url-${i}`).value.trim();
-                const percent = parseInt(document.getElementById(`percent-${i}`).value) || 0;
+                const percent = parseInt(document.getElementById(`percent-${i}`).value, 10);
                 
-                if (url) {
+                if (url && percent > 0) {
                     if (!url.startsWith('https://')) {
-                        displayStatus(`Error: URL ${i} must start with 'https://'`, 'error');
-                        logActivity(`URL ${i} validation failed.`, 'error');
-                        isValid = false;
-                        break;
+                         displayStatus(`Error: URL ${i} must start with 'https://'.`, 'error');
+                         return;
                     }
-                    distribution[url] = percent;
+                    distribution.push({ url, percent });
+                    totalPercent += percent;
+                    firstUrlSet = true;
+                } else if (!url && percent > 0) {
+                    displayStatus(`Error: Percentage (${percent}%) set for Page ${i} but no URL provided.`, 'error');
+                    return;
                 }
             }
 
-            if (!isValid) return;
+            if (!firstUrlSet) {
+                 displayStatus('Error: Please provide at least one URL and a percentage > 0.', 'error');
+                 return;
+            }
 
-            // 4. API Call
-            submitButton.disabled = true;
-            submitButton.textContent = 'Processing...';
-            displayStatus('Traffic generation request sent to server.', 'info');
-            logActivity('Sending request to Backend...', 'info');
+            if (totalPercent !== 100) {
+                displayStatus(`Error: Total distribution must be 100%. Currently: ${totalPercent}%.`, 'error');
+                return;
+            }
+
+            // 3. Prepare Request and UI
+            startButton.disabled = true;
+            startButton.textContent = 'Sending Request...';
+            displayStatus('Sending request to Backend. Please wait...', 'info');
+            addLog('Sending request to Backend...');
 
             try {
+                // IMPORTANT: Sending the new 'country' data to the Backend
+                const requestBody = { 
+                    ga_id: gaId, 
+                    api_secret: apiSecret, 
+                    views: totalViews, 
+                    distribution: distribution,
+                    country: country // Added country here!
+                };
+                
                 const response = await fetch(`${API_BASE_URL}/boost-mp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        ga_id: gaId, 
-                        api_secret: apiSecret, 
-                        views: parseInt(totalViews, 10),
-                        distribution: distribution
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const result = await response.json();
 
-                if (response.ok) {
-                    displayStatus('Success: Request accepted! Processing started.', 'success');
-                    logActivity(`[SERVER] Success: ${result.message}`, 'info');
-                    // Simulating the traffic slots starting
-                    logActivity(`[SLOT 1] Starting ${totalViews} views for GA ID ${gaId}...`, 'info');
-                    logActivity(`[SLOT 1] Processing will continue in the background.`, 'info');
-                } else {
-                    displayStatus(`Error: ${result.error || 'Backend failed to process request.'}`, 'error');
-                    logActivity(`[SERVER] Error: ${result.error || 'Unknown error.'}`, 'error');
+                if (!response.ok) {
+                    const errorMessage = result.error || 'Unknown server error.';
+                    throw new Error(`HTTP Error: ${response.status}. Detail: ${errorMessage}`);
                 }
+                
+                // 4. Success Handling
+                displayStatus('Success: Request accepted! Processing started.', 'success');
+                addLog(`Success: Boosting job successfully initiated. (Target Country: ${country})`);
+                addLog(`INFO: Targeting ${totalViews} views for GA ID ${gaId}...`);
+                addLog('LOG: Processing will continue in the background.');
 
             } catch (error) {
-                console.error("Fetch Error:", error);
-                displayStatus('Network Error: Could not reach the server. Check your Render URL.', 'error');
-                logActivity(`[NETWORK] Failed to connect: ${error.message}`, 'error');
+                console.error("Traffic Generation Error:", error);
+                displayStatus(`Generation Failed. **Backend is down or connection failed**. Error: ${error.message}`, 'error');
+                addLog(`ERROR: Failed to start job. ${error.message}`);
             } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'START TRAFFIC GENERATION';
+                startButton.disabled = false;
+                startButton.textContent = 'START TRAFFIC GENERATION';
             }
+        }
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTotalDistribution();
+            addLog('System ready. Enter details and click START.');
         });
-
-        // Initialize total calculation on load
-        window.onload = calculateTotal;
-
     </script>
 </body>
 </html>
