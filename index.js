@@ -1,303 +1,270 @@
-// index.js (FINAL STABLE ESM CODE - GA4 Booster & AI Caption Generator)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Traffic Booster Tool (GA4 MP)</title>
+    <style>
+        /* Base Styles and Responsiveness */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { color: #d9534f; margin: 0; font-size: 1.8em; font-weight: 700; }
+        
+        .container { background-color: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e0e0e0; }
+        
+        /* Input & Form Styling (Similar to your reference images) */
+        label { display: block; text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: #555; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
+        .form-group { margin-bottom: 15px; }
 
-import express from 'express';
-import { GoogleGenAI } from '@google/genai'; 
-import cors from 'cors'; 
-import fs from 'fs'; 
-// Note: Node.js v18+ mein built-in 'fetch' use kiya gaya hai.
+        /* Page List Styling */
+        .page-list { border: 1px solid #ddd; padding: 15px; border-radius: 5px; background-color: #f9f9f9; max-height: 250px; overflow-y: auto; }
+        .page-item { display: flex; align-items: center; margin-bottom: 10px; padding: 8px; border-bottom: 1px dotted #eee; }
+        .page-item:last-child { border-bottom: none; }
+        .page-item input { margin-bottom: 0; }
+        .page-item button { margin-left: 10px; background-color: #f0ad4e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s; }
+        .page-item button:hover { background-color: #ec971f; }
+        .url-input { flex-grow: 1; margin-right: 10px; }
+        .percent-input { width: 60px; text-align: center; }
 
-const app = express();
-// Render uses process.env.PORT
-const PORT = process.env.PORT || 10000; 
+        /* Controls */
+        .add-page-btn { background-color: #5cb85c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1em; margin-top: 10px; width: 100%; transition: background-color 0.3s; }
+        .add-page-btn:hover { background-color: #449d44; }
+        
+        .submit-btn { background-color: #d9534f; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 1.1em; width: 100%; margin-top: 20px; transition: background-color 0.3s; }
+        .submit-btn:hover { background-color: #c9302c; }
+        .submit-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
-// --- GEMINI KEY CONFIGURATION ---
-let GEMINI_KEY;
-try {
-    // Correct path for Secret Files on Render
-    GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
-    console.log("Gemini Key loaded successfully from Secret File.");
-} catch (e) {
-    // Fallback for local development or Environment Variable
-    GEMINI_KEY = process.env.GEMINI_API_KEY; 
-    if (GEMINI_KEY) {
-        console.log("Gemini Key loaded from Environment Variable.");
-    } else {
-        console.error("FATAL: Gemini Key could not be loaded. Insta Caption Tool will fail.");
-    }
-}
+        /* Message & Footer */
+        .message-box { padding: 15px; margin-top: 20px; border-radius: 5px; font-weight: bold; text-align: center; }
+        .message-box.success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        .message-box.error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #d9534f; border-radius: 50%; width: 20px; height: 20px; animation: spin 2s linear infinite; display: inline-block; margin-left: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .footer { margin-top: 30px; font-size: 0.8em; color: #888; text-align: center; }
 
-// Initialize AI object only if key is available
-let ai;
-if (GEMINI_KEY) {
-    ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-} else {
-    // Dummy object to prevent crash if AI endpoints are called without a key
-    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
-}
+        /* Total & Warning */
+        .total-percent { margin-top: 10px; font-weight: bold; padding: 10px; border-radius: 5px; }
+        .total-percent.valid { background-color: #e6ffe6; color: #2e8b57; border: 1px solid #a3d9a3; }
+        .total-percent.invalid { background-color: #ffcccc; color: #cc0000; border: 1px solid #ff6666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>🌐 Website Traffic Booster</h2>
+        <p>GA4 Measurement Protocol - Views Generation</p>
+    </div>
 
-// --- MIDDLEWARE & UTILITIES ---
-app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', 
-    methods: ['GET', 'POST'],
-    credentials: true
-}));
-app.use(express.json());
+    <div class="container">
+        <form id="booster-form">
+            <!-- GA ID and API Key -->
+            <div class="form-group">
+                <label for="ga_id">GA4 Measurement ID (G-XXXXXXXXXX)</label>
+                <input type="text" id="ga_id" placeholder="e.g., G-XYZ1234567" required>
+            </div>
+            <div class="form-group">
+                <label for="api_key">Measurement API Secret Key</label>
+                <input type="text" id="api_key" placeholder="e.g., Your_API_Secret_Key" required>
+            </div>
 
-app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running! (GA4 Booster & AI)');
-});
+            <!-- Total Views -->
+            <div class="form-group">
+                <label for="views">Total Views to Generate (Max 500)</label>
+                <input type="number" id="views" min="1" max="500" value="50" required>
+            </div>
 
-const MIN_DELAY = 3000; 
-const MAX_DELAY = 12000; 
-// --- 15 DIVERSE COUNTRY LOCATIONS ---
-const geoLocations = [
-    { country: "United States", region: "California" },
-    { country: "India", region: "Maharashtra" },
-    { country: "Germany", region: "Bavaria" },
-    { country: "Japan", region: "Tokyo" },
-    { country: "Brazil", region: "Sao Paulo" },
-    { country: "United Kingdom", region: "England" },
-    { country: "Canada", region: "Ontario" },
-    { country: "Australia", region: "New South Wales" },
-    { country: "France", region: "Ile-de-France" },
-    { country: "Singapore", region: "Central Region" },
-    { country: "Mexico", region: "Mexico City" },
-    { country: "Russia", region: "Moscow" },
-    { country: "South Africa", region: "Gauteng" },
-    { country: "Spain", region: "Madrid" },
-    { country: "Netherlands", region: "North Holland" },
-];
+            <!-- Page Distribution -->
+            <div class="form-group">
+                <label>Page URL Distribution (Total must be 100%)</label>
+                <div class="page-list" id="page-list">
+                    <!-- Dynamic page items will be added here -->
+                </div>
+                <div class="total-percent" id="total-percent">Total: 0%</div>
+                <button type="button" class="add-page-btn" onclick="addPageItem()">+ Add Page</button>
+            </div>
 
+            <div id="message-container"></div>
+            
+            <button type="submit" class="submit-btn" id="submit-btn" disabled>Submit & Start Boosting</button>
+        </form>
+    </div>
 
-function getRandomDelay() {
-    return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
-}
-function getRandomGeo() {
-    return geoLocations[Math.floor(Math.random() * geoLocations.length)];
-}
+    <div class="footer">
+        Disclaimer: Use responsibly and in compliance with Google Analytics Terms of Service.
+    </div>
 
-// Helper: Sends data to GA4 Measurement Protocol
-async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
-    // Built-in global fetch is used
-    const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
+    <script>
+        // CRITICAL FIX: The live URL of the Render API service
+        const RENDER_API_URL = 'https://pooreyoutuber-github-io.onrender.com/boost-mp';
+        const form = document.getElementById('booster-form');
+        const pageList = document.getElementById('page-list');
+        const submitBtn = document.getElementById('submit-btn');
+        const messageContainer = document.getElementById('message-container');
+        const totalPercentDisplay = document.getElementById('total-percent');
+        const STORAGE_KEY = 'ga4_booster_details';
+        
+        // --- Utility Functions ---
 
-    try {
-        const response = await fetch(gaEndpoint, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.status === 204) { 
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType}`);
-            return { success: true };
-        } else {
-            const errorText = await response.text(); 
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
-            return { success: false };
+        function showMessage(type, message, hideButton = false) {
+            messageContainer.innerHTML = `<div class="message-box ${type}"> ${message} ${!hideButton ? '<span class="loading-spinner"></span>' : ''} </div>`;
+            submitBtn.disabled = !hideButton;
         }
-    } catch (error) {
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
-        return { success: false };
-    }
-}
 
-// Helper: Generates a plan of which URL gets which view
-function generateViewPlan(totalViews, pages) {
-    const viewPlan = [];
-    // FIX: Arrow function syntax corrected from (sum, page => ...) to (sum, page) => ...
-    const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
-    
-    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
-        console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
-        return [];
-    }
-    
-    pages.forEach(page => {
-        const viewsForPage = Math.round(totalViews * (page.percent / 100));
-        for (let i = 0; i < viewsForPage; i++) {
-            if (page.url) { 
-                viewPlan.push(page.url);
+        function updateDisplayTotal() {
+            const percents = Array.from(pageList.querySelectorAll('.percent-input')).map(input => parseFloat(input.value) || 0);
+            const total = percents.reduce((sum, current) => sum + current, 0);
+            
+            totalPercentDisplay.textContent = `Total: ${total.toFixed(2)}%`;
+
+            if (total > 99.9 && total < 100.1) {
+                totalPercentDisplay.className = 'total-percent valid';
+                submitBtn.disabled = false;
+            } else {
+                totalPercentDisplay.className = 'total-percent invalid';
+                submitBtn.disabled = true;
             }
         }
-    });
 
-    viewPlan.sort(() => Math.random() - 0.5);
-    return viewPlan;
-}
+        function addPageItem(url = '', percent = 0) {
+            const item = document.createElement('div');
+            item.className = 'page-item';
+            
+            item.innerHTML = `
+                <input type="text" class="url-input" value="${url}" placeholder="https://example.com/page" required oninput="saveDetails()">
+                <input type="number" class="percent-input" value="${percent}" min="0" max="100" step="0.1" required oninput="updateDisplayTotal(); saveDetails()">
+                <span>%</span>
+                <button type="button" onclick="removePageItem(this)">Remove</button>
+            `;
+            
+            pageList.appendChild(item);
+            updateDisplayTotal();
+        }
 
+        function removePageItem(button) {
+            button.closest('.page-item').remove();
+            updateDisplayTotal();
+            saveDetails();
+        }
 
-// ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Concurrency
-// ===================================================================
-app.post('/boost-mp', async (req, res) => {
-    const { ga_id, api_key, views, pages } = req.body; 
-
-    if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0) {
-        return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
-    }
-    
-    const viewPlan = generateViewPlan(parseInt(views), pages.filter(p => p.percent > 0)); 
-    if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
-    }
-
-    // Immediately respond with 'accepted'
-    res.json({ 
-        status: 'accepted', 
-        message: `Request for ${viewPlan.length} views accepted. Processing started in the background.`
-    });
-
-    // Start views generation asynchronously
-    (async () => {
-        const totalViews = viewPlan.length;
-        let successfulViews = 0;
-        console.log(`[BOOSTER START] Starting for ${totalViews} views...`);
-
-        const viewPromises = viewPlan.map((targetUrl, i) => {
-            return (async () => {
-                const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-                const SESSION_ID = Date.now(); 
-                const geo = getRandomGeo();
-                // Real-type engagement time: 30 seconds to 120 seconds (1 minute)
-                const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-                const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
-                
-                // Initial spread delay to prevent all requests hitting at once
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); 
-
-                // 1. Session Start Event (Crucial for GA4 Session metrics)
-                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
-
-                // 2. Page View Event (Primary view count)
-                const pageViewPayload = {
-                    client_id: CLIENT_ID,
-                    user_properties: commonUserProperties, 
-                    events: [{ name: 'page_view', params: { page_location: targetUrl, page_title: `PROJECT_PAGE_${i + 1}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
+        function getFormData() {
+            const pages = Array.from(pageList.querySelectorAll('.page-item')).map(item => {
+                const urlInput = item.querySelector('.url-input');
+                const percentInput = item.querySelector('.percent-input');
+                return {
+                    url: urlInput.value.trim(),
+                    percent: parseFloat(percentInput.value)
                 };
-                const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
-                if (pageViewResult.success) {
-                    successfulViews++;
+            }).filter(page => page.url && page.percent > 0);
+
+            return {
+                ga_id: document.getElementById('ga_id').value.trim(),
+                api_key: document.getElementById('api_key').value.trim(),
+                views: parseInt(document.getElementById('views').value),
+                pages: pages
+            };
+        }
+
+        // --- Local Storage Handling ---
+
+        function saveDetails() {
+            const data = getFormData();
+            const saveData = {
+                ga_id: data.ga_id,
+                api_key: data.api_key,
+                views: data.views,
+                pages: data.pages 
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+        }
+
+        function loadSavedDetails() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('ga_id').value = data.ga_id || '';
+                document.getElementById('api_key').value = data.api_key || '';
+                document.getElementById('views').value = data.views || 50;
+
+                // Clear default page list
+                pageList.innerHTML = ''; 
+
+                if (data.pages && data.pages.length > 0) {
+                    data.pages.forEach(page => addPageItem(page.url, page.percent));
+                } else {
+                    addPageItem('https://example.com/home', 100);
+                }
+            } else {
+                // Initial setup if no data exists
+                addPageItem('https://example.com/page-1', 50);
+                addPageItem('https://example.com/page-2', 50);
+            }
+        }
+        
+        // --- Submission Logic ---
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = getFormData();
+
+            if (!data.ga_id || !data.api_key || data.views < 1 || data.views > 500 || data.pages.length === 0) {
+                showMessage('error', '❌ Please fill all required fields correctly and ensure views are between 1-500.', true);
+                return;
+            }
+            
+            saveDetails(); // Save valid details before submission
+            showMessage('success', 'Sending request... Please wait. (Up to 15 seconds)', false);
+
+            // Start submission with max 3 retries
+            await submitData(data, 3); 
+        });
+
+        // Function to handle API submission with retry logic
+        async function submitData(data, retriesLeft) {
+            if (retriesLeft < 3) {
+                 showMessage('success', `Retry attempt ${4 - retriesLeft}. Checking server status...`, false);
+            }
+            
+            try {
+                const response = await fetch(RENDER_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                // Server might return 400/500 if data is bad, but 200 if accepted.
+                if (response.status === 400 || response.status === 500) {
+                    const errorData = await response.json();
+                    throw new Error(`Server Rejected: ${errorData.message || errorData.error || 'Unknown server error.'}`);
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+                
+                const responseData = await response.json();
+
+                if (responseData.status === 'accepted') {
+                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. **Processing in background, results expected within 24-48 hours.** You can close this page now.`, true);
+                } else {
+                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
                 }
 
-                // 3. User Engagement Event (Ensures low bounce rate and high average engagement time)
-                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
+            } catch (error) {
+                if (retriesLeft > 0) {
+                    // Exponential backoff or simple fixed delay before retry
+                    await new Promise(resolve => setTimeout(resolve, 2000)); 
+                    return submitData(data, retriesLeft - 1);
+                } else {
+                    showMessage('error', `❌ Final Connection Error. Please check your **API key and GA ID**. Error: ${error.message.substring(0, 80)}`, true);
+                }
+            } 
+        }
 
-                // Delay for next view to mimic natural user behavior
-                await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-                
-                return pageViewResult.success;
-            })();
+        document.addEventListener('DOMContentLoaded', () => {
+             loadSavedDetails();
+             updateDisplayTotal();
         });
-
-        // Wait for all views to complete
-        Promise.all(viewPromises).then(results => {
-            console.log(`[BOOSTER FINISH] Job Ended. Total successful page_views: ${successfulViews}/${totalViews}`);
-        }).catch(err => {
-            console.error(`[BOOSTER CRITICAL] An error occurred during view processing: ${err.message}`);
-        });
-
-    })();
-});
-
-
-// ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
-// ===================================================================
-app.post('/api/caption-generate', async (req, res) => { 
-    
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
-    }
-    
-    const { reelTitle, style } = req.body;
-
-    if (!reelTitle) {
-        return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
-    }
-    
-    // Prompt for Viral, Export, and View Increase Tags
-    const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
-
---- CRITICAL INSTRUCTION ---
-For each caption, provide exactly 5 trending, high-reach, and relevant hashtags. Include **latest viral Instagram marketing terms** like **#viralreel, #exportviews, #viewincrease, #reelsmarketing** only if they are relevant to the topic. Focus mainly on niche-specific and fast-trending tags to maximize virality. The final output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
-
-
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "array",
-                    items: { type: "object", properties: { caption: { type: "string" } }, required: ["caption"] }
-                },
-                temperature: 0.8,
-            },
-        });
-
-        const captions = JSON.parse(response.text.trim());
-        res.status(200).json({ captions: captions });
-
-    } catch (error) {
-        console.error('Gemini API Error:', error.message);
-        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
-    }
-});
-
-
-// ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
-// ===================================================================
-app.post('/api/caption-edit', async (req, res) => {
-    
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
-    }
-
-    const { originalCaption, requestedChange } = req.body;
-
-    if (!originalCaption || !requestedChange) {
-        return res.status(400).json({ error: 'Original caption and requested change are required.' });
-    }
-
-    const prompt = `Rewrite and edit the following original caption based on the requested change. The output should be only the final, edited caption and its hashtags.
-
-Original Caption: "${originalCaption}"
-Requested Change: "${requestedChange}"
-
---- CRITICAL INSTRUCTION ---
-The final output MUST be a single JSON object with a key called 'editedCaption'. The caption should be highly engaging for Instagram Reels. If the original caption included hashtags, ensure the edited caption has 5 relevant and trending hashtags, separated from the text by a new line.`;
-    
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "object",
-                    properties: { editedCaption: { type: "string" } },
-                    required: ["editedCaption"]
-                },
-                temperature: 0.7,
-            },
-        });
-
-        const result = JSON.parse(response.text.trim());
-        res.status(200).json(result);
-
-    } catch (error) {
-        console.error('Gemini API Error (Edit):', error.message);
-        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
-    }
-});
-
-
-// ===================================================================
-// START THE SERVER 
-// ===================================================================
-app.listen(PORT, () => {
-    console.log(`Combined API Server listening on port ${PORT}.`);
-});
+    </script>
+</body>
+</html>
