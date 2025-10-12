@@ -3,307 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1. Article Submission Tool | PooreYouTuber</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <title>SEO Article Publisher & AI Grammar Tool</title>
     <style>
-        /* Modern, Clean UI based on YouTube/Material Design */
-        :root {
-            --youtube-red: #FF0000;
-            --youtube-dark-red: #CC0000;
-            --primary-text: #212121;
-            --secondary-text: #707070;
-            --bg-color: #f9f9f9;
-            --card-bg: #ffffff;
-            --border-color: #e0e0e0;
-        }
-
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: var(--bg-color);
-            color: var(--primary-text);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: var(--youtube-red);
-            text-align: center;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-            font-size: 28px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .disclaimer {
-            background: #fff3f3; 
-            color: #d32f2f; 
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 25px;
-            border-left: 3px solid var(--youtube-red);
-            font-size: 14px;
-        }
-
-        /* Form Styles */
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
-        input[type="text"], textarea {
-            width: 100%; padding: 10px; border: 1px solid var(--border-color);
-            border-radius: 2px; box-sizing: border-box; 
-            background: #fff; color: var(--primary-text);
-            font-size: 16px;
-        }
-        textarea { resize: vertical; min-height: 120px; }
-        button[type="submit"] {
-            background: var(--youtube-red); color: white; border: none;
-            padding: 10px 20px; border-radius: 2px; cursor: pointer;
-            font-size: 14px; font-weight: bold; transition: background 0.2s;
-            text-transform: uppercase;
-        }
-        button[type="submit"]:hover { background: var(--youtube-dark-red); }
+        /* Modern, Clean UI for Blogging */
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #343a40; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; }
         
-        /* Articles List Styles */
-        #article-list-container {
-            margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color);
-        }
-        #article-list-container h2 {
-            font-size: 22px;
-            color: var(--primary-text);
-            margin-bottom: 15px;
-        }
-
-        .article-card {
-            background: var(--card-bg); 
-            border: 1px solid var(--border-color);
-            padding: 15px; margin-bottom: 15px; border-radius: 4px;
-            display: flex; 
-            align-items: flex-start;
-        }
+        .container { background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); width: 100%; max-width: 800px; margin-bottom: 30px; }
         
-        .article-number {
-            font-size: 1.2em; font-weight: bold; color: var(--youtube-red);
-            margin-right: 15px; min-width: 25px; text-align: right;
-            line-height: 1.5;
-        }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #007bff; padding-bottom: 15px; }
+        .header h2 { color: #007bff; font-size: 2.2em; font-weight: 700; margin: 0; }
+        .header p { color: #6c757d; }
+
+        /* Form and Input Styling */
+        label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 600; color: #495057; }
+        input[type="text"], textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; font-size: 1em; transition: border-color 0.3s; }
+        input[type="text"]:focus, textarea:focus { border-color: #007bff; outline: none; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
+        textarea { min-height: 250px; resize: vertical; }
+
+        /* Buttons */
+        .btn-primary { background-color: #007bff; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 600; transition: background-color 0.3s; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-secondary { background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin-left: 10px; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-danger { background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9em; }
+        .btn-danger:hover { background-color: #c82333; }
+        /* AI Button Styling */
+        .btn-ai { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9em; }
+        .btn-ai:hover { background-color: #1e7e34; }
+
+        /* Article List Styling */
+        .article-card { padding: 15px; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background-color: #f8f9fa; }
+        .article-card:hover { background-color: #e2e6ea; }
+        .article-title { font-size: 1.2em; font-weight: 600; color: #007bff; cursor: pointer; }
+
+        /* Article View Styling */
+        #article-view-interface h1 { color: #343a40; margin-bottom: 10px; }
+        #article-view-interface p.meta { color: #6c757d; font-size: 0.9em; margin-bottom: 20px; border-bottom: 1px dashed #ced4da; padding-bottom: 10px; }
+        /* This is crucial for rendering uploaded images inside the article content */
+        #article-content-view img { max-width: 100%; height: auto; display: block; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
         
-        .article-content-wrapper { flex-grow: 1; }
+        /* Social Buttons */
+        .social-buttons { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ced4da; display: flex; gap: 20px; justify-content: center; }
+        .social-btn { background: none; border: none; color: #007bff; cursor: pointer; font-size: 1em; }
+        .social-btn i { margin-right: 5px; }
 
-        .article-card h3 { 
-            color: var(--primary-text); 
-            margin-top: 0; 
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        .article-card p { 
-            white-space: pre-wrap; 
-            font-size: 14px;
-            color: var(--primary-text);
-        }
-        .article-meta { 
-            font-size: 0.8em; 
-            color: var(--secondary-text); 
-            margin-bottom: 10px; 
-        }
-
-        /* Action Buttons */
-        .article-actions {
-            margin-top: 10px;
-            padding-top: 5px;
-            display: flex;
-            gap: 10px;
-        }
-        .delete-button {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 2px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background-color 0.2s;
-        }
-        .delete-button:hover {
-            background-color: #c0392b;
-        }
+        /* Message */
+        .message-box { padding: 15px; margin-top: 15px; border-radius: 6px; font-weight: bold; text-align: center; }
+        .message-box.success { background-color: #d4edda; color: #155724; }
+        .message-box.error { background-color: #f8d7da; color: #721c24; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-left: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h2>📝 SEO Article Publisher</h2>
+        <p>Write, Optimize, and Publish content with AI Grammar Check.</p>
+    </div>
 
     <div class="container">
-        <h1>🖊️ Article Submission Tool (Server Storage)</h1>
-
-        <div class="disclaimer">
-            **API Status:** <span id="apiStatus">Checking...</span> | Articles are saved **permanently** on the Render server.
+        
+        <div id="article-list-interface">
+            <button class="btn-primary" onclick="showCreateInterface()">+ Write New Article</button>
+            <label style="margin-top: 25px;">Article Search Bar (SEO Check):</label>
+            <input type="text" id="search-input" placeholder="Search articles by title or content (This ensures SEO works)">
+            
+            <h4 style="margin-top: 30px;">Published Articles</h4>
+            <div id="article-list">
+                <div class="article-card" data-id="1">
+                    <span class="article-title" onclick="viewArticle('1')">SEO Guide for Beginners (Sample Article)</span>
+                    <div>
+                        <button class="btn-danger" onclick="deleteArticle('1', event)">Delete</button>
+                    </div>
+                </div>
+                </div>
         </div>
 
-        <form id="article-form">
-            <h2>Submit Your Article</h2>
-            <div class="form-group">
-                <label for="author-name">Your Name (Author)</label>
-                <input type="text" id="author-name" placeholder="E.g., PooreYouTuber Fan" required>
-            </div>
-            <div class="form-group">
-                <label for="article-title">Article Title</label>
-                <input type="text" id="article-title" required>
-            </div>
-            <div class="form-group">
-                <label for="article-content">Article Content</label>
-                <textarea id="article-content" required></textarea>
-            </div>
-            <button type="submit">Publish Article</button>
-        </form>
+        <div id="create-interface" style="display:none;">
+            <h3>New Article</h3>
+            <div id="create-message-container"></div>
+            
+            <label for="title-input">Article Title (SEO Focused H1)</label>
+            <input type="text" id="title-input" placeholder="How to Fix Render Crash in Node.js" oninput="generateSlug()">
+            
+            <label for="slug-input">SEO Slug (Final URL Path)</label>
+            <input type="text" id="slug-input" placeholder="render-crash-fix" readonly>
+            
+            <label for="meta-input">Meta Description (150 characters max for Google Search)</label>
+            <input type="text" id="meta-input" placeholder="SEO friendly description of your article" maxlength="150">
 
-        <div id="article-list-container">
-            <h2>Latest Articles</h2>
-            <div id="articles-list">
-                <p id="no-articles-msg">Loading articles...</p>
+            <label for="article-area">Article Content (Images add karne ke liye HTML tags `<img src='image_url'>` use karein)</label>
+            <textarea id="article-area" placeholder="Start writing your amazing article here..."></textarea>
+            
+            <label for="image-upload">Upload Featured Image (Picture add karne ke liye)</label>
+            <input type="file" id="image-upload" accept="image/*" style="margin-bottom: 20px;">
+
+            <button class="btn-primary" onclick="uploadArticle()">Publish Article</button>
+            <button class="btn-ai" id="ai-check-create-btn" onclick="checkGrammar('create')">AI Check & Fix Grammar</button>
+            <button class="btn-secondary" onclick="showArticleList()">Cancel</button>
+        </div>
+
+        <div id="article-view-interface" style="display:none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <button class="btn-secondary" onclick="showArticleList()">← Back to List</button>
+                <div id="owner-actions">
+                    <button class="btn-ai" id="ai-check-view-btn" onclick="checkGrammar('view')">AI Check & Fix Grammar</button>
+                    <button class="btn-danger" id="delete-article-btn" onclick="deleteArticle(currentArticleId, event)">Delete Article</button>
+                </div>
             </div>
+
+            <h1 id="article-title-view"></h1>
+            <p class="meta" id="article-meta-view"></p>
+            <div id="article-content-view"></div>
+
+            <div class="social-buttons">
+                <button class="social-btn" onclick="handleSocial('like')"><span style="color:#dc3545;">❤️</span> Like (0)</button>
+                <button class="social-btn" onclick="handleSocial('comment')"><span style="color:#ffc107;">💬</span> Comment (0)</button>
+                <button class="social-btn" onclick="handleSocial('share')"><span style="color:#007bff;">🔗</span> Share</button>
+            </div>
+            
+            <h4 style="margin-top: 30px;">Comments (0)</h4>
+            <div style="padding: 15px; border: 1px solid #ced4da; border-radius: 6px;">
+                <textarea placeholder="Write a comment..." style="min-height: 80px;"></textarea>
+                <button class="btn-primary" style="margin-top: 10px;">Post Comment</button>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // ⭐ API URL for Article Tool (CHECK THIS) ⭐
-        const API_URL = "https://pooreyoutuber-github-io.onrender.com/api/articles"; 
+        // CRITICAL: The live URL of the Render API service - FINAL VERSION
+        const RENDER_API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com/api';
         
-        const articleForm = document.getElementById('article-form');
-        const articlesListDiv = document.getElementById('articles-list');
-        const apiStatus = document.getElementById('apiStatus');
+        let currentArticleId = null;
+        let articlesData = [
+            // Dummy Data for demonstration
+            { id: '1', title: 'SEO Guide for Beginners', slug: 'seo-guide-for-beginners', meta: 'A comprehensive guide to basic SEO for website owners.', content: '<p>Search Engine Optimization (SEO) is the process of improving your site visibility. This is how your article gets discovered in Google Search, ensuring your article is seen.</p><img src="https://via.placeholder.com/800x400?text=Featured+Image+Here" alt="SEO Image"><p><strong>Focus on Keywords:</strong> Use your primary keyword in the title and the first paragraph. Also, make sure your URL is short and descriptive (the slug).</p>', likes: 0, comments: 0 }
+        ];
 
-        // --- STATUS & FETCH FUNCTIONS ---
-        function updateStatus(message, color = 'var(--secondary-text)') {
-            apiStatus.textContent = message;
-            apiStatus.style.color = color;
+        // --- UI Switching ---
+        function showInterface(id) {
+            document.getElementById('article-list-interface').style.display = 'none';
+            document.getElementById('create-interface').style.display = 'none';
+            document.getElementById('article-view-interface').style.display = 'none';
+            document.getElementById(id).style.display = 'block';
+            document.getElementById('create-message-container').innerHTML = ''; 
         }
 
-        async function fetchArticles() {
-            updateStatus('Fetching articles...', '#f39c12');
-            try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('API server returned error.');
-                updateStatus('Connected to Server', '#2ecc71');
-                return await response.json();
-            } catch (error) {
-                updateStatus('Error: Server unreachable or bad response.', '#e74c3c');
-                console.error("Fetch Error:", error);
-                return [];
-            }
+        function showArticleList() {
+            renderArticleList();
+            showInterface('article-list-interface');
         }
 
-        async function postArticle(articleData) {
-            updateStatus('Publishing...', '#3498db');
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(articleData)
-                });
-                if (!response.ok) throw new Error('Failed to publish article');
-                updateStatus('Article Published!', '#2ecc71');
-                return true;
-            } catch (error) {
-                updateStatus('Error during publish.', '#e74c3c');
-                alert(`Error publishing article: ${error.message}`);
-                return false;
-            }
-        }
-        
-        async function deleteArticle(articleId) {
-            const deleteKey = prompt("⚠️ CONFIRM DELETE: Please enter your Owner Delete Key:");
-            if (!deleteKey) return;
-            
-            updateStatus('Deleting...', '#e74c3c');
-            try {
-                const response = await fetch(`${API_URL}/${articleId}`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ deleteKey: deleteKey })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert(result.message);
-                    updateStatus('Article Deleted!', '#e74c3c');
-                    renderArticles(); 
-                } else {
-                    alert(`Deletion Failed: ${result.message}`);
-                    updateStatus(`Deletion Failed: ${result.message.substring(0, 30)}...`, '#e74c3c');
-                }
-
-            } catch (error) {
-                updateStatus('Network Error during deletion.', '#e74c3c');
-                alert(`Network Error during deletion: ${error.message}`);
-            }
+        function showCreateInterface() {
+            document.getElementById('title-input').value = '';
+            document.getElementById('slug-input').value = '';
+            document.getElementById('meta-input').value = '';
+            document.getElementById('article-area').value = '';
+            document.getElementById('image-upload').value = null; // Clear file input
+            showInterface('create-interface');
         }
 
+        function renderArticleList() {
+            const listElement = document.getElementById('article-list');
+            listElement.innerHTML = '';
+            // Filter articles based on the search input (Frontend Search)
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            const filteredArticles = articlesData.filter(a => 
+                a.title.toLowerCase().includes(searchText) || a.content.toLowerCase().includes(searchText)
+            );
 
-        // --- RENDER LOGIC ---
-        function renderArticles() {
-            articlesListDiv.innerHTML = '<p style="text-align:center;">Loading articles...</p>';
-            fetchArticles().then(articles => {
-                articlesListDiv.innerHTML = ''; 
-                if (articles.length === 0) {
-                    articlesListDiv.innerHTML = '<p style="text-align:center; color: var(--secondary-text);">No articles found on the server. Submit one!</p>';
-                    return;
-                }
-
-                articles.forEach((article, index) => {
-                    const articleCard = document.createElement('div');
-                    articleCard.className = 'article-card';
-                    const date = new Date(article.timestamp).toLocaleString();
-                    
-                    articleCard.innerHTML = `
-                        <div class="article-number">#${index + 1}</div>
-                        <div class="article-content-wrapper">
-                            <h3>${article.title}</h3>
-                            <div class="article-meta">
-                                By: <strong>${article.author || 'Anonymous'}</strong> | Published: ${date}
-                            </div>
-                            <p>${article.content}</p>
-                            <div class="article-actions">
-                                <button class="delete-button" onclick="deleteArticle('${article.id}')">
-                                    <i class="fas fa-trash-alt"></i> Delete
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    articlesListDiv.appendChild(articleCard);
-                });
+            filteredArticles.forEach(article => {
+                const card = document.createElement('div');
+                card.className = 'article-card';
+                card.setAttribute('data-id', article.id);
+                card.innerHTML = `
+                    <span class="article-title" onclick="viewArticle('${article.id}')">${article.title}</span>
+                    <div>
+                        <button class="btn-danger" onclick="deleteArticle('${article.id}', event)">Delete</button>
+                    </div>
+                `;
+                listElement.appendChild(card);
             });
         }
+        
+        // --- SEO Utility ---
+        document.getElementById('search-input').addEventListener('input', renderArticleList);
 
-        // Handle form submission
-        articleForm.addEventListener('submit', async function(e) {
-            e.preventDefault(); 
-            const author = document.getElementById('author-name').value.trim();
-            const title = document.getElementById('article-title').value.trim();
-            const content = document.getElementById('article-content').value.trim();
+        function generateSlug() {
+            const title = document.getElementById('title-input').value;
+            const slug = title.toLowerCase()
+                              .trim()
+                              .replace(/[^a-z0-9\s-]/g, '') 
+                              .replace(/[\s-]+/g, '-');    
+            document.getElementById('slug-input').value = slug;
+        }
 
-            if (!author || !title || !content) {
-                alert('Please fill out all fields.');
-                return;
+        // --- Core Functions ---
+
+        async function uploadArticle() {
+            const title = document.getElementById('title-input').value;
+            const slug = document.getElementById('slug-input').value;
+            const meta = document.getElementById('meta-input').value;
+            const content = document.getElementById('article-area').value;
+            const imageFile = document.getElementById('image-upload').files[0]; 
+
+            if (!title || !content || !slug) {
+                 showMessage(document.getElementById('create-message-container'), 'error', '❌ कृपया Title, Content और SEO Slug भरें।');
+                 return;
             }
 
-            if (await postArticle({ author, title, content })) {
-                articleForm.reset();
-                renderArticles();
+            showMessage(document.getElementById('create-message-container'), 'success', 'Publishing article and saving to server...', false);
+
+            try {
+                // Backend API call for saving (We will implement this in the unified index.js)
+                const response = await fetch(`${RENDER_API_BASE_URL}/article-upload`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ title, slug, meta, content, imageFilename: imageFile ? imageFile.name : null })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || `Server Error: ${response.status}`);
+                }
+                
+                // Simulation of saving and getting new ID
+                const newId = (articlesData.length + 1).toString();
+                const newArticle = { id: newId, title, slug, meta, content: content.replace(/\n/g, '<br>'), likes: 0, comments: 0 };
+                articlesData.push(newArticle); 
+                
+                showMessage(document.getElementById('create-message-container'), 'success', '✅ Article Published Successfully! (Server Par Save Ho Gaya)', true);
+                setTimeout(showArticleList, 1500);
+
+            } catch (error) {
+                 showMessage(document.getElementById('create-message-container'), 'error', `❌ Upload Failed. **Backend is currently unreachable/down.** Error: ${error.message.substring(0, 70)}...`, true);
             }
-        });
+        }
+        
+        function viewArticle(id) {
+            currentArticleId = id;
+            const article = articlesData.find(a => a.id === id);
+            if (!article) return;
+
+            document.getElementById('article-title-view').textContent = article.title;
+            document.getElementById('article-meta-view').textContent = `Slug: ${article.slug} | Posted: ${new Date().toLocaleDateString()}`;
+            // Content ko HTML ke roop mein render karein, taaki images dikh sakein.
+            document.getElementById('article-content-view').innerHTML = article.content; 
+            
+            document.title = article.title + " | Your Blog"; 
+            
+            showInterface('article-view-interface');
+        }
+
+        function deleteArticle(id, event) {
+            if (event) event.stopPropagation(); 
+
+            if (!confirm('क्या आप सचमुच इस आर्टिकल को डिलीट करना चाहते हैं? (Owner Action)')) return;
+
+            // API Call to delete article from server
+            fetch(`${RENDER_API_BASE_URL}/article-delete/${id}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        articlesData = articlesData.filter(a => a.id !== id);
+                        showArticleList(); 
+                        alert('Article deleted successfully!');
+                    } else {
+                        alert('Delete failed. Backend error.');
+                    }
+                })
+                .catch(err => alert(`Deletion failed (Server error: ${err.message}).`));
+        }
+
+        async function checkGrammar(mode) {
+             let contentElement;
+             let buttonElement;
+             
+             if (mode === 'create') {
+                 contentElement = document.getElementById('article-area');
+                 buttonElement = document.getElementById('ai-check-create-btn');
+             } else { // mode === 'view'
+                 contentElement = document.getElementById('article-content-view');
+                 buttonElement = document.getElementById('ai-check-view-btn');
+             }
+             
+             const originalContent = contentElement.value || contentElement.innerText;
+             if (!originalContent.trim()) {
+                 alert('पहले कुछ कंटेंट लिखें!');
+                 return;
+             }
+
+             const originalText = buttonElement.textContent;
+             buttonElement.textContent = 'Checking...';
+             buttonElement.disabled = true;
+
+             try {
+                 // Backend API call for grammar check (We will implement this in the unified index.js)
+                 const response = await fetch(`${RENDER_API_BASE_URL}/ai-check-grammar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: originalContent })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error || !data.correctedContent) {
+                    throw new Error(data.error || `Server Error: ${response.status}`);
+                }
+                
+                const correctedContent = data.correctedContent;
+
+                if (mode === 'create') {
+                    contentElement.value = correctedContent;
+                    alert('✅ Grammar and spelling corrected in the text area.');
+                } else {
+                    // Update content in view mode (requires careful HTML handling for images)
+                    contentElement.innerHTML = correctedContent.replace(/\n/g, '<br>'); // Simple update
+                    alert('✅ Grammar corrected on the screen. (Note: Please edit source in Create view if permanent save is needed)');
+                }
+
+
+            } catch (error) {
+                 alert(`❌ AI Check Failed. Backend problem. Error: ${error.message}`);
+            } finally {
+                buttonElement.textContent = originalText;
+                buttonElement.disabled = false;
+            }
+        }
+
+        // --- Social/Interaction Placeholders ---
+        function handleSocial(action) {
+            alert(`Interaction: ${action} registered. (Requires Server/Database for permanent count)`);
+        }
 
         // Initial Load
-        document.addEventListener('DOMContentLoaded', renderArticles);
-        
-        window.deleteArticle = deleteArticle; // Expose globally
+        document.addEventListener('DOMContentLoaded', showArticleList);
     </script>
 </body>
 </html>
