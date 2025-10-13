@@ -2,8 +2,8 @@ import express from 'express';
 import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto'; 
-import axios from 'axios'; // For HTTP requests (Needs package.json update)
-import { HttpsProxyAgent } from 'https-proxy-agent'; // For proxy support (Needs package.json update)
+import axios from 'axios'; // For HTTP requests
+import { HttpsProxyAgent } from 'https-proxy-agent'; // For proxy support
 
 // --- Configuration ---
 const app = express();
@@ -12,35 +12,38 @@ const GA4_API_URL = 'https://www.google-analytics.com/mp/collect';
 
 // --- Proxy and User-Agent Data ---
 
-// 🛑 100% CORRECTED PROXY LIST (with http:// prefix for HttpsProxyAgent) 🛑
-// If you use proxies with authentication (user:pass), please update the format: 'http://user:pass@ip:port'
+// 🛑 10 NEW PREMIUM AUTHENTICATED PROXY LIST 🛑
+// Format: 'http://username:password@ip:port' (Needed for 407 error fix)
 let ALL_GLOBAL_PROXIES = [
-    'http://45.3.49.4:3129', 'http://209.50.164.165:3129', 'http://216.26.232.247:3129', 'http://65.111.3.145:3129',
-    'http://209.50.168.254:3129', 'http://104.207.63.195:3129', 'http://65.111.2.236:3129', 'http://104.207.61.3:3129',
-    'http://104.207.60.58:3129', 'http://209.50.166.110:3129', 'http://209.50.170.93:3129', 'http://216.26.254.100:3129',
-    'http://209.50.164.168:3129', 'http://104.207.57.162:3129', 'http://65.111.15.170:3129', 'http://209.50.170.126:3129',
-    'http://209.50.188.66:3129', 'http://65.111.6.214:3129', 'http://104.207.44.84:3129', 'http://104.207.40.98:3129',
-    'http://65.111.24.172:3129', 'http://216.26.254.110:3129', 'http://45.3.42.225:3129', 'http://45.3.55.246:3129',
-    'http://65.111.15.15:3129', 'http://65.111.29.210:3129', 'http://216.26.229.214:3129', 'http://45.3.32.13:3129',
-    'http://45.3.53.142:3129', 'http://154.213.160.98:3129', 'http://65.111.1.33:3129', 'http://216.26.237.142:3129',
-    'http://104.207.36.219:3129', 'http://45.3.39.66:3129', 'http://45.3.44.176:3129', 'http://104.207.60.243:3129',
-    'http://104.207.52.73:3129', 'http://65.111.5.122:3129', 'http://216.26.253.178:3129', 'http://104.207.34.14:3129',
-    'http://154.213.166.61:3129', 'http://209.50.171.188:3129', 'http://65.111.7.44:3129', 'http://65.111.4.124:3129',
-    'http://216.26.228.120:3129', 'http://216.26.232.191:3129', 'http://65.111.30.12:3129', 'http://45.3.45.87:3129',
-    'http://104.207.40.63:3129', 'http://104.207.37.61:3129', 'http://216.26.253.33:3129', 'http://104.207.36.147:3129',
-    'http://45.3.32.221:3129', 'http://154.213.161.220:3129', 'http://65.111.8.148:3129', 'http://104.207.43.160:3129',
-    'http://65.111.8.236:3129', 'http://154.213.164.107:3129', 'http://209.50.191.236:3129', 'http://65.111.7.120:3129',
-    'http://209.50.179.65:3129', 'http://65.111.13.25:3129', 'http://104.207.47.183:3129', 'http://65.111.26.13:3129',
-    'http://216.26.250.229:3129', 'http://104.207.62.125:3129', 'http://209.50.190.245:3129', 'http://216.26.233.180:3129',
-    'http://209.50.172.51:3129', 'http://45.3.51.2:3129', 'http://209.50.166.230:3129', 'http://104.207.45.3:3129',
-    'http://104.207.42.200:3129', 'http://45.3.41.231:3129', 'http://104.207.49.44:3129', 'http://45.3.51.234:3129',
-    'http://45.3.36.2:3129', 'http://209.50.186.85:3129', 'http://104.207.34.99:3129', 'http://209.50.163.251:3129',
-    'http://216.26.231.232:3129', 'http://209.50.178.133:3129', 'http://45.3.45.19:3129', 'http://65.111.12.11:3129',
-    'http://65.111.12.100:3129', 'http://216.26.242.199:3129', 'http://65.111.31.65:3129', 'http://154.213.163.95:3129',
-    'http://45.3.50.117:3129', 'http://65.111.22.188:3129', 'http://104.207.37.202:3129', 'http://154.213.160.201:3129',
-    'http://209.50.160.27:3129', 'http://65.111.28.111:3129', 'http://104.207.33.105:3129', 'http://216.26.241.226:3129',
-    'http://104.207.46.76:3129', 'http://216.26.240.92:3129', 'http://216.26.251.165:3129', 'http://45.3.47.110:3129'
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', // New Proxy 1
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', // New Proxy 1 (Repeat for better pool size)
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', // New Proxy 1 (Repeat)
+    
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6997', // Proxy 2
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6754', // Proxy 3
+    'http://bqcytpvz:399xb3kxqv6i@38.176.176.177:5572', // Proxy 4
+    'http://bqcytpvz:399xb3kxqv6i@198.23.239.134:6540', // Proxy 5
+    'http://bqcytpvz:399xb3kxqv6i@45.38.107.97:6014',  // Proxy 6
+    'http://bqcytpvz:399xb3kxqv6i@107.172.153.27:6543', // Proxy 7
+    'http://bqcytpvz:399xb3kxqv6i@54.137.96.74:6641',  // Proxy 8
+    'http://bqcytpvz:399xb3kxqv6i@216.18.27.159:6837', // Proxy 9
+    'http://bqcytpvz:399xb3kxqv6i@142.111.67.146:5611', // Proxy 10
+    'http://bqcytpvz:399xb3kxqv6i@142.147.128.93:6593', // Additional Proxy from list
+
+    // Duplicating the list to ensure a larger pool size and better randomization for views
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', 
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6997',
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6754',
+    'http://bqcytpvz:399xb3kxqv6i@38.176.176.177:5572',
+    'http://bqcytpvz:399xb3kxqv6i@198.23.239.134:6540',
+    'http://bqcytpvz:399xb3kxqv6i@45.38.107.97:6014', 
+    'http://bqcytpvz:399xb3kxqv6i@107.172.153.27:6543',
+    'http://bqcytpvz:399xb3kxqv6i@54.137.96.74:6641', 
+    'http://bqcytpvz:399xb3kxqv6i@216.18.27.159:6837',
+    'http://bqcytpvz:399xb3kxqv6i@142.111.67.146:5611',
+    'http://bqcytpvz:399xb3kxqv6i@142.147.128.93:6593'
 ];
+// -----------------------------------------------------------
 
 const GLOBAL_COUNTRIES = ["US", "IN", "CA", "GB", "AU", "DE", "FR", "JP", "BR", "SG", "AE", "ES", "IT", "MX", "NL"];
 
@@ -65,6 +68,7 @@ let ai;
 let geminiApiKey;
 
 function loadApiKey() {
+    // Your Render secrets are properly configured as a file named 'gemini'
     const secretPath = '/etc/secrets/gemini'; 
     try {
         if (fs.existsSync(secretPath)) {
@@ -123,7 +127,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
     const clientId = crypto.randomUUID(); 
     const pageUrl = getUrlToHit(distribution);
     
-    // --- 1. PROXY & USER-AGENT SETUP ---
+    // --- 1. PROXY & USER-AGENT SETUP (Use Authenticated Proxies) ---
     let proxyUrl = null;
     let agent = undefined;
 
@@ -131,9 +135,9 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
         // Select a random proxy from the global list
         const proxyIndex = Math.floor(Math.random() * ALL_GLOBAL_PROXIES.length);
         proxyUrl = ALL_GLOBAL_PROXIES[proxyIndex];
+        // HttpsProxyAgent handles the authentication part from the URL format
         agent = new HttpsProxyAgent(proxyUrl);
     } else {
-        // Fallback to direct connection if no proxies are left
         console.warn("WARNING: Proxy list is empty. Traffic will use Render IP.");
     }
     
@@ -143,7 +147,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 
     let events = [];
     
-    // 1. Session Start (Crucial for realism)
+    // 1. Session Start 
     if (realEvents) {
         events.push({ name: 'session_start' });
     }
@@ -179,21 +183,19 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
     // --- GA4 POST CALL using AXIOS and Proxy ---
     try {
         const response = await axios.post(endpoint, payload, {
-            // Set proxy agent and User-Agent header
             httpsAgent: agent, 
             headers: {
                 'Content-Type': 'application/json',
-                'User-Agent': userAgent // Set the realistic User-Agent
+                'User-Agent': userAgent 
             },
-            validateStatus: status => true, // Don't throw error on non-2xx status
+            validateStatus: status => true, 
             timeout: 5000 
         });
 
         if (response.status === 407) {
-            // 🛑 FIX for 407 (Authentication Required) ERROR 🛑
+            // 🛑 407 FIX: Should not happen with authenticated proxies, but good for fallback 🛑
             console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Removing proxy: ${proxyUrl}.`);
             
-            // Remove the failed proxy from the list so it won't be used again
             const failedProxyIndex = ALL_GLOBAL_PROXIES.indexOf(proxyUrl);
             if (failedProxyIndex > -1) {
                 ALL_GLOBAL_PROXIES.splice(failedProxyIndex, 1);
@@ -243,7 +245,19 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
         });
 
         const text = response.text.trim();
-        const captions = text.split('\n').filter(c => c.trim().length > 0);
+        // Since the prompt specifies a list of strings, we'll try to parse the output as JSON array if possible, 
+        // or fall back to splitting by newlines.
+        let captions;
+        try {
+            // Attempt to parse as a JSON array of strings
+            captions = JSON.parse(text);
+            if (!Array.isArray(captions)) throw new Error("Not an array");
+        } catch {
+             // Fallback: Split by newlines and clean up
+             captions = text.split('\n')
+                           .map(c => c.trim().replace(/^["\[\]\s]+|["\[\]\s]+$/g, ''))
+                           .filter(c => c.length > 0);
+        }
 
         console.log(`AI: Successfully generated ${captions.length} captions for: Style: ${style}, Topic: ${description.substring(0, 30)}...`);
         
@@ -258,7 +272,7 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
 });
 
 
-// --- Website Booster Endpoint (Now fully integrated with Proxy and Real Events) ---
+// --- Website Booster Endpoint ---
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_secret, views, distribution, country, real_events } = req.body;
     
@@ -274,7 +288,7 @@ app.post('/boost-mp', async (req, res) => {
     
     console.log(`BOOST JOB RECEIVED: GA ID ${ga_id}, Views: ${views}`);
     console.log(`TARGETING ${targetCountries.length} COUNTRIES: ${targetCountries.join(', ')}`);
-    console.log(`SIMULATION MODE: ${real_events ? 'REAL_USER_EVENTS (Proxy/UA)' : 'PAGE_VIEW_ONLY (Proxy/UA)'}`);
+    console.log(`SIMULATION MODE: ${real_events ? 'REAL_USER_EVENTS (Authenticated Proxy/UA)' : 'PAGE_VIEW_ONLY (Authenticated Proxy/UA)'}`);
 
     // Runs Asynchronously in the background
     (async () => {
@@ -298,7 +312,7 @@ app.post('/boost-mp', async (req, res) => {
     res.status(200).json({ 
         message: "Traffic boosting job successfully initiated and is running in the background.",
         jobId: Date.now(),
-        simulation_mode: real_events ? "REAL_USER_EVENTS (Proxy/UA)" : "PAGE_VIEW_ONLY (Proxy/UA)",
+        simulation_mode: real_events ? "REAL_USER_EVENTS (Authenticated Proxy/UA)" : "PAGE_VIEW_ONLY (Authenticated Proxy/UA)",
         countries_targeted: targetCountries.length,
         proxies_used: ALL_GLOBAL_PROXIES.length > 0 ? "YES" : "NO"
     });
