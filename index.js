@@ -3,6 +3,9 @@ import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto'; 
 import axios from 'axios'; 
+// We are using HttpsProxyAgent again, as it is the most reliable way to handle 
+// http://user:pass@ip:port format, which matches the Webshare example.
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 // --- Configuration ---
 const app = express();
@@ -11,35 +14,30 @@ const GA4_API_URL = 'https://www.google-analytics.com/mp/collect';
 
 // --- Proxy and User-Agent Data ---
 
-// 🛑 1. AUTHENTICATION DETAILS (Use the specific user/pass from your logs) 🛑
-// WebShare uses different usernames for different proxies, but we will use the pattern.
-const PROXY_USERNAME = 'bqcytpvz'; 
+// 🛑 1. CORRECTED PREMIUM PROXY URL LIST (10 Proxies with their specific usernames) 🛑
+// Format: http://username:password@ip:port
+// The IPs are from your Webshare screenshot.
 const PROXY_PASSWORD = '399xb3kxqv6i';
 
-// 🛑 2. GLOBAL PROXY POOL (Using Webshare's DNS Hostname format: host:port) 🛑
-// This format is generally more reliable for authenticated proxies.
-// We are using the webshare hostname (p.webshare.io) and port 80 as shown in your screenshot.
 const BASE_PROXIES = [
-    // We use the Hostname:Port pattern for cleaner Axios integration
-    'p.webshare.io:80', 
-    'p.webshare.io:80', 
-    'p.webshare.io:80', 
-    'p.webshare.io:80', 
-    'p.webshare.io:80', 
-    'p.webshare.io:80', 
-    'p.webshare.io:80', 
-    'p.webshare.io:80', 
-    'p.webshare.io:80', 
-    'p.webshare.io:80',
+    // Webshare's DNS hostname is used with specific usernames as shown in your logs
+    `http://bqcytpvz-1:${PROXY_PASSWORD}@216.26.27.159:80`, // (IP from your screenshot)
+    `http://bqcytpvz-2:${PROXY_PASSWORD}@198.23.239.134:80`,
+    `http://bqcytpvz-3:${PROXY_PASSWORD}@142.147.128.93:80`,
+    `http://bqcytpvz-4:${PROXY_PASSWORD}@142.111.48.253:80`,
+    `http://bqcytpvz-5:${PROXY_PASSWORD}@38.170.176.177:80`,
+    `http://bqcytpvz-6:${PROXY_PASSWORD}@107.172.163.27:80`,
+    `http://bqcytpvz-7:${PROXY_PASSWORD}@31.59.20.176:80`,
+    `http://bqcytpvz-8:${PROXY_PASSWORD}@64.137.96.74:80`,
+    `http://bqcytpvz-9:${PROXY_PASSWORD}@142.111.67.146:80`,
+    `http://bqcytpvz-10:${PROXY_PASSWORD}@45.38.107.97:80`,
 ];
 
-// 🛑 3. PROXY POOL DUPLICATION FOR REALISTIC ROTATION (5x repetition) 🛑
+// 🛑 2. PROXY POOL DUPLICATION FOR REALISTIC ROTATION (5x repetition - Total 50 proxies) 🛑
 let ALL_GLOBAL_PROXIES = [];
 for (let i = 0; i < 5; i++) { 
     ALL_GLOBAL_PROXIES.push(...BASE_PROXIES);
 }
-// Total pool size is 50, ensuring random use for a high view count (as requested for 500 views).
-
 
 const GLOBAL_COUNTRIES = ["US", "IN", "CA", "GB", "AU", "DE", "FR", "JP", "BR", "SG", "AE", "ES", "IT", "MX", "NL"];
 
@@ -66,12 +64,14 @@ let geminiApiKey;
 function loadApiKey() {
     const secretPath = '/etc/secrets/gemini'; 
     try {
+        // First, check the Secret File path (which is configured and working - SUCCESS)
         if (fs.existsSync(secretPath)) {
             geminiApiKey = fs.readFileSync(secretPath, 'utf8').trim();
             if (geminiApiKey) {
                 console.log("SUCCESS: Gemini API Key loaded from Secret File.");
             }
         } 
+        // Second, check the Environment Variable (backup)
         if (!geminiApiKey && process.env.GEMINI_API_KEY) {
              geminiApiKey = process.env.GEMINI_API_KEY;
              console.log("SUCCESS: Gemini API Key loaded from Environment Variable.");
@@ -116,38 +116,29 @@ function getUrlToHit(distribution) {
 }
 
 /**
- * Parses a host:port string into Axios-compatible proxy configuration,
- * explicitly including authentication details.
- */
-function parseProxyHostWithAuth(proxyString) {
-    const [host, port] = proxyString.split(':');
-    return {
-        protocol: 'http', 
-        host: host,
-        port: port,
-        // 🛑 FIX: Explicitly setting the authentication in the Axios proxy config
-        auth: {
-            username: PROXY_USERNAME,
-            password: PROXY_PASSWORD,
-        },
-    };
-}
-
-/**
  * Sends a single GA4 hit using a Proxy, Real User-Agent, and Real Events.
  */
 async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents) {
     const clientId = crypto.randomUUID(); 
     const pageUrl = getUrlToHit(distribution);
     
-    // --- 1. PROXY SELECTION ---
-    let proxyString = null;
-    let proxyConfig = null;
+    // --- 1. PROXY AGENT SETUP ---
+    let proxyAgent = null;
+    let proxyUrl = null;
 
     if (ALL_GLOBAL_PROXIES.length > 0) {
+        // Select a random proxy from the global list (rotation)
         const proxyIndex = Math.floor(Math.random() * ALL_GLOBAL_PROXIES.length);
-        proxyString = ALL_GLOBAL_PROXIES[proxyIndex];
-        proxyConfig = parseProxyHostWithAuth(proxyString);
+        proxyUrl = ALL_GLOBAL_PROXIES[proxyIndex];
+        
+        // 🛑 FIX: Using HttpsProxyAgent with the full URL (http://user:pass@ip:port)
+        // This is the most robust method for this proxy type.
+        try {
+            proxyAgent = new HttpsProxyAgent(proxyUrl);
+        } catch (e) {
+            console.error(`Invalid Proxy URL construction: ${proxyUrl}`, e.message);
+            proxyAgent = null; // Proceed without proxy if invalid
+        }
     } else {
         console.warn("WARNING: Proxy list is empty. Traffic will use Render IP.");
     }
@@ -186,18 +177,19 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
     const payload = { client_id: clientId, events: events };
     const endpoint = `${GA4_API_URL}?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
-    // --- AXIOS CONFIGURATION with Explicit Proxy ---
+    // --- AXIOS CONFIGURATION with HttpsProxyAgent ---
     const axiosConfig = {
         headers: {
             'Content-Type': 'application/json',
             'User-Agent': userAgent,
         },
         validateStatus: status => true, 
-        timeout: 12000, // Increased timeout to 12 seconds for better stability
+        timeout: 12000, 
     };
     
-    if (proxyConfig) {
-        axiosConfig.proxy = proxyConfig;
+    if (proxyAgent) {
+        axiosConfig.httpAgent = proxyAgent;
+        axiosConfig.httpsAgent = proxyAgent; 
     }
 
     // --- GA4 POST CALL ---
@@ -206,17 +198,17 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 
         // Check for 407 and other non-success status
         if (response.status === 407) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyString}. Proxies may be configured incorrectly or locked.`);
+            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyUrl}. The proxy's specific username/password may be incorrect.`);
         } else if (response.status !== 204) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: ${response.status}. Proxy: ${proxyString || 'None'}. Response Data: ${JSON.stringify(response.data)}`);
+            console.error(`GA4 Hit failed for ${countryCode}. Status: ${response.status}. Proxy: ${proxyUrl || 'None'}.`);
         } else {
              // Success (Status 204)
         }
     } catch (error) {
         // Handle network errors (ETIMEDOUT, ECONNREFUSED)
-        if (proxyString) {
-            // Log the error but DO NOT REMOVE the proxy. Proxy instability is likely the issue.
-            console.error(`Network Error (Proxy or Connection) for ${countryCode} using ${proxyString}:`, error.message);
+        if (proxyUrl) {
+            // Logging the error. Proxy instability is likely the issue if 407 is resolved.
+            console.error(`Network Error (Proxy or Connection) for ${countryCode} using ${proxyUrl}:`, error.message);
         } else {
              console.error(`Network Error (Direct Connection) for ${countryCode}:`, error.message);
         }
@@ -224,7 +216,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 }
 
 
-// --- AI Endpoints (Confirmed working and with hashtag logic) ---
+// --- AI Endpoints (Confirmed working) ---
 app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
     const { description, count } = req.body;
     const style = req.body.style || "Catchy and Funny"; 
@@ -285,8 +277,8 @@ app.post('/boost-mp', async (req, res) => {
     
     console.log(`BOOST JOB RECEIVED: GA ID ${ga_id}, Views: ${views}`);
     console.log(`TARGETING ${targetCountries.length} COUNTRIES: ${targetCountries.join(', ')}`);
-    console.log(`SIMULATION MODE: ${real_events ? 'REAL_USER_EVENTS (Webshare DNS Proxy/UA)' : 'PAGE_VIEW_ONLY (Webshare DNS Proxy/UA)'}`);
-    console.log(`PROXY POOL SIZE: ${ALL_GLOBAL_PROXIES.length}. Auth set via Axios proxy object.`);
+    console.log(`SIMULATION MODE: ${real_events ? 'REAL_USER_EVENTS (Authenticated Proxy/UA)' : 'PAGE_VIEW_ONLY (Authenticated Proxy/UA)'}`);
+    console.log(`PROXY POOL SIZE: ${ALL_GLOBAL_PROXIES.length}. Auth set via HttpsProxyAgent with specific usernames.`);
 
 
     // Runs Asynchronously in the background
@@ -312,7 +304,7 @@ app.post('/boost-mp', async (req, res) => {
     res.status(200).json({ 
         message: "Traffic boosting job successfully initiated and is running in the background. Check logs for stability.",
         jobId: Date.now(),
-        simulation_mode: real_events ? "REAL_USER_EVENTS (Webshare DNS Proxy/UA)" : "PAGE_VIEW_ONLY (Webshare DNS Proxy/UA)",
+        simulation_mode: real_events ? "REAL_USER_EVENTS (Authenticated Proxy/UA)" : "PAGE_VIEW_ONLY (Authenticated Proxy/UA)",
         countries_targeted: targetCountries.length,
         proxies_used: ALL_GLOBAL_PROXIES.length > 0 ? "YES" : "NO"
     });
