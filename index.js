@@ -3,9 +3,7 @@ import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto'; 
 import axios from 'axios'; 
-// We are using HttpsProxyAgent again, as it is the most reliable way to handle 
-// http://user:pass@ip:port format, which matches the Webshare example.
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent'; 
 
 // --- Configuration ---
 const app = express();
@@ -14,42 +12,50 @@ const GA4_API_URL = 'https://www.google-analytics.com/mp/collect';
 
 // --- Proxy and User-Agent Data ---
 
-// 🛑 1. CORRECTED PREMIUM PROXY URL LIST (10 Proxies with their specific usernames) 🛑
-// Format: http://username:password@ip:port
-// The IPs are from your Webshare screenshot.
-const PROXY_PASSWORD = '399xb3kxqv6i';
+// 🛑 1. CORRECT WEBSSHARE AUTHENTICATION DETAILS (From your screenshot) 🛑
+// These are now CORRECTLY set from your Webshare dashboard screenshots.
+const PROXY_USERNAME = 'bqcytpvz'; // Webshare Username
+const PROXY_PASSWORD = '399xb3kxqv6i'; // Webshare Password
 
-const BASE_PROXIES = [
-    // Webshare's DNS hostname is used with specific usernames as shown in your logs
-    `http://bqcytpvz-1:${PROXY_PASSWORD}@216.26.27.159:80`, // (IP from your screenshot)
-    `http://bqcytpvz-2:${PROXY_PASSWORD}@198.23.239.134:80`,
-    `http://bqcytpvz-3:${PROXY_PASSWORD}@142.147.128.93:80`,
-    `http://bqcytpvz-4:${PROXY_PASSWORD}@142.111.48.253:80`,
-    `http://bqcytpvz-5:${PROXY_PASSWORD}@38.170.176.177:80`,
-    `http://bqcytpvz-6:${PROXY_PASSWORD}@107.172.163.27:80`,
-    `http://bqcytpvz-7:${PROXY_PASSWORD}@31.59.20.176:80`,
-    `http://bqcytpvz-8:${PROXY_PASSWORD}@64.137.96.74:80`,
-    `http://bqcytpvz-9:${PROXY_PASSWORD}@142.111.67.146:80`,
-    `http://bqcytpvz-10:${PROXY_PASSWORD}@45.38.107.97:80`,
+// 🛑 2. WEBSSHARE IP:PORT LIST (From your screenshot) 🛑
+// These are the 10 IPs and Ports you provided.
+const RAW_PROXIES = [
+    '142.111.48.253:7030', // New port from screenshot
+    '31.59.20.176:6754',
+    '38.170.176.177:5572',
+    '198.23.239.134:6540',
+    '45.38.107.97:6014',
+    '107.172.163.27:6543',
+    '64.137.96.74:6641',
+    '216.26.27.159:6837',
+    '142.111.67.146:5611',
+    '142.147.128.93:6593',
 ];
 
-// 🛑 2. PROXY POOL DUPLICATION FOR REALISTIC ROTATION (5x repetition - Total 50 proxies) 🛑
-let ALL_GLOBAL_PROXIES = [];
-for (let i = 0; i < 5; i++) { 
-    ALL_GLOBAL_PROXIES.push(...BASE_PROXIES);
+// 🛑 3. PROXY URL CREATION AND POOL DUPLICATION (10x repetition - Total 100 proxies) 🛑
+const ALL_GLOBAL_PROXIES = [];
+const authString = `${PROXY_USERNAME}:${PROXY_PASSWORD}@`;
+
+// Repeat 10 times to create a pool of 100 rotating proxies
+for (let i = 0; i < 10; i++) { 
+    RAW_PROXIES.forEach(ipPort => {
+        // Constructing the exact URL format required: http://user:pass@ip:port
+        ALL_GLOBAL_PROXIES.push(`http://${authString}${ipPort}`);
+    });
 }
+console.log(`INFO: Proxy pool created with ${ALL_GLOBAL_PROXIES.length} Webshare URLs (using http://${PROXY_USERNAME}:***@IP:PORT format).`);
 
 const GLOBAL_COUNTRIES = ["US", "IN", "CA", "GB", "AU", "DE", "FR", "JP", "BR", "SG", "AE", "ES", "IT", "MX", "NL"];
 
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15',
-    'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/124.0.0.0',
     'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/605.1.15',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0'
 ];
 
-// --- Middleware and API Key Loading (Confirmed working) ---
+// --- Middleware and API Key Loading ---
 app.use(express.json());
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); 
@@ -64,14 +70,12 @@ let geminiApiKey;
 function loadApiKey() {
     const secretPath = '/etc/secrets/gemini'; 
     try {
-        // First, check the Secret File path (which is configured and working - SUCCESS)
         if (fs.existsSync(secretPath)) {
             geminiApiKey = fs.readFileSync(secretPath, 'utf8').trim();
             if (geminiApiKey) {
                 console.log("SUCCESS: Gemini API Key loaded from Secret File.");
             }
         } 
-        // Second, check the Environment Variable (backup)
         if (!geminiApiKey && process.env.GEMINI_API_KEY) {
              geminiApiKey = process.env.GEMINI_API_KEY;
              console.log("SUCCESS: Gemini API Key loaded from Environment Variable.");
@@ -131,13 +135,12 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
         const proxyIndex = Math.floor(Math.random() * ALL_GLOBAL_PROXIES.length);
         proxyUrl = ALL_GLOBAL_PROXIES[proxyIndex];
         
-        // 🛑 FIX: Using HttpsProxyAgent with the full URL (http://user:pass@ip:port)
-        // This is the most robust method for this proxy type.
+        // FIX: Using HttpsProxyAgent with the full URL (http://user:pass@ip:port)
         try {
             proxyAgent = new HttpsProxyAgent(proxyUrl);
         } catch (e) {
             console.error(`Invalid Proxy URL construction: ${proxyUrl}`, e.message);
-            proxyAgent = null; // Proceed without proxy if invalid
+            proxyAgent = null; 
         }
     } else {
         console.warn("WARNING: Proxy list is empty. Traffic will use Render IP.");
@@ -184,7 +187,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
             'User-Agent': userAgent,
         },
         validateStatus: status => true, 
-        timeout: 12000, 
+        timeout: 15000, 
     };
     
     if (proxyAgent) {
@@ -198,16 +201,15 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 
         // Check for 407 and other non-success status
         if (response.status === 407) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyUrl}. The proxy's specific username/password may be incorrect.`);
+            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyUrl}. This is now a Webshare issue if credentials are confirmed correct.`);
         } else if (response.status !== 204) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: ${response.status}. Proxy: ${proxyUrl || 'None'}.`);
+            console.error(`GA4 Hit failed for ${countryCode}. Status: ${response.status}. Proxy: ${proxyUrl || 'None'}. Response: ${response.data ? JSON.stringify(response.data) : 'No body'}`);
         } else {
              // Success (Status 204)
         }
     } catch (error) {
         // Handle network errors (ETIMEDOUT, ECONNREFUSED)
         if (proxyUrl) {
-            // Logging the error. Proxy instability is likely the issue if 407 is resolved.
             console.error(`Network Error (Proxy or Connection) for ${countryCode} using ${proxyUrl}:`, error.message);
         } else {
              console.error(`Network Error (Direct Connection) for ${countryCode}:`, error.message);
@@ -216,7 +218,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 }
 
 
-// --- AI Endpoints (Confirmed working) ---
+// --- AI Endpoints ---
 app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
     const { description, count } = req.body;
     const style = req.body.style || "Catchy and Funny"; 
@@ -277,15 +279,14 @@ app.post('/boost-mp', async (req, res) => {
     
     console.log(`BOOST JOB RECEIVED: GA ID ${ga_id}, Views: ${views}`);
     console.log(`TARGETING ${targetCountries.length} COUNTRIES: ${targetCountries.join(', ')}`);
-    console.log(`SIMULATION MODE: ${real_events ? 'REAL_USER_EVENTS (Authenticated Proxy/UA)' : 'PAGE_VIEW_ONLY (Authenticated Proxy/UA)'}`);
-    console.log(`PROXY POOL SIZE: ${ALL_GLOBAL_PROXIES.length}. Auth set via HttpsProxyAgent with specific usernames.`);
+    console.log(`SIMULATION MODE: ${real_events ? 'REAL_USER_EVENTS (Webshare Proxy/UA)' : 'PAGE_VIEW_ONLY (Webshare Proxy/UA)'}`);
+    console.log(`PROXY POOL SIZE: ${ALL_GLOBAL_PROXIES.length}. Auth set via HttpsProxyAgent (http://user:pass@ip:port).`);
 
 
     // Runs Asynchronously in the background
     (async () => {
         let successfulAttempts = 0;
         for (let i = 0; i < views; i++) {
-            // Select country randomly
             const countryCode = targetCountries[Math.floor(Math.random() * targetCountries.length)];
             
             try {
@@ -304,7 +305,7 @@ app.post('/boost-mp', async (req, res) => {
     res.status(200).json({ 
         message: "Traffic boosting job successfully initiated and is running in the background. Check logs for stability.",
         jobId: Date.now(),
-        simulation_mode: real_events ? "REAL_USER_EVENTS (Authenticated Proxy/UA)" : "PAGE_VIEW_ONLY (Authenticated Proxy/UA)",
+        simulation_mode: real_events ? "REAL_USER_EVENTS (Webshare Proxy/UA)" : "PAGE_VIEW_ONLY (Webshare Proxy/UA)",
         countries_targeted: targetCountries.length,
         proxies_used: ALL_GLOBAL_PROXIES.length > 0 ? "YES" : "NO"
     });
