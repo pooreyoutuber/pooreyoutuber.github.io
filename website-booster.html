@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Traffic Booster Tool</title>
+    <title>Website Traffic Booster Tool - Global 15 Countries</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -36,8 +36,8 @@
 
     <div class="w-full max-w-4xl">
         <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-600 mb-2">Website Traffic Booster Tool</h1>
-            <p class="text-gray-600">Increase your page views and engagement metrics</p>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-600 mb-2">🌎 Website Traffic Booster Tool (Global)</h1>
+            <p class="text-gray-600">Get automatic, diversified traffic from 15 top countries globally.</p>
         </header>
 
         <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100">
@@ -45,7 +45,7 @@
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-lg">
                 <p class="font-bold text-yellow-800 mb-2">⚠️ Important Instructions</p>
                 <ul class="text-sm text-yellow-700 list-disc ml-5 space-y-1">
-                    <li>This tool uses the GA4 Measurement Protocol. **Real Type Views** are simulated.</li>
+                    <li>Traffic will be automatically distributed across 15 countries.</li>
                     <li>**All URLs** MUST start with `https://`.</li>
                 </ul>
             </div>
@@ -63,33 +63,9 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label for="total-views" class="block text-sm font-medium text-gray-700 mb-2">3. Total Views to Generate (Max 500)</label>
-                        <input type="number" id="total-views" value="100" min="1" max="500" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
-                    </div>
-                    
-                    <div>
-                        <label for="country" class="block text-sm font-medium text-gray-700 mb-2">4. Target Country</label>
-                        <select id="country" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150 appearance-none bg-white bg-no-repeat bg-right-2 bg-center-y">
-                            <option value="Global">Global (Mixed Traffic)</option>
-                            <option value="US">United States (US)</option>
-                            <option value="IN" selected>India (IN)</option>
-                            <option value="CA">Canada (CA)</option>
-                            <option value="GB">United Kingdom (GB)</option>
-                            <option value="AU">Australia (AU)</option>
-                            <option value="DE">Germany (DE)</option>
-                            <option value="FR">France (FR)</option>
-                            <option value="JP">Japan (JP)</option>
-                            <option value="BR">Brazil (BR)</option>
-                            <option value="SG">Singapore (SG)</option>
-                            <option value="AE">United Arab Emirates (AE)</option>
-                            <option value="ES">Spain (ES)</option>
-                            <option value="IT">Italy (IT)</option>
-                            <option value="MX">Mexico (MX)</option>
-                            <option value="NL">Netherlands (NL)</option>
-                        </select>
-                    </div>
+                <div class="mb-4">
+                    <label for="total-views" class="block text-sm font-medium text-gray-700 mb-2">3. Total Views to Generate (Max 500)</label>
+                    <input type="number" id="total-views" value="100" min="1" max="500" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
                 </div>
                 
                 <div class="mb-6">
@@ -101,7 +77,7 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">6. Distribute Traffic Across Pages <span class="text-red-500 font-bold">(Total must be 100%)</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">5. Distribute Traffic Across Pages <span class="text-red-500 font-bold">(Total must be 100%)</span></label>
                     <div id="distribution-container" class="space-y-3 p-4 border border-gray-200 rounded-lg">
                         <div class="flex items-center space-x-2">
                             <input type="url" id="url-1" placeholder="Page 1 URL (Required): https://" class="input-field w-3/4 p-2 border border-gray-300 rounded-lg" required value="https://pooreyoutuber.github.io/website-booster.html">
@@ -154,9 +130,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateTotalDistribution();
             addLog('System ready. Enter details and click START.');
+            addLog('NOTE: Traffic will be automatically distributed across 15 countries.');
         });
         
-        // --- Helper Functions ---
+        // --- Helper Functions (Same as before) ---
 
         function updateTotalDistribution() {
             let total = 0;
@@ -211,9 +188,11 @@
             const gaId = document.getElementById('ga-id').value.trim();
             const apiSecret = document.getElementById('api-secret').value.trim();
             const totalViews = parseInt(document.getElementById('total-views').value, 10);
-            const country = document.getElementById('country').value;
-            // NEW: Get the state of the checkbox
             const realEvents = document.getElementById('real-events-checkbox').checked; 
+            
+            // CRITICAL CHANGE: The country is now hardcoded to signal the Backend 
+            // to use the full 15-country list for distribution.
+            const country = "All_15_Global"; 
 
             // 1. Basic Validation
             if (!gaId || !apiSecret || !totalViews) {
@@ -229,7 +208,7 @@
             let totalPercent = 0;
             const distribution = [];
             let firstUrlSet = false;
-
+            // ... (Distribution validation logic remains the same) ...
             for (let i = 1; i <= 3; i++) {
                 const url = document.getElementById(`url-${i}`).value.trim();
                 const percent = parseInt(document.getElementById(`percent-${i}`).value, 10);
@@ -263,17 +242,17 @@
             startButton.textContent = 'Sending Request...';
             displayStatus('Sending request to Backend. Please wait...', 'info');
             addLog('Sending request to Backend...');
-            addLog(`Simulation Mode: ${realEvents ? 'Real Events' : 'Page View Only'}`);
+            addLog(`Traffic Source: ${country}. Simulation Mode: ${realEvents ? 'Real Events' : 'Page View Only'}`);
 
             try {
-                // IMPORTANT: Sending the new 'country' and 'real_events' data to the Backend
+                // Sending the new 'country' flag to the Backend
                 const requestBody = { 
                     ga_id: gaId, 
                     api_secret: apiSecret, 
                     views: totalViews, 
                     distribution: distribution,
-                    country: country,
-                    real_events: realEvents // NEW: Include the flag
+                    country: country, // Sends "All_15_Global"
+                    real_events: realEvents 
                 };
                 
                 const response = await fetch(`${API_BASE_URL}/boost-mp`, {
@@ -289,16 +268,17 @@
                     throw new Error(`HTTP Error: ${response.status}. Detail: ${errorMessage}`);
                 }
                 
-                // 4. Success Handling
+                // 4. Success Handling (Job Accepted)
                 displayStatus('Success: Request accepted! Processing started.', 'success');
-                addLog(`Success: Boosting job initiated. Mode: ${result.simulation_mode}`);
-                addLog(`INFO: Targeting ${totalViews} views from ${country} for GA ID ${gaId}...`);
-                addLog('LOG: Processing will continue in the background.');
+                addLog(`✅ Job Accepted! Mode: ${result.simulation_mode}. This means the Backend is now processing the job.`);
+                addLog(`INFO: Targeting ${totalViews} views, distributed over 15 countries.`);
+                addLog('LOG: Check your Google Analytics Realtime Report in a few minutes for diversified views.');
 
             } catch (error) {
                 console.error("Traffic Generation Error:", error);
-                displayStatus(`Generation Failed. **Backend is down or connection failed**. Error: ${error.message}`, 'error');
-                addLog(`ERROR: Failed to start job. ${error.message}`);
+                displayStatus(`Generation Failed. Server response error. Error: ${error.message}. (Check GA Keys)`, 'error');
+                addLog(`❌ ERROR: Failed to start job. ${error.message}`);
+                addLog('HINT: This usually means the GA ID or API Secret is WRONG or the Render Server URL is outdated.');
             } finally {
                 startButton.disabled = false;
                 startButton.textContent = 'START TRAFFIC GENERATION';
