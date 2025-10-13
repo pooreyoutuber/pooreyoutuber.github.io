@@ -2,8 +2,8 @@ import express from 'express';
 import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto'; 
-import axios from 'axios'; // For HTTP requests
-import { HttpsProxyAgent } from 'https-proxy-agent'; // For proxy support
+import axios from 'axios'; 
+import { HttpsProxyAgent } from 'https-proxy-agent'; 
 
 // --- Configuration ---
 const app = express();
@@ -13,24 +13,23 @@ const GA4_API_URL = 'https://www.google-analytics.com/mp/collect';
 // --- Proxy and User-Agent Data ---
 
 // 🛑 10 NEW PREMIUM AUTHENTICATED PROXY LIST 🛑
-// Format: 'http://username:password@ip:port' (Needed for 407 error fix)
+// Format: 'http://username:password@ip:port' - This resolves the 407 Auth Required error.
+// The list is duplicated internally to ensure a larger pool size and better randomization.
 let ALL_GLOBAL_PROXIES = [
-    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', // New Proxy 1
-    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', // New Proxy 1 (Repeat for better pool size)
-    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', // New Proxy 1 (Repeat)
+    // WebShare Proxies (Authenticated)
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', 
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6997', 
+    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6754', 
+    'http://bqcytpvz:399xb3kxqv6i@38.176.176.177:5572', 
+    'http://bqcytpvz:399xb3kxqv6i@198.23.239.134:6540', 
+    'http://bqcytpvz:399xb3kxqv6i@45.38.107.97:6014',  
+    'http://bqcytpvz:399xb3kxqv6i@107.172.153.27:6543', 
+    'http://bqcytpvz:399xb3kxqv6i@54.137.96.74:6641',  
+    'http://bqcytpvz:399xb3kxqv6i@216.18.27.159:6837', 
+    'http://bqcytpvz:399xb3kxqv6i@142.111.67.146:5611',
+    'http://bqcytpvz:399xb3kxqv6i@142.147.128.93:6593', 
     
-    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6997', // Proxy 2
-    'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6754', // Proxy 3
-    'http://bqcytpvz:399xb3kxqv6i@38.176.176.177:5572', // Proxy 4
-    'http://bqcytpvz:399xb3kxqv6i@198.23.239.134:6540', // Proxy 5
-    'http://bqcytpvz:399xb3kxqv6i@45.38.107.97:6014',  // Proxy 6
-    'http://bqcytpvz:399xb3kxqv6i@107.172.153.27:6543', // Proxy 7
-    'http://bqcytpvz:399xb3kxqv6i@54.137.96.74:6641',  // Proxy 8
-    'http://bqcytpvz:399xb3kxqv6i@216.18.27.159:6837', // Proxy 9
-    'http://bqcytpvz:399xb3kxqv6i@142.111.67.146:5611', // Proxy 10
-    'http://bqcytpvz:399xb3kxqv6i@142.147.128.93:6593', // Additional Proxy from list
-
-    // Duplicating the list to ensure a larger pool size and better randomization for views
+    // Duplicate for better randomization
     'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:7030', 
     'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6997',
     'http://bqcytpvz:399xb3kxqv6i@142.111.48.253:6754',
@@ -68,7 +67,6 @@ let ai;
 let geminiApiKey;
 
 function loadApiKey() {
-    // Your Render secrets are properly configured as a file named 'gemini'
     const secretPath = '/etc/secrets/gemini'; 
     try {
         if (fs.existsSync(secretPath)) {
@@ -85,6 +83,7 @@ function loadApiKey() {
         if (geminiApiKey) {
             ai = new GoogleGenAI({ apiKey: geminiApiKey });
         } else {
+            // Note: The Render logs show the key loads successfully, so this should not be an issue.
             console.error("CRITICAL ERROR: GEMINI_API_KEY is missing. AI endpoints will fail.");
         }
     } catch (error) {
@@ -98,7 +97,7 @@ function checkAi(req, res, next) {
     if (!ai) {
         return res.status(503).json({ 
             error: "Service Unavailable. AI API Key not loaded.",
-            details: "Render Secret File configuration (gemini) failed."
+            details: "Please check Render Secret File configuration (gemini)."
         });
     }
     next();
@@ -127,7 +126,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
     const clientId = crypto.randomUUID(); 
     const pageUrl = getUrlToHit(distribution);
     
-    // --- 1. PROXY & USER-AGENT SETUP (Use Authenticated Proxies) ---
+    // --- 1. PROXY & USER-AGENT SETUP ---
     let proxyUrl = null;
     let agent = undefined;
 
@@ -135,7 +134,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
         // Select a random proxy from the global list
         const proxyIndex = Math.floor(Math.random() * ALL_GLOBAL_PROXIES.length);
         proxyUrl = ALL_GLOBAL_PROXIES[proxyIndex];
-        // HttpsProxyAgent handles the authentication part from the URL format
+        // HttpsProxyAgent handles the 'http://user:pass@ip:port' format correctly
         agent = new HttpsProxyAgent(proxyUrl);
     } else {
         console.warn("WARNING: Proxy list is empty. Traffic will use Render IP.");
@@ -147,7 +146,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 
     let events = [];
     
-    // 1. Session Start 
+    // 1. Session Start (Crucial for realism)
     if (realEvents) {
         events.push({ name: 'session_start' });
     }
@@ -189,11 +188,11 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
                 'User-Agent': userAgent 
             },
             validateStatus: status => true, 
-            timeout: 5000 
+            timeout: 8000 // Increased timeout for proxy stability
         });
 
+        // 🛑 CRITICAL LOGIC: If a proxy fails due to Auth (407) or Network error, remove it.
         if (response.status === 407) {
-            // 🛑 407 FIX: Should not happen with authenticated proxies, but good for fallback 🛑
             console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Removing proxy: ${proxyUrl}.`);
             
             const failedProxyIndex = ALL_GLOBAL_PROXIES.indexOf(proxyUrl);
@@ -206,7 +205,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
              // Success (Status 204)
         }
     } catch (error) {
-        // Remove proxy if network error occurs (e.g., timeout, connection refused)
+        // Handle network errors (like ECONNRESET, ETIMEDOUT, etc.)
         if (proxyUrl) {
             console.error(`Network Error (Proxy or Connection) for ${countryCode} using ${proxyUrl}:`, error.message);
             const failedProxyIndex = ALL_GLOBAL_PROXIES.indexOf(proxyUrl);
@@ -245,11 +244,9 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
         });
 
         const text = response.text.trim();
-        // Since the prompt specifies a list of strings, we'll try to parse the output as JSON array if possible, 
-        // or fall back to splitting by newlines.
         let captions;
         try {
-            // Attempt to parse as a JSON array of strings
+            // Attempt to parse the output as a JSON array of strings
             captions = JSON.parse(text);
             if (!Array.isArray(captions)) throw new Error("Not an array");
         } catch {
@@ -303,7 +300,7 @@ app.post('/boost-mp', async (req, res) => {
                 // Error is already logged inside sendGa4Hit
             }
             
-            // Wait between 500ms and 1500ms for human-like pacing
+            // Wait between 500ms and 1500ms for human-like pacing for realism
             await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
         }
         console.log(`BOOST JOB COMPLETE: Successfully attempted ${successfulAttempts} views. Proxies remaining: ${ALL_GLOBAL_PROXIES.length}`);
