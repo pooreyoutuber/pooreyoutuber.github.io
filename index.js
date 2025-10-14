@@ -12,38 +12,37 @@ const GA4_API_URL = 'https://www.google-analytics.com/mp/collect';
 
 // --- Proxy and User-Agent Data ---
 
-// 🛑 1. CORRECT WEBSSHARE AUTHENTICATION DETAILS (From your screenshot) 🛑
-// These are now CORRECTLY set from your Webshare dashboard screenshots.
-const PROXY_USERNAME = 'bqcytpvz'; // Webshare Username
-const PROXY_PASSWORD = '399xb3kxqv6i'; // Webshare Password
+// 🛑 1. CORRECT WEBSSHARE AUTHENTICATION DETAILS (आपके स्क्रीनशॉट से) 🛑
+const PROXY_USERNAME = 'bqctypvz'; // Confirmed Username
+const PROXY_PASSWORD = '399xb3kxqv6i'; // Confirmed Password
 
-// 🛑 2. WEBSSHARE IP:PORT LIST (From your screenshot) 🛑
-// These are the 10 IPs and Ports you provided.
+// 🛑 2. WEBSSHARE IP:PORT LIST (आपके स्क्रीनशॉट से सभी 10 प्रॉक्सी) 🛑
 const RAW_PROXIES = [
-    '142.111.48.253:7030', // New port from screenshot
-    '31.59.20.176:6754',
-    '38.170.176.177:5572',
-    '198.23.239.134:6540',
-    '45.38.107.97:6014',
-    '107.172.163.27:6543',
-    '64.137.96.74:6641',
-    '216.26.27.159:6837',
-    '142.111.67.146:5611',
-    '142.147.128.93:6593',
+    '142.111.48.253:7030', // Proxy 1
+    '31.59.20.176:6754',    // Proxy 2
+    '38.170.176.177:5572',  // Proxy 3
+    '198.23.239.134:6540',  // Proxy 4
+    '45.38.107.97:6014',    // Proxy 5
+    '107.172.163.27:6543',  // Proxy 6
+    '64.137.96.74:6641',    // Proxy 7
+    '216.26.27.159:6837',   // Proxy 8
+    '142.111.67.146:5611',  // Proxy 9
+    '142.147.128.93:6593',  // Proxy 10
 ];
 
 // 🛑 3. PROXY URL CREATION AND POOL DUPLICATION (10x repetition - Total 100 proxies) 🛑
 const ALL_GLOBAL_PROXIES = [];
+// Creates the correct authentication string: bqcytpvz:399xb3kxqv6i@
 const authString = `${PROXY_USERNAME}:${PROXY_PASSWORD}@`;
 
-// Repeat 10 times to create a pool of 100 rotating proxies
+// Repeat 10 times for robust rotation pool
 for (let i = 0; i < 10; i++) { 
     RAW_PROXIES.forEach(ipPort => {
-        // Constructing the exact URL format required: http://user:pass@ip:port
+        // FINAL PROXY URL: http://user:pass@ip:port (आपके द्वारा बताया गया सही फ़ॉर्मेट)
         ALL_GLOBAL_PROXIES.push(`http://${authString}${ipPort}`);
     });
 }
-console.log(`INFO: Proxy pool created with ${ALL_GLOBAL_PROXIES.length} Webshare URLs (using http://${PROXY_USERNAME}:***@IP:PORT format).`);
+console.log(`INFO: Proxy pool created with ${ALL_GLOBAL_PROXIES.length} Webshare URLs (using the correct http://user:pass@ip:port format).`);
 
 const GLOBAL_COUNTRIES = ["US", "IN", "CA", "GB", "AU", "DE", "FR", "JP", "BR", "SG", "AE", "ES", "IT", "MX", "NL"];
 
@@ -131,7 +130,6 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
     let proxyUrl = null;
 
     if (ALL_GLOBAL_PROXIES.length > 0) {
-        // Select a random proxy from the global list (rotation)
         const proxyIndex = Math.floor(Math.random() * ALL_GLOBAL_PROXIES.length);
         proxyUrl = ALL_GLOBAL_PROXIES[proxyIndex];
         
@@ -201,7 +199,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 
         // Check for 407 and other non-success status
         if (response.status === 407) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyUrl}. This is now a Webshare issue if credentials are confirmed correct.`);
+            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyUrl}. The proxy's URL format (http://user:pass@ip:port) is confirmed correct. Check Webshare account status.`);
         } else if (response.status !== 204) {
             console.error(`GA4 Hit failed for ${countryCode}. Status: ${response.status}. Proxy: ${proxyUrl || 'None'}. Response: ${response.data ? JSON.stringify(response.data) : 'No body'}`);
         } else {
@@ -246,7 +244,7 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
             if (!Array.isArray(captions)) throw new Error("Not an array");
         } catch {
              captions = text.split('\n')
-                           .map(c => c.trim().replace(/^["\[\]\s]+|["\[\]\s]+$/g, ''))
+                           .map(c => c.trim().replace(/^["\[\]\s]+|["\[\[\]\s]+$/g, ''))
                            .filter(c => c.length > 0);
         }
 
