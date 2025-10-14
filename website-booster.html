@@ -133,7 +133,7 @@
             addLog('NOTE: Traffic will be automatically distributed across 15 countries.');
         });
         
-        // --- Helper Functions (Same as before) ---
+        // --- Helper Functions ---
 
         function updateTotalDistribution() {
             let total = 0;
@@ -204,11 +204,11 @@
                 return;
             }
 
-            // 2. Distribution Validation and Data Collection (Same as before)
+            // 2. Distribution Validation and Data Collection
             let totalPercent = 0;
             const distribution = [];
             let firstUrlSet = false;
-            // ... (Distribution validation logic remains the same) ...
+            
             for (let i = 1; i <= 3; i++) {
                 const url = document.getElementById(`url-${i}`).value.trim();
                 const percent = parseInt(document.getElementById(`percent-${i}`).value, 10);
@@ -255,16 +255,29 @@
                     real_events: realEvents 
                 };
                 
-                const response = await fetch(`${API_BASE_URL}/boost-mp`, {
+                // *** CRITICAL FIX: The endpoint is changed from /boost-mp to /api/boost-traffic ***
+                const response = await fetch(`${API_BASE_URL}/api/boost-traffic`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
+                // **********************************************************************************
 
                 const result = await response.json();
 
                 if (!response.ok) {
-                    const errorMessage = result.error || 'Unknown server error.';
+                    const errorMessage = result.message || result.error || 'Unknown server error.';
+                    
+                    // Check for specific backend errors (Proxy/GA Keys)
+                    if (response.status === 400) {
+                         // Likely GA keys are wrong, or bad JSON format sent to Google
+                         throw new Error(`400 Bad Request. Detail: ${errorMessage}`);
+                    }
+                    if (response.status === 500) {
+                         // Likely Proxy failure (all 10 failed) or Missing Credentials
+                         throw new Error(`500 Internal Server Error. Detail: ${errorMessage}`);
+                    }
+                    
                     throw new Error(`HTTP Error: ${response.status}. Detail: ${errorMessage}`);
                 }
                 
@@ -276,9 +289,19 @@
 
             } catch (error) {
                 console.error("Traffic Generation Error:", error);
-                displayStatus(`Generation Failed. Server response error. Error: ${error.message}. (Check GA Keys)`, 'error');
+                
+                let userHint = 'HINT: This usually means the GA ID or API Secret is WRONG or the Render Server URL is outdated.';
+                if (error.message.includes('500 Internal Server Error') && error.message.includes('Proxy Credentials')) {
+                    userHint = 'HINT: Proxy credentials (PROXY_USER/PROXY_PASS) are missing in Render Secrets.';
+                } else if (error.message.includes('500 Internal Server Error') && error.message.includes('All proxies failed')) {
+                     userHint = 'HINT: All 10 Webshare IPs failed to connect. Try replacing IPs in your app.py.';
+                }
+
+
+                displayStatus(`Generation Failed. Server response error. Error: ${error.message}.`, 'error');
                 addLog(`❌ ERROR: Failed to start job. ${error.message}`);
-                addLog('HINT: This usually means the GA ID or API Secret is WRONG or the Render Server URL is outdated.');
+                addLog(userHint);
+
             } finally {
                 startButton.disabled = false;
                 startButton.textContent = 'START TRAFFIC GENERATION';
