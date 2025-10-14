@@ -106,7 +106,9 @@ def boost_traffic():
     if not all([ga_id, api_secret, url]):
         return jsonify({"success": False, "message": "Missing required fields (gaId, apiSecret, url)."}), 400
 
-    ga4_url = f"[https://www.google-analytics.com/mp/collect?measurement_id=](https://www.google-analytics.com/mp/collect?measurement_id=){ga_id}&api_secret={api_secret}"
+    # *** URL अब 100% सही है ***
+    ga4_url = f"https://www.google-analytics.com/mp/collect?measurement_id={ga_id}&api_secret={api_secret}"
+    # ***
 
     payload = {
         "client_id": str(uuid.uuid4()), 
@@ -189,4 +191,3 @@ def generate_caption():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-```eof
