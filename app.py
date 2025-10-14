@@ -1,4 +1,3 @@
-```python:Final Working GA4 and Caption API:app.py
 import os
 import random
 import json
