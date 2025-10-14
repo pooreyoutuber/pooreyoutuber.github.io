@@ -1,9 +1,9 @@
-import express from 'express';
+    import express from 'express';
 import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto'; 
-import axios from 'axios'; 
-import { HttpsProxyAgent } from 'https-proxy-agent'; 
+// --- NEW LIBRARY: Using require for request-promise as per user's request ---
+const rp = require('request-promise'); 
 
 // --- Configuration ---
 const app = express();
@@ -18,7 +18,7 @@ const PROXY_PASSWORD = '399xb3kxqv6i'; // Confirmed Password
 
 // 🛑 2. WEBSSHARE IP:PORT LIST (आपके स्क्रीनशॉट से सभी 10 प्रॉक्सी) 🛑
 const RAW_PROXIES = [
-    '142.111.48.253:7030', // Proxy 1
+    '142.111.48.253:7030', // Proxy 1 (आपके उदाहरण वाला)
     '31.59.20.176:6754',    // Proxy 2
     '38.170.176.177:5572',  // Proxy 3
     '198.23.239.134:6540',  // Proxy 4
@@ -30,15 +30,14 @@ const RAW_PROXIES = [
     '142.147.128.93:6593',  // Proxy 10
 ];
 
-// 🛑 3. PROXY URL CREATION AND POOL DUPLICATION (10x repetition - Total 100 proxies) 🛑
+// 🛑 3. PROXY URL CREATION: http://user:pass@ip:port 🛑
 const ALL_GLOBAL_PROXIES = [];
-// Creates the correct authentication string: bqcytpvz:399xb3kxqv6i@
 const authString = `${PROXY_USERNAME}:${PROXY_PASSWORD}@`;
 
-// Repeat 10 times for robust rotation pool
+// 10x Repetition of the 10 proxies for a total pool of 100
 for (let i = 0; i < 10; i++) { 
     RAW_PROXIES.forEach(ipPort => {
-        // FINAL PROXY URL: http://user:pass@ip:port (आपके द्वारा बताया गया सही फ़ॉर्मेट)
+        // EXACT FORMAT: http://bqctypvz:399xb3kxqv6i@142.111.48.253:7030
         ALL_GLOBAL_PROXIES.push(`http://${authString}${ipPort}`);
     });
 }
@@ -119,27 +118,18 @@ function getUrlToHit(distribution) {
 }
 
 /**
- * Sends a single GA4 hit using a Proxy, Real User-Agent, and Real Events.
+ * Sends a single GA4 hit using request-promise and direct proxy string.
  */
 async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents) {
     const clientId = crypto.randomUUID(); 
     const pageUrl = getUrlToHit(distribution);
     
-    // --- 1. PROXY AGENT SETUP ---
-    let proxyAgent = null;
+    // --- 1. PROXY URL SELECTION ---
     let proxyUrl = null;
 
     if (ALL_GLOBAL_PROXIES.length > 0) {
         const proxyIndex = Math.floor(Math.random() * ALL_GLOBAL_PROXIES.length);
-        proxyUrl = ALL_GLOBAL_PROXIES[proxyIndex];
-        
-        // FIX: Using HttpsProxyAgent with the full URL (http://user:pass@ip:port)
-        try {
-            proxyAgent = new HttpsProxyAgent(proxyUrl);
-        } catch (e) {
-            console.error(`Invalid Proxy URL construction: ${proxyUrl}`, e.message);
-            proxyAgent = null; 
-        }
+        proxyUrl = ALL_GLOBAL_PROXIES[proxyIndex]; // This is the http://user:pass@ip:port string
     } else {
         console.warn("WARNING: Proxy list is empty. Traffic will use Render IP.");
     }
@@ -178,30 +168,31 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
     const payload = { client_id: clientId, events: events };
     const endpoint = `${GA4_API_URL}?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
-    // --- AXIOS CONFIGURATION with HttpsProxyAgent ---
-    const axiosConfig = {
+    // --- REQUEST-PROMISE CONFIGURATION (as per your example) ---
+    const rpOptions = {
+        method: 'POST',
+        uri: endpoint,
+        body: payload,
+        json: true, // Automatically stringify body and parse response
         headers: {
-            'Content-Type': 'application/json',
+            'User-Type': 'application/json',
             'User-Agent': userAgent,
         },
-        validateStatus: status => true, 
+        proxy: proxyUrl, // <---- THE DIRECT PROXY STRING IS HERE
+        simple: false, // Prevents throwing errors on non-2xx status codes
+        resolveWithFullResponse: true, // We need the status code
         timeout: 15000, 
     };
-    
-    if (proxyAgent) {
-        axiosConfig.httpAgent = proxyAgent;
-        axiosConfig.httpsAgent = proxyAgent; 
-    }
 
-    // --- GA4 POST CALL ---
+    // --- GA4 POST CALL using request-promise ---
     try {
-        const response = await axios.post(endpoint, payload, axiosConfig);
+        const response = await rp(rpOptions);
 
         // Check for 407 and other non-success status
-        if (response.status === 407) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyUrl}. The proxy's URL format (http://user:pass@ip:port) is confirmed correct. Check Webshare account status.`);
-        } else if (response.status !== 204) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: ${response.status}. Proxy: ${proxyUrl || 'None'}. Response: ${response.data ? JSON.stringify(response.data) : 'No body'}`);
+        if (response.statusCode === 407) {
+            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyUrl}. NOTE: The direct proxy string method is used, check Webshare Whitelisting.`);
+        } else if (response.statusCode !== 204) {
+            console.error(`GA4 Hit failed for ${countryCode}. Status: ${response.statusCode}. Proxy: ${proxyUrl || 'None'}. Response: ${response.body ? JSON.stringify(response.body) : 'No body'}`);
         } else {
              // Success (Status 204)
         }
@@ -216,7 +207,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 }
 
 
-// --- AI Endpoints ---
+// --- AI Endpoints (Unchanged) ---
 app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
     const { description, count } = req.body;
     const style = req.body.style || "Catchy and Funny"; 
@@ -244,7 +235,7 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
             if (!Array.isArray(captions)) throw new Error("Not an array");
         } catch {
              captions = text.split('\n')
-                           .map(c => c.trim().replace(/^["\[\]\s]+|["\[\[\]\s]+$/g, ''))
+                           .map(c => c.trim().replace(/^["\[\]\s]+|["\[\]\s]+$/g, ''))
                            .filter(c => c.length > 0);
         }
 
@@ -261,7 +252,7 @@ app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
 });
 
 
-// --- Website Booster Endpoint ---
+// --- Website Booster Endpoint (Unchanged Logic) ---
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_secret, views, distribution, country, real_events } = req.body;
     
@@ -278,7 +269,7 @@ app.post('/boost-mp', async (req, res) => {
     console.log(`BOOST JOB RECEIVED: GA ID ${ga_id}, Views: ${views}`);
     console.log(`TARGETING ${targetCountries.length} COUNTRIES: ${targetCountries.join(', ')}`);
     console.log(`SIMULATION MODE: ${real_events ? 'REAL_USER_EVENTS (Webshare Proxy/UA)' : 'PAGE_VIEW_ONLY (Webshare Proxy/UA)'}`);
-    console.log(`PROXY POOL SIZE: ${ALL_GLOBAL_PROXIES.length}. Auth set via HttpsProxyAgent (http://user:pass@ip:port).`);
+    console.log(`PROXY POOL SIZE: ${ALL_GLOBAL_PROXIES.length}. Auth set via request-promise (http://user:pass@ip:port).`);
 
 
     // Runs Asynchronously in the background
