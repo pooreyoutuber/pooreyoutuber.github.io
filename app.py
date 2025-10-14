@@ -1,3 +1,4 @@
+```python:Final Working GA4 and Caption API:app.py
 import os
 import random
 import json
@@ -11,12 +12,18 @@ import uuid
 app = Flask(__name__)
 
 # Environment Variables (Render Secrets) से लोड करें
-# **कृपया सुनिश्चित करें कि ये तीनों Render Secrets में सेट हैं**
+# **PROXY_USER, PROXY_PASS, और GEMINI_API_KEY Render Secrets में होने चाहिए**
 PROXY_USER = os.environ.get('PROXY_USER')
 PROXY_PASS = os.environ.get('PROXY_PASS')
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 
+# *** RENDER LOGS के लिए DEBUGGING LINE ***
+# यह लाइन Render Logs में बताएगी कि PROXY_USER और PROXY_PASS लोड हुए या नहीं
+# अगर यह 'False | False' दिखाता है, तो Render Secrets में गलती है।
+print(f"DEBUG: PROXY_USER loaded: {bool(PROXY_USER)} | PROXY_PASS loaded: {bool(PROXY_PASS)}")
+
 # **Webshare Direct Connection के 10 IPs:Port**
+# अगर 'Failed to fetch' आता है, तो Webshare डैशबोर्ड से नए IPs जनरेट करके यहाँ अपडेट करें।
 RAW_PROXY_LIST = [
     '142.111.48.253:7030',
     '31.59.20.176:6754',
@@ -39,11 +46,12 @@ def send_ga4_hit_with_retry(ga4_url, payload):
     प्रॉक्सी लिस्ट को रोटेट करके GA4 हिट भेजता है।
     """
     if not PROXY_USER or not PROXY_PASS:
-        # अगर Secrets सेट नहीं हैं तो Error दें
-        raise ValueError("Proxy authentication credentials (PROXY_USER/PROXY_PASS) are missing from Environment Variables. Please set them in Render Secrets.")
+        # अगर Secrets सेट नहीं हैं तो यह एक्सेप्शन 'Traffic Boost Failed. Missing Proxy Credentials' देगा।
+        raise ValueError("Proxy authentication credentials (PROXY_USER/PROXY_PASS) are missing from Render Environment Variables.")
 
     last_error = None
 
+    # हर प्रॉक्सी IP को बारी-बारी से ट्राई करें
     for i, proxy_ip_port in enumerate(RAW_PROXY_LIST):
         # Authenticated Proxy URL बनाना
         proxy_url = f"http://{PROXY_USER}:{PROXY_PASS}@{proxy_ip_port}"
@@ -73,14 +81,14 @@ def send_ga4_hit_with_retry(ga4_url, payload):
             last_error = response
 
         except requests.exceptions.RequestException as e:
-            # Network errors (ETIMEDOUT, ECONNREFUSED)
+            # Network errors (Timeout, Connection Refused)
             print(f"Proxy {proxy_ip_port} failed with network error: {e}")
             last_error = e
 
     # अगर सभी प्रॉक्सी फेल हो गए
     if isinstance(last_error, requests.Response):
-        # HTTP Error
-        raise requests.exceptions.HTTPError(f"All proxies failed. Last status: {last_error.status_code}", response=last_error)
+        # HTTP Error (जैसे 400 Bad Request)
+        raise requests.exceptions.HTTPError(f"All proxies failed. Last HTTP Status: {last_error.status_code}", response=last_error)
     elif last_error:
         # Network Error
         raise last_error
@@ -99,7 +107,7 @@ def boost_traffic():
     if not all([ga_id, api_secret, url]):
         return jsonify({"success": False, "message": "Missing required fields (gaId, apiSecret, url)."}), 400
 
-    ga4_url = f"https://www.google-analytics.com/mp/collect?measurement_id={ga_id}&api_secret={api_secret}"
+    ga4_url = f"[https://www.google-analytics.com/mp/collect?measurement_id=](https://www.google-analytics.com/mp/collect?measurement_id=){ga_id}&api_secret={api_secret}"
 
     payload = {
         "client_id": str(uuid.uuid4()), 
@@ -125,22 +133,24 @@ def boost_traffic():
     except requests.exceptions.HTTPError as e:
         return jsonify({
             "success": False, 
-            "message": "Traffic Boost Failed. Proxy returned HTTP Error.", 
+            "message": f"Traffic Boost Failed. Proxy returned HTTP Error. Last Status: {e.response.status_code}", 
             "status": e.response.status_code, 
             "detail": str(e)
-        }), e.response.status_code
+        }), 500
         
     except ValueError as e:
+        # Missing Credentials error
         return jsonify({
             "success": False, 
-            "message": "Traffic Boost Failed. Missing Proxy Credentials.", 
+            "message": "Traffic Boost Failed. Missing Proxy Credentials in Render Secrets.", 
             "detail": str(e)
         }), 500
         
     except Exception as e:
+        # Network or All proxies failed error
         return jsonify({
             "success": False, 
-            "message": "Traffic Boost Failed. All proxies failed or connection error.", 
+            "message": "Traffic Boost Failed. All proxies failed to connect or timed out.", 
             "detail": str(e)
         }), 500
 
@@ -180,3 +190,4 @@ def generate_caption():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+```eof
