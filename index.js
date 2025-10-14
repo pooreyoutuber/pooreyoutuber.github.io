@@ -1,312 +1,162 @@
-// --- CommonJS Imports (Required due to removal of "type": "module" in package.json) ---
+// **Fix 1: Module Error** - CommonJS (require) सिंटैक्स का उपयोग करें
 const express = require('express');
-const fs = require('fs');
+const rp = require('request-promise'); 
 const { GoogleGenAI } = require('@google/genai'); 
-const crypto = require('crypto'); 
-const rp = require('request-promise'); // The library you requested for proxy handling
-
-// --- Configuration ---
 const app = express();
-const PORT = process.env.PORT || 3000;
-const GA4_API_URL = 'https://www.google-analytics.com/mp/collect';
 
-// --- Proxy and User-Agent Data ---
+const port = process.env.PORT || 10000;
 
-// 🛑 1. CORRECT WEBSSHARE AUTHENTICATION DETAILS (आपके स्क्रीनशॉट से) 🛑
-const PROXY_USERNAME = 'bqctypvz'; // Confirmed Username
-const PROXY_PASSWORD = '399xb3kxqv6i'; // Confirmed Password
-
-// 🛑 2. WEBSSHARE IP:PORT LIST (आपके स्क्रीनशॉट से सभी 10 प्रॉक्सी) 🛑
-const RAW_PROXIES = [
-    '142.111.48.253:7030', // Proxy 1
-    '31.59.20.176:6754',    // Proxy 2
-    '38.170.176.177:5572',  // Proxy 3
-    '198.23.239.134:6540',  // Proxy 4
-    '45.38.107.97:6014',    // Proxy 5
-    '107.172.163.27:6543',  // Proxy 6
-    '64.137.96.74:6641',    // Proxy 7
-    '216.26.27.159:6837',   // Proxy 8
-    '142.111.67.146:5611',  // Proxy 9
-    '142.147.128.93:6593',  // Proxy 10
+// ------------------- प्रॉक्सी लिस्ट कॉन्फ़िगरेशन -------------------
+// **Fix 2: 10 Proxy Rotation** - Webshare Backbone Connection Proxies
+// ये क्रेडेंशियल्स आपके स्क्रीनशॉट से लिए गए हैं।
+const PROXY_HOST = 'p.webshare.io';
+const PROXY_PORT = '80';
+const PROXY_LIST = [
+    // Username (Example): bqctypvz-1 से bqctypvz-10 तक 
+    { user: 'bqctypvz-1', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-2', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-3', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-4', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-5', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-6', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-7', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-8', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-9', pass: '399xb3kxqv6i' },
+    { user: 'bqctypvz-10', pass: '399xb3kxqv6i' }
 ];
+// -----------------------------------------------------------------
 
-// 🛑 3. PROXY URL CREATION: http://user:pass@ip:port 🛑
-const ALL_GLOBAL_PROXIES = [];
-const authString = `${PROXY_USERNAME}:${PROXY_PASSWORD}@`;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
+const ai = new GoogleGenAI(GEMINI_API_KEY);
 
-// 10x Repetition of the 10 proxies for a total pool of 100
-for (let i = 0; i < 10; i++) { 
-    RAW_PROXIES.forEach(ipPort => {
-        // EXACT FORMAT: http://bqctypvz:399xb3kxqv6i@142.111.48.253:7030
-        ALL_GLOBAL_PROXIES.push(`http://${authString}${ipPort}`);
-    });
-}
-console.log(`INFO: Proxy pool created with ${ALL_GLOBAL_PROXIES.length} Webshare URLs (using the correct http://user:pass@ip:port format).`);
-
-const GLOBAL_COUNTRIES = ["US", "IN", "CA", "GB", "AU", "DE", "FR", "JP", "BR", "SG", "AE", "ES", "IT", "MX", "NL"];
-
-const USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15',
-    'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/124.0.0.0',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/605.1.15',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0'
-];
-
-// --- Middleware and API Key Loading ---
 app.use(express.json());
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*'); 
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-});
-
-let ai;
-let geminiApiKey;
-
-function loadApiKey() {
-    const secretPath = '/etc/secrets/gemini'; 
-    try {
-        if (fs.existsSync(secretPath)) {
-            geminiApiKey = fs.readFileSync(secretPath, 'utf8').trim();
-            if (geminiApiKey) {
-                console.log("SUCCESS: Gemini API Key loaded from Secret File.");
-            }
-        } 
-        if (!geminiApiKey && process.env.GEMINI_API_KEY) {
-             geminiApiKey = process.env.GEMINI_API_KEY;
-             console.log("SUCCESS: Gemini API Key loaded from Environment Variable.");
-        }
-
-        if (geminiApiKey) {
-            ai = new GoogleGenAI({ apiKey: geminiApiKey });
-        } else {
-            console.error("CRITICAL ERROR: GEMINI_API_KEY is missing. AI endpoints will fail.");
-        }
-    } catch (error) {
-        console.error("FATAL ERROR loading API Key:", error);
-    }
-}
-
-loadApiKey();
-
-function checkAi(req, res, next) {
-    if (!ai) {
-        return res.status(503).json({ 
-            error: "Service Unavailable. AI API Key not loaded.",
-            details: "Please check Render Secret File configuration (gemini)."
-        });
-    }
-    next();
-}
-
-// --- Website Booster Helper Functions ---
-
-function getUrlToHit(distribution) {
-    let rand = Math.random() * 100;
-    let cumulative = 0;
-    for (const item of distribution) {
-        if (item.url && item.percent > 0) {
-            cumulative += item.percent;
-            if (rand < cumulative) {
-                return item.url;
-            }
-        }
-    }
-    return distribution[0]?.url || 'https://default-fallback.com/';
-}
 
 /**
- * Sends a single GA4 hit using request-promise and direct proxy string.
+ * प्रॉक्सी लिस्ट को Iterate करता है और पहला काम करने वाला प्रॉक्सी ढूंढता है
  */
-async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents) {
-    const clientId = crypto.randomUUID(); 
-    const pageUrl = getUrlToHit(distribution);
-    
-    // --- 1. PROXY URL SELECTION ---
-    let proxyUrl = null;
+async function sendHitWithRetry(ga4Url, payload) {
+    let successfulResponse = null;
+    let lastError = null;
 
-    if (ALL_GLOBAL_PROXIES.length > 0) {
-        const proxyIndex = Math.floor(Math.random() * ALL_GLOBAL_PROXIES.length);
-        proxyUrl = ALL_GLOBAL_PROXIES[proxyIndex]; // This is the http://user:pass@ip:port string
-    } else {
-        console.warn("WARNING: Proxy list is empty. Traffic will use Render IP.");
-    }
-    
-    // Select a random User-Agent
-    const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-    // ------------------------------------
+    for (let i = 0; i < PROXY_LIST.length; i++) {
+        const proxy = PROXY_LIST[i];
+        const proxyUrl = `http://${proxy.user}:${proxy.pass}@${PROXY_HOST}:${PROXY_PORT}`;
 
-    let events = [];
-    
-    if (realEvents) {
-        events.push({ name: 'session_start' });
-    }
-    
-    events.push({
-        name: 'page_view',
-        params: {
-            page_location: pageUrl,
-            page_title: `Simulated View from ${countryCode}`,
-            user_properties: {
-                geo_country: { value: countryCode } 
+        try {
+            console.log(`Trying Proxy ${i + 1}/${PROXY_LIST.length}: ${proxy.user}`);
+            
+            const options = {
+                method: 'POST',
+                uri: ga4Url,
+                proxy: proxyUrl, // Current Proxy URL
+                json: true,
+                body: payload,
+                simple: false, 
+                resolveWithFullResponse: true 
+            };
+
+            const response = await rp(options);
+
+            // अगर GA4 Success Status Code 204 है, तो तुरंत सफल (success) मानें और बाहर निकल जाएँ।
+            if (response.statusCode === 204) {
+                console.log(`SUCCESS: Hit sent successfully with Proxy ${i + 1}`);
+                successfulResponse = response;
+                break; 
             }
-        }
-    });
 
-    if (realEvents) {
-        events.push({ name: 'scroll', params: { direction: 'down' } });
-        
-        if (Math.random() < 0.5) { 
-             events.push({ name: 'click_cta', params: { button_text: 'Read More' } });
+            // अगर 407 (Auth Required) या 400 (Bad Request) है, तो इसे फेल माना जाएगा और अगला प्रॉक्सी ट्राई किया जाएगा।
+            console.warn(`Proxy ${i + 1} failed with status: ${response.statusCode}`);
+            lastError = response;
+
+        } catch (error) {
+            // Network errors (ETIMEDOUT, ECONNREFUSED) यहाँ पकड़े जाते हैं।
+            console.error(`Proxy ${i + 1} failed with network error: ${error.message}`);
+            lastError = error;
         }
-        
-        events.push({ name: 'engagement_time_msec', params: { engagement_time_msec: Math.floor(Math.random() * 5000) + 1000 } });
     }
 
-    const payload = { client_id: clientId, events: events };
-    const endpoint = `${GA4_API_URL}?measurement_id=${gaId}&api_secret=${apiSecret}`;
-
-    // --- REQUEST-PROMISE CONFIGURATION (as per your example) ---
-    const rpOptions = {
-        method: 'POST',
-        uri: endpoint,
-        body: payload,
-        json: true, // Automatically stringify body and parse response
-        headers: {
-            'User-Type': 'application/json',
-            'User-Agent': userAgent,
-        },
-        proxy: proxyUrl, // <---- THE DIRECT PROXY STRING IS HERE
-        simple: false, // Prevents throwing errors on non-2xx status codes
-        resolveWithFullResponse: true, // We need the status code
-        timeout: 15000, 
-    };
-
-    // --- GA4 POST CALL using request-promise ---
-    try {
-        const response = await rp(rpOptions);
-
-        // Check for 407 and other non-success status
-        if (response.statusCode === 407) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: 407 (Auth Required). Proxy: ${proxyUrl}. NOTE: The direct proxy string method is used, check Webshare Whitelisting.`);
-        } else if (response.statusCode !== 204) {
-            console.error(`GA4 Hit failed for ${countryCode}. Status: ${response.statusCode}. Proxy: ${proxyUrl || 'None'}. Response: ${response.body ? JSON.stringify(response.body) : 'No body'}`);
-        } else {
-             // Success (Status 204)
-        }
-    } catch (error) {
-        // Handle network errors (ETIMEDOUT, ECONNREFUSED)
-        if (proxyUrl) {
-            console.error(`Network Error (Proxy or Connection) for ${countryCode} using ${proxyUrl}:`, error.message);
-        } else {
-             console.error(`Network Error (Direct Connection) for ${countryCode}:`, error.message);
-        }
+    if (successfulResponse) {
+        return successfulResponse;
+    } else {
+        // अगर सारे प्रॉक्सी फेल हो गए
+        throw lastError;
     }
 }
 
+// ------------------------------------------------------------------
 
-// --- AI Endpoints (Unchanged Logic) ---
-app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
-    const { description, count } = req.body;
-    const style = req.body.style || "Catchy and Funny"; 
+// API Endpoint 1: Website Traffic Booster
+app.post('/api/boost-traffic', async (req, res) => {
+    const { gaId, apiSecret, url } = req.body; 
 
-    if (!description || !count) {
-        return res.status(400).json({ error: "Description and count are required." });
-    }
+    // GA4 Measurement Protocol URL
+    const ga4Url = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
-    const prompt = `Generate exactly ${count} Instagram Reels captions (in Hindi/Hinglish if topic is popular, otherwise English) for a video about "${description}". The style should be ${style}. 
-    
-    For each caption, also suggest 5 to 7 highly relevant and trending Instagram/Reels hashtags.
-    
-    Format the output strictly as a list of strings. Each string must contain the caption followed by the hashtags. Example: ["Caption 1 #tag1 #tag2", "Caption 2 #tagA #tagB"]`;
+    // Dynamic Payload
+    const payload = {
+        "client_id": "unique_visitor_id_" + Date.now().toString(36), 
+        "events": [{
+            "name": "page_view",
+            "params": {
+                "page_location": url,
+                "session_id": "session_" + Date.now(),
+                "engagement_time_msec": "5000"
+            }
+        }]
+    };
 
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash", 
-            contents: prompt
-        });
-
-        const text = response.text.trim();
-        let captions;
-        try {
-            captions = JSON.parse(text);
-            if (!Array.isArray(captions)) throw new Error("Not an array");
-        } catch {
-             captions = text.split('\n')
-                           .map(c => c.trim().replace(/^["\[\]\s]+|["\[\]\s]+$/g, ''))
-                           .filter(c => c.length > 0);
-        }
-
-        console.log(`AI: Successfully generated ${captions.length} captions for: Style: ${style}, Topic: ${description.substring(0, 30)}...`);
+        // प्रॉक्सी रोटेशन फंक्शन को कॉल करें
+        const response = await sendHitWithRetry(ga4Url, payload);
         
-        res.status(200).json({
-            captions: captions
-        });
+        // Success (204)
+        return res.json({ success: true, message: "Traffic hit sent successfully after proxy rotation.", status: response.statusCode });
 
     } catch (error) {
-        console.error("AI Generation Error:", error);
-        res.status(500).json({ error: "Failed to generate captions from AI.", detail: error.message });
+        // Catch-all failure after trying all proxies
+        const statusCode = error.statusCode || 500;
+        const errorMessage = error.message || "All proxies failed to connect or authenticate.";
+        
+        console.error("FINAL FAILURE: All proxies failed.", errorMessage);
+
+        res.status(statusCode).json({ 
+            success: false, 
+            message: "Traffic Boost Failed. All 10 proxies failed (407 or Timeout).", 
+            detail: errorMessage 
+        });
     }
 });
 
+// ------------------------------------------------------------------
 
-// --- Website Booster Endpoint (Unchanged Logic) ---
-app.post('/boost-mp', async (req, res) => {
-    const { ga_id, api_secret, views, distribution, country, real_events } = req.body;
+// API Endpoint 2: AI Caption Generator
+app.post('/api/generate-caption', async (req, res) => {
+    const { reelTopic, captionStyle, numberOfCaptions } = req.body;
     
-    if (!ga_id || !api_secret || !views || !distribution || !country) {
-        return res.status(400).json({ error: "Missing required fields for traffic boosting." });
+    if (!GEMINI_API_KEY) {
+        return res.status(500).json({ success: false, message: "GEMINI_API_KEY is not configured." });
     }
-    
-    let targetCountries = (country === "All_15_Global") ? GLOBAL_COUNTRIES : [country];
-    
-    if (ALL_GLOBAL_PROXIES.length === 0) {
-        console.warn("CRITICAL: PROXY LIST IS EMPTY. Traffic boosting will use Render IP.");
+
+    try {
+        const prompt = `Generate ${numberOfCaptions} catchy, viral captions in ${captionStyle} style for a reel about "${reelTopic}". Respond with a simple, numbered list of captions.`;
+        
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: [{ role: 'user', parts: [{ text: prompt }] }]
+        });
+        
+        const rawCaptions = response.text.trim().split('\n');
+        const captions = rawCaptions.map(line => line.replace(/^\s*\d+\.\s*/, '').trim()).filter(line => line.length > 0);
+
+        res.json({ success: true, captions: captions });
+    } catch (error) {
+        console.error("Gemini API Error:", error.message);
+        res.status(500).json({ success: false, message: "Caption generation failed. Check Gemini API key.", detail: error.message });
     }
-    
-    console.log(`BOOST JOB RECEIVED: GA ID ${ga_id}, Views: ${views}`);
-    console.log(`TARGETING ${targetCountries.length} COUNTRIES: ${targetCountries.join(', ')}`);
-    console.log(`SIMULATION MODE: ${real_events ? 'REAL_USER_EVENTS (Webshare Proxy/UA)' : 'PAGE_VIEW_ONLY (Webshare Proxy/UA)'}`);
-    console.log(`PROXY POOL SIZE: ${ALL_GLOBAL_PROXIES.length}. Auth set via request-promise (http://user:pass@ip:port).`);
-
-
-    // Runs Asynchronously in the background
-    (async () => {
-        let successfulAttempts = 0;
-        for (let i = 0; i < views; i++) {
-            const countryCode = targetCountries[Math.floor(Math.random() * targetCountries.length)];
-            
-            try {
-                await sendGa4Hit(ga_id, api_secret, distribution, countryCode, real_events);
-                successfulAttempts++;
-            } catch (error) {
-                // Error is already logged inside sendGa4Hit
-            }
-            
-            // Wait between 500ms and 1500ms for human-like pacing for realism
-            await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
-        }
-        console.log(`BOOST JOB COMPLETE: Attempted ${views} views. Successful attempts: ${successfulAttempts}.`);
-    })();
-    
-    res.status(200).json({ 
-        message: "Traffic boosting job successfully initiated and is running in the background. Check logs for stability.",
-        jobId: Date.now(),
-        simulation_mode: real_events ? "REAL_USER_EVENTS (Webshare Proxy/UA)" : "PAGE_VIEW_ONLY (Webshare Proxy/UA)",
-        countries_targeted: targetCountries.length,
-        proxies_used: ALL_GLOBAL_PROXIES.length > 0 ? "YES" : "NO"
-    });
 });
 
+// ------------------------------------------------------------------
 
-// Simple root route to check server health
-app.get('/', (req, res) => {
-    res.status(200).send("Render Backend is running. AI Status: " + (ai ? "Active" : "Key Missing/Loading"));
-});
-
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running on port ${port} 🎉`);
 });
