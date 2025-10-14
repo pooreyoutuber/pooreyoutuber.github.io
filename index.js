@@ -1,9 +1,9 @@
-    import express from 'express';
-import fs from 'fs';
-import { GoogleGenAI } from '@google/genai';
-import crypto from 'crypto'; 
-// --- NEW LIBRARY: Using require for request-promise as per user's request ---
-const rp = require('request-promise'); 
+// --- CommonJS Imports (Required due to removal of "type": "module" in package.json) ---
+const express = require('express');
+const fs = require('fs');
+const { GoogleGenAI } = require('@google/genai'); 
+const crypto = require('crypto'); 
+const rp = require('request-promise'); // The library you requested for proxy handling
 
 // --- Configuration ---
 const app = express();
@@ -18,7 +18,7 @@ const PROXY_PASSWORD = '399xb3kxqv6i'; // Confirmed Password
 
 // 🛑 2. WEBSSHARE IP:PORT LIST (आपके स्क्रीनशॉट से सभी 10 प्रॉक्सी) 🛑
 const RAW_PROXIES = [
-    '142.111.48.253:7030', // Proxy 1 (आपके उदाहरण वाला)
+    '142.111.48.253:7030', // Proxy 1
     '31.59.20.176:6754',    // Proxy 2
     '38.170.176.177:5572',  // Proxy 3
     '198.23.239.134:6540',  // Proxy 4
@@ -207,7 +207,7 @@ async function sendGa4Hit(gaId, apiSecret, distribution, countryCode, realEvents
 }
 
 
-// --- AI Endpoints (Unchanged) ---
+// --- AI Endpoints (Unchanged Logic) ---
 app.post('/api/ai-caption-generate', checkAi, async (req, res) => {
     const { description, count } = req.body;
     const style = req.body.style || "Catchy and Funny"; 
