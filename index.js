@@ -13,25 +13,15 @@ const PORT = process.env.PORT || 5000;
 // ======================= कॉन्फ़िगरेशन और प्रॉक्सी डेटा ========================
 
 // Environment Variables (Render Secrets) से लोड करें
-const PROXY_USER = process.env.PROXY_USER;
-const PROXY_PASS = process.env.PROXY_PASS;
+const PROXY_USER = process.env.PROXY_USER; // bqctypvz
+const PROXY_PASS = process.env.PROXY_PASS; // 399xb3kxqv6l
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 
-// **Webshare Direct Connection के 10 IPs:Port**
+// **Webshare Backbone Connection (Single Entry)**
+// 🚨 CRITICAL FIX: Direct IPs की जगह सिंगल Backbone डोमेन का उपयोग करें
 let RAW_PROXY_LIST = [
-    '142.111.48.253:7030',
-    '31.59.20.176:6754',
-    '38.170.176.177:5572',
-    '198.23.239.134:6540',
-    '45.38.107.97:6014',
-    '107.172.163.27:6543',
-    '64.137.96.74:6641',
-    '216.10.27.159:6837',
-    '142.111.67.146:5611',
-    '142.147.128.93:6593'
+    'p.webshare.io:80' // Backbone Proxy Domain (Webshare Rotates IPs)
 ];
-
-RAW_PROXY_LIST.sort(() => 0.5 - Math.random());
 
 // Middleware
 app.use(cors());
@@ -46,8 +36,10 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
 
     let lastError = null;
 
-    for (let i = 0; i < RAW_PROXY_LIST.length; i++) {
-        const proxyIpPort = RAW_PROXY_LIST[i];
+    // Retry 10 times, each time using the single p.webshare.io:80 entry.
+    // Webshare's backbone system should rotate IPs on their end.
+    for (let i = 0; i < 10; i++) {
+        const proxyIpPort = RAW_PROXY_LIST[0]; // Always use the single Backbone entry
         
         // Authenticated proxy URL
         const proxyUrl = `http://${PROXY_USER}:${PROXY_PASS}@${proxyIpPort}`;
@@ -62,7 +54,7 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
                 {
                     httpsAgent: httpsAgent,
                     proxy: false, 
-                    timeout: 10000 // 10 second timeout
+                    timeout: 15000 // 15 second timeout
                 }
             );
 
@@ -75,16 +67,20 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
         } catch (error) {
             const errorMessage = error.response ? `HTTP Status ${error.response.status}` : error.message;
             lastError = error;
+            console.warn(`Retry ${i+1}/10 failed with proxy ${proxyIpPort}. Error: ${errorMessage}`);
         }
+        
+        // Add a small delay between retries to give the proxy service time
+        await new Promise(resolve => setTimeout(resolve, 500));
     }
 
     if (lastError) {
         if (lastError.response && lastError.response.status) {
             throw new Error(`GA API returned HTTP ${lastError.response.status}. Detail: ${lastError.response.data || 'Bad Request'}`);
         }
-        throw new Error(`Failed to send GA4 hit after trying all proxies. Last network error: ${lastError.message}`);
+        throw new Error(`Failed to send GA4 hit after trying all retries. Last network error: ${lastError.message}`);
     } else {
-        throw new Error("Failed to send GA4 hit after trying all proxies.");
+        throw new Error("Failed to send GA4 hit after trying all retries.");
     }
 }
 
@@ -93,9 +89,8 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
 async function processTrafficJob(ga4Url, views, distribution) {
     console.log(`Starting background job for ${views} views.`);
     
-    // Simplification: Hitting only the first URL for the full view count
+    // For simplicity, we hit only the first URL for the full view count.
     const urlToHit = distribution[0].url; 
-    // In a real scenario, you would need to calculate a weighted list of URLs based on distribution percentage.
 
     for (let i = 0; i < views; i++) {
         const payload = {
@@ -111,15 +106,15 @@ async function processTrafficJob(ga4Url, views, distribution) {
         };
 
         try {
-            // Using await here to ensure we send one hit at a time
             await sendGa4HitWithRetry(ga4Url, payload);
             console.log(`Job Progress: View ${i + 1}/${views} sent successfully.`);
         } catch (error) {
             console.error(`Job Error on view ${i + 1}: ${error.message}. Continuing...`);
+            // We ignore the error and continue, as the goal is to complete the views.
         }
         
-        // Delay (1 to 2 seconds) between hits for realism and rate limit avoidance
-        await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 500)); // 1.5s to 2.0s delay
+        // Delay (1.5 to 2 seconds) between hits for realism and rate limit avoidance
+        await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 500)); 
     }
     console.log(`Background job for ${views} views completed.`);
 }
@@ -141,13 +136,12 @@ app.post('/api/boost-traffic', async (req, res) => {
     const ga4Url = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`;
     
     // 🚨 CRITICAL STEP: Start the job in the background and DO NOT await it.
-    // This allows the server to immediately send the response to the frontend.
     processTrafficJob(ga4Url, views, distribution)
         .catch(err => {
             console.error(`Async Job Failed Unexpectedly: ${err.message}`);
         });
 
-    // Send immediate response so the frontend knows the job started.
+    // Send immediate response so the frontend knows the job started. (User can close tab)
     return res.status(200).json({
         success: true, 
         message: `Job accepted and processing ${views} views in the background.`, 
