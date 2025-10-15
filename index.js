@@ -22,23 +22,36 @@ let RAW_PROXY_LIST = [
     'p.webshare.io:80' // Backbone Proxy Domain (Webshare Rotates IPs)
 ];
 
+// रैंडम यूज़र एजेंट (Real User Agent Strings)
+const USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+    'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.101 Mobile Safari/537.36',
+    'Mozilla/5.0 (iPad; CPU OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/605.1.15'
+];
+
+// रैंडम स्क्रीन साइज़
+const SCREEN_SIZES = [
+    '1920x1080', '1366x768', '1440x900', '375x667', '414x896'
+];
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // ======================= प्रॉक्सी लॉजिक (Sub-Function) ========================
 
-async function sendGa4HitWithRetry(ga4Url, payload) {
+async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
     if (!PROXY_USER || !PROXY_PASS) {
         throw new Error("Traffic Boost Failed. Missing Proxy Credentials in Render Environment Variables.");
     }
 
     let lastError = null;
-    const MAX_RETRIES = 5; // Retries reduced to 5 for efficiency
+    const MAX_RETRIES = 5; 
 
     for (let i = 0; i < MAX_RETRIES; i++) {
         const proxyIpPort = RAW_PROXY_LIST[0]; 
-        
         const proxyUrl = `http://${PROXY_USER}:${PROXY_PASS}@${proxyIpPort}`;
         const httpsAgent = new HttpsProxyAgent(proxyUrl);
         
@@ -49,7 +62,11 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
                 {
                     httpsAgent: httpsAgent,
                     proxy: false, 
-                    timeout: 15000 
+                    timeout: 15000, 
+                    // CRITICAL: Request Headers में User-Agent भेजें
+                    headers: {
+                        'User-Agent': userAgent || USER_AGENTS[0] 
+                    }
                 }
             );
 
@@ -63,6 +80,9 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
             const errorMessage = error.response ? `HTTP Status ${error.response.status}` : error.message;
             lastError = error;
             console.warn(`Retry ${i+1}/${MAX_RETRIES} failed. Error: ${errorMessage}`);
+            if (String(errorMessage).includes('407')) {
+                 throw new Error("Proxy Authentication Failed (407). Check PROXY_USER/PASS in Render Secrets.");
+            }
         }
         
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -78,85 +98,93 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
     }
 }
 
-// ======================= ASYNC BACKGROUND JOB (REAL EVENTS) ========================
+// ======================= ASYNC BACKGROUND JOB (MAXIMUM REALISM) ========================
 
-// एक छोटे समय के लिए डिले (delay) फ़ंक्शन
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function processTrafficJob(ga4Url, views, distribution) {
-    console.log(`Starting REAL EVENTS background job for ${views} views.`);
+    console.log(`Starting MAXIMUM REALISM job for ${views} views.`);
     
     const urlToHit = distribution[0].url; 
-
+    
     for (let i = 0; i < views; i++) {
         const client_id = uuidv4();
         const session_id = String(Date.now());
         
-        // 1. Session Start (Engagement Events का बेस)
-        const sessionStartPayload = {
-            "client_id": client_id, 
-            "events": [{
-                "name": "session_start",
-                "params": {
-                    "page_location": urlToHit
-                }
-            }]
-        };
-        
-        try {
-            await sendGa4HitWithRetry(ga4Url, sessionStartPayload);
-            console.log(`Job ${i + 1}: Session Started.`);
-        } catch (error) {
-            console.error(`Job ${i + 1}: Session Start failed. ${error.message}`);
-        }
-        
-        await wait(500 + Math.random() * 500); // 0.5s to 1s delay
-        
-        // 2. Page View (सबसे ज़रूरी)
-        const pageViewPayload = {
-            "client_id": client_id, 
-            "events": [{
-                "name": "page_view",
-                "params": {
-                    "page_location": urlToHit,
-                    "session_id": session_id,
-                    "engagement_time_msec": String(5000 + Math.floor(Math.random() * 5000)) // 5s to 10s engagement
-                }
-            }]
-        };
+        // Randomly select User-Agent and Screen Size for this user
+        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        const screen_resolution = SCREEN_SIZES[Math.floor(Math.random() * SCREEN_SIZES.length)];
+        const engagement_duration = 10000 + Math.floor(Math.random() * 10000); // 10s to 20s engagement
 
-        try {
-            await sendGa4HitWithRetry(ga4Url, pageViewPayload);
-            console.log(`Job ${i + 1}: Page View sent successfully.`);
-        } catch (error) {
-            console.error(`Job ${i + 1}: Page View failed. ${error.message}`);
-        }
-        
-        await wait(2000 + Math.random() * 1500); // 2s to 3.5s delay
-        
-        // 3. Scroll Event (Randomly 60% time भेजेंगे)
-        if (Math.random() < 0.6) {
-             const scrollPayload = {
-                "client_id": client_id, 
-                "events": [{
-                    "name": "scroll",
+        // --- 1. Session Start + Page View (The Start) ---
+        const initialPayload = {
+            "client_id": client_id, 
+            "user_properties": {
+                "user_agent": { "value": userAgent }, // Custom User Property (Optional, but good practice)
+                "screen_resolution": { "value": screen_resolution }
+            },
+            "events": [
+                { "name": "session_start" },
+                { 
+                    "name": "page_view",
                     "params": {
                         "page_location": urlToHit,
                         "session_id": session_id,
-                        "percent_scrolled": 90 // मान लीजिए यूज़र 90% स्क्रॉल करता है
+                        "engagement_time_msec": String(engagement_duration)
+                    }
+                }
+            ]
+        };
+        
+        try {
+            await sendGa4HitWithRetry(ga4Url, initialPayload, userAgent);
+            console.log(`Job ${i + 1}: Session Start & Page View sent.`);
+        } catch (error) {
+            console.error(`Job ${i + 1}: Initial events failed. ${error.message}`);
+        }
+        
+        await wait(2000 + Math.random() * 1500); // 2s to 3.5s delay
+
+        // --- 2. Action Event (Click or Scroll) ---
+        if (Math.random() < 0.7) { // 70% chance of an action
+            let actionName;
+            let actionParams;
+
+            if (Math.random() < 0.5) {
+                // 50% chance of Scroll
+                actionName = "scroll";
+                actionParams = { "percent_scrolled": 80 + Math.floor(Math.random() * 20) }; // 80-100% scroll
+                console.log(`Job ${i + 1}: Sending Scroll.`);
+            } else {
+                // 50% chance of Click (or another interaction)
+                actionName = "click";
+                actionParams = { "link_text": "read_more_button" }; // Simulating a button click
+                console.log(`Job ${i + 1}: Sending Click.`);
+            }
+
+            const actionPayload = {
+                "client_id": client_id, 
+                "events": [{
+                    "name": actionName,
+                    "params": {
+                        ...actionParams,
+                        "page_location": urlToHit,
+                        "session_id": session_id,
+                        "engagement_time_msec": String(engagement_duration)
                     }
                 }]
             };
+
             try {
-                await sendGa4HitWithRetry(ga4Url, scrollPayload);
-                console.log(`Job ${i + 1}: Scroll Event sent.`);
+                await sendGa4HitWithRetry(ga4Url, actionPayload, userAgent);
             } catch (error) {
-                console.error(`Job ${i + 1}: Scroll failed. ${error.message}`);
+                console.error(`Job ${i + 1}: Action failed. ${error.message}`);
             }
-            await wait(1000 + Math.random() * 1000); // 1s to 2s delay
         }
         
-        // 4. User Engagement (GA4 का डिफ़ॉल्ट एंगेजमेंट इवेंट)
+        await wait(1000 + Math.random() * 1000); // 1s to 2s delay
+
+        // --- 3. User Engagement (The End of the Session) ---
         const engagementPayload = {
             "client_id": client_id, 
             "events": [{
@@ -164,20 +192,20 @@ async function processTrafficJob(ga4Url, views, distribution) {
                 "params": {
                     "page_location": urlToHit,
                     "session_id": session_id,
-                    "engagement_time_msec": String(15000 + Math.floor(Math.random() * 5000)) // Total session time 15-20s
+                    "engagement_time_msec": String(engagement_duration) 
                 }
             }]
         };
         
         try {
-            await sendGa4HitWithRetry(ga4Url, engagementPayload);
+            await sendGa4HitWithRetry(ga4Url, engagementPayload, userAgent);
             console.log(`Job ${i + 1}: Engagement Event sent. **VIEW COMPLETE**`);
         } catch (error) {
             console.error(`Job ${i + 1}: Engagement failed. ${error.message}`);
         }
         
-        // 5. Long Delay before Next User
-        await wait(5000 + Math.random() * 3000); // 5s to 8s delay before the next user starts (for concurrency)
+        // 4. Long Delay before Next User
+        await wait(6000 + Math.random() * 4000); // 6s to 10s delay before the next user starts
     }
     console.log(`Background job for ${views} views completed.`);
 }
@@ -186,6 +214,8 @@ async function processTrafficJob(ga4Url, views, distribution) {
 
 // Traffic Boost API: /api/boost-traffic
 app.post('/api/boost-traffic', async (req, res) => {
+    // ... (rest of the API POST code remains the same) ...
+
     const { ga_id, api_secret, views, distribution } = req.body;
     
     if (!ga_id || !api_secret || !views || !distribution || distribution.length === 0) {
@@ -208,13 +238,13 @@ app.post('/api/boost-traffic', async (req, res) => {
     return res.status(200).json({
         success: true, 
         message: `Job accepted and processing ${views} REAL VIEWS in the background.`, 
-        simulation_mode: "Real Events" 
+        simulation_mode: "Maximum Realism Events" 
     });
 });
 
-
 // Caption Generator API: /api/generate-caption
 app.post('/api/generate-caption', async (req, res) => {
+    // ... (rest of the Caption API code remains the same) ...
     const { reelTopic, captionStyle, numberOfCaptions } = req.body;
 
     if (!GEMINI_API_KEY) {
