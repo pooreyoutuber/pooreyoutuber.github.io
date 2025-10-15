@@ -13,29 +13,15 @@ const PORT = process.env.PORT || 5000;
 // ======================= 1. कॉन्फ़िगरेशन और प्रॉक्सी डेटा ========================
 
 // Environment Variables (Render Secrets) से लोड करें
-const PROXY_USER = process.env.PROXY_USER; 
-const PROXY_PASS = process.env.PROXY_PASS; 
-// आप GEMINI_API_KEY या OPENAI_API_KEY का उपयोग कर सकते हैं।
+const PROXY_USER = process.env.PROXY_USER; // Must be bqctypvz-rotate
+const PROXY_PASS = process.env.PROXY_PASS; // 399xb3kxqv6l
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY; 
 
-// 🚨 CRITICAL: DIRECT CONNECTION IPs
-// Webshare से अपनी 10 IPs और उनके सही पोर्ट्स के साथ इस लिस्ट को अपडेट करें।
-// (उदाहरण के लिए पोर्ट 8080 का उपयोग किया गया है)
+// 🚨 CRITICAL FIX: ROTATING PROXY ENDPOINT (Backbone)
+// सिर्फ़ एक एंट्री का उपयोग करें। Webshare खुद ही IPs को रोटेट करेगा।
 let RAW_PROXY_LIST = [
-    '216.10.27.159:8080', 
-    '198.23.239.134:8080', 
-    '142.147.128.93:8080', 
-    '142.111.48.253:8080', 
-    '38.170.176.177:8080', 
-    '107.172.163.27:8080', 
-    '31.59.20.176:8080', 
-    '64.137.96.74:8080', 
-    '142.111.67.146:8080', 
-    '45.38.107.97:8080' 
+    'p.webshare.io:80' // Correct Domain and Port from your Webshare config
 ];
-
-// प्रॉक्सी लिस्ट को रैंडमली शफ़ल करें
-RAW_PROXY_LIST.sort(() => 0.5 - Math.random()); 
 
 
 // रैंडम Google Search Referrers (dr parameter)
@@ -76,9 +62,9 @@ async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
     let lastError = null;
     const MAX_RETRIES = 5; 
 
+    // अब हम 5 बार एक ही Rotating Endpoint पर रिट्राई करेंगे
     for (let i = 0; i < MAX_RETRIES; i++) {
-        // Direct Connection के लिए रोटेट करें
-        const proxyIpPort = RAW_PROXY_LIST[i % RAW_PROXY_LIST.length]; 
+        const proxyIpPort = RAW_PROXY_LIST[0]; // Always p.webshare.io:80
         
         const proxyUrl = `http://${PROXY_USER}:${PROXY_PASS}@${proxyIpPort}`;
         const httpsAgent = new HttpsProxyAgent(proxyUrl);
@@ -107,8 +93,13 @@ async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
             const errorMessage = error.response ? `HTTP Status ${error.response.status}` : error.message;
             lastError = error;
             console.warn(`Retry ${i+1}/${MAX_RETRIES} failed with proxy ${proxyIpPort}. Error: ${errorMessage}`);
+            
+            // Check for 407 (Proxy Auth) or ECONNREFUSED (Connection Refused)
             if (String(errorMessage).includes('407')) {
-                 throw new Error("Proxy Authentication Failed (407). Check PROXY_USER/PASS in Render Secrets.");
+                 throw new Error("Proxy Authentication Failed (407). Check PROXY_USER/PASS in Render Secrets (should be 'bqctypvz-rotate').");
+            }
+            if (String(errorMessage).includes('ECONNREFUSED')) {
+                 throw new Error("Connection Refused. Check if proxy endpoint is active and port is 80.");
             }
         }
         
@@ -130,7 +121,7 @@ async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function processTrafficJob(ga4Url, views, distribution) {
-    console.log(`Starting SEARCH TRAFFIC job for ${views} views.`);
+    console.log(`Starting ROTATING SEARCH TRAFFIC job for ${views} views.`);
     
     const urlToHit = distribution[0].url; 
     
@@ -251,8 +242,8 @@ app.post('/api/boost-traffic', async (req, res) => {
 
     return res.status(200).json({
         success: true, 
-        message: `Job accepted and processing ${views} SEARCH VIEWS in the background.`, 
-        simulation_mode: "Search Traffic + Direct Proxy" 
+        message: `Job accepted and processing ${views} ROTATING SEARCH VIEWS in the background.`, 
+        simulation_mode: "Rotating Proxy + Search Traffic" 
     });
 });
 
