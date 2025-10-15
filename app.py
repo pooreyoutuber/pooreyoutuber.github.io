@@ -1,193 +1,312 @@
-import os
-import random
-import json
-from flask import Flask, request, jsonify
-import requests
-from google import genai
-import uuid
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Traffic Booster Tool - Global 15 Countries</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
+        }
+        .primary-button {
+            background-color: #3b82f6;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .primary-button:hover {
+            background-color: #2563eb;
+        }
+        .primary-button:active {
+            transform: scale(0.98);
+        }
+        .live-log-box {
+            background-color: #1f2937;
+            color: #10b981; 
+            border-left: 4px solid #10b981;
+        }
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 flex justify-center items-start min-h-screen">
 
-# ======================= कॉन्फ़िगरेशन ========================
+    <div class="w-full max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-600 mb-2">🌎 Website Traffic Booster Tool (Global)</h1>
+            <p class="text-gray-600">Get automatic, diversified traffic from 15 top countries globally.</p>
+        </header>
 
-app = Flask(__name__)
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100">
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-lg">
+                <p class="font-bold text-yellow-800 mb-2">⚠️ Important Instructions</p>
+                <ul class="text-sm text-yellow-700 list-disc ml-5 space-y-1">
+                    <li>Traffic will be automatically distributed across 15 countries.</li>
+                    <li>**All URLs** MUST start with `https://`.</li>
+                </ul>
+            </div>
 
-# Environment Variables (Render Secrets) से लोड करें
-# **PROXY_USER, PROXY_PASS, और GEMINI_API_KEY Render Secrets में होने चाहिए**
-PROXY_USER = os.environ.get('PROXY_USER')
-PROXY_PASS = os.environ.get('PROXY_PASS')
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+            <form id="traffic-form" onsubmit="event.preventDefault(); startTrafficGeneration()">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="ga-id" class="block text-sm font-medium text-gray-700 mb-2">1. Google Analytics ID (G-XXXXX)</label>
+                        <input type="text" id="ga-id" placeholder="Enter your GA4 Measurement ID" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
+                    </div>
+                    <div>
+                        <label for="api-secret" class="block text-sm font-medium text-gray-700 mb-2">2. API Secret</label>
+                        <input type="text" id="api-secret" placeholder="Enter your GA4 API Secret" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
+                    </div>
+                </div>
 
-# *** RENDER LOGS के लिए DEBUGGING LINE ***
-# यह लाइन Render Logs में बताएगी कि PROXY_USER और PROXY_PASS लोड हुए या नहीं
-# अगर यह 'False | False' दिखाता है, तो Render Secrets में गलती है।
-print(f"DEBUG: PROXY_USER loaded: {bool(PROXY_USER)} | PROXY_PASS loaded: {bool(PROXY_PASS)}")
+                <div class="mb-4">
+                    <label for="total-views" class="block text-sm font-medium text-gray-700 mb-2">3. Total Views to Generate (Max 500)</label>
+                    <input type="number" id="total-views" value="100" min="1" max="500" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
+                </div>
+                
+                <div class="mb-6">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="real-events-checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" checked>
+                        <span class="text-sm font-medium text-gray-700">Send **Real User Events** (Scroll, Session Start, etc.)</span>
+                    </label>
+                    <p class="text-xs text-gray-500 ml-6">Recommended: Makes your traffic look more realistic than just a page view.</p>
+                </div>
 
-# **Webshare Direct Connection के 10 IPs:Port**
-# अगर 'Failed to fetch' आता है, तो Webshare डैशबोर्ड से नए IPs जनरेट करके यहाँ अपडेट करें।
-RAW_PROXY_LIST = [
-    '142.111.48.253:7030',
-    '31.59.20.176:6754',
-    '38.170.176.177:5572',
-    '198.23.239.134:6540',
-    '45.38.107.97:6014',
-    '107.172.163.27:6543',
-    '64.137.96.74:6641',
-    '216.10.27.159:6837',
-    '142.111.67.146:5611',
-    '142.147.128.93:6593'
-] 
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">5. Distribute Traffic Across Pages <span class="text-red-500 font-bold">(Total must be 100%)</span></label>
+                    <div id="distribution-container" class="space-y-3 p-4 border border-gray-200 rounded-lg">
+                        <div class="flex items-center space-x-2">
+                            <input type="url" id="url-1" placeholder="Page 1 URL (Required): https://" class="input-field w-3/4 p-2 border border-gray-300 rounded-lg" required value="https://pooreyoutuber.github.io/website-booster.html">
+                            <input type="number" id="percent-1" value="100" min="0" max="100" class="input-field w-1/4 p-2 border border-gray-300 rounded-lg text-center" oninput="updateTotalDistribution()">
+                            <span class="text-gray-500">%</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="url" id="url-2" placeholder="Page 2 URL (Optional): https://" class="input-field w-3/4 p-2 border border-gray-300 rounded-lg">
+                            <input type="number" id="percent-2" value="0" min="0" max="100" class="input-field w-1/4 p-2 border border-gray-300 rounded-lg text-center" oninput="updateTotalDistribution()">
+                            <span class="text-gray-500">%</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="url" id="url-3" placeholder="Page 3 URL (Optional): https://" class="input-field w-3/4 p-2 border border-gray-300 rounded-lg">
+                            <input type="number" id="percent-3" value="0" min="0" max="100" class="input-field w-1/4 p-2 border border-gray-300 rounded-lg text-center" oninput="updateTotalDistribution()">
+                            <span class="text-gray-500">%</span>
+                        </div>
+                        <div class="text-right pt-2 border-t mt-2">
+                            <span class="font-bold text-gray-700">Total Distribution: </span>
+                            <span id="total-distribution" class="font-bold text-red-500">100%</span>
+                        </div>
+                    </div>
+                </div>
 
-random.shuffle(RAW_PROXY_LIST)
+                <button type="submit" id="start-button" class="w-full py-3 px-4 rounded-lg text-white font-semibold shadow-lg primary-button focus:outline-none focus:ring-4 focus:ring-blue-300">
+                    START TRAFFIC GENERATION
+                </button>
+            </form>
 
-# ======================= फ़ंक्शन लॉजिक ========================
+            <div id="status-message" class="mt-4 p-3 rounded-lg text-center hidden font-medium" role="alert"></div>
 
-def send_ga4_hit_with_retry(ga4_url, payload):
-    """
-    प्रॉक्सी लिस्ट को रोटेट करके GA4 हिट भेजता है।
-    """
-    if not PROXY_USER or not PROXY_PASS:
-        # अगर Secrets सेट नहीं हैं तो यह एक्सेप्शन 'Traffic Boost Failed. Missing Proxy Credentials' देगा।
-        raise ValueError("Proxy authentication credentials (PROXY_USER/PROXY_PASS) are missing from Render Environment Variables.")
+            <div class="mt-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-2">Live Activity Log</h2>
+                <div id="live-log" class="live-log-box p-4 rounded-lg h-32 overflow-y-scroll text-sm space-y-1">
+                    </div>
+            </div>
+        </div>
+    </div>
 
-    last_error = None
+    <script>
+        // *** CRITICAL: YOUR RENDER BACKEND URL IS SET HERE ***
+        const API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
 
-    # हर प्रॉक्सी IP को बारी-बारी से ट्राई करें
-    for i, proxy_ip_port in enumerate(RAW_PROXY_LIST):
-        # Authenticated Proxy URL बनाना
-        proxy_url = f"http://{PROXY_USER}:{PROXY_PASS}@{proxy_ip_port}"
-        proxies = {
-            "http": proxy_url,
-            "https": proxy_url
+        const statusMessage = document.getElementById('status-message');
+        const startButton = document.getElementById('start-button');
+        const liveLog = document.getElementById('live-log');
+        const totalDistributionDisplay = document.getElementById('total-distribution');
+        const distributionContainer = document.getElementById('distribution-container');
+
+        // Initialize total distribution display on load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTotalDistribution();
+            addLog('System ready. Enter details and click START.');
+            addLog('NOTE: Traffic will be automatically distributed across 15 countries.');
+        });
+        
+        // --- Helper Functions ---
+
+        function updateTotalDistribution() {
+            let total = 0;
+            for (let i = 1; i <= 3; i++) {
+                const percentInput = document.getElementById(`percent-${i}`);
+                total += parseInt(percentInput.value || 0);
+            }
+            
+            totalDistributionDisplay.textContent = `${total}%`;
+            
+            if (total === 100) {
+                totalDistributionDisplay.classList.remove('text-red-500');
+                totalDistributionDisplay.classList.add('text-green-500');
+                distributionContainer.classList.remove('border-red-400');
+                distributionContainer.classList.add('border-gray-200');
+            } else {
+                totalDistributionDisplay.classList.remove('text-green-500');
+                totalDistributionDisplay.classList.add('text-red-500');
+                distributionContainer.classList.add('border-red-400');
+                distributionContainer.classList.remove('border-gray-200');
+            }
         }
         
-        try:
-            print(f"Trying Proxy {i + 1}/{len(RAW_PROXY_LIST)}: {proxy_ip_port}")
+        function displayStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
             
-            # Timeout और प्रॉक्सी के साथ request भेजें
-            response = requests.post(
-                ga4_url, 
-                json=payload, 
-                proxies=proxies, 
-                timeout=10 # 10 सेकंड का Timeout
-            )
-
-            # GA4 Success Status Code 204 है
-            if response.status_code == 204:
-                print(f"SUCCESS: Hit sent successfully with Proxy {proxy_ip_port}")
-                return response
-            
-            # Network/HTTP errors पर अगला प्रॉक्सी ट्राई करें
-            print(f"Proxy {proxy_ip_port} failed with status: {response.status_code}. Retrying.")
-            last_error = response
-
-        except requests.exceptions.RequestException as e:
-            # Network errors (Timeout, Connection Refused)
-            print(f"Proxy {proxy_ip_port} failed with network error: {e}")
-            last_error = e
-
-    # अगर सभी प्रॉक्सी फेल हो गए
-    if isinstance(last_error, requests.Response):
-        # HTTP Error (जैसे 400 Bad Request)
-        raise requests.exceptions.HTTPError(f"All proxies failed. Last HTTP Status: {last_error.status_code}", response=last_error)
-    elif last_error:
-        # Network Error
-        raise last_error
-    else:
-        raise Exception("Failed to send GA4 hit after trying all proxies.")
-
-# ======================= API ENDPOINTS ========================
-
-@app.route('/api/boost-traffic', methods=['POST'])
-def boost_traffic():
-    data = request.get_json()
-    ga_id = data.get('gaId')
-    api_secret = data.get('apiSecret')
-    url = data.get('url')
-
-    if not all([ga_id, api_secret, url]):
-        return jsonify({"success": False, "message": "Missing required fields (gaId, apiSecret, url)."}), 400
-
-    # *** URL अब 100% सही है ***
-    ga4_url = f"https://www.google-analytics.com/mp/collect?measurement_id={ga_id}&api_secret={api_secret}"
-    # ***
-
-    payload = {
-        "client_id": str(uuid.uuid4()), 
-        "events": [{
-            "name": "page_view",
-            "params": {
-                "page_location": url,
-                "session_id": str(int(os.times()[4] * 1000)),
-                "engagement_time_msec": "5000"
+            if (type === 'error') {
+                statusMessage.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                statusMessage.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                statusMessage.classList.add('bg-blue-100', 'text-blue-700');
             }
-        }]
-    }
+            statusMessage.classList.remove('hidden');
+        }
 
-    try:
-        response = send_ga4_hit_with_retry(ga4_url, payload)
-        
-        return jsonify({
-            "success": True, 
-            "message": "Traffic hit sent successfully after proxy rotation.", 
-            "status": response.status_code
-        }), 200
+        function addLog(message) {
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${timeString}] ${message}`;
+            liveLog.appendChild(logEntry);
+            
+            liveLog.scrollTop = liveLog.scrollHeight;
+        }
 
-    except requests.exceptions.HTTPError as e:
-        return jsonify({
-            "success": False, 
-            "message": f"Traffic Boost Failed. Proxy returned HTTP Error. Last Status: {e.response.status_code}", 
-            "status": e.response.status_code, 
-            "detail": str(e)
-        }), 500
-        
-    except ValueError as e:
-        # Missing Credentials error
-        return jsonify({
-            "success": False, 
-            "message": "Traffic Boost Failed. Missing Proxy Credentials in Render Secrets.", 
-            "detail": str(e)
-        }), 500
-        
-    except Exception as e:
-        # Network or All proxies failed error
-        return jsonify({
-            "success": False, 
-            "message": "Traffic Boost Failed. All proxies failed to connect or timed out.", 
-            "detail": str(e)
-        }), 500
+        // --- Main Function ---
+
+        async function startTrafficGeneration() {
+            const gaId = document.getElementById('ga-id').value.trim();
+            const apiSecret = document.getElementById('api-secret').value.trim();
+            const totalViews = parseInt(document.getElementById('total-views').value, 10);
+            const realEvents = document.getElementById('real-events-checkbox').checked; 
+            
+            // CRITICAL CHANGE: The country is now hardcoded to signal the Backend 
+            // to use the full 15-country list for distribution.
+            const country = "All_15_Global"; 
+
+            // 1. Basic Validation
+            if (!gaId || !apiSecret || !totalViews) {
+                displayStatus('Error: Please fill in GA ID, API Secret, and Total Views.', 'error');
+                return;
+            }
+            if (totalViews < 1 || totalViews > 500) {
+                displayStatus('Error: Total views must be between 1 and 500.', 'error');
+                return;
+            }
+
+            // 2. Distribution Validation and Data Collection
+            let totalPercent = 0;
+            const distribution = [];
+            let firstUrlSet = false;
+            
+            for (let i = 1; i <= 3; i++) {
+                const url = document.getElementById(`url-${i}`).value.trim();
+                const percent = parseInt(document.getElementById(`percent-${i}`).value, 10);
+                
+                if (url && percent > 0) {
+                    if (!url.startsWith('https://')) {
+                         displayStatus(`Error: URL ${i} must start with 'https://'.`, 'error');
+                         return;
+                    }
+                    distribution.push({ url, percent });
+                    totalPercent += percent;
+                    firstUrlSet = true;
+                } else if (!url && percent > 0) {
+                    displayStatus(`Error: Percentage (${percent}%) set for Page ${i} but no URL provided.`, 'error');
+                    return;
+                }
+            }
+
+            if (!firstUrlSet) {
+                 displayStatus('Error: Please provide at least one URL and a percentage > 0.', 'error');
+                 return;
+            }
+
+            if (totalPercent !== 100) {
+                displayStatus(`Error: Total distribution must be 100%. Currently: ${totalPercent}%.`, 'error');
+                return;
+            }
+
+            // 3. Prepare Request and UI
+            startButton.disabled = true;
+            startButton.textContent = 'Sending Request...';
+            displayStatus('Sending request to Backend. Please wait...', 'info');
+            addLog('Sending request to Backend...');
+            addLog(`Traffic Source: ${country}. Simulation Mode: ${realEvents ? 'Real Events' : 'Page View Only'}`);
+
+            try {
+                // Sending the new 'country' flag to the Backend
+                const requestBody = { 
+                    ga_id: gaId, 
+                    api_secret: apiSecret, 
+                    views: totalViews, 
+                    distribution: distribution,
+                    country: country, // Sends "All_15_Global"
+                    real_events: realEvents 
+                };
+                
+                // *** CRITICAL FIX: The endpoint is set to the correct Python backend endpoint ***
+                const response = await fetch(`${API_BASE_URL}/api/boost-traffic`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                // **********************************************************************************
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    const errorMessage = result.message || result.error || 'Unknown server error.';
+                    
+                    // Check for specific backend errors (Proxy/GA Keys)
+                    if (response.status === 400) {
+                         // Likely GA keys are wrong
+                         throw new Error(`400 Bad Request. Detail: ${errorMessage}`);
+                    }
+                    if (response.status === 500) {
+                         // Likely Proxy failure or Missing Credentials
+                         throw new Error(`500 Internal Server Error. Detail: ${errorMessage}`);
+                    }
+                    
+                    throw new Error(`HTTP Error: ${response.status}. Detail: ${errorMessage}`);
+                }
+                
+                // 4. Success Handling (Job Accepted)
+                displayStatus('Success: Request accepted! Processing started.', 'success');
+                addLog(`✅ Job Accepted! Mode: ${result.simulation_mode || 'Real Events'}. This means the Backend is now processing the job.`);
+                addLog(`INFO: Targeting ${totalViews} views, distributed over 15 countries.`);
+                addLog('LOG: Check your Google Analytics Realtime Report in a few minutes for diversified views.');
+
+            } catch (error) {
+                console.error("Traffic Generation Error:", error);
+                
+                let userHint = 'HINT: This usually means the GA ID or API Secret is WRONG or the Render Server URL is outdated.';
+                if (String(error.message).includes('500 Internal Server Error') && String(error.message).includes('Proxy Credentials')) {
+                    userHint = 'HINT: Proxy credentials (PROXY_USER/PASS) are missing/wrong in Render Secrets.';
+                } else if (String(error.message).includes('500 Internal Server Error') && String(error.message).includes('All proxies failed')) {
+                     userHint = 'HINT: All 10 Webshare IPs failed to connect. Try replacing IPs in your app.py.';
+                }
 
 
-@app.route('/api/generate-caption', methods=['POST'])
-def generate_caption():
-    data = request.get_json()
-    reel_topic = data.get('reelTopic')
-    caption_style = data.get('captionStyle')
-    number_of_captions = data.get('numberOfCaptions')
+                displayStatus(`Generation Failed. Server response error. Error: ${error.message}.`, 'error');
+                addLog(`❌ ERROR: Failed to start job. ${error.message}`);
+                addLog(userHint);
 
-    if not GEMINI_API_KEY:
-        return jsonify({"success": False, "message": "GEMINI_API_KEY is not configured."}), 500
-
-    try:
-        client = genai.Client(api_key=GEMINI_API_KEY)
-        
-        prompt = f"Generate {number_of_captions} catchy, viral captions in {caption_style} style for a reel about \"{reel_topic}\". Respond with a simple, numbered list of captions."
-        
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt
-        )
-        
-        raw_captions = response.text.strip().split('\n')
-        captions = [line.lstrip('0123456789. \t').strip() for line in raw_captions if line.strip()]
-
-        return jsonify({"success": True, "captions": captions}), 200
-    
-    except Exception as e:
-        print(f"Gemini API Error: {e}")
-        return jsonify({"success": False, "message": "Caption generation failed. Check Gemini API key.", "detail": str(e)}), 500
-
-
-# ======================= सर्वर स्टार्ट ========================
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+            } finally {
+                startButton.disabled = false;
+                startButton.textContent = 'START TRAFFIC GENERATION';
+            }
+        }
+    </script>
+</body>
+</html>
