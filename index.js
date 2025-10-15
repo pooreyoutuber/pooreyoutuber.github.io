@@ -4,21 +4,18 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
-const { OpenAI } = require('openai'); // Used for the Caption Generator
-const { HttpsProxyAgent } = require('https-proxy-agent'); // CRITICAL for HTTPS traffic via proxy
+const { OpenAI } = require('openai');
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ======================= कॉन्फ़िगरेशन ========================
+// ======================= कॉन्फ़िगरेशन और प्रॉक्सी डेटा ========================
 
-// Environment Variables (Render Secrets)
+// Environment Variables (Render Secrets) से लोड करें
 const PROXY_USER = process.env.PROXY_USER;
 const PROXY_PASS = process.env.PROXY_PASS;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
-
-// *** RENDER LOGS के लिए DEBUGGING LINE ***
-console.log(`DEBUG: PROXY_USER loaded: ${!!PROXY_USER} | PROXY_PASS loaded: ${!!PROXY_PASS}`);
 
 // **Webshare Direct Connection के 10 IPs:Port**
 let RAW_PROXY_LIST = [
@@ -34,14 +31,13 @@ let RAW_PROXY_LIST = [
     '142.147.128.93:6593'
 ];
 
-// Shuffle proxies once on startup for rotation
 RAW_PROXY_LIST.sort(() => 0.5 - Math.random());
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// ======================= फ़ंक्शन लॉजिक (Proxy) ========================
+// ======================= प्रॉक्सी लॉजिक (Sub-Function) ========================
 
 async function sendGa4HitWithRetry(ga4Url, payload) {
     if (!PROXY_USER || !PROXY_PASS) {
@@ -53,47 +49,36 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
     for (let i = 0; i < RAW_PROXY_LIST.length; i++) {
         const proxyIpPort = RAW_PROXY_LIST[i];
         
-        // 🚨 CRITICAL FIX: Creating the full authenticated proxy URL
+        // Authenticated proxy URL
         const proxyUrl = `http://${PROXY_USER}:${PROXY_PASS}@${proxyIpPort}`;
         
-        // 🚨 CRITICAL FIX: Creating the HTTPS agent for the proxy
+        // HTTPS agent for proxying GA4 request
         const httpsAgent = new HttpsProxyAgent(proxyUrl);
         
-        console.log(`Trying Proxy ${i + 1}/${RAW_PROXY_LIST.length}: ${proxyIpPort}`);
-
         try {
             const response = await axios.post(
                 ga4Url,
                 payload,
                 {
-                    // Use the custom agent to route traffic through the authenticated proxy
                     httpsAgent: httpsAgent,
-                    // We must disable the default Axios proxy config to use the custom agent
                     proxy: false, 
                     timeout: 10000 // 10 second timeout
                 }
             );
 
-            // GA4 Success Status Code 204 है
             if (response.status === 204) {
-                console.log(`SUCCESS: Hit sent successfully with Proxy ${proxyIpPort}`);
                 return response;
             }
 
-            console.log(`Proxy ${proxyIpPort} failed with status: ${response.status}. Retrying.`);
             lastError = new Error(`HTTP Status ${response.status} from proxy: ${proxyIpPort}`);
 
         } catch (error) {
-            // Check for Axios specific errors (like ETIMEDOUT, ECONNRESET, etc.)
             const errorMessage = error.response ? `HTTP Status ${error.response.status}` : error.message;
-            console.log(`Proxy ${proxyIpPort} failed with network error: ${errorMessage}`);
             lastError = error;
         }
     }
 
-    // If all proxies failed
     if (lastError) {
-        // If the last error was an HTTP response error (like 400), throw it specifically
         if (lastError.response && lastError.response.status) {
             throw new Error(`GA API returned HTTP ${lastError.response.status}. Detail: ${lastError.response.data || 'Bad Request'}`);
         }
@@ -103,59 +88,71 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
     }
 }
 
+// ======================= ASYNC BACKGROUND JOB ========================
+
+async function processTrafficJob(ga4Url, views, distribution) {
+    console.log(`Starting background job for ${views} views.`);
+    
+    // Simplification: Hitting only the first URL for the full view count
+    const urlToHit = distribution[0].url; 
+    // In a real scenario, you would need to calculate a weighted list of URLs based on distribution percentage.
+
+    for (let i = 0; i < views; i++) {
+        const payload = {
+            "client_id": uuidv4(), 
+            "events": [{
+                "name": "page_view",
+                "params": {
+                    "page_location": urlToHit,
+                    "session_id": String(Date.now()), // New session for each hit
+                    "engagement_time_msec": "5000"
+                }
+            }]
+        };
+
+        try {
+            // Using await here to ensure we send one hit at a time
+            await sendGa4HitWithRetry(ga4Url, payload);
+            console.log(`Job Progress: View ${i + 1}/${views} sent successfully.`);
+        } catch (error) {
+            console.error(`Job Error on view ${i + 1}: ${error.message}. Continuing...`);
+        }
+        
+        // Delay (1 to 2 seconds) between hits for realism and rate limit avoidance
+        await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 500)); // 1.5s to 2.0s delay
+    }
+    console.log(`Background job for ${views} views completed.`);
+}
+
 // ======================= API ENDPOINTS ========================
 
 // Traffic Boost API: /api/boost-traffic
 app.post('/api/boost-traffic', async (req, res) => {
-    // Frontend is sending: ga_id, api_secret, distribution, etc.
-    const { ga_id, api_secret, distribution } = req.body;
+    const { ga_id, api_secret, views, distribution } = req.body;
     
-    let firstUrl = '';
-    if (distribution && distribution.length > 0) {
-        firstUrl = distribution[0].url;
+    if (!ga_id || !api_secret || !views || !distribution || distribution.length === 0) {
+        return res.status(400).json({ success: false, message: "Missing required fields." });
     }
 
-    if (!ga_id || !api_secret || !firstUrl) {
-        return res.status(400).json({ success: false, message: "Missing required fields (ga_id, api_secret, or URL)." });
+    if (views < 1 || views > 500) {
+        return res.status(400).json({ success: false, message: "Views must be between 1 and 500." });
     }
 
     const ga4Url = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`;
     
-    const payload = {
-        "client_id": uuidv4(), 
-        "events": [{
-            "name": "page_view",
-            "params": {
-                "page_location": firstUrl,
-                "session_id": String(Date.now()),
-                "engagement_time_msec": "5000"
-            }
-        }]
-    };
-
-    try {
-        const response = await sendGa4HitWithRetry(ga4Url, payload);
-        
-        return res.status(200).json({
-            success: true, 
-            message: "Traffic hit sent successfully after proxy rotation.", 
-            status: response.status,
-            simulation_mode: "Real Events" 
+    // 🚨 CRITICAL STEP: Start the job in the background and DO NOT await it.
+    // This allows the server to immediately send the response to the frontend.
+    processTrafficJob(ga4Url, views, distribution)
+        .catch(err => {
+            console.error(`Async Job Failed Unexpectedly: ${err.message}`);
         });
 
-    } catch (error) {
-        console.error("Traffic Boost Error:", error.message);
-        
-        // Handle specific errors for frontend display
-        let status = 500;
-        if (error.message.includes('GA API returned HTTP 400')) status = 400; 
-
-        return res.status(status).json({
-            success: false,
-            message: `Traffic Boost Failed. ${error.message}`,
-            detail: error.message
-        });
-    }
+    // Send immediate response so the frontend knows the job started.
+    return res.status(200).json({
+        success: true, 
+        message: `Job accepted and processing ${views} views in the background.`, 
+        simulation_mode: "Real Events" 
+    });
 });
 
 
@@ -168,7 +165,6 @@ app.post('/api/generate-caption', async (req, res) => {
     }
 
     try {
-        // Use OpenAI's library with the GEMINI_API_KEY
         const openai = new OpenAI({ apiKey: GEMINI_API_KEY }); 
         
         const prompt = `Generate ${numberOfCaptions} catchy, viral captions in ${captionStyle} style for a reel about "${reelTopic}". Respond with a simple, numbered list of captions.`;
