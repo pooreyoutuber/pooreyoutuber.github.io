@@ -46,6 +46,7 @@
                 <p class="font-bold text-yellow-800 mb-2">⚠️ Important Instructions</p>
                 <ul class="text-sm text-yellow-700 list-disc ml-5 space-y-1">
                     <li>Traffic will be automatically distributed across 15 countries.</li>
+                    <li>**Once submitted, the job runs on our server. You can close this window.**</li>
                     <li>**All URLs** MUST start with `https://`.</li>
                 </ul>
             </div>
@@ -118,7 +119,7 @@
 
     <script>
         // *** CRITICAL: YOUR RENDER BACKEND URL IS SET HERE ***
-        const API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com'; 
+        const API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com'; // CHECK YOUR LIVE RENDER URL
 
         const statusMessage = document.getElementById('status-message');
         const startButton = document.getElementById('start-button');
@@ -131,17 +132,16 @@
             updateTotalDistribution();
             addLog('System ready. Enter details and click START.');
             addLog('NOTE: Traffic will be automatically distributed across 15 countries.');
+            addLog('INFO: The job runs in the background. You can close this window after submission.');
         });
         
         // --- Helper Functions ---
-
         function updateTotalDistribution() {
             let total = 0;
             for (let i = 1; i <= 3; i++) {
                 const percentInput = document.getElementById(`percent-${i}`);
                 total += parseInt(percentInput.value || 0);
             }
-            
             totalDistributionDisplay.textContent = `${total}%`;
             
             if (total === 100) {
@@ -189,22 +189,14 @@
             const apiSecret = document.getElementById('api-secret').value.trim();
             const totalViews = parseInt(document.getElementById('total-views').value, 10);
             const realEvents = document.getElementById('real-events-checkbox').checked; 
-            
-            // CRITICAL CHANGE: The country is now hardcoded to signal the Backend 
-            // to use the full 15-country list for distribution.
             const country = "All_15_Global"; 
 
-            // 1. Basic Validation
-            if (!gaId || !apiSecret || !totalViews) {
-                displayStatus('Error: Please fill in GA ID, API Secret, and Total Views.', 'error');
-                return;
-            }
-            if (totalViews < 1 || totalViews > 500) {
-                displayStatus('Error: Total views must be between 1 and 500.', 'error');
+            // 1. Validation 
+            if (!gaId || !apiSecret || !totalViews || totalViews < 1 || totalViews > 500) {
+                displayStatus('Error: Please check GA ID, API Secret, and ensure views are 1-500.', 'error');
                 return;
             }
 
-            // 2. Distribution Validation and Data Collection
             let totalPercent = 0;
             const distribution = [];
             let firstUrlSet = false;
@@ -237,72 +229,62 @@
                 return;
             }
 
-            // 3. Prepare Request and UI
+            // 2. Prepare Request and UI
             startButton.disabled = true;
-            startButton.textContent = 'Sending Request...';
-            displayStatus('Sending request to Backend. Please wait...', 'info');
-            addLog('Sending request to Backend...');
-            addLog(`Traffic Source: ${country}. Simulation Mode: ${realEvents ? 'Real Events' : 'Page View Only'}`);
+            startButton.textContent = 'Submitting Job...';
+            displayStatus('Submitting job to server. Please wait...', 'info');
+            addLog('Submitting job to server...');
 
             try {
-                // Sending the new 'country' flag to the Backend
                 const requestBody = { 
                     ga_id: gaId, 
                     api_secret: apiSecret, 
                     views: totalViews, 
                     distribution: distribution,
-                    country: country, // Sends "All_15_Global"
+                    country: country,
                     real_events: realEvents 
                 };
                 
-                // *** CRITICAL FIX: The endpoint is changed from /boost-mp to /api/boost-traffic ***
+                // Fetch call to the correct Node.js endpoint
                 const response = await fetch(`${API_BASE_URL}/api/boost-traffic`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
-                // **********************************************************************************
 
                 const result = await response.json();
 
                 if (!response.ok) {
+                    // Error handling remains the same
                     const errorMessage = result.message || result.error || 'Unknown server error.';
-                    
-                    // Check for specific backend errors (Proxy/GA Keys)
-                    if (response.status === 400) {
-                         // Likely GA keys are wrong, or bad JSON format sent to Google
-                         throw new Error(`400 Bad Request. Detail: ${errorMessage}`);
-                    }
-                    if (response.status === 500) {
-                         // Likely Proxy failure (all 10 failed) or Missing Credentials
-                         throw new Error(`500 Internal Server Error. Detail: ${errorMessage}`);
-                    }
-                    
+                    if (response.status === 400) throw new Error(`400 Bad Request. Detail: ${errorMessage}`);
+                    if (response.status === 500) throw new Error(`500 Internal Server Error. Detail: ${errorMessage}`);
                     throw new Error(`HTTP Error: ${response.status}. Detail: ${errorMessage}`);
                 }
                 
-                // 4. Success Handling (Job Accepted)
-                displayStatus('Success: Request accepted! Processing started.', 'success');
-                addLog(`✅ Job Accepted! Mode: ${result.simulation_mode}. This means the Backend is now processing the job.`);
-                addLog(`INFO: Targeting ${totalViews} views, distributed over 15 countries.`);
-                addLog('LOG: Check your Google Analytics Realtime Report in a few minutes for diversified views.');
+                // 3. Success Handling (Job Accepted)
+                displayStatus(`✅ Job Accepted! Server is now generating ${totalViews} views.`, 'success');
+                addLog(`✅ Job Accepted! Total Views: ${totalViews}.`);
+                addLog('✨ You can now safely close this window. View generation will continue in the background.');
+                addLog('LOG: Check your GA4 Realtime Report for traffic over the next few minutes.');
+                
 
             } catch (error) {
+                // Error handling remains the same
                 console.error("Traffic Generation Error:", error);
-                
-                let userHint = 'HINT: This usually means the GA ID or API Secret is WRONG or the Render Server URL is outdated.';
-                if (error.message.includes('500 Internal Server Error') && error.message.includes('Proxy Credentials')) {
-                    userHint = 'HINT: Proxy credentials (PROXY_USER/PROXY_PASS) are missing in Render Secrets.';
-                } else if (error.message.includes('500 Internal Server Error') && error.message.includes('All proxies failed')) {
-                     userHint = 'HINT: All 10 Webshare IPs failed to connect. Try replacing IPs in your app.py.';
+                let userHint = 'HINT: Check GA ID/API Secret or if the Render Server URL is correct.';
+                if (String(error.message).includes('Proxy Credentials')) {
+                    userHint = 'HINT: Proxy credentials are missing in Render Secrets.';
+                } else if (String(error.message).includes('All proxies failed')) {
+                     userHint = 'HINT: All 10 Webshare IPs failed to connect. Try replacing IPs.';
                 }
-
 
                 displayStatus(`Generation Failed. Server response error. Error: ${error.message}.`, 'error');
                 addLog(`❌ ERROR: Failed to start job. ${error.message}`);
                 addLog(userHint);
 
             } finally {
+                // Button remains enabled for the next job
                 startButton.disabled = false;
                 startButton.textContent = 'START TRAFFIC GENERATION';
             }
