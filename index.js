@@ -13,12 +13,11 @@ const PORT = process.env.PORT || 5000;
 // ======================= कॉन्फ़िगरेशन और प्रॉक्सी डेटा ========================
 
 // Environment Variables (Render Secrets) से लोड करें
-const PROXY_USER = process.env.PROXY_USER; // bqctypvz
-const PROXY_PASS = process.env.PROXY_PASS; // 399xb3kxqv6l
+const PROXY_USER = process.env.PROXY_USER; 
+const PROXY_PASS = process.env.PROXY_PASS; 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 
 // **Webshare Backbone Connection (Single Entry)**
-// 🚨 CRITICAL FIX: Direct IPs की जगह सिंगल Backbone डोमेन का उपयोग करें
 let RAW_PROXY_LIST = [
     'p.webshare.io:80' // Backbone Proxy Domain (Webshare Rotates IPs)
 ];
@@ -35,16 +34,12 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
     }
 
     let lastError = null;
+    const MAX_RETRIES = 5; // Retries reduced to 5 for efficiency
 
-    // Retry 10 times, each time using the single p.webshare.io:80 entry.
-    // Webshare's backbone system should rotate IPs on their end.
-    for (let i = 0; i < 10; i++) {
-        const proxyIpPort = RAW_PROXY_LIST[0]; // Always use the single Backbone entry
+    for (let i = 0; i < MAX_RETRIES; i++) {
+        const proxyIpPort = RAW_PROXY_LIST[0]; 
         
-        // Authenticated proxy URL
         const proxyUrl = `http://${PROXY_USER}:${PROXY_PASS}@${proxyIpPort}`;
-        
-        // HTTPS agent for proxying GA4 request
         const httpsAgent = new HttpsProxyAgent(proxyUrl);
         
         try {
@@ -54,7 +49,7 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
                 {
                     httpsAgent: httpsAgent,
                     proxy: false, 
-                    timeout: 15000 // 15 second timeout
+                    timeout: 15000 
                 }
             );
 
@@ -67,10 +62,9 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
         } catch (error) {
             const errorMessage = error.response ? `HTTP Status ${error.response.status}` : error.message;
             lastError = error;
-            console.warn(`Retry ${i+1}/10 failed with proxy ${proxyIpPort}. Error: ${errorMessage}`);
+            console.warn(`Retry ${i+1}/${MAX_RETRIES} failed. Error: ${errorMessage}`);
         }
         
-        // Add a small delay between retries to give the proxy service time
         await new Promise(resolve => setTimeout(resolve, 500));
     }
 
@@ -84,42 +78,111 @@ async function sendGa4HitWithRetry(ga4Url, payload) {
     }
 }
 
-// ======================= ASYNC BACKGROUND JOB ========================
+// ======================= ASYNC BACKGROUND JOB (REAL EVENTS) ========================
+
+// एक छोटे समय के लिए डिले (delay) फ़ंक्शन
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function processTrafficJob(ga4Url, views, distribution) {
-    console.log(`Starting background job for ${views} views.`);
+    console.log(`Starting REAL EVENTS background job for ${views} views.`);
     
-    // For simplicity, we hit only the first URL for the full view count.
     const urlToHit = distribution[0].url; 
 
     for (let i = 0; i < views; i++) {
-        const payload = {
-            "client_id": uuidv4(), 
+        const client_id = uuidv4();
+        const session_id = String(Date.now());
+        
+        // 1. Session Start (Engagement Events का बेस)
+        const sessionStartPayload = {
+            "client_id": client_id, 
+            "events": [{
+                "name": "session_start",
+                "params": {
+                    "page_location": urlToHit
+                }
+            }]
+        };
+        
+        try {
+            await sendGa4HitWithRetry(ga4Url, sessionStartPayload);
+            console.log(`Job ${i + 1}: Session Started.`);
+        } catch (error) {
+            console.error(`Job ${i + 1}: Session Start failed. ${error.message}`);
+        }
+        
+        await wait(500 + Math.random() * 500); // 0.5s to 1s delay
+        
+        // 2. Page View (सबसे ज़रूरी)
+        const pageViewPayload = {
+            "client_id": client_id, 
             "events": [{
                 "name": "page_view",
                 "params": {
                     "page_location": urlToHit,
-                    "session_id": String(Date.now()), // New session for each hit
-                    "engagement_time_msec": "5000"
+                    "session_id": session_id,
+                    "engagement_time_msec": String(5000 + Math.floor(Math.random() * 5000)) // 5s to 10s engagement
                 }
             }]
         };
 
         try {
-            await sendGa4HitWithRetry(ga4Url, payload);
-            console.log(`Job Progress: View ${i + 1}/${views} sent successfully.`);
+            await sendGa4HitWithRetry(ga4Url, pageViewPayload);
+            console.log(`Job ${i + 1}: Page View sent successfully.`);
         } catch (error) {
-            console.error(`Job Error on view ${i + 1}: ${error.message}. Continuing...`);
-            // We ignore the error and continue, as the goal is to complete the views.
+            console.error(`Job ${i + 1}: Page View failed. ${error.message}`);
         }
         
-        // Delay (1.5 to 2 seconds) between hits for realism and rate limit avoidance
-        await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 500)); 
+        await wait(2000 + Math.random() * 1500); // 2s to 3.5s delay
+        
+        // 3. Scroll Event (Randomly 60% time भेजेंगे)
+        if (Math.random() < 0.6) {
+             const scrollPayload = {
+                "client_id": client_id, 
+                "events": [{
+                    "name": "scroll",
+                    "params": {
+                        "page_location": urlToHit,
+                        "session_id": session_id,
+                        "percent_scrolled": 90 // मान लीजिए यूज़र 90% स्क्रॉल करता है
+                    }
+                }]
+            };
+            try {
+                await sendGa4HitWithRetry(ga4Url, scrollPayload);
+                console.log(`Job ${i + 1}: Scroll Event sent.`);
+            } catch (error) {
+                console.error(`Job ${i + 1}: Scroll failed. ${error.message}`);
+            }
+            await wait(1000 + Math.random() * 1000); // 1s to 2s delay
+        }
+        
+        // 4. User Engagement (GA4 का डिफ़ॉल्ट एंगेजमेंट इवेंट)
+        const engagementPayload = {
+            "client_id": client_id, 
+            "events": [{
+                "name": "user_engagement",
+                "params": {
+                    "page_location": urlToHit,
+                    "session_id": session_id,
+                    "engagement_time_msec": String(15000 + Math.floor(Math.random() * 5000)) // Total session time 15-20s
+                }
+            }]
+        };
+        
+        try {
+            await sendGa4HitWithRetry(ga4Url, engagementPayload);
+            console.log(`Job ${i + 1}: Engagement Event sent. **VIEW COMPLETE**`);
+        } catch (error) {
+            console.error(`Job ${i + 1}: Engagement failed. ${error.message}`);
+        }
+        
+        // 5. Long Delay before Next User
+        await wait(5000 + Math.random() * 3000); // 5s to 8s delay before the next user starts (for concurrency)
     }
     console.log(`Background job for ${views} views completed.`);
 }
 
-// ======================= API ENDPOINTS ========================
+// ======================= API ENDPOINTS (No Change) ========================
 
 // Traffic Boost API: /api/boost-traffic
 app.post('/api/boost-traffic', async (req, res) => {
@@ -135,7 +198,7 @@ app.post('/api/boost-traffic', async (req, res) => {
 
     const ga4Url = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`;
     
-    // 🚨 CRITICAL STEP: Start the job in the background and DO NOT await it.
+    // Start the job in the background and DO NOT await it.
     processTrafficJob(ga4Url, views, distribution)
         .catch(err => {
             console.error(`Async Job Failed Unexpectedly: ${err.message}`);
@@ -144,7 +207,7 @@ app.post('/api/boost-traffic', async (req, res) => {
     // Send immediate response so the frontend knows the job started. (User can close tab)
     return res.status(200).json({
         success: true, 
-        message: `Job accepted and processing ${views} views in the background.`, 
+        message: `Job accepted and processing ${views} REAL VIEWS in the background.`, 
         simulation_mode: "Real Events" 
     });
 });
