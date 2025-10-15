@@ -1,34 +1,72 @@
-// ... (index.js का बाकी कोड - Imports and Environment Variables) ...
+// Load environment variables (from Render Secrets)
+require('dotenv').config(); 
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
+const { OpenAI } = require('openai');
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// ======================= 1. कॉन्फ़िगरेशन और प्रॉक्सी डेटा ========================
 
 // Environment Variables (Render Secrets) से लोड करें
 const PROXY_USER = process.env.PROXY_USER; 
 const PROXY_PASS = process.env.PROXY_PASS; 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
+// आप GEMINI_API_KEY या OPENAI_API_KEY का उपयोग कर सकते हैं।
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY; 
 
-// 🚨 CRITICAL FIX: DIRECT CONNECTION IPs
-// यह लिस्ट आपके Webshare डैशबोर्ड से 10 अलग-अलग IP:PORT के साथ अपडेट होनी चाहिए।
-// उदाहरण के लिए, मान लें कि पोर्ट 8080 है।
+// 🚨 CRITICAL: DIRECT CONNECTION IPs
+// Webshare से अपनी 10 IPs और उनके सही पोर्ट्स के साथ इस लिस्ट को अपडेट करें।
+// (उदाहरण के लिए पोर्ट 8080 का उपयोग किया गया है)
 let RAW_PROXY_LIST = [
-    '216.10.27.159:8080', // Proxy 1 IP:Port
-    '198.23.239.134:8080', // Proxy 2 IP:Port
-    '142.147.128.93:8080', // Proxy 3 IP:Port
-    '142.111.48.253:8080', // Proxy 4 IP:Port
-    '38.170.176.177:8080', // Proxy 5 IP:Port
-    '107.172.163.27:8080', // Proxy 6 IP:Port
-    '31.59.20.176:8080', // Proxy 7 IP:Port
-    '64.137.96.74:8080', // Proxy 8 IP:Port
-    '142.111.67.146:8080', // Proxy 9 IP:Port
-    '45.38.107.97:8080' // Proxy 10 IP:Port
+    '216.10.27.159:8080', 
+    '198.23.239.134:8080', 
+    '142.147.128.93:8080', 
+    '142.111.48.253:8080', 
+    '38.170.176.177:8080', 
+    '107.172.163.27:8080', 
+    '31.59.20.176:8080', 
+    '64.137.96.74:8080', 
+    '142.111.67.146:8080', 
+    '45.38.107.97:8080' 
 ];
 
-// CRITICAL: Randomly shuffle the list so that traffic is distributed evenly among 10 proxies.
+// प्रॉक्सी लिस्ट को रैंडमली शफ़ल करें
 RAW_PROXY_LIST.sort(() => 0.5 - Math.random()); 
 
-// ... (getGoogleReferrer function और USER_AGENTS/SCREEN_SIZES arrays समान रहेंगे) ...
 
-// ... (Middleware समान रहेगा) ...
+// रैंडम Google Search Referrers (dr parameter)
+const SEARCH_QUERIES = [
+    'best tools for traffic boosting', 'buy organic website traffic', 
+    'how to increase website views fast', 'free website traffic generator', 
+    'website booster tool review', 'organic traffic solution'
+];
 
-// ======================= प्रॉक्सी लॉजिक (Sub-Function) ========================
+const getGoogleReferrer = (urlToHit) => {
+    const query = SEARCH_QUERIES[Math.floor(Math.random() * SEARCH_QUERIES.length)];
+    const encodedQuery = encodeURIComponent(query);
+    return `https://www.google.com/search?q=${encodedQuery}&sourceid=chrome&ie=UTF-8&filter=0&url=${encodeURIComponent(urlToHit)}`;
+};
+
+
+// रैंडम यूज़र एजेंट और स्क्रीन साइज़
+const USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+    'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.101 Mobile Safari/537.36',
+];
+const SCREEN_SIZES = ['1920x1080', '1366x768', '1440x900', '375x667', '414x896'];
+
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// ======================= 2. प्रॉक्सी लॉजिक (Sub-Function) ========================
 
 async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
     if (!PROXY_USER || !PROXY_PASS) {
@@ -37,16 +75,14 @@ async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
 
     let lastError = null;
     const MAX_RETRIES = 5; 
-    
-    // CRITICAL: Now we loop through the 10 direct proxies.
+
     for (let i = 0; i < MAX_RETRIES; i++) {
-        // Use the modulus operator (%) to cycle through the 10 proxies for better distribution
+        // Direct Connection के लिए रोटेट करें
         const proxyIpPort = RAW_PROXY_LIST[i % RAW_PROXY_LIST.length]; 
         
         const proxyUrl = `http://${PROXY_USER}:${PROXY_PASS}@${proxyIpPort}`;
         const httpsAgent = new HttpsProxyAgent(proxyUrl);
         
-        // ... (Try/Catch block for sending GA4 hit remains the same) ...
         try {
             const response = await axios.post(
                 ga4Url,
@@ -80,7 +116,6 @@ async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
     }
 
     if (lastError) {
-        // ... (Error handling remains the same) ...
         if (lastError.response && lastError.response.status) {
             throw new Error(`GA API returned HTTP ${lastError.response.status}. Detail: ${lastError.response.data || 'Bad Request'}`);
         }
@@ -90,7 +125,197 @@ async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
     }
 }
 
-// ... (बाकी के processTrafficJob और API ENDPOINTS समान रहेंगे) ...
+// ======================= 3. TRAFFIC BOOSTER LOGIC ========================
+
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function processTrafficJob(ga4Url, views, distribution) {
+    console.log(`Starting SEARCH TRAFFIC job for ${views} views.`);
+    
+    const urlToHit = distribution[0].url; 
+    
+    for (let i = 0; i < views; i++) {
+        const client_id = uuidv4();
+        const session_id = String(Date.now());
+        
+        const document_referrer = getGoogleReferrer(urlToHit);
+        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        const screen_resolution = SCREEN_SIZES[Math.floor(Math.random() * SCREEN_SIZES.length)];
+        const engagement_duration = 10000 + Math.floor(Math.random() * 10000); 
+
+        // --- 1. Session Start + Page View ---
+        const initialPayload = {
+            "client_id": client_id, 
+            "user_properties": {
+                "screen_resolution": { "value": screen_resolution }
+            },
+            "events": [
+                { "name": "session_start" },
+                { 
+                    "name": "page_view",
+                    "params": {
+                        "page_location": urlToHit, 
+                        "document_referrer": document_referrer,
+                        "session_id": session_id,
+                        "engagement_time_msec": String(engagement_duration)
+                    }
+                }
+            ]
+        };
+        
+        try {
+            await sendGa4HitWithRetry(ga4Url, initialPayload, userAgent);
+            console.log(`Job ${i + 1}: Session Start & Page View (from Search) sent.`);
+        } catch (error) {
+            console.error(`Job ${i + 1}: Initial events failed. ${error.message}`);
+        }
+        
+        await wait(2000 + Math.random() * 1500); 
+
+        // --- 2. Action Event (Click or Scroll) ---
+        if (Math.random() < 0.7) { 
+            let actionName = Math.random() < 0.5 ? "scroll" : "click";
+            let actionParams = actionName === "scroll" 
+                ? { "percent_scrolled": 80 + Math.floor(Math.random() * 20) } 
+                : { "link_text": "read_more_button" }; 
+
+            const actionPayload = {
+                "client_id": client_id, 
+                "events": [{
+                    "name": actionName,
+                    "params": {
+                        ...actionParams,
+                        "page_location": urlToHit,
+                        "document_referrer": document_referrer, 
+                        "session_id": session_id,
+                        "engagement_time_msec": String(engagement_duration)
+                    }
+                }]
+            };
+
+            try {
+                await sendGa4HitWithRetry(ga4Url, actionPayload, userAgent);
+                console.log(`Job ${i + 1}: Action Event (${actionName}) sent.`);
+            } catch (error) {
+                console.error(`Job ${i + 1}: Action failed. ${error.message}`);
+            }
+        }
+        
+        await wait(1000 + Math.random() * 1000); 
+
+        // --- 3. User Engagement (Session End) ---
+        const engagementPayload = {
+            "client_id": client_id, 
+            "events": [{
+                "name": "user_engagement",
+                "params": {
+                    "page_location": urlToHit,
+                    "document_referrer": document_referrer, 
+                    "session_id": session_id,
+                    "engagement_time_msec": String(engagement_duration) 
+                }
+            }]
+        };
+        
+        try {
+            await sendGa4HitWithRetry(ga4Url, engagementPayload, userAgent);
+            console.log(`Job ${i + 1}: Engagement Event sent. **VIEW COMPLETE**`);
+        } catch (error) {
+            console.error(`Job ${i + 1}: Engagement failed. ${error.message}`);
+        }
+        
+        await wait(6000 + Math.random() * 4000); 
+    }
+    console.log(`Background job for ${views} views completed.`);
+}
+
+// ======================= 4. API ENDPOINTS ========================
+
+// Traffic Boost API: /api/boost-traffic
+app.post('/api/boost-traffic', async (req, res) => {
+    const { ga_id, api_secret, views, distribution } = req.body;
+    
+    if (!ga_id || !api_secret || !views || !distribution || distribution.length === 0) {
+        return res.status(400).json({ success: false, message: "Missing required fields." });
+    }
+    if (views < 1 || views > 500) {
+        return res.status(400).json({ success: false, message: "Views must be between 1 and 500." });
+    }
+
+    const ga4Url = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`;
+    
+    processTrafficJob(ga4Url, views, distribution)
+        .catch(err => {
+            console.error(`Async Job Failed Unexpectedly: ${err.message}`);
+        });
+
+    return res.status(200).json({
+        success: true, 
+        message: `Job accepted and processing ${views} SEARCH VIEWS in the background.`, 
+        simulation_mode: "Search Traffic + Direct Proxy" 
+    });
+});
+
+
+// Instagram Caption Generator API: /api/generate-caption
+app.post('/api/generate-caption', async (req, res) => {
+    const { reelTopic, captionStyle, numberOfCaptions } = req.body;
+
+    if (!GEMINI_API_KEY) {
+        return res.status(500).json({ success: false, message: "API Key is not configured." });
+    }
+
+    try {
+        const openai = new OpenAI({ apiKey: GEMINI_API_KEY }); 
+        
+        const prompt = `Generate ${numberOfCaptions} catchy, viral captions in ${captionStyle} style for a reel about "${reelTopic}". Respond with a simple, numbered list of captions.`;
+        
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo", 
+            messages: [{ role: "user", content: prompt }],
+        });
+        
+        const captions = completion.choices[0].message.content.trim().split('\n')
+            .map(line => line.replace(/^\s*\d+\.\s*/, '').trim()) 
+            .filter(line => line.length > 0);
+
+        return res.status(200).json({ success: true, captions: captions });
+    
+    } catch (error) {
+        console.error("Caption Generation Error:", error.message);
+        return res.status(500).json({ success: false, message: "Caption generation failed. Check API key.", detail: error.message });
+    }
+});
+
+
+// Article Generator API: /api/generate-article
+app.post('/api/generate-article', async (req, res) => {
+    const { topic, length, style } = req.body;
+
+    if (!GEMINI_API_KEY) {
+        return res.status(500).json({ success: false, message: "API Key is not configured." });
+    }
+
+    try {
+        const openai = new OpenAI({ apiKey: GEMINI_API_KEY }); 
+        
+        const prompt = `Write a comprehensive article on "${topic}". The article should be ${length} words long and written in a ${style} tone. Include an introduction, 3-4 main sections with subheadings, and a conclusion.`;
+        
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4", // Using a more advanced model for better article quality
+            messages: [{ role: "user", content: prompt }],
+        });
+        
+        const article = completion.choices[0].message.content.trim();
+
+        return res.status(200).json({ success: true, article: article });
+    
+    } catch (error) {
+        console.error("Article Generation Error:", error.message);
+        return res.status(500).json({ success: false, message: "Article generation failed. Check API key.", detail: error.message });
+    }
+});
+
 
 // Start Server
 app.listen(PORT, () => {
