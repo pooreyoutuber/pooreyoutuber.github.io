@@ -22,6 +22,25 @@ let RAW_PROXY_LIST = [
     'p.webshare.io:80' // Backbone Proxy Domain (Webshare Rotates IPs)
 ];
 
+// रैंडम Google Search Referrers (dr parameter के लिए)
+const SEARCH_QUERIES = [
+    'best tools for traffic boosting',
+    'buy organic website traffic',
+    'how to increase website views fast',
+    'free website traffic generator',
+    'website booster tool review'
+];
+
+const getGoogleReferrer = (urlToHit) => {
+    // Randomly select a search query
+    const query = SEARCH_QUERIES[Math.floor(Math.random() * SEARCH_QUERIES.length)];
+    const encodedQuery = encodeURIComponent(query);
+    
+    // Construct a realistic Google Search URL
+    return `https://www.google.com/search?q=${encodedQuery}&sourceid=chrome&ie=UTF-8&filter=0&url=${encodeURIComponent(urlToHit)}`;
+};
+
+
 // रैंडम यूज़र एजेंट (Real User Agent Strings)
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36',
@@ -63,7 +82,6 @@ async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
                     httpsAgent: httpsAgent,
                     proxy: false, 
                     timeout: 15000, 
-                    // CRITICAL: Request Headers में User-Agent भेजें
                     headers: {
                         'User-Agent': userAgent || USER_AGENTS[0] 
                     }
@@ -98,18 +116,21 @@ async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
     }
 }
 
-// ======================= ASYNC BACKGROUND JOB (MAXIMUM REALISM) ========================
+// ======================= ASYNC BACKGROUND JOB (SEARCH TRAFFIC + REALISM) ========================
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function processTrafficJob(ga4Url, views, distribution) {
-    console.log(`Starting MAXIMUM REALISM job for ${views} views.`);
+    console.log(`Starting SEARCH TRAFFIC job for ${views} views.`);
     
     const urlToHit = distribution[0].url; 
     
     for (let i = 0; i < views; i++) {
         const client_id = uuidv4();
         const session_id = String(Date.now());
+        
+        // CRITICAL: Get the Search Referrer URL
+        const document_referrer = getGoogleReferrer(urlToHit);
         
         // Randomly select User-Agent and Screen Size for this user
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
@@ -120,7 +141,6 @@ async function processTrafficJob(ga4Url, views, distribution) {
         const initialPayload = {
             "client_id": client_id, 
             "user_properties": {
-                "user_agent": { "value": userAgent }, // Custom User Property (Optional, but good practice)
                 "screen_resolution": { "value": screen_resolution }
             },
             "events": [
@@ -128,7 +148,8 @@ async function processTrafficJob(ga4Url, views, distribution) {
                 { 
                     "name": "page_view",
                     "params": {
-                        "page_location": urlToHit,
+                        "page_location": urlToHit, 
+                        "document_referrer": document_referrer, // <--- CRITICAL: Search Referrer
                         "session_id": session_id,
                         "engagement_time_msec": String(engagement_duration)
                     }
@@ -138,7 +159,7 @@ async function processTrafficJob(ga4Url, views, distribution) {
         
         try {
             await sendGa4HitWithRetry(ga4Url, initialPayload, userAgent);
-            console.log(`Job ${i + 1}: Session Start & Page View sent.`);
+            console.log(`Job ${i + 1}: Session Start & Page View (from Search) sent.`);
         } catch (error) {
             console.error(`Job ${i + 1}: Initial events failed. ${error.message}`);
         }
@@ -146,19 +167,19 @@ async function processTrafficJob(ga4Url, views, distribution) {
         await wait(2000 + Math.random() * 1500); // 2s to 3.5s delay
 
         // --- 2. Action Event (Click or Scroll) ---
-        if (Math.random() < 0.7) { // 70% chance of an action
+        if (Math.random() < 0.7) { 
             let actionName;
             let actionParams;
 
             if (Math.random() < 0.5) {
-                // 50% chance of Scroll
+                // Scroll
                 actionName = "scroll";
-                actionParams = { "percent_scrolled": 80 + Math.floor(Math.random() * 20) }; // 80-100% scroll
+                actionParams = { "percent_scrolled": 80 + Math.floor(Math.random() * 20) }; 
                 console.log(`Job ${i + 1}: Sending Scroll.`);
             } else {
-                // 50% chance of Click (or another interaction)
+                // Click 
                 actionName = "click";
-                actionParams = { "link_text": "read_more_button" }; // Simulating a button click
+                actionParams = { "link_text": "read_more_button" }; 
                 console.log(`Job ${i + 1}: Sending Click.`);
             }
 
@@ -169,6 +190,7 @@ async function processTrafficJob(ga4Url, views, distribution) {
                     "params": {
                         ...actionParams,
                         "page_location": urlToHit,
+                        "document_referrer": document_referrer, // <--- CRITICAL: Referrer sent again
                         "session_id": session_id,
                         "engagement_time_msec": String(engagement_duration)
                     }
@@ -191,6 +213,7 @@ async function processTrafficJob(ga4Url, views, distribution) {
                 "name": "user_engagement",
                 "params": {
                     "page_location": urlToHit,
+                    "document_referrer": document_referrer, // <--- CRITICAL: Referrer sent again
                     "session_id": session_id,
                     "engagement_time_msec": String(engagement_duration) 
                 }
@@ -237,8 +260,8 @@ app.post('/api/boost-traffic', async (req, res) => {
     // Send immediate response so the frontend knows the job started. (User can close tab)
     return res.status(200).json({
         success: true, 
-        message: `Job accepted and processing ${views} REAL VIEWS in the background.`, 
-        simulation_mode: "Maximum Realism Events" 
+        message: `Job accepted and processing ${views} SEARCH VIEWS in the background.`, 
+        simulation_mode: "Search Traffic + Maximum Realism" 
     });
 });
 
