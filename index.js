@@ -1,226 +1,175 @@
-// Load environment variables (from Render Secrets)
-require('dotenv').config(); 
+// index.js
+
 const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { v4: uuidv4 } = require('uuid');
 const { OpenAI } = require('openai');
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
+puppeteer.use(StealthPlugin()); // Anti-detection plugin
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = 10000;
+
+app.use(express.json());
 
 // ======================= 1. कॉन्फ़िगरेशन और प्रॉक्सी डेटा ========================
 
-// Environment Variables (Render Secrets) से लोड करें
-const PROXY_USER = process.env.PROXY_USER; // Should be 'bqctypvz-rotate'
-const PROXY_PASS = process.env.PROXY_PASS; // Should be your Webshare password
+// Environment Variables से लोड करें
+const PROXY_LIST_STRING = process.env.PROXY_LIST;
+const PROXY_USER = process.env.PROXY_USER || ""; // प्रॉक्सी यूज़रनेम (अगर है)
+const PROXY_PASS = process.env.PROXY_PASS || ""; // प्रॉक्सी पासवर्ड (अगर है)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY; 
 
-// 🚨 BEST PROXY METHOD: ROTATING PROXY ENDPOINT 
-// यह सबसे स्थिर (stable) है।
-const RAW_PROXY_LIST = [
-    'p.webshare.io:80' 
-];
+// प्रॉक्सी लिस्ट तैयार करें
+let PROXIES = [];
+if (PROXY_LIST_STRING) {
+    // केवल http/https प्रॉक्सी को स्वीकार करें
+    PROXIES = PROXY_LIST_STRING.split(',').filter(p => p.startsWith('http://') || p.startsWith('https://'));
+}
 
-// रैंडम Google Search Referrers
-const SEARCH_QUERIES = [
-    'best tools for traffic boosting', 'buy organic website traffic', 
-    'how to increase website views fast', 'free website traffic generator', 
-    'website booster tool review', 'organic traffic solution'
-];
+if (PROXIES.length === 0) {
+    console.error("PROXY_LIST is empty or invalid. Traffic tools will fail!");
+}
 
-const getGoogleReferrer = (urlToHit) => {
-    const query = SEARCH_QUERIES[Math.floor(Math.random() * SEARCH_QUERIES.length)];
-    const encodedQuery = encodeURIComponent(query);
-    return `https://www.google.com/search?q=${encodedQuery}&sourceid=chrome&ie=UTF-8&filter=0&url=${encodeURIComponent(urlToHit)}`;
-};
+let proxyIndex = 0;
 
-// रैंडम यूज़र एजेंट और स्क्रीन साइज़
-const USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
-    'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.101 Mobile Safari/537.36',
-];
-const SCREEN_SIZES = ['1920x1080', '1366x768', '1440x900', '375x667', '414x896'];
-
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// ======================= 2. प्रॉक्सी लॉजिक (Sub-Function) ========================
+// टारगेट कॉन्फ़िगरेशन (यूज़र को API के माध्यम से भेजना चाहिए)
+// यहाँ उदाहरण के लिए एक डिफ़ॉल्ट वैल्यू सेट की गई है
+const DEFAULT_TARGET_URL = 'https://www.google.com/'; // API में यूज़र से लेना बेहतर है
+const DEFAULT_SEARCH_QUERY = 'Best website booster tool';
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function sendGa4HitWithRetry(ga4Url, payload, userAgent) {
-    if (!PROXY_USER || !PROXY_PASS) {
-        throw new Error("Traffic Boost Failed. Missing Proxy Credentials in Render Environment Variables.");
+// ======================= 2. एडवांस ट्रैफ़िक लॉजिक (Search, Click, Scroll) ========================
+
+async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searchQuery) {
+    let browser;
+    let authUrl = proxyUrl; 
+
+    // अगर PROXY_USER/PASS है, तो प्रॉक्सी URL को बदलें
+    if (PROXY_USER && PROXY_PASS) {
+        // http://user:pass@ip:port फॉर्मेट तैयार करें
+        const urlObj = new URL(proxyUrl);
+        authUrl = `${urlObj.protocol}//${PROXY_USER}:${PROXY_PASS}@${urlObj.host}`;
     }
 
-    let lastError = null;
-    const MAX_RETRIES = 5; 
-    const proxyIpPort = RAW_PROXY_LIST[0]; // Always p.webshare.io:80
+    try {
+        console.log(`[🚀 ${jobId} View ${viewNumber}] Starting with Proxy: ${proxyUrl.split('@').pop()}`);
 
-    for (let i = 0; i < MAX_RETRIES; i++) {
-        const proxyUrl = `http://${PROXY_USER}:${PROXY_PASS}@${proxyIpPort}`;
-        const httpsAgent = new HttpsProxyAgent(proxyUrl);
-        
-        try {
-            const response = await axios.post(
-                ga4Url,
-                payload,
-                {
-                    httpsAgent: httpsAgent,
-                    proxy: false, 
-                    timeout: 15000, 
-                    headers: { 'User-Agent': userAgent || USER_AGENTS[0] }
-                }
-            );
-
-            if (response.status === 204) {
-                return response;
-            }
-
-            lastError = new Error(`HTTP Status ${response.status} from proxy: ${proxyIpPort}`);
-
-        } catch (error) {
-            const errorMessage = error.response ? `HTTP Status ${error.response.status}` : error.message;
-            lastError = error;
-            // console.warn(`Retry ${i+1}/${MAX_RETRIES} failed. Error: ${errorMessage}`);
-            
-            if (String(errorMessage).includes('407')) {
-                 throw new Error("Proxy Authentication Failed (407). Check PROXY_USER/PASS in Render Secrets.");
-            }
-        }
-        
-        await wait(500);
-    }
-
-    if (lastError) {
-        throw new Error(`Failed to send GA4 hit after trying all retries. Last network error: ${lastError.message}`);
-    } else {
-        throw new Error("Failed to send GA4 hit after trying all retries.");
-    }
-}
-
-// ======================= 3. TRAFFIC BOOSTER LOGIC (Concurrent Dispatch) ========================
-
-// यह फंक्शन एक सिंगल यूज़र के लिए सभी व्यूज़ को डिस्पैच करता है
-async function processTrafficJob(jobId, ga4Url, views, distribution) {
-    console.log(`\n--- Starting Concurrent Job: ${jobId} (Views: ${views}) ---`);
-    const urlToHit = distribution[0].url; 
-    
-    // 24 घंटे में व्यूज डिस्पैच करें 
-    const TOTAL_DISPATCH_TIME_HOURS = 24; 
-    const TOTAL_DISPATCH_TIME_MS = TOTAL_DISPATCH_TIME_HOURS * 60 * 60 * 1000; 
-    const BASE_DELAY_MS = TOTAL_DISPATCH_TIME_MS / views; 
-    
-    // हर व्यू के बीच कम से कम 1 मिनट का अंतर
-    const MIN_DELAY_MS = 60000; 
-    const effectiveBaseDelay = Math.max(BASE_DELAY_MS, MIN_DELAY_MS);
-
-
-    for (let i = 0; i < views; i++) {
-        const client_id = uuidv4();
-        const session_id = String(Date.now());
-        
-        const document_referrer = getGoogleReferrer(urlToHit);
-        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        const screen_resolution = SCREEN_SIZES[Math.floor(Math.random() * SCREEN_SIZES.length)];
-        const engagement_duration = 10000 + Math.floor(Math.random() * 10000); 
-
-        // --- 1. Session Start + Page View ---
-        const initialPayload = {
-            "client_id": client_id, 
-            "user_properties": { "screen_resolution": { "value": screen_resolution } },
-            "events": [
-                { "name": "session_start" },
-                { "name": "page_view", "params": { "page_location": urlToHit, "document_referrer": document_referrer, "session_id": session_id, "engagement_time_msec": String(engagement_duration) } }
+        // Puppeteer को प्रॉक्सी के साथ लॉन्च करें
+        browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                `--proxy-server=${authUrl.replace('http://', '').replace('https://', '')}`, // Puppeteer को सिर्फ़ ip:port चाहिए (या auth के साथ)
+                '--no-sandbox',
+                '--disable-setuid-sandbox'
             ]
-        };
-        try { 
-            await sendGa4HitWithRetry(ga4Url, initialPayload, userAgent);
-            console.log(`[🟢 ${jobId}] View ${i+1}/${views}: Initial event complete (Green Tick).`);
-        } catch (e) { 
-            console.error(`[🔴 ${jobId}] View ${i+1}/${views}: Initial event failed. ${e.message}`); 
+        });
+        const page = await browser.newPage();
+        
+        // 1. Authentication (अगर ज़रूरत हो)
+        if (PROXY_USER && PROXY_PASS) {
+            await page.authenticate({ username: PROXY_USER, password: PROXY_PASS });
         }
-        await wait(2000 + Math.random() * 1500); 
 
-        // --- 2. Action Event (Click or Scroll) ---
-        if (Math.random() < 0.7) { 
-            let actionName = Math.random() < 0.5 ? "scroll" : "click";
-            let actionParams = actionName === "scroll" ? { "percent_scrolled": 80 + Math.floor(Math.random() * 20) } : { "link_text": "read_more_button" }; 
-            const actionPayload = {
-                "client_id": client_id, 
-                "events": [{ "name": actionName, "params": { ...actionParams, "page_location": urlToHit, "document_referrer": document_referrer, "session_id": session_id, "engagement_time_msec": String(engagement_duration) } }]
-            };
-            try { await sendGa4HitWithRetry(ga4Url, actionPayload, userAgent); } catch (e) { console.error(`[🔴 ${jobId}] View ${i+1}: Action failed.`); }
+        // 2. Search (खोजें) - Google पर जाएँ
+        console.log(`[${jobId} View ${viewNumber}] Searching Google for: ${searchQuery}`);
+        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.type('textarea[name="q"]', searchQuery, { delay: 100 }); // धीरे-धीरे टाइप करें
+        await page.keyboard.press('Enter');
+        
+        // 3. Click (क्लिक करें) - अपनी वेबसाइट ढूंढें
+        await page.waitForTimeout(5000); 
+        
+        // अपनी वेबसाइट के डोमेन को सही ढंग से निकालने की कोशिश करें
+        const targetDomain = new URL(targetUrl).hostname;
+        
+        // targetDomain वाले लिंक को ढूंढें और क्लिक करें
+        const targetLinkSelector = `a[href*="${targetDomain}"]`;
+        const targetLink = await page.$(targetLinkSelector);
+        
+        if (targetLink) {
+            console.log(`[🟢 ${jobId} View ${viewNumber}] Target URL found. Clicking...`);
+            await targetLink.click();
+            await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 30000 }); // अपनी वेबसाइट पर नेविगेट करें और नेटवर्क शांत होने का इंतज़ार करें
+        } else {
+            console.log(`[🔴 ${jobId} View ${viewNumber}] Target URL not found on search page. Aborting view.`);
+            await browser.close();
+            return;
         }
-        await wait(1000 + Math.random() * 1000); 
 
-        // --- 3. User Engagement (Session End) ---
-        const engagementPayload = {
-            "client_id": client_id, 
-            "events": [{ "name": "user_engagement", "params": { "page_location": urlToHit, "document_referrer": document_referrer, "session_id": session_id, "engagement_time_msec": String(engagement_duration) } }]
-        };
-        try { await sendGa4HitWithRetry(ga4Url, engagementPayload, userAgent); } catch (e) { console.error(`[🔴 ${jobId}] View ${i+1}: Engagement failed.`); }
+        // 4. On-Page Interaction (स्क्रॉल करें और रुकें)
+        console.log(`[${jobId} View ${viewNumber}] Landed. Starting deep interaction...`);
         
-        
-        // --- 4. CONCURRENT DISPATCH DELAY (Long Break) ---
-        // प्रतीक्षा समय: औसत देरी + 50% तक रैंडम वेरिएशन
-        const randomVariance = Math.random() * effectiveBaseDelay * 0.5;
-        const totalDelay = (effectiveBaseDelay + randomVariance) - 6000; // Subtract session time (approx 6s)
-        
-        // सुनिश्चित करें कि देरी 1 सेकंड से कम न हो
-        const finalDelay = Math.max(1000, totalDelay);
-        
-        // Console में लंबी देरी (Pause) दिखाने की जरूरत नहीं है, क्योंकि यह लाखों मिलीसेकंड हो सकता है
-        // console.log(`[${jobId}] Pausing for ${Math.round(finalDelay / 1000)} seconds before the next view.`);
-        if (i < views - 1) {
-            await wait(finalDelay);
+        const totalDuration = Math.floor(Math.random() * (30000 - 15000 + 1)) + 15000; // 15-30 seconds
+        const scrollCount = 4;
+        const scrollDelay = totalDuration / scrollCount;
+
+        for (let i = 1; i <= scrollCount; i++) {
+            const scrollAmount = Math.floor(Math.random() * 500) + 100;
+            await page.evaluate(y => { window.scrollBy(0, y); }, scrollAmount); 
+            await page.waitForTimeout(scrollDelay * (Math.random() * 0.5 + 0.75)); 
         }
+
+        // 5. Success
+        await browser.close();
+        console.log(`[✅ ${jobId} View ${viewNumber}] Full User Journey Complete.`);
+
+    } catch (error) {
+        console.error(`[❌ ${jobId} View ${viewNumber}] Job failed for proxy ${proxyUrl.split('@').pop()}:`, error.message);
+        if (browser) await browser.close();
     }
-    console.log(`--- Job ${jobId} COMPLETED ---`);
 }
 
-
-// ======================= 4. API ENDPOINTS ========================
+// ----------------------------------------------------
+// API ENDPOINTS (Concurrent Dispatch)
+// ----------------------------------------------------
 
 // Traffic Boost API: /api/boost-traffic
 app.post('/api/boost-traffic', async (req, res) => {
-    const { ga_id, api_secret, views, distribution } = req.body;
+    const { targetUrl, searchQuery, views } = req.body;
     
-    if (!ga_id || !api_secret || !views || !distribution || distribution.length === 0) {
-        return res.status(400).json({ success: false, message: "Missing required fields." });
-    }
-    if (views < 1 || views > 500) {
-        return res.status(400).json({ success: false, message: "Views must be between 1 and 500." });
+    // इनपुट वैलिडेशन
+    if (!targetUrl || !searchQuery || !views || views > 30 || PROXIES.length === 0) {
+        return res.status(400).json({ 
+            success: false, 
+            message: "Missing fields, views > 30, or PROXY_LIST is empty. Max 30 views allowed due to Render Free Plan limits." 
+        });
     }
 
-    const ga4Url = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`;
     const jobId = uuidv4().substring(0, 8);
     
-    // 🚨 CRITICAL: We start the job immediately and concurrently (without a global queue)
-    // .catch() is used to handle errors without blocking the server thread
-    processTrafficJob(jobId, ga4Url, views, distribution)
-        .catch(err => {
-            console.error(`Async Job ${jobId} Failed Unexpectedly: ${err.message}`);
-        });
-
-    return res.status(200).json({
+    res.status(202).json({
         success: true, 
-        message: `Job ${jobId} accepted. First view is being dispatched now. All views will be delivered over the next 24 hours.`, 
-        simulation_mode: "Concurrent Dispatch (Green Tick Mode)" 
+        message: `Job ${jobId} accepted. ${views} views will be dispatched immediately. Check logs for progress (Green Tick).`, 
+        simulation_mode: "Advanced Headless Browser (GSC/GA4 Focus)" 
     });
+
+    const viewPromises = [];
+    for (let i = 1; i <= views; i++) {
+        const currentProxy = PROXIES[proxyIndex];
+        
+        // प्रॉक्सी इंडेक्स को रोटेट करें
+        proxyIndex = (proxyIndex + 1) % PROXIES.length;
+
+        // सभी व्यूज़ को एक साथ (Concurrent) चलाएँ
+        viewPromises.push(sendAdvancedTraffic(jobId, i, currentProxy, targetUrl, searchQuery));
+
+        // 2-5 सेकंड का छोटा ब्रेक ताकि सर्वर ओवरलोड न हो
+        await wait(Math.random() * 3000 + 2000); 
+    }
+    
+    // सभी व्यूज़ के खत्म होने का इंतज़ार करें
+    await Promise.all(viewPromises);
+    console.log(`--- Job ${jobId} Finished! ---`);
 });
 
 
-// Instagram Caption Generator API: /api/generate-caption
+// Instagram Caption Generator API: /api/generate-caption (AI part for completeness)
 app.post('/api/generate-caption', async (req, res) => {
     const { reelTopic, captionStyle, numberOfCaptions } = req.body;
-    if (!GEMINI_API_KEY) { return res.status(500).json({ success: false, message: "API Key is not configured." }); }
+    if (!GEMINI_API_KEY) { return res.status(500).json({ success: false, message: "AI Key is not configured." }); }
+    // ... (AI generation logic) ...
     try {
         const openai = new OpenAI({ apiKey: GEMINI_API_KEY }); 
         const prompt = `Generate ${numberOfCaptions} catchy, viral captions in ${captionStyle} style for a reel about "${reelTopic}". Respond with a simple, numbered list of captions.`;
@@ -228,16 +177,16 @@ app.post('/api/generate-caption', async (req, res) => {
         const captions = completion.choices[0].message.content.trim().split('\n').map(line => line.replace(/^\s*\d+\.\s*/, '').trim()).filter(line => line.length > 0);
         return res.status(200).json({ success: true, captions: captions });
     } catch (error) {
-        console.error("Caption Generation Error:", error.message);
-        return res.status(500).json({ success: false, message: "Caption generation failed. Check API key.", detail: error.message });
+        return res.status(500).json({ success: false, message: "Caption generation failed. Check API key." });
     }
 });
 
 
-// Article Generator API: /api/generate-article
+// Article Generator API: /api/generate-article (AI part for completeness)
 app.post('/api/generate-article', async (req, res) => {
     const { topic, length, style } = req.body;
-    if (!GEMINI_API_KEY) { return res.status(500).json({ success: false, message: "API Key is not configured." }); }
+    if (!GEMINI_API_KEY) { return res.status(500).json({ success: false, message: "AI Key is not configured." }); }
+    // ... (AI generation logic) ...
     try {
         const openai = new OpenAI({ apiKey: GEMINI_API_KEY }); 
         const prompt = `Write a comprehensive article on "${topic}". The article should be ${length} words long and written in a ${style} tone. Include an introduction, 3-4 main sections with subheadings, and a conclusion.`;
@@ -245,13 +194,17 @@ app.post('/api/generate-article', async (req, res) => {
         const article = completion.choices[0].message.content.trim();
         return res.status(200).json({ success: true, article: article });
     } catch (error) {
-        console.error("Article Generation Error:", error.message);
-        return res.status(500).json({ success: false, message: "Article generation failed. Check API key.", detail: error.message });
+        return res.status(500).json({ success: false, message: "Article generation failed. Check API key." });
     }
 });
 
 
+// Health check endpoint (Render Sleep Fix)
+app.get('/', (req, res) => {
+    res.send('Service is active.');
+});
+
 // Start Server
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
