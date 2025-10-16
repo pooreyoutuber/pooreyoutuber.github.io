@@ -3,193 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Traffic Booster Tool - Global Search Simulation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Traffic Booster Client</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f9;
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f7f6;
         }
-        .primary-button {
-            background-color: #10b981; 
-            transition: background-color 0.2s ease, transform 0.1s ease;
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .primary-button:hover {
-            background-color: #059669;
+        h2 {
+            text-align: center;
+            color: #333;
         }
-        .primary-button:active {
-            transform: scale(0.98);
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
         }
-        .live-log-box {
-            background-color: #1f2937;
-            color: #10b981; 
-            border-left: 4px solid #10b981;
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; 
         }
-        .input-field:focus {
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #response-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; 
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #ffe599;
+            color: #333;
+            border: 1px solid #e0c27b;
         }
     </style>
 </head>
-<body class="p-4 sm:p-8 flex justify-center items-start min-h-screen">
+<body>
 
-    <div class="w-full max-w-4xl">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-green-600 mb-2">🌎 Advanced Search & Traffic Generator</h1>
-            <p class="text-gray-600">Simulates real user behavior (Search > Click > Scroll) for Country-Wise Views.</p>
-        </header>
-
-        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100">
-            
-            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-lg">
-                <p class="font-bold text-blue-800 mb-2">⚠️ महत्वपूर्ण सूचना (Important Note)</p>
-                <ul class="text-sm text-blue-700 list-disc ml-5 space-y-1">
-                    <li>यह टूल **500 व्यूज़** को **24 घंटों** में फैलाएगा, जिससे ट्रैफ़िक प्राकृतिक (natural) दिखेगा।</li>
-                    <li>प्रत्येक व्यू के बीच लगभग **3 मिनट** का ब्रेक होगा।</li>
-                    <li>**ट्रैफ़िक भेजने के बाद आप यह विंडो बंद कर सकते हैं।**</li>
-                </ul>
-            </div>
-
-            <form id="traffic-form" onsubmit="event.preventDefault(); startTrafficGeneration()">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label for="target-url" class="block text-sm font-medium text-gray-700 mb-2">1. Target Website URL (Your Site)</label>
-                        <input type="url" id="target-url" placeholder="https://yourwebsite.com/page1" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150" required value="https://pooreyoutuber.github.io/website-booster.html">
-                    </div>
-                    <div>
-                        <label for="search-query" class="block text-sm font-medium text-gray-700 mb-2">2. Google Search Keyword</label>
-                        <input type="text" id="search-query" placeholder="E.g., Website Booster Tool" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150" required value="website booster tool">
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <label for="total-views" class="block text-sm font-medium text-gray-700 mb-2">3. Total Views to Generate (Max 500)</label>
-                    <input type="number" id="total-views" value="500" min="1" max="500" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150">
-                </div>
-                
-                <button type="submit" id="start-button" class="w-full py-3 px-4 rounded-lg text-white font-semibold shadow-lg primary-button focus:outline-none focus:ring-4 focus:ring-green-300">
-                    START SEARCH & TRAFFIC GENERATION (24 HOUR DISPATCH)
-                </button>
-            </form>
-
-            <div id="status-message" class="mt-4 p-3 rounded-lg text-center hidden font-medium" role="alert"></div>
-
-            <div class="mt-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-2">Live Activity Log</h2>
-                <div id="live-log" class="live-log-box p-4 rounded-lg h-32 overflow-y-scroll text-sm space-y-1">
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // *** CRITICAL: YOUR RENDER BACKEND URL IS SET HERE ***
-        const API_BASE_URL = 'https://pooreyoutuber-github-io.onrender.com';
-
-        const statusMessage = document.getElementById('status-message');
-        const startButton = document.getElementById('start-button');
-        const liveLog = document.getElementById('live-log');
-
-        document.addEventListener('DOMContentLoaded', () => {
-            addLog('System ready. Enter details and click START.');
-            addLog('NOTE: 500 Views will be dispatched over 24 hours (approx. 3 mins per view).');
-        });
+<div class="container">
+    <h2>Traffic Boost Request</h2>
+    <form id="trafficForm">
         
-        // --- Helper Functions ---
-        function displayStatus(message, type = 'info') {
-            statusMessage.textContent = message;
-            statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
-            
-            if (type === 'error') {
-                statusMessage.classList.add('bg-red-100', 'text-red-700');
-            } else if (type === 'success') {
-                statusMessage.classList.add('bg-green-100', 'text-green-700');
+        <label for="renderUrl">Render Service URL (Required):</label>
+        <input type="text" id="renderUrl" value="https://pooreyoutuber-github-io.onrender.com" required>
+
+        <label for="targetUrl">Target Website URL (e.g., https://yoursite.com/article):</label>
+        <input type="text" id="targetUrl" placeholder="https://www.example.com/page" required>
+
+        <label for="searchQuery">Search Query (Ignored, but required):</label>
+        <input type="text" id="searchQuery" value="my awesome keyword" required>
+
+        <label for="views">Views (1-500):</label>
+        <input type="number" id="views" value="10" min="1" max="500" required>
+
+        <button type="submit">Start Traffic Boost</button>
+    </form>
+
+    <div id="response-message"></div>
+</div>
+
+<script>
+    const form = document.getElementById('trafficForm');
+    const responseDiv = document.getElementById('response-message');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+
+        const renderUrl = document.getElementById('renderUrl').value.trim();
+        const targetUrl = document.getElementById('targetUrl').value.trim();
+        const searchQuery = document.getElementById('searchQuery').value.trim();
+        const views = parseInt(document.getElementById('views').value, 10);
+
+        if (!renderUrl.startsWith('http')) {
+            displayMessage('Invalid Render URL. It must start with https://...', 'error');
+            return;
+        }
+        
+        if (views < 1 || views > 500 || isNaN(views)) {
+            displayMessage('The number of views must be between 1 and 500.', 'error');
+            return;
+        }
+
+        const payload = {
+            targetUrl: targetUrl,
+            searchQuery: searchQuery,
+            views: views
+        };
+
+        const apiEndpoint = `${renderUrl}/api/boost-traffic`;
+        
+        displayMessage('Request is being sent... Check Render Logs.', 'info');
+
+        try {
+            const response = await fetch(apiEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // 200/202 status code
+                displayMessage(`✅ Success! ${data.message}`, 'success');
             } else {
-                statusMessage.classList.add('bg-blue-100', 'text-blue-700');
+                // 4xx/5xx status code
+                displayMessage(`❌ Error: ${data.message}`, 'error');
             }
-            statusMessage.classList.remove('hidden');
+
+        } catch (error) {
+            console.error('Network Error:', error);
+            displayMessage(`❌ Network Error: Could not connect to the server. Check the Render URL or Render Logs.`, 'error');
         }
+    });
 
-        function addLog(message) {
-            const now = new Date();
-            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-            
-            const logEntry = document.createElement('div');
-            logEntry.textContent = `[${timeString}] ${message}`;
-            liveLog.appendChild(logEntry);
-            
-            liveLog.scrollTop = liveLog.scrollHeight;
-        }
+    function displayMessage(message, type) {
+        responseDiv.textContent = message;
+        responseDiv.className = ''; 
+        responseDiv.classList.add(type);
+        responseDiv.style.display = 'block';
+    }
+</script>
 
-        // --- Main Function ---
-
-        async function startTrafficGeneration() {
-            const targetUrl = document.getElementById('target-url').value.trim();
-            const searchQuery = document.getElementById('search-query').value.trim();
-            const totalViews = parseInt(document.getElementById('total-views').value, 10);
-            
-            // 2. Validation 
-            if (!targetUrl || !searchQuery || !totalViews || totalViews < 1 || totalViews > 500) {
-                displayStatus('Error: Please check Target URL, Search Query, and ensure views are 1-500.', 'error');
-                return;
-            }
-            
-            if (!targetUrl.startsWith('https://')) {
-                 displayStatus(`Error: Target URL must start with 'https://'.`, 'error');
-                 return;
-            }
-
-
-            // 3. Prepare Request and UI
-            startButton.disabled = true;
-            startButton.textContent = 'Submitting Job...';
-            displayStatus('Submitting job to server. Please wait...', 'info');
-            addLog('Submitting job to server...');
-            addLog('INFO: The job will run in the background simulating Search > Click > Scroll.');
-
-
-            try {
-                const requestBody = { 
-                    targetUrl: targetUrl, 
-                    searchQuery: searchQuery, 
-                    views: totalViews
-                };
-                
-                const response = await fetch(`${API_BASE_URL}/api/boost-traffic`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    const errorMessage = result.message || result.error || 'Unknown server error.';
-                    throw new Error(`HTTP Error: ${response.status}. Detail: ${errorMessage}`);
-                }
-                
-                // 4. Success Handling
-                displayStatus(`✅ Job Accepted! ${totalViews} views will be delivered over 24 hours.`, 'success');
-                addLog(`✅ Job Accepted! Total Views: ${totalViews}.`);
-                addLog('✨ You can now safely close this window. View generation will continue in the background.');
-                addLog('LOG: Check your Search Console and GA4 reports for country-based traffic increase.');
-                
-
-            } catch (error) {
-                console.error("Traffic Generation Error:", error);
-                let userHint = 'HINT: Ensure your PROXY_USER/PASS and PROXY_LIST are correctly set in Render Secrets.';
-                
-                displayStatus(`Generation Failed. Server response error. Error: ${error.message}.`, 'error');
-                addLog(`❌ ERROR: Failed to start job. ${error.message}`);
-                addLog(userHint);
-
-            } finally {
-                // बटन को फिर से इनेबल न करें, क्योंकि यह एक 24 घंटे का जॉब है
-                startButton.textContent = 'JOB RUNNING IN BACKGROUND (24 HOURS)';
-            }
-        }
-    </script>
 </body>
 </html>
