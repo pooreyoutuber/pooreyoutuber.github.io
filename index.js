@@ -22,7 +22,6 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
 // प्रॉक्सी लिस्ट तैयार करें
 let PROXIES = [];
 if (PROXY_LIST_STRING) {
-    // केवल http/https प्रॉक्सी को स्वीकार करें
     PROXIES = PROXY_LIST_STRING.split(',').filter(p => p.startsWith('http://') || p.startsWith('https://'));
 }
 
@@ -44,7 +43,6 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
     if (PROXY_USER && PROXY_PASS) {
         try {
             const urlObj = new URL(proxyUrl);
-            // Puppeteer Launch Args के लिए user:pass@ip:port फॉर्मेट तैयार करें
             finalProxyUrl = `${urlObj.protocol}//${PROXY_USER}:${PROXY_PASS}@${urlObj.host}`;
         } catch (e) {
             console.error("Invalid Proxy URL in list.");
@@ -53,11 +51,9 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
     }
 
     try {
-        // Console में Auth URL को छिपाएँ
         const displayProxy = proxyUrl.split('@').pop();
         console.log(`[🚀 ${jobId} View ${viewNumber}] Starting with Proxy: ${displayProxy}`);
 
-        // Puppeteer को प्रॉक्सी के साथ लॉन्च करें
         browser = await puppeteer.launch({
             headless: true,
             args: [
@@ -66,13 +62,11 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-gpu', 
-                '--window-size=1280,720' // फिक्स्ड विंडो साइज़
+                '--window-size=1280,720' 
             ]
         });
         const page = await browser.newPage();
         
-        // ❌ page.authenticate() हटा दिया गया है
-
         // 2. Search (खोजें) - Google पर जाएँ
         console.log(`[${jobId} View ${viewNumber}] Searching Google for: ${searchQuery}`);
         await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -80,7 +74,7 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
         await page.keyboard.press('Enter');
         
         // 3. Click (क्लिक करें) - अपनी वेबसाइट ढूंढें
-        await page.waitForTimeout(5000 + Math.random() * 2000); // Wait 5-7 seconds
+        await page.waitForTimeout(5000 + Math.random() * 2000); 
         
         const targetDomain = new URL(targetUrl).hostname;
         const targetLinkSelector = `a[href*="${targetDomain}"]`;
@@ -114,53 +108,62 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
         console.log(`[✅ ${jobId} View ${viewNumber}] Full User Journey Complete.`);
 
     } catch (error) {
-        // अक्सर error.message में 407 दिख सकता है
         console.error(`[❌ ${jobId} View ${viewNumber}] Job failed. Check Proxy User/Pass: ${error.message}`);
         if (browser) await browser.close();
     }
 }
 
 // ----------------------------------------------------
-// API ENDPOINTS (Concurrent Dispatch)
+// API ENDPOINTS (Timed Dispatch Logic)
 // ----------------------------------------------------
 
 // Traffic Boost API: /api/boost-traffic
 app.post('/api/boost-traffic', async (req, res) => {
-    // targetUrl और searchQuery को API बॉडी से लें
     const { targetUrl, searchQuery, views } = req.body;
     
     // इनपुट वैलिडेशन
-    if (!targetUrl || !searchQuery || !views || views > 30 || PROXIES.length === 0) {
+    if (!targetUrl || !searchQuery || !views || views > 500 || PROXIES.length === 0) {
         return res.status(400).json({ 
             success: false, 
-            message: "Missing fields, views > 30, or PROXY_LIST is empty. Max 30 views allowed due to Render Free Plan limits." 
+            message: "Missing fields, views > 500, or PROXY_LIST is empty." 
         });
     }
 
     const jobId = uuidv4().substring(0, 8);
+    const TOTAL_DISPATCH_TIME_HOURS = 24; // 24 घंटे में फैलाना
+    const TOTAL_DISPATCH_TIME_MS = TOTAL_DISPATCH_TIME_HOURS * 60 * 60 * 1000;
     
+    // प्रति व्यू औसत डिले (मिलीसेकंड में)
+    const BASE_DELAY_MS = TOTAL_DISPATCH_TIME_MS / views; 
+    
+    // सर्वर को तुरंत जवाब दें
     res.status(202).json({
         success: true, 
-        message: `Job ${jobId} accepted. ${views} views will be dispatched immediately. Check logs for progress (Green Tick).`, 
-        simulation_mode: "Advanced Headless Browser (Auth Fix Applied)" 
+        message: `Job ${jobId} accepted. ${views} views will be dispatched over the next ${TOTAL_DISPATCH_TIME_HOURS} hours. Check logs for progress.`, 
+        simulation_mode: "Timed Headless Browser Dispatch (Country Views)" 
     });
 
-    const viewPromises = [];
+    // 🚨 टाइमिंग लॉजिक: व्यूज़ को सीरियली भेजें
     for (let i = 1; i <= views; i++) {
         const currentProxy = PROXIES[proxyIndex];
         
         // प्रॉक्सी इंडेक्स को रोटेट करें
         proxyIndex = (proxyIndex + 1) % PROXIES.length;
 
-        // सभी व्यूज़ को एक साथ (Concurrent) चलाएँ
-        viewPromises.push(sendAdvancedTraffic(jobId, i, currentProxy, targetUrl, searchQuery));
+        // व्यू को चलाएँ
+        await sendAdvancedTraffic(jobId, i, currentProxy, targetUrl, searchQuery);
 
-        // 2-5 सेकंड का छोटा ब्रेक
-        await wait(Math.random() * 3000 + 2000); 
+        // 24 घंटे में फैलाने के लिए डिले कैलकुलेट करें (2.8 मिनट + रैंडम वेरिएशन)
+        const randomVariation = Math.random() * 0.3 + 0.85; // 85% से 115% तक वेरिएशन
+        const finalDelay = BASE_DELAY_MS * randomVariation;
+
+        console.log(`[⏱️ ${jobId} View ${i}/${views}] Waiting for ${(finalDelay / 1000 / 60).toFixed(2)} minutes before next dispatch.`);
+        
+        // इंतज़ार करें
+        await wait(finalDelay); 
     }
     
-    await Promise.all(viewPromises);
-    console.log(`--- Job ${jobId} Finished! ---`);
+    console.log(`--- Job ${jobId} Finished! All ${views} views delivered over ${TOTAL_DISPATCH_TIME_HOURS} hours. ---`);
 });
 
 
