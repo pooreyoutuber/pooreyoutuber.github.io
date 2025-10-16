@@ -1,22 +1,26 @@
+// index.js
+
 const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { v4: uuidv4 } = require('uuid');
 const { OpenAI } = require('openai');
-const url = require('url'); // URL module include करें
-puppeteer.use(StealthPlugin()); // Anti-detection plugin
+const url = require('url'); 
+puppeteer.use(StealthPlugin());
 
 const app = express();
 const port = 10000;
 
 app.use(express.json());
 
-// ======================= 1. कॉन्फ़िगरेशन और प्रॉक्सी डेटा ========================
+// ======================= 1. कॉन्फ़िगरेशन और प्रॉक्सी डेटा (Environment Variables से लोड) ========================
 
-// Environment Variables से लोड करें
-const PROXY_LIST_STRING = process.env.PROXY_LIST;
-const PROXY_USER = process.env.PROXY_USER || ""; // प्रॉक्सी यूज़रनेम (अगर है)
-const PROXY_PASS = process.env.PROXY_PASS || ""; // प्रॉक्सी पासवर्ड (अगर है)
+// 🚨 ये तीनों Values Render Secrets से लोड होंगी।
+// सुनिश्चित करें कि Render Secrets में PROXY_USER और PROXY_PASS सही हों।
+const PROXY_LIST_STRING = process.env.PROXY_LIST; 
+const PROXY_USER = process.env.PROXY_USER || ""; 
+const PROXY_PASS = process.env.PROXY_PASS || ""; 
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY; 
 
 // प्रॉक्सी लिस्ट तैयार करें
@@ -43,6 +47,7 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
     if (PROXY_USER && PROXY_PASS) {
         try {
             const urlObj = new URL(proxyUrl);
+            // Puppeteer को देने के लिए सही फ़ॉर्मेट: user:pass@ip:port
             finalProxyUrl = `${urlObj.protocol}//${PROXY_USER}:${PROXY_PASS}@${urlObj.host}`;
         } catch (e) {
             console.error("Invalid Proxy URL in list.");
@@ -57,7 +62,7 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
         browser = await puppeteer.launch({
             headless: true,
             args: [
-                // Proxy Server Argument में पूरा ऑथेंटिकेटेड URL पास करें (CRITICAL FIX)
+                // प्रॉक्सी सर्वर आर्गुमेंट
                 `--proxy-server=${finalProxyUrl}`, 
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -128,9 +133,17 @@ app.post('/api/boost-traffic', async (req, res) => {
             message: "Missing fields, views > 500, or PROXY_LIST is empty." 
         });
     }
+    if (!PROXY_USER || !PROXY_PASS) {
+        // जब क्रेडेंशियल्स ही नहीं होंगे, तो Puppeteer क्रैश होगा।
+        return res.status(500).json({ 
+            success: false, 
+            message: "Proxy User/Pass are missing in Environment Variables. Fix secrets." 
+        });
+    }
+
 
     const jobId = uuidv4().substring(0, 8);
-    const TOTAL_DISPATCH_TIME_HOURS = 24; // 24 घंटे में फैलाना
+    const TOTAL_DISPATCH_TIME_HOURS = 24; 
     const TOTAL_DISPATCH_TIME_MS = TOTAL_DISPATCH_TIME_HOURS * 60 * 60 * 1000;
     
     // प्रति व्यू औसत डिले (मिलीसेकंड में)
@@ -154,7 +167,7 @@ app.post('/api/boost-traffic', async (req, res) => {
         await sendAdvancedTraffic(jobId, i, currentProxy, targetUrl, searchQuery);
 
         // 24 घंटे में फैलाने के लिए डिले कैलकुलेट करें (2.8 मिनट + रैंडम वेरिएशन)
-        const randomVariation = Math.random() * 0.3 + 0.85; // 85% से 115% तक वेरिएशन
+        const randomVariation = Math.random() * 0.3 + 0.85; 
         const finalDelay = BASE_DELAY_MS * randomVariation;
 
         console.log(`[⏱️ ${jobId} View ${i}/${views}] Waiting for ${(finalDelay / 1000 / 60).toFixed(2)} minutes before next dispatch.`);
@@ -199,7 +212,7 @@ app.post('/api/generate-article', async (req, res) => {
 });
 
 
-// Health check endpoint (Render Sleep Fix)
+// Health check endpoint
 app.get('/', (req, res) => {
     res.send('Service is active.');
 });
