@@ -1,10 +1,9 @@
-// index.js
-
 const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { v4: uuidv4 } = require('uuid');
 const { OpenAI } = require('openai');
+const url = require('url'); // URL module include करें
 puppeteer.use(StealthPlugin()); // Anti-detection plugin
 
 const app = express();
@@ -33,65 +32,64 @@ if (PROXIES.length === 0) {
 
 let proxyIndex = 0;
 
-// टारगेट कॉन्फ़िगरेशन (यूज़र को API के माध्यम से भेजना चाहिए)
-// यहाँ उदाहरण के लिए एक डिफ़ॉल्ट वैल्यू सेट की गई है
-const DEFAULT_TARGET_URL = 'https://www.google.com/'; // API में यूज़र से लेना बेहतर है
-const DEFAULT_SEARCH_QUERY = 'Best website booster tool';
-
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // ======================= 2. एडवांस ट्रैफ़िक लॉजिक (Search, Click, Scroll) ========================
 
 async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searchQuery) {
     let browser;
-    let authUrl = proxyUrl; 
+    let finalProxyUrl = proxyUrl; 
 
-    // अगर PROXY_USER/PASS है, तो प्रॉक्सी URL को बदलें
+    // 🚨 ऑथेंटिकेशन फिक्स: user:pass को सीधे प्रॉक्सी URL में डालें
     if (PROXY_USER && PROXY_PASS) {
-        // http://user:pass@ip:port फॉर्मेट तैयार करें
-        const urlObj = new URL(proxyUrl);
-        authUrl = `${urlObj.protocol}//${PROXY_USER}:${PROXY_PASS}@${urlObj.host}`;
+        try {
+            const urlObj = new URL(proxyUrl);
+            // Puppeteer Launch Args के लिए user:pass@ip:port फॉर्मेट तैयार करें
+            finalProxyUrl = `${urlObj.protocol}//${PROXY_USER}:${PROXY_PASS}@${urlObj.host}`;
+        } catch (e) {
+            console.error("Invalid Proxy URL in list.");
+            return;
+        }
     }
 
     try {
-        console.log(`[🚀 ${jobId} View ${viewNumber}] Starting with Proxy: ${proxyUrl.split('@').pop()}`);
+        // Console में Auth URL को छिपाएँ
+        const displayProxy = proxyUrl.split('@').pop();
+        console.log(`[🚀 ${jobId} View ${viewNumber}] Starting with Proxy: ${displayProxy}`);
 
         // Puppeteer को प्रॉक्सी के साथ लॉन्च करें
         browser = await puppeteer.launch({
             headless: true,
             args: [
-                `--proxy-server=${authUrl.replace('http://', '').replace('https://', '')}`, // Puppeteer को सिर्फ़ ip:port चाहिए (या auth के साथ)
+                // Proxy Server Argument में पूरा ऑथेंटिकेटेड URL पास करें (CRITICAL FIX)
+                `--proxy-server=${finalProxyUrl}`, 
                 '--no-sandbox',
-                '--disable-setuid-sandbox'
+                '--disable-setuid-sandbox',
+                '--disable-gpu', 
+                '--window-size=1280,720' // फिक्स्ड विंडो साइज़
             ]
         });
         const page = await browser.newPage();
         
-        // 1. Authentication (अगर ज़रूरत हो)
-        if (PROXY_USER && PROXY_PASS) {
-            await page.authenticate({ username: PROXY_USER, password: PROXY_PASS });
-        }
+        // ❌ page.authenticate() हटा दिया गया है
 
         // 2. Search (खोजें) - Google पर जाएँ
         console.log(`[${jobId} View ${viewNumber}] Searching Google for: ${searchQuery}`);
         await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.type('textarea[name="q"]', searchQuery, { delay: 100 }); // धीरे-धीरे टाइप करें
+        await page.type('textarea[name="q"]', searchQuery, { delay: 100 }); 
         await page.keyboard.press('Enter');
         
         // 3. Click (क्लिक करें) - अपनी वेबसाइट ढूंढें
-        await page.waitForTimeout(5000); 
+        await page.waitForTimeout(5000 + Math.random() * 2000); // Wait 5-7 seconds
         
-        // अपनी वेबसाइट के डोमेन को सही ढंग से निकालने की कोशिश करें
         const targetDomain = new URL(targetUrl).hostname;
-        
-        // targetDomain वाले लिंक को ढूंढें और क्लिक करें
         const targetLinkSelector = `a[href*="${targetDomain}"]`;
         const targetLink = await page.$(targetLinkSelector);
         
         if (targetLink) {
             console.log(`[🟢 ${jobId} View ${viewNumber}] Target URL found. Clicking...`);
             await targetLink.click();
-            await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 30000 }); // अपनी वेबसाइट पर नेविगेट करें और नेटवर्क शांत होने का इंतज़ार करें
+            await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 30000 }); 
         } else {
             console.log(`[🔴 ${jobId} View ${viewNumber}] Target URL not found on search page. Aborting view.`);
             await browser.close();
@@ -101,7 +99,7 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
         // 4. On-Page Interaction (स्क्रॉल करें और रुकें)
         console.log(`[${jobId} View ${viewNumber}] Landed. Starting deep interaction...`);
         
-        const totalDuration = Math.floor(Math.random() * (30000 - 15000 + 1)) + 15000; // 15-30 seconds
+        const totalDuration = Math.floor(Math.random() * (30000 - 15000 + 1)) + 15000;
         const scrollCount = 4;
         const scrollDelay = totalDuration / scrollCount;
 
@@ -116,7 +114,8 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
         console.log(`[✅ ${jobId} View ${viewNumber}] Full User Journey Complete.`);
 
     } catch (error) {
-        console.error(`[❌ ${jobId} View ${viewNumber}] Job failed for proxy ${proxyUrl.split('@').pop()}:`, error.message);
+        // अक्सर error.message में 407 दिख सकता है
+        console.error(`[❌ ${jobId} View ${viewNumber}] Job failed. Check Proxy User/Pass: ${error.message}`);
         if (browser) await browser.close();
     }
 }
@@ -127,6 +126,7 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl, searc
 
 // Traffic Boost API: /api/boost-traffic
 app.post('/api/boost-traffic', async (req, res) => {
+    // targetUrl और searchQuery को API बॉडी से लें
     const { targetUrl, searchQuery, views } = req.body;
     
     // इनपुट वैलिडेशन
@@ -142,7 +142,7 @@ app.post('/api/boost-traffic', async (req, res) => {
     res.status(202).json({
         success: true, 
         message: `Job ${jobId} accepted. ${views} views will be dispatched immediately. Check logs for progress (Green Tick).`, 
-        simulation_mode: "Advanced Headless Browser (GSC/GA4 Focus)" 
+        simulation_mode: "Advanced Headless Browser (Auth Fix Applied)" 
     });
 
     const viewPromises = [];
@@ -155,11 +155,10 @@ app.post('/api/boost-traffic', async (req, res) => {
         // सभी व्यूज़ को एक साथ (Concurrent) चलाएँ
         viewPromises.push(sendAdvancedTraffic(jobId, i, currentProxy, targetUrl, searchQuery));
 
-        // 2-5 सेकंड का छोटा ब्रेक ताकि सर्वर ओवरलोड न हो
+        // 2-5 सेकंड का छोटा ब्रेक
         await wait(Math.random() * 3000 + 2000); 
     }
     
-    // सभी व्यूज़ के खत्म होने का इंतज़ार करें
     await Promise.all(viewPromises);
     console.log(`--- Job ${jobId} Finished! ---`);
 });
@@ -169,7 +168,6 @@ app.post('/api/boost-traffic', async (req, res) => {
 app.post('/api/generate-caption', async (req, res) => {
     const { reelTopic, captionStyle, numberOfCaptions } = req.body;
     if (!GEMINI_API_KEY) { return res.status(500).json({ success: false, message: "AI Key is not configured." }); }
-    // ... (AI generation logic) ...
     try {
         const openai = new OpenAI({ apiKey: GEMINI_API_KEY }); 
         const prompt = `Generate ${numberOfCaptions} catchy, viral captions in ${captionStyle} style for a reel about "${reelTopic}". Respond with a simple, numbered list of captions.`;
@@ -186,7 +184,6 @@ app.post('/api/generate-caption', async (req, res) => {
 app.post('/api/generate-article', async (req, res) => {
     const { topic, length, style } = req.body;
     if (!GEMINI_API_KEY) { return res.status(500).json({ success: false, message: "AI Key is not configured." }); }
-    // ... (AI generation logic) ...
     try {
         const openai = new OpenAI({ apiKey: GEMINI_API_KEY }); 
         const prompt = `Write a comprehensive article on "${topic}". The article should be ${length} words long and written in a ${style} tone. Include an introduction, 3-4 main sections with subheadings, and a conclusion.`;
