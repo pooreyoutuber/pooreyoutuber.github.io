@@ -1,5 +1,3 @@
-// index.js
-
 const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -13,81 +11,87 @@ const port = 10000;
 
 app.use(express.json());
 
-// ======================= 1. कॉन्फ़िगरेशन और प्रॉक्सी डेटा (Environment Variables से लोड) ========================
+// ======================= 1. कॉन्फ़िगरेशन और प्रॉक्सी डेटा (HARDCODED) ========================
 
-// 🚨 ये तीनों Values Render Secrets से लोड होंगी।
-// सुनिश्चित करें कि Render Secrets में PROXY_USER और PROXY_PASS सही हों।
-const PROXY_LIST_STRING = process.env.PROXY_LIST; 
-const PROXY_USER = process.env.PROXY_USER || ""; 
-const PROXY_PASS = process.env.PROXY_PASS || ""; 
+// 🚨 Webshare Proxy Credentials को सीधे यहाँ डाला गया है।
+const PROXY_USER = "bqctypvz";
+const PROXY_PASS = "399xb3kxqv6i";
+
+// आपके Webshare IPs की पूरी लिस्ट (पहला IP: 142.111.48.253:7030)
+const PROXY_LIST_STRING = "http://142.111.48.253:7030,http://31.59.20.176:6754,http://38.170.176.177:5572,http://198.23.239.134:6540,http://45.38.107.97:6014,http://107.172.163.27:6543,http://64.137.96.74:6641,http://216.10.27.159:6837,http://142.111.67.146:5611,http://142.147.128.93:6593"; 
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY; 
 
 // प्रॉक्सी लिस्ट तैयार करें
 let PROXIES = [];
 if (PROXY_LIST_STRING) {
-    PROXIES = PROXY_LIST_STRING.split(',').filter(p => p.startsWith('http://') || p.startsWith('https://'));
+    PROXIES = PROXY_LIST_STRING.split(',').filter(p => p.length > 0);
 }
 
 if (PROXIES.length === 0) {
-    console.error("PROXY_LIST is empty or invalid. Traffic tools will fail!");
+    console.warn("PROXY_LIST is empty. The application will use Direct Connection (Render's IP).");
 }
 
 let proxyIndex = 0;
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// ======================= 2. एडवांस ट्रैफ़िक लॉजिक (Direct Navigation for GA4) ========================
+// ======================= 2. एडवांस ट्रैफ़िक लॉजिक (GA4 Direct Views) ========================
 
 async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl) {
     let browser;
-    let finalProxyUrl = proxyUrl; 
+    let finalProxyUrl = null; 
 
-    // 🚨 ऑथेंटिकेशन फिक्स: user:pass को सीधे प्रॉक्सी URL में डालें
-    if (PROXY_USER && PROXY_PASS) {
+    // प्रॉक्सी ऑथेंटिकेशन और URL फ़ॉर्मेटिंग
+    if (proxyUrl && PROXY_USER && PROXY_PASS) {
         try {
             const urlObj = new URL(proxyUrl);
-            // Puppeteer को देने के लिए सही फ़ॉर्मेट: user:pass@ip:port
+            // Puppeteer के लिए सही फ़ॉर्मेट: user:pass@ip:port
             finalProxyUrl = `${urlObj.protocol}//${PROXY_USER}:${PROXY_PASS}@${urlObj.host}`;
         } catch (e) {
-            console.error("Invalid Proxy URL in list.");
-            return;
+            console.error(`[${jobId}] Invalid Proxy URL in list: ${proxyUrl}`);
+            finalProxyUrl = null; 
         }
     }
-
+    
     try {
-        const displayProxy = proxyUrl.split('@').pop();
-        console.log(`[🚀 ${jobId} View ${viewNumber}] Starting with Proxy: ${displayProxy}`);
+        const displayProxy = finalProxyUrl ? finalProxyUrl.split('@').pop() : 'Direct Connection (No Proxy)';
+        console.log(`[🚀 ${jobId} View ${viewNumber}] Starting with: ${displayProxy}`);
 
         // --- 1. ब्राउज़र लॉन्च ---
+        let launchArgs = [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-gpu', 
+            '--window-size=1280,720' 
+        ];
+
+        if (finalProxyUrl) {
+            // प्रॉक्सी सर्वर आर्गुमेंट जोड़ें
+            launchArgs.push(`--proxy-server=${finalProxyUrl}`);
+        }
+
         try {
             browser = await puppeteer.launch({
                 headless: true,
-                args: [
-                    `--proxy-server=${finalProxyUrl}`, 
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-gpu', 
-                    '--window-size=1280,720' 
-                ],
-                timeout: 45000 // ब्राउज़र लॉन्च टाइमआउट
+                args: launchArgs, 
+                timeout: 45000 
             });
         } catch (e) {
-            console.error(`[❌ ${jobId} View ${viewNumber}] BROWSER LAUNCH FAILED (Proxy might be down/slow). Error: ${e.message}`);
+            console.error(`[❌ ${jobId} View ${viewNumber}] BROWSER LAUNCH FAILED. Error: ${e.message}`);
             return; 
         }
 
         const page = await browser.newPage();
         
-        // 2. Direct Navigation (सीधे जाएँ) - Search Console को बायपास करें
-        console.log(`[🟢 ${jobId} View ${viewNumber}] Direct Navigation to: ${targetUrl} (GA4 Target)`);
-        // टाइमआउट बढ़ाकर 45 सेकंड किया गया
+        // 2. Direct Navigation (सीधे जाएँ)
+        console.log(`[🟢 ${jobId} View ${viewNumber}] Navigating directly to: ${targetUrl}`);
         await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
         
         // 3. On-Page Interaction (स्क्रॉल करें और रुकें)
         console.log(`[${jobId} View ${viewNumber}] Landed. Starting deep interaction...`);
         
-        const totalDuration = Math.floor(Math.random() * (30000 - 15000 + 1)) + 15000; // 15 से 30 सेकंड
+        const totalDuration = Math.floor(Math.random() * (30000 - 15000 + 1)) + 15000; 
         const scrollCount = 4;
         const scrollDelay = totalDuration / scrollCount;
 
@@ -116,20 +120,21 @@ async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl) {
 
 // Traffic Boost API: /api/boost-traffic
 app.post('/api/boost-traffic', async (req, res) => {
-    // searchQuery की अब ज़रूरत नहीं है, लेकिन इसे हटाना मुश्किल हो सकता है।
     const { targetUrl, searchQuery, views } = req.body; 
     
-    // इनपुट वैलिडेशन
-    if (!targetUrl || !views || views > 500 || PROXIES.length === 0) {
+    if (!targetUrl || !views || views > 500) {
         return res.status(400).json({ 
             success: false, 
-            message: "Missing fields, views > 500, or PROXY_LIST is empty." 
+            message: "Missing fields or views > 500." 
         });
     }
-    if (!PROXY_USER || !PROXY_PASS) {
+    
+    const hasProxy = PROXIES.length > 0;
+    if (hasProxy && (!PROXY_USER || !PROXY_PASS)) {
+        // यह चेक अब सिर्फ़ सुरक्षा के लिए है, क्योंकि हमने वैल्यू हार्डकोड कर दी हैं।
         return res.status(500).json({ 
             success: false, 
-            message: "Proxy User/Pass are missing in Environment Variables. Fix secrets." 
+            message: "Proxy list found, but User/Pass are missing in Environment Variables. Fix secrets." 
         });
     }
 
@@ -137,35 +142,31 @@ app.post('/api/boost-traffic', async (req, res) => {
     const jobId = uuidv4().substring(0, 8);
     const TOTAL_DISPATCH_TIME_HOURS = 24; 
     const TOTAL_DISPATCH_TIME_MS = TOTAL_DISPATCH_TIME_HOURS * 60 * 60 * 1000;
-    
-    // प्रति व्यू औसत डिले (मिलीसेकंड में)
     const BASE_DELAY_MS = TOTAL_DISPATCH_TIME_MS / views; 
     
-    // सर्वर को तुरंत जवाब दें
+    const mode = hasProxy ? "Proxy Rotation (Hardcoded)" : "Direct Connection (Render IP)";
+
     res.status(202).json({
         success: true, 
-        message: `Job ${jobId} accepted. ${views} views will be dispatched over the next ${TOTAL_DISPATCH_TIME_HOURS} hours. Check logs for progress.`, 
-        simulation_mode: "Timed Headless Browser Dispatch (Direct GA4 Views)" 
+        message: `Job ${jobId} accepted. ${views} views will be dispatched over the next ${TOTAL_DISPATCH_TIME_HOURS} hours. Mode: ${mode}`, 
+        simulation_mode: mode 
     });
 
-    // 🚨 टाइमिंग लॉजिक: व्यूज़ को सीरियली भेजें
     for (let i = 1; i <= views; i++) {
-        const currentProxy = PROXIES[proxyIndex];
+        let currentProxy = null;
         
-        // प्रॉक्सी इंडेक्स को रोटेट करें
-        proxyIndex = (proxyIndex + 1) % PROXIES.length;
+        if (hasProxy) {
+            currentProxy = PROXIES[proxyIndex];
+            proxyIndex = (proxyIndex + 1) % PROXIES.length;
+        }
 
-        // व्यू को चलाएँ
-        // अब searchQuery पैरामीटर नहीं भेजा जा रहा है
         await sendAdvancedTraffic(jobId, i, currentProxy, targetUrl);
 
-        // 24 घंटे में फैलाने के लिए डिले कैलकुलेट करें 
         const randomVariation = Math.random() * 0.3 + 0.85; 
         const finalDelay = BASE_DELAY_MS * randomVariation;
 
         console.log(`[⏱️ ${jobId} View ${i}/${views}] Waiting for ${(finalDelay / 1000 / 60).toFixed(2)} minutes before next dispatch.`);
         
-        // इंतज़ार करें
         await wait(finalDelay); 
     }
     
