@@ -1,23 +1,22 @@
-// index.js (FINAL CODE - Webshare Premium Proxy + Real User Fixes)
+// index.js (ULTIMATE FINAL CODE - Webshare Premium Proxy + All Real User Fixes)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// सिर्फ HTTPS Proxy Agent का इस्तेमाल करें, क्योंकि Webshare proxy HTTP/HTTPS है
+// Webshare Premium Proxy के लिए HttpsProxyAgent का उपयोग करें
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
+// socks-proxy-agent package.json में है, लेकिन Webshare IP Auth के लिए HttpsProxyAgent का उपयोग किया जाएगा।
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- 1. PROXY CONFIGURATION: WEBSHARE ROTATING PROXY ---
-// Webshare Rotating Endpoint: p.webshare.io:9999 (HTTP/HTTPS Protocol)
+// --- 1. PROXY CONFIGURATION: WEBSHARE ROTATING PROXY (IP Auth) ---
+// Webshare Rotating Endpoint (IP Authentication के लिए)
 const WEBSHARE_PROXY_HOST = 'p.webshare.io:9999';
-const PROXY_URL = `http://${WEBSHARE_PROXY_HOST}`; // HttpsProxyAgent can tunnel HTTPS over HTTP proxy
-
-// 🚨 Only one agent is needed for the rotating endpoint
-const PROXY_AGENT = new HttpsProxyAgent(PROXY_URL);
+const PROXY_URL = `http://${WEBSHARE_PROXY_HOST}`; 
+const PROXY_AGENT = new HttpsProxyAgent(PROXY_URL); // Webshare HTTP/HTTPS Proxy के लिए
 
 // --- GEMINI KEY CONFIGURATION (Unchanged) ---
 let GEMINI_KEY;
@@ -45,7 +44,7 @@ app.get('/', (req, res) => {
 const MIN_DELAY = 3000; 
 const MAX_DELAY = 12000; 
 
-// 🎯 FIX 1: Geo-location (Country-wise View)
+// 🎯 FIX 1: Geo-location (Country-wise View) - विविधता बढ़ाई गई
 const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
@@ -57,9 +56,11 @@ const geoLocations = [
     { country: "Canada", region: "Ontario" },
     { country: "France", region: "Ile-de-France" },
     { country: "Singapore", region: "Central Region" },
+    { country: "Mexico", region: "Mexico City" },
+    { country: "South Africa", region: "Gauteng" },
 ];
 
-// 🎯 FIX 2: Source/Medium (Search/Click)
+// 🎯 FIX 2: Source/Medium (Search/Click) - referrer list
 const REFERRERS = [
     'https://www.google.com/search?q=college+project+ideas', // Organic Search
     'https://t.co/random_link_id', // Social (Twitter/X)
@@ -68,6 +69,7 @@ const REFERRERS = [
     'https://bing.com/search?q=latest+projects', // Organic Search
     'https://reddit.com/r/webdev/', // Social
     'https://mail.google.com/mail/u/0/#inbox', // Email
+    'https://youtube.com/watch?v=tutorial_link', // Video Click
     'https://pooreyoutuber.github.io' // Direct/Referral (Less frequent)
 ];
 
@@ -81,12 +83,12 @@ function getRandomReferrer() {
     return REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 }
 
-// --- sendData (Updated for Webshare Proxy) ---
+// --- sendData (Webshare Proxy Agent के साथ अपडेटेड) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     
     const proxyHost = WEBSHARE_PROXY_HOST;
-    const proxyAgent = PROXY_AGENT;
+    const proxyAgent = PROXY_AGENT; // 🚨 Webshare Premium Agent
 
     try {
         const fetchOptions = {
@@ -107,6 +109,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             return { success: false };
         }
     } catch (error) {
+        // यह Connection Failed error Webshare के IP Auth में भी आ सकता है अगर Render का IP बदल जाए और Webshare में अपडेट न हो।
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message} | Proxy: ${proxyHost}`);
         return { success: false };
     }
@@ -163,7 +166,8 @@ app.post('/boost-mp', async (req, res) => {
                 const engagementTime = 30000 + Math.floor(Math.random() * 90000); // 30s to 120s
                 const referrer = getRandomReferrer(); 
 
-                // 🎯 FIX 1 Implementation: Country-wise Fix
+                // 🚨 FIX 1: Geo-location (Country-wise Fix)
+                // GA4 के लिए 'country' और 'region' को अलग-अलग User Properties के रूप में भेजा जाता है
                 const commonUserProperties = { 
                     country: { value: geo.country }, 
                     region: { value: geo.region }
@@ -183,12 +187,12 @@ app.post('/boost-mp', async (req, res) => {
                         page_title: `PROJECT_PAGE_${i + 1}`, 
                         session_id: SESSION_ID, 
                         engagement_time_msec: engagementTime,
-                        page_referrer: referrer // 🎯 FIX 2 Implementation: Search/Click Source Fix
+                        page_referrer: referrer // 🚨 FIX 2: Search/Click Source Fix
                     } }]
                 };
                 const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
 
-                // 🎯 FIX 3: user_engagement (Scrolling/Reading time Fix)
+                // 3. user_engagement (Scrolling/Reading time Fix)
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
 
                 await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
@@ -206,9 +210,6 @@ app.post('/boost-mp', async (req, res) => {
 
     })();
 });
-
-
-// (AI Sections remain unchanged)
 
 
 // ===================================================================
