@@ -1,47 +1,48 @@
-// index.js (FINAL CODE - All Nodmaven Proxies + Advanced GA4 Fix)
+// index.js (ULTIMATE CODE - Fixed for Geo/Source/Medium, Nodmaven Proxies)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// 🚨 PROXY AGENT REQUIRE करें: Nodmaven Proxies के लिए SocksProxyAgent का उपयोग
 const { SocksProxyAgent } = require('socks-proxy-agent'); 
+// 🚨 HTTPS Proxy Agent भी रखें, क्योंकि कुछ Nodmaven Proxies HTTPS हैं
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
 // --- 1. PROXY CONFIGURATION: CONSOLIDATED NODEMAVEN IPs (From All Screenshots) ---
-// Proxies are anonymous/free, so no credentials are required.
 const PROXY_HOSTS = [
-    // United States (SOCKS5/4)
-    '98.186.47.132:4145', '98.170.57.249:4145', '98.190.239.43:4145', '98.186.47.150:4145',
-    '98.191.0.47:4145', '98.176.72.30:4145', '98.176.72.21:10919', '98.182.171.161:4145',
-    '98.181.137.80:4145', '98.175.31.195:4145', '98.178.72.21:10919', '98.182.171.161:4145',
-    // Germany (SOCKS5 - All IPs from screenshots)
-    '89.58.45.94:36742', '89.58.45.94:42441', '89.58.45.94:36259', '89.58.45.94:42441',
-    '89.58.45.94:36935', '89.58.45.94:46486', '89.58.45.94:38121', '89.58.45.94:43663',
-    '89.58.45.94:46022', '89.58.45.94:35361', '89.58.45.94:45159', '89.58.45.94:55073',
-    // Indonesia (Mostly HTTPS, but SocksProxyAgent will attempt to tunnel HTTPS too)
-    '8.219.167.110:8989', // SOCKS4
-    '8.215.3.250:6379', '8.215.3.250:8123', '8.215.3.250:4037', '8.215.3.250:199', 
-    '8.215.3.250:1337', '8.215.3.250:8118', '8.215.3.250:9080', '8.215.3.250:4006',
-    // United Kingdom (SOCKS4/5)
-    '89.46.249.142:31415', '89.46.249.170:12345', '89.46.249.234:5678', 
-    // Singapore (SOCKS4/5)
-    '94.74.80.88:4145', '8.219.160.188:1011', 
-    // France
-    '94.23.222.122:14822',
-    // Other (Mix of SOCKS4/5 and HTTPS)
-    '94.74.96.240:3129', // Hong Kong
+    // United States (Mostly SOCKS4/5)
+    { host: '98.186.47.132:4145', type: 'socks' }, { host: '98.170.57.249:4145', type: 'socks' }, 
+    { host: '98.190.239.43:4145', type: 'socks' }, { host: '98.186.47.150:4145', type: 'socks' },
+    { host: '98.191.0.47:4145', type: 'socks' }, { host: '98.176.72.30:4145', type: 'socks' }, 
+    { host: '98.176.72.21:10919', type: 'socks' }, { host: '98.182.171.161:4145', type: 'socks' },
+    // Germany (SOCKS5)
+    { host: '89.58.45.94:36742', type: 'socks' }, { host: '89.58.45.94:42441', type: 'socks' }, 
+    { host: '89.58.45.94:36259', type: 'socks' }, { host: '89.58.45.94:36935', type: 'socks' },
+    { host: '89.58.45.94:46486', type: 'socks' }, { host: '89.58.45.94:38121', type: 'socks' },
+    // Indonesia & Others (Mix of HTTPS and SOCKS)
+    { host: '8.219.167.110:8989', type: 'socks' }, // SOCKS4
+    { host: '8.215.3.250:6379', type: 'http' }, { host: '8.215.3.250:8123', type: 'http' }, // HTTPS Proxies
+    { host: '89.46.249.142:31415', type: 'socks' }, // UK
+    { host: '94.74.80.88:4145', type: 'socks' }, // Singapore
+    { host: '94.74.96.240:3129', type: 'http' }, // Hong Kong (HTTPS)
 ];
 
 // --- PROXY AGENT INITIALIZATION ---
-const PROXY_AGENTS = PROXY_HOSTS.map(host => {
-    // Nodmaven IPs mostly use SOCKS4/5. We use socks5:// format for SocksProxyAgent
-    // which can often handle SOCKS4 as well.
-    const url = `socks5://${host}`; 
-    return { host: host, agent: new SocksProxyAgent(url) };
+const PROXY_AGENTS = PROXY_HOSTS.map(item => {
+    let agent;
+    let url;
+    if (item.type === 'socks') {
+        url = `socks5://${item.host}`;
+        agent = new SocksProxyAgent(url);
+    } else { // http/https
+        url = `http://${item.host}`; // HttpsProxyAgent can tunnel HTTPS over HTTP proxy
+        agent = new HttpsProxyAgent(url);
+    }
+    return { host: item.host, type: item.type, agent: agent };
 });
 
 function getRandomAgent() {
@@ -90,15 +91,15 @@ const geoLocations = [
     { country: "Singapore", region: "Central Region" },
 ];
 
-// Realistic Traffic Source Referrers (Search/Social/Direct)
+// Realistic Traffic Source Referrers (Source/Medium Fix)
 const REFERRERS = [
-    'https://www.google.com/search?q=college+website+projects', // Organic Search
+    'https://www.google.com/search?q=college+project+ideas', // Organic Search
     'https://t.co/', // Social (Twitter/X)
-    'https://facebook.com/', // Social
-    'https://linkedin.com/feed/', // Social
-    'https://mail.google.com/', // Email
-    'https://duckduckgo.com/?q=latest+projects', // Organic Search
-    'https://pooreyoutuber.github.io' // Direct/Referral
+    'https://facebook.com/groups/projecthelp/', // Social
+    'https://linkedin.com/posts/project-manager/', // Social
+    'https://bing.com/search?q=latest+projects', // Organic Search
+    'https://reddit.com/r/webdev/', // Social
+    'https://pooreyoutuber.github.io' // Direct/Referral (Less frequent)
 ];
 
 function getRandomDelay() {
@@ -108,15 +109,15 @@ function getRandomGeo() {
     return geoLocations[Math.floor(Math.random() * geoLocations.length)];
 }
 function getRandomReferrer() {
+    // Referrers ko zyada realistic banane ke liye
     return REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 }
 
-// --- sendData (Updated for Proxy) ---
+// --- sendData (Proxy enabled and ready) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     
-    // 🚨 PROXY AGENT Selection
-    const { host: proxyHost, agent: proxyAgent } = getRandomAgent();
+    const { host: proxyHost, type: proxyType, agent: proxyAgent } = getRandomAgent();
 
     try {
         const fetchOptions = {
@@ -129,16 +130,14 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         const response = await fetch(gaEndpoint, fetchOptions);
 
         if (response.status === 204) { 
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyHost}`);
+            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyHost} (${proxyType})`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            // 407 (Proxy Auth Required) या 403 (Forbidden) error तब आती है जब प्रॉक्सी काम नहीं करता
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)} | Proxy: ${proxyHost}`);
             return { success: false };
         }
     } catch (error) {
-        // ETIMEDOUT error तब होगा जब प्रॉक्सी कनेक्ट नहीं हो रहा है (Dead Proxy)
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message} | Proxy: ${proxyHost}`);
         return { success: false };
     }
@@ -184,7 +183,6 @@ app.post('/boost-mp', async (req, res) => {
 
     res.json({ status: 'accepted', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
 
-    // Start views generation asynchronously
     (async () => {
         const totalViews = viewPlan.length;
 
@@ -193,10 +191,10 @@ app.post('/boost-mp', async (req, res) => {
                 const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
                 const SESSION_ID = Date.now(); 
                 const geo = getRandomGeo();
-                const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
+                const engagementTime = 30000 + Math.floor(Math.random() * 90000); // 30s to 120s
                 const referrer = getRandomReferrer(); 
 
-                // 🚨 Geo-location Fix: Separate 'country' and 'region' properties
+                // 🚨 CRITICAL FIX: Separate 'country' and 'region' for accurate GA4 Geo-location
                 const commonUserProperties = { 
                     country: { value: geo.country }, 
                     region: { value: geo.region }
@@ -204,7 +202,7 @@ app.post('/boost-mp', async (req, res) => {
                 
                 await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); 
 
-                // 1. session_start (Starts the session)
+                // 1. session_start (Geo Fix applied)
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
                 // 2. page_view (Source/Medium Fix: page_referrer)
@@ -216,7 +214,7 @@ app.post('/boost-mp', async (req, res) => {
                         page_title: `PROJECT_PAGE_${i + 1}`, 
                         session_id: SESSION_ID, 
                         engagement_time_msec: engagementTime,
-                        page_referrer: referrer // 🚨 Search/Social/Click Source Fix
+                        page_referrer: referrer // 🚨 THIS IS THE SOURCE/MEDIUM/CLICK FIX
                     } }]
                 };
                 const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
@@ -239,9 +237,6 @@ app.post('/boost-mp', async (req, res) => {
 
     })();
 });
-
-
-// (AI Sections remain unchanged)
 
 
 // ===================================================================
