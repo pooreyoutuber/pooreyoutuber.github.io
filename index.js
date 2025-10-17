@@ -1,4 +1,4 @@
-// index.js (FINAL CODE - Latest Nodmaven Proxies + Advanced GA4 Fix)
+// index.js (FINAL CODE - All Nodmaven Proxies + Advanced GA4 Fix)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -11,50 +11,35 @@ const { SocksProxyAgent } = require('socks-proxy-agent');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- 1. PROXY CONFIGURATION: CONSOLIDATED NODEMAVEN IPs (From User Screenshots) ---
+// --- 1. PROXY CONFIGURATION: CONSOLIDATED NODEMAVEN IPs (From All Screenshots) ---
 // Proxies are anonymous/free, so no credentials are required.
 const PROXY_HOSTS = [
     // United States (SOCKS5/4)
-    '98.186.47.132:4145',   
-    '98.170.57.249:4145',   
-    '98.190.239.43:4145',   
-    '98.175.31.195:4145', 
-    '98.182.171.161:4145',
-    '98.181.137.80:4145',
-    '98.176.72.21:10919',
-    '98.167.92.115:4145',
-    '98.182.152.126:4145',
-    '98.182.152.126:4145', // Duplicates for more rotation capacity
-    // Germany (SOCKS5)
-    '89.58.45.94:36742',    
-    '89.58.45.94:42441',    
-    '89.58.45.94:36935',    
-    '89.58.45.94:46486',
-    '89.58.45.94:38121',
-    '89.58.45.94:43663',
-    '89.58.45.94:46022',
-    // Indonesia (HTTPS/HTTP - Formatted as Socks URL for consistency)
-    '8.215.3.250:6379',
-    '8.215.3.250:8123',
-    '8.215.3.250:4037',
-    '8.215.3.250:9080',
+    '98.186.47.132:4145', '98.170.57.249:4145', '98.190.239.43:4145', '98.186.47.150:4145',
+    '98.191.0.47:4145', '98.176.72.30:4145', '98.176.72.21:10919', '98.182.171.161:4145',
+    '98.181.137.80:4145', '98.175.31.195:4145', '98.178.72.21:10919', '98.182.171.161:4145',
+    // Germany (SOCKS5 - All IPs from screenshots)
+    '89.58.45.94:36742', '89.58.45.94:42441', '89.58.45.94:36259', '89.58.45.94:42441',
+    '89.58.45.94:36935', '89.58.45.94:46486', '89.58.45.94:38121', '89.58.45.94:43663',
+    '89.58.45.94:46022', '89.58.45.94:35361', '89.58.45.94:45159', '89.58.45.94:55073',
+    // Indonesia (Mostly HTTPS, but SocksProxyAgent will attempt to tunnel HTTPS too)
+    '8.219.167.110:8989', // SOCKS4
+    '8.215.3.250:6379', '8.215.3.250:8123', '8.215.3.250:4037', '8.215.3.250:199', 
+    '8.215.3.250:1337', '8.215.3.250:8118', '8.215.3.250:9080', '8.215.3.250:4006',
     // United Kingdom (SOCKS4/5)
-    '89.46.249.142:31415',  
-    '89.46.249.170:12345',
+    '89.46.249.142:31415', '89.46.249.170:12345', '89.46.249.234:5678', 
     // Singapore (SOCKS4/5)
-    '94.74.80.88:4145',     
-    '8.219.160.188:1011',
-    // Hong Kong (HTTPS)
-    '94.74.96.240:3129',
+    '94.74.80.88:4145', '8.219.160.188:1011', 
     // France
     '94.23.222.122:14822',
-    '152.67.65.250:8989', // Additional IP
-    '8.219.167.110:8989', // Additional IP
+    // Other (Mix of SOCKS4/5 and HTTPS)
+    '94.74.96.240:3129', // Hong Kong
 ];
 
 // --- PROXY AGENT INITIALIZATION ---
 const PROXY_AGENTS = PROXY_HOSTS.map(host => {
-    // SOCKS5 प्रॉक्सी के लिए SocksProxyAgent का उपयोग
+    // Nodmaven IPs mostly use SOCKS4/5. We use socks5:// format for SocksProxyAgent
+    // which can often handle SOCKS4 as well.
     const url = `socks5://${host}`; 
     return { host: host, agent: new SocksProxyAgent(url) };
 });
@@ -107,13 +92,13 @@ const geoLocations = [
 
 // Realistic Traffic Source Referrers (Search/Social/Direct)
 const REFERRERS = [
-    'https://www.google.com/search?q=college+website+projects', 
-    'https://t.co/', // Twitter/X
-    'https://facebook.com/', 
-    'https://linkedin.com/feed/', 
-    'https://mail.google.com/', 
-    'https://duckduckgo.com/?q=latest+projects',
-    'https://pooreyoutuber.github.io' // Direct
+    'https://www.google.com/search?q=college+website+projects', // Organic Search
+    'https://t.co/', // Social (Twitter/X)
+    'https://facebook.com/', // Social
+    'https://linkedin.com/feed/', // Social
+    'https://mail.google.com/', // Email
+    'https://duckduckgo.com/?q=latest+projects', // Organic Search
+    'https://pooreyoutuber.github.io' // Direct/Referral
 ];
 
 function getRandomDelay() {
@@ -126,10 +111,11 @@ function getRandomReferrer() {
     return REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 }
 
-// --- sendData (Proxy enabled and ready) ---
+// --- sendData (Updated for Proxy) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     
+    // 🚨 PROXY AGENT Selection
     const { host: proxyHost, agent: proxyAgent } = getRandomAgent();
 
     try {
@@ -255,6 +241,9 @@ app.post('/boost-mp', async (req, res) => {
 });
 
 
+// (AI Sections remain unchanged)
+
+
 // ===================================================================
 // 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
 // ===================================================================
@@ -270,7 +259,6 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
     
-    // Updated Prompt for Viral, Export, and View Increase Tags
     const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
