@@ -1,11 +1,11 @@
-// index.js (COMPLETE CODE with PROXY ROTATION, AUTHENTICATION, and GA4 GEO FIX)
+// index.js (FINAL CODE with PROXY ROTATION, GA4 GEO FIX, and REALISTIC REFERRER)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// 🚨 प्रॉक्सी के लिए ज़रूरी लाइब्रेरी
+// 🚨 PROXY AGENT REQUIRE करें
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
@@ -15,29 +15,28 @@ const PORT = process.env.PORT || 10000;
 // Credentials from your WebShare screenshot: bqctypvz:399xb3kxqv6i
 const PROXY_CREDENTIALS = 'bqctypvz:399xb3kxqv6i';
 const PROXY_HOSTS = [
-    '142.111.48.253:7030',   // Proxy 1
-    '31.59.20.176:6754',     // Proxy 2
-    '38.176.176.177:5572',   // Proxy 3
-    '198.23.239.134:6540',   // Proxy 4
-    '45.38.107.97:6014',     // Proxy 5
-    '107.172.163.27:6543',   // Proxy 6
-    '64.137.96.74:6641',     // Proxy 7
-    '216.10.27.159:6837',   // Proxy 8
-    '142.111.67.146:5611',   // Proxy 9
-    '142.147.128.93:6593'    // Proxy 10
+    '142.111.48.253:7030',   
+    '31.59.20.176:6754',     
+    '38.176.176.177:5572',   
+    '198.23.239.134:6540',   
+    '45.38.107.97:6014',     
+    '107.172.163.27:6543',   
+    '64.137.96.74:6641',     
+    '216.10.27.159:6837',   
+    '142.111.67.146:5611',   
+    '142.147.128.93:6593'    
 ];
 
-// सभी प्रॉक्सी के लिए Agent पहले से बना कर रखें
 const PROXY_AGENTS = PROXY_HOSTS.map(host => {
     const url = `http://${PROXY_CREDENTIALS}@${host}`;
     return { host: host, agent: new HttpsProxyAgent(url) };
 });
 
 function getRandomAgent() {
-    // हर रिक्वेस्ट के लिए एक रैंडम प्रॉक्सी एजेंट चुनें
     return PROXY_AGENTS[Math.floor(Math.random() * PROXY_AGENTS.length)];
 }
 console.log(`Initialized ${PROXY_AGENTS.length} Proxy Agents for rotation.`);
+
 
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
@@ -74,7 +73,8 @@ app.get('/', (req, res) => {
 
 const MIN_DELAY = 3000; 
 const MAX_DELAY = 12000; 
-// ज़्यादा देशों को जोड़ा गया है ताकि 'Not Set' से बचा जा सके और ज़्यादा रैंडम लगे
+
+// Country diversity list (Geo Fix)
 const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
@@ -88,18 +88,32 @@ const geoLocations = [
     { country: "Singapore", region: "Central Region" },
 ];
 
+// 🚨 Realistic Traffic Source Referrers (Search/Social/Direct)
+const REFERRERS = [
+    'https://www.google.com/search?q=college+website+projects', // Search Engine (Organic)
+    'https://in.search.yahoo.com/search?p=online+course+reviews', // Search Engine (Organic)
+    'https://duckduckgo.com/?q=latest+projects', // Search Engine (Organic)
+    'https://t.co/', // X (Twitter) - Social
+    'https://facebook.com/', // Facebook - Social
+    'https://linkedin.com/feed/', // LinkedIn - Social
+    'https://mail.google.com/', // Email/Direct
+    'https://pooreyoutuber.github.io' // Tool's Frontend/Direct
+];
+
 function getRandomDelay() {
     return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
 }
 function getRandomGeo() {
     return geoLocations[Math.floor(Math.random() * geoLocations.length)];
 }
+function getRandomReferrer() {
+    return REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
+}
 
 // --- sendData UPDATED to use Random Proxy Agent ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     
-    // Get a random proxy for this request
     const { host: proxyHost, agent: proxyAgent } = getRandomAgent();
 
     try {
@@ -107,7 +121,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 'Content-Type': 'application/json' },
-            // 🚨 PROXY AGENT यहाँ जोड़ा गया है (407/ETIMEDOUT फिक्स)
             agent: proxyAgent 
         });
 
@@ -116,12 +129,10 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            // 407 (Proxy Auth) या 400 (GA4 Payload) error को log करेगा
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)} | Proxy: ${proxyHost}`);
             return { success: false };
         }
     } catch (error) {
-        // ETIMEDOUT (Connection Failed) तब होगा जब Proxy IP Authorized न हो या प्रॉक्सी डाउन हो
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message} | Proxy: ${proxyHost}`);
         return { success: false };
     }
@@ -151,7 +162,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Concurrency
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages } = req.body; 
@@ -165,7 +176,6 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    // Immediately respond with 'accepted'
     res.json({ 
         status: 'accepted', 
         message: `Request for ${viewPlan.length} views accepted. Processing started in the background.`
@@ -182,27 +192,34 @@ app.post('/boost-mp', async (req, res) => {
                 const SESSION_ID = Date.now(); 
                 const geo = getRandomGeo();
                 const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-                
-                // 🚨 महत्वपूर्ण: GEO data user_properties में भेजा जाता है ताकि GA4 में 'Not Set' न आए।
+                const referrer = getRandomReferrer(); // 🚨 Random Referrer for realistic source
+
+                // 🚨 GEO FIX: Country/Region user properties
                 const commonUserProperties = { 
-                    // geo field एक generic custom user property है
-                    geo: { value: `${geo.country}, ${geo.region}` },
-                    // Country और Region को अलग से भेजने से GA4 इन्हें geo-location के लिए प्राथमिकता देता है
                     country: { value: geo.country }, 
                     region: { value: geo.region }
                 };
                 
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); // Initial spread delay
+                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); 
 
+                // 1. session_start
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
+                // 2. page_view (Simulates real click/search by using page_referrer)
                 const pageViewPayload = {
                     client_id: CLIENT_ID,
                     user_properties: commonUserProperties, 
-                    events: [{ name: 'page_view', params: { page_location: targetUrl, page_title: `PROJECT_PAGE_${i + 1}`, session_id: SESSION_ID, engagement_time_msec: engagementTime } }]
+                    events: [{ name: 'page_view', params: { 
+                        page_location: targetUrl, 
+                        page_title: `PROJECT_PAGE_${i + 1}`, 
+                        session_id: SESSION_ID, 
+                        engagement_time_msec: engagementTime,
+                        page_referrer: referrer // 🚨 Adds Source/Medium data (Search/Social/Direct)
+                    } }]
                 };
                 const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
 
+                // 3. user_engagement (Confirms "scrolling" or long session time)
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
 
                 await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
@@ -224,24 +241,21 @@ app.post('/boost-mp', async (req, res) => {
 
 // ===================================================================
 // 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
+// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
+// (AI sections unchanged)
 // ===================================================================
+
 app.post('/api/caption-generate', async (req, res) => { 
-    
     if (!GEMINI_KEY) {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
-    
     const { reelTitle, style } = req.body;
-
     if (!reelTitle) {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
-    
     const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
-
 --- CRITICAL INSTRUCTION ---
 For each caption, provide exactly 5 trending, high-reach, and relevant hashtags. Include **latest viral Instagram marketing terms** like **#viralreel, #exportviews, #viewincrease, #reelsmarketing** only if they are relevant to the topic. Focus mainly on niche-specific and fast-trending tags to maximize virality. The final output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
-
 
     try {
         const response = await ai.models.generateContent({
@@ -256,37 +270,25 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
                 temperature: 0.8,
             },
         });
-
         const captions = JSON.parse(response.text.trim());
         res.status(200).json({ captions: captions });
-
     } catch (error) {
         console.error('Gemini API Error:', error.message);
         res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
 
-
-// ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
-// ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
-    
     if (!GEMINI_KEY) {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
-
     const { originalCaption, requestedChange } = req.body;
-
     if (!originalCaption || !requestedChange) {
         return res.status(400).json({ error: 'Original caption and requested change are required.' });
     }
-
     const prompt = `Rewrite and edit the following original caption based on the requested change. The output should be only the final, edited caption and its hashtags.
-
 Original Caption: "${originalCaption}"
 Requested Change: "${requestedChange}"
-
 --- CRITICAL INSTRUCTION ---
 The final output MUST be a single JSON object with a key called 'editedCaption'. The caption should be highly engaging for Instagram Reels. If the original caption included hashtags, ensure the edited caption has 5 relevant and trending hashtags, separated from the text by a new line.`;
     
@@ -304,10 +306,8 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
                 temperature: 0.7,
             },
         });
-
         const result = JSON.parse(response.text.trim());
         res.status(200).json(result);
-
     } catch (error) {
         console.error('Gemini API Error (Edit):', error.message);
         res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
@@ -316,7 +316,7 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 
 
 // ===================================================================
-// START THE SERVER (App Crash Fix)
+// START THE SERVER 
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
