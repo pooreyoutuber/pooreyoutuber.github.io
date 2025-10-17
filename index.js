@@ -1,52 +1,21 @@
-// index.js (FINAL CODE with PROXY ROTATION, GA4 GEO FIX, and REALISTIC REFERRER)
+// index.js (FINAL CODE - Geo & Source Payload Fix - No Proxy)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// 🚨 PROXY AGENT REQUIRE करें
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- PROXY CONFIGURATION (10 Proxies for Rotation) ---
-// WebShare Credentials: bqctypvz:399xb3kxqv6i
-// **NOTE: If ETIMEDOUT error persists, replace these IPs with a new free/trial proxy service that does NOT require IP Whitelisting.**
-const PROXY_CREDENTIALS = 'bqctypvz:399xb3kxqv6i';
-const PROXY_HOSTS = [
-    '142.111.48.253:7030',   
-    '31.59.20.176:6754',     
-    '38.176.176.177:5572',   
-    '198.23.239.134:6540',   
-    '45.38.107.97:6014',     
-    '107.172.163.27:6543',   
-    '64.137.96.74:6641',     
-    '216.10.27.159:6837',   
-    '142.111.67.146:5611',   
-    '142.147.128.93:6593'    
-];
-
-const PROXY_AGENTS = PROXY_HOSTS.map(host => {
-    // Proxy Authentication is done via URL: http://user:pass@host:port
-    const url = `http://${PROXY_CREDENTIALS}@${host}`;
-    return { host: host, agent: new HttpsProxyAgent(url) };
-});
-
-function getRandomAgent() {
-    return PROXY_AGENTS[Math.floor(Math.random() * PROXY_AGENTS.length)];
-}
-
-
-// --- GEMINI KEY CONFIGURATION ---
+// --- GEMINI KEY CONFIGURATION (Unchanged) ---
 let GEMINI_KEY;
 try {
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
 } catch (e) {
     GEMINI_KEY = process.env.GEMINI_API_KEY; 
 }
-
 let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
@@ -54,12 +23,8 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- MIDDLEWARE & UTILITIES ---
-app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', 
-    methods: ['GET', 'POST'],
-    credentials: true
-}));
+// --- MIDDLEWARE & UTILITIES (Unchanged) ---
+app.use(cors({ origin: 'https://pooreyoutuber.github.io', methods: ['GET', 'POST'], credentials: true }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -86,12 +51,11 @@ const geoLocations = [
 // Realistic Traffic Source Referrers (Search/Social/Direct)
 const REFERRERS = [
     'https://www.google.com/search?q=college+website+projects', 
-    'https://in.search.yahoo.com/search?p=online+course+reviews', 
-    'https://duckduckgo.com/?q=latest+projects', 
     'https://t.co/', 
     'https://facebook.com/', 
     'https://linkedin.com/feed/', 
     'https://mail.google.com/', 
+    'https://duckduckgo.com/?q=latest+projects',
     'https://pooreyoutuber.github.io' 
 ];
 
@@ -105,38 +69,33 @@ function getRandomReferrer() {
     return REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 }
 
-// --- sendData UPDATED to use Random Proxy Agent ---
+// --- sendData (Direct connection - No Proxy) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     
-    // 🚨 PROXY AGENT Selection
-    const { host: proxyHost, agent: proxyAgent } = getRandomAgent();
-
     try {
         const response = await fetch(gaEndpoint, {
             method: 'POST',
             body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' },
-            agent: proxyAgent // 🚨 Proxy Agent is used here
+            headers: { 'Content-Type': 'application/json' }
         });
 
         if (response.status === 204) { 
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyHost}`);
+            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType}`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            // 407 (Proxy Auth Required) error तब आएगी जब WebShare IP Whitelist न हो
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)} | Proxy: ${proxyHost}`);
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
             return { success: false };
         }
     } catch (error) {
-        // 🚨 ETIMEDOUT (Connection Failed) तब होगा जब Proxy IP Authorized न हो
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message} | Proxy: ${proxyHost}`);
+        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
         return { success: false };
     }
 }
 
 function generateViewPlan(totalViews, pages) {
+    // ... (unchanged)
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
     
@@ -174,10 +133,7 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    res.json({ 
-        status: 'accepted', 
-        message: `Request for ${viewPlan.length} views accepted. Processing started in the background.`
-    });
+    res.json({ status: 'accepted', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
 
     // Start views generation asynchronously
     (async () => {
@@ -191,7 +147,7 @@ app.post('/boost-mp', async (req, res) => {
                 const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
                 const referrer = getRandomReferrer(); 
 
-                // 🚨 GEO FIX: Country/Region user properties
+                // 🚨 CRITICAL FIX: Separate 'country' and 'region' properties are required by GA4
                 const commonUserProperties = { 
                     country: { value: geo.country }, 
                     region: { value: geo.region }
@@ -202,7 +158,7 @@ app.post('/boost-mp', async (req, res) => {
                 // 1. session_start
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
-                // 2. page_view (Simulates real click/search by using page_referrer)
+                // 2. page_view (Source/Medium fix: page_referrer)
                 const pageViewPayload = {
                     client_id: CLIENT_ID,
                     user_properties: commonUserProperties, 
@@ -211,12 +167,12 @@ app.post('/boost-mp', async (req, res) => {
                         page_title: `PROJECT_PAGE_${i + 1}`, 
                         session_id: SESSION_ID, 
                         engagement_time_msec: engagementTime,
-                        page_referrer: referrer // Adds Source/Medium data
+                        page_referrer: referrer // 🚨 This is the Source/Medium Fix
                     } }]
                 };
                 const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
 
-                // 3. user_engagement (Confirms "scrolling" or long session time)
+                // 3. user_engagement (Scrolling/Reading time fix)
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
 
                 await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
@@ -236,7 +192,7 @@ app.post('/boost-mp', async (req, res) => {
 });
 
 
-// (AI Sections are omitted for brevity, they remain unchanged)
+// (AI Sections remain unchanged)
 
 
 // ===================================================================
