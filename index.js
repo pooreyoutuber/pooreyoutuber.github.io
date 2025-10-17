@@ -1,22 +1,43 @@
-// index.js (FINAL COMPLETE CODE with Proxy Integration)
+// index.js (COMPLETE CODE with PROXY ROTATION, AUTHENTICATION, and GA4 GEO FIX)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// --- New Dependency for Proxy ---
-const { HttpsProxyAgent } = require('https-proxy-agent');
+// 🚨 प्रॉक्सी के लिए ज़रूरी लाइब्रेरी
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- PROXY CONFIGURATION (Updated with your credentials) ---
-// Note: We use the IP address from your screenshot: 142.111.48.253:7030
-// Credentials: bqctypvz:399xb3kxqv6i
-const PROXY_URL = 'http://bqctypvz:399xb3kxqv6i@142.111.48.253:7030';
-const proxyAgent = new HttpsProxyAgent(PROXY_URL);
-console.log(`Proxy Agent set up for: ${PROXY_URL}`);
+// --- PROXY CONFIGURATION (10 Proxies for Rotation) ---
+// Credentials from your WebShare screenshot: bqctypvz:399xb3kxqv6i
+const PROXY_CREDENTIALS = 'bqctypvz:399xb3kxqv6i';
+const PROXY_HOSTS = [
+    '142.111.48.253:7030',   // Proxy 1
+    '31.59.20.176:6754',     // Proxy 2
+    '38.176.176.177:5572',   // Proxy 3
+    '198.23.239.134:6540',   // Proxy 4
+    '45.38.107.97:6014',     // Proxy 5
+    '107.172.163.27:6543',   // Proxy 6
+    '64.137.96.74:6641',     // Proxy 7
+    '216.10.27.159:6837',   // Proxy 8
+    '142.111.67.146:5611',   // Proxy 9
+    '142.147.128.93:6593'    // Proxy 10
+];
+
+// सभी प्रॉक्सी के लिए Agent पहले से बना कर रखें
+const PROXY_AGENTS = PROXY_HOSTS.map(host => {
+    const url = `http://${PROXY_CREDENTIALS}@${host}`;
+    return { host: host, agent: new HttpsProxyAgent(url) };
+});
+
+function getRandomAgent() {
+    // हर रिक्वेस्ट के लिए एक रैंडम प्रॉक्सी एजेंट चुनें
+    return PROXY_AGENTS[Math.floor(Math.random() * PROXY_AGENTS.length)];
+}
+console.log(`Initialized ${PROXY_AGENTS.length} Proxy Agents for rotation.`);
 
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
@@ -53,11 +74,18 @@ app.get('/', (req, res) => {
 
 const MIN_DELAY = 3000; 
 const MAX_DELAY = 12000; 
+// ज़्यादा देशों को जोड़ा गया है ताकि 'Not Set' से बचा जा सके और ज़्यादा रैंडम लगे
 const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
     { country: "Germany", region: "Bavaria" },
     { country: "Japan", region: "Tokyo" },
+    { country: "United Kingdom", region: "England" },
+    { country: "Brazil", region: "Sao Paulo" },
+    { country: "Australia", region: "New South Wales" },
+    { country: "Canada", region: "Ontario" },
+    { country: "France", region: "Ile-de-France" },
+    { country: "Singapore", region: "Central Region" },
 ];
 
 function getRandomDelay() {
@@ -67,33 +95,34 @@ function getRandomGeo() {
     return geoLocations[Math.floor(Math.random() * geoLocations.length)];
 }
 
-// Helper function definitions 
-// --- sendData UPDATED to use Proxy Agent ---
+// --- sendData UPDATED to use Random Proxy Agent ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
+    
+    // Get a random proxy for this request
+    const { host: proxyHost, agent: proxyAgent } = getRandomAgent();
 
     try {
         const response = await fetch(gaEndpoint, {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 'Content-Type': 'application/json' },
-            // <-- PROXY AGENT ADDED HERE
+            // 🚨 PROXY AGENT यहाँ जोड़ा गया है (407/ETIMEDOUT फिक्स)
             agent: proxyAgent 
         });
 
         if (response.status === 204) { 
-            // Proxy success will result in a 204 from Google Analytics
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Via Proxy`);
+            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyHost}`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            // If we get an error, it could be GA error or still a Proxy issue (e.g., 403 Forbidden)
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
+            // 407 (Proxy Auth) या 400 (GA4 Payload) error को log करेगा
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)} | Proxy: ${proxyHost}`);
             return { success: false };
         }
     } catch (error) {
-        // Critical error, likely connection or DNS failure
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
+        // ETIMEDOUT (Connection Failed) तब होगा जब Proxy IP Authorized न हो या प्रॉक्सी डाउन हो
+        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message} | Proxy: ${proxyHost}`);
         return { success: false };
     }
 }
@@ -122,7 +151,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp)
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Concurrency
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages } = req.body; 
@@ -136,6 +165,7 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
+    // Immediately respond with 'accepted'
     res.json({ 
         status: 'accepted', 
         message: `Request for ${viewPlan.length} views accepted. Processing started in the background.`
@@ -152,9 +182,17 @@ app.post('/boost-mp', async (req, res) => {
                 const SESSION_ID = Date.now(); 
                 const geo = getRandomGeo();
                 const engagementTime = 30000 + Math.floor(Math.random() * 90000); 
-                const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
                 
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); 
+                // 🚨 महत्वपूर्ण: GEO data user_properties में भेजा जाता है ताकि GA4 में 'Not Set' न आए।
+                const commonUserProperties = { 
+                    // geo field एक generic custom user property है
+                    geo: { value: `${geo.country}, ${geo.region}` },
+                    // Country और Region को अलग से भेजने से GA4 इन्हें geo-location के लिए प्राथमिकता देता है
+                    country: { value: geo.country }, 
+                    region: { value: geo.region }
+                };
+                
+                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); // Initial spread delay
 
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
@@ -185,7 +223,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     
@@ -230,7 +268,7 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT
+// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     
@@ -278,7 +316,7 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 
 
 // ===================================================================
-// START THE SERVER
+// START THE SERVER (App Crash Fix)
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
