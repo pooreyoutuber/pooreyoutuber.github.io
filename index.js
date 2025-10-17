@@ -1,22 +1,37 @@
-// index.js (ULTIMATE FINAL CODE - Webshare Premium Proxy + All Real User Fixes)
+// index.js (ULTIMATE FINAL CODE - Webshare Username/Password Auth + All Real User Fixes)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// Webshare Premium Proxy के लिए HttpsProxyAgent का उपयोग करें
+// HttpsProxyAgent का उपयोग करें क्योंकि Webshare Premium Proxy HTTP/HTTPS है।
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// socks-proxy-agent package.json में है, लेकिन Webshare IP Auth के लिए HttpsProxyAgent का उपयोग किया जाएगा।
+// SOCKS Agent package.json में है, लेकिन Webshare के लिए HttpsProxyAgent का उपयोग किया जाएगा।
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- 1. PROXY CONFIGURATION: WEBSHARE ROTATING PROXY (IP Auth) ---
-// Webshare Rotating Endpoint (IP Authentication के लिए)
+// --- 1. PROXY CONFIGURATION: WEBSHARE ROTATING PROXY (Username/Password Auth) ---
 const WEBSHARE_PROXY_HOST = 'p.webshare.io:9999';
-const PROXY_URL = `http://${WEBSHARE_PROXY_HOST}`; 
-const PROXY_AGENT = new HttpsProxyAgent(PROXY_URL); // Webshare HTTP/HTTPS Proxy के लिए
+
+// 🚨 Render Environment Variables से Username और Password उठाएँ
+const PROXY_USER = process.env.Proxy_Username;
+const PROXY_PASS = process.env.Proxy_Password;
+
+// Proxy URL: http://username:password@host:port format
+const PROXY_URL = `http://${PROXY_USER}:${PROXY_PASS}@${WEBSHARE_PROXY_HOST}`; 
+
+let PROXY_AGENT;
+if (PROXY_USER && PROXY_PASS) {
+    PROXY_AGENT = new HttpsProxyAgent(PROXY_URL);
+    console.log("Webshare Proxy Agent initialized using Username/Password.");
+} else {
+    // अगर Keys न मिलें तो Proxy को Disable रखें (लेकिन Views नहीं बढ़ेंगे)
+    PROXY_AGENT = undefined;
+    console.error("FATAL: Proxy Username/Password missing. Running without proxy.");
+}
+
 
 // --- GEMINI KEY CONFIGURATION (Unchanged) ---
 let GEMINI_KEY;
@@ -83,12 +98,13 @@ function getRandomReferrer() {
     return REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 }
 
-// --- sendData (Webshare Proxy Agent के साथ अपडेटेड) ---
+// --- sendData (Updated for Username/Password Proxy) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     
-    const proxyHost = WEBSHARE_PROXY_HOST;
-    const proxyAgent = PROXY_AGENT; // 🚨 Webshare Premium Agent
+    // 🚨 PROXY_AGENT का उपयोग
+    const proxyAgent = PROXY_AGENT;
+    const proxyInfo = proxyAgent ? `${PROXY_AGENT.proxy.host}:${PROXY_AGENT.proxy.port}` : 'None';
 
     try {
         const fetchOptions = {
@@ -101,16 +117,15 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         const response = await fetch(gaEndpoint, fetchOptions);
 
         if (response.status === 204) { 
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyHost}`);
+            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyInfo}`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)} | Proxy: ${proxyHost}`);
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)} | Proxy: ${proxyInfo}`);
             return { success: false };
         }
     } catch (error) {
-        // यह Connection Failed error Webshare के IP Auth में भी आ सकता है अगर Render का IP बदल जाए और Webshare में अपडेट न हो।
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message} | Proxy: ${proxyHost}`);
+        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message} | Proxy: ${proxyInfo}`);
         return { success: false };
     }
 }
@@ -148,6 +163,11 @@ app.post('/boost-mp', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
     }
     
+    // Proxy available है या नहीं, चेक करें
+    if (!PROXY_AGENT) {
+        return res.status(500).json({ status: 'error', message: 'Proxy configuration error. Cannot proceed without proxy access.' });
+    }
+
     const viewPlan = generateViewPlan(parseInt(views), pages.filter(p => p.percent > 0)); 
     if (viewPlan.length === 0) {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
@@ -167,7 +187,6 @@ app.post('/boost-mp', async (req, res) => {
                 const referrer = getRandomReferrer(); 
 
                 // 🚨 FIX 1: Geo-location (Country-wise Fix)
-                // GA4 के लिए 'country' और 'region' को अलग-अलग User Properties के रूप में भेजा जाता है
                 const commonUserProperties = { 
                     country: { value: geo.country }, 
                     region: { value: geo.region }
@@ -212,6 +231,7 @@ app.post('/boost-mp', async (req, res) => {
 });
 
 
+// (AI Sections remain unchanged from your original file)
 // ===================================================================
 // 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
 // ===================================================================
@@ -227,6 +247,7 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
     
+    // Updated Prompt for Viral, Export, and View Increase Tags
     const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
@@ -306,7 +327,7 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 
 
 // ===================================================================
-// START THE SERVER 
+// START THE SERVER (App Crash Fix)
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
