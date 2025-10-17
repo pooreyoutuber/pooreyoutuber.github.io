@@ -5,69 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Traffic Booster Client</title>
     <style>
+        /* Exact UI Matching Styles */
         body {
             font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         .container {
-            max-width: 600px;
-            margin: auto;
+            width: 100%;
+            max-width: 450px; /* Slightly narrower to match typical mobile app width */
             background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            border-radius: 10px; /* More pronounced rounded corners */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Deeper shadow for elevation */
         }
         h2 {
             text-align: center;
-            color: #333;
+            color: #1a1a1a;
+            font-size: 24px;
+            margin-bottom: 30px; 
+            border-bottom: 2px solid #007bff; /* Underline effect for title */
+            padding-bottom: 10px;
         }
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px; 
             font-weight: bold;
+            color: #333;
+            font-size: 14px;
         }
         input[type="text"], input[type="number"] {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; /* Smoother input corners */
             box-sizing: border-box; 
+            font-size: 16px;
+            background-color: #f9f9f9; /* Light input background */
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #007bff; 
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
         }
         button {
-            background-color: #007bff;
+            background-color: #007bff; 
             color: white;
-            padding: 12px 20px;
+            padding: 15px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             width: 100%;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s, transform 0.1s;
         }
         button:hover {
             background-color: #0056b3;
         }
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        /* Response Message Styling */
         #response-message {
-            margin-top: 20px;
+            margin-top: 25px;
             padding: 15px;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-weight: bold;
             display: none; 
+            white-space: pre-wrap;
+            line-height: 1.4;
         }
         .success {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #d4edda; 
+            color: #155724; 
             border: 1px solid #c3e6cb;
         }
         .error {
-            background-color: #f8d7da;
-            color: #721c24;
+            background-color: #f8d7da; 
+            color: #721c24; 
             border: 1px solid #f5c6cb;
         }
         .info {
-            background-color: #ffe599;
-            color: #333;
-            border: 1px solid #e0c27b;
+            background-color: #fff3cd; 
+            color: #856404; 
+            border: 1px solid #ffeeba;
         }
     </style>
 </head>
@@ -125,7 +155,7 @@
 
         const apiEndpoint = `${renderUrl}/api/boost-traffic`;
         
-        displayMessage('Request is being sent... Check Render Logs.', 'info');
+        displayMessage('Request is being sent... **Check Render Logs for processing status.**', 'info');
 
         try {
             const response = await fetch(apiEndpoint, {
@@ -139,21 +169,22 @@
             const data = await response.json();
 
             if (response.ok) {
-                // 200/202 status code
-                displayMessage(`✅ Success! ${data.message}`, 'success');
+                // 202 Accepted status code from the server
+                displayMessage(`✅ **Success! Job Accepted.**\n\n${data.message}\nMode: ${data.simulation_mode}`, 'success');
             } else {
                 // 4xx/5xx status code
-                displayMessage(`❌ Error: ${data.message}`, 'error');
+                displayMessage(`❌ **Server Responded with Error (${response.status}):**\n\n${data.message}`, 'error');
             }
 
         } catch (error) {
             console.error('Network Error:', error);
-            displayMessage(`❌ Network Error: Could not connect to the server. Check the Render URL or Render Logs.`, 'error');
+            // This is the error you are seeing.
+            displayMessage(`❌ **NETWORK ERROR:** Could not connect to the Render service URL. The server is likely **DOWN** or **CRASHING** due to bad proxies.\n\n**Action:** Please ensure your Render service is **LIVE** and your **Webshare Proxies are active** in the \`index.js\` file.`, 'error');
         }
     });
 
     function displayMessage(message, type) {
-        responseDiv.textContent = message;
+        responseDiv.innerHTML = message;
         responseDiv.className = ''; 
         responseDiv.classList.add(type);
         responseDiv.style.display = 'block';
