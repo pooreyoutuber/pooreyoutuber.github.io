@@ -1,55 +1,23 @@
-// index.js (ULTIMATE CODE - Fixed for Geo/Source/Medium, Nodmaven Proxies)
+// index.js (FINAL CODE - Webshare Premium Proxy + Real User Fixes)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-const { SocksProxyAgent } = require('socks-proxy-agent'); 
-// 🚨 HTTPS Proxy Agent भी रखें, क्योंकि कुछ Nodmaven Proxies HTTPS हैं
+// सिर्फ HTTPS Proxy Agent का इस्तेमाल करें, क्योंकि Webshare proxy HTTP/HTTPS है
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- 1. PROXY CONFIGURATION: CONSOLIDATED NODEMAVEN IPs (From All Screenshots) ---
-const PROXY_HOSTS = [
-    // United States (Mostly SOCKS4/5)
-    { host: '98.186.47.132:4145', type: 'socks' }, { host: '98.170.57.249:4145', type: 'socks' }, 
-    { host: '98.190.239.43:4145', type: 'socks' }, { host: '98.186.47.150:4145', type: 'socks' },
-    { host: '98.191.0.47:4145', type: 'socks' }, { host: '98.176.72.30:4145', type: 'socks' }, 
-    { host: '98.176.72.21:10919', type: 'socks' }, { host: '98.182.171.161:4145', type: 'socks' },
-    // Germany (SOCKS5)
-    { host: '89.58.45.94:36742', type: 'socks' }, { host: '89.58.45.94:42441', type: 'socks' }, 
-    { host: '89.58.45.94:36259', type: 'socks' }, { host: '89.58.45.94:36935', type: 'socks' },
-    { host: '89.58.45.94:46486', type: 'socks' }, { host: '89.58.45.94:38121', type: 'socks' },
-    // Indonesia & Others (Mix of HTTPS and SOCKS)
-    { host: '8.219.167.110:8989', type: 'socks' }, // SOCKS4
-    { host: '8.215.3.250:6379', type: 'http' }, { host: '8.215.3.250:8123', type: 'http' }, // HTTPS Proxies
-    { host: '89.46.249.142:31415', type: 'socks' }, // UK
-    { host: '94.74.80.88:4145', type: 'socks' }, // Singapore
-    { host: '94.74.96.240:3129', type: 'http' }, // Hong Kong (HTTPS)
-];
+// --- 1. PROXY CONFIGURATION: WEBSHARE ROTATING PROXY ---
+// Webshare Rotating Endpoint: p.webshare.io:9999 (HTTP/HTTPS Protocol)
+const WEBSHARE_PROXY_HOST = 'p.webshare.io:9999';
+const PROXY_URL = `http://${WEBSHARE_PROXY_HOST}`; // HttpsProxyAgent can tunnel HTTPS over HTTP proxy
 
-// --- PROXY AGENT INITIALIZATION ---
-const PROXY_AGENTS = PROXY_HOSTS.map(item => {
-    let agent;
-    let url;
-    if (item.type === 'socks') {
-        url = `socks5://${item.host}`;
-        agent = new SocksProxyAgent(url);
-    } else { // http/https
-        url = `http://${item.host}`; // HttpsProxyAgent can tunnel HTTPS over HTTP proxy
-        agent = new HttpsProxyAgent(url);
-    }
-    return { host: item.host, type: item.type, agent: agent };
-});
-
-function getRandomAgent() {
-    if (PROXY_AGENTS.length === 0) return { host: 'Direct', agent: null };
-    return PROXY_AGENTS[Math.floor(Math.random() * PROXY_AGENTS.length)];
-}
-
+// 🚨 Only one agent is needed for the rotating endpoint
+const PROXY_AGENT = new HttpsProxyAgent(PROXY_URL);
 
 // --- GEMINI KEY CONFIGURATION (Unchanged) ---
 let GEMINI_KEY;
@@ -77,7 +45,7 @@ app.get('/', (req, res) => {
 const MIN_DELAY = 3000; 
 const MAX_DELAY = 12000; 
 
-// Country diversity list (Geo Fix)
+// 🎯 FIX 1: Geo-location (Country-wise View)
 const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
@@ -91,14 +59,15 @@ const geoLocations = [
     { country: "Singapore", region: "Central Region" },
 ];
 
-// Realistic Traffic Source Referrers (Source/Medium Fix)
+// 🎯 FIX 2: Source/Medium (Search/Click)
 const REFERRERS = [
     'https://www.google.com/search?q=college+project+ideas', // Organic Search
-    'https://t.co/', // Social (Twitter/X)
+    'https://t.co/random_link_id', // Social (Twitter/X)
     'https://facebook.com/groups/projecthelp/', // Social
     'https://linkedin.com/posts/project-manager/', // Social
     'https://bing.com/search?q=latest+projects', // Organic Search
     'https://reddit.com/r/webdev/', // Social
+    'https://mail.google.com/mail/u/0/#inbox', // Email
     'https://pooreyoutuber.github.io' // Direct/Referral (Less frequent)
 ];
 
@@ -109,15 +78,15 @@ function getRandomGeo() {
     return geoLocations[Math.floor(Math.random() * geoLocations.length)];
 }
 function getRandomReferrer() {
-    // Referrers ko zyada realistic banane ke liye
     return REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 }
 
-// --- sendData (Proxy enabled and ready) ---
+// --- sendData (Updated for Webshare Proxy) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     
-    const { host: proxyHost, type: proxyType, agent: proxyAgent } = getRandomAgent();
+    const proxyHost = WEBSHARE_PROXY_HOST;
+    const proxyAgent = PROXY_AGENT;
 
     try {
         const fetchOptions = {
@@ -130,7 +99,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         const response = await fetch(gaEndpoint, fetchOptions);
 
         if (response.status === 204) { 
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyHost} (${proxyType})`);
+            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyHost}`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
@@ -194,7 +163,7 @@ app.post('/boost-mp', async (req, res) => {
                 const engagementTime = 30000 + Math.floor(Math.random() * 90000); // 30s to 120s
                 const referrer = getRandomReferrer(); 
 
-                // 🚨 CRITICAL FIX: Separate 'country' and 'region' for accurate GA4 Geo-location
+                // 🎯 FIX 1 Implementation: Country-wise Fix
                 const commonUserProperties = { 
                     country: { value: geo.country }, 
                     region: { value: geo.region }
@@ -202,10 +171,10 @@ app.post('/boost-mp', async (req, res) => {
                 
                 await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); 
 
-                // 1. session_start (Geo Fix applied)
+                // 1. session_start 
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
-                // 2. page_view (Source/Medium Fix: page_referrer)
+                // 2. page_view (Base View)
                 const pageViewPayload = {
                     client_id: CLIENT_ID,
                     user_properties: commonUserProperties, 
@@ -214,12 +183,12 @@ app.post('/boost-mp', async (req, res) => {
                         page_title: `PROJECT_PAGE_${i + 1}`, 
                         session_id: SESSION_ID, 
                         engagement_time_msec: engagementTime,
-                        page_referrer: referrer // 🚨 THIS IS THE SOURCE/MEDIUM/CLICK FIX
+                        page_referrer: referrer // 🎯 FIX 2 Implementation: Search/Click Source Fix
                     } }]
                 };
                 const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
 
-                // 3. user_engagement (Scrolling/Reading time Fix)
+                // 🎯 FIX 3: user_engagement (Scrolling/Reading time Fix)
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
 
                 await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
@@ -237,6 +206,9 @@ app.post('/boost-mp', async (req, res) => {
 
     })();
 });
+
+
+// (AI Sections remain unchanged)
 
 
 // ===================================================================
