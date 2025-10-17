@@ -5,9 +5,7 @@ const { GoogleGenAI } = require('@google/genai');
 const fetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// HttpsProxyAgent का उपयोग करें क्योंकि Webshare Premium Proxy HTTP/HTTPS है।
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// SOCKS Agent package.json में है, लेकिन Webshare के लिए HttpsProxyAgent का उपयोग किया जाएगा।
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -59,7 +57,7 @@ app.get('/', (req, res) => {
 const MIN_DELAY = 3000; 
 const MAX_DELAY = 12000; 
 
-// 🎯 FIX 1: Geo-location (Country-wise View) - विविधता बढ़ाई गई
+// 🎯 FIX 1: Geo-location (Country-wise View)
 const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
@@ -75,17 +73,17 @@ const geoLocations = [
     { country: "South Africa", region: "Gauteng" },
 ];
 
-// 🎯 FIX 2: Source/Medium (Search/Click) - referrer list
+// 🎯 FIX 2: Source/Medium (Search/Click)
 const REFERRERS = [
-    'https://www.google.com/search?q=college+project+ideas', // Organic Search
-    'https://t.co/random_link_id', // Social (Twitter/X)
-    'https://facebook.com/groups/projecthelp/', // Social
-    'https://linkedin.com/posts/project-manager/', // Social
-    'https://bing.com/search?q=latest+projects', // Organic Search
-    'https://reddit.com/r/webdev/', // Social
-    'https://mail.google.com/mail/u/0/#inbox', // Email
-    'https://youtube.com/watch?v=tutorial_link', // Video Click
-    'https://pooreyoutuber.github.io' // Direct/Referral (Less frequent)
+    'https://www.google.com/search?q=college+project+ideas', // Organic Search (Google/organic)
+    'https://t.co/random_link_id', // Social (twitter/social)
+    'https://facebook.com/groups/projecthelp/', // Social (facebook/social)
+    'https://linkedin.com/posts/project-manager/', // Social (linkedin/social)
+    'https://bing.com/search?q=latest+projects', // Organic Search (bing/organic)
+    'https://reddit.com/r/webdev/', // Social (reddit/social)
+    'https://mail.google.com/mail/u/0/#inbox', // Email (gmail/email)
+    'https://youtube.com/watch?v=tutorial_link', // Video Click (youtube/referral)
+    'https://pooreyoutuber.github.io' // Direct/Referral
 ];
 
 function getRandomDelay() {
@@ -102,7 +100,6 @@ function getRandomReferrer() {
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     
-    // 🚨 PROXY_AGENT का उपयोग
     const proxyAgent = PROXY_AGENT;
     const proxyInfo = proxyAgent ? `${PROXY_AGENT.proxy.host}:${PROXY_AGENT.proxy.port}` : 'None';
 
@@ -121,11 +118,12 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             return { success: true };
         } else {
             const errorText = await response.text(); 
+            // 🚨 400 Errors अक्सर Payload Errors या Webshare Authentication Failure के कारण होते हैं
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)} | Proxy: ${proxyInfo}`);
             return { success: false };
         }
     } catch (error) {
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message} | Proxy: ${proxyInfo}`);
+        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed (Proxy/Network): ${error.message} | Proxy: ${proxyInfo}`);
         return { success: false };
     }
 }
@@ -163,7 +161,6 @@ app.post('/boost-mp', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
     }
     
-    // Proxy available है या नहीं, चेक करें
     if (!PROXY_AGENT) {
         return res.status(500).json({ status: 'error', message: 'Proxy configuration error. Cannot proceed without proxy access.' });
     }
@@ -186,7 +183,7 @@ app.post('/boost-mp', async (req, res) => {
                 const engagementTime = 30000 + Math.floor(Math.random() * 90000); // 30s to 120s
                 const referrer = getRandomReferrer(); 
 
-                // 🚨 FIX 1: Geo-location (Country-wise Fix)
+                // 🚨 FIX 1: Geo-location Fix (Country-wise View)
                 const commonUserProperties = { 
                     country: { value: geo.country }, 
                     region: { value: geo.region }
@@ -194,24 +191,26 @@ app.post('/boost-mp', async (req, res) => {
                 
                 await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); 
 
-                // 1. session_start 
+                // 1. session_start (Session initiates)
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
 
-                // 2. page_view (Base View)
+                // 2. page_view (Page is loaded)
                 const pageViewPayload = {
                     client_id: CLIENT_ID,
                     user_properties: commonUserProperties, 
                     events: [{ name: 'page_view', params: { 
                         page_location: targetUrl, 
-                        page_title: `PROJECT_PAGE_${i + 1}`, 
+                        // Target URL का उपयोग page_title के रूप में न करें, यह Views को 'Project Page View' में डाल सकता है।
+                        page_title: `Article_${i + 1}_${geo.country}`, 
                         session_id: SESSION_ID, 
                         engagement_time_msec: engagementTime,
-                        page_referrer: referrer // 🚨 FIX 2: Search/Click Source Fix
+                        page_referrer: referrer // 🚨 FIX 2: Source/Medium Fix (Search/Click)
                     } }]
                 };
                 const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
 
-                // 3. user_engagement (Scrolling/Reading time Fix)
+                // 3. user_engagement (Scrolling/Reading time)
+                // 🚨 FIX 3: Ensures the session is marked as 'Engaged'
                 await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
 
                 await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
@@ -231,7 +230,7 @@ app.post('/boost-mp', async (req, res) => {
 });
 
 
-// (AI Sections remain unchanged from your original file)
+// (AI Sections remain unchanged)
 // ===================================================================
 // 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
 // ===================================================================
@@ -247,7 +246,6 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
     
-    // Updated Prompt for Viral, Export, and View Increase Tags
     const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
@@ -327,7 +325,7 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 
 
 // ===================================================================
-// START THE SERVER (App Crash Fix)
+// START THE SERVER 
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
