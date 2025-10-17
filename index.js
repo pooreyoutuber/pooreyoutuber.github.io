@@ -1,3 +1,4 @@
+// index.js (FINAL COMPLETE CODE with Proxy Integration)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -10,12 +11,14 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- PROXY CONFIGURATION (From Screenshot) ---
-const PROXY_URL = 'http://bqctypvz:399xb3kxqv6l@142.111.48.253:7030';
+// --- PROXY CONFIGURATION (Updated with your credentials) ---
+// Note: We use the IP address from your screenshot: 142.111.48.253:7030
+// Credentials: bqctypvz:399xb3kxqv6i
+const PROXY_URL = 'http://bqctypvz:399xb3kxqv6i@142.111.48.253:7030';
 const proxyAgent = new HttpsProxyAgent(PROXY_URL);
 console.log(`Proxy Agent set up for: ${PROXY_URL}`);
 
-// --- GEMINI KEY CONFIGURATION (Unchanged) ---
+// --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
@@ -36,7 +39,7 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- MIDDLEWARE & UTILITIES (Unchanged) ---
+// --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
@@ -74,18 +77,22 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 'Content-Type': 'application/json' },
-            agent: proxyAgent // <-- PROXY AGENT ADDED HERE
+            // <-- PROXY AGENT ADDED HERE
+            agent: proxyAgent 
         });
 
         if (response.status === 204) { 
+            // Proxy success will result in a 204 from Google Analytics
             console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Via Proxy`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
+            // If we get an error, it could be GA error or still a Proxy issue (e.g., 403 Forbidden)
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
             return { success: false };
         }
     } catch (error) {
+        // Critical error, likely connection or DNS failure
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
         return { success: false };
     }
@@ -115,7 +122,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Concurrency (Unchanged Logic)
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages } = req.body; 
@@ -178,7 +185,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT (Unchanged)
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     
@@ -223,7 +230,7 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (Unchanged)
+// 3. AI INSTA CAPTION EDITOR ENDPOINT
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     
