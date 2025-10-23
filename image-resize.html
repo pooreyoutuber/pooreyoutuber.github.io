@@ -1,202 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pro Image Resizer & Editor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Pro Image Resizer</title>
 
-  <meta name="description" content="A free, fast, and secure online tool to resize images to specific dimensions and apply basic photo editing filters like rotation, grayscale, and sepia.">
-  <meta name="keywords" content="image resizer, photo editor, resize image online, crop image, rotate photo, grayscale filter, sepia effect">
-  <meta name="robots" content="index, follow">
+    <meta name="description" content="A fast, secure, and free online tool to resize images to specific dimensions right in your browser.">
+    <meta name="keywords" content="image resizer, photo resize, resize image online, change image size, dimensions">
+    <meta name="robots" content="index, follow">
 
-  <style>
-    /* General Styling */
-    body { font-family: 'Arial', sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f4f6f9; }
-    .container { 
-        max-width: 900px; 
-        margin: 30px auto; 
-        background: #fff; 
-        padding: 30px; 
-        border-radius: 12px; 
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-    h1 { color: #333; margin-bottom: 5px; }
-    p.subtitle { color: #666; margin-bottom: 20px; }
-    
-    /* Input and Controls */
-    .control-group { margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; display: inline-block; }
-    .control-group input, .control-group button { margin: 8px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
-    
-    .editor-controls button { background: #ffc107; color: #333; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
-    .editor-controls button:hover { background: #e0a800; }
-    
-    .resize-button { padding: 12px 30px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; font-size: 16px; margin-top: 15px; }
-    .resize-button:hover { background: #1e7e34; }
-    
-    /* Image Preview */
-    .image-preview-area { margin-top: 25px; border-top: 2px solid #eee; padding-top: 25px; }
-    #preview-img { max-width: 100%; max-height: 500px; border: 1px solid #ccc; padding: 5px; display: block; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    #canvas { display: none; }
+    <style>
+        /* General Styling */
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            text-align: center; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #eef2f7; /* Lighter, professional background */
+            color: #333;
+        }
+        .container { 
+            max-width: 950px; 
+            margin: 40px auto; 
+            background: #fff; 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #007bff; /* Primary brand color */
+            margin-bottom: 5px; 
+            font-size: 2.5em;
+        }
+        p.subtitle { 
+            color: #5a6268; 
+            margin-bottom: 30px; 
+            font-size: 1.1em;
+        }
+        
+        /* Input and Controls - Focus on Resizing */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
 
-    /* Description Section */
-    .description-section {
-        text-align: left;
-        padding: 25px;
-        margin-top: 40px;
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        border: 1px solid #e9ecef;
-        line-height: 1.6;
-    }
-    .description-section h2 {
-        color: #007bff;
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 5px;
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 1.5em;
-    }
-    .description-section strong { color: #333; }
-    
-    /* NEW: Ad Container for Spacing */
-    .monetag-ad-space { margin: 20px auto; max-width: 728px; text-align: center; }
-  </style>
-  
-      <script>(function(s){s.dataset.zone='9914657',s.src='https://forfrogadiertor.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  
+        .control-group { 
+            background: #f8f9fa; /* Light background for control groups */
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #007bff;
+        }
+
+        .control-group input[type="number"], .control-group input[type="file"] { 
+            width: 100%;
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #ced4da; 
+            font-size: 16px; 
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .control-group input[type="number"]:focus, .control-group input[type="file"]:focus {
+            border-color: #0056b3;
+            outline: none;
+        }
+
+        /* File Upload Custom Style */
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .custom-file-upload {
+            border: 2px dashed #007bff;
+            display: inline-block;
+            padding: 15px 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            color: #007bff;
+            background-color: #e9f5ff;
+            width: 100%;
+            box-sizing: border-box;
+            font-weight: bold;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #d0e8ff;
+            border-color: #0056b3;
+        }
+
+        /* Action Button */
+        .action-button-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .resize-button { 
+            padding: 15px 40px; 
+            background: #28a745; /* Green for action */
+            color: #fff; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            font-size: 1.2em; 
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .resize-button:hover { 
+            background: #1e7e34; 
+            transform: translateY(-2px);
+        }
+
+        /* Image Preview Area */
+        .image-preview-area { 
+            margin-top: 30px; 
+            padding-top: 30px; 
+            border-top: 2px solid #ced4da;
+        }
+        #preview-img { 
+            max-width: 100%; 
+            max-height: 400px; 
+            border: 5px solid #007bff; /* Highlight border */
+            border-radius: 10px;
+            padding: 3px; 
+            display: block; 
+            margin: 0 auto; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            object-fit: contain;
+            transform-origin: center center; /* Important for rotation */
+        }
+        #canvas { display: none; }
+        
+        /* Utility */
+        .hidden { display: none !important; }
+
+        /* Editing controls (Optional for Resizing Focus) */
+        .editor-controls {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #ced4da;
+            text-align: center;
+        }
+        .editor-controls button { 
+            padding: 10px 20px;
+            margin: 5px; 
+            border-radius: 5px; 
+            border: 1px solid #ffc107;
+            background: #fff3cd; 
+            color: #333; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+        }
+        .editor-controls button:hover { background: #ffe08a; }
+
+        .dimension-group {
+            display: flex;
+            gap: 10px;
+        }
+        .dimension-group > div {
+            flex-grow: 1;
+        }
+
+    </style>
 </head>
 <body>
 <div class="container">
-    <h1>🖼️ Pro Image Resizer & Editor</h1>
-    <p class="subtitle">Quickly resize your images to exact dimensions and apply basic photo filters instantly.</p>
+    <h1>📐 Pro Image Resizer</h1>
+    <p class="subtitle">Quickly resize, scale, and crop images to your desired pixel dimensions. Secure & browser-based.</p>
 
-            <div class="monetag-ad-space">
-        <div id="monetag-top-native">
-            <script data-cfasync="false" type="text/javascript">(function(d,z,s,c){s.src='//'+d+'/400/'+z;s.onerror=s.onload=E;function E(){c&&c();c=null}try{(document.body||document.documentElement).appendChild(s)}catch(e){E()}})('ueuee.com',9914741,document.createElement('script'),_atdtnkoi)</script>
-        </div>
-    </div>
+    <div class="controls-grid">
+        <div class="control-group">
+            <label for="upload">1. Upload Image</label>
+            <div class="file-upload-wrapper">
+                <input type="file" id="upload" accept="image/*">
+                <div class="custom-file-upload">
+                    <span id="file-status">📂 Click to Select File...</span>
+                </div>
+            </div>
+        </div>
 
-    <div class="control-group">
-        <input type="file" id="upload" accept="image/*">
-    </div>
-    
-    <div class="control-group">
-        <input type="number" id="width" placeholder="New Width (px)" value="800">
-        <input type="number" id="height" placeholder="New Height (px)" value="450">
-    </div>
-    
-    <div class="editor-controls control-group">
-        <button onclick="rotateImage()">🔄 Rotate 90°</button>
-        <button onclick="applyFilter('grayscale')">⚫ Grayscale</button>
-        <button onclick="applyFilter('sepia')">🟤 Sepia</button>
-        <button onclick="applyFilter('original')">✨ Reset Filters</button>
-    </div>
+        <div class="control-group">
+            <label>2. Enter New Dimensions (px)</label>
+            <div class="dimension-group">
+                <div>
+                    <input type="number" id="width" placeholder="New Width" value="1200">
+                </div>
+                <div>
+                    <input type="number" id="height" placeholder="New Height" value="675">
+                </div>
+            </div>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">*Aspect ratio is not locked by default (crops/stretches to fit).</p>
+        </div>
+    </div>
+    
+    <div class="editor-controls">
+        <label style="color: #6c757d; font-weight: bold; display: block; margin-bottom: 10px;">Optional Edits:</label>
+        <button onclick="rotateImage()">🔄 Rotate 90°</button>
+        <button onclick="applyFilter('grayscale')">⚫ Grayscale</button>
+        <button onclick="applyFilter('sepia')">🟤 Sepia</button>
+        <button onclick="applyFilter('original')">✨ Reset Filters</button>
+    </div>
 
-    <div>
-        <button class="resize-button" onclick="resizeAndDownload()">Resize & Download Final Image</button>
-    </div>
-    
-            <div class="monetag-ad-space">
-        <div id="monetag-center-richmedia">
-            <script data-cfasync="false" type="text/javascript">(()=>{var K='...'; ...;})()</script>
-            <script>(function(d,z,s,c){s.src='//'+d+'/400/'+z;s.onerror=s.onload=E;function E(){c&&c();c=null}try{(document.body||document.documentElement).appendChild(s)}catch(e){E()}})('ueuee.com',9914658,document.createElement('script'),_atdtnkoi)</script>
-        </div>
-    </div>
-
-
-    <div class="image-preview-area">
-        <img id="preview-img" src="" alt="Image Preview">
-        <canvas id="canvas"></canvas>
-    </div>
-    
-            <div class="monetag-ad-space">
-        <div id="monetag-footer-vignette">
-            <script>(function(s){s.dataset.zone='9914849',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-        </div>
-    </div>
-    
-    <div class="description-section">
-        <h2>About This Tool: Resize, Edit, and Enhance</h2>
-        <p>The **Pro Image Resizer and Editor** is an all-in-one utility for content creators, web developers, and everyday users who need **quick and secure** image modifications. Unlike many online tools, the entire resizing and editing process happens **directly in your browser**, meaning your images are never uploaded to a server, ensuring your **absolute privacy**.</p>
-        
-        <p>This tool is perfect for:</p>
-        <ul>
-            <li>**Social Media:** Quickly resizing profile pictures, cover photos, or post images to exact pixel requirements (e.g., 1080x1080).</li>
-            <li>**Web Optimization:** Scaling down large images to improve website loading speed and performance.</li>
-            <li>**Basic Editing:** Applying common edits like **rotation** and **color filters** (grayscale for professional documents or sepia for a vintage look) before the final resize.</li>
-        </ul>
-        
-        <p>Simply upload your file, enter your desired width and height, apply any necessary edits, and click **"Resize & Download"**. The final image will be downloaded instantly, ready for use.</p>
-    </div>
+    <div class="action-button-container">
+        <button class="resize-button" onclick="resizeAndDownload()">3. Resize & Download Final Image</button>
+    </div>
+    
+    <div class="image-preview-area">
+        <img id="preview-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450' width='800' height='450'><rect width='800' height='450' fill='%23f0f0f0'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='40' fill='%236c757d'>Image Preview Area</text><text x='50%' y='65%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='%236c757d'>Upload an image to start resizing</text></svg>" alt="Image Preview Placeholder">
+        <canvas id="canvas"></canvas>
+    </div>
+    
 </div>
 
 <script>
-    let uploadedImage = null;
-    let rotationAngle = 0; // 0, 90, 180, 270
-    let currentFilter = 'original';
+    let uploadedImage = null;
+    let rotationAngle = 0; // 0, 90, 180, 270
+    let currentFilter = 'original';
 
-    const uploadInput = document.getElementById("upload");
-    const previewImg = document.getElementById("preview-img");
-    const canvas = document.getElementById("canvas");
+    const uploadInput = document.getElementById("upload");
+    const previewImg = document.getElementById("preview-img");
+    const canvas = document.getElementById("canvas");
+    const fileStatus = document.getElementById("file-status");
 
-    // --- Core Upload Handler ---
-    uploadInput.addEventListener("change", function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                uploadedImage = new Image();
-                uploadedImage.src = e.target.result;
-                uploadedImage.onload = function() {
-                    // Reset everything when a new image is loaded
-                    rotationAngle = 0;
-                    currentFilter = 'original';
-                    previewImg.style.transform = 'none';
-                    previewImg.style.filter = 'none';
-                    previewImg.src = uploadedImage.src;
-                    
-                    // Set default dimensions to original size for a better start
-                    document.getElementById("width").value = uploadedImage.width;
-                    document.getElementById("height").value = uploadedImage.height;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    // --- Core Upload Handler ---
+    uploadInput.addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            fileStatus.textContent = `✅ ${file.name}`; // Update custom button text
 
-    // --- Editing Functions ---
-    
-    function rotateImage() {
-        if (!uploadedImage) {
-            alert("Please upload an image first!");
-            return;
-        }
-        rotationAngle = (rotationAngle + 90) % 360;
-        previewImg.style.transform = `rotate(${rotationAngle}deg)`;
-    }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage = new Image();
+                uploadedImage.src = e.target.result;
+                uploadedImage.onload = function() {
+                    // Reset everything when a new image is loaded
+                    rotationAngle = 0;
+                    currentFilter = 'original';
+                    previewImg.style.transform = 'none';
+                    previewImg.style.filter = 'none';
+                    previewImg.src = uploadedImage.src;
+                    
+                    // Set default dimensions to original size
+                    document.getElementById("width").value = uploadedImage.width;
+                    document.getElementById("height").value = uploadedImage.height;
+                }
+            };
+            reader.readAsDataURL(file);
+        } else {
+            fileStatus.textContent = "📂 Click to Select File...";
+        }
+    });
 
-    function applyFilter(filter) {
-        if (!uploadedImage) {
-            alert("Please upload an image first!");
-            return;
-        }
-        currentFilter = filter;
-        
-        switch (filter) {
-            case 'grayscale':
-                previewImg.style.filter = 'grayscale(100%)';
-                break;
-            case 'sepia':
-                previewImg.style.filter = 'sepia(80%)';
-                break;
-            case 'original':
-            default:
-                previewImg.style.filter = 'none';
-                break;
-        }
-    }
+    // --- Editing Functions (Kept for full functionality) ---
+    
+    function rotateImage() {
+        if (!uploadedImage) {
+            alert("Please upload an image first!");
+            return;
+        }
+        // Cycle rotation 0 -> 90 -> 180 -> 270
+        rotationAngle = (rotationAngle + 90) % 360;
+        previewImg.style.transform = `rotate(${rotationAngle}deg)`;
+    }
 
-    // --- Final Action and Download ---
+    function applyFilter(filter) {
+        if (!uploadedImage) {
+            alert("Please upload an image first!");
+            return;
+        }
+        currentFilter = filter;
+        
+        switch (filter) {
+            case 'grayscale':
+                previewImg.style.filter = 'grayscale(100%)';
+                break;
+            case 'sepia':
+                previewImg.style.filter = 'sepia(80%)';
+                break;
+            case 'original':
+            default:
+                previewImg.style.filter = 'none';
+                break;
+        }
+    }
 
-    function resizeAndDownload() {
-        if (!uploadedImage) {
+    // --- Final Action and Download ---
+
+    function resizeAndDownload() {
+        if (!uploadedImage) {
+            alert("Please upload an image first.");
+            return;
+        }
+
+        const newWidth = parseInt(document.getElementById("width").value);
+        const newHeight = parseInt(document.getElementById("height").value);
+
+        if (isNaN(newWidth) || isNaN(newHeight) || newWidth <= 0 || newHeight <= 0) {
+            alert("Please enter valid width and height values (must be greater than 0).");
+            return;
+        }
+
+        const ctx = canvas.getContext("2d");
+        
+        // 1. Determine canvas size based on rotation
+        if (rotationAngle === 90 || rotationAngle === 270) {
+            canvas.width = newHeight;
+            canvas.height = newWidth;
+        } else {
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+        }
+        
+        // 2. Apply filter CSS for download (this is a simple, browser-only method)
+        switch (currentFilter) {
+            case 'grayscale':
+                ctx.filter = 'grayscale(100%)';
+                break;
+            case 'sepia':
+                ctx.filter = 'sepia(80%)';
+                break;
+            case 'original':
+            default:
+                ctx.filter = 'none';
+                break;
+        }
+
+        // 3. Apply rotation transforms
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(rotationAngle * Math.PI / 180);
+
+        let drawX = -newWidth / 2;
+        let drawY = -newHeight / 2;
+        let drawW = newWidth;
+        let drawH = newHeight;
+
+        // If rotated 90/270 degrees, the original image dimensions are swapped for drawing
+        if (rotationAngle === 90 || rotationAngle === 270) {
+            drawX = -newHeight / 2;
+            drawY = -newWidth / 2;
+            drawW = newHeight;
+            drawH = newWidth;
+        }
+        
+        // 4. Draw the image (resizing happens here)
+        ctx.drawImage(uploadedImage, drawX, drawY, drawW, drawH);
+        
+        ctx.restore(); // Restore context to default (remove transforms/filters)
+
+        // 5. Download the final image
+        const dataURL = canvas.toDataURL("image/png"); // Prefer PNG for quality, can use 'image/jpeg' if needed
+        const a = document.createElement("a");
+        a.href = dataURL;
+        a.download = `resized-image-${newWidth}x${newHeight}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Reset canvas filter and size after download
+        canvas.width = 0;
+        canvas.height = 0;
+        ctx.filter = 'none';
+    }
+</script>
+</body>
+</html>
