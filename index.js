@@ -1,332 +1,160 @@
-// index.js (ULTIMATE FINAL CODE - Webshare Username/Password Auth + All Real User Fixes)
+// index.js
 
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai'); 
-const fetch = require('node-fetch'); 
-const cors = require('cors'); 
-const fs = require('fs'); 
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const { v4: uuidv4 } = require('uuid');
+const url = require('url'); 
+puppeteer.use(StealthPlugin());
 
 const app = express();
-const PORT = process.env.PORT || 10000; 
+const port = process.env.PORT || 10000; 
 
-// --- 1. PROXY CONFIGURATION: WEBSHARE ROTATING PROXY (Username/Password Auth) ---
-const WEBSHARE_PROXY_HOST = 'p.webshare.io:9999';
-
-// 🚨 Render Environment Variables से Username और Password उठाएँ
-const PROXY_USER = process.env.Proxy_Username;
-const PROXY_PASS = process.env.Proxy_Password;
-
-// Proxy URL: http://username:password@host:port format
-const PROXY_URL = `http://${PROXY_USER}:${PROXY_PASS}@${WEBSHARE_PROXY_HOST}`; 
-
-let PROXY_AGENT;
-if (PROXY_USER && PROXY_PASS) {
-    PROXY_AGENT = new HttpsProxyAgent(PROXY_URL);
-    console.log("Webshare Proxy Agent initialized using Username/Password.");
-} else {
-    // अगर Keys न मिलें तो Proxy को Disable रखें (लेकिन Views नहीं बढ़ेंगे)
-    PROXY_AGENT = undefined;
-    console.error("FATAL: Proxy Username/Password missing. Running without proxy.");
-}
-
-
-// --- GEMINI KEY CONFIGURATION (Unchanged) ---
-let GEMINI_KEY;
-try {
-    GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
-} catch (e) {
-    GEMINI_KEY = process.env.GEMINI_API_KEY; 
-}
-
-let ai;
-if (GEMINI_KEY) {
-    ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-} else {
-    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
-}
-
-// --- MIDDLEWARE & UTILITIES (Unchanged) ---
-app.use(cors({ origin: 'https://pooreyoutuber.github.io', methods: ['GET', 'POST'], credentials: true }));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running!');
-});
+// ======================= 1. Configuration and Proxy Data (HARDCODED) ========================
 
-const MIN_DELAY = 3000; 
-const MAX_DELAY = 12000; 
+// 🚨 Hardcoded Webshare Proxy Credentials
+const PROXY_USER = "bqctypvz";
+const PROXY_PASS = "399xb3kxqv6i";
 
-// 🎯 FIX 1: Geo-location (Country-wise View)
-const geoLocations = [
-    { country: "United States", region: "California" },
-    { country: "India", region: "Maharashtra" },
-    { country: "Germany", region: "Bavaria" },
-    { country: "Japan", region: "Tokyo" },
-    { country: "United Kingdom", region: "England" },
-    { country: "Brazil", region: "Sao Paulo" },
-    { country: "Australia", region: "New South Wales" },
-    { country: "Canada", region: "Ontario" },
-    { country: "France", region: "Ile-de-France" },
-    { country: "Singapore", region: "Central Region" },
-    { country: "Mexico", region: "Mexico City" },
-    { country: "South Africa", region: "Gauteng" },
-];
+// Your Webshare IPs List (Ensure you have at least 8 unique IPs here)
+const PROXY_LIST_STRING = "http://142.111.48.253:7030,http://31.59.20.176:6754,http://38.170.176.177:5572,http://198.23.239.134:6540,http://45.38.107.97:6014,http://107.172.163.27:6543,http://64.137.96.74:6641,http://216.10.27.159:6837,http://142.111.67.146:5611,http://142.147.128.93:6593"; 
 
-// 🎯 FIX 2: Source/Medium (Search/Click)
-const REFERRERS = [
-    'https://www.google.com/search?q=college+project+ideas', // Organic Search (Google/organic)
-    'https://t.co/random_link_id', // Social (twitter/social)
-    'https://facebook.com/groups/projecthelp/', // Social (facebook/social)
-    'https://linkedin.com/posts/project-manager/', // Social (linkedin/social)
-    'https://bing.com/search?q=latest+projects', // Organic Search (bing/organic)
-    'https://reddit.com/r/webdev/', // Social (reddit/social)
-    'https://mail.google.com/mail/u/0/#inbox', // Email (gmail/email)
-    'https://youtube.com/watch?v=tutorial_link', // Video Click (youtube/referral)
-    'https://pooreyoutuber.github.io' // Direct/Referral
-];
+let PROXIES = PROXY_LIST_STRING ? PROXY_LIST_STRING.split(',').filter(p => p.length > 0) : [];
 
-function getRandomDelay() {
-    return Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY; 
-}
-function getRandomGeo() {
-    return geoLocations[Math.floor(Math.random() * geoLocations.length)];
-}
-function getRandomReferrer() {
-    return REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
-}
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// --- sendData (Updated for Username/Password Proxy) ---
-async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
-    const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
+// ======================= 2. Advanced Traffic Logic (Puppeteer) ========================
+
+async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl) {
+    let browser;
+    let finalProxyUrl = null; 
+
+    if (proxyUrl && PROXY_USER && PROXY_PASS) {
+        try {
+            const urlObj = new URL(proxyUrl);
+            finalProxyUrl = `${urlObj.protocol}//${PROXY_USER}:${PROXY_PASS}@${urlObj.host}`;
+        } catch (e) {
+            console.error(`[${jobId}] View ${viewNumber}: Invalid Proxy URL. Error: ${e.message}`);
+            finalProxyUrl = null; 
+        }
+    }
     
-    const proxyAgent = PROXY_AGENT;
-    const proxyInfo = proxyAgent ? `${PROXY_AGENT.proxy.host}:${PROXY_AGENT.proxy.port}` : 'None';
-
     try {
-        const fetchOptions = {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' },
-            agent: proxyAgent 
-        };
-        
-        const response = await fetch(gaEndpoint, fetchOptions);
+        const displayProxy = finalProxyUrl ? finalProxyUrl.split('@').pop() : 'Direct Connection (No Proxy)';
+        console.log(`[🚀 ${jobId} View ${viewNumber}] Starting with: ${displayProxy}`);
 
-        if (response.status === 204) { 
-            console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType} | Proxy: ${proxyInfo}`);
-            return { success: true };
-        } else {
-            const errorText = await response.text(); 
-            // 🚨 400 Errors अक्सर Payload Errors या Webshare Authentication Failure के कारण होते हैं
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)} | Proxy: ${proxyInfo}`);
-            return { success: false };
+        let launchArgs = [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-gpu', 
+            '--window-size=1280,720' 
+        ];
+
+        if (finalProxyUrl) {
+            launchArgs.push(`--proxy-server=${finalProxyUrl}`);
         }
+
+        try {
+            browser = await puppeteer.launch({
+                headless: true,
+                args: launchArgs, 
+                timeout: 45000 
+            });
+        } catch (e) {
+            // CRITICAL: Prevent server crash on proxy failure
+            console.error(`[❌ ${jobId} View ${viewNumber}] BROWSER LAUNCH FAILED. Error: ${e.message}. Skipping view.`);
+            return; 
+        }
+
+        const page = await browser.newPage();
+        
+        // Navigation and Interaction
+        console.log(`[🟢 ${jobId} View ${viewNumber}] Navigating directly to: ${targetUrl}`);
+        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+        
+        const totalDuration = Math.floor(Math.random() * (30000 - 15000 + 1)) + 15000; 
+        const scrollCount = 4;
+        const scrollDelay = totalDuration / scrollCount;
+
+        for (let i = 1; i <= scrollCount; i++) {
+            const scrollAmount = Math.floor(Math.random() * 500) + 100;
+            await page.evaluate(y => { window.scrollBy(0, y); }, scrollAmount); 
+            await page.waitForTimeout(scrollDelay * (Math.random() * 0.5 + 0.75)); 
+        }
+
+        console.log(`[✅ ${jobId} View ${viewNumber}] Full User Journey Complete.`);
+
     } catch (error) {
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed (Proxy/Network): ${error.message} | Proxy: ${proxyInfo}`);
-        return { success: false };
+        console.error(`[❌ ${jobId} View ${viewNumber}] Job failed (Navigation/Interaction Timeout). Error: ${error.message}`);
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
     }
 }
 
-function generateViewPlan(totalViews, pages) {
-    const viewPlan = [];
-    const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
+// ----------------------------------------------------
+// API ENDPOINT (PARALLEL EXECUTION)
+// ----------------------------------------------------
+
+app.post('/api/boost-traffic', async (req, res) => {
+    const { targetUrl, views } = req.body; 
     
-    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
-        console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
-        return [];
+    if (!targetUrl || !views || views > 500) {
+        return res.status(400).json({ success: false, message: "Missing fields or views > 500." });
     }
     
-    pages.forEach(page => {
-        const viewsForPage = Math.round(totalViews * (page.percent / 100));
-        for (let i = 0; i < viewsForPage; i++) {
-            if (page.url) { 
-                viewPlan.push(page.url);
-            }
-        }
+    const jobId = uuidv4().substring(0, 8);
+    const mode = PROXIES.length > 0 ? "Parallel Proxy Rotation (Webshare Hardcoded)" : "Direct Connection (Render IP)";
+    
+    // The number of simultaneous parallel jobs will be limited by the number of views requested, 
+    // and the number of available proxies (capped at 8 for efficiency and resource management).
+    const maxConcurrency = Math.min(views, PROXIES.length, 8); 
+
+    res.status(202).json({
+        success: true, 
+        message: `Job ${jobId} accepted. ${views} views will be dispatched in parallel batches (Concurrency: ${maxConcurrency}).`, 
+        simulation_mode: mode 
     });
 
-    viewPlan.sort(() => Math.random() - 0.5);
-    return viewPlan;
-}
-
-
-// ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp)
-// ===================================================================
-app.post('/boost-mp', async (req, res) => {
-    const { ga_id, api_key, views, pages } = req.body; 
-
-    if (!ga_id || !api_key || !views || views < 1 || views > 500 || !Array.isArray(pages) || pages.length === 0) {
-        return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
+    const tasks = [];
+    const BATCH_SIZE = maxConcurrency;
+    
+    // Create a pool of promises to run concurrently
+    for (let i = 1; i <= views; i++) {
+        const proxyUrl = PROXIES[(i - 1) % PROXIES.length];
+        
+        // Create the promise for the traffic job
+        const jobPromise = sendAdvancedTraffic(jobId, i, proxyUrl, targetUrl);
+        tasks.push(jobPromise);
+        
+        // Use Promise.all() to run a batch concurrently
+        if (tasks.length >= BATCH_SIZE || i === views) {
+            console.log(`--- [Batch ${Math.ceil(i / BATCH_SIZE)}] Dispatching ${tasks.length} views in parallel... ---`);
+            await Promise.all(tasks);
+            tasks.length = 0; // Clear the batch for the next set
+            
+            // Add a small, randomized delay between batches to reduce immediate load spikes
+            if (i < views) {
+                const delay = 5000 + Math.random() * 5000; // 5 to 10 seconds delay
+                console.log(`--- Waiting ${Math.round(delay / 1000)}s before next batch ---`);
+                await wait(delay);
+            }
+        }
     }
     
-    if (!PROXY_AGENT) {
-        return res.status(500).json({ status: 'error', message: 'Proxy configuration error. Cannot proceed without proxy access.' });
-    }
-
-    const viewPlan = generateViewPlan(parseInt(views), pages.filter(p => p.percent > 0)); 
-    if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
-    }
-
-    res.json({ status: 'accepted', message: `Request for ${viewPlan.length} views accepted. Processing started in the background.` });
-
-    (async () => {
-        const totalViews = viewPlan.length;
-
-        const viewPromises = viewPlan.map((targetUrl, i) => {
-            return (async () => {
-                const CLIENT_ID = Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-                const SESSION_ID = Date.now(); 
-                const geo = getRandomGeo();
-                const engagementTime = 30000 + Math.floor(Math.random() * 90000); // 30s to 120s
-                const referrer = getRandomReferrer(); 
-
-                // 🚨 FIX 1: Geo-location Fix (Country-wise View)
-                const commonUserProperties = { 
-                    country: { value: geo.country }, 
-                    region: { value: geo.region }
-                };
-                
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 5000)); 
-
-                // 1. session_start (Session initiates)
-                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'session_start', params: { session_id: SESSION_ID, _ss: 1 } }] }, i + 1, 'session_start');
-
-                // 2. page_view (Page is loaded)
-                const pageViewPayload = {
-                    client_id: CLIENT_ID,
-                    user_properties: commonUserProperties, 
-                    events: [{ name: 'page_view', params: { 
-                        page_location: targetUrl, 
-                        // Target URL का उपयोग page_title के रूप में न करें, यह Views को 'Project Page View' में डाल सकता है।
-                        page_title: `Article_${i + 1}_${geo.country}`, 
-                        session_id: SESSION_ID, 
-                        engagement_time_msec: engagementTime,
-                        page_referrer: referrer // 🚨 FIX 2: Source/Medium Fix (Search/Click)
-                    } }]
-                };
-                const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
-
-                // 3. user_engagement (Scrolling/Reading time)
-                // 🚨 FIX 3: Ensures the session is marked as 'Engaged'
-                await sendData(ga_id, api_key, { client_id: CLIENT_ID, user_properties: commonUserProperties, events: [{ name: 'user_engagement', params: { session_id: SESSION_ID, engagement_time_msec: engagementTime } }] }, i + 1, 'user_engagement');
-
-                await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-                
-                return pageViewResult.success;
-            })();
-        });
-
-        Promise.all(viewPromises).then(results => {
-            const finalSuccessCount = results.filter(r => r).length;
-            console.log(`[BOOSTER FINISH] Total success: ${finalSuccessCount}/${totalViews}`);
-        }).catch(err => {
-            console.error(`[BOOSTER CRITICAL] An error occurred during view processing: ${err.message}`);
-        });
-
-    })();
+    console.log(`--- Job ${jobId} Finished! All ${views} views delivered. ---`);
 });
 
 
-// (AI Sections remain unchanged)
-// ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
-// ===================================================================
-app.post('/api/caption-generate', async (req, res) => { 
-    
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
-    }
-    
-    const { reelTitle, style } = req.body;
-
-    if (!reelTitle) {
-        return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
-    }
-    
-    const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
-
---- CRITICAL INSTRUCTION ---
-For each caption, provide exactly 5 trending, high-reach, and relevant hashtags. Include **latest viral Instagram marketing terms** like **#viralreel, #exportviews, #viewincrease, #reelsmarketing** only if they are relevant to the topic. Focus mainly on niche-specific and fast-trending tags to maximize virality. The final output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
-
-
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "array",
-                    items: { type: "object", properties: { caption: { type: "string" } }, required: ["caption"] }
-                },
-                temperature: 0.8,
-            },
-        });
-
-        const captions = JSON.parse(response.text.trim());
-        res.status(200).json({ captions: captions });
-
-    } catch (error) {
-        console.error('Gemini API Error:', error.message);
-        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
-    }
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.send('Service is active and listening to /api/boost-traffic');
 });
 
-
-// ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
-// ===================================================================
-app.post('/api/caption-edit', async (req, res) => {
-    
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
-    }
-
-    const { originalCaption, requestedChange } = req.body;
-
-    if (!originalCaption || !requestedChange) {
-        return res.status(400).json({ error: 'Original caption and requested change are required.' });
-    }
-
-    const prompt = `Rewrite and edit the following original caption based on the requested change. The output should be only the final, edited caption and its hashtags.
-
-Original Caption: "${originalCaption}"
-Requested Change: "${requestedChange}"
-
---- CRITICAL INSTRUCTION ---
-The final output MUST be a single JSON object with a key called 'editedCaption'. The caption should be highly engaging for Instagram Reels. If the original caption included hashtags, ensure the edited caption has 5 relevant and trending hashtags, separated from the text by a new line.`;
-    
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "object",
-                    properties: { editedCaption: { type: "string" } },
-                    required: ["editedCaption"]
-                },
-                temperature: 0.7,
-            },
-        });
-
-        const result = JSON.parse(response.text.trim());
-        res.status(200).json(result);
-
-    } catch (error) {
-        console.error('Gemini API Error (Edit):', error.message);
-        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
-    }
-});
-
-
-// ===================================================================
-// START THE SERVER 
-// ===================================================================
-app.listen(PORT, () => {
-    console.log(`Combined API Server listening on port ${PORT}.`);
+// Start Server
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
