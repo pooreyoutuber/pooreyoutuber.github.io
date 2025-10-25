@@ -1,7 +1,8 @@
     // index.js
 
 const express = require('express');
-const puppeteer = require require('puppeteer-extra');
+// BUG FIXED: 'require' was duplicated. Now it's correct:
+const puppeteer = require('puppeteer-extra'); 
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { v4: uuidv4 } = require('uuid');
 const url = require('url'); 
@@ -21,8 +22,7 @@ app.use(express.json());
 const PROXY_USER = "bqctypvz";
 const PROXY_PASS = "399xb3kxqv6i";
 
-// 10 Webshare IPs (Ensure these are current and active)
-// These IPs will be used for rotation and parallel execution.
+// 10 Webshare IPs
 const PROXY_LIST_STRING = "http://142.111.48.253:7030,http://31.59.20.176:6754,http://38.170.176.177:5572,http://198.23.239.134:6540,http://45.38.107.97:6014,http://107.172.163.27:6543,http://64.137.96.74:6641,http://216.10.27.159:6837,http://142.111.67.146:5611,http://142.147.128.93:6593"; 
 
 let PROXIES = PROXY_LIST_STRING ? PROXY_LIST_STRING.split(',').filter(p => p.length > 0) : [];
