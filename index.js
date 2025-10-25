@@ -1,8 +1,9 @@
-// index.js (FINAL COMPLETE CODE with CRITICAL FIXES for fetch and AI)
+// index.js (FINAL COMPLETE CODE with CRITICAL FIXES for fetch and package.json compatibility)
 
 const express = require('express');
+// CRITICAL FIX: Ensure Node.js compatible require() for AI SDK
 const { GoogleGenAI } = require('@google/genai'); 
-// CRITICAL FIX: node-fetch को एक अलग नाम से आयात करें और default export का उपयोग करें
+// CRITICAL FIX: node-fetch v2.6.7 requires this simple require call
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
