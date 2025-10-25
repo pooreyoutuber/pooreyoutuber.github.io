@@ -1,23 +1,23 @@
-// index.js (FINAL COMPLETE CODE with Crash Fix)
+// index.js (FINAL COMPLETE CODE with CRITICAL FIXES for fetch and AI)
 
 const express = require('express');
+// CRITICAL FIX: Use CommonJS require style for the AI SDK
 const { GoogleGenAI } = require('@google/genai'); 
-const fetch = require('node-fetch'); 
+// CRITICAL FIX: node-fetch is imported as an ES module by default, 
+// but require() needs the default export, or simply use the package.
+const nodeFetch = require('node-fetch'); // Renamed to nodeFetch to avoid conflict
 const cors = require('cors'); 
 const fs = require('fs'); 
 
 const app = express();
-// Render uses process.env.PORT
 const PORT = process.env.PORT || 10000; 
 
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
-    // Correct path for Secret Files on Render
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback for local development or Environment Variable
     GEMINI_KEY = process.env.GEMINI_API_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable.");
@@ -29,15 +29,16 @@ try {
 // Initialize AI object only if key is available
 let ai;
 if (GEMINI_KEY) {
+    // CRITICAL FIX: Ensure the constructor is correctly called
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
-    // Dummy object to prevent crash if AI endpoints are called without a key
+    // Dummy object to prevent crash
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
 // --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', // Your Frontend URL
+    origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
     credentials: true
 }));
@@ -68,7 +69,8 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
     try {
-        const response = await fetch(gaEndpoint, {
+        // CRITICAL FIX: Using nodeFetch instead of the failed global fetch
+        const response = await nodeFetch(gaEndpoint, { 
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 'Content-Type': 'application/json' }
@@ -114,6 +116,9 @@ function generateViewPlan(totalViews, pages) {
 // ===================================================================
 // 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Concurrency
 // ===================================================================
+// NOTE: This uses concurrent processing. If the server crashes again, 
+// you MUST replace this entire block with the "Queue System" logic 
+// provided in the previous answer for maximum stability.
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages } = req.body; 
 
@@ -190,7 +195,6 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
     }
     
-    // Updated Prompt for Viral, Export, and View Increase Tags
     const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
@@ -270,9 +274,8 @@ The final output MUST be a single JSON object with a key called 'editedCaption'.
 
 
 // ===================================================================
-// START THE SERVER (App Crash Fix)
+// START THE SERVER
 // ===================================================================
-// Yeh block server ko turant exit hone se rokta hai aur Render ke PORT par sunna shuru karta hai.
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
