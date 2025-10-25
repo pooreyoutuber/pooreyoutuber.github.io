@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Video Checker | SEO Tool</title>
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsense.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541" crossorigin="anonymous"></script>
 
     <style>
         /* ================================================= */
@@ -40,7 +40,7 @@
         }
         
         /* ================================================= */
-        /* BASE STYLES & DARK MODE APPLICATION */
+        /* 2. BASE STYLES & DARK MODE APPLICATION */
         /* ================================================= */
         body {
             font-family: 'Poppins', sans-serif;
@@ -111,15 +111,30 @@
             background-color: var(--youtube-dark-red);
         }
         
+        /* Ad Section Styling */
+        .ad-section {
+            margin: 25px 0;
+            text-align: center;
+        }
+        .mobile-feed-ad { 
+            display: none; /* Hidden by default */
+        }
+
         /* Explanation Section */
         .explanation-section {
             background-color: var(--explanation-bg);
             border-left: 5px solid var(--explanation-border-left);
             color: var(--text-color); /* Inherit or explicitly set text color */
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            line-height: 1.6;
         }
         .explanation-section h2 {
             color: var(--explanation-border-left);
             border-bottom: 2px solid var(--explanation-border-left);
+            padding-bottom: 5px;
+            margin-top: 0;
         }
         .explanation-section p, .explanation-section ul {
             color: var(--secondary-text-color);
@@ -129,26 +144,54 @@
         .data-card {
             background-color: var(--data-card-bg);
             border: 1px solid var(--input-border);
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 8px;
+            text-align: left;
             transition: background-color 0.3s, border-color 0.3s;
         }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
+            margin-top: 20px;
         }
         .stat-item {
             background-color: var(--stat-item-bg);
+            padding: 15px;
+            border-radius: 6px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            text-align: center;
             transition: background-color 0.3s;
         }
         .stat-item strong {
-            color: var(--explanation-border-left); /* Use the accent color */
+            display: block;
+            font-size: 0.9em;
+            color: var(--secondary-text-color);
+            margin-bottom: 5px;
         }
         .stat-item span {
+            display: block;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--explanation-border-left);
+        }
+        .tag-badge {
+            display: inline-block;
+            background-color: var(--stat-item-bg);
             color: var(--text-color);
+            padding: 5px 10px;
+            margin: 3px;
+            border-radius: 4px;
+            font-size: 0.85em;
         }
         .error {
-            /* Error colors */
+            color: var(--youtube-red);
+            font-weight: bold;
+            padding: 10px;
+            border: 1px solid var(--youtube-red);
+            background-color: rgba(255, 0, 0, 0.1);
+            border-radius: 5px;
         }
 
         /* ================================================= */
@@ -160,7 +203,7 @@
             }
             .container {
                 padding: 15px;
-                box-shadow: none; /* Less shadow on mobile */
+                box-shadow: none;
                 border-radius: 0;
             }
             h1 {
@@ -188,6 +231,11 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+            
+            /* Show mobile feed ad */
+            .mobile-feed-ad {
+                display: block;
+            }
         }
     </style>
 </head>
@@ -200,6 +248,18 @@
     <div class="input-group">
         <input type="text" id="videoLink" placeholder="Enter YouTube Video URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)">
         <button onclick="fetchVideoData()">Check Video</button>
+    </div>
+
+    <div class="ad-section">
+        <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-client="ca-pub-9877532310172541"
+              data-ad-slot="8809504326"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
 
     <div id="initial-explanation" class="explanation-section">
@@ -235,12 +295,36 @@
     </div>
 
     <div id="result">
-        </div>
+    </div>
+
+    <div class="ad-section">
+        <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-client="ca-pub-9877532310172541"
+              data-ad-slot="5235685858"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <div class="mobile-feed-ad ad-section">
+        <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-format="fluid"
+              data-ad-layout-key="-fb+5w+4e-db+86"
+              data-ad-client="ca-pub-9877532310172541"
+              data-ad-slot="8241957297"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
 </div>
 
 <script>
     // **Your YouTube Data API Key**
-    const API_KEY = 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo';
+    const API_KEY = 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo'; // Note: This key seems to be a public example/placeholder. Ensure you use your valid key.
 
     function extractVideoId(url) {
         // Regex to extract Video ID from various YouTube URL formats
@@ -259,6 +343,8 @@
 
         if (!videoId) {
             resultDiv.innerHTML = '<p class="error">⚠️ Please enter a valid YouTube video link.</p>';
+            // Show initial explanation if input is invalid
+            initialExplanation.style.display = 'block';
             return;
         }
 
@@ -337,10 +423,13 @@
         html += `</div>`;
 
         resultDiv.innerHTML = html;
+        
+        // Ensure AdSense push is called for dynamically loaded content as well (optional, but safer)
+        (adsbygoogle = window.adsbygoogle || []).push({});
     }
     
     // ==========================================================
-    // 4. DARK MODE PERSISTENCE LOGIC (The fix for your problem)
+    // 4. DARK MODE PERSISTENCE LOGIC & INITIAL AD LOAD
     // ==========================================================
     const body = document.body;
     
@@ -353,8 +442,11 @@
         }
     }
 
-    // पेज लोड होते ही थीम लागू करें (यही वह चीज़ है जो थीम को याद रखती है)
-    document.addEventListener('DOMContentLoaded', applyThemeFromLocalStorage);
+    document.addEventListener('DOMContentLoaded', () => {
+        applyThemeFromLocalStorage();
+        // Initialize all AdSense units loaded on the page
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    });
 </script>
 
 </body>
