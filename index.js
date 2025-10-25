@@ -1,11 +1,9 @@
 // index.js (FINAL COMPLETE CODE with CRITICAL FIXES for fetch and AI)
 
 const express = require('express');
-// CRITICAL FIX: Use CommonJS require style for the AI SDK
 const { GoogleGenAI } = require('@google/genai'); 
-// CRITICAL FIX: node-fetch is imported as an ES module by default, 
-// but require() needs the default export, or simply use the package.
-const nodeFetch = require('node-fetch'); // Renamed to nodeFetch to avoid conflict
+// CRITICAL FIX: node-fetch को एक अलग नाम से आयात करें और default export का उपयोग करें
+const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
 
@@ -26,13 +24,10 @@ try {
     }
 }
 
-// Initialize AI object only if key is available
 let ai;
 if (GEMINI_KEY) {
-    // CRITICAL FIX: Ensure the constructor is correctly called
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
-    // Dummy object to prevent crash
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -64,12 +59,12 @@ function getRandomGeo() {
     return geoLocations[Math.floor(Math.random() * geoLocations.length)];
 }
 
-// Helper function definitions (sendData and generateViewPlan remain the same)
+// Helper function definitions 
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
     try {
-        // CRITICAL FIX: Using nodeFetch instead of the failed global fetch
+        // CRITICAL FIX: nodeFetch का उपयोग करें
         const response = await nodeFetch(gaEndpoint, { 
             method: 'POST',
             body: JSON.stringify(payload),
@@ -116,9 +111,6 @@ function generateViewPlan(totalViews, pages) {
 // ===================================================================
 // 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Concurrency
 // ===================================================================
-// NOTE: This uses concurrent processing. If the server crashes again, 
-// you MUST replace this entire block with the "Queue System" logic 
-// provided in the previous answer for maximum stability.
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages } = req.body; 
 
@@ -169,6 +161,7 @@ app.post('/boost-mp', async (req, res) => {
             })();
         });
 
+        // Use Promise.all to run all views concurrently
         Promise.all(viewPromises).then(results => {
             const finalSuccessCount = results.filter(r => r).length;
             console.log(`[BOOSTER FINISH] Total success: ${finalSuccessCount}/${totalViews}`);
