@@ -3,280 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Website Traffic Booster Tool</title>
+    <title>Traffic Multi-Booster Client</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Base Styles and Responsiveness */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; }
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h2 { color: #d9534f; margin: 0; font-size: 1.8em; font-weight: 700; }
+        /* Modern and Clean Design */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f0f4f8, #c8d3e2); /* Gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px; 
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Deeper, more noticeable shadow */
+            transition: transform 0.3s ease;
+        }
+        .container:hover {
+             transform: translateY(-5px);
+        }
+        h2 {
+            text-align: center;
+            color: #1a1a1a;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 30px; 
+            border-bottom: 3px solid #007bff; 
+            padding-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px; 
+            font-weight: 600; /* Semi-bold label */
+            color: #333;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 20px; 
+            border: 2px solid #e0e4e8; /* Cleaner border */
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 16px;
+            background-color: #ffffff; 
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #007bff; 
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+            outline: none;
+        }
+        button {
+            background: linear-gradient(90deg, #007bff, #0056b3); /* Blue gradient button */
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+            transition: background 0.3s, transform 0.1s;
+        }
+        button:hover {
+            background: linear-gradient(90deg, #0056b3, #003d80);
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
         
-        .container { background-color: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 500px; margin-bottom: 20px; border: 1px solid #e0e0e0; }
-        
-        /* Input & Form Styling (Similar to your reference images) */
-        label { display: block; text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: #555; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
-
-        /* Page Distribution */
-        .page-entry-group { border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #f9f9f9; }
-        .page-entry { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .page-entry input[type="text"] { flex-grow: 4; margin-bottom: 0; background-color: #fff; }
-        .page-entry input[type="number"] { width: 40px; flex-grow: 0; margin-bottom: 0; text-align: center; background-color: #eef4ff; }
-        .percent-label { font-weight: bold; width: 25px; color: #5cb85c; }
-        .total-percent-display { text-align: right; margin-top: 10px; font-weight: bold; font-size: 1.1em; }
-        
-        /* Button Styling */
-        button { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 1em; transition: background-color 0.3s; }
-        button:hover { background-color: #0056b3; }
-
-        /* Message Box Styling */
-        #message { margin-top: 20px; padding: 12px; border-radius: 5px; font-weight: bold; text-align: center; border: 1px solid transparent; }
-        .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
-        .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        .info { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
-
-        /* Info Card */
-        .info-card { background-color: #f0f3f8; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #007bff; }
-        .info-card h3 { color: #007bff; margin-top: 0; font-size: 1.1em; }
-        .key-guide { margin-top: 10px; padding-left: 20px; font-size: 0.9em;}
-        .key-guide li { margin-bottom: 5px; }
-
+        /* Response Message Styling */
+        #response-message {
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none; 
+            white-space: pre-wrap;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+        .success {
+            background-color: #e6ffed; 
+            color: #155724; 
+            border: 1px solid #a3ccb4;
+        }
+        .error {
+            background-color: #ffe6e6; 
+            color: #721c24; 
+            border: 1px solid #cc9999;
+        }
+        .info {
+            background-color: #fff8e6; 
+            color: #856404; 
+            border: 1px solid #e0c27b;
+        }
+        .note {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>🚀 Website Traffic Booster Tool</h2>
-        <p style="color: #888; margin-top: 5px;">Increase your page views and engagement metrics.</p>
-    </div>
+
+<div class="container">
+    <h2>Multi-Country Traffic Boost 🚀</h2>
+    <form id="trafficForm">
+        
+        <label for="renderUrl">Render Service URL (Required):</label>
+        <input type="text" id="renderUrl" value="https://pooreyoutuber-github-io.onrender.com" placeholder="Enter your Render URL here" required>
+
+        <label for="targetUrl">Target Website URL (e.g., https://yoursite.com/article):</label>
+        <input type="text" id="targetUrl" placeholder="https://www.example.com/page" required>
+
+        <label for="searchQuery">Search Query (Ignored, but required):</label>
+        <input type="text" id="searchQuery" value="my awesome keyword" required>
+
+        <label for="views">Total Views (1-500):</label>
+        <input type="number" id="views" value="10" min="1" max="500" required>
+
+        <button type="submit">Start Parallel Traffic Boost</button>
+    </form>
     
-    <div class="container">
+    <p class="note">This service dispatches views from multiple countries simultaneously (max 8) using your hardcoded proxies.</p>
+
+    <div id="response-message"></div>
+</div>
+
+<script>
+    const form = document.getElementById('trafficForm');
+    const responseDiv = document.getElementById('response-message');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+
+        const renderUrl = document.getElementById('renderUrl').value.trim();
+        const targetUrl = document.getElementById('targetUrl').value.trim();
+        const searchQuery = document.getElementById('searchQuery').value.trim();
+        const views = parseInt(document.getElementById('views').value, 10);
+
+        if (!renderUrl.startsWith('http')) {
+            displayMessage('Invalid Render URL. It must start with https://...', 'error');
+            return;
+        }
         
-        <form id="boosterForm">
-            
-            <label for="gaid">1. Google Analytics ID (G-XXXXX):</label>
-            <input type="text" id="gaid" placeholder="Enter your GA4 Measurement ID" required autocomplete="off">
-            
-            <label for="apikey">2. API Secret (Measurement Protocol Key):</label>
-            <input type="text" id="apikey" placeholder="Enter your GA4 API Secret" required autocomplete="off">
-            
-            <label for="views">3. Total Views to Generate (Max 500):</label>
-            <input type="number" id="views" value="100" min="1" max="500" required autocomplete="off">
-            
-            <div class="page-entry-group">
-                <label style="color: #007bff;">4. Distribute Traffic Across Pages (Total must be 100%):</label>
-                
-                <div class="page-entry">
-                    <input type="text" id="url1" class="page-url" placeholder="Page 1 URL (Required)" required autocomplete="off">
-                    <input type="number" id="percent1" class="page-percent" value="100" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <div class="page-entry">
-                    <input type="text" id="url2" class="page-url" placeholder="Page 2 URL (Optional)">
-                    <input type="number" id="percent2" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-
-                <div class="page-entry">
-                    <input type="text" id="url3" class="page-url" placeholder="Page 3 URL (Optional)">
-                    <input type="number" id="percent3" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-
-                <div class="page-entry">
-                    <input type="text" id="url4" class="page-url" placeholder="Page 4 URL (Optional)">
-                    <input type="number" id="percent4" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <div class="page-entry">
-                    <input type="text" id="url5" class="page-url" placeholder="Page 5 URL (Optional)">
-                    <input type="number" id="percent5" class="page-percent" value="0" min="0" max="100" required>
-                    <span class="percent-label">%</span>
-                </div>
-                
-                <p class="total-percent-display">
-                    Total Distribution: <span id="totalPercent" style="color:#d9534f;">100</span>%
-                </p>
-            </div>
-            
-            <button type="submit" id="submitBtn">Generate Traffic and Close Browser</button>
-        </form>
-        
-        <div id="message"></div>
-
-        <div class="info-card">
-            <h3>How This Tool Helps You (Summary):</h3>
-            <p style="font-size: 0.9em; line-height: 1.5;">
-                This **Website Traffic Booster Tool** utilizes the Google Analytics 4 (GA4) Measurement Protocol to accurately simulate realistic, high-engagement user sessions on your website. Instead of simple pings, it creates sophisticated traffic that includes randomized details like **geographic location**, **session start events**, and **user engagement time (30 to 120 seconds)**. This process is crucial because it ensures the generated traffic not only increases your **total page views** but also significantly improves your **average engagement time**—a key metric for SEO and performance analysis. By distributing the traffic (1-500 views per request) across multiple pages with custom percentages, you can target specific content, making the overall traffic pattern appear more organic and valuable in your GA4 reports. The process runs on a stable server in the background, which means once you submit the request, you can safely close your browser. **Results are typically reflected in your GA4 dashboard within 24 to 48 hours** as Google processes the API data.
-            </p>
-        </div>
-
-        <div class="info-card">
-            <h3>🔑 GA4 Key Retrieval Guide:</h3>
-            <ul class="key-guide">
-                <li>**Google Analytics ID (G-XXXXX):** Go to your GA4 dashboard, navigate to **Admin** $\rightarrow$ **Data Streams**. Click on your Web stream, and the ID (e.g., G-A1B2C3D4E5) will be displayed at the top.</li>
-                <li>**API Secret (Measurement Protocol Key):** From the same **Data Streams** page, scroll down to **Measurement Protocol API Secrets**. Click "Create" to generate a new secret and copy the key (e.g., XXXXXXXXXXXXX).</li>
-            </ul>
-        </div>
-    </div>
-    
-    <script>
-        // 🚨 FINAL RENDER API URL - DYNAMICALLY SET
-        const RENDER_API_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com/boost-mp'; 
-        const STORAGE_KEY = 'booster_details_v6'; // Updated storage key for new structure
-        
-        const form = document.getElementById('boosterForm');
-        const messageDiv = document.getElementById('message');
-        const submitBtn = document.getElementById('submitBtn');
-        const totalPercentSpan = document.getElementById('totalPercent');
-        
-        const pageInputs = [1, 2, 3, 4, 5].map(i => ({
-            url: document.getElementById(`url${i}`),
-            percent: document.getElementById(`percent${i}`)
-        }));
-
-        // --- Local Storage Functions ---
-        function loadSavedDetails() {
-            const savedData = localStorage.getItem(STORAGE_KEY);
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    document.getElementById('gaid').value = data.gaid || '';
-                    document.getElementById('apikey').value = data.apikey || '';
-                    document.getElementById('views').value = data.views || '100';
-                    
-                    data.pages.forEach((page, index) => {
-                        if (index < 5) {
-                            pageInputs[index].url.value = page.url || '';
-                            pageInputs[index].percent.value = page.percent || '0';
-                        }
-                    });
-
-                } catch (e) { /* Error ignored */ }
-                updateDisplayTotal();
-            }
+        if (views < 1 || views > 500 || isNaN(views)) {
+            displayMessage('The number of views must be between 1 and 500.', 'error');
+            return;
         }
 
-        function saveDetails(gaid, apikey, views, pages) {
-            const data = { gaid, apikey, views, pages };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
+        const payload = {
+            targetUrl: targetUrl,
+            searchQuery: searchQuery,
+            views: views
+        };
 
-        // --- UI Functions ---
-        function updateDisplayTotal() {
-            let total = 0;
-            document.querySelectorAll('.page-percent').forEach(input => {
-                total += parseInt(input.value) || 0;
-            });
-            totalPercentSpan.textContent = total;
-            totalPercentSpan.style.color = total === 100 ? '#5cb85c' : '#d9534f';
-            return total;
-        }
-        document.querySelectorAll('.page-percent').forEach(input => {
-            input.addEventListener('input', updateDisplayTotal);
-        });
+        const apiEndpoint = `${renderUrl}/api/boost-traffic`;
+        
+        displayMessage('Request is being sent... **Check Render Logs for processing status.**', 'info');
 
-        function showMessage(type, message, reenable) {
-            messageDiv.className = type;
-            messageDiv.innerHTML = message;
-            if (reenable) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Generate Traffic and Close Browser';
-            }
-        }
-
-        // --- Main Submission Logic ---
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            const gaId = document.getElementById('gaid').value.trim();
-            const apiKey = document.getElementById('apikey').value.trim();
-            let viewsCount = parseInt(document.getElementById('views').value);
-            
-            if (!gaId || !apiKey || viewsCount < 1) {
-                showMessage('error', '❌ Error: GA Keys, API Secret, and Total Views are required.', true);
-                return;
-            }
-
-            const totalPercent = updateDisplayTotal();
-            if (totalPercent !== 100) {
-                showMessage('error', `❌ Error: Total distribution must be 100%, but it is ${totalPercent}%.`, true);
-                return;
-            }
-            
-            let pages = [];
-            // Collect all pages with URL and percentage > 0
-            pageInputs.forEach(input => {
-                const url = input.url.value.trim();
-                const percent = parseInt(input.percent.value) || 0;
-                if (url && percent > 0) {
-                    // Basic URL validation: requires 'http' to ensure a complete URL is passed to the API
-                    if (!url.startsWith('http')) {
-                        showMessage('error', '❌ Error: All page URLs must start with http:// or https://', true);
-                        pages = null; // Mark as invalid
-                        return;
-                    }
-                    pages.push({ url: url, percent: percent });
-                }
+        try {
+            const response = await fetch(apiEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
             });
 
-            if (!pages) return; // Exit if URL validation failed
+            const data = await response.json();
 
-            if (pages.length === 0) {
-                 showMessage('error', '❌ Error: At least one Page URL (Page 1) with a percentage > 0 must be filled.', true);
-                 return;
-            }
-
-            saveDetails(gaId, apiKey, viewsCount, pages); 
-            const payload = { ga_id: gaId, api_key: apiKey, views: viewsCount, pages: pages };
-            
-            submitData(payload, 2); 
-        });
-
-        async function submitData(data, retriesLeft) {
-            submitBtn.disabled = true;
-            
-            if (retriesLeft < 2) {
-                submitBtn.textContent = `⚠️ Pinging server... Retrying in 5 seconds...`;
-                showMessage('info', `⚠️ Server is waking up. Retrying in 5 seconds...`, false);
-                await new Promise(resolve => setTimeout(resolve, 5000));
+            if (response.ok) {
+                // 202 Accepted status code from the server
+                displayMessage(`✅ **Success! Job Accepted.**\n\n${data.message}\nMode: ${data.simulation_mode}`, 'success');
             } else {
-                submitBtn.textContent = '✅ Request initiated. Checking server status...';
-                showMessage('info', '✅ Request initiated. Checking server status...', false);
+                // 4xx/5xx status code
+                displayMessage(`❌ **Server Responded with Error (${response.status}):**\n\n${data.message}`, 'error');
             }
-            
-            try {
-                const response = await fetch(RENDER_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-                
-                const responseData = await response.json();
 
-                if (responseData.status === 'processing' || responseData.status === 'ok' || responseData.status === 'accepted') {
-                    showMessage('success', `✨ Success! Request for ${data.views} views accepted. **Results expected within 24-48 hours.** You can close this browser now.`, true);
-                } else {
-                    showMessage('error', `❌ API Error: ${responseData.message || 'Unknown error. Check server logs.'}.`, true);
-                }
-
-            } catch (error) {
-                if (retriesLeft > 0) {
-                    return submitData(data, retriesLeft - 1);
-                } else {
-                    showMessage('error', `❌ Final Connection Error (3 attempts). Ensure your API service is LIVE and the URL is correct.`, true);
-                }
-            } 
+        } catch (error) {
+            console.error('Network Error:', error);
+            // This is the common error you are seeing.
+            displayMessage(`❌ **NETWORK ERROR:** Could not connect to the Render service URL. The server is likely **DOWN** or **CRASHING** due to bad proxies.\n\n**Action:** Please ensure your Render service is **LIVE** and your **Webshare Proxies are active** in the \`index.js\` file.`, 'error');
         }
+    });
 
-        document.addEventListener('DOMContentLoaded', () => {
-             loadSavedDetails();
-             updateDisplayTotal();
-        });
-    </script>
+    function displayMessage(message, type) {
+        responseDiv.innerHTML = message;
+        responseDiv.className = ''; 
+        responseDiv.classList.add(type);
+        responseDiv.style.display = 'block';
+    }
+</script>
+
 </body>
-    </html>
+</html>
