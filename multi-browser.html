@@ -1,238 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Multi Viewer | Boost Long Video Performance</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Multi Viewer | Boost Long Video Performance</title>
 
-  <meta name="description" content="Free YouTube Multi Viewer tool for long videos. Paste any video URL and watch multiple players simultaneously for initial analysis and boost.">
-  <meta name="keywords" content="YouTube multi viewer, watch multiple videos, long video player, YouTube initial boost, free video tool, Watch Time analysis">
-  <meta name="robots" content="index, follow">
+    <meta name="description" content="Free YouTube Multi Viewer tool for long videos. Paste any video URL and watch multiple players simultaneously for initial analysis and boost.">
+    <meta name="keywords" content="YouTube multi viewer, watch multiple videos, long video player, YouTube initial boost, free video tool, Watch Time analysis">
+    <meta name="robots" content="index, follow">
 
-  <meta property="og:title" content="YouTube Multi Viewer for Long Videos">
-  <meta property="og:description" content="Use this free tool to load multiple players of your YouTube long video for early performance testing and seeding.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yourwebsite.com/multi-viewer">
-  <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
+    <meta property="og:title" content="YouTube Multi Viewer for Long Videos">
+    <meta property="og:description" content="Use this free tool to load multiple players of your YouTube long video for early performance testing and seeding.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourwebsite.com/multi-viewer">
+    <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
 
-  <style>
-    /* ================================================= */
-    /* 1. DARK MODE CSS VARIABLES */
-    /* ================================================= */
-    :root {
-        /* Light Mode Variables (Default) */
-        --youtube-red: #ff0000;
-        --youtube-dark-red: #cc0000;
-        --blue-accent: #007bff;
-        --blue-accent-hover: #0056b3;
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
+        crossorigin="anonymous"></script>
+
+    <style>
+        /* ================================================= */
+        /* 1. DARK MODE CSS VARIABLES */
+        /* ================================================= */
+        :root {
+            /* Light Mode Variables (Default) */
+            --youtube-red: #ff0000;
+            --youtube-dark-red: #cc0000;
+            --blue-accent: #007bff;
+            --blue-accent-hover: #0056b3;
+            
+            --bg-color: #f4f6f9;
+            --container-bg: #ffffff;
+            --text-color: #333;
+            --secondary-text-color: #555;
+            --input-border: #ccc;
+            --result-border: #eee;
+            
+            --explanation-bg: #f8f9fa;
+            --warning-bg: #e6f7ff; 
+            --warning-border: #b3d9ff;
+        }
+
+        /* Dark Mode Variables (Applied when body has dark-mode class) */
+        body.dark-mode {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --secondary-text-color: #b0b0b0;
+            --input-border: #444;
+            --result-border: #333;
+            --blue-accent: #3498db;
+            --blue-accent-hover: #2980b9;
+            
+            --explanation-bg: #2d2d2d;
+            --warning-bg: #1c2e4a; /* Darker warning background */
+            --warning-border: #3498db;
+        }
         
-        --bg-color: #f4f6f9;
-        --container-bg: #ffffff;
-        --text-color: #333;
-        --secondary-text-color: #555;
-        --input-border: #ccc;
-        --result-border: #eee;
-        
-        --explanation-bg: #f8f9fa;
-        --warning-bg: #e6f7ff; 
-        --warning-border: #b3d9ff;
-    }
-
-    /* Dark Mode Variables (Applied when body has dark-mode class) */
-    body.dark-mode {
-        --bg-color: #121212;
-        --container-bg: #1e1e1e;
-        --text-color: #f0f0f0;
-        --secondary-text-color: #b0b0b0;
-        --input-border: #444;
-        --result-border: #333;
-        --blue-accent: #3498db;
-        --blue-accent-hover: #2980b9;
-        
-        --explanation-bg: #2d2d2d;
-        --warning-bg: #1c2e4a; /* Darker warning background */
-        --warning-border: #3498db;
-    }
-    
-    /* ================================================= */
-    /* 2. BASE STYLES & DARK MODE APPLICATION */
-    /* ================================================= */
-    body {
-        font-family: 'Arial', sans-serif; 
-        background: var(--bg-color); 
-        text-align:center; 
-        margin:0; 
-        padding:0; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        min-height: 100vh;
-        color: var(--text-color);
-        transition: background 0.3s, color 0.3s;
-    }
-    .container-wrapper {
-        width: 90%;
-        max-width: 1400px;
-        margin: 30px auto;
-        background: var(--container-bg);
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        transition: background 0.3s, box-shadow 0.3s;
-    }
-    h1 {
-        color: var(--youtube-red); 
-        margin-top:0; 
-        font-size: 2.2em;
-    }
-    p.subtitle {
-        color: var(--secondary-text-color); 
-        margin-bottom: 25px;
-    }
-
-    /* Input & Button Styles */
-    #input-section { 
-        display: flex; 
-        justify-content: center; 
-        gap: 10px; 
-        margin-bottom: 30px; 
-        flex-wrap: wrap;
-    }
-    input, button {
-      padding:12px 15px;
-      margin:0;
-      border-radius:6px;
-      border:1px solid var(--input-border);
-      font-size:16px;
-      box-sizing: border-box;
-      transition: background 0.3s, color 0.3s, border-color 0.3s;
-    }
-    input { 
-        width: 350px; 
-        background: var(--container-bg);
-        color: var(--text-color);
-    }
-    input[type="number"] { 
-        width: 150px; 
-    }
-    button {
-      background: var(--blue-accent);
-      color:#fff;
-      cursor:pointer;
-      border: 1px solid var(--blue-accent);
-      font-weight: bold;
-    }
-    button:hover { 
-        background: var(--blue-accent-hover); 
-        border-color: var(--blue-accent-hover); 
-    }
-
-    /* Players Container Styles */
-    #players {
-      display: grid;
-      /* Wider minmax for 16:9 long videos */
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-      gap: 20px;
-      padding: 20px 0;
-      border-top: 2px solid var(--result-border);
-      margin-bottom: 30px;
-      transition: border-top 0.3s;
-    }
-    iframe {
-      width: 100%;
-      height: 200px; /* 16:9 aspect ratio height for desktop (relative to 320px min width) */
-      border: none;
-      border-radius:12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      background: black;
-    }
-
-    /* Utility Explanation Section */
-    .utility-explanation {
-        text-align: left;
-        padding: 25px;
-        background-color: var(--explanation-bg); 
-        border-radius: 10px;
-        border: 1px solid var(--input-border); 
-        line-height: 1.6;
-        color: var(--secondary-text-color);
-        transition: background-color 0.3s, border-color 0.3s;
-    }
-    .utility-explanation h3 {
-        color: var(--blue-accent);
-        border-bottom: 2px solid var(--blue-accent);
-        padding-bottom: 5px;
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 1.5em;
-    }
-    .utility-explanation strong { 
-        color: var(--text-color); 
-    }
-    
-    /* Crucial Warning Highlight */
-    .warning-note {
-        background-color: var(--warning-bg); 
-        color: var(--text-color); 
-        border: 1px solid var(--warning-border);
-        padding: 15px;
-        margin: 20px 0;
-        border-radius: 8px;
-        text-align: center;
-        border-left: 5px solid var(--blue-accent);
-        transition: background-color 0.3s, border-color 0.3s;
-    }
-    .warning-note strong {
-        font-size: 1.1em;
-        color: var(--text-color); 
-    }
-
-    /* ================================================= */
-    /* 3. MOBILE RESPONSIVENESS FIX */
-    /* ================================================= */
-    @media (max-width: 600px) {
+        /* ================================================= */
+        /* 2. BASE STYLES & DARK MODE APPLICATION */
+        /* ================================================= */
         body {
-            padding: 10px;
+            font-family: 'Arial', sans-serif; 
+            background: var(--bg-color); 
+            text-align:center; 
+            margin:0; 
+            padding:0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
         }
         .container-wrapper {
-            margin: 15px auto;
-            padding: 15px;
-            width: 100%;
-            border-radius: 0;
-            box-shadow: none;
+            width: 90%;
+            max-width: 1400px;
+            margin: 30px auto;
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: background 0.3s, box-shadow 0.3s;
         }
         h1 {
-            font-size: 1.8em;
+            color: var(--youtube-red); 
+            margin-top:0; 
+            font-size: 2.2em;
+        }
+        p.subtitle {
+            color: var(--secondary-text-color); 
+            margin-bottom: 25px;
         }
 
-        /* Stack Input and Button on Mobile */
-        #input-section {
-            flex-direction: column;
-            gap: 15px;
+        /* Input & Button Styles */
+        #input-section { 
+            display: flex; 
+            justify-content: center; 
+            gap: 10px; 
+            margin-bottom: 30px; 
+            flex-wrap: wrap;
         }
         input, button {
-            width: 100%;
+            padding:12px 15px;
+            margin:0;
+            border-radius:6px;
+            border:1px solid var(--input-border);
+            font-size:16px;
+            box-sizing: border-box;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
         }
-        input[type="number"] {
-             width: 100%;
+        input { 
+            width: 350px; 
+            background: var(--container-bg);
+            color: var(--text-color);
+        }
+        input[type="number"] { 
+            width: 150px; 
+        }
+        button {
+            background: var(--blue-accent);
+            color:#fff;
+            cursor:pointer;
+            border: 1px solid var(--blue-accent);
+            font-weight: bold;
+        }
+        button:hover { 
+            background: var(--blue-accent-hover); 
+            border-color: var(--blue-accent-hover); 
         }
 
-        /* Players container adjustments */
+        /* Players Container Styles */
         #players {
-            /* Force single column for better vertical viewing experience */
-            grid-template-columns: 1fr; 
-            gap: 15px;
+            display: grid;
+            /* Wider minmax for 16:9 long videos */
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 20px;
+            padding: 20px 0;
+            border-top: 2px solid var(--result-border);
+            margin-bottom: 30px;
+            transition: border-top 0.3s;
         }
         iframe {
-             /* Adjust height for a 16:9 aspect ratio on a typical mobile width */
-            height: 200px; 
+            width: 100%;
+            height: 200px; /* 16:9 aspect ratio height for desktop (relative to 320px min width) */
+            border: none;
+            border-radius:12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: black;
         }
 
-        .utility-explanation {
-            padding: 15px;
+        /* ✅ Ad Section Styling */
+        .ad-section {
+            margin: 25px auto;
+            text-align: center;
+            /* Optional: prevent ad from stretching too wide on huge screens */
+            max-width: 1000px; 
         }
-    }
-  </style>
+        
+        /* Utility Explanation Section */
+        .utility-explanation {
+            text-align: left;
+            padding: 25px;
+            background-color: var(--explanation-bg); 
+            border-radius: 10px;
+            border: 1px solid var(--input-border); 
+            line-height: 1.6;
+            color: var(--secondary-text-color);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .utility-explanation h3 {
+            color: var(--blue-accent);
+            border-bottom: 2px solid var(--blue-accent);
+            padding-bottom: 5px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .utility-explanation strong { 
+            color: var(--text-color); 
+        }
+        
+        /* Crucial Warning Highlight */
+        .warning-note {
+            background-color: var(--warning-bg); 
+            color: var(--text-color); 
+            border: 1px solid var(--warning-border);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 5px solid var(--blue-accent);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .warning-note strong {
+            font-size: 1.1em;
+            color: var(--text-color); 
+        }
+
+        /* ================================================= */
+        /* 3. MOBILE RESPONSIVENESS FIX */
+        /* ================================================= */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container-wrapper {
+                margin: 15px auto;
+                padding: 15px;
+                width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+
+            /* Stack Input and Button on Mobile */
+            #input-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+            input, button {
+                width: 100%;
+            }
+            input[type="number"] {
+                width: 100%;
+            }
+
+            /* Players container adjustments */
+            #players {
+                /* Force single column for better vertical viewing experience */
+                grid-template-columns: 1fr; 
+                gap: 15px;
+            }
+            iframe {
+                /* Adjust height for a 16:9 aspect ratio on a typical mobile width */
+                height: 200px; 
+            }
+
+            .utility-explanation {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -245,8 +256,32 @@
         <input type="number" id="count" placeholder="Number of players" value="5" min="1">
         <button onclick="generatePlayers()">Play</button>
     </div>
+    
+    <div class="ad-section">
+        <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-client="ca-pub-9877532310172541"
+              data-ad-slot="2293472524"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
 
     <div class="container" id="players"></div>
+
+    <div class="ad-section">
+        <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-format="fluid"
+              data-ad-layout-key="-6t+ed+2i-1n-4w"
+              data-ad-client="ca-pub-9877532310172541"
+              data-ad-slot="4004448947"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
 
     <div id="explanation-section" class="utility-explanation">
         <h3>📈 Long Video Strategy: Boosting Watch Time with Multi Viewer</h3>
@@ -274,6 +309,19 @@
         
         <p>We recommend using a browser that can handle multiple simultaneous video streams (e.g., Chrome or Firefox on a stable connection). Click **"Play"** to begin analysis.</p>
     </div>
+    
+    <div class="ad-section">
+        <ins class="adsbygoogle"
+              style="display:block; text-align:center;"
+              data-ad-layout="in-article"
+              data-ad-format="fluid"
+              data-ad-client="ca-pub-9877532310172541"
+              data-ad-slot="3423555515"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    
 </div>
 
 <script>
@@ -291,17 +339,15 @@
         const container = document.querySelector('.container-wrapper');
         const explanationSection = document.getElementById('explanation-section');
         
+        // Ensure Ads load again after new content (players) is generated
+        (adsbygoogle = window.adsbygoogle || []).push({});
+
         playersDiv.innerHTML = '';
         playersDiv.style.display = 'grid'; 
 
         if (!url || isNaN(count) || count <= 0 || count > 50) {
             alert("Please enter a valid YouTube Video URL and a number between 1 and 50.");
             playersDiv.style.display = 'none';
-            // Reposition explanation section back up if an error occurs
-            if (explanationSection.parentNode !== container) {
-                 // Insert explanation section back to its original position before the player div
-                 container.insertBefore(explanationSection, playersDiv); 
-            }
             return;
         }
 
@@ -309,18 +355,10 @@
         if (!videoId) {
             alert("Invalid YouTube Video URL format. Please ensure it links directly to a video.");
             playersDiv.style.display = 'none';
-            if (explanationSection.parentNode !== container) {
-                 container.insertBefore(explanationSection, playersDiv); 
-            }
             return;
         }
         
-        // 1. Move Explanation Section BELOW the Output/Results
-        if (explanationSection) {
-            container.appendChild(explanationSection);
-        }
-
-        // 2. Generate Players
+        // 1. Generate Players
         for (let i=0; i<count; i++) {
             const iframe = document.createElement('iframe');
             // Using 'autoplay=0' and 'rel=0' (no related videos)
@@ -353,6 +391,9 @@
 
         // Apply theme on load
         applyThemeFromLocalStorage();
+
+        // ✅ Initialize all AdSense units loaded on the page
+        (adsbygoogle = window.adsbygoogle || []).push({});
     });
 </script>
 </body>
