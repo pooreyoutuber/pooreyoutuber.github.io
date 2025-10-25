@@ -1,171 +1,184 @@
-    // index.js
+        // index.js
 
 const express = require('express');
-// BUG FIXED: 'require' was duplicated. Now it's correct:
-const puppeteer = require('puppeteer-extra'); 
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const axios = require('axios'); 
 const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const url = require('url'); 
 
-// Puppeteer setup for stealth and anti-bot detection
-puppeteer.use(StealthPlugin());
-
 const app = express();
-// Use the PORT environment variable provided by Render
 const port = process.env.PORT || 10000; 
 
+// Base URL for Google Analytics 4 Measurement Protocol
+const GA4_MP_URL = 'https://www.google-analytics.com/mp/collect';
+
+// --- MIDDLEWARE ---
 app.use(express.json());
 
-// ======================= 1. Configuration and Proxy Data (HARDCODED) ========================
+// --- UTILITY FUNCTIONS ---
 
-// 🚨 Hardcoded Webshare Proxy Credentials
-const PROXY_USER = "bqctypvz";
-const PROXY_PASS = "399xb3kxqv6i";
+/** Generates a random integer between min (inclusive) and max (inclusive). */
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// 10 Webshare IPs
-const PROXY_LIST_STRING = "http://142.111.48.253:7030,http://31.59.20.176:6754,http://38.170.176.177:5572,http://198.23.239.134:6540,http://45.38.107.97:6014,http://107.172.163.27:6543,http://64.137.96.74:6641,http://216.10.27.159:6837,http://142.111.67.146:5611,http://142.147.128.93:6593"; 
+/** Creates a unique client ID, simulating a unique user. */
+const generateClientId = () => {
+    // Generates a secure random hex string (simulating a unique user/real user name)
+    return crypto.randomBytes(16).toString('hex');
+};
 
-let PROXIES = PROXY_LIST_STRING ? PROXY_LIST_STRING.split(',').filter(p => p.length > 0) : [];
-
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// ======================= 2. Advanced Traffic Logic (Puppeteer) ========================
-// Function to handle a single view/traffic session
-
-async function sendAdvancedTraffic(jobId, viewNumber, proxyUrl, targetUrl) {
-    let browser;
-    let finalProxyUrl = null; 
-
-    // 1. Format Proxy URL with credentials
-    if (proxyUrl && PROXY_USER && PROXY_PASS) {
-        try {
-            const urlObj = new URL(proxyUrl);
-            finalProxyUrl = `${urlObj.protocol}//${PROXY_USER}:${PROXY_PASS}@${urlObj.host}`;
-        } catch (e) {
-            console.error(`[${jobId}] View ${viewNumber}: Invalid Proxy URL. Error: ${e.message}`);
-            finalProxyUrl = null; 
+/** Distributes the total views across pages based on percentage. */
+function getPagesDistribution(views, pages) {
+    const totalHits = [];
+    
+    // Calculate how many hits each page should receive
+    pages.forEach(page => {
+        const hits = Math.round(views * (page.percent / 100));
+        for (let i = 0; i < hits; i++) {
+            totalHits.push(page.url);
         }
+    });
+
+    // Handle rounding errors to ensure total views match
+    while (totalHits.length < views && pages.length > 0) {
+        totalHits.push(pages[0].url); 
+    }
+    while (totalHits.length > views) {
+        totalHits.pop();
     }
     
+    // Shuffle the array to randomize the order of hits
+    for (let i = totalHits.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [totalHits[i], totalHits[j]] = [totalHits[j], totalHits[i]];
+    }
+
+    return totalHits;
+}
+
+
+/** Sends a full GA4 session (start, view, engagement) for one user. */
+async function sendGA4Session(gaId, apiKey, pageUrl) {
+    const clientId = generateClientId();
+    // User engagement time (30 to 120 seconds)
+    const engagementTimeMs = randomInt(30000, 120000); 
+
+    const events = [];
+
+    // 1. session_start event
+    events.push({
+        name: 'session_start'
+    });
+
+    // --- CRUCIAL CHANGE HERE ---
+    // 2. Custom Event (Not 'page_view')
     try {
-        const displayProxy = finalProxyUrl ? finalProxyUrl.split('@').pop() : 'Direct Connection (No Proxy)';
-        console.log(`[🚀 ${jobId} View ${viewNumber}] Starting with: ${displayProxy}`);
-
-        // --- 2. Configure and Launch Browser ---
-        let launchArgs = [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-gpu', 
-            '--window-size=1280,720' 
-        ];
-
-        if (finalProxyUrl) {
-            launchArgs.push(`--proxy-server=${finalProxyUrl}`);
-        }
-
-        try {
-            // Launch attempt with high timeout for slow proxies
-            browser = await puppeteer.launch({
-                headless: true, // Run in headless mode (no visible browser window)
-                args: launchArgs, 
-                timeout: 45000 // 45 seconds to launch browser
-            });
-        } catch (e) {
-            // CRITICAL ERROR HANDLING: Prevents the server from crashing when the proxy connection fails.
-            console.error(`[❌ ${jobId} View ${viewNumber}] BROWSER LAUNCH FAILED (Proxy connection failed/Puppeteer Error). Error: ${e.message}. Skipping view.`);
-            return; 
-        }
-
-        const page = await browser.newPage();
+        const parsedUrl = new URL(pageUrl);
+        // Page title derived from the URL path, as per your request
+        const customTitle = parsedUrl.pathname.replace(/-/g, ' ').replace(/\//g, '').substring(0, 50) || 'Home Page';
         
-        // --- 3. Navigation and Interaction ---
-        console.log(`[🟢 ${jobId} View ${viewNumber}] Navigating directly to: ${targetUrl}`);
-        // Navigate attempt
-        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 }); // 45 seconds for navigation
-        
-        // Simulate deep user interaction (scrolling and waiting)
-        const totalDuration = Math.floor(Math.random() * (30000 - 15000 + 1)) + 15000; // 15-30 seconds total session time
-        const scrollCount = 4;
-        const scrollDelay = totalDuration / scrollCount;
+        events.push({
+            name: 'website_hit', // Custom event name as requested
+            params: {
+                page_location: pageUrl,
+                page_title: `Content View: ${customTitle}`, // A dynamic, relevant page title
+            }
+        });
+    } catch (e) {
+        // Fallback for invalid URLs
+        events.push({
+            name: 'website_hit',
+            params: {
+                page_location: pageUrl,
+                page_title: `Content View: Error Parsing URL`, 
+            }
+        });
+    }
 
-        for (let i = 1; i <= scrollCount; i++) {
-            const scrollAmount = Math.floor(Math.random() * 500) + 100;
-            await page.evaluate(y => { window.scrollBy(0, y); }, scrollAmount); 
-            await page.waitForTimeout(scrollDelay * (Math.random() * 0.5 + 0.75)); 
+    // 3. user_engagement event (Simulates scrolling, clicking, reading)
+    events.push({
+        name: 'user_engagement',
+        params: {
+            engagement_time_msec: engagementTimeMs,
         }
+    });
 
-        console.log(`[✅ ${jobId} View ${viewNumber}] Full User Journey Complete.`);
+    // Base payload for the Measurement Protocol API
+    const payload = {
+        client_id: clientId,
+        user_properties: {
+            // Simulating a random US-based IP address for general geo tracking (cannot set country via MP)
+            user_ip: `72.${randomInt(1, 255)}.${randomInt(1, 255)}.${randomInt(1, 255)}`, 
+        },
+        events: events
+    };
+
+    try {
+        const fullUrl = `${GA4_MP_URL}?measurement_id=${gaId}&api_secret=${apiKey}`;
+        
+        await axios.post(fullUrl, payload, { timeout: 10000 });
+        
+        console.log(`[✅ HIT] Client: ${clientId.substring(0, 6)}... | Event: website_hit | Page: ${pageUrl} | Engaged: ${Math.round(engagementTimeMs / 1000)}s`);
+        return true;
 
     } catch (error) {
-        // General error handling for navigation timeouts or other session issues
-        console.error(`[❌ ${jobId} View ${viewNumber}] Job failed (Navigation/Interaction Timeout). Error: ${error.message}`);
-    } finally {
-        // Ensure browser is closed
-        if (browser) {
-            await browser.close();
-        }
+        // Log validation error or connection timeout
+        const errorMsg = error.response ? JSON.stringify(error.response.data) : error.message;
+        console.error(`[❌ FAIL] GA4 API Error for ${pageUrl}: ${errorMsg}`);
+        return false;
     }
 }
 
+
 // ----------------------------------------------------
-// API ENDPOINT (PARALLEL EXECUTION)
+// API ENDPOINT: /boost-mp
 // ----------------------------------------------------
 
-app.post('/api/boost-traffic', async (req, res) => {
-    // Only extract necessary data
-    const { targetUrl, views } = req.body; 
+app.post('/boost-mp', async (req, res) => {
+    const { ga_id, api_key, views, pages } = req.body; 
     
-    if (!targetUrl || !views || views > 500 || views < 1) {
-        return res.status(400).json({ success: false, message: "Missing fields or views must be between 1 and 500." });
+    if (!ga_id || !api_key || !views || !pages || views > 500 || views < 1) {
+        return res.status(400).json({ status: 'error', message: "Missing GA ID, API Key, or invalid views count (1-500)." });
     }
     
     const jobId = uuidv4().substring(0, 8);
-    const mode = PROXIES.length > 0 ? "Parallel Proxy Rotation (Max 8 concurrent views)" : "Direct Connection (Render IP)";
     
-    // Set concurrency limit: Max 8 simultaneous views, limited by available proxies or requested views.
-    const maxConcurrency = Math.min(views, PROXIES.length, 8); 
+    // 1. Distribute views based on percentages
+    const hitsToDispatch = getPagesDistribution(views, pages);
+    const totalHits = hitsToDispatch.length;
 
-    // 1. Respond immediately (202 Accepted) to prevent client timeout
+    // 2. Respond immediately (202 Accepted)
     res.status(202).json({
-        success: true, 
-        message: `Job ${jobId} accepted. ${views} views will be dispatched in parallel batches (Concurrency: ${maxConcurrency}).`, 
-        simulation_mode: mode 
+        status: 'accepted', 
+        message: `Job ${jobId} accepted. ${totalHits} unique sessions (event: website_hit) will be dispatched now. Results in GA4 in 24-48 hours.`,
+        total_sessions: totalHits
     });
 
-    const tasks = [];
-    const BATCH_SIZE = maxConcurrency;
+    console.log(`\n--- JOB ${jobId} STARTED: Dispatching ${totalHits} sessions ---`);
+
+    // 3. Dispatch all hits concurrently
+    const CONCURRENCY_LIMIT = 20; 
+    const batches = [];
     
-    // 2. Start Parallel Background Processing
-    for (let i = 1; i <= views; i++) {
-        // Assign proxy in a round-robin fashion
-        const proxyUrl = PROXIES[(i - 1) % PROXIES.length];
-        
-        // Create the promise for the traffic job
-        const jobPromise = sendAdvancedTraffic(jobId, i, proxyUrl, targetUrl);
-        tasks.push(jobPromise);
-        
-        // When the batch size is reached or it's the last view, execute the batch in parallel
-        if (tasks.length >= BATCH_SIZE || i === views) {
-            console.log(`--- [Batch ${Math.ceil(i / BATCH_SIZE)}] Dispatching ${tasks.length} views in parallel... ---`);
-            await Promise.all(tasks); // This line runs all promises concurrently
-            tasks.length = 0; // Clear the batch
-            
-            // Add a small delay between batches
-            if (i < views) {
-                const delay = 5000 + Math.random() * 5000; // 5 to 10 seconds delay
-                console.log(`--- Waiting ${Math.round(delay / 1000)}s before next batch ---`);
-                await wait(delay);
-            }
-        }
+    for (let i = 0; i < totalHits; i += CONCURRENCY_LIMIT) {
+        batches.push(hitsToDispatch.slice(i, i + CONCURRENCY_LIMIT));
     }
     
-    console.log(`--- Job ${jobId} Finished! All ${views} views delivered. ---`);
+    for (const batch of batches) {
+        const batchPromises = batch.map(pageUrl => sendGA4Session(ga_id, api_key, pageUrl));
+        await Promise.all(batchPromises);
+        
+        // Small delay between batches to avoid server rate limiting
+        const delay = randomInt(500, 1500); 
+        await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    
+    console.log(`--- JOB ${jobId} FINISHED! ---`);
 });
 
 
-// Health check endpoint for Render service status
+// Health check endpoint
 app.get('/', (req, res) => {
-    res.send('Service is active and listening to /api/boost-traffic');
+    res.send('GA4 Measurement Protocol Service is active and listening to /boost-mp');
 });
 
 // Start Server
