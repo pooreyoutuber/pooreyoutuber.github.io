@@ -11,7 +11,7 @@
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #f0f4f8, #c8d3e2); /* Gradient background */
+            background: linear-gradient(135deg, #f0f4f8, #c8d3e2);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,11 +23,7 @@
             background: #ffffff;
             padding: 30px;
             border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Deeper, more noticeable shadow */
-            transition: transform 0.3s ease;
-        }
-        .container:hover {
-             transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); 
         }
         h2 {
             text-align: center;
@@ -41,7 +37,7 @@
         label {
             display: block;
             margin-bottom: 5px; 
-            font-weight: 600; /* Semi-bold label */
+            font-weight: 600; 
             color: #333;
             font-size: 14px;
         }
@@ -49,12 +45,11 @@
             width: 100%;
             padding: 14px;
             margin-bottom: 20px; 
-            border: 2px solid #e0e4e8; /* Cleaner border */
+            border: 2px solid #e0e4e8; 
             border-radius: 8px; 
             box-sizing: border-box; 
             font-size: 16px;
             background-color: #ffffff; 
-            transition: border-color 0.3s;
         }
         input[type="text"]:focus, input[type="number"]:focus {
             border-color: #007bff; 
@@ -62,7 +57,7 @@
             outline: none;
         }
         button {
-            background: linear-gradient(90deg, #007bff, #0056b3); /* Blue gradient button */
+            background: linear-gradient(90deg, #007bff, #0056b3);
             color: white;
             padding: 15px 20px;
             border: none;
@@ -77,11 +72,6 @@
         }
         button:hover {
             background: linear-gradient(90deg, #0056b3, #003d80);
-            transform: translateY(-2px);
-        }
-        button:active {
-            transform: translateY(0);
-            box-shadow: none;
         }
         
         /* Response Message Styling */
@@ -95,21 +85,9 @@
             line-height: 1.5;
             font-size: 15px;
         }
-        .success {
-            background-color: #e6ffed; 
-            color: #155724; 
-            border: 1px solid #a3ccb4;
-        }
-        .error {
-            background-color: #ffe6e6; 
-            color: #721c24; 
-            border: 1px solid #cc9999;
-        }
-        .info {
-            background-color: #fff8e6; 
-            color: #856404; 
-            border: 1px solid #e0c27b;
-        }
+        .success { background-color: #e6ffed; color: #155724; border: 1px solid #a3ccb4; }
+        .error { background-color: #ffe6e6; color: #721c24; border: 1px solid #cc9999; }
+        .info { background-color: #fff8e6; color: #856404; border: 1px solid #e0c27b; }
         .note {
             font-size: 12px;
             color: #888;
@@ -120,12 +98,11 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" data-server-url="https://pooreyoutuber-github-io-blmp.onrender.com">
     <h2>Multi-Country Traffic Boost 🚀</h2>
     <form id="trafficForm">
         
-        <label for="renderUrl">Render Service URL (Required):</label>
-        <input type="text" id="renderUrl" value="https://pooreyoutuber-github-io.onrender.com" placeholder="Enter your Render URL here" required>
+        <p style="font-size: 14px; font-weight: 600; color: #007bff;">✅ Server URL is configured internally.</p>
 
         <label for="targetUrl">Target Website URL (e.g., https://yoursite.com/article):</label>
         <input type="text" id="targetUrl" placeholder="https://www.example.com/page" required>
@@ -139,7 +116,7 @@
         <button type="submit">Start Parallel Traffic Boost</button>
     </form>
     
-    <p class="note">This service dispatches views from multiple countries simultaneously (max 8) using your hardcoded proxies.</p>
+    <p class="note">Views will be dispatched from multiple countries simultaneously (max 8) via the configured Render service.</p>
 
     <div id="response-message"></div>
 </div>
@@ -147,66 +124,66 @@
 <script>
     const form = document.getElementById('trafficForm');
     const responseDiv = document.getElementById('response-message');
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault(); 
-
-        const renderUrl = document.getElementById('renderUrl').value.trim();
-        const targetUrl = document.getElementById('targetUrl').value.trim();
-        const searchQuery = document.getElementById('searchQuery').value.trim();
-        const views = parseInt(document.getElementById('views').value, 10);
-
-        if (!renderUrl.startsWith('http')) {
-            displayMessage('Invalid Render URL. It must start with https://...', 'error');
-            return;
-        }
-        
-        if (views < 1 || views > 500 || isNaN(views)) {
-            displayMessage('The number of views must be between 1 and 500.', 'error');
-            return;
-        }
-
-        const payload = {
-            targetUrl: targetUrl,
-            searchQuery: searchQuery,
-            views: views
-        };
-
-        const apiEndpoint = `${renderUrl}/api/boost-traffic`;
-        
-        displayMessage('Request is being sent... **Check Render Logs for processing status.**', 'info');
-
-        try {
-            const response = await fetch(apiEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // 202 Accepted status code from the server
-                displayMessage(`✅ **Success! Job Accepted.**\n\n${data.message}\nMode: ${data.simulation_mode}`, 'success');
-            } else {
-                // 4xx/5xx status code
-                displayMessage(`❌ **Server Responded with Error (${response.status}):**\n\n${data.message}`, 'error');
-            }
-
-        } catch (error) {
-            console.error('Network Error:', error);
-            // This is the common error you are seeing.
-            displayMessage(`❌ **NETWORK ERROR:** Could not connect to the Render service URL. The server is likely **DOWN** or **CRASHING** due to bad proxies.\n\n**Action:** Please ensure your Render service is **LIVE** and your **Webshare Proxies are active** in the \`index.js\` file.`, 'error');
-        }
-    });
+    // Get the Render URL securely from the data attribute
+    const renderUrl = document.querySelector('.container').getAttribute('data-server-url');
 
     function displayMessage(message, type) {
         responseDiv.innerHTML = message;
-        responseDiv.className = ''; 
-        responseDiv.classList.add(type);
+        responseDiv.className = type;
         responseDiv.style.display = 'block';
+    }
+
+    // Check if the URL is configured at all
+    if (!renderUrl || !renderUrl.startsWith('http')) {
+        displayMessage('❌ **CONFIGURATION ERROR:** The Server URL is missing or invalid in the HTML code (data-server-url attribute).', 'error');
+        // Prevent form submission if the URL is bad
+        form.addEventListener('submit', (e) => e.preventDefault());
+    } else {
+        // If URL is good, proceed with form logic
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+
+            const targetUrl = document.getElementById('targetUrl').value.trim();
+            const searchQuery = document.getElementById('searchQuery').value.trim();
+            const views = parseInt(document.getElementById('views').value, 10);
+
+            if (views < 1 || views > 500 || isNaN(views)) {
+                displayMessage('The number of views must be between 1 and 500.', 'error');
+                return;
+            }
+
+            const payload = {
+                targetUrl: targetUrl,
+                searchQuery: searchQuery,
+                views: views
+            };
+
+            const apiEndpoint = `${renderUrl}/api/boost-traffic`;
+            
+            displayMessage('Request is being sent... **Check Render Logs for processing status.**', 'info');
+
+            try {
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayMessage(`✅ **Success! Job Accepted.**\n\n${data.message}\nMode: ${data.simulation_mode}`, 'success');
+                } else {
+                    displayMessage(`❌ **Server Responded with Error (${response.status}):**\n\n${data.message}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Network Error:', error);
+                displayMessage(`❌ **NETWORK ERROR:** Could not connect to the Render service URL. The server is likely **DOWN** or **CRASHING** due to bad proxies.\n\n**Action:** Please ensure your Render service is **LIVE** and the proxies in \`index.js\` are working.`, 'error');
+            }
+        });
     }
 </script>
 
