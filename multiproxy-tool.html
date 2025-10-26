@@ -169,11 +169,11 @@
       <div class="quick-sets">
         <button id="setAllProxyium" class="ghost">All → Proxyium</button>
         <button id="setAllProxysite" class="ghost">All → ProxySite</button>
-        <button id="setAllDirect" class="ghost">All → Direct</button>
+        <button id="setAllRandom" class="ghost">All → Random Proxy</button>
       </div>
     </div>
 
-    <div class="hint">Tip: If a frame stays blank the provider may block embedding — use "Open in new tab". You can edit provider templates in the script if you have custom proxy URLs.</div>
+    <div class="hint">Tip: If a frame stays blank the provider may block embedding. The proxy service always adds its own URL bar/header inside the frame (this is unavoidable).</div>
 
     <div class="grid" id="grid"></div>
 
@@ -182,26 +182,26 @@
 
 <script>
 /* ------------------------
-   Provider URL templates (Proxy URL banane ka format)
+   Provider URL templates
    ------------------------ */
 const providerTemplates = {
-  // Direct option ko abhi bhi rakha hai, taaki agar zarurat pade to kaam aa sake, lekin use default mein hata diya gaya hai
+  // Direct option is for internal use/fallback, but not exposed in UI dropdown
   "Direct": (t) => t,
   
-  // ProxySite ka format: URL ko 'u=' parameter mein daalta hai
+  // ProxySite format
   "ProxySite": (t) => {
-    // encodeURIComponent(t) zaroori hai URL ko surakshit banane ke liye
     return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}`;
   },
   
-  // Proxyium ka format: URL ko 'q=' parameter mein daalta hai
+  // Proxyium format
   "Proxyium": (t) => {
     return `https://proxyium.com/?q=${encodeURIComponent(t)}`;
   }
 };
 
-/* default provider assignments for 8 slots */
-// Direct ko exclude karke, ProxySite aur Proxyium ka distribution: (4 ProxySite, 4 Proxyium)
+/* ------------------------
+   Default Proxy Settings: USER ALWAYS USES PROXY
+   ------------------------ */
 const defaultProviders = ["Proxyium","ProxySite","Proxyium","ProxySite","Proxyium","ProxySite","Proxyium","ProxySite"];
 
 const grid = document.getElementById('grid');
@@ -217,7 +217,6 @@ function createSlot(index, defaultProvider){
     </div>
     <div class="slot-controls">
       <select id="provider-${index}" aria-label="provider-${index}">
-        <option>Direct</option>
         <option>ProxySite</option>
         <option>Proxyium</option>
       </select>
@@ -265,7 +264,7 @@ function createSlot(index, defaultProvider){
     setStatus('loading...');
     ping.style.display = 'none';
     embedHint.textContent = 'embed';
-    const provider = prov.value || 'ProxySite'; // Default to ProxySite agar provider gayab hai
+    const provider = prov.value || 'ProxySite'; 
     
     // Original URL, provider ke template ke through format hokar final URL ban raha hai
     const finalProxyUrl = (providerTemplates[provider] || providerTemplates['ProxySite'])(originalUrl);
@@ -342,6 +341,7 @@ function createSlot(index, defaultProvider){
 // create 8 slots
 const slots = [];
 for(let i=0;i<8;i++){
+  // defaultProviders[i] ensure karta hai ki slot default mein Proxyium ya ProxySite set ho
   const slot = createSlot(i, defaultProviders[i]);
   slots.push(slot);
 }
@@ -353,27 +353,25 @@ document.getElementById('globalGo').addEventListener('click', ()=>{
   
   // Har slot ke liye URL ko process karo
   slots.forEach(s => {
-    // 1. Slot ke input field mein URL set karo (bas dikhane ke liye)
     s.input.value = url; 
-    
-    // 2. loadUrl ko original URL do, aur yeh khud hi proxy template use karke load karega
     s.loadUrl(url); 
   });
 });
 
-// quick-set buttons (ab All -> Direct button sirf provider select karega)
+// quick-set buttons 
 document.getElementById('setAllProxyium').addEventListener('click', ()=>{
   slots.forEach(s => s.prov.value = 'Proxyium');
 });
 document.getElementById('setAllProxysite').addEventListener('click', ()=>{
   slots.forEach(s => s.prov.value = 'ProxySite');
 });
-document.getElementById('setAllDirect').addEventListener('click', ()=>{
-  slots.forEach(s => s.prov.value = 'Direct');
+// 'All -> Random Proxy' button
+document.getElementById('setAllRandom').addEventListener('click', ()=>{
+  slots.forEach((s, i) => s.prov.value = defaultProviders[i]);
 });
 
 // optional: sample placeholder
-document.getElementById('globalUrl').placeholder = 'https://example.com';
+document.getElementById('globalUrl').placeholder = 'https://pooreyoutuber.github.io/website-booster.html';
 
 </script>
 </body>
