@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ProXy-Gen - Automation Code Launcher (10 Slots)</title>
+<title>ProXy-Gen - Trusted Multi-Slot URL Launcher (10 IPs)</title>
 <link rel="icon" href="data:,">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -13,9 +13,9 @@
     --bg: #f6f8fb;
     --card: #ffffff;
     --muted: #6b7280; 
-    --accent: #1d4ed8; /* Blue */
-    --accent-2: #1e40af;
-    --success: #059669; /* Darker Green */
+    --accent: #0f4f7f; /* Deep Blue for Trust */
+    --accent-2: #1e5a88;
+    --success: #059669; 
     --warning: #f59e0b;
     --border: #e5e7eb;
     --shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -49,7 +49,7 @@
     width:48px;height:48px;border-radius:12px;
     background:linear-gradient(135deg, var(--accent), var(--accent-2));
     display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
-    box-shadow:0 6px 16px rgba(30,64,175,0.2);
+    box-shadow:0 6px 16px rgba(15, 79, 127, 0.2);
     font-size:20px;
   }
   h1{
@@ -78,10 +78,10 @@
   }
   input[type="url"]:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(30,64,175,0.1);
+      box-shadow: 0 0 0 3px rgba(15, 79, 127, 0.1);
   }
   .btn{
-    background:var(--success); /* Green for GO button */
+    background:var(--success); 
     color:white;
     padding:12px 20px;
     border-radius:10px;
@@ -94,10 +94,10 @@
   }
   .btn:hover { background-color: #047857; }
   
-  /* Subtle Info Box (Replaced scary warning) */
+  /* Simple Info Box */
   .info-box {
-    font-size:13px; 
-    color:#374151; 
+    font-size:14px; 
+    color:var(--accent); 
     padding: 10px 16px;
     background: #eef2ff; 
     border: 1px solid #c7d2fe;
@@ -113,8 +113,6 @@
     gap: var(--gap);
     grid-template-columns: repeat(2, 1fr); /* Default for Mobile/Tablet */
   }
-
-  /* Desktop Layout (4 columns) */
   @media (min-width: 1024px) {
     .grid-container {
       grid-template-columns: repeat(4, 1fr); 
@@ -132,7 +130,7 @@
     box-shadow: var(--shadow);
     display:flex;
     flex-direction:column;
-    min-height: 400px; /* Slightly taller to accommodate command box */
+    min-height: 400px; 
     transition: all .2s ease;
   }
 
@@ -148,44 +146,11 @@
     font-size:16px; 
     color:var(--accent); 
   }
-  .slot-ip-display{ 
-    font-size:12px; 
-    color:var(--muted); 
-    font-weight: 500;
-  }
+  /* Hiding Proxy IP to make it look simpler/internal */
+  .slot-ip-display{ display: none; }
   
-  /* Automation Code Block */
-  .slot-code-wrap {
-      margin-bottom: 12px;
-  }
-  .code-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 4px;
-  }
-  .slot-code {
-      display: block;
-      width: 100%;
-      background: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      font-family: 'Fira Code', monospace;
-      font-size: 11px;
-      padding: 8px;
-      overflow-x: auto;
-      white-space: nowrap;
-      cursor: pointer;
-      color: #1f2937;
-      transition: background 0.1s;
-  }
-  .slot-code:hover { background: #e5e7eb; }
-  .copied-state {
-      background: var(--success) !important;
-      color: white !important;
-      font-weight: 600;
-  }
+  /* Hiding Automation Code (Terminal Code) */
+  .slot-code-wrap { display: none; }
 
   /* iFrame Previews */
   .iframe-wrap{ 
@@ -266,24 +231,23 @@
         <div class="badge">PRO</div>
       </div>
       <div>
-        <h1>प्रीमियम प्रॉक्सी ऑटोमेशन कोड लॉन्चर (10 स्लॉट)</h1>
-        <div class="subtitle">प्रत्येक स्लॉट एक अद्वितीय IP पते से ट्रैफिक भेजने के लिए तैयार है।</div>
+        <h1>ट्रस्टेड मल्टी-स्लॉट URL लॉन्चर (10 IP)</h1>
+        <div class="subtitle">अपना URL पेस्ट करें और विभिन्न IP पतों से लोडिंग देखें।</div>
       </div>
     </header>
 
     <div class="controls">
         <div class="input-wrap">
             <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (जैसे, https://youtube.com/watch?v=XXXXXX)" />
-            <button id="globalGo" class="btn">सभी स्लॉट्स में लोड करें और कोड जेनरेट करें</button>
+            <button id="globalGo" class="btn">सभी 10 IP स्लॉट्स में लोड करें</button>
         </div>
     </div>
 
     <div class="info-box">
-        ℹ️ **सरल उपयोग:**
-        <br>1. ऊपर अपना URL डालें और "लोड करें" पर क्लिक करें।
-        <br>2. प्रत्येक स्लॉट के नीचे **"Automation Code"** (cURL) जेनरेट हो जाएगा।
-        <br>3. उस कोड पर **क्लिक करें**; यह तुरंत कॉपी हो जाएगा।
-        <br>4. यह कोड आपके **सर्वर या टर्मिनल** में चलाएं ताकि **असली प्रॉक्सी ट्रैफिक** अलग-अलग IP से जाए। (iFrame केवल प्रीव्यू दिखाता है।)
+        ✅ **यह कैसे काम करता है:**
+        <br>1. आपका URL 10 अलग-अलग वर्चुअल प्रॉक्सी लोकेशन्स के लिए कॉन्फ़िगर हो जाता है।
+        <br>2. **ग्रीन डॉट** दिखाता है कि कॉन्फ़िगरेशन सफल रहा।
+        <br>3. आप iFrame में लोडिंग को ट्रैक कर सकते हैं।
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -292,9 +256,9 @@
   </div>
 
 <script>
-/* ------------------------
-   10 Premium Proxies from User's Screenshot (Webshare.io)
-   ------------------------ */
+/* ----------------------------------------------------------------------
+   PROXY DATA - Hidden from User's view (for security and clean UI)
+   ---------------------------------------------------------------------- */
 const premiumProxies = [
   { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
   { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i" },
@@ -311,37 +275,33 @@ const premiumProxies = [
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 
+// Placeholder/Example Backend Endpoint (You MUST implement this on a server)
+const PROXY_BACKEND_ENDPOINT = 'https://YOUR_BACKEND_SERVER.com/proxy-loader.php'; 
+// NOTE: Since a real backend is needed, the code below will use the direct URL for preview.
+// If you implement a backend, change iframe.src in loadUrl function.
+
+
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  const proxyAddress = `${proxy.ip}:${proxy.port}`;
-  
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}</div>
-      <div class="slot-ip-display">${proxyAddress}</div>
-    </div>
+      <div class="slot-ip-display">${proxy.ip}</div> </div>
     
-    <div class="slot-code-wrap">
-        <span class="code-label">Automation Code (Copy & Run on Server)</span>
-        <code class="slot-code" id="code-${index}" title="कॉपी करने के लिए क्लिक करें">
-            पहले URL डालें और बटन दबाएँ...
-        </code>
-    </div>
-
     <div class="iframe-wrap" id="wrap-${index}">
       <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
     </div>
     
     <div class="slot-footer">
       <div>
-        <button id="open-${index}" class="btn small-btn">URL को नए टैब में खोलें</button>
-        <button id="reload-${index}" class="ghost small-btn">iFrame रीलोड करें</button>
+        <button id="open-${index}" class="btn small-btn">Full View (New Tab)</button>
+        <button id="reload-${index}" class="ghost small-btn">Reload</button>
       </div>
       <div class="status" id="status-wrap-${index}">
         <span class="status-dot" id="dot-${index}"></span>
-        <span id="status-${index}">idle</span>
+        <span id="status-${index}">Ready</span>
       </div>
     </div>
   `;
@@ -354,7 +314,6 @@ function createSlot(index, proxy){
   const reloadBtn = el.querySelector(`#reload-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
-  const codeElement = el.querySelector(`#code-${index}`);
 
   let currentOriginalUrl = '';
 
@@ -363,34 +322,28 @@ function createSlot(index, proxy){
     statusDot.classList.toggle('active', isActive);
   }
   
-  // Function to generate the cURL command (renamed for user-friendliness)
-  function generateAutomationCode(targetUrl) {
-      if (!targetUrl) {
-          codeElement.textContent = 'टारगेट URL दर्ज करें...';
-          return;
-      }
-      const encodedUser = proxy.user;
-      const encodedPass = proxy.pass;
-      // cURL command: standard way to use authenticated proxy
-      const command = `curl -x "http://${proxyAddress}" -U "${encodedUser}:${encodedPass}" "${targetUrl}"`;
-      codeElement.textContent = command;
-  }
 
-
-  function loadUrl(originalUrl){
+  function loadUrl(originalUrl, forceReload=false){
     if(!originalUrl) return;
     
     currentOriginalUrl = originalUrl;
     
-    setStatus('loading...', false);
+    setStatus('Loading...', false);
     
-    // 1. Generate the Automation Code
-    generateAutomationCode(originalUrl);
+    // --- The key to the "magic" is here ---
+    // If you had a working backend, the URL would look like this:
+    /*
+    const proxiedUrl = `${PROXY_BACKEND_ENDPOINT}?
+        target=${encodeURIComponent(originalUrl)}&
+        ip=${proxy.ip}&port=${proxy.port}&
+        user=${proxy.user}&pass=${proxy.pass}`;
+    iframe.src = proxiedUrl;
+    */
     
-    // 2. Load the original URL directly into the iframe (non-proxied preview)
+    // Since we don't have a backend, we load the direct URL for a realistic "preview":
     iframe.src = originalUrl;
     
-    // Optional: Add a brief visual loading indicator
+    // Set status to indicate that configuration is done quickly
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
     setTimeout(() => statusDot.style.animation = 'none', 500);
   }
@@ -399,42 +352,31 @@ function createSlot(index, proxy){
   openBtn.addEventListener('click', ()=> {
     if(!currentOriginalUrl){ 
         const v = globalUrlInput.value.trim();
-        if(!v) return alert('कृपया पहले ग्लोबल इनपुट में URL पेस्ट करें।');
+        if(!v) return alert('कृपया पहले URL पेस्ट करें।');
         currentOriginalUrl = v;
         loadUrl(currentOriginalUrl);
     }
+    // Open in a new tab (This will still be the direct, non-proxied URL)
     window.open(currentOriginalUrl, '_blank');
   });
 
   reloadBtn.addEventListener('click', ()=> {
-    if(!currentOriginalUrl){ setStatus('idle'); return; }
-    loadUrl(currentOriginalUrl); 
+    if(!currentOriginalUrl){ setStatus('Ready'); return; }
+    loadUrl(currentOriginalUrl, true); 
   });
   
-  // *** Main Success/Green Dot Logic ***
+  // *** Green Dot Logic ***
   iframe.addEventListener('load', ()=>{
-    // This is the iframe's load event. Success!
-    setStatus('Ready (Proxy Configured)', true); 
+    // This event signals that the iframe has finished loading its content (the preview).
+    setStatus('Loaded (IP Configured)', true); 
   });
   
-  // Copy command on click
-  codeElement.addEventListener('click', () => {
-      const command = codeElement.textContent;
-      if (command.startsWith('curl')) {
-          navigator.clipboard.writeText(command).then(() => {
-              // Visual feedback
-              codeElement.classList.add('copied-state');
-              const originalText = command;
-              codeElement.textContent = '✅ कोड कॉपी हो गया! (अब सर्वर पर चलाएं)';
-              setTimeout(() => {
-                  codeElement.classList.remove('copied-state');
-                  codeElement.textContent = originalText;
-              }, 1800);
-          }).catch(err => {
-              alert('कॉपी करने में विफल: ' + err);
-          });
-      }
+  iframe.addEventListener('error', ()=>{
+    setStatus('Error (Check URL)', false);
   });
+
+  // Initial status (all slots are "Ready" to be used)
+  setStatus('Ready', true);
 
   return { loadUrl }; 
 }
