@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PooreYouTuber Tools — Multi Proxy Browser</title>
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --muted: #7b7f92;
+    --accent: #6b5dd3; /* purple */
+    --accent-2: #4f46e5;
+    --border: #e7e9f0;
+    --shadow: 0 8px 20px rgba(40,40,90,0.06);
+    --radius: 12px;
+    --gap: 14px;
+    --maxwidth: 1200px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg, var(--bg), #eef2ff 200px);
+    color:#111827;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width: var(--maxwidth);
+    margin:22px auto;
+    padding:18px;
+  }
+  header{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .logo {
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .logo .badge{
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 6px 18px rgba(110,89,240,0.18);
+    font-size:18px;
+  }
+  h1{
+    font-size:18px;margin:0;
+    letter-spacing: -0.2px;
+  }
+  .subtitle{ color:var(--muted); font-size:13px; margin-top:4px }
+  .controls {
+    margin-top:12px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    justify-content:space-between;
+  }
+  .left-controls{ display:flex; gap:8px; align-items:center; flex:1 1 560px; }
+  .input-wrap{ display:flex; gap:8px; width:100%; }
+  input[type="url"]{
+    flex:1;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:white;
+    font-size:14px;
+    outline:none;
+  }
+  .btn{
+    background:var(--accent);
+    color:white;
+    padding:10px 14px;
+    border-radius:10px;
+    border:0;
+    cursor:pointer;
+    font-weight:600;
+    box-shadow: 0 6px 16px rgba(99,84,238,0.12);
+  }
+  .ghost{
+    background:transparent; color:var(--accent-2); border:1px solid var(--border);
+  }
+  .quick-sets{ display:flex; gap:8px; align-items:center; }
+  .hint { font-size:12px; color:var(--muted); margin-top:8px; }
+
+  /* grid */
+  .grid{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:var(--gap);
+  }
+
+  .slot{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:12px;
+    box-shadow: var(--shadow);
+    display:flex;
+    flex-direction:column;
+    min-height:320px;
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+  .slot:hover{ transform:translateY(-6px); box-shadow: 0 18px 40px rgba(45,50,90,0.06) }
+  .slot-top{
+    display:flex; gap:8px; align-items:center; margin-bottom:10px;
+  }
+  .slot-title{ font-weight:600; font-size:13px; color:#111827; }
+  .slot-controls{ display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+  select{
+    padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:white; font-size:13px;
+  }
+  .slot-input{
+    flex:1; padding:9px 10px; border-radius:8px; border:1px solid var(--border); font-size:13px;
+  }
+  .small-btn{ padding:8px 10px; border-radius:8px; border:0; cursor:pointer; font-weight:600; color:white; background:#2f9cdb }
+  .iframe-wrap{ flex:1; border-radius:8px; overflow:hidden; background:#fcfdff; border:1px solid var(--border); position:relative; }
+  iframe{ width:100%; height:100%; border:0; display:block; background:white; }
+
+  .slot-footer{ display:flex; gap:8px; align-items:center; margin-top:10px; justify-content:space-between; }
+  .status { font-size:12px; color:var(--muted) }
+
+  /* responsive */
+  @media (max-width:1100px){
+    .grid{ grid-template-columns: repeat(3,1fr); }
+  }
+  @media (max-width:820px){
+    .grid{ grid-template-columns: repeat(2,1fr); }
+  }
+  @media (max-width:520px){
+    .grid{ grid-template-columns: 1fr; }
+    header{ flex-direction:column; align-items:flex-start; gap:8px; }
+    .controls{ flex-direction:column; align-items:stretch; gap:10px; }
+  }
+
+  /* tiny animations */
+  .pulse {
+    display:inline-block; width:8px;height:8px;border-radius:50%; background:#34d399; box-shadow:0 0 8px rgba(52,211,153,0.3);
+    position:relative; top:2px;
+    animation: ping 1.6s infinite;
+  }
+  @keyframes ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <div class="badge">PY</div>
+      </div>
+      <div>
+        <h1>PooreYouTuber Tools — Multi Proxy Browser</h1>
+        <div class="subtitle">Open a URL across 8 proxied mini-browsers at once. Use per-slot provider selectors or set all at once.</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="left-controls">
+        <div class="input-wrap">
+          <input id="globalUrl" type="url" placeholder="Paste the URL here (https://...) — then click Load in all slots" />
+          <button id="globalGo" class="btn">Load in all</button>
+        </div>
+      </div>
+
+      <div class="quick-sets">
+        <button id="setAllProxyium" class="ghost">All → Proxyium</button>
+        <button id="setAllProxysite" class="ghost">All → ProxySite</button>
+        <button id="setAllDirect" class="ghost">All → Direct</button>
+      </div>
+    </div>
+
+    <div class="hint">Tip: If a frame stays blank the provider may block embedding — use "Open in new tab". You can edit provider templates in the script if you have custom proxy URLs.</div>
+
+    <div class="grid" id="grid"></div>
+
+    <p style="margin-top:18px; font-size:13px; color:var(--muted)">Built for quick testing and demo. For production reliability use a proxy that you control (with `?url=` param and iframe embedding allowed).</p>
+  </div>
+
+<script>
+/* ------------------------
+   Provider URL templates
+   Update these if you know exact provider formats.
+   Must return full final URL given target t (string).
+   ------------------------ */
+const providerTemplates = {
+  "Direct": (t) => t,
+  // Common guessed templates. YOU CAN ADJUST THEM.
+  "ProxySite": (t) => {
+    // Example: proxysite tends to use index.php?u= or /# with URL - adjust if needed
+    // return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}&b=4`;
+    return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}`;
+  },
+  "Proxyium": (t) => {
+    // Adjust to real pattern if you know it. This is a guessed template.
+    // return `https://proxyium.com/index.php?url=${encodeURIComponent(t)}`;
+    return `https://proxyium.com/?q=${encodeURIComponent(t)}`;
+  }
+};
+
+/* default provider assignments for 8 slots */
+const defaultProviders = ["Proxyium","ProxySite","Direct","ProxySite","Proxyium","ProxySite","Direct","Proxyium"];
+
+const grid = document.getElementById('grid');
+
+function createSlot(index, defaultProvider){
+  const el = document.createElement('div');
+  el.className = 'slot';
+  el.innerHTML = `
+    <div class="slot-top">
+      <div class="slot-title">Slot ${index+1}</div>
+      <div style="flex:1"></div>
+      <div class="status" id="status-${index}">idle</div>
+    </div>
+    <div class="slot-controls">
+      <select id="provider-${index}" aria-label="provider-${index}">
+        <option>Direct</option>
+        <option>ProxySite</option>
+        <option>Proxyium</option>
+      </select>
+      <input id="input-${index}" class="slot-input" type="url" placeholder="Enter URL or use global" />
+      <button id="go-${index}" class="btn small-btn">Go</button>
+    </div>
+    <div class="iframe-wrap" id="wrap-${index}">
+      <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+    </div>
+    <div class="slot-footer">
+      <div style="display:flex;gap:8px">
+        <button id="open-${index}" class="ghost small-btn">Open in new tab</button>
+        <button id="reload-${index}" class="ghost small-btn">Reload</button>
+      </div>
+      <div style="display:flex;gap:8px; align-items:center">
+        <span id="embed-hint-${index}" style="font-size:12px;color:var(--muted)">embed</span>
+        <span id="ping-${index}" style="display:none" title="loaded"><span class="pulse"></span></span>
+      </div>
+    </div>
+  `;
+  grid.appendChild(el);
+
+  // references
+  const prov = el.querySelector(`#provider-${index}`);
+  prov.value = defaultProvider || 'Direct';
+  const input = el.querySelector(`#input-${index}`);
+  const goBtn = el.querySelector(`#go-${index}`);
+  const iframe = el.querySelector(`#iframe-${index}`);
+  const openBtn = el.querySelector(`#open-${index}`);
+  const reloadBtn = el.querySelector(`#reload-${index}`);
+  const status = el.querySelector(`#status-${index}`);
+  const ping = el.querySelector(`#ping-${index}`);
+  const embedHint = el.querySelector(`#embed-hint-${index}`);
+
+  let lastUrl = '';
+
+  function setStatus(text){
+    status.textContent = text;
+  }
+
+  function loadUrl(url){
+    if(!url) return;
+    setStatus('loading...');
+    ping.style.display = 'none';
+    embedHint.textContent = 'embed';
+    const provider = prov.value || 'Direct';
+    const final = (providerTemplates[provider] || providerTemplates['Direct'])(url);
+    lastUrl = final;
+
+    // set iframe src and set up timeout to detect possible embed-block
+    iframe.src = final;
+
+    // If the frame contentWindow is accessible it might be same-origin (rare).
+    // Otherwise we rely on timeouts and visual cue + "Open in new tab" fallback.
+
+    // set a 2s grace then mark attempted, 5s to mark possible-block
+    setTimeout(()=> {
+      setStatus('attempted');
+      // show the ping after a successful-ish wait (not guaranteed)
+      ping.style.display = 'inline-block';
+      setTimeout(()=> ping.style.display = 'none', 1200);
+    }, 1400);
+
+    // after 4s, if frame height is still blank, show hint to use new tab
+    setTimeout(()=> {
+      // try to infer if iframe blocked (we can't access document due to cross-origin)
+      // So we check readyState via onload fallback: if cannot detect onload, we show hint.
+      // We'll use a lightweight heuristic: if iframe contentWindow length is 0 and still blank, show hint
+      try {
+        // This will throw for cross-origin, so it's defensive
+        if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
+          embedHint.textContent = 'embedded';
+        } else {
+          embedHint.textContent = 'embed (may be blocked)';
+        }
+      } catch (e){
+        embedHint.textContent = 'embed (may be blocked)';
+      }
+    }, 3800);
+  }
+
+  // click handlers
+  goBtn.addEventListener('click', ()=> {
+    const v = input.value || document.getElementById('globalUrl').value;
+    if(!v) return alert('Paste a URL in the slot or the global input first.');
+    loadUrl(v.trim());
+  });
+
+  openBtn.addEventListener('click', ()=> {
+    const v = input.value || document.getElementById('globalUrl').value;
+    if(!v) return alert('Paste a URL in the slot or the global input first.');
+    const provider = prov.value || 'Direct';
+    const final = (providerTemplates[provider] || providerTemplates['Direct'])(v.trim());
+    window.open(final, '_blank');
+  });
+
+  reloadBtn.addEventListener('click', ()=> {
+    if(!lastUrl){ setStatus('idle'); return; }
+    iframe.src = lastUrl;
+    setStatus('reloading');
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') goBtn.click();
+  });
+
+  // try to detect iframe load (best-effort)
+  iframe.addEventListener('load', ()=>{
+    setStatus('loaded');
+    ping.style.display = 'inline-block';
+    setTimeout(()=> ping.style.display = 'none', 1200);
+    try {
+      // if same-origin, check if body has content
+      if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
+        embedHint.textContent = 'embedded';
+      }
+    } catch(e){
+      // cross-origin - we can't inspect
+      // keep embedHint as it was
+    }
+  });
+
+  return { prov, input, goBtn, openBtn, reloadBtn, iframe, setStatus };
+}
+
+// create 8 slots
+const slots = [];
+for(let i=0;i<8;i++){
+  const slot = createSlot(i, defaultProviders[i]);
+  slots.push(slot);
+}
+
+// global actions
+document.getElementById('globalGo').addEventListener('click', ()=>{
+  const url = document.getElementById('globalUrl').value.trim();
+  if(!url){ alert('Paste a URL in the global field first'); return; }
+  // set each slot input and invoke go
+  slots.forEach(s => {
+    s.input.value = url;
+    s.goBtn.click();
+  });
+});
+
+// quick-set buttons
+document.getElementById('setAllProxyium').addEventListener('click', ()=>{
+  slots.forEach(s => s.prov.value = 'Proxyium');
+});
+document.getElementById('setAllProxysite').addEventListener('click', ()=>{
+  slots.forEach(s => s.prov.value = 'ProxySite');
+});
+document.getElementById('setAllDirect').addEventListener('click', ()=>{
+  slots.forEach(s => s.prov.value = 'Direct');
+});
+
+// optional: sample placeholder
+document.getElementById('globalUrl').placeholder = 'https://example.com';
+
+</script>
+</body>
+</html>
