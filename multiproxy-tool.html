@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PY Tools — Multi Proxy Browser (Naproxy, Flyproxy, ProxySite)</title>
+<title>PY Tools — Multi Proxy Browser (3-3-4 Layout)</title>
 <link rel="icon" href="data:,">
 <style>
-  /* CSS Styles (Desktop Optimized Layout) */
+  /* CSS Styles - Larger Slots and Custom Grid */
   :root{
     --bg: #f6f8fb;
     --card: #ffffff;
@@ -48,16 +48,16 @@
     letter-spacing: -0.2px;
   }
   .subtitle{ color:var(--muted); font-size:13px; margin-top:4px }
+  
+  /* Global Input Control */
   .controls {
     margin-top:12px;
     display:flex;
     gap:10px;
     align-items:center;
     flex-wrap:wrap;
-    justify-content:space-between;
   }
-  .left-controls{ display:flex; gap:8px; align-items:center; flex:1 1 560px; }
-  .input-wrap{ display:flex; gap:8px; width:100%; }
+  .input-wrap{ display:flex; gap:8px; width:100%; margin-bottom: 20px; }
   input[type="url"]{
     flex:1;
     padding:12px 14px;
@@ -77,19 +77,37 @@
     font-weight:600;
     box-shadow: 0 6px 16px rgba(99,84,238,0.12);
   }
-  .ghost{
-    background:transparent; color:var(--accent-2); border:1px solid var(--border);
+  .hint { 
+    font-size:14px; 
+    color:#d97706; 
+    padding: 12px;
+    background: #fef3c7; 
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    margin-bottom: 20px;
   }
-  .quick-sets{ display:flex; gap:8px; align-items:center; }
-  .hint { font-size:12px; color:var(--muted); margin-top:8px; }
 
-  /* grid and slot styles */
-  .grid{
-    margin-top:18px;
-    display:grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap:var(--gap);
+  /* Custom Grid for 3-3-4 Layout */
+  .grid-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    margin-top: 18px;
   }
+  .grid-row {
+    display: grid;
+    gap: var(--gap);
+  }
+  /* First two rows: 3 columns */
+  .grid-row-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  /* Last row: 4 columns */
+  .grid-row-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Slot Styles - Increased Height */
   .slot{
     background:var(--card);
     border-radius:var(--radius);
@@ -97,8 +115,8 @@
     box-shadow: var(--shadow);
     display:flex;
     flex-direction:column;
-    /* Updated slot size to 334px as requested */
-    min-height:334px; 
+    /* Increased minimum height to make the view bigger */
+    min-height:400px; 
     transition:transform .22s ease, box-shadow .22s ease;
   }
   .slot-top{
@@ -107,14 +125,12 @@
   }
   .slot-title{ 
     font-weight:600; font-size:13px; color:#111827; 
-    display:flex; align-items:center; gap:6px;
   }
   .slot-url-display{ 
     font-size:11px; color:var(--muted);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     flex:1;
   }
-  /* Slot controls with select box added back */
   .slot-controls {
     display:flex; gap:8px; align-items:center; margin-bottom:10px; 
   }
@@ -131,7 +147,12 @@
     background:#fcfdff; border:1px solid var(--border); 
     position:relative; 
   }
-  iframe{ width:100%; height:100%; border:0; display:block; background:white; }
+  iframe{ 
+    width:100%; height:100%; border:0; display:block; 
+    background:white; 
+    /* Force initial scroll to show top content */
+    overflow: auto; 
+  }
   .slot-footer{ 
     display:flex; gap:8px; align-items:center; margin-top:10px; 
     justify-content:space-between; 
@@ -144,7 +165,6 @@
   }
   @keyframes ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
   
-  /* Description Styling */
   .tool-description {
     margin-top: 30px;
     padding: 20px;
@@ -158,26 +178,6 @@
     margin-top: 0;
     margin-bottom: 15px;
   }
-  .tool-description ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .tool-description ul li {
-    font-size: 14px;
-    color: #333;
-    margin-bottom: 10px;
-    line-height: 1.4;
-    padding-left: 20px;
-    position: relative;
-  }
-  .tool-description ul li:before {
-    content: "✓";
-    color: #34d399;
-    font-weight: bold;
-    position: absolute;
-    left: 0;
-  }
 </style>
 </head>
 <body>
@@ -188,67 +188,69 @@
       </div>
       <div>
         <h1>PooreYouTuber Tools — Multi Proxy Browser</h1>
-        <div class="subtitle">Open a URL across 8 proxied mini-browsers at once. Use the **New Tab** button for the best Desktop View.</div>
+        <div class="subtitle">10 Slots: Control and view your URL through different proxy servers in a large iFrame.</div>
       </div>
     </header>
 
     <div class="controls">
-      <div class="left-controls">
-        <div class="input-wrap">
-          <input id="globalUrl" type="url" placeholder="Paste YOUR URL here (e.g., https://yourwebsite.com)" />
-          <button id="globalGo" class="btn">Load in all slots</button>
-        </div>
+      <div class="input-wrap">
+        <input id="globalUrl" type="url" placeholder="Paste YOUR TARGET URL here (e.g., https://yourwebsite.com)" />
+        <button id="globalGo" class="btn">Load in all slots</button>
       </div>
     </div>
 
     <div class="hint">
-        ⚠️ **Important Note:** Public proxies often show their own ads/homepage in the slots (like Slot 2, 4, 6, 8 in your image). Use the **Desktop View (New Tab)** button for the correct desktop experience of your URL.
+        ⚠️ **IMPORTANT WARNING:** The larger slot size allows more control, but public proxies (Naproxy, Flyproxy, ProxySite) may still show their **header/ads** and struggle to stay in **Desktop Mode** inside the iFrame. **Use 'Open in New Tab'** for the most reliable desktop view.
     </div>
 
-    <div class="grid" id="grid"></div>
+    <div class="grid-container" id="gridContainer">
+        <div class="grid-row grid-row-3" id="row1"></div>
+        <div class="grid-row grid-row-3" id="row2"></div>
+        <div class="grid-row grid-row-4" id="row3"></div>
+    </div>
     
     <div class="tool-description">
-        <h2>Guidance for Accurate Testing</h2>
-        <p style="font-size:14px; color:#555; margin-bottom:15px;">The following steps ensure you get the most accurate, desktop-optimized view of your website through the selected proxies:</p>
+        <h2>Control and View Guidance</h2>
+        <p style="font-size:14px; color:#555; margin-bottom:15px;">The layout is now 3-3-4 and slots are bigger (400px height). Control your experience using the buttons below each frame:</p>
         <ul>
-            <li>**Primary Action:** Paste your URL above and click **'Load in all slots'**. This assigns a proxy and URL to each slot.</li>
-            <li>**Desktop View Guarantee:** Since iFrame slots often display mobile/ads, click the **'Desktop View (New Tab)'** button in each slot. This opens the URL directly via the proxy in a new browser tab, which is the only way to guarantee a full desktop view with the proxy active.</li>
-            <li>**Proxy Selection:** Use the dropdown in each slot to cycle between the three available proxies (Naproxy, Flyproxy, ProxySite) plus Direct link.</li>
-            <li>**Proxies Available:** **ProxySite.com, Flyproxy.com, and Naproxy.com** are included as requested.</li>
+            <li>**Desktop View (New Tab):** Click this for the most reliable, full-screen desktop view of your URL through the selected proxy.</li>
+            <li>**Reload iFrame:** Use this to refresh the content inside the current slot if it fails to load or freezes.</li>
+            <li>**Select Box:** Change the proxy used for that specific slot (Naproxy, Flyproxy, ProxySite, or Direct).</li>
         </ul>
-        <p style="font-size:12px; color:var(--muted); margin-top:15px;">**Slot Height:** The height of each slot is set to **334px** as requested for better visibility.</p>
     </div>
     </div>
 
 <script>
 /* ------------------------
-   Provider URL templates (Requested Proxies + Desktop Mode parameters)
+   Provider URL templates (Naproxy, Flyproxy, ProxySite)
    ------------------------ */
 const providerTemplates = {
-  // Direct option
   "Direct": (t) => t,
-  
-  // ProxySite format: Using view=desktop
   "ProxySite": (t) => {
+    // view=desktop parameter
     return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}&d=us&view=desktop`;
   },
-  
-  // FlyProxy format: Using the standard URL= query and trying to enforce desktop mode
   "FlyProxy": (t) => {
+    // desktop=1 parameter
     return `https://www.flyproxy.com/?url=${encodeURIComponent(t)}&desktop=1`; 
   },
-  
-  // NAProxy format: Using the standard URL= query and trying to enforce desktop mode
   "NAProxy": (t) => {
+    // desktop=1 parameter
     return `https://www.naproxy.com/?url=${encodeURIComponent(t)}&desktop=1`; 
   }
 };
 
-/* default provider assignments for 8 slots (Alternating three proxies) */
-const defaultProviders = ["ProxySite","FlyProxy","NAProxy","ProxySite","FlyProxy","NAProxy","ProxySite","FlyProxy"];
+/* default provider assignments for 10 slots (Alternating three proxies) */
+const defaultProviders = [
+    "ProxySite", "FlyProxy", "NAProxy",  // Row 1 (3 slots)
+    "ProxySite", "FlyProxy", "NAProxy",  // Row 2 (3 slots)
+    "ProxySite", "FlyProxy", "NAProxy", "Direct" // Row 3 (4 slots)
+];
 const availableProviders = ["ProxySite", "FlyProxy", "NAProxy", "Direct"];
 
-const grid = document.getElementById('grid');
+const row1 = document.getElementById('row1');
+const row2 = document.getElementById('row2');
+const row3 = document.getElementById('row3');
 const globalUrlInput = document.getElementById('globalUrl');
 
 function createSlot(index, defaultProvider){
@@ -260,12 +262,10 @@ function createSlot(index, defaultProvider){
       `<option value="${p}" ${p === defaultProvider ? 'selected' : ''}>${p}</option>`
   ).join('');
 
-  // Slot HTML (Select box added back)
+  // Slot HTML (iFrame is back)
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">
-        Slot ${index+1} 
-      </div>
+      <div class="slot-title">Slot ${index+1}</div>
       <div class="slot-url-display" id="slot-url-display-${index}"></div>
     </div>
 
@@ -290,7 +290,15 @@ function createSlot(index, defaultProvider){
       </div>
     </div>
   `;
-  grid.appendChild(el);
+  
+  // Append to the correct row
+  if (index < 3) {
+      row1.appendChild(el);
+  } else if (index < 6) {
+      row2.appendChild(el);
+  } else {
+      row3.appendChild(el);
+  }
 
   // references
   const prov = el.querySelector(`#provider-${index}`);
@@ -353,7 +361,7 @@ function createSlot(index, defaultProvider){
   });
 
   iframe.addEventListener('load', ()=>{
-    setStatus('loaded (check new tab)');
+    setStatus('loaded (check iFrame)');
     ping.style.display = 'inline-block';
     setTimeout(()=> ping.style.display = 'none', 1200);
   });
@@ -361,9 +369,9 @@ function createSlot(index, defaultProvider){
   return { loadUrl, prov }; 
 }
 
-// create 8 slots
+// create 10 slots
 const slots = [];
-for(let i=0;i<8;i++){
+for(let i=0;i<10;i++){
   const slot = createSlot(i, defaultProviders[i]);
   slots.push(slot);
 }
