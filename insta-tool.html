@@ -12,7 +12,7 @@
             background-color: #f4f7f9;
         }
         .primary-button {
-            background-color: #ec4899; /* Pink color for Generate button */
+            background-color: #ec4899; 
             transition: background-color 0.2s ease, transform 0.1s ease;
         }
         .primary-button:hover {
@@ -78,11 +78,11 @@
 
     <script>
         // *** CRITICAL: YOUR RENDER BACKEND URL IS SET HERE ***
-        const API_BASE_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com'; 
+        const API_BASE_URL = 'https://pooreyoutuber-github.io-blmp.onrender.com'; 
 
         const statusMessage = document.getElementById('status-message');
         const generateButton = document.getElementById('generate-button');
-        const captionsOutput = document.getElementById('captions-output'); // The new element
+        const captionsOutput = document.getElementById('captions-output'); 
 
         function displayStatus(message, type = 'info') {
             statusMessage.textContent = message;
@@ -101,7 +101,6 @@
         async function generateCaptions() {
             const description = document.getElementById('description').value.trim();
             const style = document.getElementById('style').value;
-            const count = parseInt(document.getElementById('count').value, 10);
             
             if (!description) {
                 displayStatus('Error: Please enter a reel topic/title.', 'error');
@@ -110,39 +109,48 @@
 
             generateButton.disabled = true;
             generateButton.textContent = 'Generating...';
-            captionsOutput.innerHTML = ''; // Clear previous results
+            captionsOutput.innerHTML = ''; 
             displayStatus('Requesting captions from AI Backend. Please wait...', 'info');
 
             try {
-                const promptDescription = `${description} (Style: ${style})`;
-
+                // Correct API endpoint
                 const response = await fetch(`${API_BASE_URL}/api/caption-generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        description: promptDescription, 
-                        count: count 
+                        description: description, 
+                        style: style             
                     })
                 });
 
-                const result = await response.json();
-
                 if (!response.ok) {
-                    const errorMessage = result.error || 'Unknown server error.';
-                    throw new Error(`HTTP Error: ${response.status}. Detail: ${errorMessage}`);
+                    let errorMessage = `Server Status ${response.status}`;
+                    try {
+                        const errorBody = await response.json();
+                        errorMessage = errorBody.error || errorMessage;
+                    } catch (e) {
+                        errorMessage = await response.text();
+                        errorMessage = `HTTP Error: Unexpected response (starts with: ${errorMessage.substring(0, 50)})`;
+                    }
+                    throw new Error(errorMessage);
                 }
                 
-                // 4. Success and Display Logic (FIXED LOGIC)
+                const result = await response.json(); 
+
+                // Success and Display Logic
                 displayStatus('Captions generated successfully!', 'success');
                 
                 if (result && result.captions && Array.isArray(result.captions)) {
                     let htmlContent = '<h3 class="text-lg font-bold text-gray-800 mb-3">Generated Captions (Copy & Use)</h3>';
                     
-                    result.captions.forEach((caption, index) => {
+                    result.captions.forEach((item, index) => {
+                        // FIX: Using item.caption to display the actual text
+                        const captionText = item.caption || `Error: No caption text found for item ${index + 1}`;
+                        
                         htmlContent += `
                             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-3">
                                 <p class="text-sm font-semibold text-pink-600 mb-1">Caption ${index + 1}:</p>
-                                <textarea rows="4" class="w-full text-gray-700 p-2 border border-gray-300 rounded-md focus:outline-none" readonly>${caption}</textarea>
+                                <textarea rows="4" class="w-full text-gray-700 p-2 border border-gray-300 rounded-md focus:outline-none" readonly>${captionText}</textarea>
                                 <button onclick="navigator.clipboard.writeText(this.previousElementSibling.value)" class="mt-2 text-xs font-medium text-white bg-pink-500 hover:bg-pink-600 px-3 py-1 rounded-full transition">Copy Caption</button>
                             </div>
                         `;
@@ -150,12 +158,12 @@
                     
                     captionsOutput.innerHTML = htmlContent;
                 } else {
-                    displayStatus('Warning: Backend returned success, but no captions were found. Try again.', 'error');
+                    displayStatus('Warning: Backend returned success, but the data format was unexpected. Try again.', 'error');
                 }
 
             } catch (error) {
                 console.error("Caption Generation Error:", error);
-                displayStatus(`❌ Generation Failed. **Backend is down or key is missing**. Error: HTTP Error: ${error.message}`, 'error');
+                displayStatus(`❌ Generation Failed. Error: ${error.message}. (Server might be sleeping. Try again in 30s).`, 'error');
             } finally {
                 generateButton.disabled = false;
                 generateButton.textContent = 'Generate 10 Captions';
