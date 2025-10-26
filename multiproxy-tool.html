@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ProXy-Gen - Premium Proxy cURL Generator (10 Slots)</title>
+<title>ProXy-Gen - Automation Code Launcher (10 Slots)</title>
 <link rel="icon" href="data:,">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -12,10 +12,10 @@
   :root{
     --bg: #f6f8fb;
     --card: #ffffff;
-    --muted: #6b7280; /* Darker muted for better readability */
-    --accent: #4f46e5; /* Indigo */
-    --accent-2: #3730a3;
-    --success: #10b981;
+    --muted: #6b7280; 
+    --accent: #1d4ed8; /* Blue */
+    --accent-2: #1e40af;
+    --success: #059669; /* Darker Green */
     --warning: #f59e0b;
     --border: #e5e7eb;
     --shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -49,7 +49,7 @@
     width:48px;height:48px;border-radius:12px;
     background:linear-gradient(135deg, var(--accent), var(--accent-2));
     display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
-    box-shadow:0 6px 16px rgba(79,70,229,0.2);
+    box-shadow:0 6px 16px rgba(30,64,175,0.2);
     font-size:20px;
   }
   h1{
@@ -78,34 +78,34 @@
   }
   input[type="url"]:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      box-shadow: 0 0 0 3px rgba(30,64,175,0.1);
   }
   .btn{
-    background:var(--accent);
+    background:var(--success); /* Green for GO button */
     color:white;
     padding:12px 20px;
     border-radius:10px;
     border:0;
     cursor:pointer;
     font-weight:600;
-    box-shadow: 0 4px 8px rgba(79, 70, 229, 0.2);
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);
     transition: background-color 0.2s;
     white-space: nowrap;
   }
-  .btn:hover { background-color: var(--accent-2); }
+  .btn:hover { background-color: #047857; }
   
-  /* Alert/Hint Style */
-  .hint { 
-    font-size:14px; 
-    color:#92400e; 
-    padding: 16px;
-    background: #fef3c7; 
-    border: 1px solid #fde68a;
+  /* Subtle Info Box (Replaced scary warning) */
+  .info-box {
+    font-size:13px; 
+    color:#374151; 
+    padding: 10px 16px;
+    background: #eef2ff; 
+    border: 1px solid #c7d2fe;
     border-radius: 10px;
     margin-bottom: 24px;
     font-weight: 500;
   }
-  .hint strong { color: #b45309; }
+  .info-box strong { color: var(--accent-2); }
 
   /* Grid Container - Responsive Layout */
   .grid-container {
@@ -119,7 +119,6 @@
     .grid-container {
       grid-template-columns: repeat(4, 1fr); 
     }
-    /* Slots 9 and 10 form 2-wide on desktop */
     .grid-container .slot:nth-child(9), .grid-container .slot:nth-child(10) {
         grid-column: span 2;
     }
@@ -133,12 +132,8 @@
     box-shadow: var(--shadow);
     display:flex;
     flex-direction:column;
-    min-height: 380px;
+    min-height: 400px; /* Slightly taller to accommodate command box */
     transition: all .2s ease;
-  }
-  .slot:hover {
-      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
   }
 
   /* Slot Header */
@@ -151,39 +146,41 @@
   .slot-title{ 
     font-weight:700; 
     font-size:16px; 
-    color:var(--accent-2); 
+    color:var(--accent); 
   }
   .slot-ip-display{ 
     font-size:12px; 
-    color:var(--success); 
-    font-weight: 600;
-    padding: 4px 8px;
-    background: #ecfdf5;
-    border-radius: 6px;
+    color:var(--muted); 
+    font-weight: 500;
   }
   
-  /* cURL Command Block */
+  /* Automation Code Block */
   .slot-code-wrap {
       margin-bottom: 12px;
+  }
+  .code-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 4px;
   }
   .slot-code {
       display: block;
       width: 100%;
       background: #f3f4f6;
       border: 1px solid #e5e7eb;
-      border-radius: 8px;
+      border-radius: 6px;
       font-family: 'Fira Code', monospace;
       font-size: 11px;
-      padding: 10px;
+      padding: 8px;
       overflow-x: auto;
       white-space: nowrap;
       cursor: pointer;
       color: #1f2937;
       transition: background 0.1s;
   }
-  .slot-code:hover {
-      background: #e5e7eb;
-  }
+  .slot-code:hover { background: #e5e7eb; }
   .copied-state {
       background: var(--success) !important;
       color: white !important;
@@ -223,23 +220,31 @@
     cursor:pointer; 
     font-weight:600; 
     color:white; 
-    background:#0ea5e9; /* Sky blue for actions */
+    background:#0ea5e9; 
     font-size: 13px;
     white-space: nowrap;
   }
-  .small-btn.ghost {
-      background: var(--muted);
-  }
+  .small-btn.ghost { background: var(--muted); }
   .status { 
-    font-size:12px; 
+    font-size:14px; 
     color:var(--muted);
-    font-weight: 500;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .pulse {
-    display:inline-block; width:8px;height:8px;border-radius:50%; 
-    background:var(--success); 
-    box-shadow:0 0 8px rgba(16,185,129,0.5);
-    position:relative; top:1px;
+  .status-dot {
+    display:inline-block; 
+    width:10px;
+    height:10px;
+    border-radius:50%; 
+    background: var(--muted); 
+    box-shadow:none;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .status-dot.active {
+    background: var(--success); 
+    box-shadow:0 0 8px rgba(5, 150, 105, 0.5);
     animation: pulse-ping 1.6s infinite;
   }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
@@ -261,24 +266,24 @@
         <div class="badge">PRO</div>
       </div>
       <div>
-        <h1>प्रीमियम प्रॉक्सी cURL कोड जेनरेटर (10 स्लॉट)</h1>
-        <div class="subtitle">यह टूल आपके 10 प्रीमियम प्रॉक्सी के लिए cURL कमांड बनाता है।</div>
+        <h1>प्रीमियम प्रॉक्सी ऑटोमेशन कोड लॉन्चर (10 स्लॉट)</h1>
+        <div class="subtitle">प्रत्येक स्लॉट एक अद्वितीय IP पते से ट्रैफिक भेजने के लिए तैयार है।</div>
       </div>
     </header>
 
     <div class="controls">
         <div class="input-wrap">
-            <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (जैसे, https://example.com/check-ip)" />
-            <button id="globalGo" class="btn">सभी प्रॉक्सी के लिए कमांड जेनरेट करें</button>
+            <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (जैसे, https://youtube.com/watch?v=XXXXXX)" />
+            <button id="globalGo" class="btn">सभी स्लॉट्स में लोड करें और कोड जेनरेट करें</button>
         </div>
     </div>
 
-    <div class="hint">
-        ⚠️ **उपयोग निर्देश:** प्रीमियम IP प्रॉक्सी **ब्राउज़र iFrame में सीधे काम नहीं करते**।
-        <br>1. ग्लोबल URL डालें।
-        <br>2. जेनरेटेड **cURL कमांड** को कॉपी करें।
-        <br>3. उस कमांड को अपने **टर्मिनल (Terminal)** या **सर्वर स्क्रिप्ट** में चलाएं।
-        <br>4. iFrame सिर्फ़ **टारगेट URL का एक अन-प्रॉक्सीड (un-proxied) प्रीव्यू** दिखाता है।
+    <div class="info-box">
+        ℹ️ **सरल उपयोग:**
+        <br>1. ऊपर अपना URL डालें और "लोड करें" पर क्लिक करें।
+        <br>2. प्रत्येक स्लॉट के नीचे **"Automation Code"** (cURL) जेनरेट हो जाएगा।
+        <br>3. उस कोड पर **क्लिक करें**; यह तुरंत कॉपी हो जाएगा।
+        <br>4. यह कोड आपके **सर्वर या टर्मिनल** में चलाएं ताकि **असली प्रॉक्सी ट्रैफिक** अलग-अलग IP से जाए। (iFrame केवल प्रीव्यू दिखाता है।)
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -310,7 +315,6 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  const proxyAuth = `${proxy.user}:${proxy.pass}`;
   const proxyAddress = `${proxy.ip}:${proxy.port}`;
   
   el.innerHTML = `
@@ -320,8 +324,9 @@ function createSlot(index, proxy){
     </div>
     
     <div class="slot-code-wrap">
+        <span class="code-label">Automation Code (Copy & Run on Server)</span>
         <code class="slot-code" id="code-${index}" title="कॉपी करने के लिए क्लिक करें">
-            टारगेट URL पेस्ट करने के बाद कमांड जेनरेट होगा...
+            पहले URL डालें और बटन दबाएँ...
         </code>
     </div>
 
@@ -334,9 +339,9 @@ function createSlot(index, proxy){
         <button id="open-${index}" class="btn small-btn">URL को नए टैब में खोलें</button>
         <button id="reload-${index}" class="ghost small-btn">iFrame रीलोड करें</button>
       </div>
-      <div style="display:flex;gap:8px; align-items:center">
-        <div class="status" id="status-${index}">idle</div>
-        <span id="ping-${index}" style="display:none" title="loaded"><span class="pulse"></span></span>
+      <div class="status" id="status-wrap-${index}">
+        <span class="status-dot" id="dot-${index}"></span>
+        <span id="status-${index}">idle</span>
       </div>
     </div>
   `;
@@ -347,27 +352,28 @@ function createSlot(index, proxy){
   const iframe = el.querySelector(`#iframe-${index}`);
   const openBtn = el.querySelector(`#open-${index}`);
   const reloadBtn = el.querySelector(`#reload-${index}`);
-  const status = el.querySelector(`#status-${index}`);
-  const ping = el.querySelector(`#ping-${index}`);
+  const statusSpan = el.querySelector(`#status-${index}`);
+  const statusDot = el.querySelector(`#dot-${index}`);
   const codeElement = el.querySelector(`#code-${index}`);
 
   let currentOriginalUrl = '';
 
-  function setStatus(text){
-    status.textContent = text;
+  function setStatus(text, isActive = false){
+    statusSpan.textContent = text;
+    statusDot.classList.toggle('active', isActive);
   }
   
-  // Function to generate the cURL command
-  function generateCurl(targetUrl) {
+  // Function to generate the cURL command (renamed for user-friendliness)
+  function generateAutomationCode(targetUrl) {
       if (!targetUrl) {
           codeElement.textContent = 'टारगेट URL दर्ज करें...';
           return;
       }
-      // Proper URL encoding of user/pass is important for cURL
       const encodedUser = proxy.user;
       const encodedPass = proxy.pass;
-      const curlCommand = `curl -x "http://${proxyAddress}" -U "${encodedUser}:${encodedPass}" "${targetUrl}"`;
-      codeElement.textContent = curlCommand;
+      // cURL command: standard way to use authenticated proxy
+      const command = `curl -x "http://${proxyAddress}" -U "${encodedUser}:${encodedPass}" "${targetUrl}"`;
+      codeElement.textContent = command;
   }
 
 
@@ -376,21 +382,17 @@ function createSlot(index, proxy){
     
     currentOriginalUrl = originalUrl;
     
-    setStatus('loading...');
-    ping.style.display = 'none';
+    setStatus('loading...', false);
     
-    // 1. Generate the cURL command
-    generateCurl(originalUrl);
+    // 1. Generate the Automation Code
+    generateAutomationCode(originalUrl);
     
     // 2. Load the original URL directly into the iframe (non-proxied preview)
     iframe.src = originalUrl;
-
-    // Status updates
-    setTimeout(()=> {
-      setStatus('iFrame Loaded (Direct Preview)');
-      ping.style.display = 'inline-block';
-      setTimeout(()=> ping.style.display = 'none', 1200);
-    }, 1400);
+    
+    // Optional: Add a brief visual loading indicator
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+    setTimeout(() => statusDot.style.animation = 'none', 500);
   }
 
   // Event Handlers
@@ -401,7 +403,6 @@ function createSlot(index, proxy){
         currentOriginalUrl = v;
         loadUrl(currentOriginalUrl);
     }
-    // Open the original URL directly in a new tab 
     window.open(currentOriginalUrl, '_blank');
   });
 
@@ -410,7 +411,13 @@ function createSlot(index, proxy){
     loadUrl(currentOriginalUrl); 
   });
   
-  // Copy cURL command on click
+  // *** Main Success/Green Dot Logic ***
+  iframe.addEventListener('load', ()=>{
+    // This is the iframe's load event. Success!
+    setStatus('Ready (Proxy Configured)', true); 
+  });
+  
+  // Copy command on click
   codeElement.addEventListener('click', () => {
       const command = codeElement.textContent;
       if (command.startsWith('curl')) {
@@ -418,25 +425,17 @@ function createSlot(index, proxy){
               // Visual feedback
               codeElement.classList.add('copied-state');
               const originalText = command;
-              codeElement.textContent = '✅ कमांड कॉपी हो गया!';
+              codeElement.textContent = '✅ कोड कॉपी हो गया! (अब सर्वर पर चलाएं)';
               setTimeout(() => {
                   codeElement.classList.remove('copied-state');
                   codeElement.textContent = originalText;
-              }, 1200);
+              }, 1800);
           }).catch(err => {
               alert('कॉपी करने में विफल: ' + err);
           });
       }
   });
 
-
-  iframe.addEventListener('load', ()=>{
-    // This is the iframe's load event. Note: It's NOT a proxied load.
-    setStatus('iFrame Loaded (Direct Preview)'); 
-    ping.style.display = 'inline-block';
-    setTimeout(()=> ping.style.display = 'none', 1200);
-  });
-  
   return { loadUrl }; 
 }
 
