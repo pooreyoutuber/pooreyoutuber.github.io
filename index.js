@@ -1,7 +1,8 @@
-// index.js (FINAL STABLE CODE with AI Secret Key Fix and Real View Simulation)
+// index.js (FINAL STABLE CODE with AI Key Fix and Real View Simulation)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
+// CRITICAL FIX: node-fetch v2.6.7 requires this simple require call
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
@@ -16,7 +17,7 @@ try {
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback to Environment Variable (for local or if Secret file fails)
+    // Fallback to Environment Variable
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -52,18 +53,19 @@ const geoLocations = [
     { country: "United States", region: "California" },
     { country: "India", region: "Maharashtra" },
     { country: "Germany", region: "Bavaria" },
-    // ... add more locations if desired
+    { country: "Japan", region: "Tokyo" },
 ];
 function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
 }
 
 
-// --- GA4 DATA SENDING ---
+// --- GA4 DATA SENDING (PROXY REMOVED) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
     try {
+        // CRITICAL FIX: Removed proxy for GA4 call as it often causes connection failures.
         const response = await nodeFetch(gaEndpoint, { 
             method: 'POST',
             body: JSON.stringify(payload),
@@ -79,7 +81,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             return { success: false };
         }
     } catch (error) {
-        // This is the CRITICAL ERROR you were seeing, fixed by package.json change
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
         return { success: false };
     }
@@ -87,7 +88,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 
 // --- VIEW PLAN GENERATION ---
 function generateViewPlan(totalViews, pages) {
-    // ... (This function remains the same)
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
     
@@ -147,27 +147,25 @@ app.post('/boost-mp', async (req, res) => {
 
                 // --- REAL VIEW SIMULATION STEPS ---
 
-                // STEP 1: Search Simulation (Less realistic page_view, but shows intent)
-                // Sending a custom event 'search' from Google/External source.
+                // STEP 1: Search Simulation (Simulating arrival from Google)
                 await sendData(ga_id, api_key, { 
                     client_id: CLIENT_ID, 
                     user_properties: commonUserProperties, 
                     events: [{ 
-                        name: 'search', 
+                        name: 'session_start', 
                         params: { 
                             session_id: SESSION_ID, 
-                            search_term: search_keyword || 'website boost tool',
-                            // Mimic search engine as referral source
-                            page_referrer: 'https://www.google.com/',
+                            _ss: 1,
+                            // Mimic Google as referral source
+                            page_referrer: 'https://www.google.com/', 
                         } 
                     }] 
-                }, i + 1, 'search');
+                }, i + 1, 'session_start');
 
                 // Delay for search/landing time (2-5 seconds)
                 await new Promise(resolve => setTimeout(resolve, randomInt(2000, 5000)));
 
                 // STEP 2: Actual Page View (The "Click")
-                // Simulate landing on the target page after the "search"
                 const engagementTime = randomInt(30000, 90000); // 30-90 seconds engagement
                 const pageViewPayload = {
                     client_id: CLIENT_ID,
@@ -184,8 +182,8 @@ app.post('/boost-mp', async (req, res) => {
                 };
                 const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
                 
-                // Delay for session duration (this is the key to slow, real simulation)
-                await new Promise(resolve => setTimeout(resolve, randomInt(3000, 7000))); // Small delay to simulate scrolling/activity
+                // Delay for user activity (scrolling/reading)
+                await new Promise(resolve => setTimeout(resolve, randomInt(3000, 7000)));
 
                 // STEP 3: User Engagement (The "Scrolling/Activity")
                 await sendData(ga_id, api_key, { 
@@ -200,8 +198,7 @@ app.post('/boost-mp', async (req, res) => {
                     }] 
                 }, i + 1, 'user_engagement');
 
-                // FINAL DELAY (The 4-5 second break you requested)
-                // This ensures the next user doesn't start too quickly
+                // FINAL DELAY (Break before next user starts)
                 await new Promise(resolve => setTimeout(resolve, getRandomDelay(4000, 6000))); 
                 
                 return pageViewResult.success;
@@ -228,16 +225,17 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
     
-    const { reelTitle, style } = req.body;
+    // CRITICAL FIX: Extract 'description' and 'style' to match your HTML form
+    const { description, style } = req.body;
 
-    if (!reelTitle) {
-        return res.status(400).json({ error: 'Reel topic (reelTitle) is required.' });
+    if (!description) {
+        return res.status(400).json({ error: 'Reel topic (description) is required.' });
     }
     
-    const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${reelTitle}". The style should be: "${style || 'Catchy and Funny'}". 
+    const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${description}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
-The final output MUST be a JSON array of objects, where each object has a single key called 'caption'. Include 5 relevant and trending hashtags with each caption, separated from the text by a new line.`;
+For each caption, provide exactly 5 trending, high-reach, and relevant hashtags. The final output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
 
 
     try {
