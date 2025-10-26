@@ -188,21 +188,20 @@
    ------------------------ */
 const providerTemplates = {
   "Direct": (t) => t,
-  // Common guessed templates. YOU CAN ADJUST THEM.
+  // ProxySite ka template: Target URL ko 'u=' parameter mein daalta hai
   "ProxySite": (t) => {
-    // Example: proxysite tends to use index.php?u= or /# with URL - adjust if needed
-    // return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}&b=4`;
+    // encodeURIComponent(t) zaroori hai URL ko surakshit banane ke liye
     return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}`;
   },
+  // Proxyium ka template: Target URL ko 'q=' parameter mein daalta hai
   "Proxyium": (t) => {
-    // Adjust to real pattern if you know it. This is a guessed template.
-    // return `https://proxyium.com/index.php?url=${encodeURIComponent(t)}`;
     return `https://proxyium.com/?q=${encodeURIComponent(t)}`;
   }
 };
 
 /* default provider assignments for 8 slots */
-const defaultProviders = ["Proxyium","ProxySite","Direct","ProxySite","Proxyium","ProxySite","Direct","Proxyium"];
+// Aapki pasand ka default distribution (Proxyium, ProxySite, Direct ka mix)
+const defaultProviders = ["Proxyium","ProxySite","Direct","ProxySite","Proxyium","Direct","Proxyium","Proxyium"];
 
 const grid = document.getElementById('grid');
 
@@ -258,20 +257,21 @@ function createSlot(index, defaultProvider){
     status.textContent = text;
   }
 
-  function loadUrl(url){
-    if(!url) return;
+  // loadUrl function ab original URL leta hai aur proxy template lagata hai
+  function loadUrl(originalUrl){
+    if(!originalUrl) return;
     setStatus('loading...');
     ping.style.display = 'none';
     embedHint.textContent = 'embed';
     const provider = prov.value || 'Direct';
-    const final = (providerTemplates[provider] || providerTemplates['Direct'])(url);
-    lastUrl = final;
+    
+    // Original URL, provider ke template ke through format hokar final URL ban raha hai
+    const finalProxyUrl = (providerTemplates[provider] || providerTemplates['Direct'])(originalUrl);
+    
+    lastUrl = finalProxyUrl; // lastUrl mein ab proxy-formatted URL save hoga
 
-    // set iframe src and set up timeout to detect possible embed-block
-    iframe.src = final;
-
-    // If the frame contentWindow is accessible it might be same-origin (rare).
-    // Otherwise we rely on timeouts and visual cue + "Open in new tab" fallback.
+    // set iframe src
+    iframe.src = finalProxyUrl;
 
     // set a 2s grace then mark attempted, 5s to mark possible-block
     setTimeout(()=> {
@@ -283,11 +283,7 @@ function createSlot(index, defaultProvider){
 
     // after 4s, if frame height is still blank, show hint to use new tab
     setTimeout(()=> {
-      // try to infer if iframe blocked (we can't access document due to cross-origin)
-      // So we check readyState via onload fallback: if cannot detect onload, we show hint.
-      // We'll use a lightweight heuristic: if iframe contentWindow length is 0 and still blank, show hint
       try {
-        // This will throw for cross-origin, so it's defensive
         if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
           embedHint.textContent = 'embedded';
         } else {
@@ -310,6 +306,7 @@ function createSlot(index, defaultProvider){
     const v = input.value || document.getElementById('globalUrl').value;
     if(!v) return alert('Paste a URL in the slot or the global input first.');
     const provider = prov.value || 'Direct';
+    // New tab mein open karne ke liye bhi template use hoga
     const final = (providerTemplates[provider] || providerTemplates['Direct'])(v.trim());
     window.open(final, '_blank');
   });
@@ -330,17 +327,15 @@ function createSlot(index, defaultProvider){
     ping.style.display = 'inline-block';
     setTimeout(()=> ping.style.display = 'none', 1200);
     try {
-      // if same-origin, check if body has content
       if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
         embedHint.textContent = 'embedded';
       }
     } catch(e){
       // cross-origin - we can't inspect
-      // keep embedHint as it was
     }
   });
 
-  return { prov, input, goBtn, openBtn, reloadBtn, iframe, setStatus };
+  return { prov, input, goBtn, openBtn, reloadBtn, iframe, setStatus, loadUrl };
 }
 
 // create 8 slots
@@ -353,15 +348,19 @@ for(let i=0;i<8;i++){
 // global actions
 document.getElementById('globalGo').addEventListener('click', ()=>{
   const url = document.getElementById('globalUrl').value.trim();
-  if(!url){ alert('Paste a URL in the global field first'); return; }
-  // set each slot input and invoke go
+  if(!url){ alert('Please paste a URL in the global field first.'); return; }
+  
+  // Har slot ke liye URL ko process karo
   slots.forEach(s => {
-    s.input.value = url;
-    s.goBtn.click();
+    // 1. Slot ke input field mein URL set karo (bas dikhane ke liye)
+    s.input.value = url; 
+    
+    // 2. loadUrl ko original URL do, aur yeh khud hi proxy template use karke load karega
+    s.loadUrl(url); 
   });
 });
 
-// quick-set buttons
+// quick-set buttons (same as before)
 document.getElementById('setAllProxyium').addEventListener('click', ()=>{
   slots.forEach(s => s.prov.value = 'Proxyium');
 });
