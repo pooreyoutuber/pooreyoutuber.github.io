@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PY Tools — Multi Proxy Browser (3-3-4 Layout)</title>
+<title>PY Tools — Multi Proxy Browser (8 Slots, Webshare Placeholder)</title>
 <link rel="icon" href="data:,">
 <style>
-  /* CSS Styles - Larger Slots and Custom Grid */
+  /* CSS Styles - Larger Slots and 4x4 Grid */
   :root{
     --bg: #f6f8fb;
     --card: #ffffff;
@@ -87,26 +87,14 @@
     margin-bottom: 20px;
   }
 
-  /* Custom Grid for 3-3-4 Layout */
+  /* 4x4 Grid */
   .grid-container {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--gap);
     margin-top: 18px;
   }
-  .grid-row {
-    display: grid;
-    gap: var(--gap);
-  }
-  /* First two rows: 3 columns */
-  .grid-row-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  /* Last row: 4 columns */
-  .grid-row-4 {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
+  
   /* Slot Styles - Increased Height */
   .slot{
     background:var(--card);
@@ -115,7 +103,6 @@
     box-shadow: var(--shadow);
     display:flex;
     flex-direction:column;
-    /* Increased minimum height to make the view bigger */
     min-height:400px; 
     transition:transform .22s ease, box-shadow .22s ease;
   }
@@ -150,7 +137,6 @@
   iframe{ 
     width:100%; height:100%; border:0; display:block; 
     background:white; 
-    /* Force initial scroll to show top content */
     overflow: auto; 
   }
   .slot-footer{ 
@@ -187,8 +173,8 @@
         <div class="badge">PY</div>
       </div>
       <div>
-        <h1>PooreYouTuber Tools — Multi Proxy Browser</h1>
-        <div class="subtitle">10 Slots: Control and view your URL through different proxy servers in a large iFrame.</div>
+        <h1>PooreYouTuber Tools — Multi Proxy Browser (8 Slots)</h1>
+        <div class="subtitle">Use 8 slots for testing. **'Webshare Proxy' requires manual activation in your browser.**</div>
       </div>
     </header>
 
@@ -200,23 +186,21 @@
     </div>
 
     <div class="hint">
-        ⚠️ **IMPORTANT WARNING:** The larger slot size allows more control, but public proxies (Naproxy, Flyproxy, ProxySite) may still show their **header/ads** and struggle to stay in **Desktop Mode** inside the iFrame. **Use 'Open in New Tab'** for the most reliable desktop view.
+        💡 **Webshare Proxy Placeholder:** Slots labeled 'Webshare Proxy' will load the URL directly. **You must manually activate your Webshare proxy in your browser settings or a third-party extension** to use it for that slot.
     </div>
 
     <div class="grid-container" id="gridContainer">
-        <div class="grid-row grid-row-3" id="row1"></div>
-        <div class="grid-row grid-row-3" id="row2"></div>
-        <div class="grid-row grid-row-4" id="row3"></div>
-    </div>
+        </div>
     
     <div class="tool-description">
-        <h2>Control and View Guidance</h2>
-        <p style="font-size:14px; color:#555; margin-bottom:15px;">The layout is now 3-3-4 and slots are bigger (400px height). Control your experience using the buttons below each frame:</p>
+        <h2>Control and View Guidance (8 Slots)</h2>
+        <p style="font-size:14px; color:#555; margin-bottom:15px;">The layout is 4x4 (8 total slots) and slots are large (400px height) for better control:</p>
         <ul>
+            <li>**ProxySite, FlyProxy, NAProxy:** These are public web proxies that work automatically.</li>
+            <li>**Webshare Proxy:** This slot will load your URL **Directly**. If you want this slot to use your Webshare service, you must first enable your Webshare proxy in your browser (e.g., using a **Proxy Switcher** extension).</li>
             <li>**Desktop View (New Tab):** Click this for the most reliable, full-screen desktop view of your URL through the selected proxy.</li>
-            <li>**Reload iFrame:** Use this to refresh the content inside the current slot if it fails to load or freezes.</li>
-            <li>**Select Box:** Change the proxy used for that specific slot (Naproxy, Flyproxy, ProxySite, or Direct).</li>
         </ul>
+        <p style="font-size:12px; color:var(--muted); margin-top:10px;">*The Webshare link in the select box is a placeholder for your manual activation.*</p>
     </div>
     </div>
 
@@ -225,7 +209,9 @@
    Provider URL templates (Naproxy, Flyproxy, ProxySite)
    ------------------------ */
 const providerTemplates = {
-  "Direct": (t) => t,
+  // Webshare Proxy is just the Direct URL, as manual activation is required
+  "Webshare Proxy": (t) => t, 
+  
   "ProxySite": (t) => {
     // view=desktop parameter
     return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}&d=us&view=desktop`;
@@ -240,17 +226,14 @@ const providerTemplates = {
   }
 };
 
-/* default provider assignments for 10 slots (Alternating three proxies) */
+/* default provider assignments for 8 slots (Alternating three public proxies + Webshare Placeholder) */
 const defaultProviders = [
-    "ProxySite", "FlyProxy", "NAProxy",  // Row 1 (3 slots)
-    "ProxySite", "FlyProxy", "NAProxy",  // Row 2 (3 slots)
-    "ProxySite", "FlyProxy", "NAProxy", "Direct" // Row 3 (4 slots)
+    "ProxySite", "FlyProxy", "NAProxy", "Webshare Proxy",  // Row 1 (4 slots)
+    "ProxySite", "FlyProxy", "NAProxy", "Webshare Proxy"   // Row 2 (4 slots)
 ];
-const availableProviders = ["ProxySite", "FlyProxy", "NAProxy", "Direct"];
+const availableProviders = ["ProxySite", "FlyProxy", "NAProxy", "Webshare Proxy"];
 
-const row1 = document.getElementById('row1');
-const row2 = document.getElementById('row2');
-const row3 = document.getElementById('row3');
+const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 
 function createSlot(index, defaultProvider){
@@ -291,14 +274,8 @@ function createSlot(index, defaultProvider){
     </div>
   `;
   
-  // Append to the correct row
-  if (index < 3) {
-      row1.appendChild(el);
-  } else if (index < 6) {
-      row2.appendChild(el);
-  } else {
-      row3.appendChild(el);
-  }
+  // Append to the 4x4 grid container
+  gridContainer.appendChild(el);
 
   // references
   const prov = el.querySelector(`#provider-${index}`);
@@ -369,9 +346,9 @@ function createSlot(index, defaultProvider){
   return { loadUrl, prov }; 
 }
 
-// create 10 slots
+// create 8 slots
 const slots = [];
-for(let i=0;i<10;i++){
+for(let i=0;i<8;i++){
   const slot = createSlot(i, defaultProviders[i]);
   slots.push(slot);
 }
