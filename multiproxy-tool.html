@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PY Tools — Multi Proxy Browser (Flyproxy, Naproxy, ProxySite)</title>
+<title>PY Tools — Multi Proxy Browser (Desktop View Focus)</title>
 <link rel="icon" href="data:,">
 <style>
   /* CSS Styles (Desktop Optimized Layout) */
@@ -102,20 +102,36 @@
   }
   .slot-top{
     display:flex; gap:8px; align-items:center; margin-bottom:10px;
+    justify-content: space-between;
   }
-  .slot-title{ font-weight:600; font-size:13px; color:#111827; }
-  .slot-controls{ display:flex; gap:8px; align-items:center; margin-bottom:10px; }
-  select{
-    padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:white; font-size:13px;
+  .slot-title{ 
+    font-weight:600; font-size:13px; color:#111827; 
+    display:flex; align-items:center; gap:6px;
   }
-  .slot-input{
-    flex:1; padding:9px 10px; border-radius:8px; border:1px solid var(--border); font-size:13px;
+  .slot-controls{ 
+    display:flex; gap:8px; align-items:center; 
+    margin-bottom:10px; 
   }
-  .small-btn{ padding:8px 10px; border-radius:8px; border:0; cursor:pointer; font-weight:600; color:white; background:#2f9cdb }
-  .iframe-wrap{ flex:1; border-radius:8px; overflow:hidden; background:#fcfdff; border:1px solid var(--border); position:relative; }
-  /* Forced desktop view for iFrame to be slightly wider */
+  .slot-url-display{ 
+    font-size:11px; color:var(--muted);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    flex:1;
+  }
+
+  .small-btn{ 
+    padding:8px 10px; border-radius:8px; border:0; cursor:pointer; 
+    font-weight:600; color:white; background:#2f9cdb 
+  }
+  .iframe-wrap{ 
+    flex:1; border-radius:8px; overflow:hidden; 
+    background:#fcfdff; border:1px solid var(--border); 
+    position:relative; 
+  }
   iframe{ width:100%; height:100%; border:0; display:block; background:white; }
-  .slot-footer{ display:flex; gap:8px; align-items:center; margin-top:10px; justify-content:space-between; }
+  .slot-footer{ 
+    display:flex; gap:8px; align-items:center; margin-top:10px; 
+    justify-content:space-between; 
+  }
   .status { font-size:12px; color:var(--muted) }
   .pulse {
     display:inline-block; width:8px;height:8px;border-radius:50%; background:#34d399; box-shadow:0 0 8px rgba(52,211,153,0.3);
@@ -168,49 +184,44 @@
       </div>
       <div>
         <h1>PooreYouTuber Tools — Multi Proxy Browser</h1>
-        <div class="subtitle">Open a URL across 8 proxied mini-browsers at once. Use per-slot provider selectors or set all at once.</div>
+        <div class="subtitle">Open a URL across 8 proxied mini-browsers at once. Focus on **Desktop View (New Tab)** for best results.</div>
       </div>
     </header>
 
     <div class="controls">
       <div class="left-controls">
         <div class="input-wrap">
-          <input id="globalUrl" type="url" placeholder="Paste the URL here (https://...) — then click Load in all slots" />
-          <button id="globalGo" class="btn">Load in all</button>
+          <input id="globalUrl" type="url" placeholder="Paste YOUR URL here (e.g., https://yourwebsite.com)" />
+          <button id="globalGo" class="btn">Load in all slots</button>
         </div>
-      </div>
-
-      <div class="quick-sets">
-        <button id="setAllProxySite" class="ghost">All → ProxySite</button>
-        <button id="setAllFlyProxy" class="ghost">All → FlyProxy</button>
-        <button id="setAllNAProxy" class="ghost">All → NAProxy</button>
       </div>
     </div>
 
-    <div class="hint">⚠️ **Important Note:** Public proxies **often block embedding (iFrame)**. If a slot is blank, it means the proxy (or the destination site) is blocking it. We enforce **Desktop Mode** via URL parameters, but the final view depends on the proxy server.</div>
+    <div class="hint">
+        ⚠️ **Important Note:** Public proxies often block embedding (iFrame). If a slot is blank, use the **Desktop View (New Tab)** button to open the URL directly through the proxy.
+    </div>
 
     <div class="grid" id="grid"></div>
     
     <div class="tool-description">
         <h2>Enhance Your Testing: Simulate Real User Behavior</h2>
-        <p style="font-size:14px; color:#555; margin-bottom:15px;">This **Multi Proxy Browser** is designed to help you test how your website performs and looks across different locations and browser settings, mimicking natural user behavior for genuine results.</p>
+        <p style="font-size:14px; color:#555; margin-bottom:15px;">This **Multi Proxy Browser** simulates real user traffic by routing your URL through different proxy servers, allowing you to test website performance and check analytics scripts.</p>
         <ul>
-            <li>**Multi-Country Views:** Each slot utilizes a different public proxy (**ProxySite, FlyProxy, NAProxy**) to simulate visitors coming from various geographical locations.</li>
-            <li>**Desktop Consistency:** All slots are optimized for **desktop view**, ensuring your full website layout, including any advertisements or analytics scripts, loads correctly and completely.</li>
-            <li>**Real Traffic Simulation:** By viewing your site through diverse proxies, you get a clearer picture of how real users experience your content globally.</li>
-            <li>**Easy Control:** Use the global URL input for quick testing across all slots, or manually select a specific proxy for each individual slot to target specific testing needs.</li>
+            <li>**Centralized URL Input:** Paste your URL once in the main input field and click **'Load in all slots'** to test across all proxies simultaneously.</li>
+            <li>**Desktop View Focus:** Since iFrame embedding is unreliable, use the **'Desktop View (New Tab)'** button to launch your URL through the selected proxy with forced desktop parameters.</li>
+            <li>**Proxy Variety:** Slots alternate between **ProxySite, FlyProxy, and NAProxy** to simulate visitors from varied locations and server types.</li>
+            <li>**Real-World Testing:** By checking your site through these diverse access points, you confirm that your content and ads are loading correctly for a global audience.</li>
         </ul>
-        <p style="font-size:12px; color:var(--muted); margin-top:15px;">**Tip:** If a slot remains blank, try clicking the **Reload** button or selecting **Open in new tab** to bypass iFrame blocking and confirm the proxy is working.</p>
+        <p style="font-size:12px; color:var(--muted); margin-top:15px;">**Trust Tip:** The proxy content shown inside the slots (like the proxy's own header or ads) confirms the proxy is active. For the actual website view, use the **New Tab** button.</p>
     </div>
-    <p style="margin-top:18px; font-size:13px; color:var(--muted)">Disclaimer: Public proxies can be slow or unreliable and are prone to blocking embedded content.</p>
-  </div>
+    </div>
 
 <script>
 /* ------------------------
-   Provider URL templates (Using requested proxies + Desktop Mode parameters)
+   Provider URL templates (Requested Proxies + Desktop Mode parameters)
    ------------------------ */
 const providerTemplates = {
-  // Direct option
+  // Direct option - Used for simple reload/open
   "Direct": (t) => t,
   
   // ProxySite format: Using view=desktop
@@ -231,40 +242,36 @@ const providerTemplates = {
 
 /* default provider assignments for 8 slots (Alternating three proxies) */
 const defaultProviders = ["ProxySite","FlyProxy","NAProxy","ProxySite","FlyProxy","NAProxy","ProxySite","FlyProxy"];
+const providerNames = ["ProxySite", "FlyProxy", "NAProxy", "Direct"];
 
 const grid = document.getElementById('grid');
+const globalUrlInput = document.getElementById('globalUrl');
 
 function createSlot(index, defaultProvider){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  // Slot HTML 
+  // Slot HTML (Simplified - removed per-slot URL input)
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">Slot ${index+1}</div>
-      <div style="flex:1"></div>
-      <div class="status" id="status-${index}">idle</div>
+      <div class="slot-title">
+        Slot ${index+1} 
+        <span style="font-size:12px; font-weight:normal; color:var(--accent-2); border:1px solid var(--accent); padding:2px 6px; border-radius:4px;" id="provider-name-${index}">${defaultProvider}</span>
+      </div>
+      <div class="slot-url-display" id="slot-url-display-${index}"></div>
     </div>
-    <div class="slot-controls">
-      <select id="provider-${index}" aria-label="provider-${index}">
-        <option>ProxySite</option>
-        <option>FlyProxy</option>
-        <option>NAProxy</option>
-        <option>Direct</option>
-      </select>
-      <input id="input-${index}" class="slot-input" type="url" placeholder="Enter URL or use global" />
-      <button id="go-${index}" class="btn small-btn">Go</button>
-    </div>
+    
     <div class="iframe-wrap" id="wrap-${index}">
       <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
     </div>
+    
     <div class="slot-footer">
       <div style="display:flex;gap:8px">
-        <button id="open-${index}" class="ghost small-btn">Open in new tab</button>
-        <button id="reload-${index}" class="ghost small-btn">Reload</button>
+        <button id="open-${index}" class="btn small-btn">Desktop View (New Tab)</button>
+        <button id="reload-${index}" class="ghost small-btn">Reload iFrame</button>
       </div>
       <div style="display:flex;gap:8px; align-items:center">
-        <span id="embed-hint-${index}" style="font-size:12px;color:var(--muted)">embed</span>
+        <div class="status" id="status-${index}">idle</div>
         <span id="ping-${index}" style="display:none" title="loaded"><span class="pulse"></span></span>
       </div>
     </div>
@@ -272,102 +279,69 @@ function createSlot(index, defaultProvider){
   grid.appendChild(el);
 
   // references
-  const prov = el.querySelector(`#provider-${index}`);
-  prov.value = defaultProvider || 'ProxySite'; 
-  const input = el.querySelector(`#input-${index}`);
-  const goBtn = el.querySelector(`#go-${index}`);
   const iframe = el.querySelector(`#iframe-${index}`);
   const openBtn = el.querySelector(`#open-${index}`);
   const reloadBtn = el.querySelector(`#reload-${index}`);
   const status = el.querySelector(`#status-${index}`);
   const ping = el.querySelector(`#ping-${index}`);
-  const embedHint = el.querySelector(`#embed-hint-${index}`);
+  const providerDisplay = el.querySelector(`#provider-name-${index}`);
+  const urlDisplay = el.querySelector(`#slot-url-display-${index}`);
 
-  let lastUrl = '';
+  let currentOriginalUrl = '';
+  let currentProvider = defaultProvider;
 
   function setStatus(text){
     status.textContent = text;
   }
 
-  function loadUrl(originalUrl){
+  function loadUrl(originalUrl, provider=currentProvider){
     if(!originalUrl) return;
+    
+    currentOriginalUrl = originalUrl;
+    currentProvider = provider;
+    
+    urlDisplay.textContent = originalUrl;
+    providerDisplay.textContent = provider;
     setStatus('loading...');
     ping.style.display = 'none';
-    embedHint.textContent = 'embed';
-    const provider = prov.value || 'ProxySite'; 
     
     // Get final proxy URL
     const finalProxyUrl = (providerTemplates[provider] || providerTemplates['ProxySite'])(originalUrl);
     
-    lastUrl = finalProxyUrl; 
-
     // set iframe src
     iframe.src = finalProxyUrl;
 
-    // Status updates and checks
+    // Status updates
     setTimeout(()=> {
       setStatus('attempted');
       ping.style.display = 'inline-block';
       setTimeout(()=> ping.style.display = 'none', 1200);
     }, 1400);
-
-    setTimeout(()=> {
-      try {
-        if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
-          embedHint.textContent = 'embedded';
-        } else {
-          embedHint.textContent = 'embed (may be blocked)';
-        }
-      } catch (e){
-        embedHint.textContent = 'embed (may be blocked)';
-      }
-    }, 3800);
   }
 
   // Event Handlers
-  goBtn.addEventListener('click', ()=> {
-    const v = input.value || document.getElementById('globalUrl').value;
-    if(!v) return alert('Paste a URL in the slot or the global input first.');
-    loadUrl(v.trim());
-  });
-  // If the proxy provider changes, auto-reload the current URL
-  prov.addEventListener('change', () => {
-    const v = input.value || document.getElementById('globalUrl').value;
-    if(v) loadUrl(v.trim());
-  });
-
   openBtn.addEventListener('click', ()=> {
-    const v = input.value || document.getElementById('globalUrl').value;
-    if(!v) return alert('Paste a URL in the slot or the global input first.');
-    const provider = prov.value || 'ProxySite';
-    const final = (providerTemplates[provider] || providerTemplates['ProxySite'])(v.trim());
+    if(!currentOriginalUrl){ 
+        const v = globalUrlInput.value.trim();
+        if(!v) return alert('Please paste a URL in the main input field first.');
+        currentOriginalUrl = v;
+    }
+    const final = (providerTemplates[currentProvider] || providerTemplates['ProxySite'])(currentOriginalUrl);
     window.open(final, '_blank');
   });
 
   reloadBtn.addEventListener('click', ()=> {
-    if(!lastUrl){ setStatus('idle'); return; }
-    const originalUrl = input.value || document.getElementById('globalUrl').value;
-    if(!originalUrl) { setStatus('idle'); return; }
-    loadUrl(originalUrl); 
-  });
-
-  input.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') goBtn.click();
+    if(!currentOriginalUrl){ setStatus('idle'); return; }
+    loadUrl(currentOriginalUrl, currentProvider); 
   });
 
   iframe.addEventListener('load', ()=>{
-    setStatus('loaded');
+    setStatus('loaded (check new tab)');
     ping.style.display = 'inline-block';
     setTimeout(()=> ping.style.display = 'none', 1200);
-    try {
-      if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
-        embedHint.textContent = 'embedded';
-      }
-    } catch(e){
-    }
   });
-
-  return { prov, input, goBtn, openBtn, reloadBtn, iframe, setStatus, loadUrl };
+  
+  return { loadUrl }; // Return only the necessary function
 }
 
 // create 8 slots
@@ -379,31 +353,13 @@ for(let i=0;i<8;i++){
 
 // global actions
 document.getElementById('globalGo').addEventListener('click', ()=>{
-  const url = document.getElementById('globalUrl').value.trim();
+  const url = globalUrlInput.value.trim();
   if(!url){ alert('Please paste a URL in the global field first.'); return; }
   
-  slots.forEach(s => {
-    s.input.value = url; 
-    s.loadUrl(url); 
+  slots.forEach((s, index) => {
+    s.loadUrl(url, defaultProviders[index]); // Use the alternating default provider
   });
 });
-
-// quick-set buttons 
-document.getElementById('setAllProxySite').addEventListener('click', ()=>{
-  slots.forEach(s => s.prov.value = 'ProxySite');
-});
-document.getElementById('setAllFlyProxy').addEventListener('click', ()=>{
-  slots.forEach(s => s.prov.value = 'FlyProxy');
-});
-document.getElementById('setAllNAProxy').addEventListener('click', ()=>{
-  slots.forEach(s => s.prov.value = 'NAProxy');
-});
-document.getElementById('setAllDirect').addEventListener('click', ()=>{
-  slots.forEach(s => s.prov.value = 'Direct');
-});
-
-// optional: sample placeholder
-document.getElementById('globalUrl').placeholder = 'https://example.com or your website URL';
 
 </script>
 </body>
