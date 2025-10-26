@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PY Tools — Multi Proxy Browser (8 Slots, Webshare Placeholder)</title>
+<title>PY Tools — Webshare Multi-Mode Launcher (10 Slots)</title>
 <link rel="icon" href="data:,">
 <style>
-  /* CSS Styles - Larger Slots and 4x4 Grid */
+  /* CSS Styles - Optimized for 5x5 Grid and Launch Focus */
   :root{
     --bg: #f6f8fb;
     --card: #ffffff;
@@ -16,8 +16,8 @@
     --border: #e7e9f0;
     --shadow: 0 8px 20px rgba(40,40,90,0.06);
     --radius: 12px;
-    --gap: 14px;
-    --maxwidth: 1200px;
+    --gap: 12px; /* Reduced gap for 5 columns */
+    --maxwidth: 1400px; /* Increased max width for 5 columns */
   }
   *{box-sizing:border-box}
   body{
@@ -44,10 +44,10 @@
     font-size:18px;
   }
   h1{
-    font-size:18px;margin:0;
+    font-size:20px;margin:0;
     letter-spacing: -0.2px;
   }
-  .subtitle{ color:var(--muted); font-size:13px; margin-top:4px }
+  .subtitle{ color:var(--muted); font-size:14px; margin-top:4px }
   
   /* Global Input Control */
   .controls {
@@ -77,25 +77,27 @@
     font-weight:600;
     box-shadow: 0 6px 16px rgba(99,84,238,0.12);
   }
-  .hint { 
+  
+  /* Warning/Disclaimer */
+  .warning-box { 
     font-size:14px; 
     color:#d97706; 
-    padding: 12px;
+    padding: 15px;
     background: #fef3c7; 
     border: 1px solid #fde68a;
     border-radius: 8px;
     margin-bottom: 20px;
   }
 
-  /* 4x4 Grid */
+  /* 5x5 Grid */
   .grid-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: var(--gap);
     margin-top: 18px;
   }
   
-  /* Slot Styles - Increased Height */
+  /* Slot Styles */
   .slot{
     background:var(--card);
     border-radius:var(--radius);
@@ -103,66 +105,55 @@
     box-shadow: var(--shadow);
     display:flex;
     flex-direction:column;
-    min-height:400px; 
-    transition:transform .22s ease, box-shadow .22s ease;
+    min-height:350px; 
+    text-align: center;
   }
   .slot-top{
-    display:flex; gap:8px; align-items:center; margin-bottom:10px;
-    justify-content: space-between;
+    font-weight:700;
+    font-size:14px;
+    color:#3b82f6; /* Blue for Webshare */
+    margin-bottom: 5px;
   }
-  .slot-title{ 
-    font-weight:600; font-size:13px; color:#111827; 
-  }
-  .slot-url-display{ 
-    font-size:11px; color:var(--muted);
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    flex:1;
-  }
-  .slot-controls {
-    display:flex; gap:8px; align-items:center; margin-bottom:10px; 
-  }
-  select{
-    padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:white; font-size:13px;
+  .slot-subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 12px;
   }
   
-  .small-btn{ 
-    padding:8px 10px; border-radius:8px; border:0; cursor:pointer; 
-    font-weight:600; color:white; background:#2f9cdb 
+  /* Mode Selection */
+  .mode-select {
+    display:flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1; /* Push launch buttons down */
+    justify-content: center;
+    align-items: center;
   }
-  .iframe-wrap{ 
-    flex:1; border-radius:8px; overflow:hidden; 
-    background:#fcfdff; border:1px solid var(--border); 
-    position:relative; 
+  .mode-btn {
+    width: 90%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+    margin: 5px 0;
+    transition: background-color 0.2s;
   }
-  iframe{ 
-    width:100%; height:100%; border:0; display:block; 
-    background:white; 
-    overflow: auto; 
+  .desktop-btn {
+    background:#10b981; /* Green */
+    box-shadow: 0 4px 12px rgba(16,185,129,0.2);
   }
-  .slot-footer{ 
-    display:flex; gap:8px; align-items:center; margin-top:10px; 
-    justify-content:space-between; 
+  .mobile-btn {
+    background:#f97316; /* Orange */
+    box-shadow: 0 4px 12px rgba(249,115,22,0.2);
   }
-  .status { font-size:12px; color:var(--muted) }
-  .pulse {
-    display:inline-block; width:8px;height:8px;border-radius:50%; background:#34d399; box-shadow:0 0 8px rgba(52,211,153,0.3);
-    position:relative; top:2px;
-    animation: ping 1.6s infinite;
-  }
-  @keyframes ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
-  
-  .tool-description {
-    margin-top: 30px;
-    padding: 20px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .tool-description h2 {
-    font-size: 16px;
-    color: var(--accent-2);
-    margin-top: 0;
-    margin-bottom: 15px;
+
+  .slot-footer {
+    margin-top: 15px;
+    font-size: 11px;
+    color: #ef4444; /* Red for warning */
+    font-weight: 500;
   }
 </style>
 </head>
@@ -173,198 +164,145 @@
         <div class="badge">PY</div>
       </div>
       <div>
-        <h1>PooreYouTuber Tools — Multi Proxy Browser (8 Slots)</h1>
-        <div class="subtitle">Use 8 slots for testing. **'Webshare Proxy' requires manual activation in your browser.**</div>
+        <h1>PooreYouTuber Tools — Webshare 10-Slot Mode Launcher</h1>
+        <div class="subtitle">Quickly launch your URL across 10 Webshare slots for simultaneous testing (5 Desktop + 5 Mobile).</div>
       </div>
     </header>
 
     <div class="controls">
       <div class="input-wrap">
         <input id="globalUrl" type="url" placeholder="Paste YOUR TARGET URL here (e.g., https://yourwebsite.com)" />
-        <button id="globalGo" class="btn">Load in all slots</button>
+        <button id="globalLoad" class="btn">Set URL in All Slots</button>
       </div>
     </div>
 
-    <div class="hint">
-        💡 **Webshare Proxy Placeholder:** Slots labeled 'Webshare Proxy' will load the URL directly. **You must manually activate your Webshare proxy in your browser settings or a third-party extension** to use it for that slot.
+    <div class="warning-box">
+        <h2>🔒 Data Security & Webshare Integration</h2>
+        <p style="margin-top: 5px;">✅ **No Data Collection:** This HTML tool runs entirely in your browser. **It does not collect, store, or transmit any data**, including the URLs you enter or any information about your Webshare account.</p>
+        <p style="margin-top: 10px; color:#ef4444; font-weight:700;">⚠️ **Webshare Setup Required:** This tool only provides launch buttons. **For the Webshare proxy to work, you MUST manually activate your Webshare proxy (IP:Port:User:Pass) in a separate browser extension (like Proxy Switcher) before clicking the launch buttons.**</p>
     </div>
 
     <div class="grid-container" id="gridContainer">
         </div>
     
-    <div class="tool-description">
-        <h2>Control and View Guidance (8 Slots)</h2>
-        <p style="font-size:14px; color:#555; margin-bottom:15px;">The layout is 4x4 (8 total slots) and slots are large (400px height) for better control:</p>
-        <ul>
-            <li>**ProxySite, FlyProxy, NAProxy:** These are public web proxies that work automatically.</li>
-            <li>**Webshare Proxy:** This slot will load your URL **Directly**. If you want this slot to use your Webshare service, you must first enable your Webshare proxy in your browser (e.g., using a **Proxy Switcher** extension).</li>
-            <li>**Desktop View (New Tab):** Click this for the most reliable, full-screen desktop view of your URL through the selected proxy.</li>
-        </ul>
-        <p style="font-size:12px; color:var(--muted); margin-top:10px;">*The Webshare link in the select box is a placeholder for your manual activation.*</p>
-    </div>
-    </div>
+  </div>
 
 <script>
 /* ------------------------
-   Provider URL templates (Naproxy, Flyproxy, ProxySite)
+   Provider URL templates (Only Direct/Webshare Placeholder)
    ------------------------ */
 const providerTemplates = {
-  // Webshare Proxy is just the Direct URL, as manual activation is required
+  // Since we cannot implement actual proxy logic, this is a Direct link.
+  // The user must activate their Webshare proxy externally.
   "Webshare Proxy": (t) => t, 
-  
-  "ProxySite": (t) => {
-    // view=desktop parameter
-    return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}&d=us&view=desktop`;
-  },
-  "FlyProxy": (t) => {
-    // desktop=1 parameter
-    return `https://www.flyproxy.com/?url=${encodeURIComponent(t)}&desktop=1`; 
-  },
-  "NAProxy": (t) => {
-    // desktop=1 parameter
-    return `https://www.naproxy.com/?url=${encodeURIComponent(t)}&desktop=1`; 
-  }
 };
 
-/* default provider assignments for 8 slots (Alternating three public proxies + Webshare Placeholder) */
-const defaultProviders = [
-    "ProxySite", "FlyProxy", "NAProxy", "Webshare Proxy",  // Row 1 (4 slots)
-    "ProxySite", "FlyProxy", "NAProxy", "Webshare Proxy"   // Row 2 (4 slots)
+/* 10 slots with alternating modes */
+const defaultSlots = [
+    { mode: 'Desktop', name: 'Webshare Proxy 1' },
+    { mode: 'Mobile', name: 'Webshare Proxy 2' },
+    { mode: 'Desktop', name: 'Webshare Proxy 3' },
+    { mode: 'Mobile', name: 'Webshare Proxy 4' },
+    { mode: 'Desktop', name: 'Webshare Proxy 5' },
+    
+    { mode: 'Mobile', name: 'Webshare Proxy 6' },
+    { mode: 'Desktop', name: 'Webshare Proxy 7' },
+    { mode: 'Mobile', name: 'Webshare Proxy 8' },
+    { mode: 'Desktop', name: 'Webshare Proxy 9' },
+    { mode: 'Mobile', name: 'Webshare Proxy 10' }
 ];
-const availableProviders = ["ProxySite", "FlyProxy", "NAProxy", "Webshare Proxy"];
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 
-function createSlot(index, defaultProvider){
+function createSlot(index, slotInfo){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  // Dynamically create options for the select box
-  const optionsHtml = availableProviders.map(p => 
-      `<option value="${p}" ${p === defaultProvider ? 'selected' : ''}>${p}</option>`
-  ).join('');
-
-  // Slot HTML (iFrame is back)
+  // Slot HTML (Focus on Launch Buttons)
   el.innerHTML = `
-    <div class="slot-top">
-      <div class="slot-title">Slot ${index+1}</div>
-      <div class="slot-url-display" id="slot-url-display-${index}"></div>
-    </div>
-
-    <div class="slot-controls">
-        <select id="provider-${index}" aria-label="provider-${index}">
-            ${optionsHtml}
-        </select>
-    </div>
+    <div class="slot-top">${slotInfo.name}</div>
+    <div class="slot-subtitle">Mode: ${slotInfo.mode}</div>
     
-    <div class="iframe-wrap" id="wrap-${index}">
-      <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+    <div class="mode-select">
+        <button id="desktop-launch-${index}" class="mode-btn desktop-btn" disabled>
+            Launch Desktop View (New Tab)
+        </button>
+        <button id="mobile-launch-${index}" class="mode-btn mobile-btn" disabled>
+            Launch Mobile View (New Tab)
+        </button>
     </div>
-    
-    <div class="slot-footer">
-      <div style="display:flex;gap:8px">
-        <button id="open-${index}" class="btn small-btn">Desktop View (New Tab)</button>
-        <button id="reload-${index}" class="ghost small-btn">Reload iFrame</button>
-      </div>
-      <div style="display:flex;gap:8px; align-items:center">
-        <div class="status" id="status-${index}">idle</div>
-        <span id="ping-${index}" style="display:none" title="loaded"><span class="pulse"></span></span>
-      </div>
+    <div class="slot-footer" id="slot-status-${index}">
+        URL not set.
     </div>
   `;
   
-  // Append to the 4x4 grid container
   gridContainer.appendChild(el);
 
   // references
-  const prov = el.querySelector(`#provider-${index}`);
-  const iframe = el.querySelector(`#iframe-${index}`);
-  const openBtn = el.querySelector(`#open-${index}`);
-  const reloadBtn = el.querySelector(`#reload-${index}`);
-  const status = el.querySelector(`#status-${index}`);
-  const ping = el.querySelector(`#ping-${index}`);
-  const urlDisplay = el.querySelector(`#slot-url-display-${index}`);
-
+  const desktopBtn = el.querySelector(`#desktop-launch-${index}`);
+  const mobileBtn = el.querySelector(`#mobile-launch-${index}`);
+  const statusDiv = el.querySelector(`#slot-status-${index}`);
+  
   let currentOriginalUrl = '';
 
-  function setStatus(text){
-    status.textContent = text;
-  }
-
-  function loadUrl(originalUrl, provider=prov.value){
-    if(!originalUrl) return;
-    
+  function setUrl(originalUrl){
     currentOriginalUrl = originalUrl;
+    const isDisabled = !originalUrl;
     
-    urlDisplay.textContent = originalUrl;
-    setStatus('loading...');
-    ping.style.display = 'none';
+    desktopBtn.disabled = isDisabled;
+    mobileBtn.disabled = isDisabled;
     
-    // Get final proxy URL
-    const finalProxyUrl = (providerTemplates[provider] || providerTemplates['ProxySite'])(originalUrl);
-    
-    // set iframe src
-    iframe.src = finalProxyUrl;
-
-    // Status updates
-    setTimeout(()=> {
-      setStatus('attempted');
-      ping.style.display = 'inline-block';
-      setTimeout(()=> ping.style.display = 'none', 1200);
-    }, 1400);
+    statusDiv.textContent = isDisabled ? "URL not set." : "Ready to Launch (Webshare required)";
   }
 
   // Event Handlers
-  prov.addEventListener('change', () => {
-    // If proxy changes, reload with the current URL
-    if(currentOriginalUrl) loadUrl(currentOriginalUrl, prov.value);
-  });
-  
-  openBtn.addEventListener('click', ()=> {
-    if(!currentOriginalUrl){ 
-        const v = globalUrlInput.value.trim();
-        if(!v) return alert('Please paste a URL in the main input field first.');
-        currentOriginalUrl = v;
-        urlDisplay.textContent = v;
-    }
-    const final = (providerTemplates[prov.value] || providerTemplates['ProxySite'])(currentOriginalUrl);
-    window.open(final, '_blank');
+  desktopBtn.addEventListener('click', ()=> {
+    if(!currentOriginalUrl) return;
+    
+    // Open in new tab (This is the direct URL, requires external Webshare activation)
+    const finalUrl = providerTemplates["Webshare Proxy"](currentOriginalUrl);
+    
+    // Forcing Desktop Mode on the new window
+    window.open(finalUrl, '_blank', 'width=1280,height=960'); 
   });
 
-  reloadBtn.addEventListener('click', ()=> {
-    if(!currentOriginalUrl){ setStatus('idle'); return; }
-    loadUrl(currentOriginalUrl, prov.value); 
-  });
-
-  iframe.addEventListener('load', ()=>{
-    setStatus('loaded (check iFrame)');
-    ping.style.display = 'inline-block';
-    setTimeout(()=> ping.style.display = 'none', 1200);
+  mobileBtn.addEventListener('click', ()=> {
+    if(!currentOriginalUrl) return;
+    
+    // Open in new tab (This is the direct URL, requires external Webshare activation)
+    const finalUrl = providerTemplates["Webshare Proxy"](currentOriginalUrl);
+    
+    // Forcing Mobile View on the new window (smaller size)
+    window.open(finalUrl, '_blank', 'width=414,height=736'); 
   });
   
-  return { loadUrl, prov }; 
+  return { setUrl }; 
 }
 
-// create 8 slots
+// create 10 slots
 const slots = [];
-for(let i=0;i<8;i++){
-  const slot = createSlot(i, defaultProviders[i]);
+for(let i=0;i<10;i++){
+  const slot = createSlot(i, defaultSlots[i]);
   slots.push(slot);
 }
 
 // global actions
-document.getElementById('globalGo').addEventListener('click', ()=>{
+document.getElementById('globalLoad').addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ alert('Please paste a URL in the global field first.'); return; }
   
-  slots.forEach((s, index) => {
-    // Set the select box to the default alternating provider first
-    s.prov.value = defaultProviders[index];
-    s.loadUrl(url, defaultProviders[index]); 
+  // Set the URL in all slot objects
+  slots.forEach(s => {
+    s.setUrl(url); 
   });
 });
 
+// Optional: Initial placeholder check
+globalUrlInput.addEventListener('input', ()=>{
+    const url = globalUrlInput.value.trim();
+    slots.forEach(s => s.setUrl(url));
+});
 </script>
 </body>
 </html>
