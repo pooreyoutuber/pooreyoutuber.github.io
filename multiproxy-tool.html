@@ -6,12 +6,12 @@
 <title>PooreYouTuber Tools — Multi Proxy Browser</title>
 <link rel="icon" href="data:,">
 <style>
-  /* CSS Styles */
+  /* CSS Styles (Same as before) */
   :root{
     --bg: #f6f8fb;
     --card: #ffffff;
     --muted: #7b7f92;
-    --accent: #6b5dd3; /* purple */
+    --accent: #6b5dd3;
     --accent-2: #4f46e5;
     --border: #e7e9f0;
     --shadow: 0 8px 20px rgba(40,40,90,0.06);
@@ -37,11 +37,6 @@
     gap:12px;
     align-items:center;
     margin-bottom:18px;
-  }
-  .logo {
-    display:flex;
-    align-items:center;
-    gap:10px;
   }
   .logo .badge{
     width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
@@ -187,11 +182,11 @@
       <div class="quick-sets">
         <button id="setAllProxySite" class="ghost">All → ProxySite</button>
         <button id="setAllProxyium" class="ghost">All → Proxyium</button>
-        <button id="setAllProxy3" class="ghost">All → Proxy 3</button>
+        <button id="setAllProxy3" class="ghost">All → CroxyProxy</button>
       </div>
     </div>
 
-    <div class="hint"> ** (Important Note):** Public proxies (ProxySite, Proxyium, Proxy 3) will always display their URL bar/Header inside the slot. Parameters have been added to try and enforce a **Desktop View** for better ad/script loading.</div>
+    <div class="hint">⚠️ **ज़रूरी जानकारी (Important Note):** Public proxies **often block embedding (iFrame)**. If a slot is blank, it means the proxy (or the destination site) is blocking it. Desktop view is attempted but not guaranteed.</div>
 
     <div class="grid" id="grid"></div>
     
@@ -211,10 +206,10 @@
 
 <script>
 /* ------------------------
-   Provider URL templates (Proxy3 is a replacement for 911proxy)
+   Provider URL templates (Proxy3 is now CroxyProxy)
    ------------------------ */
 const providerTemplates = {
-  // Direct option
+  // Direct option - Will show "embed" if the site doesn't block iFraming
   "Direct": (t) => t,
   
   // ProxySite format: Desktop view attempt
@@ -229,10 +224,10 @@ const providerTemplates = {
     return `https://proxyium.com/?q=${encodeURIComponent(t)}&country=fr`; 
   },
   
-  // Proxy3 (FilterBypass): A third public proxy for variety.
+  // Proxy3 (CroxyProxy): Known for bypassing some blocks, attempting desktop mode
   "Proxy3": (t) => {
-    // Defaults to desktop and often works well for full-page rendering
-    return `https://www.filterbypass.me/index.php?u=${encodeURIComponent(t)}`; 
+    // CroxyProxy is often more robust but will have its own header bar
+    return `https://www.croxyproxy.com/browse.php?u=${encodeURIComponent(t)}&desktop_mode=1`; 
   }
 };
 
@@ -263,7 +258,8 @@ function createSlot(index, defaultProvider){
       <button id="go-${index}" class="btn small-btn">Go</button>
     </div>
     <div class="iframe-wrap" id="wrap-${index}">
-      <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+      <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin" 
+        data-user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36"></iframe>
     </div>
     <div class="slot-footer">
       <div style="display:flex;gap:8px">
@@ -320,12 +316,15 @@ function createSlot(index, defaultProvider){
 
     setTimeout(()=> {
       try {
+        // Check if content loaded (Cross-origin restrictions apply here)
         if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
           embedHint.textContent = 'embedded';
         } else {
+          // This is the default failure message for cross-origin or blank content
           embedHint.textContent = 'embed (may be blocked)';
         }
       } catch (e){
+        // This catch block is mostly hit when cross-origin access is denied
         embedHint.textContent = 'embed (may be blocked)';
       }
     }, 3800);
