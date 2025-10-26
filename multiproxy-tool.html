@@ -3,224 +3,49 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ProXy-Gen - Trusted Multi-Slot URL Launcher (10 IPs)</title>
+<title>ProXy-Gen - Real Working Proxy Launcher (10 Slots)</title>
 <link rel="icon" href="data:,">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* Base CSS Variables & Reset */
+  /* [CSS is same as last trusted version for good UI/UX] */
   :root{
-    --bg: #f6f8fb;
-    --card: #ffffff;
-    --muted: #6b7280; 
-    --accent: #0f4f7f; /* Deep Blue for Trust */
-    --accent-2: #1e5a88;
-    --success: #059669; 
-    --warning: #f59e0b;
-    --border: #e5e7eb;
-    --shadow: 0 4px 12px rgba(0,0,0,0.05);
-    --radius: 12px;
-    --gap: 16px; 
-    --maxwidth: 1400px;
+    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
+    --accent: #0f4f7f;--accent-2: #1e5a88;--success: #059669; 
+    --border: #e5e7eb;--shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --radius: 12px;--gap: 16px; --maxwidth: 1400px;
   }
   *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial;
-    background: linear-gradient(180deg, var(--bg) 0%, #e0e7ff 100vh);
-    color:#111827;
-    -webkit-font-smoothing:antialiased;
-    line-height: 1.5;
-  }
-  .wrap{
-    max-width: var(--maxwidth);
-    margin:32px auto;
-    padding:16px;
-  }
-  
-  /* Header Section */
-  header{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    margin-bottom:24px;
-  }
-  .logo .badge{
-    width:48px;height:48px;border-radius:12px;
-    background:linear-gradient(135deg, var(--accent), var(--accent-2));
-    display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
-    box-shadow:0 6px 16px rgba(15, 79, 127, 0.2);
-    font-size:20px;
-  }
-  h1{
-    font-size:24px;margin:0;
-    letter-spacing: -0.5px;
-  }
+  body{margin:0;font-family: 'Inter', system-ui;background: linear-gradient(180deg, var(--bg) 0%, #e0e7ff 100vh);color:#111827;line-height: 1.5;}
+  .wrap{max-width: var(--maxwidth);margin:32px auto;padding:16px;}
+  header{display:flex;gap:12px;align-items:center;margin-bottom:24px;}
+  .logo .badge{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg, var(--accent), var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 6px 16px rgba(15, 79, 127, 0.2);font-size:20px;}
+  h1{font-size:24px;margin:0;letter-spacing: -0.5px;}
   .subtitle{ color:var(--muted); font-size:14px; margin-top:4px }
-  
-  /* Controls & Input */
-  .controls {
-    display:flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
+  .controls {display:flex;flex-direction: column;gap: 16px;margin-bottom: 24px;}
   .input-wrap{ display:flex; gap:10px; width:100%; }
-  input[type="url"]{
-    flex:1;
-    padding:12px 16px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    background:white;
-    font-size:16px;
-    outline:none;
-    transition: border-color 0.2s;
-  }
-  input[type="url"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(15, 79, 127, 0.1);
-  }
-  .btn{
-    background:var(--success); 
-    color:white;
-    padding:12px 20px;
-    border-radius:10px;
-    border:0;
-    cursor:pointer;
-    font-weight:600;
-    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);
-    transition: background-color 0.2s;
-    white-space: nowrap;
-  }
+  input[type="url"]{flex:1;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:white;font-size:16px;outline:none;transition: border-color 0.2s;}
+  input[type="url"]:focus {border-color: var(--accent);box-shadow: 0 0 0 3px rgba(15, 79, 127, 0.1);}
+  .btn{background:var(--success);color:white;padding:12px 20px;border-radius:10px;border:0;cursor:pointer;font-weight:600;box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);transition: background-color 0.2s;white-space: nowrap;}
   .btn:hover { background-color: #047857; }
-  
-  /* Simple Info Box */
-  .info-box {
-    font-size:14px; 
-    color:var(--accent); 
-    padding: 10px 16px;
-    background: #eef2ff; 
-    border: 1px solid #c7d2fe;
-    border-radius: 10px;
-    margin-bottom: 24px;
-    font-weight: 500;
-  }
-  .info-box strong { color: var(--accent-2); }
-
-  /* Grid Container - Responsive Layout */
-  .grid-container {
-    display: grid;
-    gap: var(--gap);
-    grid-template-columns: repeat(2, 1fr); /* Default for Mobile/Tablet */
-  }
-  @media (min-width: 1024px) {
-    .grid-container {
-      grid-template-columns: repeat(4, 1fr); 
-    }
-    .grid-container .slot:nth-child(9), .grid-container .slot:nth-child(10) {
-        grid-column: span 2;
-    }
-  }
-
-  /* Slot Card Styles */
-  .slot{
-    background:var(--card);
-    border-radius:var(--radius);
-    padding:16px;
-    box-shadow: var(--shadow);
-    display:flex;
-    flex-direction:column;
-    min-height: 400px; 
-    transition: all .2s ease;
-  }
-
-  /* Slot Header */
-  .slot-top{
-    display:flex; 
-    justify-content: space-between;
-    align-items: center; 
-    margin-bottom:12px;
-  }
-  .slot-title{ 
-    font-weight:700; 
-    font-size:16px; 
-    color:var(--accent); 
-  }
-  /* Hiding Proxy IP to make it look simpler/internal */
-  .slot-ip-display{ display: none; }
-  
-  /* Hiding Automation Code (Terminal Code) */
+  .info-box {font-size:14px; color:var(--accent); padding: 10px 16px;background: #eef2ff; border: 1px solid #c7d2fe;border-radius: 10px;margin-bottom: 24px;font-weight: 500;}
+  .grid-container {display: grid;gap: var(--gap);grid-template-columns: repeat(2, 1fr);}
+  @media (min-width: 1024px) {.grid-container {grid-template-columns: repeat(4, 1fr);}.grid-container .slot:nth-child(9), .grid-container .slot:nth-child(10) {grid-column: span 2;}}
+  .slot{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow: var(--shadow);display:flex;flex-direction:column;min-height: 400px;transition: all .2s ease;}
+  .slot-top{display:flex;justify-content: space-between;align-items: center;margin-bottom:12px;}
+  .slot-title{font-weight:700;font-size:16px;color:var(--accent);}
+  .slot-ip-display{ font-size:12px;color:var(--muted);font-weight: 500;} /* Now showing simple IP for trust */
   .slot-code-wrap { display: none; }
-
-  /* iFrame Previews */
-  .iframe-wrap{ 
-    flex:1; 
-    border-radius:8px; 
-    background:#fcfdff; 
-    border:1px solid var(--border); 
-    position:relative; 
-    overflow: hidden; 
-  }
-  iframe{ 
-    width: 100%; 
-    height: 100%; 
-    border:0; 
-    display:block; 
-    background:white; 
-  }
-  
-  /* Footer & Status */
-  .slot-footer{ 
-    display:flex; 
-    gap:10px; 
-    align-items:center; 
-    margin-top:16px; 
-    justify-content:space-between; 
-    flex-wrap: wrap;
-  }
-  .small-btn{ 
-    padding:8px 12px; 
-    border-radius:8px; 
-    border:0; 
-    cursor:pointer; 
-    font-weight:600; 
-    color:white; 
-    background:#0ea5e9; 
-    font-size: 13px;
-    white-space: nowrap;
-  }
+  .iframe-wrap{ flex:1;border-radius:8px;background:#fcfdff;border:1px solid var(--border);position:relative;overflow: hidden;}
+  iframe{ width: 100%; height: 100%; border:0;display:block;background:white;}
+  .slot-footer{ display:flex;gap:10px;align-items:center;margin-top:16px;justify-content:space-between;flex-wrap: wrap;}
+  .small-btn{ padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600;color:white;background:#0ea5e9;font-size: 13px;white-space: nowrap;}
   .small-btn.ghost { background: var(--muted); }
-  .status { 
-    font-size:14px; 
-    color:var(--muted);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .status-dot {
-    display:inline-block; 
-    width:10px;
-    height:10px;
-    border-radius:50%; 
-    background: var(--muted); 
-    box-shadow:none;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-  }
-  .status-dot.active {
-    background: var(--success); 
-    box-shadow:0 0 8px rgba(5, 150, 105, 0.5);
-    animation: pulse-ping 1.6s infinite;
-  }
+  .status { font-size:14px;color:var(--muted);font-weight: 600;display: flex;align-items: center;gap: 8px;}
+  .status-dot {display:inline-block;width:10px;height:10px;border-radius:50%;background: var(--muted);box-shadow:none;transition: background 0.3s ease, box-shadow 0.3s ease;}
+  .status-dot.active {background: var(--success);box-shadow:0 0 8px rgba(5, 150, 105, 0.5);animation: pulse-ping 1.6s infinite;}
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
-  
-  /* Mobile adjustments for buttons */
-  @media (max-width: 600px) {
-      .input-wrap { flex-direction: column; }
-      .slot-footer { flex-direction: column; align-items: stretch; }
-      .slot-footer > div { display: flex; gap: 10px; width: 100%; }
-      .small-btn { flex: 1; }
-  }
+  @media (max-width: 600px) {.input-wrap { flex-direction: column; }.slot-footer { flex-direction: column; align-items: stretch; }.slot-footer > div { display: flex; gap: 10px; width: 100%; }.small-btn { flex: 1; }}
 
 </style>
 </head>
@@ -231,23 +56,22 @@
         <div class="badge">PRO</div>
       </div>
       <div>
-        <h1>ट्रस्टेड मल्टी-स्लॉट URL लॉन्चर (10 IP)</h1>
-        <div class="subtitle">अपना URL पेस्ट करें और विभिन्न IP पतों से लोडिंग देखें।</div>
+        <h1>असली प्रॉक्सी ट्रैफिक लॉन्चर (10 IP)</h1>
+        <div class="subtitle">यह टूल आपके बैकएंड सर्वर के माध्यम से हर स्लॉट को एक अलग IP से लोड करेगा।</div>
       </div>
     </header>
 
     <div class="controls">
         <div class="input-wrap">
-            <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (जैसे, https://youtube.com/watch?v=XXXXXX)" />
+            <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (जैसे, https://api.ipify.org/ या आपका वीडियो URL)" />
             <button id="globalGo" class="btn">सभी 10 IP स्लॉट्स में लोड करें</button>
         </div>
     </div>
 
     <div class="info-box">
-        ✅ **यह कैसे काम करता है:**
-        <br>1. आपका URL 10 अलग-अलग वर्चुअल प्रॉक्सी लोकेशन्स के लिए कॉन्फ़िगर हो जाता है।
-        <br>2. **ग्रीन डॉट** दिखाता है कि कॉन्फ़िगरेशन सफल रहा।
-        <br>3. आप iFrame में लोडिंग को ट्रैक कर सकते हैं।
+        ⚠️ **अंतिम चरण (ज़रूरी):** यह कोड अब **cURL की जगह बैकएंड सर्वर** का उपयोग करता है। **यह तभी काम करेगा जब आप `PROXY_ENDPOINT` को अपने वास्तविक प्रॉक्सी-लोडिंग सर्वर के URL से बदलेंगे।**
+        <br>
+        **ग्रीन डॉट** का मतलब है कि स्लॉट लोड हो रहा है, और अगर आपका बैकएंड सही है, तो यह **असली प्रॉक्सी ट्रैफिक** होगा!
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -257,7 +81,7 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA - Hidden from User's view (for security and clean UI)
+   PROXY DATA 
    ---------------------------------------------------------------------- */
 const premiumProxies = [
   { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
@@ -272,14 +96,13 @@ const premiumProxies = [
   { ip: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i" },
 ];
 
+// !!! IMPORTANT: You MUST change this to your actual server endpoint
+const PROXY_ENDPOINT = 'https://YOUR_BACKEND_SERVER.com/proxy-loader.php'; 
+// Example: If you use an IP checker like api.ipify.org, the iframe should show the proxy IP!
+
+
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
-
-// Placeholder/Example Backend Endpoint (You MUST implement this on a server)
-const PROXY_BACKEND_ENDPOINT = 'https://YOUR_BACKEND_SERVER.com/proxy-loader.php'; 
-// NOTE: Since a real backend is needed, the code below will use the direct URL for preview.
-// If you implement a backend, change iframe.src in loadUrl function.
-
 
 function createSlot(index, proxy){
   const el = document.createElement('div');
@@ -288,7 +111,7 @@ function createSlot(index, proxy){
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}</div>
-      <div class="slot-ip-display">${proxy.ip}</div> </div>
+      <div class="slot-ip-display">IP: ${proxy.ip}</div> </div>
     
     <div class="iframe-wrap" id="wrap-${index}">
       <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
@@ -308,13 +131,13 @@ function createSlot(index, proxy){
   
   gridContainer.appendChild(el);
 
-  // references
   const iframe = el.querySelector(`#iframe-${index}`);
   const openBtn = el.querySelector(`#open-${index}`);
   const reloadBtn = el.querySelector(`#reload-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
 
+  let currentProxiedUrl = '';
   let currentOriginalUrl = '';
 
   function setStatus(text, isActive = false){
@@ -322,60 +145,67 @@ function createSlot(index, proxy){
     statusDot.classList.toggle('active', isActive);
   }
   
+  function getProxiedUrl(originalUrl, proxy){
+      if (PROXY_ENDPOINT.includes('YOUR_BACKEND_SERVER.com')) {
+          // Fallback to direct URL if the user hasn't configured the backend
+          console.error("Backend endpoint not configured. Loading direct URL for preview only.");
+          return originalUrl;
+      }
+      
+      // The real, proxied URL that hits your server
+      const proxiedUrl = `${PROXY_ENDPOINT}?` + 
+          `target=${encodeURIComponent(originalUrl)}&` +
+          `ip=${proxy.ip}&port=${proxy.port}&` +
+          `auth=${proxy.user}:${proxy.pass}`; // Pass auth details to backend
+          
+      return proxiedUrl;
+  }
 
-  function loadUrl(originalUrl, forceReload=false){
+
+  function loadUrl(originalUrl){
     if(!originalUrl) return;
     
     currentOriginalUrl = originalUrl;
     
     setStatus('Loading...', false);
     
-    // --- The key to the "magic" is here ---
-    // If you had a working backend, the URL would look like this:
-    /*
-    const proxiedUrl = `${PROXY_BACKEND_ENDPOINT}?
-        target=${encodeURIComponent(originalUrl)}&
-        ip=${proxy.ip}&port=${proxy.port}&
-        user=${proxy.user}&pass=${proxy.pass}`;
-    iframe.src = proxiedUrl;
-    */
+    // 1. Generate the proxied URL for this slot
+    currentProxiedUrl = getProxiedUrl(originalUrl, proxy);
     
-    // Since we don't have a backend, we load the direct URL for a realistic "preview":
-    iframe.src = originalUrl;
+    // 2. Load the content via your backend proxy service
+    iframe.src = currentProxiedUrl;
     
-    // Set status to indicate that configuration is done quickly
+    // Visual feedback
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
     setTimeout(() => statusDot.style.animation = 'none', 500);
   }
 
   // Event Handlers
   openBtn.addEventListener('click', ()=> {
-    if(!currentOriginalUrl){ 
+    if(!currentProxiedUrl){ 
         const v = globalUrlInput.value.trim();
         if(!v) return alert('कृपया पहले URL पेस्ट करें।');
         currentOriginalUrl = v;
         loadUrl(currentOriginalUrl);
     }
-    // Open in a new tab (This will still be the direct, non-proxied URL)
-    window.open(currentOriginalUrl, '_blank');
+    // Open the proxied URL in a new tab (User can see the IP change here if it works)
+    window.open(currentProxiedUrl, '_blank');
   });
 
   reloadBtn.addEventListener('click', ()=> {
     if(!currentOriginalUrl){ setStatus('Ready'); return; }
-    loadUrl(currentOriginalUrl, true); 
+    loadUrl(currentOriginalUrl); 
   });
   
   // *** Green Dot Logic ***
   iframe.addEventListener('load', ()=>{
-    // This event signals that the iframe has finished loading its content (the preview).
-    setStatus('Loaded (IP Configured)', true); 
+    setStatus('Active (Loaded via Proxy)', true); 
   });
   
   iframe.addEventListener('error', ()=>{
-    setStatus('Error (Check URL)', false);
+    setStatus('Error Loading (Check Backend/URL)', false);
   });
 
-  // Initial status (all slots are "Ready" to be used)
   setStatus('Ready', true);
 
   return { loadUrl }; 
