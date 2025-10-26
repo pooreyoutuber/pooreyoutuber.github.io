@@ -13,11 +13,11 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION (FIXED) ---
 let GEMINI_KEY;
 try {
-    // Attempt to load from Render Secret File (Path: /etc/secrets/gemini)
+    // Render Secret File (Path: /etc/secrets/gemini) से Key लोड करने का प्रयास
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback to Environment Variable
+    // Environment Variable से Key लोड करने का प्रयास
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -30,7 +30,6 @@ let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
-    // Dummy object to prevent crash
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -60,12 +59,12 @@ function getRandomGeo() {
 }
 
 
-// --- GA4 DATA SENDING (PROXY REMOVED) ---
+// --- GA4 DATA SENDING (PROXY REMOVED FOR STABILITY) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
     try {
-        // CRITICAL FIX: Removed proxy for GA4 call as it often causes connection failures.
+        // nodeFetch का उपयोग करें
         const response = await nodeFetch(gaEndpoint, { 
             method: 'POST',
             body: JSON.stringify(payload),
@@ -81,6 +80,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             return { success: false };
         }
     } catch (error) {
+        // यह 'Connection Failed: fetch' एरर को हैंडल करेगा
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
         return { success: false };
     }
@@ -125,6 +125,7 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
+    // Immediately respond with 'accepted' to prevent client timeout
     res.json({ 
         status: 'accepted', 
         message: `Request for ${viewPlan.length} real-simulated views accepted. Processing started in the background (will be slow and stable).`
@@ -145,9 +146,7 @@ app.post('/boost-mp', async (req, res) => {
                 // 1. Initial spread delay (to prevent burst traffic)
                 await new Promise(resolve => setTimeout(resolve, randomInt(1000, 5000)));
 
-                // --- REAL VIEW SIMULATION STEPS ---
-
-                // STEP 1: Search Simulation (Simulating arrival from Google)
+                // STEP 1: Session Start (Simulating arrival from Google)
                 await sendData(ga_id, api_key, { 
                     client_id: CLIENT_ID, 
                     user_properties: commonUserProperties, 
@@ -198,13 +197,15 @@ app.post('/boost-mp', async (req, res) => {
                     }] 
                 }, i + 1, 'user_engagement');
 
-                // FINAL DELAY (Break before next user starts)
+                // FINAL DELAY (Break before next user starts: approx 5 mins total dispatch time per view)
+                // Total time per view is now (5s spread + 5s landing + 7s activity + 6s final delay) approx 23 seconds in this loop, but the map/promise structure ensures that views are started in a distributed manner, spreading the load.
                 await new Promise(resolve => setTimeout(resolve, getRandomDelay(4000, 6000))); 
                 
                 return pageViewResult.success;
             })();
         });
 
+        // Promise.all is used to manage all concurrent tasks efficiently
         Promise.all(viewPromises).then(results => {
             const finalSuccessCount = results.filter(r => r).length;
             console.log(`[BOOSTER FINISH] Total success: ${finalSuccessCount}/${totalViews}`);
@@ -252,7 +253,8 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
             },
         });
 
-        const captions = JSON.parse(response.text.trim());
+        // Ensure the response is trimmed before parsing
+        const captions = JSON.parse(response.text.trim()); 
         res.status(200).json({ captions: captions });
 
     } catch (error) {
