@@ -1,8 +1,7 @@
-// index.js (FINAL STABLE CODE with AI Key Fix and Real View Simulation)
+// index.js (FINAL STABLE CODE with English + Foreign Language AI Logic)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
-// CRITICAL FIX: node-fetch v2.6.7 requires this simple require call
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
@@ -13,11 +12,9 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION (FIXED) ---
 let GEMINI_KEY;
 try {
-    // Render Secret File (Path: /etc/secrets/gemini) से Key लोड करने का प्रयास
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Environment Variable से Key लोड करने का प्रयास
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -42,11 +39,11 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running!');
+    res.status(200).send('PooreYouTuber Combined API is running!'); 
 });
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-const getRandomDelay = (min = 3000, max = 12000) => randomInt(min, max);
+const getRandomDelay = (min = 4000, max = 6000) => randomInt(min, max);
 
 const geoLocations = [
     { country: "United States", region: "California" },
@@ -59,12 +56,11 @@ function getRandomGeo() {
 }
 
 
-// --- GA4 DATA SENDING (PROXY REMOVED FOR STABILITY) ---
+// --- GA4 DATA SENDING (STABLE) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
     try {
-        // nodeFetch का उपयोग करें
         const response = await nodeFetch(gaEndpoint, { 
             method: 'POST',
             body: JSON.stringify(payload),
@@ -80,13 +76,12 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             return { success: false };
         }
     } catch (error) {
-        // यह 'Connection Failed: fetch' एरर को हैंडल करेगा
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
         return { success: false };
     }
 }
 
-// --- VIEW PLAN GENERATION ---
+// --- VIEW PLAN GENERATION (Same) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
@@ -111,7 +106,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Real Simulation Logic
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - Confirmed Stable
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -125,13 +120,11 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    // Immediately respond with 'accepted' to prevent client timeout
     res.json({ 
         status: 'accepted', 
         message: `Request for ${viewPlan.length} real-simulated views accepted. Processing started in the background (will be slow and stable).`
     });
 
-    // Start views generation asynchronously
     (async () => {
         const totalViews = viewPlan.length;
         console.log(`[BOOSTER START] Starting for ${totalViews} views. REAL SIMULATION ENABLED.`);
@@ -143,10 +136,9 @@ app.post('/boost-mp', async (req, res) => {
                 const geo = getRandomGeo();
                 const commonUserProperties = { geo: { value: `${geo.country}, ${geo.region}` } };
                 
-                // 1. Initial spread delay (to prevent burst traffic)
                 await new Promise(resolve => setTimeout(resolve, randomInt(1000, 5000)));
 
-                // STEP 1: Session Start (Simulating arrival from Google)
+                // STEP 1: Session Start
                 await sendData(ga_id, api_key, { 
                     client_id: CLIENT_ID, 
                     user_properties: commonUserProperties, 
@@ -155,17 +147,15 @@ app.post('/boost-mp', async (req, res) => {
                         params: { 
                             session_id: SESSION_ID, 
                             _ss: 1,
-                            // Mimic Google as referral source
                             page_referrer: 'https://www.google.com/', 
                         } 
                     }] 
                 }, i + 1, 'session_start');
 
-                // Delay for search/landing time (2-5 seconds)
                 await new Promise(resolve => setTimeout(resolve, randomInt(2000, 5000)));
 
-                // STEP 2: Actual Page View (The "Click")
-                const engagementTime = randomInt(30000, 90000); // 30-90 seconds engagement
+                // STEP 2: Actual Page View 
+                const engagementTime = randomInt(30000, 90000); 
                 const pageViewPayload = {
                     client_id: CLIENT_ID,
                     user_properties: commonUserProperties, 
@@ -181,10 +171,9 @@ app.post('/boost-mp', async (req, res) => {
                 };
                 const pageViewResult = await sendData(ga_id, api_key, pageViewPayload, i + 1, 'page_view');
                 
-                // Delay for user activity (scrolling/reading)
                 await new Promise(resolve => setTimeout(resolve, randomInt(3000, 7000)));
 
-                // STEP 3: User Engagement (The "Scrolling/Activity")
+                // STEP 3: User Engagement 
                 await sendData(ga_id, api_key, { 
                     client_id: CLIENT_ID, 
                     user_properties: commonUserProperties, 
@@ -197,15 +186,13 @@ app.post('/boost-mp', async (req, res) => {
                     }] 
                 }, i + 1, 'user_engagement');
 
-                // FINAL DELAY (Break before next user starts: approx 5 mins total dispatch time per view)
-                // Total time per view is now (5s spread + 5s landing + 7s activity + 6s final delay) approx 23 seconds in this loop, but the map/promise structure ensures that views are started in a distributed manner, spreading the load.
-                await new Promise(resolve => setTimeout(resolve, getRandomDelay(4000, 6000))); 
+                // FINAL DELAY 
+                await new Promise(resolve => setTimeout(resolve, getRandomDelay())); 
                 
                 return pageViewResult.success;
             })();
         });
 
-        // Promise.all is used to manage all concurrent tasks efficiently
         Promise.all(viewPromises).then(results => {
             const finalSuccessCount = results.filter(r => r).length;
             console.log(`[BOOSTER FINISH] Total success: ${finalSuccessCount}/${totalViews}`);
@@ -218,7 +205,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT (API: /api/caption-generate)
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT (UPDATED LOGIC)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     
@@ -226,17 +213,20 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
     
-    // CRITICAL FIX: Extract 'description' and 'style' to match your HTML form
     const { description, style } = req.body;
 
     if (!description) {
         return res.status(400).json({ error: 'Reel topic (description) is required.' });
     }
     
-    const prompt = `Generate 10 unique, highly trending, and viral Instagram Reels captions in a mix of English and Hindi for the reel topic: "${description}". The style should be: "${style || 'Catchy and Funny'}". 
+    // *** FINAL PROMPT ***: 6 English + 4 Foreign Captions
+    const prompt = `Generate exactly 10 unique, highly trending, and viral Instagram Reels captions. The reel topic is: "${description}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
-For each caption, provide exactly 5 trending, high-reach, and relevant hashtags. The final output MUST be a JSON array of objects, where each object has a single key called 'caption'.`;
+1. Captions 1 through 6 MUST be STRICTLY in English.
+2. Captions 7 through 10 MUST be in a foreign language (mix of Japanese and Chinese/Mandarin) to target international viewers.
+3. For each caption, provide exactly 5 trending, high-reach, and relevant hashtags below the caption text, separated by a new line.
+4. The final output MUST be a JSON array of 10 objects, where each object has a single key called 'caption'.`;
 
 
     try {
@@ -253,8 +243,7 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
             },
         });
 
-        // Ensure the response is trimmed before parsing
-        const captions = JSON.parse(response.text.trim()); 
+        const captions = JSON.parse(response.text.trim());
         res.status(200).json({ captions: captions });
 
     } catch (error) {
@@ -265,7 +254,7 @@ For each caption, provide exactly 5 trending, high-reach, and relevant hashtags.
 
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit)
+// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit) - Same
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     
@@ -282,10 +271,7 @@ app.post('/api/caption-edit', async (req, res) => {
     const prompt = `Rewrite and edit the following original caption based on the requested change. The output should be only the final, edited caption and its hashtags.
 
 Original Caption: "${originalCaption}"
-Requested Change: "${requestedChange}"
-
---- CRITICAL INSTRUCTION ---
-The final output MUST be a single JSON object with a key called 'editedCaption'. The caption should be highly engaging for Instagram Reels. If the original caption included hashtags, ensure the edited caption has 5 relevant and trending hashtags, separated from the text by a new line.`;
+Requested Change: "${requestedChange}"`;
     
     try {
         const response = await ai.models.generateContent({
