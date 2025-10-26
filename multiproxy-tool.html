@@ -6,7 +6,7 @@
 <title>PooreYouTuber Tools — Multi Proxy Browser</title>
 <link rel="icon" href="data:,">
 <style>
-  /* CSS Styles (same as before) */
+  /* CSS Styles */
   :root{
     --bg: #f6f8fb;
     --card: #ffffff;
@@ -88,14 +88,13 @@
   .quick-sets{ display:flex; gap:8px; align-items:center; }
   .hint { font-size:12px; color:var(--muted); margin-top:8px; }
 
-  /* grid */
+  /* grid and slot styles remain the same */
   .grid{
     margin-top:18px;
     display:grid;
     grid-template-columns: repeat(4, 1fr);
     gap:var(--gap);
   }
-
   .slot{
     background:var(--card);
     border-radius:var(--radius);
@@ -106,7 +105,6 @@
     min-height:320px;
     transition:transform .22s ease, box-shadow .22s ease;
   }
-  .slot:hover{ transform:translateY(-6px); box-shadow: 0 18px 40px rgba(45,50,90,0.06) }
   .slot-top{
     display:flex; gap:8px; align-items:center; margin-bottom:10px;
   }
@@ -121,30 +119,49 @@
   .small-btn{ padding:8px 10px; border-radius:8px; border:0; cursor:pointer; font-weight:600; color:white; background:#2f9cdb }
   .iframe-wrap{ flex:1; border-radius:8px; overflow:hidden; background:#fcfdff; border:1px solid var(--border); position:relative; }
   iframe{ width:100%; height:100%; border:0; display:block; background:white; }
-
   .slot-footer{ display:flex; gap:8px; align-items:center; margin-top:10px; justify-content:space-between; }
   .status { font-size:12px; color:var(--muted) }
-
-  /* responsive */
-  @media (max-width:1100px){
-    .grid{ grid-template-columns: repeat(3,1fr); }
-  }
-  @media (max-width:820px){
-    .grid{ grid-template-columns: repeat(2,1fr); }
-  }
-  @media (max-width:520px){
-    .grid{ grid-template-columns: 1fr; }
-    header{ flex-direction:column; align-items:flex-start; gap:8px; }
-    .controls{ flex-direction:column; align-items:stretch; gap:10px; }
-  }
-
-  /* tiny animations */
   .pulse {
     display:inline-block; width:8px;height:8px;border-radius:50%; background:#34d399; box-shadow:0 0 8px rgba(52,211,153,0.3);
     position:relative; top:2px;
     animation: ping 1.6s infinite;
   }
   @keyframes ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+  
+  /* Description Styling */
+  .tool-description {
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .tool-description h2 {
+    font-size: 16px;
+    color: var(--accent-2);
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+  .tool-description ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .tool-description ul li {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    padding-left: 20px;
+    position: relative;
+  }
+  .tool-description ul li:before {
+    content: "✓";
+    color: #34d399; /* Green checkmark */
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+  }
 </style>
 </head>
 <body>
@@ -168,43 +185,59 @@
       </div>
 
       <div class="quick-sets">
-        <button id="setAllProxy2" class="ghost">All → Proxy 2 (Hidester)</button>
-        <button id="setAllProxysite" class="ghost">All → ProxySite</button>
-        <button id="setAllDirect" class="ghost">All → Direct</button>
+        <button id="setAllProxySite" class="ghost">All → ProxySite</button>
+        <button id="setAllProxyium" class="ghost">All → Proxyium</button>
+        <button id="setAllProxy3" class="ghost">All → Proxy 3</button>
       </div>
     </div>
 
-    <div class="hint">⚠️ **ज़रूरी जानकारी:** Public proxies हमेशा अपना URL bar/Header दिखाते हैं। डेस्कटॉप मोड के लिए पैरामीटर जोड़े गए हैं, ताकि विज्ञापन ठीक से लोड हों।</div>
+    <div class="hint">⚠️ **ज़रूरी जानकारी (Important Note):** Public proxies (ProxySite, Proxyium, Proxy 3) will always display their URL bar/Header inside the slot. Parameters have been added to try and enforce a **Desktop View** for better ad/script loading.</div>
 
     <div class="grid" id="grid"></div>
-
+    
+    <div class="tool-description">
+        <h2>Enhance Your Testing: Simulate Real User Behavior</h2>
+        <p style="font-size:14px; color:#555; margin-bottom:15px;">This Multi Proxy Browser is designed to help you test how your website performs and looks across different locations and browser settings, mimicking natural user behavior for genuine results.</p>
+        <ul>
+            <li>**Multi-Country Views:** Each slot utilizes a different public proxy (ProxySite, Proxyium, Proxy 3) to simulate visitors coming from various geographical locations.</li>
+            <li>**Desktop Consistency:** All slots are optimized for desktop view, ensuring your full website layout, including any advertisements or analytics scripts, loads correctly and completely.</li>
+            <li>**Real Traffic Simulation:** By viewing your site through diverse proxies, you get a clearer picture of how real users experience your content globally.</li>
+            <li>**Easy Control:** Use the global URL input for quick testing across all slots, or manually select a specific proxy for each individual slot to target specific testing needs.</li>
+        </ul>
+        <p style="font-size:12px; color:var(--muted); margin-top:15px;">**Tip:** Reload a slot if the content doesn't load immediately. Public proxies can sometimes be slow or temporarily unresponsive.</p>
+    </div>
     <p style="margin-top:18px; font-size:13px; color:var(--muted)">Built for quick testing and demo. For production reliability use a proxy that you control (with `?url=` param and iframe embedding allowed).</p>
   </div>
 
 <script>
 /* ------------------------
-   Provider URL templates (Proxyium replaced with Proxy2)
+   Provider URL templates (Updated with three proxies + Desktop Optimizations)
    ------------------------ */
 const providerTemplates = {
   // Direct option
   "Direct": (t) => t,
   
-  // ProxySite format: Adding '?d=us' for a US server and often better desktop experience
+  // ProxySite format: Desktop view attempt
   "ProxySite": (t) => {
-    // We add d=us and set the view to 'desktop' via a commonly used parameter
+    // d=us for US server, view=desktop for mode preference
     return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}&d=us&view=desktop`;
   },
   
-  // Proxy2 (Hidester) format: Another reliable public proxy.
-  "Proxy2": (t) => {
-    // Hidester uses a slightly different format and automatically tries to hide its header.
-    // It defaults to desktop view.
-    return `https://hidester.com/proxy.php?url=${encodeURIComponent(t)}&key=1a2b3c4d5e`; // 'key' parameter helps sometimes
+  // Proxyium format: Desktop view attempt
+  "Proxyium": (t) => {
+    // Defaults to desktop, using 'fr' (France) for server variation
+    return `https://proxyium.com/?q=${encodeURIComponent(t)}&country=fr`; 
+  },
+  
+  // Proxy3 (FilterProxy / FilterBypass): A third public proxy for variety.
+  "Proxy3": (t) => {
+    // Defaults to desktop and often works well for full-page rendering
+    return `https://www.filterbypass.me/index.php?u=${encodeURIComponent(t)}`; 
   }
 };
 
-/* default provider assignments for 8 slots: ProxySite/Proxy2 alternating */
-const defaultProviders = ["Proxy2","ProxySite","Proxy2","ProxySite","Proxy2","ProxySite","Proxy2","ProxySite"];
+/* default provider assignments for 8 slots (Alternating three proxies) */
+const defaultProviders = ["ProxySite","Proxyium","Proxy3","ProxySite","Proxyium","Proxy3","ProxySite","Proxyium"];
 
 const grid = document.getElementById('grid');
 
@@ -212,7 +245,7 @@ function createSlot(index, defaultProvider){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  // Slot HTML (Select box is back)
+  // Slot HTML 
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">Slot ${index+1}</div>
@@ -222,7 +255,8 @@ function createSlot(index, defaultProvider){
     <div class="slot-controls">
       <select id="provider-${index}" aria-label="provider-${index}">
         <option>ProxySite</option>
-        <option>Proxy2</option>
+        <option>Proxyium</option>
+        <option>Proxy3</option>
         <option>Direct</option>
       </select>
       <input id="input-${index}" class="slot-input" type="url" placeholder="Enter URL or use global" />
@@ -246,7 +280,6 @@ function createSlot(index, defaultProvider){
 
   // references
   const prov = el.querySelector(`#provider-${index}`);
-  // Set default provider (ProxySite/Proxy2)
   prov.value = defaultProvider || 'ProxySite'; 
   const input = el.querySelector(`#input-${index}`);
   const goBtn = el.querySelector(`#go-${index}`);
@@ -263,7 +296,6 @@ function createSlot(index, defaultProvider){
     status.textContent = text;
   }
 
-  // loadUrl function original URL लेता है और proxy template लगाता है
   function loadUrl(originalUrl){
     if(!originalUrl) return;
     setStatus('loading...');
@@ -271,22 +303,21 @@ function createSlot(index, defaultProvider){
     embedHint.textContent = 'embed';
     const provider = prov.value || 'ProxySite'; 
     
-    // Original URL, provider के template के through format होकर final URL बन रहा है
+    // Get final proxy URL
     const finalProxyUrl = (providerTemplates[provider] || providerTemplates['ProxySite'])(originalUrl);
     
-    lastUrl = finalProxyUrl; // lastUrl में अब proxy-formatted URL save होगा
+    lastUrl = finalProxyUrl; 
 
     // set iframe src
     iframe.src = finalProxyUrl;
 
-    // set a 2s grace then mark attempted, 5s to mark possible-block
+    // Status updates and checks
     setTimeout(()=> {
       setStatus('attempted');
       ping.style.display = 'inline-block';
       setTimeout(()=> ping.style.display = 'none', 1200);
     }, 1400);
 
-    // check for embed block hint
     setTimeout(()=> {
       try {
         if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
@@ -300,25 +331,28 @@ function createSlot(index, defaultProvider){
     }, 3800);
   }
 
-  // click handlers
+  // Event Handlers
   goBtn.addEventListener('click', ()=> {
     const v = input.value || document.getElementById('globalUrl').value;
     if(!v) return alert('Paste a URL in the slot or the global input first.');
     loadUrl(v.trim());
+  });
+  // If the proxy provider changes, auto-reload the current URL
+  prov.addEventListener('change', () => {
+    const v = input.value || document.getElementById('globalUrl').value;
+    if(v) loadUrl(v.trim());
   });
 
   openBtn.addEventListener('click', ()=> {
     const v = input.value || document.getElementById('globalUrl').value;
     if(!v) return alert('Paste a URL in the slot or the global input first.');
     const provider = prov.value || 'ProxySite';
-    // New tab में open करने के लिए भी template use होगा
     const final = (providerTemplates[provider] || providerTemplates['ProxySite'])(v.trim());
     window.open(final, '_blank');
   });
 
   reloadBtn.addEventListener('click', ()=> {
     if(!lastUrl){ setStatus('idle'); return; }
-    // Reload करने के लिए, original URL से proxy URL फिर से बनाओ (ताकि naye proxy settings apply hon)
     const originalUrl = input.value || document.getElementById('globalUrl').value;
     if(!originalUrl) { setStatus('idle'); return; }
     loadUrl(originalUrl); 
@@ -328,7 +362,6 @@ function createSlot(index, defaultProvider){
     if(e.key === 'Enter') goBtn.click();
   });
 
-  // try to detect iframe load (best-effort)
   iframe.addEventListener('load', ()=>{
     setStatus('loaded');
     ping.style.display = 'inline-block';
@@ -338,7 +371,6 @@ function createSlot(index, defaultProvider){
         embedHint.textContent = 'embedded';
       }
     } catch(e){
-      // cross-origin - we can't inspect
     }
   });
 
@@ -357,22 +389,21 @@ document.getElementById('globalGo').addEventListener('click', ()=>{
   const url = document.getElementById('globalUrl').value.trim();
   if(!url){ alert('Please paste a URL in the global field first.'); return; }
   
-  // Har slot के लिए URL को process करो
   slots.forEach(s => {
-    // 1. Slot के input field में URL set करो
     s.input.value = url; 
-    
-    // 2. loadUrl को original URL दो
     s.loadUrl(url); 
   });
 });
 
-// quick-set buttons (all slots के provider को update करते हैं)
-document.getElementById('setAllProxy2').addEventListener('click', ()=>{
-  slots.forEach(s => s.prov.value = 'Proxy2');
-});
-document.getElementById('setAllProxysite').addEventListener('click', ()=>{
+// quick-set buttons 
+document.getElementById('setAllProxySite').addEventListener('click', ()=>{
   slots.forEach(s => s.prov.value = 'ProxySite');
+});
+document.getElementById('setAllProxyium').addEventListener('click', ()=>{
+  slots.forEach(s => s.prov.value = 'Proxyium');
+});
+document.getElementById('setAllProxy3').addEventListener('click', ()=>{
+  slots.forEach(s => s.prov.value = 'Proxy3');
 });
 document.getElementById('setAllDirect').addEventListener('click', ()=>{
   slots.forEach(s => s.prov.value = 'Direct');
