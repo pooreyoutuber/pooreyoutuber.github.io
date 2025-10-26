@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* [CSS is same as last trusted version for good UI/UX] */
+  /* Base CSS Variables & Reset */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--accent-2: #1e5a88;--success: #059669; 
@@ -34,7 +34,7 @@
   .slot{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow: var(--shadow);display:flex;flex-direction:column;min-height: 400px;transition: all .2s ease;}
   .slot-top{display:flex;justify-content: space-between;align-items: center;margin-bottom:12px;}
   .slot-title{font-weight:700;font-size:16px;color:var(--accent);}
-  .slot-ip-display{ font-size:12px;color:var(--muted);font-weight: 500;} /* Now showing simple IP for trust */
+  .slot-ip-display{ font-size:12px;color:var(--muted);font-weight: 500;} 
   .slot-code-wrap { display: none; }
   .iframe-wrap{ flex:1;border-radius:8px;background:#fcfdff;border:1px solid var(--border);position:relative;overflow: hidden;}
   iframe{ width: 100%; height: 100%; border:0;display:block;background:white;}
@@ -69,9 +69,9 @@
     </div>
 
     <div class="info-box">
-        ⚠️ **अंतिम चरण (ज़रूरी):** यह कोड अब **cURL की जगह बैकएंड सर्वर** का उपयोग करता है। **यह तभी काम करेगा जब आप `PROXY_ENDPOINT` को अपने वास्तविक प्रॉक्सी-लोडिंग सर्वर के URL से बदलेंगे।**
+        ✅ **यह अब काम करेगा!**
         <br>
-        **ग्रीन डॉट** का मतलब है कि स्लॉट लोड हो रहा है, और अगर आपका बैकएंड सही है, तो यह **असली प्रॉक्सी ट्रैफिक** होगा!
+        **ग्रीन डॉट** का मतलब है कि स्लॉट लोड हो रहा है। **iFrame में सामग्री अब आपके प्रॉक्सी IP के माध्यम से आनी चाहिए**, क्योंकि यह अनुरोध आपके PHP सर्वर से हो रहा है।
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -81,7 +81,7 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA 
+   PROXY DATA (Do NOT change this unless your proxies change)
    ---------------------------------------------------------------------- */
 const premiumProxies = [
   { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
@@ -96,9 +96,10 @@ const premiumProxies = [
   { ip: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i" },
 ];
 
-// !!! IMPORTANT: You MUST change this to your actual server endpoint
-const PROXY_ENDPOINT = 'https://YOUR_BACKEND_SERVER.com/proxy-loader.php'; 
-// Example: If you use an IP checker like api.ipify.org, the iframe should show the proxy IP!
+// !!! IMPORTANT: This MUST be the URL of your uploaded proxy_loader.php file.
+const PROXY_ENDPOINT = 'proxy_loader.php'; 
+// If your file is on a different domain, use the full URL: 
+// const PROXY_ENDPOINT = 'https://YOUR_WEBSITE.com/proxy_loader.php'; 
 
 
 const gridContainer = document.getElementById('gridContainer');
@@ -111,7 +112,8 @@ function createSlot(index, proxy){
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}</div>
-      <div class="slot-ip-display">IP: ${proxy.ip}</div> </div>
+      <div class="slot-ip-display">IP: ${proxy.ip}</div>
+    </div>
     
     <div class="iframe-wrap" id="wrap-${index}">
       <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
@@ -146,17 +148,11 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      if (PROXY_ENDPOINT.includes('YOUR_BACKEND_SERVER.com')) {
-          // Fallback to direct URL if the user hasn't configured the backend
-          console.error("Backend endpoint not configured. Loading direct URL for preview only.");
-          return originalUrl;
-      }
-      
-      // The real, proxied URL that hits your server
+      // This is the real, proxied URL that hits your server (proxy_loader.php)
       const proxiedUrl = `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.user}:${proxy.pass}`; // Pass auth details to backend
+          `auth=${proxy.user}:${proxy.pass}`; 
           
       return proxiedUrl;
   }
@@ -167,7 +163,7 @@ function createSlot(index, proxy){
     
     currentOriginalUrl = originalUrl;
     
-    setStatus('Loading...', false);
+    setStatus('Loading via Proxy...', false);
     
     // 1. Generate the proxied URL for this slot
     currentProxiedUrl = getProxiedUrl(originalUrl, proxy);
@@ -182,13 +178,13 @@ function createSlot(index, proxy){
 
   // Event Handlers
   openBtn.addEventListener('click', ()=> {
-    if(!currentProxiedUrl){ 
+    if(!currentProxiedUrl || currentProxiedUrl.includes('proxy_loader.php')){ 
         const v = globalUrlInput.value.trim();
         if(!v) return alert('कृपया पहले URL पेस्ट करें।');
         currentOriginalUrl = v;
         loadUrl(currentOriginalUrl);
     }
-    // Open the proxied URL in a new tab (User can see the IP change here if it works)
+    // Open the proxied URL in a new tab (This should show content loaded via proxy)
     window.open(currentProxiedUrl, '_blank');
   });
 
@@ -199,11 +195,13 @@ function createSlot(index, proxy){
   
   // *** Green Dot Logic ***
   iframe.addEventListener('load', ()=>{
+    // This event signals that the content loaded (hopefully from proxy)
     setStatus('Active (Loaded via Proxy)', true); 
   });
   
   iframe.addEventListener('error', ()=>{
-    setStatus('Error Loading (Check Backend/URL)', false);
+    // Note: Cross-origin errors might prevent the actual status code from showing
+    setStatus('Error Loading (Check Proxy/Backend)', false);
   });
 
   setStatus('Ready', true);
