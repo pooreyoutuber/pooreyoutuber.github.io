@@ -3,297 +3,336 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PY Tools — Public Proxy Launcher (10 Slots, Dynamic Layout)</title>
+<title>ProXy-Gen - Premium Proxy cURL Generator (10 Slots)</title>
 <link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-  /* CSS Styles - Base Setup */
+  /* Base CSS Variables & Reset */
   :root{
     --bg: #f6f8fb;
     --card: #ffffff;
-    --muted: #7b7f92;
-    --accent: #6b5dd3;
-    --accent-2: #4f46e5;
-    --border: #e7e9f0;
-    --shadow: 0 8px 20px rgba(40,40,90,0.06);
+    --muted: #6b7280; /* Darker muted for better readability */
+    --accent: #4f46e5; /* Indigo */
+    --accent-2: #3730a3;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --border: #e5e7eb;
+    --shadow: 0 4px 12px rgba(0,0,0,0.05);
     --radius: 12px;
-    --gap: 12px; 
+    --gap: 16px; 
     --maxwidth: 1400px;
   }
   *{box-sizing:border-box}
   body{
     margin:0;
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial;
-    background: linear-gradient(180deg, var(--bg), #eef2ff 200px);
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg, var(--bg) 0%, #e0e7ff 100vh);
     color:#111827;
     -webkit-font-smoothing:antialiased;
+    line-height: 1.5;
   }
   .wrap{
     max-width: var(--maxwidth);
-    margin:22px auto;
-    padding:18px;
+    margin:32px auto;
+    padding:16px;
   }
+  
+  /* Header Section */
   header{
     display:flex;
     gap:12px;
     align-items:center;
-    margin-bottom:18px;
+    margin-bottom:24px;
   }
   .logo .badge{
-    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
-    display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 6px 18px rgba(110,89,240,0.18);
-    font-size:18px;
+    width:48px;height:48px;border-radius:12px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
+    box-shadow:0 6px 16px rgba(79,70,229,0.2);
+    font-size:20px;
   }
   h1{
-    font-size:18px;margin:0;
-    letter-spacing: -0.2px;
+    font-size:24px;margin:0;
+    letter-spacing: -0.5px;
   }
-  .subtitle{ color:var(--muted); font-size:13px; margin-top:4px }
+  .subtitle{ color:var(--muted); font-size:14px; margin-top:4px }
   
-  /* Global Input Control & Layout Switch */
+  /* Controls & Input */
   .controls {
-    margin-top:12px;
     display:flex;
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 24px;
   }
-  .input-wrap{ display:flex; gap:8px; width:100%; }
+  .input-wrap{ display:flex; gap:10px; width:100%; }
   input[type="url"]{
     flex:1;
-    padding:12px 14px;
+    padding:12px 16px;
     border-radius:10px;
     border:1px solid var(--border);
     background:white;
-    font-size:14px;
+    font-size:16px;
     outline:none;
+    transition: border-color 0.2s;
+  }
+  input[type="url"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
   .btn{
     background:var(--accent);
     color:white;
-    padding:10px 14px;
+    padding:12px 20px;
     border-radius:10px;
     border:0;
     cursor:pointer;
     font-weight:600;
-    box-shadow: 0 6px 16px rgba(99,84,238,0.12);
+    box-shadow: 0 4px 8px rgba(79, 70, 229, 0.2);
+    transition: background-color 0.2s;
+    white-space: nowrap;
   }
+  .btn:hover { background-color: var(--accent-2); }
+  
+  /* Alert/Hint Style */
   .hint { 
     font-size:14px; 
-    color:#065f46; 
-    padding: 12px;
-    background: #d1fae5; 
-    border: 1px solid #a7f3d0;
-    border-radius: 8px;
+    color:#92400e; 
+    padding: 16px;
+    background: #fef3c7; 
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    font-weight: 500;
   }
-  .layout-switcher {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    padding: 10px 15px;
-    background: var(--card);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-  }
-  .layout-switcher label {
-    font-weight: 600;
-    font-size: 14px;
-    color: #4a5568;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .hint strong { color: #b45309; }
 
-  /* Grid Container - Base */
+  /* Grid Container - Responsive Layout */
   .grid-container {
     display: grid;
     gap: var(--gap);
-    margin-top: 18px;
-    grid-template-columns: repeat(5, 1fr); 
+    grid-template-columns: repeat(2, 1fr); /* Default for Mobile/Tablet */
   }
-  
-  /* Desktop Layout (4-4-2) */
-  .grid-container.desktop-layout {
-    grid-template-columns: repeat(4, 1fr); /* Base 4 columns */
+
+  /* Desktop Layout (4 columns) */
+  @media (min-width: 1024px) {
+    .grid-container {
+      grid-template-columns: repeat(4, 1fr); 
+    }
+    /* Slots 9 and 10 form 2-wide on desktop */
+    .grid-container .slot:nth-child(9), .grid-container .slot:nth-child(10) {
+        grid-column: span 2;
+    }
   }
-  /* Slots 1-8 form 4-4 */
-  .desktop-layout .slot:nth-child(-n+8) {
-    grid-column: span 1;
-    min-height: 350px;
-  }
-  /* Slots 9 and 10 form 2 */
-  .desktop-layout .slot:nth-child(9), .desktop-layout .slot:nth-child(10) {
-    grid-column: span 2;
-  }
-  
-  /* Mobile Layout (3-3-3-1) */
-  .grid-container.mobile-layout {
-    grid-template-columns: repeat(3, 1fr); /* Base 3 columns */
-  }
-  .mobile-layout .slot { 
-      grid-column: span 1; 
-      min-height: 250px;
-  }
-  .mobile-layout .slot:nth-child(10) { 
-      /* Slot 10 takes full width */
-      grid-column: span 3; 
-  }
-  
-  /* Slot General Styles */
+
+  /* Slot Card Styles */
   .slot{
     background:var(--card);
     border-radius:var(--radius);
-    padding:12px;
+    padding:16px;
     box-shadow: var(--shadow);
     display:flex;
     flex-direction:column;
-    transition:transform .22s ease, box-shadow .22s ease;
+    min-height: 380px;
+    transition: all .2s ease;
   }
+  .slot:hover {
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+  }
+
+  /* Slot Header */
   .slot-top{
-    display:flex; gap:8px; align-items:center; margin-bottom:10px;
+    display:flex; 
     justify-content: space-between;
+    align-items: center; 
+    margin-bottom:12px;
   }
   .slot-title{ 
-    font-weight:600; font-size:13px; color:#111827; 
+    font-weight:700; 
+    font-size:16px; 
+    color:var(--accent-2); 
   }
-  .slot-url-display{ 
-    font-size:11px; color:var(--muted);
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    flex:1;
+  .slot-ip-display{ 
+    font-size:12px; 
+    color:var(--success); 
+    font-weight: 600;
+    padding: 4px 8px;
+    background: #ecfdf5;
+    border-radius: 6px;
   }
-  /* Hiding select controls for a cleaner UI */
-  .slot-controls { display:none; }
+  
+  /* cURL Command Block */
+  .slot-code-wrap {
+      margin-bottom: 12px;
+  }
+  .slot-code {
+      display: block;
+      width: 100%;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      padding: 10px;
+      overflow-x: auto;
+      white-space: nowrap;
+      cursor: pointer;
+      color: #1f2937;
+      transition: background 0.1s;
+  }
+  .slot-code:hover {
+      background: #e5e7eb;
+  }
+  .copied-state {
+      background: var(--success) !important;
+      color: white !important;
+      font-weight: 600;
+  }
 
-  .small-btn{ 
-    padding:8px 10px; border-radius:8px; border:0; cursor:pointer; 
-    font-weight:600; color:white; background:#2f9cdb 
-  }
+  /* iFrame Previews */
   .iframe-wrap{ 
-    flex:1; border-radius:8px; 
-    background:#fcfdff; border:1px solid var(--border); 
+    flex:1; 
+    border-radius:8px; 
+    background:#fcfdff; 
+    border:1px solid var(--border); 
     position:relative; 
     overflow: hidden; 
   }
   iframe{ 
     width: 100%; 
     height: 100%; 
-    border:0; display:block; 
+    border:0; 
+    display:block; 
     background:white; 
-    overflow: auto; 
   }
-  .slot-footer{ 
-    display:flex; gap:8px; align-items:center; margin-top:10px; 
-    justify-content:space-between; 
-  }
-  .status { font-size:12px; color:var(--muted) }
-  .pulse {
-    display:inline-block; width:8px;height:8px;border-radius:50%; background:#34d399; box-shadow:0 0 8px rgba(52,211,153,0.3);
-    position:relative; top:2px;
-    animation: ping 1.6s infinite;
-  }
-  @keyframes ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
   
+  /* Footer & Status */
+  .slot-footer{ 
+    display:flex; 
+    gap:10px; 
+    align-items:center; 
+    margin-top:16px; 
+    justify-content:space-between; 
+    flex-wrap: wrap;
+  }
+  .small-btn{ 
+    padding:8px 12px; 
+    border-radius:8px; 
+    border:0; 
+    cursor:pointer; 
+    font-weight:600; 
+    color:white; 
+    background:#0ea5e9; /* Sky blue for actions */
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .small-btn.ghost {
+      background: var(--muted);
+  }
+  .status { 
+    font-size:12px; 
+    color:var(--muted);
+    font-weight: 500;
+  }
+  .pulse {
+    display:inline-block; width:8px;height:8px;border-radius:50%; 
+    background:var(--success); 
+    box-shadow:0 0 8px rgba(16,185,129,0.5);
+    position:relative; top:1px;
+    animation: pulse-ping 1.6s infinite;
+  }
+  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+  
+  /* Mobile adjustments for buttons */
+  @media (max-width: 600px) {
+      .input-wrap { flex-direction: column; }
+      .slot-footer { flex-direction: column; align-items: stretch; }
+      .slot-footer > div { display: flex; gap: 10px; width: 100%; }
+      .small-btn { flex: 1; }
+  }
+
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div class="logo">
-        <div class="badge">PY</div>
+        <div class="badge">PRO</div>
       </div>
       <div>
-        <h1>Public Proxy Launcher (10 Slots)</h1>
-        <div class="subtitle">ProxySite & Proxyium are used. Select your view mode below.</div>
+        <h1>प्रीमियम प्रॉक्सी cURL कोड जेनरेटर (10 स्लॉट)</h1>
+        <div class="subtitle">यह टूल आपके 10 प्रीमियम प्रॉक्सी के लिए cURL कमांड बनाता है।</div>
       </div>
     </header>
 
     <div class="controls">
-        <div class="layout-switcher">
-            <span style="color:var(--accent-2); font-size:14px;">लेआउट चुनें:</span>
-            
-            <label>
-                <input type="radio" name="layout" value="desktop-layout" id="desktopRadio" checked>
-                Desktop (4-4-2)
-            </label>
-            
-            <label>
-                <input type="radio" name="layout" value="mobile-layout" id="mobileRadio">
-                Mobile (3-3-3-1)
-            </label>
-        </div>
-        
         <div class="input-wrap">
-            <input id="globalUrl" type="url" placeholder="यहां अपना टारगेट URL पेस्ट करें (जैसे, https://youtube.com/watch?v=XXXXXX)" />
-            <button id="globalGo" class="btn">सभी स्लॉट्स में लोड करें</button>
+            <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (जैसे, https://example.com/check-ip)" />
+            <button id="globalGo" class="btn">सभी प्रॉक्सी के लिए कमांड जेनरेट करें</button>
         </div>
     </div>
 
     <div class="hint">
-        ✅ **प्रॉक्सी सक्रिय:** यह टूल **ProxySite** और **Proxyium** का उपयोग करता है। **ध्यान दें:** ये पब्लिक प्रॉक्सी अस्थिर (unstable) हो सकते हैं और YouTube जैसी बड़ी साइटों पर काम करना बंद कर सकते हैं।
+        ⚠️ **उपयोग निर्देश:** प्रीमियम IP प्रॉक्सी **ब्राउज़र iFrame में सीधे काम नहीं करते**।
+        <br>1. ग्लोबल URL डालें।
+        <br>2. जेनरेटेड **cURL कमांड** को कॉपी करें।
+        <br>3. उस कमांड को अपने **टर्मिनल (Terminal)** या **सर्वर स्क्रिप्ट** में चलाएं।
+        <br>4. iFrame सिर्फ़ **टारगेट URL का एक अन-प्रॉक्सीड (un-proxied) प्रीव्यू** दिखाता है।
     </div>
 
-    <!-- Grid Container - Default to Desktop Layout -->
-    <div class="grid-container desktop-layout" id="gridContainer">
-        <!-- Slots will be appended here -->
-    </div>
+    <div class="grid-container" id="gridContainer">
+        </div>
     
   </div>
 
 <script>
 /* ------------------------
-   Provider URL templates (Public Proxies)
+   10 Premium Proxies from User's Screenshot (Webshare.io)
    ------------------------ */
-const providerTemplates = {
-  // ProxySite template using URL encoding
-  "ProxySite": (t) => {
-      // ProxySite URL format: https://www.proxysite.com/includes/process.php?action=update&d=1&p%5Burl%5D=ENCODED_URL
-      return `https://www.proxysite.com/includes/process.php?action=update&d=1&p%5Burl%5D=${encodeURIComponent(t)}`;
-  }, 
-  // Proxyium template using URL encoding
-  "Proxyium": (t) => {
-      // Proxyium URL format: https://www.proxyium.com/s/proxy.php?action=update&d=1&p%5Burl%5D=ENCODED_URL
-      return `https://www.proxyium.com/s/proxy.php?action=update&d=1&p%5Burl%5D=${encodeURIComponent(t)}`;
-  },
-};
-
-/* 10 slots alternating ProxySite (P1) and Proxyium (P2) */
-const defaultProviders = [
-    "ProxySite", "Proxyium", "ProxySite", "Proxyium", "ProxySite",
-    "Proxyium", "ProxySite", "Proxyium", "ProxySite", "Proxyium"
+const premiumProxies = [
+  { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "38.170.176.177", port: "5572", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "198.23.239.134", port: "6540", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "45.38.107.97", port: "6014", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "107.172.163.27", port: "6543", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "64.137.96.74", port: "6641", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "216.10.27.159", port: "6837", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "142.111.67.146", port: "5611", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i" },
 ];
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
-const desktopRadio = document.getElementById('desktopRadio');
-const mobileRadio = document.getElementById('mobileRadio');
 
-function createSlot(index, providerName){
+function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  // Slot title now shows the assigned proxy name and slot number
+  const proxyAuth = `${proxy.user}:${proxy.pass}`;
+  const proxyAddress = `${proxy.ip}:${proxy.port}`;
+  
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">Slot ${index+1} (${providerName})</div>
-      <div class="slot-url-display" id="slot-url-display-${index}"></div>
-    </div>
-
-    <div class="slot-controls">
-        <select id="provider-${index}" aria-label="provider-${index}">
-            <option value="ProxySite" ${providerName === 'ProxySite' ? 'selected' : ''}>ProxySite</option>
-            <option value="Proxyium" ${providerName === 'Proxyium' ? 'selected' : ''}>Proxyium</option>
-        </select>
+      <div class="slot-title">SLOT ${index+1}</div>
+      <div class="slot-ip-display">${proxyAddress}</div>
     </div>
     
+    <div class="slot-code-wrap">
+        <code class="slot-code" id="code-${index}" title="कॉपी करने के लिए क्लिक करें">
+            टारगेट URL पेस्ट करने के बाद कमांड जेनरेट होगा...
+        </code>
+    </div>
+
     <div class="iframe-wrap" id="wrap-${index}">
       <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
     </div>
     
     <div class="slot-footer">
-      <div style="display:flex;gap:8px">
-        <button id="open-${index}" class="btn small-btn">Full Screen (New Tab)</button>
-        <button id="reload-${index}" class="ghost small-btn">Reload iFrame</button>
+      <div>
+        <button id="open-${index}" class="btn small-btn">URL को नए टैब में खोलें</button>
+        <button id="reload-${index}" class="ghost small-btn">iFrame रीलोड करें</button>
       </div>
       <div style="display:flex;gap:8px; align-items:center">
         <div class="status" id="status-${index}">idle</div>
@@ -310,35 +349,45 @@ function createSlot(index, providerName){
   const reloadBtn = el.querySelector(`#reload-${index}`);
   const status = el.querySelector(`#status-${index}`);
   const ping = el.querySelector(`#ping-${index}`);
-  const urlDisplay = el.querySelector(`#slot-url-display-${index}`);
-  const providerSelect = el.querySelector(`#provider-${index}`);
+  const codeElement = el.querySelector(`#code-${index}`);
 
   let currentOriginalUrl = '';
-  let currentProvider = providerName;
 
   function setStatus(text){
     status.textContent = text;
   }
+  
+  // Function to generate the cURL command
+  function generateCurl(targetUrl) {
+      if (!targetUrl) {
+          codeElement.textContent = 'टारगेट URL दर्ज करें...';
+          return;
+      }
+      // Proper URL encoding of user/pass is important for cURL
+      const encodedUser = proxy.user;
+      const encodedPass = proxy.pass;
+      const curlCommand = `curl -x "http://${proxyAddress}" -U "${encodedUser}:${encodedPass}" "${targetUrl}"`;
+      codeElement.textContent = curlCommand;
+  }
 
-  function loadUrl(originalUrl, provider=currentProvider){
+
+  function loadUrl(originalUrl){
     if(!originalUrl) return;
     
     currentOriginalUrl = originalUrl;
-    currentProvider = provider;
     
-    urlDisplay.textContent = originalUrl;
     setStatus('loading...');
     ping.style.display = 'none';
     
-    // Get final URL using the selected public proxy template
-    const finalUrl = providerTemplates[currentProvider](originalUrl);
+    // 1. Generate the cURL command
+    generateCurl(originalUrl);
     
-    // set iframe src
-    iframe.src = finalUrl;
+    // 2. Load the original URL directly into the iframe (non-proxied preview)
+    iframe.src = originalUrl;
 
     // Status updates
     setTimeout(()=> {
-      setStatus('attempted');
+      setStatus('iFrame Loaded (Direct Preview)');
       ping.style.display = 'inline-block';
       setTimeout(()=> ping.style.display = 'none', 1200);
     }, 1400);
@@ -348,33 +397,42 @@ function createSlot(index, providerName){
   openBtn.addEventListener('click', ()=> {
     if(!currentOriginalUrl){ 
         const v = globalUrlInput.value.trim();
-        if(!v) return alert('Please paste a URL in the main input field first.');
+        if(!v) return alert('कृपया पहले ग्लोबल इनपुट में URL पेस्ट करें।');
         currentOriginalUrl = v;
-        urlDisplay.textContent = v;
+        loadUrl(currentOriginalUrl);
     }
-    // Open in a new tab 
-    const final = providerTemplates[currentProvider](currentOriginalUrl);
-    window.open(final, '_blank');
+    // Open the original URL directly in a new tab 
+    window.open(currentOriginalUrl, '_blank');
   });
 
   reloadBtn.addEventListener('click', ()=> {
     if(!currentOriginalUrl){ setStatus('idle'); return; }
-    // Use the current provider set for this slot
-    loadUrl(currentOriginalUrl, currentProvider); 
+    loadUrl(currentOriginalUrl); 
   });
-
-  // Handle provider change (though the select box is hidden in CSS, this ensures functionality if needed later)
-  providerSelect.addEventListener('change', (e) => {
-      currentProvider = e.target.value;
-      el.querySelector('.slot-title').textContent = `Slot ${index+1} (${currentProvider})`;
-      if(currentOriginalUrl) {
-          loadUrl(currentOriginalUrl, currentProvider);
+  
+  // Copy cURL command on click
+  codeElement.addEventListener('click', () => {
+      const command = codeElement.textContent;
+      if (command.startsWith('curl')) {
+          navigator.clipboard.writeText(command).then(() => {
+              // Visual feedback
+              codeElement.classList.add('copied-state');
+              const originalText = command;
+              codeElement.textContent = '✅ कमांड कॉपी हो गया!';
+              setTimeout(() => {
+                  codeElement.classList.remove('copied-state');
+                  codeElement.textContent = originalText;
+              }, 1200);
+          }).catch(err => {
+              alert('कॉपी करने में विफल: ' + err);
+          });
       }
   });
 
 
   iframe.addEventListener('load', ()=>{
-    setStatus('loaded (check iFrame)');
+    // This is the iframe's load event. Note: It's NOT a proxied load.
+    setStatus('iFrame Loaded (Direct Preview)'); 
     ping.style.display = 'inline-block';
     setTimeout(()=> ping.style.display = 'none', 1200);
   });
@@ -385,42 +443,19 @@ function createSlot(index, providerName){
 // create 10 slots
 const slots = [];
 for(let i=0;i<10;i++){
-  const slot = createSlot(i, defaultProviders[i]);
+  const slot = createSlot(i, premiumProxies[i]);
   slots.push(slot);
 }
 
 // global actions
 document.getElementById('globalGo').addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
-  if(!url){ alert('कृपया पहले ग्लोबल इनपुट में URL पेस्ट करें।'); return; }
+  if(!url){ alert('कृपया पहले ग्लोबल इनपुट में एक मान्य URL पेस्ट करें।'); return; }
   
-  slots.forEach((s, index) => {
-    // Load URL using the assigned provider for each slot
-    s.loadUrl(url, defaultProviders[index]); 
+  slots.forEach(s => {
+    s.loadUrl(url); 
   });
 });
-
-
-// Layout Switching Logic
-function switchLayout(layoutName) {
-    gridContainer.className = 'grid-container'; // Reset classes
-    gridContainer.classList.add(layoutName);
-}
-
-desktopRadio.addEventListener('change', () => {
-    if (desktopRadio.checked) {
-        switchLayout('desktop-layout');
-    }
-});
-
-mobileRadio.addEventListener('change', () => {
-    if (mobileRadio.checked) {
-        switchLayout('mobile-layout');
-    }
-});
-
-// Set initial layout
-switchLayout(desktopRadio.checked ? 'desktop-layout' : 'mobile-layout');
 </script>
 </body>
 </html>
