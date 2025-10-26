@@ -6,6 +6,7 @@
 <title>PooreYouTuber Tools — Multi Proxy Browser</title>
 <link rel="icon" href="data:,">
 <style>
+  /* CSS Styles (No changes here, preserving the original look) */
   :root{
     --bg: #f6f8fb;
     --card: #ffffff;
@@ -169,11 +170,11 @@
       <div class="quick-sets">
         <button id="setAllProxyium" class="ghost">All → Proxyium</button>
         <button id="setAllProxysite" class="ghost">All → ProxySite</button>
-        <button id="setAllRandom" class="ghost">All → Random Proxy</button>
+        <button id="setAllDirect" class="ghost">All → Direct</button>
       </div>
     </div>
 
-    <div class="hint">Tip: If a frame stays blank the provider may block embedding. The proxy service always adds its own URL bar/header inside the frame (this is unavoidable).</div>
+    <div class="hint">Tip: If a frame stays blank the provider may block embedding. The view is optimized for desktop, but the proxy may still add its URL bar/header.</div>
 
     <div class="grid" id="grid"></div>
 
@@ -182,26 +183,25 @@
 
 <script>
 /* ------------------------
-   Provider URL templates
+   Provider URL templates (Desktop Optimization Added)
    ------------------------ */
 const providerTemplates = {
-  // Direct option is for internal use/fallback, but not exposed in UI dropdown
+  // Direct option
   "Direct": (t) => t,
   
-  // ProxySite format
+  // ProxySite format: Adding '?d=us' for a US server and sometimes better desktop experience
   "ProxySite": (t) => {
-    return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}`;
+    // encodeURIComponent(t) is important
+    return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}&d=us`;
   },
   
-  // Proxyium format
+  // Proxyium format: Attempting to use a European server for variation and no specific mobile flag
   "Proxyium": (t) => {
-    return `https://proxyium.com/?q=${encodeURIComponent(t)}`;
+    return `https://proxyium.com/?q=${encodeURIComponent(t)}&country=fr`;
   }
 };
 
-/* ------------------------
-   Default Proxy Settings: USER ALWAYS USES PROXY
-   ------------------------ */
+/* default provider assignments for 8 slots: ProxySite/Proxyium alternating */
 const defaultProviders = ["Proxyium","ProxySite","Proxyium","ProxySite","Proxyium","ProxySite","Proxyium","ProxySite"];
 
 const grid = document.getElementById('grid');
@@ -209,6 +209,7 @@ const grid = document.getElementById('grid');
 function createSlot(index, defaultProvider){
   const el = document.createElement('div');
   el.className = 'slot';
+  // Re-adding the select box as requested
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">Slot ${index+1}</div>
@@ -219,6 +220,7 @@ function createSlot(index, defaultProvider){
       <select id="provider-${index}" aria-label="provider-${index}">
         <option>ProxySite</option>
         <option>Proxyium</option>
+        <option>Direct</option>
       </select>
       <input id="input-${index}" class="slot-input" type="url" placeholder="Enter URL or use global" />
       <button id="go-${index}" class="btn small-btn">Go</button>
@@ -264,7 +266,7 @@ function createSlot(index, defaultProvider){
     setStatus('loading...');
     ping.style.display = 'none';
     embedHint.textContent = 'embed';
-    const provider = prov.value || 'ProxySite'; 
+    const provider = prov.value || 'ProxySite'; // Default to ProxySite agar provider gayab hai
     
     // Original URL, provider ke template ke through format hokar final URL ban raha hai
     const finalProxyUrl = (providerTemplates[provider] || providerTemplates['ProxySite'])(originalUrl);
@@ -313,8 +315,10 @@ function createSlot(index, defaultProvider){
 
   reloadBtn.addEventListener('click', ()=> {
     if(!lastUrl){ setStatus('idle'); return; }
-    iframe.src = lastUrl;
-    setStatus('reloading');
+    // Reload karne ke liye, original URL se proxy URL phir se banao (taaki naye proxy settings apply hon)
+    const originalUrl = input.value || document.getElementById('globalUrl').value;
+    if(!originalUrl) { setStatus('idle'); return; }
+    loadUrl(originalUrl); 
   });
 
   input.addEventListener('keydown', (e) => {
@@ -341,7 +345,6 @@ function createSlot(index, defaultProvider){
 // create 8 slots
 const slots = [];
 for(let i=0;i<8;i++){
-  // defaultProviders[i] ensure karta hai ki slot default mein Proxyium ya ProxySite set ho
   const slot = createSlot(i, defaultProviders[i]);
   slots.push(slot);
 }
@@ -353,25 +356,27 @@ document.getElementById('globalGo').addEventListener('click', ()=>{
   
   // Har slot ke liye URL ko process karo
   slots.forEach(s => {
+    // 1. Slot ke input field mein URL set karo
     s.input.value = url; 
+    
+    // 2. loadUrl ko original URL do, aur yeh khud hi proxy template use karke load karega
     s.loadUrl(url); 
   });
 });
 
-// quick-set buttons 
+// quick-set buttons (all slots ke provider ko update karte hain)
 document.getElementById('setAllProxyium').addEventListener('click', ()=>{
   slots.forEach(s => s.prov.value = 'Proxyium');
 });
 document.getElementById('setAllProxysite').addEventListener('click', ()=>{
   slots.forEach(s => s.prov.value = 'ProxySite');
 });
-// 'All -> Random Proxy' button
-document.getElementById('setAllRandom').addEventListener('click', ()=>{
-  slots.forEach((s, i) => s.prov.value = defaultProviders[i]);
+document.getElementById('setAllDirect').addEventListener('click', ()=>{
+  slots.forEach(s => s.prov.value = 'Direct');
 });
 
 // optional: sample placeholder
-document.getElementById('globalUrl').placeholder = 'https://pooreyoutuber.github.io/website-booster.html';
+document.getElementById('globalUrl').placeholder = 'https://example.com';
 
 </script>
 </body>
