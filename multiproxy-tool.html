@@ -182,26 +182,27 @@
 
 <script>
 /* ------------------------
-   Provider URL templates
-   Update these if you know exact provider formats.
-   Must return full final URL given target t (string).
+   Provider URL templates (Proxy URL banane ka format)
    ------------------------ */
 const providerTemplates = {
+  // Direct option ko abhi bhi rakha hai, taaki agar zarurat pade to kaam aa sake, lekin use default mein hata diya gaya hai
   "Direct": (t) => t,
-  // ProxySite ka template: Target URL ko 'u=' parameter mein daalta hai
+  
+  // ProxySite ka format: URL ko 'u=' parameter mein daalta hai
   "ProxySite": (t) => {
     // encodeURIComponent(t) zaroori hai URL ko surakshit banane ke liye
     return `https://www.proxysite.com/index.php?u=${encodeURIComponent(t)}`;
   },
-  // Proxyium ka template: Target URL ko 'q=' parameter mein daalta hai
+  
+  // Proxyium ka format: URL ko 'q=' parameter mein daalta hai
   "Proxyium": (t) => {
     return `https://proxyium.com/?q=${encodeURIComponent(t)}`;
   }
 };
 
 /* default provider assignments for 8 slots */
-// Aapki pasand ka default distribution (Proxyium, ProxySite, Direct ka mix)
-const defaultProviders = ["Proxyium","ProxySite","Direct","ProxySite","Proxyium","Direct","Proxyium","Proxyium"];
+// Direct ko exclude karke, ProxySite aur Proxyium ka distribution: (4 ProxySite, 4 Proxyium)
+const defaultProviders = ["Proxyium","ProxySite","Proxyium","ProxySite","Proxyium","ProxySite","Proxyium","ProxySite"];
 
 const grid = document.getElementById('grid');
 
@@ -241,7 +242,8 @@ function createSlot(index, defaultProvider){
 
   // references
   const prov = el.querySelector(`#provider-${index}`);
-  prov.value = defaultProvider || 'Direct';
+  // Set default provider (ProxySite/Proxyium)
+  prov.value = defaultProvider || 'ProxySite'; 
   const input = el.querySelector(`#input-${index}`);
   const goBtn = el.querySelector(`#go-${index}`);
   const iframe = el.querySelector(`#iframe-${index}`);
@@ -257,16 +259,16 @@ function createSlot(index, defaultProvider){
     status.textContent = text;
   }
 
-  // loadUrl function ab original URL leta hai aur proxy template lagata hai
+  // loadUrl function original URL leta hai aur proxy template lagata hai
   function loadUrl(originalUrl){
     if(!originalUrl) return;
     setStatus('loading...');
     ping.style.display = 'none';
     embedHint.textContent = 'embed';
-    const provider = prov.value || 'Direct';
+    const provider = prov.value || 'ProxySite'; // Default to ProxySite agar provider gayab hai
     
     // Original URL, provider ke template ke through format hokar final URL ban raha hai
-    const finalProxyUrl = (providerTemplates[provider] || providerTemplates['Direct'])(originalUrl);
+    const finalProxyUrl = (providerTemplates[provider] || providerTemplates['ProxySite'])(originalUrl);
     
     lastUrl = finalProxyUrl; // lastUrl mein ab proxy-formatted URL save hoga
 
@@ -276,12 +278,11 @@ function createSlot(index, defaultProvider){
     // set a 2s grace then mark attempted, 5s to mark possible-block
     setTimeout(()=> {
       setStatus('attempted');
-      // show the ping after a successful-ish wait (not guaranteed)
       ping.style.display = 'inline-block';
       setTimeout(()=> ping.style.display = 'none', 1200);
     }, 1400);
 
-    // after 4s, if frame height is still blank, show hint to use new tab
+    // check for embed block hint
     setTimeout(()=> {
       try {
         if (iframe.contentDocument && iframe.contentDocument.body && iframe.contentDocument.body.childElementCount > 0) {
@@ -305,9 +306,9 @@ function createSlot(index, defaultProvider){
   openBtn.addEventListener('click', ()=> {
     const v = input.value || document.getElementById('globalUrl').value;
     if(!v) return alert('Paste a URL in the slot or the global input first.');
-    const provider = prov.value || 'Direct';
+    const provider = prov.value || 'ProxySite';
     // New tab mein open karne ke liye bhi template use hoga
-    const final = (providerTemplates[provider] || providerTemplates['Direct'])(v.trim());
+    const final = (providerTemplates[provider] || providerTemplates['ProxySite'])(v.trim());
     window.open(final, '_blank');
   });
 
@@ -360,7 +361,7 @@ document.getElementById('globalGo').addEventListener('click', ()=>{
   });
 });
 
-// quick-set buttons (same as before)
+// quick-set buttons (ab All -> Direct button sirf provider select karega)
 document.getElementById('setAllProxyium').addEventListener('click', ()=>{
   slots.forEach(s => s.prov.value = 'Proxyium');
 });
