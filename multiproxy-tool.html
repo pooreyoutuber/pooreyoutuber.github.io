@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PY Tools — Multi Proxy Browser (Desktop View Focus)</title>
+<title>PY Tools — Multi Proxy Browser (Naproxy, Flyproxy, ProxySite)</title>
 <link rel="icon" href="data:,">
 <style>
   /* CSS Styles (Desktop Optimized Layout) */
@@ -97,7 +97,8 @@
     box-shadow: var(--shadow);
     display:flex;
     flex-direction:column;
-    min-height:320px;
+    /* Updated slot size to 334px as requested */
+    min-height:334px; 
     transition:transform .22s ease, box-shadow .22s ease;
   }
   .slot-top{
@@ -108,16 +109,19 @@
     font-weight:600; font-size:13px; color:#111827; 
     display:flex; align-items:center; gap:6px;
   }
-  .slot-controls{ 
-    display:flex; gap:8px; align-items:center; 
-    margin-bottom:10px; 
-  }
   .slot-url-display{ 
     font-size:11px; color:var(--muted);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     flex:1;
   }
-
+  /* Slot controls with select box added back */
+  .slot-controls {
+    display:flex; gap:8px; align-items:center; margin-bottom:10px; 
+  }
+  select{
+    padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:white; font-size:13px;
+  }
+  
   .small-btn{ 
     padding:8px 10px; border-radius:8px; border:0; cursor:pointer; 
     font-weight:600; color:white; background:#2f9cdb 
@@ -184,7 +188,7 @@
       </div>
       <div>
         <h1>PooreYouTuber Tools — Multi Proxy Browser</h1>
-        <div class="subtitle">Open a URL across 8 proxied mini-browsers at once. Focus on **Desktop View (New Tab)** for best results.</div>
+        <div class="subtitle">Open a URL across 8 proxied mini-browsers at once. Use the **New Tab** button for the best Desktop View.</div>
       </div>
     </header>
 
@@ -198,21 +202,21 @@
     </div>
 
     <div class="hint">
-        ⚠️ **Important Note:** Public proxies often block embedding (iFrame). If a slot is blank, use the **Desktop View (New Tab)** button to open the URL directly through the proxy.
+        ⚠️ **Important Note:** Public proxies often show their own ads/homepage in the slots (like Slot 2, 4, 6, 8 in your image). Use the **Desktop View (New Tab)** button for the correct desktop experience of your URL.
     </div>
 
     <div class="grid" id="grid"></div>
     
     <div class="tool-description">
-        <h2>Enhance Your Testing: Simulate Real User Behavior</h2>
-        <p style="font-size:14px; color:#555; margin-bottom:15px;">This **Multi Proxy Browser** simulates real user traffic by routing your URL through different proxy servers, allowing you to test website performance and check analytics scripts.</p>
+        <h2>Guidance for Accurate Testing</h2>
+        <p style="font-size:14px; color:#555; margin-bottom:15px;">The following steps ensure you get the most accurate, desktop-optimized view of your website through the selected proxies:</p>
         <ul>
-            <li>**Centralized URL Input:** Paste your URL once in the main input field and click **'Load in all slots'** to test across all proxies simultaneously.</li>
-            <li>**Desktop View Focus:** Since iFrame embedding is unreliable, use the **'Desktop View (New Tab)'** button to launch your URL through the selected proxy with forced desktop parameters.</li>
-            <li>**Proxy Variety:** Slots alternate between **ProxySite, FlyProxy, and NAProxy** to simulate visitors from varied locations and server types.</li>
-            <li>**Real-World Testing:** By checking your site through these diverse access points, you confirm that your content and ads are loading correctly for a global audience.</li>
+            <li>**Primary Action:** Paste your URL above and click **'Load in all slots'**. This assigns a proxy and URL to each slot.</li>
+            <li>**Desktop View Guarantee:** Since iFrame slots often display mobile/ads, click the **'Desktop View (New Tab)'** button in each slot. This opens the URL directly via the proxy in a new browser tab, which is the only way to guarantee a full desktop view with the proxy active.</li>
+            <li>**Proxy Selection:** Use the dropdown in each slot to cycle between the three available proxies (Naproxy, Flyproxy, ProxySite) plus Direct link.</li>
+            <li>**Proxies Available:** **ProxySite.com, Flyproxy.com, and Naproxy.com** are included as requested.</li>
         </ul>
-        <p style="font-size:12px; color:var(--muted); margin-top:15px;">**Trust Tip:** The proxy content shown inside the slots (like the proxy's own header or ads) confirms the proxy is active. For the actual website view, use the **New Tab** button.</p>
+        <p style="font-size:12px; color:var(--muted); margin-top:15px;">**Slot Height:** The height of each slot is set to **334px** as requested for better visibility.</p>
     </div>
     </div>
 
@@ -221,7 +225,7 @@
    Provider URL templates (Requested Proxies + Desktop Mode parameters)
    ------------------------ */
 const providerTemplates = {
-  // Direct option - Used for simple reload/open
+  // Direct option
   "Direct": (t) => t,
   
   // ProxySite format: Using view=desktop
@@ -242,7 +246,7 @@ const providerTemplates = {
 
 /* default provider assignments for 8 slots (Alternating three proxies) */
 const defaultProviders = ["ProxySite","FlyProxy","NAProxy","ProxySite","FlyProxy","NAProxy","ProxySite","FlyProxy"];
-const providerNames = ["ProxySite", "FlyProxy", "NAProxy", "Direct"];
+const availableProviders = ["ProxySite", "FlyProxy", "NAProxy", "Direct"];
 
 const grid = document.getElementById('grid');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -251,14 +255,24 @@ function createSlot(index, defaultProvider){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  // Slot HTML (Simplified - removed per-slot URL input)
+  // Dynamically create options for the select box
+  const optionsHtml = availableProviders.map(p => 
+      `<option value="${p}" ${p === defaultProvider ? 'selected' : ''}>${p}</option>`
+  ).join('');
+
+  // Slot HTML (Select box added back)
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">
         Slot ${index+1} 
-        <span style="font-size:12px; font-weight:normal; color:var(--accent-2); border:1px solid var(--accent); padding:2px 6px; border-radius:4px;" id="provider-name-${index}">${defaultProvider}</span>
       </div>
       <div class="slot-url-display" id="slot-url-display-${index}"></div>
+    </div>
+
+    <div class="slot-controls">
+        <select id="provider-${index}" aria-label="provider-${index}">
+            ${optionsHtml}
+        </select>
     </div>
     
     <div class="iframe-wrap" id="wrap-${index}">
@@ -279,29 +293,26 @@ function createSlot(index, defaultProvider){
   grid.appendChild(el);
 
   // references
+  const prov = el.querySelector(`#provider-${index}`);
   const iframe = el.querySelector(`#iframe-${index}`);
   const openBtn = el.querySelector(`#open-${index}`);
   const reloadBtn = el.querySelector(`#reload-${index}`);
   const status = el.querySelector(`#status-${index}`);
   const ping = el.querySelector(`#ping-${index}`);
-  const providerDisplay = el.querySelector(`#provider-name-${index}`);
   const urlDisplay = el.querySelector(`#slot-url-display-${index}`);
 
   let currentOriginalUrl = '';
-  let currentProvider = defaultProvider;
 
   function setStatus(text){
     status.textContent = text;
   }
 
-  function loadUrl(originalUrl, provider=currentProvider){
+  function loadUrl(originalUrl, provider=prov.value){
     if(!originalUrl) return;
     
     currentOriginalUrl = originalUrl;
-    currentProvider = provider;
     
     urlDisplay.textContent = originalUrl;
-    providerDisplay.textContent = provider;
     setStatus('loading...');
     ping.style.display = 'none';
     
@@ -320,19 +331,25 @@ function createSlot(index, defaultProvider){
   }
 
   // Event Handlers
+  prov.addEventListener('change', () => {
+    // If proxy changes, reload with the current URL
+    if(currentOriginalUrl) loadUrl(currentOriginalUrl, prov.value);
+  });
+  
   openBtn.addEventListener('click', ()=> {
     if(!currentOriginalUrl){ 
         const v = globalUrlInput.value.trim();
         if(!v) return alert('Please paste a URL in the main input field first.');
         currentOriginalUrl = v;
+        urlDisplay.textContent = v;
     }
-    const final = (providerTemplates[currentProvider] || providerTemplates['ProxySite'])(currentOriginalUrl);
+    const final = (providerTemplates[prov.value] || providerTemplates['ProxySite'])(currentOriginalUrl);
     window.open(final, '_blank');
   });
 
   reloadBtn.addEventListener('click', ()=> {
     if(!currentOriginalUrl){ setStatus('idle'); return; }
-    loadUrl(currentOriginalUrl, currentProvider); 
+    loadUrl(currentOriginalUrl, prov.value); 
   });
 
   iframe.addEventListener('load', ()=>{
@@ -341,7 +358,7 @@ function createSlot(index, defaultProvider){
     setTimeout(()=> ping.style.display = 'none', 1200);
   });
   
-  return { loadUrl }; // Return only the necessary function
+  return { loadUrl, prov }; 
 }
 
 // create 8 slots
@@ -357,7 +374,9 @@ document.getElementById('globalGo').addEventListener('click', ()=>{
   if(!url){ alert('Please paste a URL in the global field first.'); return; }
   
   slots.forEach((s, index) => {
-    s.loadUrl(url, defaultProviders[index]); // Use the alternating default provider
+    // Set the select box to the default alternating provider first
+    s.prov.value = defaultProviders[index];
+    s.loadUrl(url, defaultProviders[index]); 
   });
 });
 
