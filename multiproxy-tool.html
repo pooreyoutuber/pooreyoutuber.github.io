@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- Base Styles and Variables --- */
+  /* [पिछले CSS स्टाइल्स यहाँ मौजूद रहेंगे] - (Ad Block Fix वाले स्टाइल) */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -20,52 +20,56 @@
   header { margin-bottom: 24px; text-align: center; }
   h1 { font-size: 32px; margin: 0; color: var(--accent); letter-spacing: -1px; }
   .tagline { color: var(--muted); font-size: 16px; margin-top: 8px; }
-  
-  /* --- Controls and Input Bar --- */
   .controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
   .input-group { display: flex; gap: 10px; width: 100%; }
-  
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   input[type="url"] { flex: 1; padding: 14px 16px; border-radius: 10px 0 0 10px; border: 1px solid var(--border); border-right: none; background: white; font-size: 16px; outline: none; }
-
-  /* Slot Selector Styling */
   .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 16px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; }
   .slot-selector input[type="number"] { width: 50px; padding: 10px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  
   .btn { background: var(--primary-blue); color: white; padding: 14px 20px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
-
-  /* Info Box */
   .info-box { background: #e0f2fe; color: #075985; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid #7dd3fc; margin-bottom: 24px; }
   .info-box strong { font-weight: 700; color: #0c4a6e; }
-  
-  /* --- Grid and Slots (Responsive Layout) --- */
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
   @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
   @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
-
   .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 400px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); }
   .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-  
-  /* IFrame Styling: Zoomed out (0.4) for better desktop view simulation */
+  .iframe-message {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 20px; font-size: 14px; font-weight: 600;
+    color: #cc0000;
+    z-index: 10;
+    border-radius: 8px;
+    border: 3px solid #f99;
+    pointer-events: none;
+  }
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
     transform: scale(0.4); 
     transform-origin: 0 0;
     width: calc(100% / 0.4);
     height: calc(100% / 0.4);
+    opacity: 0.1;
   }
-  
   .slot-footer { display: flex; gap: 8px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
   .action-btn { padding: 8px 12px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; font-size: 12px; white-space: nowrap; transition: background-color 0.2s; }
   .action-btn.view { background: var(--success); color: white; }
-  .action-btn.new-tab { background: #e5e7eb; color: #374151; }
   .action-btn.view:hover { background: #047857; }
-  
+  .action-btn.new-tab { 
+      background: #f90;
+      color: white; 
+      flex-grow: 1;
+      font-size: 14px;
+      padding: 10px 12px;
+  }
+  .action-btn.new-tab:hover { background: #e80; }
   .status { font-size: 12px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
   .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
@@ -95,8 +99,9 @@
     </div>
     
     <div class="info-box">
-        ℹ️ **Proxy Status:** Using **10 unique** Webshare proxies (duplicated to 20 slots). **Authentication is fixed in JavaScript.** Clicks on Ads/Links will load **inside the slot** only.
-        <br>✅ **View Traffic:** The real view-count traffic is securely generated in the background by our PHP backend using authenticated proxy IPs.
+        ℹ️ **Google Analytics Fix:** The PHP script timeout has been increased to help Google Analytics register each proxy as a unique Active User.
+        <br>👉 **Interaction/Ad Clicks:** Use the **'Full View (New Tab)'** button for genuine Ad clicks.
+        <br>✅ **20 Unique Active Users:** Clicking **'Load & Run'** should register 20 distinct views from the 10 unique proxy IPs (duplicated to 20 slots).
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -109,24 +114,23 @@
    PROXY DATA (Latest Webshare List - 20 Slots Max)
    ---------------------------------------------------------------------- */
 
-// **COMMON AUTHENTICATION - Should remain static even if IP/Port changes**
+// **COMMON AUTHENTICATION - from your screenshot**
 const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 // **LATEST 10 UNIQUE PROXIES (from your screenshot)**
 const originalProxies = [
-  // 10 Free proxies available
-  { ip: "142.111.48.253", port: "7030", country: "US" },
-  { ip: "31.59.20.176", port: "6754", country: "DE" },
-  { ip: "38.170.176.177", port: "5572", country: "CA" },
-  { ip: "198.23.239.134", port: "6540", country: "US" },
-  { ip: "45.38.107.97", port: "6014", country: "US" },
-  { ip: "107.172.163.27", port: "6543", country: "CA" },
-  { ip: "64.137.96.74", port: "6641", country: "US" },
-  { ip: "216.10.27.159", port: "6837", country: "AU" },
-  { ip: "142.111.67.146", port: "5611", country: "US" },
-  { ip: "142.147.128.93", port: "6593", country: "CA" },
+  { ip: "142.111.48.253", port: "7030", country: "US" }, // US
+  { ip: "31.59.20.176", port: "6754", country: "DE" }, // DE
+  { ip: "38.170.176.177", port: "5572", country: "CA" }, // CA
+  { ip: "198.23.239.134", port: "6540", country: "US" }, // US
+  { ip: "45.38.107.97", port: "6014", country: "US" }, // US
+  { ip: "107.172.163.27", port: "6543", country: "CA" }, // CA
+  { ip: "64.137.96.74", port: "6641", country: "US" }, // US
+  { ip: "216.10.27.159", port: "6837", country: "AU" }, // AU
+  { ip: "142.111.67.146", port: "5611", country: "US" }, // US
+  { ip: "142.147.128.93", port: "6593", country: "CA" }, // CA
 ];
 
 // Extend to 20 total entries by duplicating the set
@@ -157,7 +161,6 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  // Note if it's a duplicate IP beyond the first 10
   const proxyNote = index >= 10 ? ' (Duplicate IP)' : ''; 
 
   el.innerHTML = `
@@ -168,10 +171,16 @@ function createSlot(index, proxy){
     
     <div class="iframe-wrap">
       <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+      
+      <div class="iframe-message">
+        Webpage Preview (iFrame)<br>
+        Ads/Clicks are blocked here.<br><br>
+        **For Clicks/Interaction**, use the **Full View** button below 👇
+      </div>
     </div>
     
     <div class="slot-footer">
-      <button id="open-${index}" class="action-btn new-tab">Open in New Tab</button>
+      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
       <button id="run-${index}" class="action-btn view">Start Proxy View</button>
       <div class="status" id="status-wrap-${index}">
         <span class="status-dot" id="dot-${index}"></span>
@@ -200,7 +209,7 @@ function createSlot(index, proxy){
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}`; // Sends the common User:Pass
+          `auth=${proxy.auth}`; 
   }
 
   // --- Core Automation Function (The REAL cURL view increase work) ---
@@ -210,8 +219,8 @@ function createSlot(index, proxy){
     automationRunning = true;
     currentOriginalUrl = originalUrl;
     
-    // 1. iFrame Load (For Ads/Manual Control)
-    iframe.src = originalUrl;
+    // 1. iFrame Load (Only for visual reference/placeholder)
+    // iframe.src = originalUrl; // This line is commented out to keep iFrame clean, but can be uncommented if you need a static preview.
     setStatus('Loading Content...', false);
 
     // 2. cURL Proxy Request (For View Count Increase)
@@ -239,11 +248,10 @@ function createSlot(index, proxy){
   
   // Event Handlers
   openBtn.addEventListener('click', ()=> {
-    if(currentOriginalUrl) {
-      window.open(currentOriginalUrl, '_blank');
-    } else {
-      alert('Please paste a URL into the global input field first.');
-    }
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    // Open the target URL directly in a new tab for genuine interaction/Ad Clicks
+    window.open(url, '_blank'); 
   });
 
   runBtn.addEventListener('click', ()=> {
