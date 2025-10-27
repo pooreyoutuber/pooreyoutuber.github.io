@@ -21,17 +21,25 @@
   h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
   .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
 
-  /* New Control Area for Global settings */
-  .global-controls { 
-      display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; 
-      border: 1px solid var(--border); background: var(--card); border-radius: var(--radius);
-      padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  /* Global Control Area */
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
+
+  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 10px 0 0 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover { background: #0c8cd8; }
+  .btn.stop { background: var(--danger); }
+  .btn.stop:hover { background: #b91c1c; }
+  
+  .repeat-control-wrap { 
+      display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); 
+      background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; 
   }
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
-  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
-  .repeat-control label { flex-shrink: 0; }
-  .repeat-control span { color: var(--accent); font-weight: 600; }
-  .global-actions { display: flex; gap: 10px; justify-content: center; }
+  .repeat-control-wrap input[type="checkbox"] { transform: scale(1.2); }
+  .repeat-control-wrap label { flex-shrink: 0; }
+  .repeat-control-wrap span { color: var(--accent); font-weight: 600; }
   
   /* Slot Grid */
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
@@ -39,23 +47,15 @@
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
   @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
   
-  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 420px; }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
   .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
-  
-  /* New Input Group in Slot */
-  .slot-input-group { display: flex; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; }
-  .slot-input-group input[type="url"] { flex: 1; padding: 8px 10px; border: 1px solid var(--border); border-right: none; background: white; font-size: 14px; outline: none; }
-  .slot-btn { background: var(--primary-blue); color: white; padding: 8px 12px; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; font-size: 14px; }
-  .slot-btn:hover { background: #0c8cd8; }
-
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   
-  /* CORRECT IFRAME SCALING FOR PREVIEW (Less aggressive scaling for better visibility) */
+  /* IFRAME SCALING */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Reduced scaling to 0.5 for better visibility/debugging of the white screen */
     transform: scale(0.5); 
     transform-origin: 0 0;
     width: calc(100% / 0.5); 
@@ -74,9 +74,6 @@
       padding: 8px 10px;
   }
   .action-btn.new-tab:hover { background: #e80; }
-  .btn.stop { background: var(--danger); }
-  .btn.stop:hover { background: #b91c1c; }
-  
   .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
   .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
@@ -90,15 +87,19 @@
       <div class="tagline">Global Traffic Generation and $\text{GA}$ $\text{Analysis}$ Tool.</div>
     </header>
 
-    <div class="global-controls">
-        <div class="repeat-control">
+    <div class="controls">
+        <div class="input-group">
+            <div class="url-input-wrap">
+                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+            </div>
+            <button id="globalGo" class="btn">Load & Run All (Random Delay)</button>
+        </div>
+        
+        <div class="repeat-control-wrap">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Continuous** Mode: Repeat all <span>30s</span> sessions for long-session $\text{GA}$ $\text{tracking}$.
+                Enable **Continuous** Mode: Repeat all <span>30s</span> for long-session $\text{GA}$ $\text{tracking}$.
             </label>
-        </div>
-        <div class="global-actions">
-            <button id="globalRun" class="action-btn view">Run All Active Slots</button>
             <button id="globalStop" class="action-btn stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
@@ -112,7 +113,7 @@
 /* ----------------------------------------------------------------------
    PROXY DATA and CONFIGURATION - DIRECT PROXIES (Using Webshare Direct IPs)
    ---------------------------------------------------------------------- */
-// Webshare Common Proxy Credentials (Used for all 10 slots)
+// Webshare Common Proxy Credentials 
 const COMMON_USER = "bqctypvz"; 
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; 
@@ -134,26 +135,23 @@ const DUMMY_PROXIES = [
 
 const IFRAME_PROXY_ENDPOINT = 'proxy_loader.php'; 
 const SESSION_ENDPOINT = 'session_guarantee.php'; 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds (Session Length)
+const REPEAT_INTERVAL_MS = 30000; // 30 seconds
 
 const gridContainer = document.getElementById('gridContainer');
-const globalRunBtn = document.getElementById('globalRun');
-const globalStopBtn = document.getElementById('globalStop');
+const globalUrlInput = document.getElementById('globalUrl');
+const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
+const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = [];
 let repeatIntervals = []; 
 const allNames = ["Logan", "Maria", "Alex", "Sophia", "William", "Joseph", "Mason", "Emily", "David", "Ava"]; 
 
-function getRandomNames(count) {
-    return allNames.slice(0, count);
-}
-let randomNamesList = getRandomNames(DUMMY_PROXIES.length); 
+let randomNamesList = allNames.slice(0, DUMMY_PROXIES.length); 
 
 
 // Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
-    // Generate a 10-digit number
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -186,11 +184,6 @@ function createSlot(index, proxy){
       <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
       <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
     </div>
-
-    <div class="slot-input-group">
-        <input id="url-input-${index}" type="url" placeholder="Enter Target URL (e.g., https://site.com)" />
-        <button id="slot-run-${index}" class="slot-btn">Run</button>
-    </div>
     
     <div class="iframe-wrap">
       <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
@@ -208,9 +201,7 @@ function createSlot(index, proxy){
   gridContainer.appendChild(el);
 
   const iframe = el.querySelector(`#iframe-${index}`);
-  const urlInput = el.querySelector(`#url-input-${index}`);
   const openBtn = el.querySelector(`#open-${index}`);
-  const runBtn = el.querySelector(`#slot-run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
@@ -226,13 +217,10 @@ function createSlot(index, proxy){
           clearInterval(currentIntervalId);
           currentIntervalId = null;
           setStatus('Stopped', false);
-          runBtn.textContent = 'Run';
-          runBtn.classList.remove('stop');
-          runBtn.classList.remove('danger');
       }
   }
 
-  // --- Core Automation Function ---
+  // --- Core Automation Function (The actual process) ---
   async function runAutomation(originalUrl){
     if(!originalUrl){
         setStatus('Error: No URL Provided', false);
@@ -243,7 +231,7 @@ function createSlot(index, proxy){
     const proxiedIframeUrl = getProxiedUrl(originalUrl, proxy, IFRAME_PROXY_ENDPOINT);
     const proxiedSessionUrl = getProxiedUrl(originalUrl, proxy, SESSION_ENDPOINT);
     
-    // 2. iFrame Load (Visible proxied preview) using Base64 method
+    // 2. iFrame Load (Visible proxied preview)
     setStatus('Fetching Content via Proxy (Base64)...', false);
 
     try {
@@ -253,6 +241,7 @@ function createSlot(index, proxy){
             throw new Error(`Proxy fetch failed with status: ${response.status}`);
         }
         
+        // Response body is the Base64 encoded, stripped HTML
         const base64Data = await response.text(); 
         
         if (base64Data.startsWith('Error:')) {
@@ -261,10 +250,11 @@ function createSlot(index, proxy){
              return;
         }
 
+        // Load the Base64 content into the iframe
         const dataUrl = `data:text/html;base64,${base64Data}`;
         iframe.src = dataUrl;
 
-        setStatus('Desktop View Loaded (Base64)', true);
+        setStatus('Desktop View Loaded (Stripped JS)', true);
         await new Promise(r => setTimeout(r, 500));
 
     } catch (error) {
@@ -279,6 +269,7 @@ function createSlot(index, proxy){
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
+        // Fetch runs in the background for the session duration
         await fetch(proxiedSessionUrl, { mode: 'no-cors' });
         setStatus('GA Hit Sent. 30s Session Running', true);
         
@@ -290,58 +281,14 @@ function createSlot(index, proxy){
     setTimeout(() => {
          setStatus('Session Complete. Ready to Repeat.', true);
          statusDot.style.animation = 'none';
-         
-         if (!currentIntervalId) {
-             // If not in repeat mode, ensure status is clear
-             setStatus('Ready (Click Run)', true);
-         }
     }, REPEAT_INTERVAL_MS + 25000); 
   }
   
-  // Event Handlers for the Slot
+  // Event Handlers
   openBtn.addEventListener('click', ()=> {
-    const url = urlInput.value.trim();
-    if(!url){ setStatus('Please enter a URL first.', false); return; }
+    const url = globalUrlInput.value.trim();
+    if(!url){ setStatus('Please paste a URL first.', false); return; }
     window.open(url, '_blank'); 
-  });
-
-  runBtn.addEventListener('click', ()=> {
-    const url = urlInput.value.trim();
-    if(!url){ setStatus('Please enter a URL first.', false); return; }
-    
-    if (currentIntervalId) {
-        // Stop button logic
-        stopAutomation();
-        return;
-    }
-    
-    // Start button logic
-    runBtn.textContent = 'STOP';
-    runBtn.classList.add('stop');
-    runBtn.classList.add('danger');
-
-    // Initial Run
-    runAutomation(url); 
-
-    // If Repeat Mode is On, set up the interval AFTER the initial run
-    if (repeatModeCheckbox.checked) {
-        currentIntervalId = setInterval(() => {
-            runAutomation(url);
-            setStatus(`Repeat Running. Next in ${REPEAT_INTERVAL_MS/1000}s...`, true);
-        }, REPEAT_INTERVAL_MS);
-        
-        repeatIntervals.push({
-            id: currentIntervalId,
-            slotIndex: index
-        });
-    } else {
-        // If not repeating, hide STOP button after session completes
-        setTimeout(() => {
-            runBtn.textContent = 'Run';
-            runBtn.classList.remove('stop');
-            runBtn.classList.remove('danger');
-        }, REPEAT_INTERVAL_MS + 30000);
-    }
   });
   
   setStatus('Ready', true);
@@ -349,10 +296,9 @@ function createSlot(index, proxy){
   return { 
       runAutomation, 
       setStatus,
-      urlInput,
-      runBtn,
-      index,
       stopAutomation,
+      index,
+      setCurrentIntervalId: (id) => { currentIntervalId = id; },
       getCurrentIntervalId: () => currentIntervalId
   }; 
 }
@@ -361,9 +307,7 @@ function createSlot(index, proxy){
 function renderSlots() {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
-
-    const count = premiumProxies.length; // Always use max available proxies
-
+    const count = premiumProxies.length; 
     for(let i=0; i < count; i++){
       const slot = createSlot(i, premiumProxies[i]);
       currentSlots.push(slot);
@@ -375,37 +319,35 @@ function renderSlots() {
 function stopAllAutomation() {
     repeatIntervals.forEach(item => clearInterval(item.id));
     repeatIntervals = [];
-    globalRunBtn.style.display = 'block';
+    globalGoBtn.style.display = 'block';
     globalStopBtn.style.display = 'none';
     
     currentSlots.forEach(s => {
-        s.stopAutomation(); // Stop any individual interval
-        s.setStatus('Ready (Global Stop)', true);
+        s.stopAutomation(); 
+        s.setStatus('Ready (Stopped)', true);
     });
 }
 
-// --- Global Start/Run Logic ---
-globalRunBtn.addEventListener('click', ()=>{
-    globalRunBtn.style.display = 'none';
+// --- Global Start/Run Logic with Random Delay (CRITICAL for Anti-Filtering) ---
+globalGoBtn.addEventListener('click', ()=>{
+    const url = globalUrlInput.value.trim();
+    if(!url){ 
+        alert('Please paste a valid URL into the input field.'); 
+        return; 
+    }
+
+    globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
 
     let delay = 0;
-    
-    currentSlots.forEach((s, index) => {
-        const url = s.urlInput.value.trim();
-        if(!url){ 
-            s.setStatus('Skip: No URL', false);
-            return;
-        }
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId)); 
+    repeatIntervals = [];
 
-        // Randomize delay between 0.5 and 2.5 seconds
+    currentSlots.forEach((s, index) => {
+        // Randomize delay between 0.5 and 2.5 seconds (to avoid batch requests)
         const randomDelay = Math.floor(Math.random() * 2000) + 500; 
         delay += randomDelay;
 
-        s.runBtn.textContent = 'STOP';
-        s.runBtn.classList.add('stop');
-        s.runBtn.classList.add('danger');
-        
         // 1. Initial Run with a Randomized Sequential Delay
         setTimeout(() => {
             s.runAutomation(url);
@@ -415,10 +357,10 @@ globalRunBtn.addEventListener('click', ()=>{
             if (repeatModeCheckbox.checked) {
                 const intervalId = setInterval(() => {
                     s.runAutomation(url);
-                    s.setStatus(`Repeat Running. Next in ${REPEAT_INTERVAL_MS/1000}s...`, true);
+                    s.setStatus(`Repeat Running. Next in 30s...`, true);
                 }, REPEAT_INTERVAL_MS);
                 
-                s.currentIntervalId = intervalId;
+                s.setCurrentIntervalId(intervalId);
                 repeatIntervals.push({ id: intervalId, slotIndex: index });
             }
         }, delay);
@@ -428,7 +370,7 @@ globalRunBtn.addEventListener('click', ()=>{
     if (!repeatModeCheckbox.checked) {
         // Wait for the last request to finish + the session duration before showing the GO button again
         setTimeout(() => {
-            globalRunBtn.style.display = 'block';
+            globalGoBtn.style.display = 'block';
             globalStopBtn.style.display = 'none';
         }, delay + REPEAT_INTERVAL_MS + 30000); 
     }
@@ -438,7 +380,7 @@ globalRunBtn.addEventListener('click', ()=>{
 // Event listeners
 globalStopBtn.addEventListener('click', stopAllAutomation);
 
-// Initial render
+// Initial render when the page loads
 renderSlots();
 </script>
 </body>
