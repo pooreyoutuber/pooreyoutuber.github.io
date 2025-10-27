@@ -1,6 +1,6 @@
 <?php
 // PHP Proxy Loader: proxy_loader.php
-// यह cURL का काम प्रॉक्सी प्रमाणीकरण (Authentication) के साथ करता है।
+// यह फ़ाइल प्रॉक्सी प्रमाणीकरण (Authentication) के साथ cURL का काम करती है।
 
 // ------------------------------------------
 // 1. सुरक्षा (CORS) - * की जगह अपनी वेबसाइट का डोमेन डालें
@@ -33,14 +33,14 @@ curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth);
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
-// अन्य सेटिंग्स
+// अन्य सेटिंग्स (यह व्यू बढ़ाने के लिए ज़रूरी है)
 curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
-// 5. प्रॉक्सी अनुरोध निष्पादित करें
+// 5. प्रॉक्सी अनुरोध निष्पादित करें (असली व्यू यहीं से जाएगा)
 $proxied_html = curl_exec($ch);
 $curl_error = curl_error($ch);
 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -49,11 +49,13 @@ curl_close($ch);
 
 // 6. आउटपुट और एरर हैंडलिंग
 if ($curl_error || $http_code >= 400 || $proxied_html === false) {
-    // त्रुटि होने पर, JavaScript को सही HTTP कोड और एरर मैसेज भेजें
+    // त्रुटि होने पर, JavaScript को सही HTTP कोड भेजें
     http_response_code($http_code ?: 500);
-    echo "PROXY LOAD FAILED! HTTP Status: " . ($http_code ?: "N/A") . " | cURL Error: " . ($curl_error ?: "None") . " | Proxy: " . $proxy_address;
+    echo "PROXY LOAD FAILED! HTTP Status: " . ($http_code ?: "N/A") . " | cURL Error: " . ($curl_error ?: "None");
 } else {
     // सफलता: स्टेटस कोड 200 OK (डिफ़ॉल्ट)
-    echo $proxied_html;
+    // हम खाली स्ट्रिंग भेज रहे हैं क्योंकि हमें HTML वापस iFrame में नहीं चाहिए,
+    // हमें सिर्फ यह जानना है कि PHP ने cURL अनुरोध सफलतापूर्वक भेजा है।
+    echo ""; 
 }
 ?>
