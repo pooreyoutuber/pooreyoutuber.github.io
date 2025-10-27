@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Traffic Simulation System</title>
+<title>Global Traffic Simulation System</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
+  /* --- CSS Styles (Minimal, professional look) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -78,7 +78,7 @@
   <div class="wrap">
     <header>
       <h1>Website Traffic Simulation System</h1>
-      <div class="tagline">Global Traffic Generation and Analysis Tool.</div>
+      <div class="tagline">Global Traffic Generation and $\text{GA}$ $\text{Analysis}$ Tool.</div>
     </header>
 
     <div class="controls">
@@ -86,7 +86,7 @@
             
             <div class="slot-selector">
                 Slots:
-                <input id="numSlots" type="number" value="20" min="1" max="20" />
+                <input id="numSlots" type="number" value="10" min="1" max="10" />
             </div>
 
             <div class="url-input-wrap">
@@ -108,13 +108,13 @@
         <strong>Tool Operation Details:</strong>
         <ul>
             <li>
-                **Proxy Setup:** Configured with $\text{Webshare}$ $\text{Backconnect}$ $\text{Gateway}$ ($\text{p.webshare.io}:80$) to ensure $\text{unique}$ $\text{source}$ $\text{IP}$ $\text{addresses}$ for each $\text{slot}$.
+                **Proxy Setup:** Configured with **10 $\text{Unique}$ $\text{Direct}$ $\text{Proxies}$** $\text{from}$ $\text{Webshare}$. $\text{Slots}$ are capped at $\text{10}$ $\text{to}$ $\text{ensure}$ $\text{10}$ $\text{Unique}$ $\text{Active}$ $\text{Users}$.
             </li>
             <li>
-                **Anti-Filtering Logic:** $\text{Traffic}$ is sent with **$\text{randomized}$ $\text{delays}$** ($\text{0.5-2}$ $\text{sec}$ $\text{apart}$) and $\text{server}$-$\text{side}$ $\text{session}$ $\text{guarantee}$ ($\text{30s}$ $\text{run}$ $\text{time}$) for $\text{realistic}$ $\text{GA}$ $\text{tracking}$.
+                **Anti-Filtering Logic:** $\text{Traffic}$ is sent with $\text{randomized}$ $\text{delays}$ ($\text{0.5-2}$ $\text{sec}$ $\text{apart}$) and $\text{server}$-$\text{side}$ $\text{session}$ $\text{guarantee}$ ($\text{30s}$ $\text{run}$ $\text{time}$) for $\text{realistic}$ $\text{GA}$ $\text{tracking}$.
             </li>
             <li>
-                **Manual Check:** Use **'Full View (New Tab)'** to manually check the $\text{proxy}$ $\text{connection}$ and $\text{interact}$ with the $\text{page}$.
+                **Note:** If your $\text{Direct}$ $\text{Proxy}$ $\text{IPs}$ $\text{change}$ on $\text{Webshare}$, you must $\text{manually}$ $\text{update}$ $\text{the}$ $\text{proxies}$ $\text{in}$ $\text{the}$ $\text{JavaScript}$ $\text{code}$.
             </li>
         </ul>
     </div>
@@ -126,44 +126,31 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION - Backconnect Gateway
+   PROXY DATA and CONFIGURATION - DIRECT PROXIES (MUST BE UPDATED MANUALLY)
    ---------------------------------------------------------------------- */
-// Webshare Rotating Proxy Credentials (Based on your screenshots)
-const COMMON_USER = "bqctypvz-rotate"; // For Rotating/Backconnect
+// Webshare Common Proxy Credentials
+const COMMON_USER = "bqctypvz"; // Common user prefix for all 10
 const COMMON_PASS = "399xb3kxqv6i";
-const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
+const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; 
+// NOTE: We are using the common password, but individual IP/Port from the list
 
-// Webshare Backconnect/Rotating Proxy Endpoint
-const ROTATING_IP = "p.webshare.io";
-const ROTATING_PORT = "80";
-
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
-
-// Function to generate a simple unique ID (used for GA4 cookie)
-function generateUniqueId() {
-    return Math.floor(Math.random() * 9000000000) + 1000000000;
-}
-
-function getRandomNames(count) {
-    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-}
-
+// Max 10 unique proxies based on your provided list (Screenshot_2025-10-27-15-16-13-68.jpg)
+const DUMMY_PROXIES = [
+    // Proxy Username format is bqctypvz-1, bqctypvz-2, etc. (using bqctypvz for simplicity if password is global)
+    // If each has a unique username (like bqctypvz-1, etc.), the code needs to be adjusted.
+    // Assuming the common username/pass works for all IPs:
+    { ip: "142.111.48.253", port: "7030", country: "US" },
+    { ip: "31.59.20.176", port: "6756", country: "GB" },
+    { ip: "23.95.150.145", port: "6114", country: "US" },
+    { ip: "198.23.239.134", port: "6540", country: "US" },
+    { ip: "45.38.107.97", port: "6014", country: "CA" },
+    { ip: "107.172.163.27", port: "6543", country: "US" },
+    { ip: "64.137.96.74", port: "6641", country: "US" },
+    { ip: "216.10.27.159", port: "6837", country: "CA" },
+    { ip: "142.111.67.146", port: "5011", country: "US" },
+    { ip: "142.147.128.93", port: "6593", country: "CA" }
+];
 // =========================================================================
-// FILLING 20 SLOTS WITH THE BACKCONNECT ENDPOINT 
-// =========================================================================
-const DUMMY_PROXIES = [];
-const MAX_SLOTS = 20;
-
-for (let i = 0; i < MAX_SLOTS; i++) {
-    DUMMY_PROXIES.push({
-        ip: ROTATING_IP,
-        port: ROTATING_PORT,
-        country: "GLOBAL" // Simplified label
-    });
-}
-// =========================================================================
-
 
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds
@@ -177,12 +164,25 @@ const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = [];
 let repeatIntervals = []; 
-let randomNamesList = getRandomNames(MAX_SLOTS); 
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+
+function getRandomNames(count) {
+    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+let randomNamesList = getRandomNames(DUMMY_PROXIES.length); 
+
+
+// Function to generate a simple unique ID (used for GA4 cookie)
+function generateUniqueId() {
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
+
 
 // Map proxies with fixed unique IDs
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
-    auth: COMMON_AUTH,
+    auth: COMMON_AUTH, // Use common auth
     name: randomNamesList[index],
     uniqueId: generateUniqueId() 
 }));
@@ -193,11 +193,10 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  // NOTE: Focus/Control Button removed here
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy Gateway: ${proxy.ip}:${proxy.port}</div>
+      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
     </div>
     
     <div class="iframe-wrap">
@@ -287,7 +286,7 @@ function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
 
-    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    const maxCount = Math.min(DUMMY_PROXIES.length); // Max is 10
     if (count < 1 || count > maxCount) {
         count = Math.min(Math.max(count, 1), maxCount);
         numSlotsInput.value = count;
