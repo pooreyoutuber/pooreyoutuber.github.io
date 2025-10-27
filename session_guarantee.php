@@ -36,6 +36,7 @@ $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
 // --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
+// CRITICAL: This cookie ensures a unique session (view count)
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
@@ -62,7 +63,7 @@ curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
 // === Active User Timeout ===
-// 30 seconds minimum session duration
+// Setting a 30s timeout here ensures the page is considered 'viewed' for a long enough duration
 curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
 
 // Other necessary settings
@@ -75,7 +76,7 @@ curl_exec($ch);
 curl_close($ch);
 
 // === CRITICAL: Add forced delay for user activity simulation ===
-// Sleep for a random time between 10 and 25 seconds AFTER fetching the page.
+// Sleep for a random time between 10 and 25 seconds AFTER fetching the page to guarantee the session count.
 $sleep_time = rand(10, 25);
 sleep($sleep_time); 
 
