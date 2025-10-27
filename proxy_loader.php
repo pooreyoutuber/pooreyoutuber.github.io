@@ -37,7 +37,7 @@ $headers = array(
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-curl_setopt($ch, CURLOPT_HEADER, false); 
+curl_setopt($ch, CURLOPT_HEADER, false); // Do not capture response headers
 
 // --- Proxy Configuration and Authentication ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
@@ -69,7 +69,7 @@ if ($body === false) {
         // Remove Content-Security-Policy meta tags
         $body = preg_replace('/<meta http-equiv=["\']Content-Security-Policy["\'].*?>/i', '', $body);
         
-        // Remove simple frame-busting JS (less aggressive than full strip)
+        // Remove simple frame-busting JS 
         $body = preg_replace('/if ?\( ?self\.location ?!= ?top\.location ?\).*;?/i', '', $body);
         
         // --- 4.2. Inject <base> Tag ---
@@ -78,12 +78,11 @@ if ($body === false) {
         $body = preg_replace('/<head>/i', '<head>' . $base_tag, $body, 1);
 
 
-        // --- 4.3. AGGRESSIVE JAVASCRIPT STRIPPING (The new, strong fix) ---
+        // --- 4.3. AGGRESSIVE JAVASCRIPT STRIPPING ---
         // a) Remove all <script> blocks (inline and external)
         $body = preg_replace('/<script\b[^>]*>([\s\S]*?)<\/script>/i', '', $body);
 
         // b) Remove all JavaScript event handlers (e.g., onclick, onload, onmouseover)
-        // This targets tags like <div onclick="...">, which can trigger frame-busting.
         $body = preg_replace('/ on(click|load|submit|error|mouseover|focus|blur)=["\'][^"\']*["\']/i', '', $body);
 
     }
