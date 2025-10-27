@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- Base Styles and Variables (Responsive CSS is retained) --- */
+  /* --- CSS Styles (Same as previous responsive version) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -20,46 +20,34 @@
   header { margin-bottom: 20px; text-align: center; }
   h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
   .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
-  
-  /* --- Controls and Input Bar --- */
   .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   @media (min-width: 600px) { .input-group { flex-direction: row; } }
-
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
   .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  
   input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
-
   .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
-  
-  /* Instruction Box (Simple Blue/White) */
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
   .info-box ul li { margin-bottom: 6px; }
-  
-  /* --- Grid and Slots (Responsive Layout) --- */
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
   @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
   @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
-
   .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
   .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-  
-  /* iFrame is visible and scaled for preview */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
     transform: scale(0.4); 
@@ -68,7 +56,6 @@
     height: calc(100% / 0.4);
     opacity: 1;
   }
-  
   .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
   .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
   .action-btn.view { background: var(--success); color: white; }
@@ -127,7 +114,7 @@
                 <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30 seconds (which is the required session time).
             </li>
             <li>
-                <strong>Important:</strong> You must use the new **`proxy_loader.php`** (with the Client ID fix and 30s timeout) for this to work correctly.
+                **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
             </li>
         </ul>
     </div>
@@ -159,7 +146,12 @@ function getRandomNames(count) {
     return shuffled.slice(0, count);
 }
 
-const originalProxies = [
+// =========================================================================
+// !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
+// =========================================================================
+// NOTE: I've kept the 10 proxies from your screenshot and duplicated them
+// for the structure, BUT YOU MUST REPLACE THEM WITH 20 UNIQUE IPs
+const DUMMY_PROXIES = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
   { ip: "38.170.176.177", port: "5572", country: "CA" },
@@ -170,16 +162,23 @@ const originalProxies = [
   { ip: "216.10.27.159", port: "6837", country: "AU" },
   { ip: "142.111.67.146", port: "5611", country: "US" },
   { ip: "142.147.128.93", port: "6593", country: "CA" },
+  
+  // DUPLICATES BELOW: REPLACE THESE 10 ENTRIES WITH 10 MORE UNIQUE IPs
+  { ip: "142.111.48.254", port: "7031", country: "US" }, // Dummy Change 11
+  { ip: "31.59.20.177", port: "6755", country: "DE" },  // Dummy Change 12
+  { ip: "38.170.176.178", port: "5573", country: "CA" }, // Dummy Change 13
+  { ip: "198.23.239.135", port: "6541", country: "US" }, // Dummy Change 14
+  { ip: "45.38.107.98", port: "6015", country: "US" }, // Dummy Change 15
+  { ip: "107.172.163.28", port: "6544", country: "CA" }, // Dummy Change 16
+  { ip: "64.137.96.75", port: "6642", country: "US" }, // Dummy Change 17
+  { ip: "216.10.27.160", port: "6838", country: "AU" }, // Dummy Change 18
+  { ip: "142.111.67.147", port: "5612", country: "US" }, // Dummy Change 19
+  { ip: "142.147.128.94", port: "6594", country: "CA" }, // Dummy Change 20
 ];
-
-const newProxiesData = [
-    ...originalProxies, 
-    ...originalProxies.map(p => ({...p})) 
-];
+// =========================================================================
 
 const MAX_SLOTS = 20;
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
-
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -192,12 +191,12 @@ let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 
-// Map proxies with fixed unique IDs for consistency within a session
-const premiumProxies = newProxiesData.map((p, index) => ({
+// Map proxies with fixed unique IDs
+const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Generate unique ID for each slot
+    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
 }));
 
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds
@@ -207,12 +206,10 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  const proxyNote = index >= 10 ? ' (Dup.)' : ''; 
-
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}${proxyNote}</div>
+      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
     </div>
     
     <div class="iframe-wrap">
@@ -236,7 +233,6 @@ function createSlot(index, proxy){
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
-  let automationRunning = false;
 
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
@@ -244,19 +240,17 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      // ADDING the unique ID (uid) to the URL for the PHP script
+      // Sending the Unique ID (uid) to the PHP script
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // NEW: Unique ID for GA4
+          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
   }
 
-  // --- Core Automation Function (The REAL cURL view increase work) ---
+  // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
-    
-    automationRunning = true;
     
     // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
@@ -264,25 +258,21 @@ function createSlot(index, proxy){
 
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending Proxy View (Active User Fix)...', false);
+    setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
         // Fetch request is sent. PHP script runs in background for 30s.
-        const response = await fetch(proxiedUrl, { mode: 'no-cors' });
+        await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        if (response.status === 200) {
-            setStatus('View Sent (BG Session Active)', true);
-        } else {
-            setStatus(`Failed (HTTP ${response.status})`, false);
-        }
+        // Response is quick due to Connection: close header in PHP
+        setStatus('View Sent (BG Session Active)', true);
         
     } catch (e) {
         setStatus('Failed (Network/Proxy Error)', false);
     }
     
     statusDot.style.animation = 'none';
-    automationRunning = false;
   }
   
   // Event Handlers
@@ -323,7 +313,6 @@ function renderSlots(count) {
       const slot = createSlot(i, premiumProxies[i]);
       currentSlots.push(slot);
     }
-    // Stop any running intervals if the slot count changes
     stopAllAutomation();
 }
 
@@ -355,8 +344,8 @@ globalGoBtn.addEventListener('click', ()=>{
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
       
-    currentSlots.forEach((s, index) => {
-        s.setStatus(`Starting Repeat Mode (${index+1}/${currentSlots.length})...`, false);
+    currentSlots.forEach((s) => {
+        s.setStatus(`Starting Repeat Mode (30s cycle)...`, true);
         
         const intervalId = setInterval(() => {
             s.runAutomation(url);
