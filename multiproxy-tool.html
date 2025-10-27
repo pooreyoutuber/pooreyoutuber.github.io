@@ -47,16 +47,15 @@
   .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   
-  /* --- DESKTOP VIEW FIX --- */
+  /* --- CORRECT IFRAME SCALING FOR PREVIEW --- */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
     transform: scale(0.4); 
     transform-origin: 0 0;
-    /* Adjust width to simulate desktop viewport (~1280px wide) */
-    width: 1280px; 
+    /* Use calculated size to hold scaled content */
+    width: calc(100% / 0.4); 
     height: calc(100% / 0.4); 
     opacity: 1;
-    /* The iframe is scaled down by 0.4, but its content is 1280px wide */
   }
   
   .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
@@ -121,7 +120,7 @@ const COMMON_USER = "bqctypvz"; // Common user prefix for all 10
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; 
 
-// Max 10 unique proxies based on your provided list
+// Max 10 unique proxies based on your provided list (Screenshot_2025-10-27-15-16-13-68.jpg)
 const DUMMY_PROXIES = [
     // IPs are hardcoded - Must be updated if they change on Webshare
     { ip: "142.111.48.253", port: "7030", country: "US" },
@@ -224,6 +223,8 @@ function createSlot(index, proxy){
     if(!originalUrl) return;
     
     // 1. iFrame Load (Visible preview)
+    // The content shown here will be based on the browser's own viewport/UA
+    // but the traffic sent below will be Desktop (via PHP cURL)
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
 
