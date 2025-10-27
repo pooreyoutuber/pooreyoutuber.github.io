@@ -70,8 +70,8 @@ if ($response === false) {
         $name = trim($parts[0]);
         $value = trim($parts[1]);
         
-        // Check if the header name is in the list of headers to strip
-        if (!in_array($name, $headers_to_strip)) {
+        // Check if the header name is in the list of headers to strip (case-insensitive)
+        if (!in_array(strtolower($name), array_map('strtolower', $headers_to_strip))) {
             // Forward other headers
             $clean_headers[] = "$name: $value";
         }
@@ -81,7 +81,6 @@ if ($response === false) {
     http_response_code($http_code);
     foreach ($clean_headers as $header_line) {
         if (strpos($header_line, 'HTTP/') === 0) {
-            // Status line should be ignored when setting headers, PHP handles this with http_response_code
             continue; 
         }
         // Send the cleaned headers (e.g., Content-Type)
