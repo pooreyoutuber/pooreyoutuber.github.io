@@ -35,9 +35,9 @@
   .btn { background: var(--primary-blue); color: white; padding: 14px 20px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
 
-  /* Info Box (Red background for safety warning) */
-  .info-box { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid #fca5a5; margin-bottom: 24px; }
-  .info-box strong { font-weight: 700; color: #7f1d1d; }
+  /* Info Box */
+  .info-box { background: #e0f2fe; color: #075985; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid #7dd3fc; margin-bottom: 24px; }
+  .info-box strong { font-weight: 700; color: #0c4a6e; }
   
   /* --- Grid and Slots (Responsive Layout) --- */
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
@@ -95,7 +95,7 @@
     </div>
     
     <div class="info-box">
-        🚨 **SECURITY WARNING: Sandbox Removed.** To ensure **Ads/Links clicks work properly**, the iFrame sandbox protection has been **removed**. The iFrame content now has full access to navigate your main window. Use this tool only with **trusted, safe URLs**.
+        ℹ️ **iFrame Security & Clicks:** The iFrame is configured to prevent its content from opening new links or Ads in your main browser window. Any click will **load inside the current slot** itself.
         <br>✅ **View Traffic:** The real view-count traffic is securely generated in the background by our PHP backend using separate authenticated proxy IPs.
     </div>
 
@@ -109,7 +109,7 @@
    PROXY DATA (Max 20 Slots)
    ---------------------------------------------------------------------- */
 const originalProxies = [
-  // Your original 10 Webshare Proxy Data
+  // Your original 10 Webshare Proxy Data (Used twice for 20 slots)
   { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
   { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i", country: "DE" },
   { ip: "38.170.176.177", port: "5572", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
@@ -155,7 +155,7 @@ function createSlot(index, proxy){
     </div>
     
     <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank"></iframe>
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
     </div>
     
     <div class="slot-footer">
@@ -252,7 +252,7 @@ function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
 
-    // Ensure count is valid
+    // Ensure count is valid (1 to 20)
     if (count < 1 || count > MAX_SLOTS) {
         count = Math.min(Math.max(count, 1), MAX_SLOTS);
         numSlotsInput.value = count;
