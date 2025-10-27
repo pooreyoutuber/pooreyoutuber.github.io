@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Active User Tracking (GA4 Fix)
+// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Rotating Proxy
 
 // 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
@@ -22,8 +22,8 @@ set_time_limit(0);
 
 // --- Capture Parameters ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
-$proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null;
-$proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
+$proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null; // This will be p.webshare.io
+$proxy_port = isset($_GET['port']) ? $_GET['port'] : null; // This will be 80
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
 $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // NEW: Capture unique ID
 
@@ -56,6 +56,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HEADER, false);
 
 // --- Proxy Configuration and Authentication ---
+// The rotating IP (p.webshare.io) is used here. It will handle the rotation internally.
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
