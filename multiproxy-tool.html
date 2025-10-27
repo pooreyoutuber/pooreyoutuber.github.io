@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Global Traffic Simulation System</title>
+<title>Website Traffic Simulation System</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -47,7 +47,7 @@
   .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   
-  /* CORRECT IFRAME SCALING FOR PREVIEW */
+  /* CORRECT IFRAME SCALING FOR PREVIEW (Desktop view scaled down) */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
     transform: scale(0.4); 
@@ -112,14 +112,14 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION - DIRECT PROXIES (UPDATED from latest screenshot)
+   PROXY DATA and CONFIGURATION - DIRECT PROXIES (Using Webshare Direct IPs)
    ---------------------------------------------------------------------- */
-// Webshare Common Proxy Credentials
-const COMMON_USER = "bqctypvz"; // Common user for all 10
+// Webshare Common Proxy Credentials (Used for all 10 slots)
+const COMMON_USER = "bqctypvz"; 
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; 
 
-// Max 10 unique proxies taken *EXACTLY* from your latest screenshot (Screenshot_2025-10-27-15-16-13-68.jpg)
+// 10 unique direct proxies taken from your screenshot (Screenshot_2025-10-27-15-16-13-68.jpg)
 const DUMMY_PROXIES = [
     { ip: "142.111.48.253", port: "7030", country: "US" },
     { ip: "31.59.20.176", port: "6756", country: "GB" },
@@ -134,8 +134,8 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const IFRAME_PROXY_ENDPOINT = 'proxy_loader.php'; // For visible proxied content
-const SESSION_ENDPOINT = 'session_guarantee.php'; // For background session count (NEW)
+const IFRAME_PROXY_ENDPOINT = 'proxy_loader.php'; 
+const SESSION_ENDPOINT = 'session_guarantee.php'; 
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds
 
 const gridContainer = document.getElementById('gridContainer');
@@ -147,11 +147,11 @@ const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = [];
 let repeatIntervals = []; 
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+const allNames = ["Logan", "Maria", "Alex", "Sophia", "William", "Joseph", "Mason", "Emily", "David", "Ava"]; 
 
 function getRandomNames(count) {
-    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+    // Ensuring the names align with the screenshot's initial names if possible
+    return allNames.slice(0, count);
 }
 let randomNamesList = getRandomNames(DUMMY_PROXIES.length); 
 
@@ -162,10 +162,10 @@ function generateUniqueId() {
 }
 
 
-// Map proxies with fixed unique IDs
+// Map proxies with fixed unique IDs and names
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
-    auth: COMMON_AUTH, // Use common auth
+    auth: COMMON_AUTH, 
     name: randomNamesList[index],
     uniqueId: generateUniqueId() 
 }));
@@ -220,7 +220,10 @@ function createSlot(index, proxy){
   
   // --- Core Automation Function (Split into two steps) ---
   async function runAutomation(originalUrl){
-    if(!originalUrl) return;
+    if(!originalUrl){
+        setStatus('Error: No URL Provided', false);
+        return;
+    }
     
     const proxiedIframeUrl = getProxiedUrl(originalUrl, proxy, IFRAME_PROXY_ENDPOINT);
     const proxiedSessionUrl = getProxiedUrl(originalUrl, proxy, SESSION_ENDPOINT);
@@ -228,35 +231,46 @@ function createSlot(index, proxy){
     // 1. iFrame Load (Visible proxied preview)
     iframe.src = proxiedIframeUrl;
     setStatus('Loading Proxied Desktop View...', false);
+    
+    // Wait a moment for iframe content to start loading (visual feedback)
+    await new Promise(r => setTimeout(r, 500));
 
 
     // 2. Trigger the 30s Background Session (The actual view count hit)
-    setStatus('Triggering 30s Session (BG)...', false);
+    // CRITICAL: This fetch runs in the background and hits the page instantly for GA4, 
+    // then holds the session for 30s.
+    setStatus('Triggering Instant GA Hit (30s BG Session)...', true);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // This fetch triggers the session_guarantee.php script to run for 30 seconds
         await fetch(proxiedSessionUrl, { mode: 'no-cors' });
         
-        setStatus('View Sent (30s BG Session Active)', true);
+        // This success means the PHP script has started running in the background.
+        setStatus('GA Hit Sent. 30s Session Running', true);
         
     } catch (e) {
-        setStatus('Failed (Network/Proxy Error)', false);
+        setStatus('Failed (Network/Proxy Error). Check Console.', false);
     }
     
-    statusDot.style.animation = 'none';
+    // We don't stop the dot animation immediately, it pulses for the duration of the session.
+    setTimeout(() => {
+         // After 30 seconds (or more), update status
+         setStatus('Session Complete. Ready to Repeat.', true);
+         statusDot.style.animation = 'none';
+    }, REPEAT_INTERVAL_MS + 25000); // 30s + extra time for PHP script to fully finish
   }
   
   // Event Handlers
   openBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    if(!url){ setStatus('Please paste a URL first.', false); return; }
+    // IMPORTANT: Open the actual URL, not the proxied iframe link.
     window.open(url, '_blank'); 
   });
 
   runBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    if(!url){ setStatus('Please paste a URL first.', false); return; }
     runAutomation(url); 
   });
   
@@ -339,11 +353,11 @@ globalGoBtn.addEventListener('click', ()=>{
 
     // Handle button visibility if repeat mode is OFF
     if (!repeatModeCheckbox.checked) {
-        // Wait for the last request to finish before showing the GO button again
+        // Wait for the last request to finish + the session duration before showing the GO button again
         setTimeout(() => {
             globalGoBtn.style.display = 'block';
             globalStopBtn.style.display = 'none';
-        }, delay + 500); 
+        }, delay + REPEAT_INTERVAL_MS + 25000); 
     }
 });
 
