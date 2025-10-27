@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Global Traffic Launcher - Premium Proxy System</title>
+<title>Website Booster Prime</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -16,24 +16,29 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
-  .wrap { max-width: 1400px; margin: 32px auto; padding: 16px; }
-  header { margin-bottom: 24px; text-align: center; }
-  h1 { font-size: 32px; margin: 0; color: var(--accent); letter-spacing: -1px; }
-  .tagline { color: var(--muted); font-size: 16px; margin-top: 8px; }
+  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } /* Improved padding for mobile */
+  header { margin-bottom: 20px; text-align: center; }
+  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } /* Smaller font for mobile */
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
   
   /* --- Controls and Input Bar --- */
-  .controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-  .input-group { display: flex; gap: 10px; width: 100%; }
-  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
-  input[type="url"] { flex: 1; padding: 14px 16px; border-radius: 10px 0 0 10px; border: 1px solid var(--border); border-right: none; background: white; font-size: 16px; outline: none; }
-  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 16px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; }
-  .slot-selector input[type="number"] { width: 50px; padding: 10px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  .btn { background: var(--primary-blue); color: white; padding: 14px 20px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
-  .btn:hover { background: #0c8cd8; }
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { /* Desktop/Tablet: Side-by-side input */
+      .input-group { flex-direction: row; }
+  }
 
-  /* Info Box / Instructions */
-  .info-box { background: #fef3c7; color: #92400e; padding: 16px; border-radius: 8px; font-size: 15px; border: 1px solid #fcd34d; margin-bottom: 24px; }
-  .info-box strong { font-weight: 700; color: #b45309; }
+  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover { background: #0c8cd8; }
+  
+  /* Instruction Box (Simple Blue/White) */
+  .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
   .info-box ul li { margin-bottom: 6px; }
   
@@ -43,11 +48,11 @@
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
   @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
 
-  .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 400px; }
-  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); }
-  .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
-  .iframe-wrap { flex: 1; border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
+  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
+  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
+  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   
   /* iFrame is visible and scaled for preview */
   iframe { 
@@ -59,20 +64,20 @@
     opacity: 1;
   }
   
-  .slot-footer { display: flex; gap: 8px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
-  .action-btn { padding: 8px 12px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; font-size: 12px; white-space: nowrap; transition: background-color 0.2s; }
+  .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
+  .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
   .action-btn.view { background: var(--success); color: white; }
   .action-btn.view:hover { background: #047857; }
   .action-btn.new-tab { 
       background: #f90;
       color: white; 
       flex-grow: 1;
-      font-size: 14px;
-      padding: 10px 12px;
+      font-size: 12px;
+      padding: 8px 10px;
   }
   .action-btn.new-tab:hover { background: #e80; }
-  .status { font-size: 12px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
-  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
+  .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
 </style>
@@ -80,8 +85,8 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Global Traffic Launcher</h1>
-      <div class="tagline">Simulate global traffic from 20 proxy locations for website testing.</div>
+      <h1>Website Booster Prime</h1>
+      <div class="tagline">Global Traffic Simulation System.</div>
     </header>
 
     <div class="controls">
@@ -100,19 +105,16 @@
     </div>
     
     <div class="info-box">
-        <strong>How to Use This Tool:</strong>
+        <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Step 1:</strong> Enter your website URL above. Use the **Slots** input to select the number of parallel views (up to 20).
+                <strong>Traffic & Views:</strong> Enter your URL and click **'Load & Run All'**. This uses 20 global proxy IPs to send server-side requests, aiming to increase your **Views** and **Active Users** in analytics.
             </li>
             <li>
-                <strong>Step 2 (Views/Users):</strong> Click **'Load & Run All'**. This uses the server-side proxy to hit your site, which **will increase your total Views** and aims to increase **Active Users** in Google Analytics.
+                <strong>Interaction:</strong> The small window below is only a preview. For genuine testing, scrolling, and interaction (like clicking Ads), use the **'Full View (New Tab)'** button.
             </li>
             <li>
-                <strong>Step 3 (Ad Clicks/Interaction):</strong> The iFrame below shows a preview. For genuine interaction (e.g., clicking Ads or navigating), click the **'Full View (New Tab)'** button below a slot.
-            </li>
-            <li>
-                <strong>Status:</strong> The green status dot indicates a successful proxy request (a view has been sent).
+                <strong>Dynamic Users:</strong> The user names and IPs change every time the page is refreshed to simulate a fresh set of visitors.
             </li>
         </ul>
     </div>
@@ -131,8 +133,14 @@ const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-// Random names for better visualization
-const randomNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper"];
+// Names list is expanded for more variety
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+
+// Function to get a unique set of names (20 max)
+function getRandomNames(count) {
+    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
 
 // LATEST 10 UNIQUE PROXIES
 const originalProxies = [
@@ -154,13 +162,6 @@ const newProxiesData = [
     ...originalProxies.map(p => ({...p})) 
 ];
 
-// Add auth and random name to all 20 entries
-const premiumProxies = newProxiesData.map((p, index) => ({
-    ...p,
-    auth: COMMON_AUTH,
-    name: randomNames[index] 
-}));
-
 const MAX_SLOTS = 20;
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
@@ -171,6 +172,15 @@ const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 
 let currentSlots = [];
+let randomNamesList = getRandomNames(MAX_SLOTS); // Get names ONCE on page load
+
+// Add auth and random name to all 20 entries
+const premiumProxies = newProxiesData.map((p, index) => ({
+    ...p,
+    auth: COMMON_AUTH,
+    name: randomNamesList[index] // Assign unique name from the new list
+}));
+
 
 // Function to create a single slot element
 function createSlot(index, proxy){
@@ -240,7 +250,6 @@ function createSlot(index, proxy){
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request to your PHP script
         const response = await fetch(proxiedUrl, { mode: 'no-cors' });
         
         if (response.status === 200) {
