@@ -1,5 +1,5 @@
 <?php
-// proxy_loader.php - Aggressive Iframe Fix using Base Tag and Base64 Encoding.
+// proxy_loader.php - Base Tag, Base64, and Aggressive JavaScript Stripping for Iframe Fix.
 
 // 1. Capture Parameters
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
@@ -15,7 +15,7 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
 $url_parts = parse_url($target_url);
 $base_scheme = isset($url_parts['scheme']) ? $url_parts['scheme'] : 'http';
 $base_host = isset($url_parts['host']) ? $url_parts['host'] : '';
-// Use the base URL including the host, ensuring it ends with a slash if there's no path
+// Base URL for the <base> tag
 $base_url_for_tag = $base_scheme . '://' . $base_host . (isset($url_parts['path']) ? dirname($url_parts['path']) : '/');
 
 
@@ -37,7 +37,7 @@ $headers = array(
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-curl_setopt($ch, CURLOPT_HEADER, false); // Do not capture response headers
+curl_setopt($ch, CURLOPT_HEADER, false); 
 
 // --- Proxy Configuration and Authentication ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
@@ -59,26 +59,33 @@ if ($body === false) {
     $error_message = curl_error($ch);
     $output = "Error: Proxy Load Failure. cURL Error: " . htmlspecialchars($error_message);
 } else {
-    // 4. Aggressive Content Modification (CRITICAL FIXES)
+    // 4. AGGRESSIVE CONTENT MODIFICATION (CRITICAL FIXES)
     if (!empty($body)) {
-        // Prepare the <base> tag
-        $base_tag = '<base href="' . $base_url_for_tag . '">';
-
-        // a) Inject the <base> tag into the <head> to fix all relative links (CSS, JS, Images)
-        // Note: '/<head>/i' is used to match <head> case-insensitively.
-        $body = preg_replace('/<head>/i', '<head>' . $base_tag, $body, 1);
         
-        // b) Aggressively strip potential frame-busting headers/scripts remaining in the content
-        
+        // --- 4.1. Frame-Busting and CSP Stripping ---
         // Remove X-Frame-Options meta tags
         $body = preg_replace('/<meta http-equiv=["\']X-Frame-Options["\'].*?>/i', '', $body);
         
-        // Remove Content-Security-Policy meta tags that might block framing
+        // Remove Content-Security-Policy meta tags
         $body = preg_replace('/<meta http-equiv=["\']Content-Security-Policy["\'].*?>/i', '', $body);
         
-        // Remove known frame-busting JavaScript patterns (e.g., `if (self.location != top.location)`)
+        // Remove simple frame-busting JS (less aggressive than full strip)
         $body = preg_replace('/if ?\( ?self\.location ?!= ?top\.location ?\).*;?/i', '', $body);
-        $body = preg_replace('/if ?\( ?window\.parent ?&& ?window\.parent\.frames\.length ?.*/i', '', $body);
+        
+        // --- 4.2. Inject <base> Tag ---
+        // This is necessary to load CSS, Images, and JS correctly
+        $base_tag = '<base href="' . $base_url_for_tag . '">';
+        $body = preg_replace('/<head>/i', '<head>' . $base_tag, $body, 1);
+
+
+        // --- 4.3. AGGRESSIVE JAVASCRIPT STRIPPING (The new, strong fix) ---
+        // a) Remove all <script> blocks (inline and external)
+        $body = preg_replace('/<script\b[^>]*>([\s\S]*?)<\/script>/i', '', $body);
+
+        // b) Remove all JavaScript event handlers (e.g., onclick, onload, onmouseover)
+        // This targets tags like <div onclick="...">, which can trigger frame-busting.
+        $body = preg_replace('/ on(click|load|submit|error|mouseover|focus|blur)=["\'][^"\']*["\']/i', '', $body);
+
     }
 
     // 5. Base64 Encode the modified content
