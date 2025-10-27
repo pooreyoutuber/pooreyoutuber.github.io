@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Advanced Simulation)</title>
+<title>Website Traffic Simulation System</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -55,7 +55,6 @@
     width: calc(100% / 0.4);
     height: calc(100% / 0.4);
     opacity: 1;
-    transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
   }
   .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
   .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
@@ -78,8 +77,8 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Website Booster Prime</h1>
-      <div class="tagline">Advanced Traffic Simulation System (College Project Ready).</div>
+      <h1>Website Traffic Simulation System</h1>
+      <div class="tagline">Global Traffic Generation and Analysis Tool.</div>
     </header>
 
     <div class="controls">
@@ -99,23 +98,23 @@
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all <span>30s</span> for better GA tracking.
+                Enable **Continuous** Mode: Repeat all <span>30s</span> for long-session $\text{GA}$ $\text{tracking}$.
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
     <div class="info-box">
-        <strong>Tool Feature Highlights for Professors:</strong>
+        <strong>Tool Operation Details:</strong>
         <ul>
             <li>
-                **Anti-Filtering:** Uses **$20$ Unique Rotating IP Addresses** ($\text{via}$ $\text{p.webshare.io}$) and $\text{Randomized}$ $\text{Timing}$ ($\text{0.5-2}$ $\text{sec}$ $\text{delay}$) to bypass $\text{GA4}$ $\text{bot}$ $\text{filters}$.
+                **Proxy Setup:** Configured with $\text{Webshare}$ $\text{Backconnect}$ $\text{Gateway}$ ($\text{p.webshare.io}:80$) to ensure $\text{unique}$ $\text{source}$ $\text{IP}$ $\text{addresses}$ for each $\text{slot}$.
             </li>
             <li>
-                **Manual Control ($\text{Crucial}$):** Click **'Focus/Control Slot'** to expand the $\text{slot}$ and manually $\text{scroll}$ / $\text{interact}$ inside the $\text{iframe}$, simulating **real $\text{user}$ $\text{behavior}$** for strong $\text{session}$ $\text{tracking}$.
+                **Anti-Filtering Logic:** $\text{Traffic}$ is sent with **$\text{randomized}$ $\text{delays}$** ($\text{0.5-2}$ $\text{sec}$ $\text{apart}$) and $\text{server}$-$\text{side}$ $\text{session}$ $\text{guarantee}$ ($\text{30s}$ $\text{run}$ $\text{time}$) for $\text{realistic}$ $\text{GA}$ $\text{tracking}$.
             </li>
             <li>
-                **Session Guarantee:** The PHP $\text{backend}$ runs for $30$ $\text{seconds}$ to $\text{guarantee}$ a recorded $\text{session}$ in $\text{GA4}$.
+                **Manual Check:** Use **'Full View (New Tab)'** to manually check the $\text{proxy}$ $\text{connection}$ and $\text{interact}$ with the $\text{page}$.
             </li>
         </ul>
     </div>
@@ -127,14 +126,14 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION - UPDATED FOR ROTATING PROXY
+   PROXY DATA and CONFIGURATION - Backconnect Gateway
    ---------------------------------------------------------------------- */
-// Webshare Rotating Proxy Credentials (Based on your screenshot)
-const COMMON_USER = "bqctypvz-rotate";
+// Webshare Rotating Proxy Credentials (Based on your screenshots)
+const COMMON_USER = "bqctypvz-rotate"; // For Rotating/Backconnect
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-// Webshare Rotating Proxy Endpoint
+// Webshare Backconnect/Rotating Proxy Endpoint
 const ROTATING_IP = "p.webshare.io";
 const ROTATING_PORT = "80";
 
@@ -151,7 +150,7 @@ function getRandomNames(count) {
 }
 
 // =========================================================================
-// FILLING 20 SLOTS WITH THE ROTATING ENDPOINT 
+// FILLING 20 SLOTS WITH THE BACKCONNECT ENDPOINT 
 // =========================================================================
 const DUMMY_PROXIES = [];
 const MAX_SLOTS = 20;
@@ -160,7 +159,7 @@ for (let i = 0; i < MAX_SLOTS; i++) {
     DUMMY_PROXIES.push({
         ip: ROTATING_IP,
         port: ROTATING_PORT,
-        country: "ROTATOR" 
+        country: "GLOBAL" // Simplified label
     });
 }
 // =========================================================================
@@ -194,10 +193,11 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
+  // NOTE: Focus/Control Button removed here
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy Endpoint: ${proxy.ip}:${proxy.port}</div>
+      <div class="slot-ip-display">Proxy Gateway: ${proxy.ip}:${proxy.port}</div>
     </div>
     
     <div class="iframe-wrap">
@@ -205,7 +205,6 @@ function createSlot(index, proxy){
     </div>
     
     <div class="slot-footer">
-      <button id="focus-${index}" class="action-btn view" style="background: #3b82f6;">Focus/Control Slot</button>
       <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
       <button id="run-${index}" class="action-btn view">Start Proxy View</button>
       <div class="status" id="status-wrap-${index}">
@@ -222,7 +221,6 @@ function createSlot(index, proxy){
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
-  const focusBtn = el.querySelector(`#focus-${index}`); // NEW
 
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
@@ -234,7 +232,7 @@ function createSlot(index, proxy){
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+          `uid=${proxy.uniqueId}`; 
   }
 
   // --- Core Automation Function ---
@@ -276,26 +274,6 @@ function createSlot(index, proxy){
     runAutomation(url); 
   });
   
-  // --- NEW Focus Button Listener (Manual Control) ---
-  focusBtn.addEventListener('click', ()=> {
-    const scale = iframe.style.transform === 'scale(1)' ? 'scale(0.4)' : 'scale(1)';
-    const minHeight = scale === 'scale(1)' ? '600px' : '380px';
-    const focusText = scale === 'scale(1)' ? 'Exit Focus Mode' : 'Focus/Control Slot';
-
-    // Toggle iframe to full size for manual control/scrolling demonstration
-    iframe.style.transform = scale;
-    iframe.style.width = scale === 'scale(1)' ? '100%' : 'calc(100% / 0.4)';
-    iframe.style.height = scale === 'scale(1)' ? '100%' : 'calc(100% / 0.4)';
-    el.style.minHeight = minHeight;
-    focusBtn.textContent = focusText;
-    focusBtn.style.backgroundColor = scale === 'scale(1)' ? '#dc2626' : '#3b82f6';
-    
-    // Alert the user for manual interaction
-    if (scale === 'scale(1)'){
-        alert('Focus Mode: You can now SCROLL and interact inside this frame to simulate real user behavior. This is crucial for session time!');
-    }
-  });
-
   setStatus('Ready', true);
 
   return { 
