@@ -40,7 +40,7 @@ $proxy_address = "$proxy_ip:$proxy_port";
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
-    // *** NEW DESKTOP USER AGENT ***
+    // *** DESKTOP USER AGENT (This tells the website that the request is from a desktop browser) ***
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     // CRITICAL: Send the unique cookie
     "Cookie: _ga=" . $ga_cookie_value . ";",
