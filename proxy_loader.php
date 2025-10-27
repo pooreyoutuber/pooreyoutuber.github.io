@@ -1,5 +1,5 @@
 <?php
-// proxy_loader.php - Fetches and displays proxied content in the iframe, stripping security headers.
+// proxy_loader.php - Fetches and displays proxied content in the iframe, stripping all potentially problematic headers.
 
 // 1. Capture Parameters
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
@@ -16,11 +16,16 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
 $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
+// GA4 Active User FIX: Setting Unique Client ID as a Cookie Header
+$unique_id = isset($_GET['uid']) ? $_GET['uid'] : '1234567890';
+$ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
+
 $headers = array(
     // Use DESKTOP User Agent
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "Accept-Language: en-US,en;q=0.9"
+    "Accept-Language: en-US,en;q=0.9",
+    "Cookie: _ga=" . $ga_cookie_value . ";" // Pass GA cookie here too for consistency
 );
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -39,7 +44,7 @@ curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Quick timeout for display
+curl_setopt($ch, CURLOPT_TIMEOUT, 15); // Increased timeout to 15s
 
 // 3. Execute Proxy Request
 $response = curl_exec($ch);
@@ -54,38 +59,33 @@ if ($response === false) {
     $body = substr($response, $header_size);
     
     // 5. CRITICAL FIX: Clean the headers for iframe rendering
-    $headers_to_strip = ['X-Frame-Options', 'Content-Security-Policy'];
-    $clean_headers = [];
+    $headers_to_strip = ['x-frame-options', 'content-security-policy', 'content-length', 'transfer-encoding', 'connection'];
+    $content_type = null;
     
+    // Parse headers to find Content-Type
     foreach (explode("\r\n", $header_text) as $header) {
-        if (trim($header) == '') continue;
-        
-        $parts = explode(':', $header, 2);
-        if (count($parts) < 2) {
-            // Keep status line (e.g., HTTP/1.1 200 OK)
-            $clean_headers[] = $header; 
-            continue;
-        }
-        
-        $name = trim($parts[0]);
-        $value = trim($parts[1]);
-        
-        // Check if the header name is in the list of headers to strip (case-insensitive)
-        if (!in_array(strtolower($name), array_map('strtolower', $headers_to_strip))) {
-            // Forward other headers
-            $clean_headers[] = "$name: $value";
+        if (strpos($header, ':') !== false) {
+            list($name, $value) = explode(':', $header, 2);
+            $lower_name = strtolower(trim($name));
+            
+            if ($lower_name === 'content-type') {
+                $content_type = trim($value);
+            }
         }
     }
     
     // 6. Output the cleaned response
     http_response_code($http_code);
-    foreach ($clean_headers as $header_line) {
-        if (strpos($header_line, 'HTTP/') === 0) {
-            continue; 
-        }
-        // Send the cleaned headers (e.g., Content-Type)
-        header($header_line, false);
+    
+    // Set the Content-Type header explicitly (most important fix)
+    if ($content_type) {
+        header("Content-Type: " . $content_type, true);
+    } else {
+        header("Content-Type: text/html", true); // Default to HTML
     }
+    
+    // WARNING: We skip sending all other headers like Set-Cookie, Cache-Control, etc.
+    // This is the most aggressive way to prevent blocking.
     
     echo $body;
 }
