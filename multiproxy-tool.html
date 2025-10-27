@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime - Hybrid Traffic Launcher (20 Slots)</title>
+<title>Website Booster Prime - Hybrid Traffic Launcher</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -21,15 +21,25 @@
   h1 { font-size: 32px; margin: 0; color: var(--accent); letter-spacing: -1px; }
   .tagline { color: var(--muted); font-size: 16px; margin-top: 8px; }
   
-  /* --- Controls and Info Box --- */
+  /* --- Controls and Input Bar --- */
   .controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-  .input-wrap { display: flex; gap: 10px; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  .input-group { display: flex; gap: 10px; width: 100%; }
+  
+  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   input[type="url"] { flex: 1; padding: 14px 16px; border-radius: 10px 0 0 10px; border: 1px solid var(--border); border-right: none; background: white; font-size: 16px; outline: none; }
+
+  /* Slot Selector Styling */
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 16px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; }
+  .slot-selector input[type="number"] { width: 50px; padding: 10px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  
   .btn { background: var(--primary-blue); color: white; padding: 14px 20px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
-  .info-box { background: #dbeafe; color: #1e40af; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid #93c5fd; margin-bottom: 24px; }
+
+  /* Info Box (Red background for safety warning) */
+  .info-box { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid #fca5a5; margin-bottom: 24px; }
+  .info-box strong { font-weight: 700; color: #7f1d1d; }
   
-  /* --- Grid and Slots (Responsive Layout for 20 slots) --- */
+  /* --- Grid and Slots (Responsive Layout) --- */
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
   @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
@@ -44,7 +54,6 @@
   /* IFrame Styling for Desktop View Simulation */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Zoom out to simulate desktop screen fitting in a small space */
     transform: scale(0.5); 
     transform-origin: 0 0;
     width: calc(100% / 0.5);
@@ -67,19 +76,27 @@
   <div class="wrap">
     <header>
       <h1>Website Booster Prime</h1>
-      <div class="tagline">Hybrid Traffic System: View Content and Increase Traffic from 20 Global Locations.</div>
+      <div class="tagline">Hybrid Traffic System: View Content and Increase Traffic from Global Locations.</div>
     </header>
 
     <div class="controls">
-        <div class="input-wrap">
-            <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
-            <button id="globalGo" class="btn">Load All 20 Slots</button>
+        <div class="input-group">
+            
+            <div class="slot-selector">
+                Slots:
+                <input id="numSlots" type="number" value="10" min="1" max="20" />
+            </div>
+
+            <div class="url-input-wrap">
+                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+            </div>
+            <button id="globalGo" class="btn">Load & Run</button>
         </div>
     </div>
     
     <div class="info-box">
-        ⚠️ **Privacy Notice:** The iFrames below display content via **your real IP** (for better ad loading and manual control). The **real view-count traffic** is generated securely in the background by our PHP backend using 20 different authenticated proxy IPs. **We do not collect any user data.**
-        <br>✅ **Ad Click Fix:** You can now click on Ads/Links inside the slots to navigate the main browser window.
+        🚨 **SECURITY WARNING: Sandbox Removed.** To ensure **Ads/Links clicks work properly**, the iFrame sandbox protection has been **removed**. The iFrame content now has full access to navigate your main window. Use this tool only with **trusted, safe URLs**.
+        <br>✅ **View Traffic:** The real view-count traffic is securely generated in the background by our PHP backend using separate authenticated proxy IPs.
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -89,10 +106,10 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA (Extended to 20 Slots)
+   PROXY DATA (Max 20 Slots)
    ---------------------------------------------------------------------- */
 const originalProxies = [
-  // Your original 10 Webshare Proxy Data (Used twice for 20 slots)
+  // Your original 10 Webshare Proxy Data
   { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
   { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i", country: "DE" },
   { ip: "38.170.176.177", port: "5572", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
@@ -105,13 +122,13 @@ const originalProxies = [
   { ip: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
 ];
 
-// Create 20 total entries by duplicating the set
+// Extend to 20 total entries by duplicating the set (for max capacity)
 const premiumProxies = [
     ...originalProxies, 
     ...originalProxies.map(p => ({...p})) 
 ];
 
-const TOTAL_SLOTS = 20;
+const MAX_SLOTS = 20;
 
 // !!! IMPORTANT: This MUST be the URL of your uploaded proxy_loader.php file.
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
@@ -119,7 +136,12 @@ const PROXY_ENDPOINT = 'proxy_loader.php';
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
+const numSlotsInput = document.getElementById('numSlots');
+const globalGoBtn = document.getElementById('globalGo');
 
+let currentSlots = [];
+
+// Function to create a single slot element
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -133,7 +155,7 @@ function createSlot(index, proxy){
     </div>
     
     <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-top-navigation"></iframe>
+      <iframe id="iframe-${index}" src="about:blank"></iframe>
     </div>
     
     <div class="slot-footer">
@@ -224,20 +246,48 @@ function createSlot(index, proxy){
   return { runAutomation }; 
 }
 
-// create 20 slots
-const slots = [];
-for(let i=0;i<TOTAL_SLOTS;i++){
-  const slot = createSlot(i, premiumProxies[i]);
-  slots.push(slot);
+// Function to redraw slots based on the selected number
+function renderSlots(count) {
+    // Clear existing slots
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+
+    // Ensure count is valid
+    if (count < 1 || count > MAX_SLOTS) {
+        count = Math.min(Math.max(count, 1), MAX_SLOTS);
+        numSlotsInput.value = count;
+    }
+    
+    globalGoBtn.textContent = `Load & Run ${count} Slots`;
+
+    // Create and append new slots
+    for(let i=0; i < count; i++){
+      const slot = createSlot(i, premiumProxies[i]);
+      currentSlots.push(slot);
+    }
 }
 
-// global actions
-document.getElementById('globalGo').addEventListener('click', ()=>{
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+
+// Event listener for slot number change
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+
+// Global Action Button Logic
+globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
-  if(!url){ alert('Please paste a valid URL into the global input field.'); return; }
+  if(!url){ 
+      alert('Please paste a valid URL into the global input field.'); 
+      return; 
+  }
   
-  // Load the iFrame content and start the cURL request for all 20
-  slots.forEach(s => {
+  // Start the cURL request for all currently rendered slots
+  currentSlots.forEach(s => {
     s.runAutomation(url); 
   });
 });
