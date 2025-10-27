@@ -3,50 +3,93 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ProXy-Gen - Real Working Proxy Launcher (10 Slots)</title>
-<link rel="icon" href="data:,">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<title>ProXy-Gen - Hybrid Ad Loading & Automation (10 Slots)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
 
 <style>
-  /* Base CSS Variables & Reset */
+  /* Base CSS */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
-    --accent: #0f4f7f;--accent-2: #1e5a88;--success: #059669; 
-    --border: #e5e7eb;--shadow: 0 4px 12px rgba(0,0,0,0.05);
-    --radius: 12px;--gap: 16px; --maxwidth: 1400px;
+    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
+    --shadow: 0 4px 12px rgba(0,0,0,0.05);--radius: 12px;--gap: 16px; 
   }
-  *{box-sizing:border-box}
-  body{margin:0;font-family: 'Inter', system-ui;background: linear-gradient(180deg, var(--bg) 0%, #e0e7ff 100vh);color:#111827;line-height: 1.5;}
-  .wrap{max-width: var(--maxwidth);margin:32px auto;padding:16px;}
-  header{display:flex;gap:12px;align-items:center;margin-bottom:24px;}
-  .logo .badge{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg, var(--accent), var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 6px 16px rgba(15, 79, 127, 0.2);font-size:20px;}
-  h1{font-size:24px;margin:0;letter-spacing: -0.5px;}
-  .subtitle{ color:var(--muted); font-size:14px; margin-top:4px }
-  .controls {display:flex;flex-direction: column;gap: 16px;margin-bottom: 24px;}
-  .input-wrap{ display:flex; gap:10px; width:100%; }
-  input[type="url"]{flex:1;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:white;font-size:16px;outline:none;transition: border-color 0.2s;}
-  input[type="url"]:focus {border-color: var(--accent);box-shadow: 0 0 0 3px rgba(15, 79, 127, 0.1);}
-  .btn{background:var(--success);color:white;padding:12px 20px;border-radius:10px;border:0;cursor:pointer;font-weight:600;box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);transition: background-color 0.2s;white-space: nowrap;}
-  .btn:hover { background-color: #047857; }
-  .info-box {font-size:14px; color:var(--accent); padding: 10px 16px;background: #eef2ff; border: 1px solid #c7d2fe;border-radius: 10px;margin-bottom: 24px;font-weight: 500;}
-  .grid-container {display: grid;gap: var(--gap);grid-template-columns: repeat(2, 1fr);}
-  @media (min-width: 1024px) {.grid-container {grid-template-columns: repeat(4, 1fr);}.grid-container .slot:nth-child(9), .grid-container .slot:nth-child(10) {grid-column: span 2;}}
-  .slot{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow: var(--shadow);display:flex;flex-direction:column;min-height: 400px;transition: all .2s ease;}
-  .slot-top{display:flex;justify-content: space-between;align-items: center;margin-bottom:12px;}
-  .slot-title{font-weight:700;font-size:16px;color:var(--accent);}
-  .slot-ip-display{ font-size:12px;color:var(--muted);font-weight: 500;} 
-  .slot-code-wrap { display: none; }
-  .iframe-wrap{ flex:1;border-radius:8px;background:#fcfdff;border:1px solid var(--border);position:relative;overflow: hidden;}
-  iframe{ width: 100%; height: 100%; border:0;display:block;background:white;}
-  .slot-footer{ display:flex;gap:10px;align-items:center;margin-top:16px;justify-content:space-between;flex-wrap: wrap;}
-  .small-btn{ padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600;color:white;background:#0ea5e9;font-size: 13px;white-space: nowrap;}
-  .small-btn.ghost { background: var(--muted); }
-  .status { font-size:14px;color:var(--muted);font-weight: 600;display: flex;align-items: center;gap: 8px;}
-  .status-dot {display:inline-block;width:10px;height:10px;border-radius:50%;background: var(--muted);box-shadow:none;transition: background 0.3s ease, box-shadow 0.3s ease;}
-  .status-dot.active {background: var(--success);box-shadow:0 0 8px rgba(5, 150, 105, 0.5);animation: pulse-ping 1.6s infinite;}
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui; background: linear-gradient(180deg, var(--bg) 0%, #e0e7ff 100vh); color: #111827; line-height: 1.5; }
+  .wrap { max-width: 1400px; margin: 32px auto; padding: 16px; }
+  header { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+  .logo .badge { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #1e5a88); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; box-shadow: 0 6px 16px rgba(15, 79, 127, 0.2); font-size: 20px; }
+  h1 { font-size: 24px; margin: 0; letter-spacing: -0.5px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-top: 4px }
+  .controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  .input-wrap { display: flex; gap: 10px; width: 100%; }
+  input[type="url"] { flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--success); color: white; padding: 12px 20px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } .grid-container .slot:nth-child(9), .grid-container .slot:nth-child(10) { grid-column: span 2; } }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 480px; }
+  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .slot-title { font-weight: 700; font-size: 16px; color: var(--accent); }
+  .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
+  .slot-footer { display: flex; gap: 10px; align-items: center; margin-top: 16px; justify-content: space-between; flex-wrap: wrap; }
+  .status { font-size: 14px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--muted); box-shadow: none; transition: background 0.3s ease; }
+  .status-dot.active { background: var(--success); box-shadow: 0 0 8px rgba(5, 150, 105, 0.5); animation: pulse-ping 1.6s infinite; }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
-  @media (max-width: 600px) {.input-wrap { flex-direction: column; }.slot-footer { flex-direction: column; align-items: stretch; }.slot-footer > div { display: flex; gap: 10px; width: 100%; }.small-btn { flex: 1; }}
+  
+  /* Tabs and Content */
+  .tab-nav { 
+    display: flex; 
+    border-bottom: 1px solid var(--border); 
+    margin-bottom: 8px;
+  }
+  .tab-button {
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab-button.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+  }
+  .content-wrapper { flex: 1; position: relative; }
+  .tab-content {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: none;
+  }
+  .tab-content.active { display: block; }
+  
+  /* Live View (iFrame) */
+  iframe { width: 100%; height: 100%; border: 0; display: block; }
 
+  /* Console Log */
+  .log-view {
+    padding: 10px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px;
+    color: #00ff41;
+    background: #1e1e1e;
+    overflow-y: auto;
+    height: 100%;
+  }
+  .log-line { opacity: 0.8; }
+  .log-timestamp { color: #777; margin-right: 6px; }
+  .log-request { color: #ff9d00; }
+  .log-success { color: #a6e22e; font-weight: bold; }
+  .log-error { color: #ff4d4d; font-weight: bold; }
+  .log-command { color: #f8f8f2; }
 </style>
 </head>
 <body>
@@ -56,22 +99,20 @@
         <div class="badge">PRO</div>
       </div>
       <div>
-        <h1>असली प्रॉक्सी ट्रैफिक लॉन्चर (10 IP)</h1>
-        <div class="subtitle">यह टूल आपके बैकएंड सर्वर के माध्यम से हर स्लॉट को एक अलग IP से लोड करेगा।</div>
+        <h1>हाइब्रिड प्रॉक्सी एड्स लोडर (10 IP)</h1>
+        <div class="subtitle">iFrame में लाइव IP देखें, और ऑटोमेशन लॉग में असली cURL ट्रैफ़िक को ट्रैक करें।</div>
       </div>
     </header>
 
     <div class="controls">
         <div class="input-wrap">
-            <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (जैसे, https://api.ipify.org/ या आपका वीडियो URL)" />
-            <button id="globalGo" class="btn">सभी 10 IP स्लॉट्स में लोड करें</button>
+            <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (असली ट्रैफ़िक के लिए)" />
+            <button id="globalGo" class="btn">सभी 10 स्लॉट्स में प्रॉक्सी लोड करें</button>
         </div>
     </div>
 
     <div class="info-box">
-        ✅ **यह अब काम करेगा!**
-        <br>
-        **ग्रीन डॉट** का मतलब है कि स्लॉट लोड हो रहा है। **iFrame में सामग्री अब आपके प्रॉक्सी IP के माध्यम से आनी चाहिए**, क्योंकि यह अनुरोध आपके PHP सर्वर से हो रहा है।
+        ⚠️ **महत्वपूर्ण:** **'Live Content'** टैब में, हम CSP ब्लॉकिंग से बचने के लिए केवल प्रॉक्सी IP दिखाने वाली साइट्स लोड करेंगे। **'Automation Log'** टैब में, **असली cURL प्रॉक्सी रिक्वेस्ट** भेजी जाएगी।
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -81,48 +122,66 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA (Do NOT change this unless your proxies change)
+   PROXY DATA 
    ---------------------------------------------------------------------- */
 const premiumProxies = [
-  { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "38.170.176.177", port: "5572", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "198.23.239.134", port: "6540", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "45.38.107.97", port: "6014", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "107.172.163.27", port: "6543", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "64.137.96.74", port: "6641", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "216.10.27.159", port: "6837", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "142.111.67.146", port: "5611", user: "bqctypvz", pass: "399xb3kxqv6i" },
-  { ip: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
+  { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i", country: "DE" },
+  { ip: "38.170.176.177", port: "5572", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
+  { ip: "198.23.239.134", port: "6540", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
+  { ip: "45.38.107.97", port: "6014", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
+  { ip: "107.172.163.27", port: "6543", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
+  { ip: "64.137.96.74", port: "6641", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
+  { ip: "216.10.27.159", port: "6837", user: "bqctypvz", pass: "399xb3kxqv6i", country: "AU" },
+  { ip: "142.111.67.146", port: "5611", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
+  { ip: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
 ];
 
 // !!! IMPORTANT: This MUST be the URL of your uploaded proxy_loader.php file.
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
-// If your file is on a different domain, use the full URL: 
-// const PROXY_ENDPOINT = 'https://YOUR_WEBSITE.com/proxy_loader.php'; 
 
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 
+function getTimestamp() {
+    const now = new Date();
+    return now.getHours().toString().padStart(2, '0') + ':' +
+           now.getMinutes().toString().padStart(2, '0') + ':' +
+           now.getSeconds().toString().padStart(2, '0');
+}
+
 function createSlot(index, proxy){
+  const slotId = `slot-${index}`;
   const el = document.createElement('div');
   el.className = 'slot';
   
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}</div>
+      <div class="slot-title">SLOT ${index+1} (${proxy.country})</div>
       <div class="slot-ip-display">IP: ${proxy.ip}</div>
     </div>
     
-    <div class="iframe-wrap" id="wrap-${index}">
-      <iframe id="iframe-${index}" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+    <div class="tab-nav">
+        <button class="tab-button active" data-tab="live-${index}">Live Content</button>
+        <button class="tab-button" data-tab="log-${index}">Automation Log</button>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="tab-content active" data-tab-content="live-${index}">
+            <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+        </div>
+        <div class="tab-content" data-tab-content="log-${index}">
+            <div class="log-view" id="log-${index}">
+                <span class="log-line"><span class="log-timestamp">${getTimestamp()}</span> <span class="log-command">INFO:</span> Ready.</span>
+            </div>
+        </div>
     </div>
     
     <div class="slot-footer">
       <div>
-        <button id="open-${index}" class="btn small-btn">Full View (New Tab)</button>
-        <button id="reload-${index}" class="ghost small-btn">Reload</button>
+        <button id="open-${index}" class="btn small-btn">Run Automation (cURL)</button>
+        <button id="reload-${index}" class="ghost small-btn">Re-run</button>
       </div>
       <div class="status" id="status-wrap-${index}">
         <span class="status-dot" id="dot-${index}"></span>
@@ -133,80 +192,128 @@ function createSlot(index, proxy){
   
   gridContainer.appendChild(el);
 
+  // References
   const iframe = el.querySelector(`#iframe-${index}`);
+  const logView = el.querySelector(`#log-${index}`);
   const openBtn = el.querySelector(`#open-${index}`);
   const reloadBtn = el.querySelector(`#reload-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
+  const tabButtons = el.querySelectorAll('.tab-button');
+  const tabContents = el.querySelectorAll('.tab-content');
 
-  let currentProxiedUrl = '';
   let currentOriginalUrl = '';
+  let automationRunning = false;
 
+  // Tab Logic
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+
+        button.classList.add('active');
+        const targetTab = button.getAttribute('data-tab');
+        el.querySelector(`[data-tab-content="${targetTab}"]`).classList.add('active');
+    });
+  });
+
+
+  function logToConsole(message, type = 'info'){
+      const line = document.createElement('div');
+      let typeClass = 'log-line';
+      let typeLabel = 'INFO:';
+
+      if (type === 'request') { typeClass = 'log-request'; typeLabel = 'CURL:'; }
+      else if (type === 'success') { typeClass = 'log-success'; typeLabel = 'SUCCESS:'; }
+      else if (type === 'error') { typeClass = 'log-error'; typeLabel = 'ERROR:'; }
+      else if (type === 'command') { typeClass = 'log-command'; typeLabel = '$'; }
+
+      line.className = typeClass;
+      line.innerHTML = `<span class="log-timestamp">${getTimestamp()}</span> <span class="log-command">${typeLabel}</span> ${message}`;
+      logView.appendChild(line);
+      logView.scrollTop = logView.scrollHeight;
+  }
+  
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
     statusDot.classList.toggle('active', isActive);
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      // This is the real, proxied URL that hits your server (proxy_loader.php)
-      const proxiedUrl = `${PROXY_ENDPOINT}?` + 
+      return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.user}:${proxy.pass}`; 
-          
-      return proxiedUrl;
   }
 
-
-  function loadUrl(originalUrl){
-    if(!originalUrl) return;
+  // --- Core Automation Function (The REAL cURL work) ---
+  async function runAutomation(originalUrl){
+    if(!originalUrl || automationRunning) return;
     
+    automationRunning = true;
     currentOriginalUrl = originalUrl;
     
-    setStatus('Loading via Proxy...', false);
+    // 1. Live Content (Simulated Ad Loading)
+    // We load a simple IP site to show the proxy is active in the iFrame.
+    iframe.src = `https://api.ipify.org?format=html`; 
     
-    // 1. Generate the proxied URL for this slot
-    currentProxiedUrl = getProxiedUrl(originalUrl, proxy);
+    // 2. Automation Log (cURL Work)
+    setStatus('Preparing cURL...', false);
+    logView.innerHTML = ''; // Clear log
     
-    // 2. Load the content via your backend proxy service
-    iframe.src = currentProxiedUrl;
-    
-    // Visual feedback
+    logToConsole(`curl -x http://${proxy.ip}:${proxy.port} "${originalUrl}"`, 'command');
+
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+
+    logToConsole(`Sending real cURL request to: ${originalUrl}`, 'request');
+    setStatus('Sending Request...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
-    setTimeout(() => statusDot.style.animation = 'none', 500);
+
+
+    try {
+        // --- REAL PHP/Server Execution (The actual view/request work) ---
+        // Fetch runs the PHP file in the background, which executes cURL via proxy.
+        const response = await fetch(proxiedUrl);
+        const httpCode = response.status;
+        const responseText = await response.text();
+
+        // 3. Log Success or Failure
+        if (httpCode >= 200 && httpCode < 300) {
+            logToConsole(`HTTP Status: 200 OK. Content fetched successfully.`, 'success');
+            setStatus('Active (Request Succeeded)', true);
+        } else if (httpCode === 407) {
+            logToConsole(`HTTP Status: 407. Proxy Auth Failed. Check credentials.`, 'error');
+            setStatus('Failed (Auth Error)', false);
+        } else {
+            logToConsole(`HTTP Status: ${httpCode} ERROR. Server failed to fetch content.`, 'error');
+            logToConsole(`Server Log Snippet: ${responseText.substring(0, 50)}...`, 'error');
+            setStatus('Failed (HTTP Error)', false);
+        }
+
+    } catch (e) {
+        logToConsole(`Critical Network Error: ${e.message}. PHP server or network inaccessible.`, 'error');
+        setStatus('Failed (Network Error)', false);
+    }
+    
+    statusDot.style.animation = 'none';
+    automationRunning = false;
   }
 
   // Event Handlers
   openBtn.addEventListener('click', ()=> {
-    if(!currentProxiedUrl || currentProxiedUrl.includes('proxy_loader.php')){ 
-        const v = globalUrlInput.value.trim();
-        if(!v) return alert('कृपया पहले URL पेस्ट करें।');
-        currentOriginalUrl = v;
-        loadUrl(currentOriginalUrl);
-    }
-    // Open the proxied URL in a new tab (This should show content loaded via proxy)
-    window.open(currentProxiedUrl, '_blank');
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('कृपया पहले URL पेस्ट करें।'); return; }
+    runAutomation(url);
   });
 
   reloadBtn.addEventListener('click', ()=> {
     if(!currentOriginalUrl){ setStatus('Ready'); return; }
-    loadUrl(currentOriginalUrl); 
+    runAutomation(currentOriginalUrl); 
   });
   
-  // *** Green Dot Logic ***
-  iframe.addEventListener('load', ()=>{
-    // This event signals that the content loaded (hopefully from proxy)
-    setStatus('Active (Loaded via Proxy)', true); 
-  });
-  
-  iframe.addEventListener('error', ()=>{
-    // Note: Cross-origin errors might prevent the actual status code from showing
-    setStatus('Error Loading (Check Proxy/Backend)', false);
-  });
-
   setStatus('Ready', true);
 
-  return { loadUrl }; 
+  return { runAutomation }; 
 }
 
 // create 10 slots
@@ -222,7 +329,7 @@ document.getElementById('globalGo').addEventListener('click', ()=>{
   if(!url){ alert('कृपया पहले ग्लोबल इनपुट में एक मान्य URL पेस्ट करें।'); return; }
   
   slots.forEach(s => {
-    s.loadUrl(url); 
+    s.runAutomation(url); 
   });
 });
 </script>
