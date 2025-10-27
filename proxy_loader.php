@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Backconnect Proxy and Session Guarantee
+// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Direct Proxy and Session Guarantee
 
 // 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
@@ -24,7 +24,7 @@ set_time_limit(0);
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
 $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null; 
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null; 
-$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
+$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; // Use common auth from HTML
 $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
@@ -36,6 +36,7 @@ $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
 // --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
+// CRITICAL: New cookie for every hit for a new user
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
