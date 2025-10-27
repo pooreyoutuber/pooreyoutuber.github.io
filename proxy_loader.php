@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Direct Proxy and Session Guarantee
+// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Desktop View and Session Guarantee
 
 // 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
@@ -24,7 +24,7 @@ set_time_limit(0);
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
 $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null; 
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null; 
-$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; // Use common auth from HTML
+$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
 $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
@@ -40,8 +40,8 @@ $proxy_address = "$proxy_ip:$proxy_port";
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
-    // Real-world User-Agent (Essential for not getting flagged)
-    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
+    // *** NEW DESKTOP USER AGENT ***
+    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     // CRITICAL: Send the unique cookie
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
