@@ -73,13 +73,14 @@ if ($body === false) {
         $body = preg_replace('/if ?\( ?self\.location ?!= ?top\.location ?\).*;?/i', '', $body);
         
         // --- 4.2. Inject <base> Tag ---
-        // This is necessary to load CSS, Images, and JS correctly
+        // This is necessary to load CSS, Images, and static assets correctly
         $base_tag = '<base href="' . $base_url_for_tag . '">';
         $body = preg_replace('/<head>/i', '<head>' . $base_tag, $body, 1);
 
 
         // --- 4.3. AGGRESSIVE JAVASCRIPT STRIPPING ---
         // a) Remove all <script> blocks (inline and external)
+        // This is the main "security feature" removal for the iframe view.
         $body = preg_replace('/<script\b[^>]*>([\s\S]*?)<\/script>/i', '', $body);
 
         // b) Remove all JavaScript event handlers (e.g., onclick, onload, onmouseover)
