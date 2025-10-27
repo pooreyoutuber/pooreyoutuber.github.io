@@ -45,19 +45,20 @@
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
   @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
 
-  .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
+  /* Min Height increased for better visibility and ad space */
+  .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 400px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); }
   .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   
-  /* IFrame Styling for Desktop View Simulation */
+  /* IFrame Styling: Zoomed out more (0.4) for more desktop space and better click detection */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    transform: scale(0.5); 
+    transform: scale(0.4); 
     transform-origin: 0 0;
-    width: calc(100% / 0.5);
-    height: calc(100% / 0.5);
+    width: calc(100% / 0.4);
+    height: calc(100% / 0.4);
   }
   
   .slot-footer { display: flex; gap: 8px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
@@ -95,7 +96,7 @@
     </div>
     
     <div class="info-box">
-        ℹ️ **iFrame Security & Clicks:** The iFrame is configured to prevent its content from opening new links or Ads in your main browser window. Any click will **load inside the current slot** itself.
+        ℹ️ **iFrame Clicks Fix:** The iFrame uses permissions to ensure that any click on a link or Ad will **load inside the current slot only** (not the main browser window). If clicks still don't register, it's a deep Ad network security block.
         <br>✅ **View Traffic:** The real view-count traffic is securely generated in the background by our PHP backend using separate authenticated proxy IPs.
     </div>
 
