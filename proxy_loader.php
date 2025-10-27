@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Rotating Proxy and Session Guarantee
+// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Backconnect Proxy and Session Guarantee
 
 // 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
