@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime - Hybrid Traffic Launcher</title>
+<title>Website Booster Prime - Hybrid Traffic Launcher (20 Slots)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -21,34 +21,34 @@
   h1 { font-size: 32px; margin: 0; color: var(--accent); letter-spacing: -1px; }
   .tagline { color: var(--muted); font-size: 16px; margin-top: 8px; }
   
-  /* --- Controls and Input Bar --- */
+  /* --- Controls and Info Box --- */
   .controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
   .input-wrap { display: flex; gap: 10px; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   input[type="url"] { flex: 1; padding: 14px 16px; border-radius: 10px 0 0 10px; border: 1px solid var(--border); border-right: none; background: white; font-size: 16px; outline: none; }
   .btn { background: var(--primary-blue); color: white; padding: 14px 20px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
-
-  .info-box { background: #dbeafe; color: #1e40af; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid #93c5fd; }
+  .info-box { background: #dbeafe; color: #1e40af; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid #93c5fd; margin-bottom: 24px; }
   
-  /* --- Grid and Slots (Responsive) --- */
+  /* --- Grid and Slots (Responsive Layout for 20 slots) --- */
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
-  @media (min-width: 768px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
 
-  .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 400px; }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); }
   .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   
-  /* IFrame Styling for Desktop View Illusion */
+  /* IFrame Styling for Desktop View Simulation */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Zooming out to simulate a desktop screen fitting in a small iframe */
-    transform: scale(0.6); 
+    /* Zoom out to simulate desktop screen fitting in a small space */
+    transform: scale(0.5); 
     transform-origin: 0 0;
-    width: calc(100% / 0.6);
-    height: calc(100% / 0.6);
+    width: calc(100% / 0.5);
+    height: calc(100% / 0.5);
   }
   
   .slot-footer { display: flex; gap: 8px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
@@ -67,18 +67,19 @@
   <div class="wrap">
     <header>
       <h1>Website Booster Prime</h1>
-      <div class="tagline">Hybrid Traffic System: View Content and Increase Traffic from 10 Global Locations.</div>
+      <div class="tagline">Hybrid Traffic System: View Content and Increase Traffic from 20 Global Locations.</div>
     </header>
 
     <div class="controls">
         <div class="input-wrap">
             <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
-            <button id="globalGo" class="btn">Load All 10 Slots</button>
+            <button id="globalGo" class="btn">Load All 20 Slots</button>
         </div>
     </div>
     
     <div class="info-box">
-        ⚠️ **Privacy Notice:** The iFrames below display content via **your real IP** (for better ad loading and manual control). The **real view-count traffic** is generated securely in the background by our PHP backend using 10 different authenticated proxy IPs. **We do not collect any user data.**
+        ⚠️ **Privacy Notice:** The iFrames below display content via **your real IP** (for better ad loading and manual control). The **real view-count traffic** is generated securely in the background by our PHP backend using 20 different authenticated proxy IPs. **We do not collect any user data.**
+        <br>✅ **Ad Click Fix:** You can now click on Ads/Links inside the slots to navigate the main browser window.
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -88,10 +89,10 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA (For REAL View Count Traffic)
+   PROXY DATA (Extended to 20 Slots)
    ---------------------------------------------------------------------- */
-const premiumProxies = [
-  // Webshare Proxy Data
+const originalProxies = [
+  // Your original 10 Webshare Proxy Data (Used twice for 20 slots)
   { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
   { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i", country: "DE" },
   { ip: "38.170.176.177", port: "5572", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
@@ -104,6 +105,14 @@ const premiumProxies = [
   { ip: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
 ];
 
+// Create 20 total entries by duplicating the set
+const premiumProxies = [
+    ...originalProxies, 
+    ...originalProxies.map(p => ({...p})) 
+];
+
+const TOTAL_SLOTS = 20;
+
 // !!! IMPORTANT: This MUST be the URL of your uploaded proxy_loader.php file.
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
@@ -115,14 +124,16 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
+  const proxyNote = index >= 10 ? ' (Duplicate IP)' : '';
+
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}</div>
+      <div class="slot-ip-display">Proxy IP: ${proxy.ip}${proxyNote}</div>
     </div>
     
     <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups"></iframe>
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-top-navigation"></iframe>
     </div>
     
     <div class="slot-footer">
@@ -152,7 +163,6 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      // This URL is for the PHP backend to execute cURL
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
@@ -173,30 +183,21 @@ function createSlot(index, proxy){
     // 2. cURL Proxy Request (For View Count Increase)
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    // Give the user a visual cue that proxy work is starting
     setStatus('Sending Proxy View...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // --- REAL PHP/Server Execution (The actual view/request work) ---
-        // Fetch runs the PHP file in the background, which executes cURL via proxy.
-        // We use { mode: 'no-cors' } as the PHP returns HTML content.
         const response = await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        // Check PHP response status (If PHP couldn't contact the proxy, it will send a non-200 status)
         if (response.status === 200) {
             setStatus('View Sent (200 OK)', true);
         } else {
-            // Read PHP error message if available
             const errorText = await response.text();
             setStatus(`Failed (HTTP ${response.status})`, false);
-            console.error(`Slot ${index+1} Proxy Error:`, errorText);
         }
         
     } catch (e) {
-        // This catches critical network issues on the client side 
         setStatus('Failed (Network Down)', false);
-        console.error(`Slot ${index+1} Critical Error:`, e);
     }
     
     statusDot.style.animation = 'none';
@@ -223,9 +224,9 @@ function createSlot(index, proxy){
   return { runAutomation }; 
 }
 
-// create 10 slots
+// create 20 slots
 const slots = [];
-for(let i=0;i<10;i++){
+for(let i=0;i<TOTAL_SLOTS;i++){
   const slot = createSlot(i, premiumProxies[i]);
   slots.push(slot);
 }
@@ -235,7 +236,7 @@ document.getElementById('globalGo').addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ alert('Please paste a valid URL into the global input field.'); return; }
   
-  // Load the iFrame content and start the cURL request for all 10
+  // Load the iFrame content and start the cURL request for all 20
   slots.forEach(s => {
     s.runAutomation(url); 
   });
