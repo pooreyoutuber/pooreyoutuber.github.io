@@ -1,6 +1,7 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - Optimized for Google Analytics tracking
+// PHP Proxy Loader: proxy_loader.php - Optimized for core view delivery
 
+// 1. Security (CORS)
 header("Access-Control-Allow-Origin: *"); 
 header('Content-Type: text/plain'); 
 
@@ -30,14 +31,12 @@ curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth);
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
-// === Optimization for Active Users (Key Changes) ===
-// 1. Desktop User-Agent (Standard browser identity)
+// === Core Settings ===
+// Standard Desktop User-Agent for better tracking
 curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36");
+// Removed explicit CURLOPT_TIMEOUT setting
 
-// 2. Longer Timeout: Gives the server/GA script more time to execute before the connection closes.
-curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Increased from 15 to 30 seconds
-
-// 3. Follow Location and SSL settings
+// Other necessary settings
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -54,7 +53,6 @@ if ($curl_error || $http_code >= 400 || $proxied_html === false) {
     http_response_code($http_code ?: 500);
     die("PROXY_LOAD_FAILED: HTTP Status: " . ($http_code ?: "N/A") . " | cURL Error: " . ($curl_error ?: "None") . " | Proxy: " . $proxy_address);
 } else {
-    // Return a status indicating success
     echo "View sent successfully."; 
 }
 ?>
