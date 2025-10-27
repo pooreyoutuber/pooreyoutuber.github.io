@@ -3,38 +3,60 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ProXy-Gen - HYBRID Real Viewer Tool (10 Slots)</title>
+<title>Website Booster Prime - Hybrid Traffic Launcher</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* [CSS Styles are simplified for clarity, based on your aesthetic preference] */
+  /* --- Base Styles and Variables --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
-    --shadow: 0 4px 12px rgba(0,0,0,0.05);--radius: 12px;--gap: 16px; 
+    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
+    --primary-blue: #0ea5e9;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: 'Inter', system-ui; background: linear-gradient(180deg, var(--bg) 0%, #e0e7ff 100vh); color: #111827; line-height: 1.5; }
+  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
   .wrap { max-width: 1400px; margin: 32px auto; padding: 16px; }
-  header { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
-  .logo .badge { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #1e5a88); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px; }
-  h1 { font-size: 24px; margin: 0; letter-spacing: -0.5px; }
-  .subtitle { color: var(--muted); font-size: 14px; margin-top: 4px }
+  header { margin-bottom: 24px; text-align: center; }
+  h1 { font-size: 32px; margin: 0; color: var(--accent); letter-spacing: -1px; }
+  .tagline { color: var(--muted); font-size: 16px; margin-top: 8px; }
+  
+  /* --- Controls and Input Bar --- */
   .controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-  .input-wrap { display: flex; gap: 10px; width: 100%; }
-  input[type="url"] { flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; }
-  .btn { background: var(--success); color: white; padding: 12px 20px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
-  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(2, 1fr); }
+  .input-wrap { display: flex; gap: 10px; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  input[type="url"] { flex: 1; padding: 14px 16px; border-radius: 10px 0 0 10px; border: 1px solid var(--border); border-right: none; background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--primary-blue); color: white; padding: 14px 20px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover { background: #0c8cd8; }
+
+  .info-box { background: #dbeafe; color: #1e40af; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid #93c5fd; }
+  
+  /* --- Grid and Slots (Responsive) --- */
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
+  @media (min-width: 768px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+
   .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 400px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); }
   .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-  iframe { width: 100%; height: 100%; border: 0; display: block; background: white; }
-  .slot-footer { display: flex; gap: 8px; align-items: center; margin-top: 8px; justify-content: space-between; }
-  .small-btn { padding: 8px 12px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; color: white; background: #0ea5e9; font-size: 12px; white-space: nowrap; }
-  .small-btn.ghost { background: var(--muted); }
+  
+  /* IFrame Styling for Desktop View Illusion */
+  iframe { 
+    width: 100%; height: 100%; border: 0; display: block; background: white; 
+    /* Zooming out to simulate a desktop screen fitting in a small iframe */
+    transform: scale(0.6); 
+    transform-origin: 0 0;
+    width: calc(100% / 0.6);
+    height: calc(100% / 0.6);
+  }
+  
+  .slot-footer { display: flex; gap: 8px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
+  .action-btn { padding: 8px 12px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; font-size: 12px; white-space: nowrap; transition: background-color 0.2s; }
+  .action-btn.view { background: var(--success); color: white; }
+  .action-btn.new-tab { background: #e5e7eb; color: #374151; }
+  .action-btn.view:hover { background: #047857; }
+  
   .status { font-size: 12px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
   .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
@@ -44,24 +66,19 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">
-        <div class="badge">PRO</div>
-      </div>
-      <div>
-        <h1>असली Viewer और Ads Loader (10 IP)</h1>
-        <div class="subtitle">iFrame में लाइव साइट खुलेगी (Ads के लिए) और पीछे cURL से **असली व्यू ट्रैफिक** भेजा जाएगा।</div>
-      </div>
+      <h1>Website Booster Prime</h1>
+      <div class="tagline">Hybrid Traffic System: View Content and Increase Traffic from 10 Global Locations.</div>
     </header>
 
     <div class="controls">
         <div class="input-wrap">
-            <input id="globalUrl" type="url" placeholder="टारगेट URL पेस्ट करें (व्यू बढ़ाने के लिए)" />
-            <button id="globalGo" class="btn">सभी 10 स्लॉट्स में लोड करें</button>
+            <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+            <button id="globalGo" class="btn">Load All 10 Slots</button>
         </div>
     </div>
-
+    
     <div class="info-box">
-        ✅ **हाइब्रिड मोड:** iFrame में आपका URL **आपके असली IP** से लोड होगा (Ads लोडिंग और मैन्युअल कंट्रोल के लिए)। **असली व्यू काउंट ट्रैफिक** 10 प्रॉक्सी IP से **बैकग्राउंड** में cURL के ज़रिए जाएगा। यह CSP ब्लॉकिंग से बचने का एकमात्र तरीका है।
+        ⚠️ **Privacy Notice:** The iFrames below display content via **your real IP** (for better ad loading and manual control). The **real view-count traffic** is generated securely in the background by our PHP backend using 10 different authenticated proxy IPs. **We do not collect any user data.**
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -74,6 +91,7 @@
    PROXY DATA (For REAL View Count Traffic)
    ---------------------------------------------------------------------- */
 const premiumProxies = [
+  // Webshare Proxy Data
   { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
   { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i", country: "DE" },
   { ip: "38.170.176.177", port: "5572", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
@@ -108,8 +126,8 @@ function createSlot(index, proxy){
     </div>
     
     <div class="slot-footer">
-      <button id="open-${index}" class="small-btn">Open in New Tab</button>
-      <button id="run-${index}" class="btn small-btn">Start Proxy View (cURL)</button>
+      <button id="open-${index}" class="action-btn new-tab">Open in New Tab</button>
+      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
       <div class="status" id="status-wrap-${index}">
         <span class="status-dot" id="dot-${index}"></span>
         <span id="status-${index}">Ready</span>
@@ -149,10 +167,8 @@ function createSlot(index, proxy){
     currentOriginalUrl = originalUrl;
     
     // 1. iFrame Load (For Ads/Manual Control)
-    // Load the URL directly in the iFrame (will use YOUR real IP, but loads ads/content)
-    // NOTE: This will fail for YouTube due to CSP, but will load for other less restricted sites.
     iframe.src = originalUrl;
-    setStatus('Loading Content (Your IP)...', false);
+    setStatus('Loading Content...', false);
 
     // 2. cURL Proxy Request (For View Count Increase)
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
@@ -163,17 +179,24 @@ function createSlot(index, proxy){
 
     try {
         // --- REAL PHP/Server Execution (The actual view/request work) ---
+        // Fetch runs the PHP file in the background, which executes cURL via proxy.
+        // We use { mode: 'no-cors' } as the PHP returns HTML content.
         const response = await fetch(proxiedUrl, { mode: 'no-cors' });
-        // Since we use 'no-cors' and the PHP returns the content, we only check the status.
         
-        // Assume success if the fetch completed without a critical network error.
-        // We rely heavily on the PHP code to report errors.
-
-        setStatus('View Sent (200 OK)', true);
+        // Check PHP response status (If PHP couldn't contact the proxy, it will send a non-200 status)
+        if (response.status === 200) {
+            setStatus('View Sent (200 OK)', true);
+        } else {
+            // Read PHP error message if available
+            const errorText = await response.text();
+            setStatus(`Failed (HTTP ${response.status})`, false);
+            console.error(`Slot ${index+1} Proxy Error:`, errorText);
+        }
         
     } catch (e) {
-        // This catches network issues on the client side (rare)
-        setStatus('Failed (Network Error)', false);
+        // This catches critical network issues on the client side 
+        setStatus('Failed (Network Down)', false);
+        console.error(`Slot ${index+1} Critical Error:`, e);
     }
     
     statusDot.style.animation = 'none';
@@ -183,16 +206,15 @@ function createSlot(index, proxy){
   // Event Handlers
   openBtn.addEventListener('click', ()=> {
     if(currentOriginalUrl) {
-      // Allows manual control in a new tab
       window.open(currentOriginalUrl, '_blank');
     } else {
-      alert('पहले ग्लोबल इनपुट में URL पेस्ट करें और लोड करें।');
+      alert('Please paste a URL into the global input field first.');
     }
   });
 
   runBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
-    if(!url){ alert('कृपया पहले URL पेस्ट करें।'); return; }
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
     runAutomation(url); 
   });
   
@@ -211,11 +233,11 @@ for(let i=0;i<10;i++){
 // global actions
 document.getElementById('globalGo').addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
-  if(!url){ alert('कृपया पहले ग्लोबल इनपुट में एक मान्य URL पेस्ट करें।'); return; }
+  if(!url){ alert('Please paste a valid URL into the global input field.'); return; }
   
-  // Load the iFrame content first
+  // Load the iFrame content and start the cURL request for all 10
   slots.forEach(s => {
-    s.runAutomation(url); // This runs iFrame load AND background cURL
+    s.runAutomation(url); 
   });
 });
 </script>
