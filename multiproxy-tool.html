@@ -47,12 +47,11 @@
   .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   
-  /* --- CORRECT IFRAME SCALING FOR PREVIEW --- */
+  /* CORRECT IFRAME SCALING FOR PREVIEW */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
     transform: scale(0.4); 
     transform-origin: 0 0;
-    /* Use calculated size to hold scaled content */
     width: calc(100% / 0.4); 
     height: calc(100% / 0.4); 
     opacity: 1;
@@ -113,16 +112,15 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION - DIRECT PROXIES (MUST BE UPDATED MANUALLY)
+   PROXY DATA and CONFIGURATION - DIRECT PROXIES (UPDATED from latest screenshot)
    ---------------------------------------------------------------------- */
 // Webshare Common Proxy Credentials
-const COMMON_USER = "bqctypvz"; // Common user prefix for all 10
+const COMMON_USER = "bqctypvz"; // Common user for all 10
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; 
 
-// Max 10 unique proxies based on your provided list (Screenshot_2025-10-27-15-16-13-68.jpg)
+// Max 10 unique proxies taken *EXACTLY* from your latest screenshot (Screenshot_2025-10-27-15-16-13-68.jpg)
 const DUMMY_PROXIES = [
-    // IPs are hardcoded - Must be updated if they change on Webshare
     { ip: "142.111.48.253", port: "7030", country: "US" },
     { ip: "31.59.20.176", port: "6756", country: "GB" },
     { ip: "23.95.150.145", port: "6114", country: "US" },
@@ -130,13 +128,14 @@ const DUMMY_PROXIES = [
     { ip: "45.38.107.97", port: "6014", country: "CA" },
     { ip: "107.172.163.27", port: "6543", country: "US" },
     { ip: "64.137.96.74", port: "6641", country: "US" },
-    { ip: "216.10.27.159", port: "6837", country: "CA" },
-    { ip: "142.111.67.146", port: "5011", country: "US" },
+    { ip: "216.10.27.159", port: "6837", country: "US" },
+    { ip: "142.111.67.146", port: "5011", country: "US" }, 
     { ip: "142.147.128.93", port: "6593", country: "CA" }
 ];
 // =========================================================================
 
-const PROXY_ENDPOINT = 'proxy_loader.php'; 
+const IFRAME_PROXY_ENDPOINT = 'proxy_loader.php'; // For visible proxied content
+const SESSION_ENDPOINT = 'session_guarantee.php'; // For background session count (NEW)
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds
 
 const gridContainer = document.getElementById('gridContainer');
@@ -170,6 +169,15 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     name: randomNamesList[index],
     uniqueId: generateUniqueId() 
 }));
+
+
+function getProxiedUrl(originalUrl, proxy, endpoint){
+    return `${endpoint}?` + 
+        `target=${encodeURIComponent(originalUrl)}&` +
+        `ip=${proxy.ip}&port=${proxy.port}&` +
+        `auth=${proxy.auth}&` + 
+        `uid=${proxy.uniqueId}`; 
+}
 
 
 // Function to create a single slot element
@@ -210,34 +218,27 @@ function createSlot(index, proxy){
     statusDot.classList.toggle('active', isActive);
   }
   
-  function getProxiedUrl(originalUrl, proxy){
-      return `${PROXY_ENDPOINT}?` + 
-          `target=${encodeURIComponent(originalUrl)}&` +
-          `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; 
-  }
-
-  // --- Core Automation Function ---
+  // --- Core Automation Function (Split into two steps) ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
-    // 1. iFrame Load (Visible preview)
-    // The content shown here will be based on the browser's own viewport/UA
-    // but the traffic sent below will be Desktop (via PHP cURL)
-    iframe.src = originalUrl;
-    setStatus('Loading Content...', false);
+    const proxiedIframeUrl = getProxiedUrl(originalUrl, proxy, IFRAME_PROXY_ENDPOINT);
+    const proxiedSessionUrl = getProxiedUrl(originalUrl, proxy, SESSION_ENDPOINT);
+    
+    // 1. iFrame Load (Visible proxied preview)
+    iframe.src = proxiedIframeUrl;
+    setStatus('Loading Proxied Desktop View...', false);
 
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    // 2. Trigger the 30s Background Session (The actual view count hit)
+    setStatus('Triggering 30s Session (BG)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for 30s.
-        await fetch(proxiedUrl, { mode: 'no-cors' });
+        // This fetch triggers the session_guarantee.php script to run for 30 seconds
+        await fetch(proxiedSessionUrl, { mode: 'no-cors' });
         
-        setStatus('View Sent (BG Session Active)', true);
+        setStatus('View Sent (30s BG Session Active)', true);
         
     } catch (e) {
         setStatus('Failed (Network/Proxy Error)', false);
