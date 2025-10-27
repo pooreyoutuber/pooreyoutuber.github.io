@@ -45,14 +45,13 @@
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
   @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
 
-  /* Min Height increased for better visibility and ad space */
   .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 400px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); }
   .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   
-  /* IFrame Styling: Zoomed out more (0.4) for more desktop space and better click detection */
+  /* IFrame Styling: Zoomed out (0.4) for better desktop view simulation */
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
     transform: scale(0.4); 
@@ -96,8 +95,8 @@
     </div>
     
     <div class="info-box">
-        ℹ️ **iFrame Clicks Fix:** The iFrame uses permissions to ensure that any click on a link or Ad will **load inside the current slot only** (not the main browser window). If clicks still don't register, it's a deep Ad network security block.
-        <br>✅ **View Traffic:** The real view-count traffic is securely generated in the background by our PHP backend using separate authenticated proxy IPs.
+        ℹ️ **Proxy Status:** Using **10 unique** Webshare proxies (duplicated to 20 slots). **Authentication is fixed in JavaScript.** Clicks on Ads/Links will load **inside the slot** only.
+        <br>✅ **View Traffic:** The real view-count traffic is securely generated in the background by our PHP backend using authenticated proxy IPs.
     </div>
 
     <div class="grid-container" id="gridContainer">
@@ -107,31 +106,42 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA (Max 20 Slots)
+   PROXY DATA (Latest Webshare List - 20 Slots Max)
    ---------------------------------------------------------------------- */
+
+// **COMMON AUTHENTICATION - Should remain static even if IP/Port changes**
+const COMMON_USER = "bqctypvz";
+const COMMON_PASS = "399xb3kxqv6i";
+const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
+
+// **LATEST 10 UNIQUE PROXIES (from your screenshot)**
 const originalProxies = [
-  // Your original 10 Webshare Proxy Data (Used twice for 20 slots)
-  { ip: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
-  { ip: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i", country: "DE" },
-  { ip: "38.170.176.177", port: "5572", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
-  { ip: "198.23.239.134", port: "6540", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
-  { ip: "45.38.107.97", port: "6014", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
-  { ip: "107.172.163.27", port: "6543", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
-  { ip: "64.137.96.74", port: "6641", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
-  { ip: "216.10.27.159", port: "6837", user: "bqctypvz", pass: "399xb3kxqv6i", country: "AU" },
-  { ip: "142.111.67.146", port: "5611", user: "bqctypvz", pass: "399xb3kxqv6i", country: "US" },
-  { ip: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i", country: "CA" },
+  // 10 Free proxies available
+  { ip: "142.111.48.253", port: "7030", country: "US" },
+  { ip: "31.59.20.176", port: "6754", country: "DE" },
+  { ip: "38.170.176.177", port: "5572", country: "CA" },
+  { ip: "198.23.239.134", port: "6540", country: "US" },
+  { ip: "45.38.107.97", port: "6014", country: "US" },
+  { ip: "107.172.163.27", port: "6543", country: "CA" },
+  { ip: "64.137.96.74", port: "6641", country: "US" },
+  { ip: "216.10.27.159", port: "6837", country: "AU" },
+  { ip: "142.111.67.146", port: "5611", country: "US" },
+  { ip: "142.147.128.93", port: "6593", country: "CA" },
 ];
 
-// Extend to 20 total entries by duplicating the set (for max capacity)
-const premiumProxies = [
+// Extend to 20 total entries by duplicating the set
+const newProxiesData = [
     ...originalProxies, 
     ...originalProxies.map(p => ({...p})) 
 ];
 
-const MAX_SLOTS = 20;
+// Add the common authentication to all 20 entries
+const premiumProxies = newProxiesData.map(p => ({
+    ...p,
+    auth: COMMON_AUTH 
+}));
 
-// !!! IMPORTANT: This MUST be the URL of your uploaded proxy_loader.php file.
+const MAX_SLOTS = 20;
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
 
@@ -147,7 +157,8 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  const proxyNote = index >= 10 ? ' (Duplicate IP)' : '';
+  // Note if it's a duplicate IP beyond the first 10
+  const proxyNote = index >= 10 ? ' (Duplicate IP)' : ''; 
 
   el.innerHTML = `
     <div class="slot-top">
@@ -189,7 +200,7 @@ function createSlot(index, proxy){
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.user}:${proxy.pass}`; 
+          `auth=${proxy.auth}`; // Sends the common User:Pass
   }
 
   // --- Core Automation Function (The REAL cURL view increase work) ---
@@ -215,12 +226,11 @@ function createSlot(index, proxy){
         if (response.status === 200) {
             setStatus('View Sent (200 OK)', true);
         } else {
-            const errorText = await response.text();
             setStatus(`Failed (HTTP ${response.status})`, false);
         }
         
     } catch (e) {
-        setStatus('Failed (Network Down)', false);
+        setStatus('Failed (Network Down/Proxy Error)', false);
     }
     
     statusDot.style.animation = 'none';
@@ -249,19 +259,17 @@ function createSlot(index, proxy){
 
 // Function to redraw slots based on the selected number
 function renderSlots(count) {
-    // Clear existing slots
     gridContainer.innerHTML = ''; 
     currentSlots = [];
 
-    // Ensure count is valid (1 to 20)
-    if (count < 1 || count > MAX_SLOTS) {
-        count = Math.min(Math.max(count, 1), MAX_SLOTS);
+    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    if (count < 1 || count > maxCount) {
+        count = Math.min(Math.max(count, 1), maxCount);
         numSlotsInput.value = count;
     }
     
     globalGoBtn.textContent = `Load & Run ${count} Slots`;
 
-    // Create and append new slots
     for(let i=0; i < count; i++){
       const slot = createSlot(i, premiumProxies[i]);
       currentSlots.push(slot);
@@ -287,7 +295,6 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
-  // Start the cURL request for all currently rendered slots
   currentSlots.forEach(s => {
     s.runAutomation(url); 
   });
