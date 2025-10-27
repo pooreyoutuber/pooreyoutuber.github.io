@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Rotating Proxy
+// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Rotating Proxy and Session Guarantee
 
 // 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
@@ -22,10 +22,10 @@ set_time_limit(0);
 
 // --- Capture Parameters ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
-$proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null; // This will be p.webshare.io
-$proxy_port = isset($_GET['port']) ? $_GET['port'] : null; // This will be 80
+$proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null; 
+$proxy_port = isset($_GET['port']) ? $_GET['port'] : null; 
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
-$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // NEW: Capture unique ID
+$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
     exit(); 
@@ -36,7 +36,6 @@ $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
 // --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
-// CRITICAL: We create a unique GA cookie for every hit to register it as a NEW USER.
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
@@ -56,14 +55,13 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HEADER, false);
 
 // --- Proxy Configuration and Authentication ---
-// The rotating IP (p.webshare.io) is used here. It will handle the rotation internally.
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
 // === Active User Timeout ===
-// 30 seconds is necessary for a successful GA4 Session to register and prevent 'Not Set'.
+// 30 seconds is the minimum session time for GA4.
 curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
 
 // Other necessary settings
@@ -75,5 +73,12 @@ curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_exec($ch); 
 
 curl_close($ch);
+
+// === CRITICAL: Add forced delay for user activity simulation ===
+// Sleep for a random time between 10 and 25 seconds AFTER fetching the page.
+// This guarantees the PHP script runs long enough to secure the session count.
+$sleep_time = rand(10, 25);
+sleep($sleep_time); 
+
 exit(); // End the background script
 ?>
