@@ -24,9 +24,7 @@
   /* --- Controls and Input Bar --- */
   .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-  @media (min-width: 600px) { 
-      .input-group { flex-direction: row; }
-  }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
 
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
@@ -38,12 +36,12 @@
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
 
-  /* New Repeat Control */
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
+  .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
   
-  /* Instruction Box */
+  /* Instruction Box (Simple Blue/White) */
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
@@ -113,23 +111,23 @@
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all ${30}s for better GA tracking.
+                Enable **Active User** Mode: Repeat all <span>30s</span> for better GA tracking.
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
-        </div>
+    </div>
     
     <div class="info-box">
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Views (Fast):</strong> Enter URL, select slots, and click 'Load & Run All'. This sends a quick view.
+                <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
-                <strong>Active Users (Best Chance):</strong> Check the **'Enable Active User Mode'** box. The tool will automatically run the views every **30 seconds** (the time needed for a GA session) to increase your active user count. Click **STOP ALL** to end the automation.
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30 seconds (which is the required session time).
             </li>
             <li>
-                <strong>Interaction:</strong> For genuine clicks/testing, use the **'Full View (New Tab)'** button.
+                <strong>Important:</strong> You must use the new **`proxy_loader.php`** (with the Client ID fix and 30s timeout) for this to work correctly.
             </li>
         </ul>
     </div>
@@ -149,6 +147,12 @@ const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+
+// Function to generate a simple unique ID (used for GA4 cookie)
+function generateUniqueId() {
+    // Generates a random 10-digit number string
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
 
 function getRandomNames(count) {
     const shuffled = [...allNames].sort(() => 0.5 - Math.random());
@@ -185,13 +189,15 @@ const repeatModeCheckbox = document.getElementById('repeatMode');
 const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = [];
-let repeatIntervals = []; // Array to hold all setInterval IDs
+let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 
+// Map proxies with fixed unique IDs for consistency within a session
 const premiumProxies = newProxiesData.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
-    name: randomNamesList[index] 
+    name: randomNamesList[index],
+    uniqueId: generateUniqueId() // Generate unique ID for each slot
 }));
 
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds
@@ -238,10 +244,12 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
+      // ADDING the unique ID (uid) to the URL for the PHP script
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}`; 
+          `auth=${proxy.auth}&` + 
+          `uid=${proxy.uniqueId}`; // NEW: Unique ID for GA4
   }
 
   // --- Core Automation Function (The REAL cURL view increase work) ---
@@ -256,11 +264,11 @@ function createSlot(index, proxy){
 
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending Proxy View...', false);
+    setStatus('Sending Proxy View (Active User Fix)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // NOTE: We use the PHP code with the 30s timeout here for maximum effectiveness!
+        // Fetch request is sent. PHP script runs in background for 30s.
         const response = await fetch(proxiedUrl, { mode: 'no-cors' });
         
         if (response.status === 200) {
@@ -294,8 +302,7 @@ function createSlot(index, proxy){
 
   return { 
       runAutomation, 
-      setStatus,
-      automationRunning 
+      setStatus
   }; 
 }
 
@@ -316,7 +323,7 @@ function renderSlots(count) {
       const slot = createSlot(i, premiumProxies[i]);
       currentSlots.push(slot);
     }
-    // Clear any active intervals if slot count changes
+    // Stop any running intervals if the slot count changes
     stopAllAutomation();
 }
 
@@ -369,6 +376,12 @@ numSlotsInput.addEventListener('change', (e) => {
 });
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
 
 // Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
