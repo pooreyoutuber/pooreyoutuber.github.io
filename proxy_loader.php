@@ -1,5 +1,5 @@
 <?php
-// proxy_loader.php - Fetches content via proxy and outputs it as Base64 for iframe to decode and render.
+// proxy_loader.php - Fetches content via proxy, rewrites relative URLs, and outputs as Base64.
 
 // 1. Capture Parameters
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
@@ -8,9 +8,14 @@ $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
-    // Output error message as plain text
     die("Error: Missing proxy parameters.");
 }
+
+// Extract base parts of the target URL for rewriting (e.g., https://example.com)
+$url_parts = parse_url($target_url);
+$base_scheme = isset($url_parts['scheme']) ? $url_parts['scheme'] : 'http';
+$base_host = isset($url_parts['host']) ? $url_parts['host'] : '';
+$base_url = $base_scheme . '://' . $base_host;
 
 // 2. Initialize PHP cURL
 $ch = curl_init();
@@ -31,7 +36,6 @@ $headers = array(
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-// We only need the body content now, no headers
 curl_setopt($ch, CURLOPT_HEADER, false); 
 
 // --- Proxy Configuration and Authentication ---
@@ -48,17 +52,62 @@ curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
 // 3. Execute Proxy Request
 $body = curl_exec($ch);
+curl_close($ch);
 
 if ($body === false) {
     $error_message = curl_error($ch);
-    // Output error message starting with a specific prefix
     $output = "Error: Proxy Load Failure. cURL Error: " . htmlspecialchars($error_message);
 } else {
-    // 4. Base64 Encode the fetched content
+    // 4. URL Rewriting (CRITICAL FIX FOR BROKEN LAYOUT)
+    if (!empty($body)) {
+        // Suppress warnings for broken HTML from external sources
+        libxml_use_internal_errors(true); 
+        $dom = new DOMDocument();
+        // The '@' suppresses a PHP warning if HTML is malformed
+        @$dom->loadHTML($body); 
+        libxml_clear_errors();
+        
+        // Tags to check and the attribute to rewrite (links, images, CSS, JS)
+        $tags = ['a' => 'href', 'img' => 'src', 'link' => 'href', 'script' => 'src'];
+        
+        foreach ($tags as $tag => $attribute) {
+            $elements = $dom->getElementsByTagName($tag);
+            foreach ($elements as $element) {
+                $url = $element->getAttribute($attribute);
+                if (!empty($url)) {
+                    // Check if URL is relative (does not start with http, https, or //)
+                    if (strpos($url, 'http') === false && strpos($url, '//') === false) {
+                        
+                        // Prepend the base URL for paths starting with a slash: /css/style.css -> https://example.com/css/style.css
+                        if (substr($url, 0, 1) == '/') {
+                            $new_url = $base_url . $url;
+                        } else {
+                            // For true relative paths (style.css), we assume they are in the root directory for simplicity here
+                            $new_url = $base_url . '/' . $url;
+                        }
+                        
+                        // Set the rewritten, absolute URL
+                        $element->setAttribute($attribute, $new_url);
+                    }
+                    // For links starting with '//' (protocol-relative), add the scheme
+                     elseif (substr($url, 0, 2) == '//') {
+                        $element->setAttribute($attribute, $base_scheme . ':' . $url);
+                    }
+                    // Absolute links (http/https) are left as is
+                }
+            }
+        }
+        
+        // Attempt to get the modified HTML
+        $modified_body = $dom->saveHTML();
+        if ($modified_body !== false) {
+             $body = $modified_body;
+        }
+    }
+
+    // 5. Base64 Encode the fetched content (with rewritten URLs)
     $output = base64_encode($body);
 }
-
-curl_close($ch);
 
 // Output the Base64 string or error message directly
 header('Content-Type: text/plain'); 
