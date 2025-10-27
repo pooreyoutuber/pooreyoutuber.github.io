@@ -7,24 +7,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- Base Styles and Variables --- */
+  /* --- Base Styles and Variables (Responsive CSS is retained) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
     --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
-    --primary-blue: #0ea5e9;
+    --primary-blue: #0ea5e9;--danger: #dc2626;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
-  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } /* Improved padding for mobile */
+  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
   header { margin-bottom: 20px; text-align: center; }
-  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } /* Smaller font for mobile */
+  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
   .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
   
   /* --- Controls and Input Bar --- */
   .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-  @media (min-width: 600px) { /* Desktop/Tablet: Side-by-side input */
+  @media (min-width: 600px) { 
       .input-group { flex-direction: row; }
   }
 
@@ -35,8 +35,15 @@
   input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
+  .btn.stop { background: var(--danger); }
+  .btn.stop:hover { background: #b91c1c; }
+
+  /* New Repeat Control */
+  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
+  .repeat-control span { color: var(--accent); font-weight: 600; }
   
-  /* Instruction Box (Simple Blue/White) */
+  /* Instruction Box */
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
@@ -102,19 +109,27 @@
             </div>
             <button id="globalGo" class="btn">Load & Run All</button>
         </div>
-    </div>
+        
+        <div class="repeat-control">
+            <input type="checkbox" id="repeatMode" />
+            <label for="repeatMode">
+                Enable **Active User** Mode: Repeat all ${30}s for better GA tracking.
+            </label>
+            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
+        </div>
+        </div>
     
     <div class="info-box">
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Traffic & Views:</strong> Enter your URL and click **'Load & Run All'**. This uses 20 global proxy IPs to send server-side requests, aiming to increase your **Views** and **Active Users** in analytics.
+                <strong>Views (Fast):</strong> Enter URL, select slots, and click 'Load & Run All'. This sends a quick view.
             </li>
             <li>
-                <strong>Interaction:</strong> The small window below is only a preview. For genuine testing, scrolling, and interaction (like clicking Ads), use the **'Full View (New Tab)'** button.
+                <strong>Active Users (Best Chance):</strong> Check the **'Enable Active User Mode'** box. The tool will automatically run the views every **30 seconds** (the time needed for a GA session) to increase your active user count. Click **STOP ALL** to end the automation.
             </li>
             <li>
-                <strong>Dynamic Users:</strong> The user names and IPs change every time the page is refreshed to simulate a fresh set of visitors.
+                <strong>Interaction:</strong> For genuine clicks/testing, use the **'Full View (New Tab)'** button.
             </li>
         </ul>
     </div>
@@ -133,16 +148,13 @@ const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-// Names list is expanded for more variety
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
-// Function to get a unique set of names (20 max)
 function getRandomNames(count) {
     const shuffled = [...allNames].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
 }
 
-// LATEST 10 UNIQUE PROXIES
 const originalProxies = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
@@ -156,7 +168,6 @@ const originalProxies = [
   { ip: "142.147.128.93", port: "6593", country: "CA" },
 ];
 
-// Extend to 20 total entries by duplicating the set
 const newProxiesData = [
     ...originalProxies, 
     ...originalProxies.map(p => ({...p})) 
@@ -170,17 +181,20 @@ const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
+const repeatModeCheckbox = document.getElementById('repeatMode');
+const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = [];
-let randomNamesList = getRandomNames(MAX_SLOTS); // Get names ONCE on page load
+let repeatIntervals = []; // Array to hold all setInterval IDs
+let randomNamesList = getRandomNames(MAX_SLOTS); 
 
-// Add auth and random name to all 20 entries
 const premiumProxies = newProxiesData.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
-    name: randomNamesList[index] // Assign unique name from the new list
+    name: randomNamesList[index] 
 }));
 
+const REPEAT_INTERVAL_MS = 30000; // 30 seconds
 
 // Function to create a single slot element
 function createSlot(index, proxy){
@@ -216,8 +230,6 @@ function createSlot(index, proxy){
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
-
-  let currentOriginalUrl = '';
   let automationRunning = false;
 
   function setStatus(text, isActive = false){
@@ -234,32 +246,31 @@ function createSlot(index, proxy){
 
   // --- Core Automation Function (The REAL cURL view increase work) ---
   async function runAutomation(originalUrl){
-    if(!originalUrl || automationRunning) return;
+    if(!originalUrl) return;
     
     automationRunning = true;
-    currentOriginalUrl = originalUrl;
     
     // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
 
-    // 2. cURL Proxy Request (For View/Active User Count Increase)
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
     setStatus('Sending Proxy View...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
+        // NOTE: We use the PHP code with the 30s timeout here for maximum effectiveness!
         const response = await fetch(proxiedUrl, { mode: 'no-cors' });
         
         if (response.status === 200) {
-            setStatus('View Sent (200 OK)', true);
+            setStatus('View Sent (BG Session Active)', true);
         } else {
             setStatus(`Failed (HTTP ${response.status})`, false);
         }
         
     } catch (e) {
-        setStatus('Failed (Network Down/Proxy Error)', false);
+        setStatus('Failed (Network/Proxy Error)', false);
     }
     
     statusDot.style.animation = 'none';
@@ -281,7 +292,11 @@ function createSlot(index, proxy){
   
   setStatus('Ready', true);
 
-  return { runAutomation }; 
+  return { 
+      runAutomation, 
+      setStatus,
+      automationRunning 
+  }; 
 }
 
 // Function to redraw slots based on the selected number
@@ -301,20 +316,23 @@ function renderSlots(count) {
       const slot = createSlot(i, premiumProxies[i]);
       currentSlots.push(slot);
     }
+    // Clear any active intervals if slot count changes
+    stopAllAutomation();
 }
 
-// Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
+// Global Stop Function
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+    
+    currentSlots.forEach(s => s.setStatus('Ready (Stopped)', true));
+    
+    repeatModeCheckbox.checked = false;
+}
 
-// Event listener for slot number change
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
-    renderSlots(count);
-});
-
-
-// Global Action Button Logic
+// Global Start/Run Logic
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -322,10 +340,38 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
-  currentSlots.forEach(s => {
-    s.runAutomation(url); 
-  });
+  // Run once immediately
+  currentSlots.forEach(s => s.runAutomation(url));
+  
+  // If repeat mode is checked, start intervals
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+      
+    currentSlots.forEach((s, index) => {
+        s.setStatus(`Starting Repeat Mode (${index+1}/${currentSlots.length})...`, false);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in 30s...`, true);
+        }, REPEAT_INTERVAL_MS);
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
 });
+
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
 </html>
