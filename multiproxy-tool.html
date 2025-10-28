@@ -114,7 +114,7 @@
                 <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30 seconds (which is the required session time).
             </li>
             <li>
-                **CRITICAL:** This version is using a **ROTATING PROXY ENDPOINT** (p.webshare.io) to simulate unique IPs for every slot and every request.
+                **CRITICAL:** This version is using a **ROTATING PROXY ENDPOINT** (`p.webshare.io:80`) to simulate unique IPs for every slot and every request. This fixes the '1 Active User' issue.
             </li>
         </ul>
     </div>
@@ -126,10 +126,10 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION - UPDATED FOR ROTATING PROXY
+   PROXY DATA and CONFIGURATION - **UPDATED FOR ROTATING PROXY**
    ---------------------------------------------------------------------- */
 
-// ROTATING PROXY ENDPOINT DETAILS
+// ROTATING PROXY ENDPOINT DETAILS (Webshare credentials)
 const ROTATING_USER = "bqctypvz-rotate"; 
 const ROTATING_PASS = "399xb3kxqv6i";    
 const COMMON_AUTH = `${ROTATING_USER}:${ROTATING_PASS}`;
@@ -138,10 +138,10 @@ const COMMON_AUTH = `${ROTATING_USER}:${ROTATING_PASS}`;
 const ROTATING_ENDPOINT = { 
     ip: "p.webshare.io", 
     port: "80",          
-    country: "GLOBAL",
+    country: "GLOBAL (Webshare)"
 };
 
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
 
 // Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
@@ -179,7 +179,6 @@ for (let i = 0; i < MAX_SLOTS; i++) {
     });
 }
 
-
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds
 
 // Function to create a single slot element
@@ -187,7 +186,7 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
-  // NOTE: Slot IP Display ko 'Rotating' dikhane ke liye update kiya gaya hai
+  // Slot IP Display ko 'Rotating' dikhane ke liye update kiya gaya hai
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
