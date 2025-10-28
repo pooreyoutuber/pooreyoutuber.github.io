@@ -26,6 +26,7 @@ $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null;
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null; 
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
 $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
+$custom_user_agent = isset($_GET['ua']) ? $_GET['ua'] : 'Mozilla/5.0 (Default)'; // NEW: Capture Dynamic User Agent
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
     exit(); 
@@ -36,12 +37,11 @@ $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
 // --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
-// CRITICAL: This cookie ensures a unique session (view count)
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
-    // *** DESKTOP USER AGENT (Simulates Chrome/Mozilla on Desktop) ***
-    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    // *** CRITICAL: Use the dynamic User-Agent from the frontend ***
+    "User-Agent: " . $custom_user_agent, 
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "Accept-Language: en-US,en;q=0.9",
