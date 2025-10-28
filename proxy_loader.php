@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL CONTENT PROXY FIX for Active User & Country View
+// PHP Proxy Loader: proxy_loader.php - FINAL CONTENT PROXY FIX (Header Filtering)
 
 // 1. Setup Execution
 ignore_user_abort(true);
@@ -17,15 +17,11 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
     exit();
 }
 
-// 2. GENERATE SUPER UNIQUE INCÓGNITO DATA
-
-// a) NEW UNIQUE CLIENT ID (Simulating Incognito Mode)
-// A truly unique and random GA4 cookie for every single request.
+// 2. GENERATE UNIQUE DATA (For Incognito Session/Active User)
 $random_id_part1 = (string) (time() - 1600000000) . rand(100, 999);
 $random_id_part2 = (string) rand(1000000000, 9999999999) . rand(1000000000, 9999999999);
 $ga_cookie_value = "GS1.1." . $random_id_part1 . "." . $random_id_part2; 
 
-// b) ROTATING DESKTOP USER AGENT (Force Desktop View)
 $desktop_agents = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
@@ -39,63 +35,67 @@ $final_user_agent = $desktop_agents[array_rand($desktop_agents)];
 $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
-$headers = array(
-    // CRITICAL: Send the rotated User-Agent
+$request_headers = array(
     "User-Agent: " . $final_user_agent,
-    // CRITICAL: Send the fully random cookie (Incognito Mode Fix)
     "Cookie: _ga=" . $ga_cookie_value . ";",
-    // Force the IP address to be the Proxy IP (Some GA installs respect this)
     "X-Forwarded-For: " . $proxy_ip,
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language: en-US,en;q=0.9"
 );
 
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-curl_setopt($ch, CURLOPT_HEADER, false); 
-
-// --- Proxy Configuration and Authentication ---
+curl_setopt($ch, CURLOPT_HEADER, true); // CRITICAL: Headers and content are fetched together
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
-
-// Use a reasonable timeout for page loading
 curl_setopt($ch, CURLOPT_TIMEOUT, 15); 
-
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
 // 4. Execute Proxy Request
-$content = curl_exec($ch);
+$response = curl_exec($ch);
 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 curl_close($ch);
 
-// 5. Output Content to Browser (iFrame)
-if ($content === false || $http_code >= 400) {
-    header('Content-Type: text/html');
-    echo '<html><body><h1>Error: Could not load target URL via proxy.</h1></body></html>';
-} else {
-    // Crucial: Set the content type header so the browser renders the HTML
-    header('Content-Type: text/html');
-    
-    // Ads/Active User Fix: Inject the 30-second session script for guaranteed Active User
-    $injection_script = '
-        <script>
-            // Forces 30s engagement time for GA4.
-            setTimeout(function() {
-                console.log("30-second engagement timer complete. Active session validated.");
-            }, 30000); 
-        </script>
-    ';
-    
-    // Inject the script just before the closing body tag
-    $content = str_ireplace('</body>', $injection_script . '</body>', $content);
+// --- 5. Error & Output Handling ---
 
-    echo $content;
+if ($response === false || $http_code >= 400) {
+    header('Content-Type: text/html');
+    echo '<html><body><h1>Connection Error!</h1><p>Could not load target URL via proxy (HTTP Code: ' . $http_code . '). Check your Proxy IP/Port/Auth.</p></body></html>';
+    exit();
 }
 
+$content = substr($response, $header_size);
+
+// CRITICAL FIX: The PHP script does not echo the security headers (X-Frame-Options, CSP) 
+// that were sent by the target website. This allows the iFrame to load the content.
+
+// Set Content-Type for the browser
+header('Content-Type: text/html');
+
+// Inject the 30-second session script for guaranteed Active User engagement
+$injection_script = '
+    <script>
+        // Forces 30s engagement time for GA4.
+        setTimeout(function() {
+            console.log("30-second engagement timer complete. Active session validated.");
+        }, 30000); 
+    </script>
+';
+
+// Inject the script just before the closing body tag
+$content = str_ireplace('</body>', $injection_script . '</body>', $content, $count);
+
+// Fallback if </body> is not found
+if ($count === 0 && strpos($content, '<html') !== false) {
+    $content .= $injection_script;
+}
+
+echo $content;
 exit();
 ?>
