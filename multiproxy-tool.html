@@ -108,13 +108,13 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                **White Screen Fix:** `proxy_loader.php` अब $\text{सिर्फ}$ **$\text{5}$ $\text{second}$ $\text{का}$ $\text{fast}$ $\text{hit}$** $\text{भेजकर}$ $\text{exit}$ $\text{हो}$ $\text{जाता}$ $\text{है।}$
+                **White Screen Fix:** `proxy_loader.php` $\text{ab}$ $\text{sirf}$ **$\text{5}$ $\text{second}$ $\text{ka}$ $\text{fast}$ $\text{hit}$** $\text{bhejkar}$ $\text{exit}$ $\text{ho}$ $\text{jaata}$ $\text{hai।}$
             </li>
             <li>
-                **Active User Session:** $\text{30}$ $\text{second}$ $\text{का}$ $\text{wait}$ $\text{अब}$ $\text{**JavaScript}$ $\text{($\text{Browser}$) $\text{**}$ $\text{में}$ $\text{चलता}$ $\text{है।}$
+                **Active User Session:** $\text{30}$ $\text{second}$ $\text{ka}$ $\text{wait}$ $\text{ab}$ $\text{**JavaScript}$ $\text{($\text{Browser}$) $\text{**}$ $\text{mein}$ $\text{chalta}$ $\text{hai।}$
             </li>
             <li>
-                **Proxy List:** $\text{Proxyscrape}$ $\text{की}$ $\text{**20}$ $\text{fresh}$ $\text{proxies**}$ $\text{code}$ $\text{में}$ $\text{डाल}$ $\text{दी}$ $\text{गयी}$ $\text{हैं।}$
+                **Proxy List:** $\text{Proxyscrape}$ $\text{ki}$ $\text{**20}$ $\text{fresh}$ $\text{proxies**}$ $\text{code}$ $\text{mein}$ $\text{daal}$ $\text{di}$ $\text{gayi}$ $\text{hain।}$
             </li>
         </ul>
     </div>
@@ -191,7 +191,7 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH, 
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix (User Profile Seed)
+    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
 }));
 
 
@@ -257,43 +257,32 @@ function createSlot(index, proxy){
   // --- Core Automation Function (Fast Hit) ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
-    
-    // REFINEMENT: Add a random cache-buster for the AJAX call
-    const cacheBuster = Math.random().toString(36).substring(2, 7);
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy) + `&cache=${cacheBuster}`;
 
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
     setStatus('Sending Fast Hit...', true);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
-    runBtn.disabled = true; // Disable button during run
 
     try {
         const response = await fetch(proxiedUrl);
         const result = await response.text();
         
-        if (result.includes('ERROR') || result.includes('cURL ERROR')) {
-             setStatus(`HIT FAIL: ${result.substring(0, 100)}...`, false);
-             statusDot.style.animation = 'none';
+        if (result.includes('ERROR')) {
+             setStatus(`PHP Error: ${result.substring(0, 50)}...`, false);
         } else {
              // Response is quick now (no background wait)
              setStatus('Hit Sent. 30s Session Wait Running...', true);
         }
         
     } catch (e) {
-        setStatus('Session Fail (Network/Proxy Error - JS Fetch)', false);
-        statusDot.style.animation = 'none';
-    } finally {
-        runBtn.disabled = false; // Re-enable button after fetch (or fail)
+        setStatus('Session Fail (Network/Proxy Error)', false);
     }
     
     // 2. JavaScript handles the 30-second session wait
     setTimeout(() => {
-         // Only update status if the slot is still considered 'Running'
-         if (statusSpan.textContent.includes('Session Wait Running')) {
-            setStatus('Session Complete. Ready to Repeat.', false);
-            statusDot.style.animation = 'none';
-         }
-    }, REPEAT_INTERVAL_MS + 3000); // 33 seconds wait to ensure GA session counts and network latency
+         setStatus('Session Complete. Ready to Repeat.', true);
+         statusDot.style.animation = 'none';
+    }, REPEAT_INTERVAL_MS + 2000); // 32 seconds wait to ensure GA session counts
   }
   
   // Event Handlers
@@ -309,7 +298,7 @@ function createSlot(index, proxy){
     runAutomation(url); 
   });
   
-  setStatus('Ready', false); // Start in a non-active state
+  setStatus('Ready', true);
 
   return { 
       runAutomation, 
@@ -349,7 +338,7 @@ function stopAllAutomation() {
     
     currentSlots.forEach(s => s.stopAutomation());
     
-    // Do NOT automatically uncheck repeatMode, as the user might want to stop/start quickly
+    repeatModeCheckbox.checked = false;
 }
 
 // Global Start/Run Logic with Random Delay (CRITICAL for Anti-Filtering)
@@ -364,7 +353,6 @@ globalGoBtn.addEventListener('click', ()=>{
   globalStopBtn.style.display = 'block';
 
   let delay = 0;
-  // Clear any existing intervals before starting new ones
   repeatIntervals.forEach(intervalId => clearInterval(intervalId)); 
   repeatIntervals = [];
 
@@ -380,7 +368,6 @@ globalGoBtn.addEventListener('click', ()=>{
 
           // 2. If Repeat Mode is On, set up the interval AFTER the initial run
           if (repeatModeCheckbox.checked) {
-              // The interval runs after the initial delay + the repeat interval (30s)
               const intervalId = setInterval(() => {
                   s.runAutomation(url);
                   s.setStatus(`Repeat Running. Next in 30s...`, true);
@@ -395,11 +382,10 @@ globalGoBtn.addEventListener('click', ()=>{
   // Handle button visibility if repeat mode is OFF
   if (!repeatModeCheckbox.checked) {
       // Wait for the last request to finish + the session duration before showing the GO button again
-      // Total wait = Last slot's start time (delay) + PHP timeout (5s) + JS session wait (33s)
       setTimeout(() => {
           globalGoBtn.style.display = 'block';
           globalStopBtn.style.display = 'none';
-      }, delay + REPEAT_INTERVAL_MS + 5000); // 5s buffer
+      }, delay + REPEAT_INTERVAL_MS + 2000); 
   }
 });
 
@@ -412,8 +398,8 @@ numSlotsInput.addEventListener('change', (e) => {
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
-    // If the tool is running (globalStopBtn is visible) and user unchecks repeat, stop everything.
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        // If repeat is unchecked while running, stop everything
         stopAllAutomation();
     }
 });
