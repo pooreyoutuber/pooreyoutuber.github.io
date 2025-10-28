@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Active User Tracking (GA4 Fix)
+// PHP Proxy Loader: proxy_loader.php - ULTIMATE GA4 Active User FIX with X-Forwarded-For
 
 // 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
@@ -25,7 +25,7 @@ $target_url = isset($_GET['target']) ? $_GET['target'] : null;
 $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null;
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
-$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // NEW: Capture unique ID
+$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
     exit(); 
@@ -35,14 +35,16 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
 $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
-// --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
-// CRITICAL: We create a unique GA cookie for every hit to register it as a NEW USER.
+// --- CRITICAL GA4 FIXES ---
+// 1. Unique Cookie (Active User Fix)
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
-    // Real-world User-Agent (Essential for not getting flagged)
+    // 2. CRITICAL FIX: X-Forwarded-For header to mask the bot IP source
+    "X-Forwarded-For: " . $proxy_ip,
+    // 3. Real-world User-Agent 
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
-    // CRITICAL: Send the unique cookie
+    // 4. Send the unique cookie
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "Accept-Language: en-US,en;q=0.9"
