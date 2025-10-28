@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
+  /* --- CSS Styles --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -23,10 +23,11 @@
   .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   @media (min-width: 600px) { .input-group { flex-direction: row; } }
-  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  .url-input-wrap, .proxy-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
   .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  input[type="url"], textarea { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  textarea { min-height: 80px; border-radius: 10px; border-left: 1px solid var(--border); }
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
@@ -72,6 +73,7 @@
   .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+  .proxy-input-label { font-weight: 600; color: var(--accent); margin-bottom: 5px; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -95,26 +97,28 @@
             <button id="globalGo" class="btn">Load & Run All</button>
         </div>
         
+        <div class="proxy-input-wrap" style="display: block; width: 100%; box-shadow: none;">
+            <label class="proxy-input-label" for="proxyListInput">Paste **UNIQUE PROXIES** here (Format: IP:PORT:USER:PASS, one per line):</label>
+            <textarea id="proxyListInput" placeholder="Paste your 10 unique proxies here. Example:&#10;142.111.48.253:7030:bqctypvz:399xb3kxqv6i&#10;31.59.20.176:6754:bqctypvz:399xb3kxqv6i&#10;..." style="border-radius: 10px;"></textarea>
+        </div>
+        
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all <span>30s</span> for better GA tracking.
+                Enable **Rotation Mode** (Active User Fix): Repeat all <span>30s</span> with **new proxies** from the list.
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
     <div class="info-box">
-        <strong>Tool Usage Instructions:</strong>
+        <strong>Tool Status: Dynamic Proxy Fix Applied</strong>
         <ul>
             <li>
-                **Final Code Fix:** This tool now uses **10 unique static proxy IPs** and sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as 10 new users.
+                **New Logic:** Proxies are now taken from the text box and **rotated** on every 'Run' or **30-second cycle**.
             </li>
             <li>
-                **Action:** Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30 seconds (the required session time for GA4).
-            </li>
-            <li>
-                **IMPORTANT:** If Active Users still show 1, the problem is your **hosting server blocking** these Datacenter Proxy IPs. The code logic is 100% correct.
+                **Active User Fix:** The PHP script sends a **unique Client ID** and the **`X-Forwarded-For`** header to maximize the chance of getting a unique Active User count.
             </li>
         </ul>
     </div>
@@ -126,80 +130,90 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION - 10 UNIQUE STATIC PROXIES
+   PROXY DATA and CONFIGURATION - Dynamic Loading
    ---------------------------------------------------------------------- */
 
-const COMMON_USER = "bqctypvz";
-const COMMON_PASS = "399xb3kxqv6i";
-const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
-
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
-
-// Function to generate a simple unique ID (used for GA4 cookie)
-function generateUniqueId() {
-    // Generates a random 10-digit number string
-    return Math.floor(Math.random() * 9000000000) + 1000000000;
-}
-
-function getRandomNames(count) {
-    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-}
-
-// =========================================================================
-// !!! 10 UNIQUE STATIC PROXIES INTEGRATED from Webshare 10 proxies (2).txt !!!
-// =========================================================================
-const UNIQUE_STATIC_PROXIES = [
-  { ip: "142.111.48.253", port: "7030", country: "US" },
-  { ip: "31.59.20.176", port: "6754", country: "DE" },
-  { ip: "23.95.150.145", port: "6114", country: "CA" },
-  { ip: "198.23.239.134", port: "6540", country: "US" },
-  { ip: "45.38.107.97", port: "6014", country: "US" },
-  { ip: "107.172.163.27", port: "6543", country: "CA" },
-  { ip: "64.137.96.74", port: "6641", country: "US" },
-  { ip: "216.10.27.159", port: "6837", country: "AU" },
-  { ip: "142.111.67.146", port: "5611", country: "US" },
-  { ip: "142.147.128.93", port: "6593", country: "CA" },
-];
-// =========================================================================
-
-const MAX_SLOTS = 10;
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
+const MAX_SLOTS = 10;
+const REPEAT_INTERVAL_MS = 30000; // 30 seconds
 
+// DOM Elements
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
 const globalStopBtn = document.getElementById('globalStop');
+const proxyListInput = document.getElementById('proxyListInput');
 
 let currentSlots = [];
 let repeatIntervals = []; 
-let randomNamesList = getRandomNames(MAX_SLOTS); 
+let availableProxies = [];
+let proxyIndex = 0;
 
-// Map proxies with fixed unique IDs
-const premiumProxies = UNIQUE_STATIC_PROXIES.map((p, index) => ({
-    ...p,
-    auth: COMMON_AUTH,
-    name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
-}));
+// Set default proxies from your Webshare list
+proxyListInput.value = `142.111.48.253:7030:bqctypvz:399xb3kxqv6i
+31.59.20.176:6754:bqctypvz:399xb3kxqv6i
+23.95.150.145:6114:bqctypvz:399xb3kxqv6i
+198.23.239.134:6540:bqctypvz:399xb3kxqv6i
+45.38.107.97:6014:bqctypvz:399xb3kxqv6i
+107.172.163.27:6543:bqctypvz:399xb3kxqv6i
+64.137.96.74:6641:bqctypvz:399xb3kxqv6i
+216.10.27.159:6837:bqctypvz:399xb3kxqv6i
+142.111.67.146:5611:bqctypvz:399xb3kxqv6i
+142.147.128.93:6593:bqctypvz:399xb3kxqv6i`;
 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds
+// --- Utility Functions ---
 
-// Function to create a single slot element
-function createSlot(index, proxy){
+function generateUniqueId() {
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
+
+function parseProxies() {
+    const list = proxyListInput.value.trim().split('\n').filter(line => line.trim() !== '');
+    if (list.length === 0) {
+        alert("Please paste at least one proxy in the list (IP:PORT:USER:PASS).");
+        return [];
+    }
+
+    // Parse and map each line to a proxy object with unique ID
+    return list.map(line => {
+        const parts = line.split(':');
+        if (parts.length === 4) {
+            return {
+                ip: parts[0],
+                port: parts[1],
+                auth: `${parts[2]}:${parts[3]}`,
+                name: allNames[Math.floor(Math.random() * allNames.length)],
+                country: 'Unknown', // Country info is not in the format, setting to Unknown
+                uniqueId: generateUniqueId() 
+            };
+        }
+        return null;
+    }).filter(p => p !== null);
+}
+
+function getNextProxy() {
+    if (availableProxies.length === 0) return null;
+    const proxy = availableProxies[proxyIndex % availableProxies.length];
+    proxyIndex++; // Increment index for the next rotation
+    return proxy;
+}
+
+// Function to create a single slot element (HTML structure remains same)
+function createSlot(index){
   const el = document.createElement('div');
   el.className = 'slot';
   
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
+      <div class="slot-title" id="slot-title-${index}">SLOT ${index+1}: Ready</div>
+      <div class="slot-ip-display" id="slot-ip-display-${index}">Proxy IP: N/A</div>
     </div>
     
     <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
     </div>
     
     <div class="slot-footer">
@@ -219,12 +233,27 @@ function createSlot(index, proxy){
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
+  const titleDiv = el.querySelector(`#slot-title-${index}`);
+  const ipDiv = el.querySelector(`#slot-ip-display-${index}`);
+  
+  // Slot-specific state
+  let currentProxy = null;
 
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
     statusDot.classList.toggle('active', isActive);
   }
   
+  function updateProxyDisplay(proxy) {
+    if (proxy) {
+        titleDiv.textContent = `SLOT ${index+1}: ${proxy.name} (${proxy.country})`;
+        ipDiv.textContent = `Proxy IP: ${proxy.ip}:${proxy.port}`;
+    } else {
+        titleDiv.textContent = `SLOT ${index+1}: No Proxy`;
+        ipDiv.textContent = `Proxy IP: N/A`;
+    }
+  }
+
   function getProxiedUrl(originalUrl, proxy){
       // Sending the Unique ID (uid) to the PHP script
       return `${PROXY_ENDPOINT}?` + 
@@ -235,20 +264,32 @@ function createSlot(index, proxy){
   }
 
   // --- Core Automation Function ---
-  async function runAutomation(originalUrl){
+  async function runAutomation(originalUrl, useRotation = false){
     if(!originalUrl) return;
     
+    // Get new proxy only if rotation is requested
+    const proxyToUse = useRotation ? getNextProxy() : currentProxy;
+    
+    if (!proxyToUse) {
+        setStatus('Error: No proxy available!', false);
+        return;
+    }
+    
+    currentProxy = proxyToUse; // Update the slot's current proxy
+    updateProxyDisplay(currentProxy); // Update IP in the display
+
     // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
 
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+    const proxiedUrl = getProxiedUrl(originalUrl, proxyToUse);
 
     setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
         // Fetch request is sent. PHP script runs in background for 30s.
+        // It's a fire-and-forget request.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         // Response is quick due to Connection: close header in PHP
@@ -271,14 +312,24 @@ function createSlot(index, proxy){
   runBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
     if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    runAutomation(url); 
+    
+    // For single click, use the current proxy or get next if none set
+    const proxy = currentProxy || getNextProxy();
+    if (proxy) {
+        runAutomation(url, false);
+    } else {
+        alert("No proxies loaded. Check the list.");
+    }
   });
   
+  // Initial display setup
+  updateProxyDisplay(null);
   setStatus('Ready', true);
 
   return { 
       runAutomation, 
-      setStatus
+      setStatus,
+      updateProxyDisplay
   }; 
 }
 
@@ -287,8 +338,7 @@ function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
 
-    // Ensure count does not exceed the available unique proxies (10)
-    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    const maxCount = Math.min(MAX_SLOTS, 100); // Allow up to 100 slots for flexibility
     if (count < 1 || count > maxCount) {
         count = Math.min(Math.max(count, 1), maxCount);
         numSlotsInput.value = count;
@@ -297,7 +347,7 @@ function renderSlots(count) {
     globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
 
     for(let i=0; i < count; i++){
-      const slot = createSlot(i, premiumProxies[i]);
+      const slot = createSlot(i);
       currentSlots.push(slot);
     }
     stopAllAutomation();
@@ -318,25 +368,34 @@ function stopAllAutomation() {
 // Global Start/Run Logic
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
+  availableProxies = parseProxies(); // Parse proxies on every run
+
   if(!url){ 
       alert('Please paste a valid URL into the global input field.'); 
       return; 
   }
+  if (availableProxies.length === 0) {
+      alert("Proxy list is empty or incorrectly formatted (IP:PORT:USER:PASS).");
+      return;
+  }
   
-  // Run once immediately
-  currentSlots.forEach(s => s.runAutomation(url));
+  proxyIndex = 0; // Reset index for a fresh run
+  
+  // Run once immediately, using rotation logic
+  currentSlots.forEach(s => s.runAutomation(url, true));
   
   // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
       
-    currentSlots.forEach((s) => {
-        s.setStatus(`Starting Repeat Mode (30s cycle)...`, true);
+    currentSlots.forEach((s, index) => {
+        s.setStatus(`Starting Rotation Mode (30s cycle)...`, true);
         
         const intervalId = setInterval(() => {
-            s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in 30s...`, true);
+            // Force rotation on every interval
+            s.runAutomation(url, true); 
+            s.setStatus(`Rotation Running. Next in 30s...`, true);
         }, REPEAT_INTERVAL_MS);
         
         repeatIntervals.push(intervalId);
