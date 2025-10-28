@@ -1,7 +1,8 @@
-<?php
-// PHP Proxy Loader: proxy_loader.php - FINAL FIX for Active User & Country View
 
-// 1. Tell the browser/client to disconnect immediately
+<?php
+// PHP Proxy Loader: proxy_loader.php - ULTIMATE FIX for Active User & Country View via cURL
+
+// 1. Client Disconnect (Client-side speed fix)
 header("Connection: close");
 header("Content-Encoding: none");
 header("Content-Length: 1"); 
@@ -22,8 +23,6 @@ $target_url = isset($_GET['target']) ? $_GET['target'] : null;
 $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null;
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
-// We don't use the unique_id from HTML anymore; we generate it fully randomly here.
-// $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
     exit();
@@ -32,7 +31,7 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
 // 3. GENERATE SUPER UNIQUE INCÓGNITO DATA
 
 // a) NEW UNIQUE CLIENT ID (Simulating Incognito Mode)
-// A truly unique and random GA4 cookie for every single request.
+// A random GA4 cookie for every single request.
 $random_id_part1 = (string) (time() - 1600000000) . rand(100, 999);
 $random_id_part2 = (string) rand(1000000000, 9999999999) . rand(1000000000, 9999999999);
 $ga_cookie_value = "GS1.1." . $random_id_part1 . "." . $random_id_part2; 
@@ -83,5 +82,5 @@ curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 // 5. Execute Proxy Request
 curl_exec($ch);
 curl_close($ch);
-exit(); // End the background script
+exit(); 
 ?>
