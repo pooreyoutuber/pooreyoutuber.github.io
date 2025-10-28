@@ -1,11 +1,12 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Description & Tags Generator</title>
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsense.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
+        crossorigin="anonymous"></script>
 
     <style>
         /* ================================================= */
@@ -68,7 +69,7 @@
         .container {
             margin-top: 30px;
             width: 90%;
-            max-width: 800px; 
+            max-width: 800px;
             background: var(--container-bg);
             padding: 30px;
             border-radius: 12px;
@@ -76,10 +77,17 @@
             transition: background 0.3s, box-shadow 0.3s;
         }
         
+        /* Ad Container CSS for Centering */
+        .ad-container {
+            margin: 25px auto;
+            text-align: center;
+            max-width: 728px; 
+        }
+
         /* Input and Button Group Styling */
         .input-group {
             display: flex;
-            margin-bottom: 25px; 
+            margin-bottom: 25px;
         }
         input[type="text"] {
             flex-grow: 1;
@@ -93,7 +101,7 @@
             transition: background 0.3s, color 0.3s, border-color 0.3s;
         }
         button.generate-btn {
-            background: var(--blue-accent); 
+            background: var(--blue-accent);
             color: white;
             padding: 12px 20px;
             border: none;
@@ -108,44 +116,75 @@
             background: var(--blue-accent-hover);
         }
 
+        /* Results Styling */
+        .result {
+            padding-top: 20px;
+        }
+        .video-card {
+            background: var(--container-bg);
+            border: 1px solid var(--input-border);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .video-card h3 {
+            color: var(--header-bg); /* YouTube Red */
+            margin-top: 0;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed var(--input-border);
+        }
+        .video-card p {
+            color: var(--secondary-text-color);
+            margin-bottom: 10px;
+        }
+        .tags {
+            color: var(--blue-accent);
+            font-size: 0.9em;
+        }
+        .copy-btn {
+            background: var(--green-accent);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background: var(--blue-accent-hover);
+        }
+
         /* Utility Explanation Section */
         .utility-explanation {
-            background-color: var(--explanation-bg); 
-            border: 1px solid var(--input-border); 
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: var(--explanation-bg);
+            border: 1px solid var(--input-border);
             color: var(--secondary-text-color);
             transition: background 0.3s, border-color 0.3s;
         }
         .utility-explanation h2 {
             color: var(--blue-accent);
             border-bottom: 2px solid var(--blue-accent);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
         }
         .utility-explanation p, .utility-explanation ul {
             color: var(--secondary-text-color);
+            line-height: 1.6;
+            margin-bottom: 15px;
         }
         .utility-explanation strong {
             color: var(--text-color);
         }
 
-        /* Results Styling */
-        .video-card {
-            background: var(--container-bg);
-            border: 1px solid var(--input-border);
-        }
-        .video-card h3 {
-            color: var(--header-bg); /* YouTube Red */
-        }
-        .video-card p {
-            color: var(--secondary-text-color);
-        }
-        .tags {
-            color: var(--blue-accent);
-        }
-        .copy-btn {
-            background: var(--green-accent); 
-        }
-        .copy-btn:hover {
-            background: var(--blue-accent-hover);
-        }
 
         /* ================================================= */
         /* 3. MOBILE RESPONSIVENESS FIX */
@@ -176,19 +215,15 @@
                 padding: 15px 20px;
             }
 
-            .utility-explanation {
+            .utility-explanation, .video-card {
                 padding: 15px;
             }
             
-            .video-card {
-                padding: 15px;
-            }
             .copy-btn {
-                position: static; /* Move button below content */
                 display: block;
                 width: 100%;
-                margin-top: 10px;
-                padding: 10px;
+                margin-top: 15px;
+                padding: 12px;
             }
         }
     </style>
@@ -199,12 +234,36 @@
 
 <div class="container">
     
+    <div class="ad-container">
+        <ins class="adsbygoogle"
+            style="display:block; text-align:center;"
+            data-ad-layout="in-article"
+            data-ad-format="fluid"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="7192383903"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    
     <div id="input-section" class="input-group">
         <input type="text" id="videoTitle" placeholder="Enter Video Title (e.g., 'Easy Chicken Curry Recipe in 20 Mins')">
         <button class="generate-btn" onclick="generate()">Generate SEO Content</button>
     </div>
 
     <div class="result" id="output"></div>
+    
+    <div class="ad-container" id="ad-after-results" style="display: none;">
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-format="fluid"
+            data-ad-layout-key="-fb+5w+4e-db+86"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="4343214500"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
     
     <div id="explanation-section" class="utility-explanation">
         <h2>🚀 Unlock Your Video's Potential: How This Tool Helps You Grow</h2>
@@ -231,49 +290,117 @@
         
         <p><strong>Ready to start?</strong> Enter your video title above and click **"Generate"** to receive multiple, SEO-ready content options now!</p>
     </div>
+
+    <div class="ad-container">
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="9818547241"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
 </div>
 
 <script>
+// Array of unique description intros and call-to-actions for variety
+const intros = [
+    "🔥 Breaking News! Today, we're diving deep into the topic of:",
+    "💡 Hey everyone! In this detailed guide, we are covering:",
+    "🎬 Welcome back! Get ready to learn all about:",
+    "❓ Ever wonder how to master the art of:",
+    "✅ Check out this ultimate video on:",
+    "🤯 You won't believe how easy it is to learn:",
+    "🙌 Join us as we simplify the process of:",
+    "⭐ This is the definitive tutorial for:",
+    "👋 What's up, fam! We're here to talk about:",
+    "🚀 Level up your skills with this deep dive into:"
+];
+
+const ctas = [
+    "Don't forget to hit the LIKE button and SUBSCRIBE for more amazing content!",
+    "If this video helped you, share it with a friend who needs it!",
+    "Let me know your thoughts or questions in the comments below!",
+    "Click the notification bell so you don't miss our next video!",
+    "What topic should we cover next? Comment and tell us!",
+    "Subscribe now and join the community!",
+    "Give this video a huge thumbs up if you found it useful!",
+    "We drop new videos every week, make sure you're subscribed!",
+    "For the best tips, watch the entire video till the end!",
+    "Your support helps us create more free tutorials like this!"
+];
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+
 function generate() {
     const title = document.getElementById("videoTitle").value.trim();
     const output = document.getElementById("output");
     const container = document.querySelector('.container');
     const explanationSection = document.getElementById('explanation-section');
+    const adAfterResults = document.getElementById('ad-after-results'); 
     output.innerHTML = "";
+    adAfterResults.style.display = "none"; 
 
     if (!title) {
-        output.innerHTML = "<p class='error' style='color: var(--youtube-red); background: var(--explanation-bg); padding: 10px; border-radius: 5px; border: 1px solid var(--input-border);'>⚠️ Please enter a video title to start content generation!</p>";
-        // Ensure explanation section remains visible if no title is entered
+        output.innerHTML = "<p class='error' style='color: var(--header-bg); background: var(--explanation-bg); padding: 10px; border-radius: 5px; border: 1px solid var(--input-border);'>⚠️ Please enter a video title to start content generation!</p>";
         if (!container.contains(explanationSection)) {
             container.appendChild(explanationSection);
         }
         return;
     }
 
-    // 1. Move Explanation Section BELOW the Output/Results
+    // 1. Explanation Section ko Output ke neeche le aayen
     if (explanationSection && container.contains(explanationSection)) {
         container.appendChild(explanationSection);
     }
 
-    // --- AI-like generation logic (Mockup) ---
-    const baseTags = ["Tutorial", "Guide", "Tips", "Tricks", "Unboxing", "Vlog", "Review", "HowTo"]; 
-    const titleWords = title.toLowerCase().split(/\s+/).filter(word => word.length > 2 && !["a", "an", "the", "in", "for", "with", "is"].includes(word));
-    
+    // --- UPDATED AI-like generation logic ---
+    const baseTags = ["Tutorial", "Guide", "Tips", "Tricks", "Review", "HowTo", "Vlog", "DIY", "Unboxing", "SEO"]; 
+    const titleWords = title.toLowerCase().split(/\s+/).filter(word => word.length > 2 && !["a", "an", "the", "in", "for", "with", "is", "of", "and"].includes(word));
+    const mainKeyword = titleWords.length > 0 ? titleWords[0] : title; // Main Keyword
+
     const results = [];
-    for (let i = 1; i <= 10; i++) {
-        // Dynamic description structure
-        const description = 
-            `Description Option ${i}: Hey everyone! Today's video is all about **"${title}"**. We'll show you the complete step-by-step process and share some valuable insights we learned along the way. This guide is perfect for anyone looking to ${titleWords.slice(0, 2).join(' ')}. If you found this helpful, please give it a thumbs up and subscribe! Share your thoughts in the comments below!\n\n---\n*Time Stamps Placeholder*\n*Links to your Socials & Products*`;
+    const shuffledIntros = shuffleArray([...intros]);
+    const shuffledCtas = shuffleArray([...ctas]);
+
+    for (let i = 0; i < 10; i++) {
+        const intro = shuffledIntros[i % shuffledIntros.length];
+        const cta = shuffledCtas[i % shuffledCtas.length];
+
+        // Dynamic description structure with more variety
+        const description =
+            `${intro} **"${title}"**.\n\n` +
+            `In this video, we'll cover the ${i % 2 === 0 ? 'essential steps' : 'pro secrets'} to mastering ${mainKeyword}. Whether you're a beginner or an expert, this guide has something for everyone. This topic is crucial for anyone looking to ${titleWords.slice(0, 2).join(' ')}.\n\n` +
+            `🔗 **Useful Links:**\n- [Your Website Link]\n- [Previous Related Video Link]\n\n` +
+            `🔔 ${cta}\n\n` +
+            `---\n` +
+            `*Time Stamps Placeholder*`;
         
-        // Dynamic tags generation 
-        let generatedTags = [...new Set([title, ...titleWords, ...baseTags.slice(0, 5), "SEO", "YouTubeTips"])];
+        // Dynamic tags generation with more randomness and relevance
+        let generatedTags = new Set([title, mainKeyword, `${mainKeyword} tutorial`, `${mainKeyword} ${new Date().getFullYear()}`]);
         
-        if (i % 2 === 0) generatedTags.push(new Date().getFullYear().toString()); 
-        if (i % 3 === 0) generatedTags.push(titleWords[0] ? `${titleWords[0]} guide` : 'new video');
+        // Add 3 random relevant words from the title
+        shuffleArray(titleWords).slice(0, 3).forEach(tag => generatedTags.add(tag));
         
-        results.push({ description, tags: generatedTags });
+        // Add 3 random base tags
+        shuffleArray(baseTags).slice(0, 3).forEach(tag => generatedTags.add(tag));
+
+        // Add broad and long-tail tags for more reach
+        if (i % 3 === 0) generatedTags.add(`${mainKeyword} tips and tricks`);
+        if (i % 4 === 0) generatedTags.add(`how to get ${mainKeyword}`);
+        
+        results.push({ description, tags: [...generatedTags] });
     }
-    // --- AI-like generation logic ends here ---
+    // --- UPDATED AI-like generation logic ends here ---
 
 
     // 2. Display results (Output)
@@ -291,6 +418,12 @@ function generate() {
         </div>`;
     });
     output.innerHTML = html;
+
+    // 3. Ad ko visible karna
+    adAfterResults.style.display = "block";
+    
+    // Optional: Scroll to the result section
+    output.scrollIntoView({ behavior: 'smooth' });
 }
 
 // Copy function
@@ -304,22 +437,22 @@ function copyText(desc, tags) {
     alert("Description & Tags Copied to Clipboard!");
 }
 
-    // ==========================================================
-    // 4. DARK MODE PERSISTENCE LOGIC (The fix for your problem)
-    // ==========================================================
-    const body = document.body;
-    
-    function applyThemeFromLocalStorage() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
-        } else {
-            body.classList.remove('dark-mode');
-        }
+// DARK MODE PERSISTENCE LOGIC
+const body = document.body;
+function applyThemeFromLocalStorage() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        body.classList.add('dark-mode');
+    } else {
+        body.classList.remove('dark-mode');
     }
+}
 
-    // पेज लोड होते ही थीम लागू करें
-    document.addEventListener('DOMContentLoaded', applyThemeFromLocalStorage);
+document.addEventListener('DOMContentLoaded', () => {
+    // Ad after results should be hidden on initial load
+    document.getElementById('ad-after-results').style.display = "none";
+    applyThemeFromLocalStorage();
+});
 </script>
 
 </body>
