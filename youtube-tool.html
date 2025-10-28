@@ -372,10 +372,10 @@ function generate() {
         container.appendChild(explanationSection);
     }
 
-    // --- UPDATED AI-like generation logic with LONGER Descriptions ---
+    // --- UPDATED AI-like generation logic with SHORTER Descriptions (No Timestamps) ---
     const baseTags = ["Tutorial", "Guide", "Tips", "Tricks", "Review", "HowTo", "Vlog", "DIY", "Unboxing", "SEO", "2024"]; 
     const titleWords = title.toLowerCase().split(/\s+/).filter(word => word.length > 2 && !["a", "an", "the", "in", "for", "with", "is", "of", "and"].includes(word));
-    const mainKeyword = titleWords.length > 0 ? titleWords[0] : title; // Main Keyword
+    const mainKeyword = titleWords.length > 0 ? titleWords[0] : title.split(/\s+/)[0]; // Main Keyword
 
     const results = [];
     
@@ -389,30 +389,20 @@ function generate() {
         const cta = shuffledCtas[i % shuffledCtas.length];
         const body_para = shuffledBody[i % shuffledBody.length]; // Use a unique body paragraph
 
-        // Dynamic description structure with more detail (Multiple paragraphs and sections)
+        // Dynamic description structure with shorter content
         const description =
             // 1. Hook/Intro (First line is crucial for YouTube)
             `${intro} **"${title}"**.\n\n` +
             
-            // 2. Detailed Body/Summary Paragraph
+            // 2. Detailed Body/Summary Paragraph (Main Content)
             `${body_para.replace('mainKeyword', mainKeyword)}\n\n` + 
             
-            // 3. Time Stamps (SEO benefit and user experience)
-            `--- **Time Stamps (Jump to section)** ---\n` +
-            `0:00 - Introduction & Hook\n` +
-            `1:30 - Key Point 1: ${mainKeyword}\n` +
-            `4:00 - Step 2: Advanced ${titleWords.slice(1, 2).join(' ')}\n` +
-            `7:15 - Tips & Mistakes to Avoid\n` +
-            `9:45 - Conclusion & Final Thoughts\n\n` +
-            
-            // 4. Social & Call-to-Action Section
+            // 3. Social & Call-to-Action Section (Condensed)
             `--- **Connect with us!** ---\n` +
             `🔔 ${cta}\n` +
-            `🔗 Subscribe Here: [Your Subscription Link]\n` +
-            `📸 Instagram: [Your Instagram Link]\n` +
-            `🌐 Official Website: [Your Website Link]\n\n` +
+            `🔗 Subscribe: [Your Link] | 📸 Insta: [Your Link] | 🌐 Website: [Your Link]\n\n` +
             
-            // 5. Relevant Keywords (Long-tail SEO at the end)
+            // 4. Relevant Keywords (Long-tail SEO at the end)
             `#${mainKeyword} #${titleWords.slice(0, 2).join('')}Tutorial #VideoGuide #${baseTags[i % baseTags.length]}`;
         
         // Dynamic tags generation with more randomness and relevance
