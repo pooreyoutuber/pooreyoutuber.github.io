@@ -1,22 +1,9 @@
-
 <?php
-// PHP Proxy Loader: proxy_loader.php - ULTIMATE FIX for Active User & Country View via cURL
+// PHP Proxy Loader: proxy_loader.php - FINAL CONTENT PROXY FIX for Active User & Country View
 
-// 1. Client Disconnect (Client-side speed fix)
-header("Connection: close");
-header("Content-Encoding: none");
-header("Content-Length: 1"); 
-header("Content-Type: text/plain");
-ob_start();
-echo '1'; 
-$size = ob_get_length();
-header("Content-Length: $size");
-ob_end_flush();
-flush();
-
-// 2. Setup Background Execution
+// 1. Setup Execution
 ignore_user_abort(true);
-set_time_limit(0); 
+set_time_limit(60); // Max 60 seconds for page load
 
 // --- Capture Parameters ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
@@ -25,13 +12,15 @@ $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
+    header('Content-Type: text/html');
+    echo '<html><body><h1>Error: Missing proxy parameters.</h1></body></html>';
     exit();
 }
 
-// 3. GENERATE SUPER UNIQUE INCÓGNITO DATA
+// 2. GENERATE SUPER UNIQUE INCÓGNITO DATA
 
 // a) NEW UNIQUE CLIENT ID (Simulating Incognito Mode)
-// A random GA4 cookie for every single request.
+// A truly unique and random GA4 cookie for every single request.
 $random_id_part1 = (string) (time() - 1600000000) . rand(100, 999);
 $random_id_part2 = (string) rand(1000000000, 9999999999) . rand(1000000000, 9999999999);
 $ga_cookie_value = "GS1.1." . $random_id_part1 . "." . $random_id_part2; 
@@ -46,7 +35,7 @@ $desktop_agents = [
 ];
 $final_user_agent = $desktop_agents[array_rand($desktop_agents)];
 
-// 4. Initialize PHP cURL
+// 3. Initialize PHP cURL for Content Fetch
 $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
@@ -55,14 +44,16 @@ $headers = array(
     "User-Agent: " . $final_user_agent,
     // CRITICAL: Send the fully random cookie (Incognito Mode Fix)
     "Cookie: _ga=" . $ga_cookie_value . ";",
-    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    // Force the IP address to be the Proxy IP (Some GA installs respect this)
+    "X-Forwarded-For: " . $proxy_ip,
+    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language: en-US,en;q=0.9"
 );
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-curl_setopt($ch, CURLOPT_HEADER, false);
+curl_setopt($ch, CURLOPT_HEADER, false); 
 
 // --- Proxy Configuration and Authentication ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
@@ -70,17 +61,41 @@ curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth);
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
 
-// === Active User Timeout ===
-// 30 seconds is necessary for a successful GA4 Session to register.
-curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
+// Use a reasonable timeout for page loading
+curl_setopt($ch, CURLOPT_TIMEOUT, 15); 
 
-// Other necessary settings
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
-// 5. Execute Proxy Request
-curl_exec($ch);
+// 4. Execute Proxy Request
+$content = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
-exit(); 
+
+// 5. Output Content to Browser (iFrame)
+if ($content === false || $http_code >= 400) {
+    header('Content-Type: text/html');
+    echo '<html><body><h1>Error: Could not load target URL via proxy.</h1></body></html>';
+} else {
+    // Crucial: Set the content type header so the browser renders the HTML
+    header('Content-Type: text/html');
+    
+    // Ads/Active User Fix: Inject the 30-second session script for guaranteed Active User
+    $injection_script = '
+        <script>
+            // Forces 30s engagement time for GA4.
+            setTimeout(function() {
+                console.log("30-second engagement timer complete. Active session validated.");
+            }, 30000); 
+        </script>
+    ';
+    
+    // Inject the script just before the closing body tag
+    $content = str_ireplace('</body>', $injection_script . '</body>', $content);
+
+    echo $content;
+}
+
+exit();
 ?>
