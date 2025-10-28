@@ -1,5 +1,5 @@
 <?php
-// proxy_api.php - Handles both 'content' loading and 'session' hitting.
+// proxy_api.php - Handles both 'content' (iframe) loading and 'session' (background hit) functionality.
 
 // 1. Get Mode
 $mode = isset($_GET['mode']) ? $_GET['mode'] : null;
@@ -16,13 +16,14 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
     if ($mode == 'content') {
         die("Error: Missing proxy parameters.");
     } else {
-        exit(); // For background session, exit quietly if parameters are missing
+        exit(); 
     }
 }
 
 // 2. Initialize cURL common settings
 $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
+// GA4 Active User FIX: Setting Unique Client ID as a Cookie Header
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
@@ -56,7 +57,7 @@ switch ($mode) {
         // ===============================================
         // MODE: CONTENT (For iframe display - Short Timeout)
         // ===============================================
-        curl_setopt($ch, CURLOPT_TIMEOUT, 15); 
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15); // Shorter timeout for faster iframe load
         
         $body = curl_exec($ch);
         curl_close($ch);
@@ -71,7 +72,7 @@ switch ($mode) {
             $base_host = isset($url_parts['host']) ? $url_parts['host'] : '';
             $base_path = $base_scheme . '://' . $base_host . '/';
 
-            // MAXIMUM AGGRESSIVE STRIPPING
+            // MAXIMUM AGGRESSIVE STRIPPING (Prevent iframe breaking scripts)
             if (!empty($body)) {
                 $body = preg_replace('/<meta http-equiv=["\'](X-Frame-Options|Content-Security-Policy)["\'].*?>/i', '', $body);
                 $body = preg_replace('/<script\b[^>]*>([\s\S]*?)<\/script>/i', '', $body);
@@ -83,11 +84,10 @@ switch ($mode) {
                 $body = preg_replace('/<head>/i', '<head>' . $base_tag, $body, 1);
             }
 
-            // Base64 Encode the modified content
+            // Base64 Encode the modified content for iframe
             $output = base64_encode($body);
         }
 
-        // Output the Base64 string or error message
         header('Content-Type: text/plain'); 
         echo $output;
         break;
@@ -110,19 +110,19 @@ switch ($mode) {
         header("Content-Length: $size");
         ob_end_flush();
         flush();
-        // Browser is disconnected, script continues
-
+        // Browser is disconnected, script continues to prevent white screen
+        
         ignore_user_abort(true);
         set_time_limit(0); 
 
-        // Set long timeout for background session (30 seconds)
+        // Set long timeout for background session (30 seconds is the minimum GA4 session)
         curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
 
         // Execute Proxy Request (The actual view/session hit)
         curl_exec($ch); 
         curl_close($ch);
         
-        // Add forced delay for user activity simulation 
+        // Add forced delay (10 to 25s) AFTER fetching the page to guarantee the session count.
         $sleep_time = rand(10, 25);
         sleep($sleep_time); 
 
@@ -130,10 +130,8 @@ switch ($mode) {
         break;
 
     default:
-        // If no valid mode is provided
         header('Content-Type: text/plain'); 
         echo "Error: Invalid or missing mode parameter.";
         break;
 }
 ?>
-
