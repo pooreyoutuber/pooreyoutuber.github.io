@@ -13,6 +13,9 @@
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
     --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
     --primary-blue: #0ea5e9;--danger: #dc2626;
+    --terminal-bg: #1e1e1e; /* Darker background */
+    --terminal-text: #00ff6a; /* Bright green text */
+    --terminal-header-bg: #000000;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
@@ -30,12 +33,12 @@
   input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 10px 0 0 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; }
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
-  .btn.stop { background: var(--danger); }
+  .btn.stop { background: var(--danger); border-radius: 8px; margin-left: 10px; }
   .btn.stop:hover { background: #b91c1c; }
   
   .repeat-control-wrap { 
       display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); 
-      background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; 
+      background: var(--card); padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; 
   }
   .repeat-control-wrap input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control-wrap label { flex-shrink: 0; }
@@ -78,6 +81,52 @@
   .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+  
+  /* --- GLOBAL TERMINAL STYLES --- */
+  .global-terminal {
+    margin-top: 30px;
+    background: var(--terminal-bg);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  .terminal-header {
+    background: var(--terminal-header-bg);
+    color: #fff;
+    padding: 10px 15px;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .command-output {
+    color: var(--terminal-text);
+    padding: 15px;
+    max-height: 400px; /* Limit height */
+    overflow-y: auto; /* Scrollable */
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .command-entry {
+      border-bottom: 1px dashed #333;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+  }
+  .command-entry:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+  }
+  .command-title {
+      color: #ff9900; /* Orange for slot title */
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: block;
+  }
+
 </style>
 </head>
 <body>
@@ -100,12 +149,22 @@
             <label for="repeatMode">
                 Enable **Continuous** Mode: Repeat all <span>30s</span> for long-session $\text{GA}$ $\text{tracking}$.
             </label>
-            <button id="globalStop" class="action-btn stop" style="display:none;">STOP ALL</button>
+            <button id="globalStop" class="btn stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
     <div class="grid-container" id="gridContainer">
+    </div>
+
+    <div class="global-terminal">
+        <div class="terminal-header">
+            Background cURL Log & Traffic Command Feed
+            <button id="clearLogBtn" class="action-btn new-tab" style="background:#555; padding: 4px 8px;">Clear Log</button>
         </div>
+        <pre class="command-output" id="globalCurlOutput">
+// Terminal Initialized. Start automation to see cURL commands...
+        </pre>
+    </div>
     
   </div>
 
@@ -133,6 +192,16 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
+// Array of common User-Agents for rotation
+const USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+];
+
+
 const IFRAME_PROXY_ENDPOINT = 'proxy_loader.php'; 
 const SESSION_ENDPOINT = 'session_guarantee.php'; 
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds
@@ -142,6 +211,8 @@ const globalUrlInput = document.getElementById('globalUrl');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
 const globalStopBtn = document.getElementById('globalStop');
+const globalCurlOutput = document.getElementById('globalCurlOutput');
+const clearLogBtn = document.getElementById('clearLogBtn');
 
 let currentSlots = [];
 let repeatIntervals = []; 
@@ -155,7 +226,6 @@ function generateUniqueId() {
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
-
 // Map proxies with fixed unique IDs and names
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
@@ -165,12 +235,51 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
 }));
 
 
-function getProxiedUrl(originalUrl, proxy, endpoint){
+// Helper to get a random User Agent
+function getRandomUserAgent() {
+    return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
+// Function to generate the CURL command string for the terminal
+function generateCurlCommand(originalUrl, proxy, userAgent, slotIndex) {
+    const proxyAuth = `user:pass@${proxy.ip}:${proxy.port}`;
+    const escapedUrl = originalUrl.replace(/'/g, "'\\''"); // Escape single quotes in URL
+    
+    const curlCommand = `curl -X GET '${escapedUrl}' \\
+    --proxy ${proxyAuth} \\
+    --proxy-user ${proxy.auth} \\
+    -A '${userAgent}' \\
+    -H 'Cookie: _ga=GS1.1.${proxy.uniqueId}.${Math.floor(Date.now() / 1000)};' \\
+    -H 'Accept-Language: en-US,en;q=0.9' \\
+    -H 'Referer: https://www.google.com/search?q=${encodeURIComponent(new URL(originalUrl).hostname)}' \\
+    --connect-timeout 30`; 
+
+    // Format the output with slot title for the global terminal
+    const terminalEntry = document.createElement('div');
+    terminalEntry.className = 'command-entry';
+    terminalEntry.innerHTML = `<span class="command-title">SLOT ${slotIndex + 1}: ${proxy.name} (${proxy.ip}) - UA Changed</span>${curlCommand}`;
+    
+    return terminalEntry;
+}
+
+function getProxiedUrl(originalUrl, proxy, endpoint, userAgent){
     return `${endpoint}?` + 
         `target=${encodeURIComponent(originalUrl)}&` +
         `ip=${proxy.ip}&port=${proxy.port}&` +
         `auth=${proxy.auth}&` + 
-        `uid=${proxy.uniqueId}`; 
+        `uid=${proxy.uniqueId}&` +
+        `ua=${encodeURIComponent(userAgent)}`; // Pass the chosen User Agent
+}
+
+// Function to update the global terminal log
+function updateGlobalTerminal(element) {
+    // Clear initial message if present
+    if (globalCurlOutput.textContent.includes('// Terminal Initialized.')) {
+        globalCurlOutput.innerHTML = '';
+    }
+    globalCurlOutput.appendChild(element);
+    // Auto-scroll to bottom
+    globalCurlOutput.scrollTop = globalCurlOutput.scrollHeight;
 }
 
 
@@ -227,11 +336,19 @@ function createSlot(index, proxy){
         return;
     }
     
-    // 1. Prepare URLs
-    const proxiedIframeUrl = getProxiedUrl(originalUrl, proxy, IFRAME_PROXY_ENDPOINT);
-    const proxiedSessionUrl = getProxiedUrl(originalUrl, proxy, SESSION_ENDPOINT);
+    // 1. Randomize User Agent (The User-Agent change on refresh/repeat feature)
+    const currentUA = getRandomUserAgent();
     
-    // 2. iFrame Load (Visible proxied preview)
+    // 2. Log the generated CURL command to the GLOBAL terminal
+    const terminalEntry = generateCurlCommand(originalUrl, proxy, currentUA, index);
+    updateGlobalTerminal(terminalEntry);
+    
+
+    // 3. Prepare URLs
+    const proxiedIframeUrl = getProxiedUrl(originalUrl, proxy, IFRAME_PROXY_ENDPOINT, currentUA);
+    const proxiedSessionUrl = getProxiedUrl(originalUrl, proxy, SESSION_ENDPOINT, currentUA);
+    
+    // 4. iFrame Load (Visible proxied preview)
     setStatus('Fetching Content via Proxy (Base64)...', false);
 
     try {
@@ -245,8 +362,9 @@ function createSlot(index, proxy){
         const base64Data = await response.text(); 
         
         if (base64Data.startsWith('Error:')) {
-             setStatus(`PHP Proxy Error: ${base64Data.substring(0, 50)}...`, false);
-             iframe.src = `data:text/html;base64,${btoa(base64Data)}`;
+             // CRITICAL: If PHP is not running, the error will be in the base64Data
+             setStatus(`PHP Error: ${base64Data.substring(0, 50)}...`, false);
+             iframe.src = `data:text/html;base64,${btoa('<h1>Error</h1><p>'+base64Data+'</p>')}`;
              return;
         }
 
@@ -264,7 +382,7 @@ function createSlot(index, proxy){
         return; 
     }
     
-    // 3. Trigger the 30s Background Session (The actual view count hit)
+    // 5. Trigger the 30s Background Session (The actual view count hit)
     setStatus('Triggering Instant GA Hit (30s BG Session)...', true);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
@@ -379,6 +497,10 @@ globalGoBtn.addEventListener('click', ()=>{
 
 // Event listeners
 globalStopBtn.addEventListener('click', stopAllAutomation);
+clearLogBtn.addEventListener('click', () => {
+    globalCurlOutput.innerHTML = '// Log Cleared.\n// Terminal Initialized. Start automation to see cURL commands...';
+});
+
 
 // Initial render when the page loads
 renderSlots();
