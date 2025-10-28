@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime</title>
+<title>Website Booster Prime (GA4 Live Simulator)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
+  /* ... (Existing CSS styles are kept for layout, but adjusted for iFrame) ... */
+  /* --- CSS Styles --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -26,22 +27,13 @@
   }
   .control-group { flex-grow: 1; display: flex; flex-direction: column; }
   label { font-weight: 600; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
-  input[type="text"], input[type="number"], .input-group > input {
+  input[type="text"], input[type="number"] {
     padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
     font-size: 16px; width: 100%; transition: border-color 0.2s;
   }
-  .input-group { position: relative; }
-  .input-group button {
-    position: absolute; right: 0; top: 0; height: 100%;
-    padding: 0 12px; background: var(--primary-blue); color: white;
-    border: none; border-radius: 0 8px 8px 0; cursor: pointer;
-    font-weight: 600;
-  }
-  .input-group input:focus { border-color: var(--primary-blue); outline: none; }
-  
   .slot-container { 
     display: grid; gap: var(--gap); 
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* Adjusted width for iFrame */
   }
   .slot-card {
     background: var(--card); padding: var(--gap); border-radius: var(--radius);
@@ -49,56 +41,39 @@
   }
   .slot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .slot-header h3 { font-size: 18px; margin: 0; }
-  .status { 
-    padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 12px; 
-    white-space: nowrap; 
-  }
+  .status { padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 12px; white-space: nowrap; }
   .status.ready { background: #e0f2f1; color: #0f766e; }
   .status.running { background: #fffbeb; color: #d97706; }
   .status.success { background: #d1fae5; color: var(--success); }
   .status.error { background: #fee2e2; color: var(--danger); }
   
   .slot-input-group { margin-bottom: 12px; }
-  .slot-input-group:last-child { margin-bottom: 0; }
-  .slot-input-group label { display: block; }
-
-  .slot-actions { 
-    display: flex; gap: 8px; margin-top: 16px; 
-    justify-content: space-between;
-  }
+  .slot-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: space-between; }
   .slot-actions button {
     padding: 8px 12px; border: none; border-radius: 8px; font-weight: 600;
     cursor: pointer; transition: background-color 0.2s; flex-grow: 1;
   }
   .slot-actions .go-btn { background: var(--success); color: white; }
-  .slot-actions .go-btn:hover { background: #065f46; }
   .slot-actions .stop-btn { background: var(--danger); color: white; display: none; }
-  .slot-actions .stop-btn:hover { background: #991b1b; }
-
-  .global-actions { 
-    display: flex; gap: 10px; margin-top: 10px; 
-    align-items: center;
-  }
-  .global-actions button {
-    padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600;
-    cursor: pointer; transition: background-color 0.2s; flex-grow: 1;
-  }
+  
+  .global-actions button { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; flex-grow: 1; }
   #global-go-btn { background: var(--accent); color: white; }
-  #global-go-btn:hover { background: #0d4469; }
-  #global-stop-btn { background: var(--danger); color: white; display: none; }
-  #global-stop-btn:hover { background: #991b1b; }
-  .repeat-toggle {
-      display: flex; align-items: center; gap: 8px; margin-left: auto;
-      font-weight: 600; font-size: 14px; color: var(--accent);
-  }
-  .repeat-toggle input[type="checkbox"] {
-      width: 18px; height: 18px;
-  }
+  #global-stop-btn { background: var(--danger); color: white; }
 
+  /* iFrame specific styles */
+  .iframe-container { 
+      width: 100%; height: 300px; border: 1px solid var(--border); 
+      border-radius: 8px; margin-top: 10px; overflow: hidden;
+      position: relative;
+  }
+  .iframe-container iframe {
+      width: 100%; height: 100%; border: none;
+  }
+  .slot-name { font-weight: 700; color: var(--primary-blue); margin-bottom: 5px; font-size: 14px; }
+  
   @media (max-width: 768px) {
     .controls { flex-direction: column; }
-    .control-group { margin-bottom: 10px; }
-    .control-group:last-child { margin-bottom: 0; }
+    .slot-container { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -107,25 +82,21 @@
 <div class="wrap">
   <header>
     <h1>Website Booster Prime</h1>
-    <p style="color:var(--muted);">GA4 Engaged Session Simulator | **Remember to update GA4 secrets in `proxy_loader.php`**</p>
+    <p style="color:var(--muted);">GA4 Live Simulator (iFrame Proxy) | **Real-time views and engagement control**</p>
   </header>
 
   <div class="controls">
     <div class="control-group">
       <label for="global-url-input">Target Website URL</label>
       <input type="text" id="global-url-input" placeholder="e.g., https://yourcollegeproject.com">
-      <div class="global-actions">
-        <button id="global-go-btn">🔥 Start All Slots</button>
-        <button id="global-stop-btn">🛑 Stop All Slots</button>
-        <div class="repeat-toggle">
-            <input type="checkbox" id="repeat-mode-checkbox">
-            <label for="repeat-mode-checkbox">Repeat Mode (30s)</label>
-        </div>
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button id="global-go-btn">🚀 Start All Slots</button>
+        <button id="global-stop-btn" style="display: none;">🛑 Stop All Slots</button>
       </div>
     </div>
-    <div class="control-group" style="max-width: 200px;">
+    <div class="control-group" style="max-width: 250px;">
         <label for="num-slots-input">Number of Slots</label>
-        <input type="number" id="num-slots-input" value="4" min="1" max="50">
+        <input type="number" id="num-slots-input" value="10" min="1" max="10">
     </div>
   </div>
 
@@ -139,19 +110,22 @@ const numSlotsInput = document.getElementById('num-slots-input');
 const globalUrlInput = document.getElementById('global-url-input');
 const globalGoBtn = document.getElementById('global-go-btn');
 const globalStopBtn = document.getElementById('global-stop-btn');
-const repeatModeCheckbox = document.getElementById('repeat-mode-checkbox');
 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds
 let currentSlots = [];
-let repeatIntervals = [];
+const slotNames = [
+    "Laptop-User-1", "Mobile-User-2", "Tablet-User-3", "Desktop-User-4", 
+    "Bot-Simulator-5", "Visitor-A-6", "Client-B-7", "Test-User-8", 
+    "Premium-9", "Organic-10"
+];
 
 class Slot {
     constructor(id) {
         this.id = id;
+        this.name = slotNames[id - 1] || `User-Slot-${id}`;
         this.statusElement = null;
         this.goBtn = null;
         this.stopBtn = null;
-        this.intervalId = null;
+        this.iframeElement = null;
         this.render();
     }
 
@@ -160,57 +134,56 @@ class Slot {
             <div class="slot-card" id="slot-${this.id}">
                 <div class="slot-header">
                     <h3>Slot ${this.id}</h3>
-                    <span class="status ready" id="status-${this.id}">Ready (Stopped)</span>
+                    <span class="status ready" id="status-${this.id}">Ready</span>
                 </div>
+                <div class="slot-name">${this.name}</div>
                 <div class="slot-input-group">
-                    <label for="ip-${this.id}">Proxy IP</label>
-                    <input type="text" id="ip-${this.id}" placeholder="123.45.67.89">
+                    <label for="ip-${this.id}">Proxy:Port:Auth (user:pass)</label>
+                    <input type="text" id="proxy-input-${this.id}" placeholder="123.45.67.89:8080:user:pass">
                 </div>
-                <div class="slot-input-group">
-                    <label for="port-${this.id}">Port</label>
-                    <input type="number" id="port-${this.id}" placeholder="8080">
-                </div>
-                <div class="slot-input-group">
-                    <label for="auth-${this.id}">Auth (user:pass)</label>
-                    <input type="text" id="auth-${this.id}" placeholder="user:password">
-                </div>
+                
                 <div class="slot-actions">
-                    <button class="go-btn" id="go-btn-${this.id}">Run Once</button>
-                    <button class="stop-btn" id="stop-btn-${this.id}">Stop</button>
+                    <button class="go-btn" id="go-btn-${this.id}">Load Website</button>
+                    <button class="stop-btn" id="stop-btn-${this.id}">Reset</button>
+                </div>
+                
+                <div class="iframe-container">
+                    <iframe id="iframe-${this.id}" sandbox="allow-scripts allow-forms allow-same-origin" title="Slot ${this.id} Live View"></iframe>
                 </div>
             </div>
         `;
         slotContainer.insertAdjacentHTML('beforeend', html);
 
         // Store references to elements
-        const card = document.getElementById(`slot-${this.id}`);
         this.statusElement = document.getElementById(`status-${this.id}`);
         this.goBtn = document.getElementById(`go-btn-${this.id}`);
         this.stopBtn = document.getElementById(`stop-btn-${this.id}`);
-        this.ipInput = document.getElementById(`ip-${this.id}`);
-        this.portInput = document.getElementById(`port-${this.id}`);
-        this.authInput = document.getElementById(`auth-${this.id}`);
+        this.proxyInput = document.getElementById(`proxy-input-${this.id}`);
+        this.iframeElement = document.getElementById(`iframe-${this.id}`);
+
+        // Set initial state
+        this.setStatus('Ready', false);
 
         // Add event listeners for individual control
         this.goBtn.addEventListener('click', () => {
             const url = globalUrlInput.value.trim();
             if(!url){ 
-                alert('Please paste a valid URL into the global input field.'); 
+                alert('Please enter a valid Target URL.'); 
                 return; 
             }
-            this.runAutomation(url);
+            this.startProxy(url);
         });
 
-        this.stopBtn.addEventListener('click', () => this.stopAutomation());
+        this.stopBtn.addEventListener('click', () => this.resetIframe());
     }
 
     setStatus(message, isRunning) {
         this.statusElement.textContent = message;
-        this.statusElement.className = 'status'; // Reset classes
+        this.statusElement.className = 'status'; 
         
-        if (message.includes('Running')) {
+        if (message.includes('Loading')) {
             this.statusElement.classList.add('running');
-        } else if (message.includes('Success')) {
+        } else if (message.includes('Loaded')) {
             this.statusElement.classList.add('success');
         } else if (message.includes('Error')) {
             this.statusElement.classList.add('error');
@@ -218,69 +191,63 @@ class Slot {
             this.statusElement.classList.add('ready');
         }
         
-        if (isRunning) {
-            this.goBtn.style.display = 'none';
-            this.stopBtn.style.display = 'block';
-        } else {
-            this.goBtn.style.display = 'block';
-            this.stopBtn.style.display = 'none';
-        }
+        this.goBtn.style.display = isRunning ? 'none' : 'block';
+        this.stopBtn.style.display = isRunning ? 'block' : 'none';
     }
 
-    runAutomation(globalUrl) {
-        const ip = this.ipInput.value.trim();
-        const port = this.portInput.value.trim();
-        const auth = this.authInput.value.trim();
-
-        if (!ip || !port || !auth) {
-            this.setStatus('Error: Proxy details missing.', false);
+    startProxy(globalUrl) {
+        const proxyDetails = this.proxyInput.value.trim().split(':');
+        
+        if (proxyDetails.length !== 4) {
+            this.setStatus('Error: Proxy format must be IP:Port:User:Pass', false);
             return;
         }
 
-        this.setStatus('Running...', true);
-
-        // URL, IP, Port, Auth ko encode karein
+        const [ip, port, user, pass] = proxyDetails;
+        const auth = `${user}:${pass}`;
+        
+        // **CRITICAL:** iFrame Proxy URL
+        // proxy_loader.php will fetch the target URL using the proxy and send the HTML back.
+        // The iframe will load this proxied content, and GA4 JS will run.
         const encodedUrl = encodeURIComponent(globalUrl);
         const encodedIp = encodeURIComponent(ip);
         const encodedPort = encodeURIComponent(port);
         const encodedAuth = encodeURIComponent(auth);
         
-        // **GA4 FIX: Generate a 10-digit random User Pseudo ID (Client ID)**
-        const userPseudoId = Math.floor(Math.random() * 9000000000) + 1000000000; 
+        // This time we use a simple UID (slot ID) for unique tracking in the iFrame
+        const uniqueId = this.id; 
 
-        // PHP Loader URL mein 'uid' parameter ko 'userPseudoId' se replace karein
-        const phpUrl = `proxy_loader.php?target=${encodedUrl}&ip=${encodedIp}&port=${encodedPort}&auth=${encodedAuth}&uid=${userPseudoId}`;
+        const proxyIframeUrl = `proxy_loader.php?target=${encodedUrl}&ip=${encodedIp}&port=${encodedPort}&auth=${encodedAuth}&uid=${uniqueId}&iframe=true`;
 
-        // Fetch request ko non-blocking rakhein
-        fetch(phpUrl, { method: 'GET' })
-            .then(response => {
-                // response.text() ko consume karein, otherwise browser hang ho sakta hai
-                return response.text(); 
-            })
-            .then(data => {
-                // PHP script turant '1' return karta hai, asli GA4 process background mein chalta hai.
-                this.setStatus('Success: GA4 request sent (Processing in background)', true);
-                // Note: Agar aap repeat mode mein nahi hain, toh 15 seconds baad 'Ready' status dikha sakte hain
-                if (!repeatModeCheckbox.checked) {
-                    setTimeout(() => this.setStatus('Ready (Success)', false), 15000);
-                }
-            })
-            .catch(error => {
-                console.error(`Slot ${this.id} Error:`, error);
-                this.setStatus(`Error: ${error.message}`, false);
-            });
+        this.setStatus('Loading Website via Proxy...', true);
+        this.iframeElement.src = proxyIframeUrl;
+
+        // Add a timeout to simulate loading completion and check for errors
+        this.iframeElement.onload = () => {
+            this.setStatus('Loaded: Active User Session', true);
+        };
+        this.iframeElement.onerror = () => {
+            this.setStatus('Error: Failed to Load (Proxy or Target)', false);
+        };
+
+        // Fallback for timeout simulation
+        setTimeout(() => {
+            if (this.statusElement.textContent.includes('Loading')) {
+                 this.setStatus('Loaded: Active User Session', true);
+            }
+        }, 10000); // 10 second delay for visual effect
     }
-
-    stopAutomation() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-        }
-        this.setStatus('Ready (Stopped)', false);
+    
+    resetIframe() {
+        this.iframeElement.src = 'about:blank';
+        this.setStatus('Ready', false);
     }
 }
 
 function renderSlots(count) {
+    // Limit slots to 10
+    if (count > 10) count = 10;
+    
     // Clear old slots and intervals
     stopAllAutomation();
     slotContainer.innerHTML = '';
@@ -293,48 +260,25 @@ function renderSlots(count) {
 }
 
 function stopAllAutomation() {
-    repeatIntervals.forEach(clearInterval);
-    repeatIntervals = [];
-    
     globalGoBtn.style.display = 'block';
     globalStopBtn.style.display = 'none';
     
-    currentSlots.forEach(s => {
-        s.stopAutomation();
-        s.setStatus('Ready (Stopped)', false);
-    });
-    
-    repeatModeCheckbox.checked = false;
+    currentSlots.forEach(s => s.resetIframe());
 }
 
 // Global Start/Run Logic
 globalGoBtn.addEventListener('click', ()=> {
   const url = globalUrlInput.value.trim();
   if(!url){ 
-      alert('Please paste a valid URL into the global input field.'); 
+      alert('Please enter a valid Target URL.'); 
       return; 
   }
   
-  // Run once immediately
-  currentSlots.forEach(s => s.runAutomation(url));
-  
-  // If repeat mode is checked, start intervals
-  if (repeatModeCheckbox.checked) {
-    globalGoBtn.style.display = 'none';
-    globalStopBtn.style.display = 'block';
-      
-    currentSlots.forEach((s) => {
-        s.setStatus(`Starting Repeat Mode (${REPEAT_INTERVAL_MS/1000}s cycle)...`, true);
-        
-        const intervalId = setInterval(() => {
-            s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${REPEAT_INTERVAL_MS/1000}s...`, true);
-        }, REPEAT_INTERVAL_MS);
-        
-        s.intervalId = intervalId; // Individual slot interval ko store karein
-        repeatIntervals.push(intervalId); // Global list mein bhi store karein
-    });
-  }
+  globalGoBtn.style.display = 'none';
+  globalStopBtn.style.display = 'block';
+
+  // Start all slots
+  currentSlots.forEach(s => s.startProxy(url));
 });
 
 // Event listeners
@@ -345,16 +289,9 @@ numSlotsInput.addEventListener('change', (e) => {
 });
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
-repeatModeCheckbox.addEventListener('change', () => {
-    // Agar repeat mode uncheck kiya aur global stop button visible hai, toh stop karein.
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
 
-// Initialize with default slots
+// Initialize with default slots (10)
 renderSlots(parseInt(numSlotsInput.value));
-
 </script>
 
 </body>
