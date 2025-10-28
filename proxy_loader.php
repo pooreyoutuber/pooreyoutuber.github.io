@@ -20,15 +20,21 @@ flush();
 ignore_user_abort(true);
 set_time_limit(0); 
 
-// --- Capture Parameters ---
-$target_url = isset($_GET['target']) ? $_GET['target'] : null;
-$proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null; // Now this is the rotating endpoint (e.g., p.webshare.io)
-$proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
-$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
-$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
-$country_code = isset($_GET['country']) ? $_GET['country'] : null; // NEW: Country Code for Webshare
+// --- Secure Hardcoded Proxy Credentials (Hidden from Frontend) ---
+// Your Webshare rotating proxy endpoint: p.webshare.io:80
+$proxy_ip = "p.webshare.io"; 
+$proxy_port = "80";
+// Your User:Pass (bqctypvz-rotate:399xb3kxqv6i) is hardcoded here for security:
+$proxy_auth = "bqctypvz-rotate:399xb3kxqv6i";
+// -----------------------------------------------------------------
 
-if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id || !$country_code) {
+// --- Capture Parameters (No IP/Port/Auth needed from URL) ---
+$target_url = isset($_GET['target']) ? $_GET['target'] : null;
+$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
+$country_code = isset($_GET['country']) ? $_GET['country'] : null; 
+
+// Only check for target URL, unique ID, and country code
+if (!$target_url || !$unique_id || !$country_code) {
     exit(); 
 }
 
@@ -42,6 +48,7 @@ $ga_cookie_value = "GS1.1." . $unique_id . "." . time();
 
 $headers = array(
     // 2. CRITICAL FIX: X-Proxy-Country header for Webshare Rotating Proxies
+    // This forces Webshare to use an IP from the selected country
     "X-Proxy-Country: " . $country_code,
     // 3. Real-world User-Agent 
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
@@ -57,7 +64,7 @@ curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 curl_setopt($ch, CURLOPT_HEADER, false);
 
-// --- Proxy Configuration and Authentication (using Rotating Endpoint) ---
+// --- Proxy Configuration and Authentication (using Hardcoded Rotating Endpoint) ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
