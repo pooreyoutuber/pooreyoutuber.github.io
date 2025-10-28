@@ -1,82 +1,142 @@
 <?php
-// proxy_loader.php - ULTIMATE White Screen Fix (Fast Hit Mode)
+// PHP Proxy Loader: proxy_loader.php - Optimized for GA4 Engaged Session
+// (Requires your GA4 Measurement ID and API Secret)
 
-// 💡 FIX 1: Force PHP to display all errors (to prevent White Screen of Death)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// -------------------------------------------------------------------------
+// *** GA4 Configuration (REQUIRED) ***
+// 1. Apni GA4 Property ID yahan daalein (Jaise: G-A1B2C3D4E5)
+$GA4_MEASUREMENT_ID = 'G-XXXXXXX'; 
+// 2. Apne Data Stream se API Secret lein aur yahan daalein (Jaise: XYZ-abc-123)
+$GA4_API_SECRET = 'YOUR_API_SECRET'; 
+// -------------------------------------------------------------------------
 
-// 💡 FIX 2: REMOVED all background execution logic (Connection: close, flush, ignore_user_abort, set_time_limit)
-// The script will now run quickly and end without blocking the server.
+// 1. Client Disconnect (Browser ko turant disconnect karne ke liye)
+header("Connection: close");
+header("Content-Encoding: none");
+header("Content-Length: 1"); 
+header("Content-Type: text/plain");
+ob_start();
+echo '1'; 
+$size = ob_get_length();
+header("Content-Length: $size");
+ob_end_flush();
+flush();
+// PHP script background mein chalna jaari rakhta hai.
+
+// 2. Execution Setup
+ignore_user_abort(true);
+set_time_limit(0); 
 
 // --- Capture Parameters ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
 $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null;
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
-$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null;
+// uid ab user_pseudo_id ke roop mein istemaal hoga (GA4 Client ID ke samaan)
+$user_pseudo_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
 
-// Critical Parameter Check 
-if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
-    // Agar parameters missing hain, toh clear error do.
-    die("Error: Missing critical parameters (target, ip, port, auth, or uid).");
+if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$user_pseudo_id || !$GA4_MEASUREMENT_ID || !$GA4_API_SECRET) {
+    // Agar koi zaroori parameter missing hai, toh exit kar dein
+    exit(); 
 }
 
-// 1. Initialize PHP cURL
-$ch = curl_init();
+// Proxy Address
 $proxy_address = "$proxy_ip:$proxy_port";
 
-// --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
-// CRITICAL: We create a unique GA cookie for every hit to register it as a NEW USER.
-$ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
+// =========================================================================
+// FUNCTION 1: Website hit karna (cURL + Proxy)
+// Website ko hit karne se aapke proxy ki efficiency pata chalti hai.
+// Yeh step GA4 mein views register nahi karega.
+// =========================================================================
+function hit_website($url, $proxy_address, $proxy_auth, $user_pseudo_id) {
+    $ch = curl_init();
 
-$headers = array(
-    // Real-world User-Agent (Essential for not getting flagged)
-    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
-    // CRITICAL: Send the unique cookie
-    "Cookie: _ga=" . $ga_cookie_value . ";",
-    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image:apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "Accept-Language: en-US,en;q=0.9"
-);
+    // GA Cookie (Sirf simulation ke liye)
+    $ga_cookie_value = "GS1.1." . $user_pseudo_id . "." . time(); 
+    
+    $headers = array(
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+        "Cookie: _ga=" . $ga_cookie_value . "; _ga_ID=" . $user_pseudo_id . ";",
+    );
 
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-curl_setopt($ch, CURLOPT_URL, $target_url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-curl_setopt($ch, CURLOPT_HEADER, false);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+    curl_setopt($ch, CURLOPT_HEADER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15); // Hit timeout
+    
+    // Proxy Setup
+    curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
+    curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
+    curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
+    curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
-// --- Proxy Configuration and Authentication ---
-curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
-curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
-curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
-curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
-
-// 💡 FIX 3: Short Timeout for Fast Hit
-curl_setopt($ch, CURLOPT_TIMEOUT, 5); // 5 seconds is enough for a fast page hit
-
-// Only fetch headers (much faster and non-blocking)
-curl_setopt($ch, CURLOPT_NOBODY, true);
-
-// Other necessary settings
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
-curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-
-// 2. Execute Proxy Request
-$result = curl_exec($ch);
-$curl_error = curl_error($ch);
-curl_close($ch);
-
-// 3. Output Result
-header('Content-Type: text/plain');
-
-if ($result === false) {
-    // Agar cURL fail hua, toh error message return karo.
-    echo "cURL ERROR: " . htmlspecialchars($curl_error);
-} else {
-    // Agar cURL succeed hua, toh success code return karo.
-    echo "SUCCESS: Fast Hit Executed.";
+    curl_exec($ch);
+    curl_close($ch);
 }
 
-// The browser/client (multiproxy-tool.html's JavaScript) ab 30-second wait ko manage karega.
+
+// =========================================================================
+// FUNCTION 2: GA4 Measurement Protocol Call (CRITICAL: GA4 mein view register karega)
+// Seedhe GA4 ke servers ko event bhejta hai.
+// =========================================================================
+function send_ga4_event($event_name, $user_pseudo_id, $measurement_id, $api_secret, $session_id, $engagement_time = 0) {
+    $curl_url = "https://www.google-analytics.com/mp/collect?measurement_id={$measurement_id}&api_secret={$api_secret}";
+
+    $payload = [
+        'client_id' => $user_pseudo_id, // GA4 mein client_id ka use user_pseudo_id ke roop mein hota hai
+        'user_pseudo_id' => $user_pseudo_id,
+        'events' => [
+            [
+                'name' => $event_name,
+                'params' => [
+                    'session_id' => $session_id,
+                    'engagement_time_msec' => $engagement_time, // Engaged Session ke liye zaroori
+                    'page_location' => $GLOBALS['target_url'],
+                    'page_title' => 'Simulated Page View',
+                    'session_engaged' => $event_name === 'user_engagement' ? 1 : 0,
+                    '_ss' => $event_name === 'session_start' ? 1 : 0,
+                ],
+            ],
+        ],
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $curl_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    // Proxy ka use sirf website hit karne ke liye zaroori hai, GA4 API hit ke liye nahi.
+    // Proxy config yahan hata di gayi hai.
+    
+    curl_exec($ch);
+    curl_close($ch);
+}
+
+// =========================================================================
+// === MAIN LOGIC ===
+// GA4 Session ko simulate karne ke liye kam se kam 10+ seconds ka session chahiye.
+// =========================================================================
+
+$session_id = time() . substr($user_pseudo_id, -5); // Har slot ke liye ek unique session ID
+
+// 1. Initial hit (optional, for proxy testing)
+hit_website($target_url, $proxy_address, $proxy_auth, $user_pseudo_id);
+
+// 2. GA4: session_start event aur pehla page_view bhejye
+send_ga4_event('session_start', $user_pseudo_id, $GA4_MEASUREMENT_ID, $GA4_API_SECRET, $session_id);
+send_ga4_event('page_view', $user_pseudo_id, $GA4_MEASUREMENT_ID, $GA4_API_SECRET, $session_id);
+
+// 3. 11 second wait karein (Engaged Session ke liye 10 second se zyada time zaroori hai)
+sleep(11); 
+
+// 4. GA4: user_engagement event bhejye. 
+// Ye batata hai ki user 11 seconds tak active raha.
+send_ga4_event('user_engagement', $user_pseudo_id, $GA4_MEASUREMENT_ID, $GA4_API_SECRET, $session_id, 11000); // 11000 milliseconds
+
+// Note: Aap chahein toh yahan ek aur 'page_view' bhi bhej sakte hain.
+// send_ga4_event('page_view', $user_pseudo_id, $GA4_MEASUREMENT_ID, $GA4_API_SECRET, $session_id);
+
 exit();
 ?>
