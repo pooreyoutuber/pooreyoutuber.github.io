@@ -1,9 +1,9 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL CONTENT PROXY FIX (Header Filtering)
+// PHP Proxy Loader: proxy_loader.php - FINAL CONTENT INTEGRITY (White Screen) FIX
 
 // 1. Setup Execution
 ignore_user_abort(true);
-set_time_limit(60); // Max 60 seconds for page load
+set_time_limit(60); 
 
 // --- Capture Parameters ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
@@ -17,7 +17,7 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
     exit();
 }
 
-// 2. GENERATE UNIQUE DATA (For Incognito Session/Active User)
+// 2. GENERATE UNIQUE DATA
 $random_id_part1 = (string) (time() - 1600000000) . rand(100, 999);
 $random_id_part2 = (string) rand(1000000000, 9999999999) . rand(1000000000, 9999999999);
 $ga_cookie_value = "GS1.1." . $random_id_part1 . "." . $random_id_part2; 
@@ -46,7 +46,7 @@ $request_headers = array(
 curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-curl_setopt($ch, CURLOPT_HEADER, true); // CRITICAL: Headers and content are fetched together
+curl_setopt($ch, CURLOPT_HEADER, true); 
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
@@ -72,13 +72,14 @@ if ($response === false || $http_code >= 400) {
 
 $content = substr($response, $header_size);
 
-// CRITICAL FIX: The PHP script does not echo the security headers (X-Frame-Options, CSP) 
-// that were sent by the target website. This allows the iFrame to load the content.
-
 // Set Content-Type for the browser
 header('Content-Type: text/html');
 
-// Inject the 30-second session script for guaranteed Active User engagement
+// CRITICAL FIX 1: Inject <base> tag to fix relative asset paths (CSS/JS)
+$base_tag = '<base href="' . htmlspecialchars($target_url) . '">';
+$content = preg_replace('/<head>/i', '<head>' . $base_tag, $content, 1, $base_count);
+
+// CRITICAL FIX 2: Inject the 30-second session script for guaranteed Active User
 $injection_script = '
     <script>
         // Forces 30s engagement time for GA4.
