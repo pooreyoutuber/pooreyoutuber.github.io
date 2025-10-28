@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Traffic Simulation System</title>
+<title>Website Traffic Simulation System (2-File)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles --- */
+  /* --- CSS Styles (Same as before) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
     --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
     --primary-blue: #0ea5e9;--danger: #dc2626;
-    --terminal-bg: #1e1e1e; /* Darker background */
-    --terminal-text: #00ff6a; /* Bright green text */
+    --terminal-bg: #1e1e1e;
+    --terminal-text: #00ff6a; 
     --terminal-header-bg: #000000;
   }
   * { box-sizing: border-box; }
@@ -102,8 +102,8 @@
   .command-output {
     color: var(--terminal-text);
     padding: 15px;
-    max-height: 400px; /* Limit height */
-    overflow-y: auto; /* Scrollable */
+    max-height: 400px; 
+    overflow-y: auto; 
     font-family: monospace;
     font-size: 12px;
     line-height: 1.6;
@@ -121,7 +121,7 @@
       padding-bottom: 0;
   }
   .command-title {
-      color: #ff9900; /* Orange for slot title */
+      color: #ff9900; 
       font-weight: bold;
       margin-bottom: 4px;
       display: block;
@@ -133,7 +133,7 @@
   <div class="wrap">
     <header>
       <h1>Website Traffic Simulation System</h1>
-      <div class="tagline">Global Traffic Generation and $\text{GA}$ $\text{Analysis}$ Tool.</div>
+      <div class="tagline">Global Traffic Generation and $\text{GA}$ $\text{Analysis}$ Tool. **(2 $\text{PHP}$ $\text{File}$ $\text{Fix}$ $\text{Applied}$)**</div>
     </header>
 
     <div class="controls">
@@ -202,9 +202,9 @@ const USER_AGENTS = [
 ];
 
 
-const IFRAME_PROXY_ENDPOINT = 'proxy_loader.php'; 
-const SESSION_ENDPOINT = 'session_guarantee.php'; 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds
+// *** NEW: Single API Endpoint for both functions ***
+const PROXY_API_ENDPOINT = 'proxy_api.php'; 
+const REPEAT_INTERVAL_MS = 30000; 
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -221,12 +221,10 @@ const allNames = ["Logan", "Maria", "Alex", "Sophia", "William", "Joseph", "Maso
 let randomNamesList = allNames.slice(0, DUMMY_PROXIES.length); 
 
 
-// Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
-// Map proxies with fixed unique IDs and names
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH, 
@@ -235,7 +233,6 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
 }));
 
 
-// Helper to get a random User Agent
 function getRandomUserAgent() {
     return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 }
@@ -243,7 +240,7 @@ function getRandomUserAgent() {
 // Function to generate the CURL command string for the terminal
 function generateCurlCommand(originalUrl, proxy, userAgent, slotIndex) {
     const proxyAuth = `user:pass@${proxy.ip}:${proxy.port}`;
-    const escapedUrl = originalUrl.replace(/'/g, "'\\''"); // Escape single quotes in URL
+    const escapedUrl = originalUrl.replace(/'/g, "'\\''"); 
     
     const curlCommand = `curl -X GET '${escapedUrl}' \\
     --proxy ${proxyAuth} \\
@@ -254,7 +251,6 @@ function generateCurlCommand(originalUrl, proxy, userAgent, slotIndex) {
     -H 'Referer: https://www.google.com/search?q=${encodeURIComponent(new URL(originalUrl).hostname)}' \\
     --connect-timeout 30`; 
 
-    // Format the output with slot title for the global terminal
     const terminalEntry = document.createElement('div');
     terminalEntry.className = 'command-entry';
     terminalEntry.innerHTML = `<span class="command-title">SLOT ${slotIndex + 1}: ${proxy.name} (${proxy.ip}) - UA Changed</span>${curlCommand}`;
@@ -262,28 +258,26 @@ function generateCurlCommand(originalUrl, proxy, userAgent, slotIndex) {
     return terminalEntry;
 }
 
-function getProxiedUrl(originalUrl, proxy, endpoint, userAgent){
+// *** UPDATED: Now generates URL with 'mode' parameter ***
+function getProxiedUrl(originalUrl, proxy, endpoint, userAgent, mode){
     return `${endpoint}?` + 
         `target=${encodeURIComponent(originalUrl)}&` +
         `ip=${proxy.ip}&port=${proxy.port}&` +
         `auth=${proxy.auth}&` + 
         `uid=${proxy.uniqueId}&` +
-        `ua=${encodeURIComponent(userAgent)}`; // Pass the chosen User Agent
+        `ua=${encodeURIComponent(userAgent)}&` +
+        `mode=${mode}`; // NEW: Append the mode
 }
 
-// Function to update the global terminal log
 function updateGlobalTerminal(element) {
-    // Clear initial message if present
     if (globalCurlOutput.textContent.includes('// Terminal Initialized.')) {
         globalCurlOutput.innerHTML = '';
     }
     globalCurlOutput.appendChild(element);
-    // Auto-scroll to bottom
     globalCurlOutput.scrollTop = globalCurlOutput.scrollHeight;
 }
 
 
-// Function to create a single slot element
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -329,24 +323,21 @@ function createSlot(index, proxy){
       }
   }
 
-  // --- Core Automation Function (The actual process) ---
   async function runAutomation(originalUrl){
     if(!originalUrl){
         setStatus('Error: No URL Provided', false);
         return;
     }
     
-    // 1. Randomize User Agent (The User-Agent change on refresh/repeat feature)
     const currentUA = getRandomUserAgent();
     
-    // 2. Log the generated CURL command to the GLOBAL terminal
     const terminalEntry = generateCurlCommand(originalUrl, proxy, currentUA, index);
     updateGlobalTerminal(terminalEntry);
     
 
-    // 3. Prepare URLs
-    const proxiedIframeUrl = getProxiedUrl(originalUrl, proxy, IFRAME_PROXY_ENDPOINT, currentUA);
-    const proxiedSessionUrl = getProxiedUrl(originalUrl, proxy, SESSION_ENDPOINT, currentUA);
+    // *** UPDATED: Use PROXY_API_ENDPOINT for both requests with different modes ***
+    const proxiedIframeUrl = getProxiedUrl(originalUrl, proxy, PROXY_API_ENDPOINT, currentUA, 'content');
+    const proxiedSessionUrl = getProxiedUrl(originalUrl, proxy, PROXY_API_ENDPOINT, currentUA, 'session');
     
     // 4. iFrame Load (Visible proxied preview)
     setStatus('Fetching Content via Proxy (Base64)...', false);
@@ -358,17 +349,15 @@ function createSlot(index, proxy){
             throw new Error(`Proxy fetch failed with status: ${response.status}`);
         }
         
-        // Response body is the Base64 encoded, stripped HTML
         const base64Data = await response.text(); 
         
         if (base64Data.startsWith('Error:')) {
-             // CRITICAL: If PHP is not running, the error will be in the base64Data
+             // If PHP error occurs (most likely missing PHP interpreter), it will show here
              setStatus(`PHP Error: ${base64Data.substring(0, 50)}...`, false);
-             iframe.src = `data:text/html;base64,${btoa('<h1>Error</h1><p>'+base64Data+'</p>')}`;
+             iframe.src = `data:text/html;base64,${btoa('<h1>Load Error</h1><p>'+base64Data+'</p>')}`;
              return;
         }
 
-        // Load the Base64 content into the iframe
         const dataUrl = `data:text/html;base64,${base64Data}`;
         iframe.src = dataUrl;
 
@@ -382,12 +371,11 @@ function createSlot(index, proxy){
         return; 
     }
     
-    // 5. Trigger the 30s Background Session (The actual view count hit)
+    // 5. Trigger the 30s Background Session
     setStatus('Triggering Instant GA Hit (30s BG Session)...', true);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch runs in the background for the session duration
         await fetch(proxiedSessionUrl, { mode: 'no-cors' });
         setStatus('GA Hit Sent. 30s Session Running', true);
         
@@ -395,14 +383,12 @@ function createSlot(index, proxy){
         setStatus('Session Fail (Network/Proxy Error)', false);
     }
     
-    // Update status after the full session duration
     setTimeout(() => {
          setStatus('Session Complete. Ready to Repeat.', true);
          statusDot.style.animation = 'none';
     }, REPEAT_INTERVAL_MS + 25000); 
   }
   
-  // Event Handlers
   openBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
     if(!url){ setStatus('Please paste a URL first.', false); return; }
@@ -421,7 +407,7 @@ function createSlot(index, proxy){
   }; 
 }
 
-// Function to redraw slots (Hardcoded to 10 based on proxies)
+
 function renderSlots() {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
@@ -433,7 +419,6 @@ function renderSlots() {
     stopAllAutomation();
 }
 
-// Global Stop Function
 function stopAllAutomation() {
     repeatIntervals.forEach(item => clearInterval(item.id));
     repeatIntervals = [];
@@ -446,7 +431,6 @@ function stopAllAutomation() {
     });
 }
 
-// --- Global Start/Run Logic with Random Delay (CRITICAL for Anti-Filtering) ---
 globalGoBtn.addEventListener('click', ()=>{
     const url = globalUrlInput.value.trim();
     if(!url){ 
@@ -462,16 +446,13 @@ globalGoBtn.addEventListener('click', ()=>{
     repeatIntervals = [];
 
     currentSlots.forEach((s, index) => {
-        // Randomize delay between 0.5 and 2.5 seconds (to avoid batch requests)
         const randomDelay = Math.floor(Math.random() * 2000) + 500; 
         delay += randomDelay;
 
-        // 1. Initial Run with a Randomized Sequential Delay
         setTimeout(() => {
             s.runAutomation(url);
             s.setStatus(`Initial View Sent. Delay: ${Math.round(delay/1000)}s`, true);
 
-            // 2. If Repeat Mode is On, set up the interval AFTER the initial run
             if (repeatModeCheckbox.checked) {
                 const intervalId = setInterval(() => {
                     s.runAutomation(url);
@@ -484,9 +465,7 @@ globalGoBtn.addEventListener('click', ()=>{
         }, delay);
     });
 
-    // Handle button visibility if repeat mode is OFF
     if (!repeatModeCheckbox.checked) {
-        // Wait for the last request to finish + the session duration before showing the GO button again
         setTimeout(() => {
             globalGoBtn.style.display = 'block';
             globalStopBtn.style.display = 'none';
@@ -495,14 +474,12 @@ globalGoBtn.addEventListener('click', ()=>{
 });
 
 
-// Event listeners
 globalStopBtn.addEventListener('click', stopAllAutomation);
 clearLogBtn.addEventListener('click', () => {
     globalCurlOutput.innerHTML = '// Log Cleared.\n// Terminal Initialized. Start automation to see cURL commands...';
 });
 
 
-// Initial render when the page loads
 renderSlots();
 </script>
 </body>
