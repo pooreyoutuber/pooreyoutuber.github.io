@@ -15,18 +15,18 @@ header("Content-Length: $size");
 ob_end_flush();
 flush();
 // The browser is disconnected, but the PHP script continues execution in the background for 30 seconds.
+
 // 2. Continue execution (The cURL process runs in the background)
 ignore_user_abort(true);
 set_time_limit(0); 
 
 // --- Capture Parameters ---
-$target_url = isset($_GET['target']) ?
-$_GET['target'] : null;
+$target_url = isset($_GET['target']) ? $_GET['target'] : null;
 $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null;
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
 $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null;
-// NEW: Capture unique ID
+// Capture unique ID
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
     exit();
@@ -35,6 +35,7 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
 // 3. Initialize PHP cURL
 $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
+
 // --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
 // CRITICAL: We create a unique GA cookie for every hit to register it as a NEW USER.
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
@@ -57,7 +58,7 @@ curl_setopt($ch, CURLOPT_HEADER, false);
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
-curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 // === Active User Timeout ===
 // 30 seconds is necessary for a successful GA4 Session to register and prevent 'Not Set'.
 curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
