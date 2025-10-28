@@ -1,216 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Thumbnail Downloader</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Thumbnail Downloader</title>
 
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsense.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
+        crossorigin="anonymous"></script>
 
-  <style>
-    /* ================================================= */
-    /* 1. DARK MODE CSS VARIABLES */
-    /* ================================================= */
-    :root {
-        /* Light Mode Variables (Default) */
-        --bg-color: #f0f2f5; 
-        --container-bg: #fff;
-        --text-color: #333;
-        --secondary-text-color: #495057;
-        --input-border: #ccc;
-        --youtube-red: #ff0000;
-        --youtube-dark-red: #cc0000;
-        --blue-accent: #007bff;
-        --blue-accent-hover: #0056b3;
-        --explanation-bg: #f8f9fa;
-        --result-border: #eee;
-    }
+    <style>
+        /* ================================================= */
+        /* 1. DARK MODE CSS VARIABLES */
+        /* ================================================= */
+        :root {
+            /* Light Mode Variables (Default) */
+            --bg-color: #f0f2f5;
+            --container-bg: #fff;
+            --text-color: #333;
+            --secondary-text-color: #495057;
+            --input-border: #ccc;
+            --youtube-red: #ff0000;
+            --youtube-dark-red: #cc0000;
+            --blue-accent: #007bff;
+            --blue-accent-hover: #0056b3;
+            --explanation-bg: #f8f9fa;
+            --result-border: #eee;
+        }
 
-    /* Dark Mode Variables (Applied when body has dark-mode class) */
-    body.dark-mode {
-        --bg-color: #121212; 
-        --container-bg: #1e1e1e;
-        --text-color: #f0f0f0;
-        --secondary-text-color: #b0b0b0;
-        --input-border: #444;
-        --youtube-dark-red: #8b0000;
-        --blue-accent: #3498db;
-        --blue-accent-hover: #2980b9;
-        --explanation-bg: #2d2d2d;
-        --result-border: #333;
-    }
+        /* Dark Mode Variables (Applied when body has dark-mode class) */
+        body.dark-mode {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --secondary-text-color: #b0b0b0;
+            --input-border: #444;
+            --youtube-dark-red: #8b0000;
+            --blue-accent: #3498db;
+            --blue-accent-hover: #2980b9;
+            --explanation-bg: #2d2d2d;
+            --result-border: #333;
+        }
 
-    /* ================================================= */
-    /* 2. BASE STYLES & DARK MODE APPLICATION */
-    /* ================================================= */
-    body { 
-        font-family: 'Arial', sans-serif; 
-        background: var(--bg-color); 
-        margin: 0; 
-        padding: 0; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        min-height: 100vh; 
-        color: var(--text-color);
-        transition: background 0.3s, color 0.3s; 
-    }
-    .container {
-        margin-top: 30px;
-        width: 90%;
-        max-width: 800px; 
-        background: var(--container-bg);
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        text-align: center;
-        transition: background 0.3s, box-shadow 0.3s;
-    }
-    h2 {
-        color: var(--youtube-red); /* YouTube Red */
-        font-size: 2em;
-        margin-bottom: 25px;
-    }
-    /* Input and Button Group Styling */
-    .input-group {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 25px;
-    }
-    input[type="text"] { 
-        width: 70%; 
-        padding: 12px 15px; 
-        border: 1px solid var(--input-border); 
-        border-radius: 5px 0 0 5px; 
-        font-size: 16px; 
-        box-sizing: border-box;
-        background: var(--container-bg);
-        color: var(--text-color);
-        transition: background 0.3s, color 0.3s, border-color 0.3s;
-    }
-    button { 
-        padding: 12px 20px; 
-        background: var(--youtube-red); 
-        color: #fff; 
-        border: none; 
-        cursor: pointer; 
-        border-radius: 0 5px 5px 0;
-        font-size: 16px;
-        transition: 0.3s;
-        font-weight: bold;
-    }
-    button:hover { 
-        background: var(--youtube-dark-red); 
-    }
-
-    /* Result Area Styling */
-    .result-section {
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 2px solid var(--result-border); 
-    }
-    #thumbnail { 
-        margin-top: 20px; 
-        max-width: 100%; 
-        height: auto;
-        border: 4px solid var(--container-bg); 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        transition: 0.3s;
-        max-height: 450px; 
-    }
-    #downloadLink { 
-        display: block; 
-        margin: 20px auto 0; 
-        color: white; 
-        background: var(--blue-accent);
-        padding: 12px 20px;
-        border-radius: 5px;
-        text-decoration: none; 
-        width: 250px;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-    #downloadLink:hover { 
-        background: var(--blue-accent-hover);
-    }
-
-    /* Utility Explanation Section */
-    .utility-explanation {
-        text-align: left;
-        margin-top: 30px; 
-        padding: 20px;
-        background-color: var(--explanation-bg); 
-        border-radius: 10px;
-        border: 1px solid var(--input-border); 
-        transition: background 0.3s, border-color 0.3s;
-    }
-    .utility-explanation h3 {
-        color: var(--blue-accent);
-        border-bottom: 2px solid var(--blue-accent);
-        padding-bottom: 5px;
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 1.5em;
-    }
-    .utility-explanation p, .utility-explanation ul {
-        line-height: 1.6;
-        color: var(--secondary-text-color);
-        margin-bottom: 15px;
-    }
-    .utility-explanation strong {
-        color: var(--text-color);
-    }
-
-    /* ================================================= */
-    /* 3. MOBILE RESPONSIVENESS FIX */
-    /* ================================================= */
-    @media (max-width: 600px) {
+        /* ================================================= */
+        /* 2. BASE STYLES & DARK MODE APPLICATION */
+        /* ================================================= */
         body {
-            padding: 10px;
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
         }
         .container {
-            padding: 15px;
-            margin-top: 15px;
-            box-shadow: none;
-            border-radius: 0;
+            margin-top: 30px;
+            width: 90%;
+            max-width: 800px;
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            text-align: center;
+            transition: background 0.3s, box-shadow 0.3s;
         }
         h2 {
-            font-size: 1.8em;
-            margin-bottom: 20px;
+            color: var(--youtube-red); /* YouTube Red */
+            font-size: 2em;
+            margin-bottom: 25px;
+        }
+        /* Input and Button Group Styling */
+        .input-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 12px 15px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px 0 0 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: var(--container-bg);
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        button {
+            padding: 12px 20px;
+            background: var(--youtube-red);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+            font-size: 16px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            background: var(--youtube-dark-red);
+        }
+
+        /* Result Area Styling */
+        .result-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--result-border);
+        }
+        #thumbnail {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+            border: 4px solid var(--container-bg);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            transition: 0.3s;
+            max-height: 450px;
+        }
+        #downloadLink {
+            display: block;
+            margin: 20px auto 0;
+            color: white;
+            background: var(--blue-accent);
+            padding: 12px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            width: 250px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        #downloadLink:hover {
+            background: var(--blue-accent-hover);
+        }
+
+        /* Utility Explanation Section */
+        .utility-explanation {
+            text-align: left;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--explanation-bg);
+            border-radius: 10px;
+            border: 1px solid var(--input-border);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .utility-explanation h3 {
+            color: var(--blue-accent);
+            border-bottom: 2px solid var(--blue-accent);
+            padding-bottom: 5px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .utility-explanation p, .utility-explanation ul {
+            line-height: 1.6;
+            color: var(--secondary-text-color);
+            margin-bottom: 15px;
+        }
+        .utility-explanation strong {
+            color: var(--text-color);
         }
         
-        /* Stack Input and Button on Mobile */
-        .input-group {
-            flex-direction: column;
-            gap: 10px;
-        }
-        input[type="text"] { 
-            width: 100%; 
-            border-radius: 5px; 
-            border: 1px solid var(--input-border); /* Restore border on all sides */
-        }
-        button { 
-            width: 100%;
-            border-radius: 5px; 
-            padding: 15px 20px;
+        /* New CSS for Ads */
+        .ad-container {
+            margin: 25px auto;
+            text-align: center;
+            /* Adjust the width if needed */
+            max-width: 728px; 
         }
 
-        #downloadLink {
-            width: 90%;
-            padding: 15px 20px;
-        }
+        /* ================================================= */
+        /* 3. MOBILE RESPONSIVENESS FIX */
+        /* ================================================= */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+                margin-top: 15px;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            h2 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
 
-        .utility-explanation {
-            padding: 15px;
+            /* Stack Input and Button on Mobile */
+            .input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            input[type="text"] {
+                width: 100%;
+                border-radius: 5px;
+                border: 1px solid var(--input-border); /* Restore border on all sides */
+            }
+            button {
+                width: 100%;
+                border-radius: 5px;
+                padding: 15px 20px;
+            }
+
+            #downloadLink {
+                width: 90%;
+                padding: 15px 20px;
+            }
+
+            .utility-explanation {
+                padding: 15px;
+            }
         }
-    }
-  </style>
+    </style>
 </head>
 <body>
 
 <div class="container">
     <h2>📸 YouTube Thumbnail Downloader</h2>
+    
+    <div class="ad-container">
+        <ins class="adsbygoogle"
+            style="display:block; text-align:center;"
+            data-ad-layout="in-article"
+            data-ad-format="fluid"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="7192383903"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
     
     <div id="input-section" class="input-group">
         <input type="text" id="videoURL" placeholder="Enter YouTube Video URL (e.g., https://www.youtube.com/watch?v=XXXXXX)">
@@ -221,10 +242,22 @@
         <img id="thumbnail" src="" alt="Thumbnail Preview">
         <a id="downloadLink" href="#" download="YouTube_Thumbnail.jpg">Download High-Resolution Thumbnail</a>
     </div>
+    
+    <div class="ad-container" id="ad-after-results">
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-format="fluid"
+            data-ad-layout-key="-fb+5w+4e-db+86"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="4343214500"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
 
     <div id="explanation-section" class="utility-explanation">
         <h3>💡 Why Use This Thumbnail Downloader?</h3>
-        
+
         <p>This simple, free **YouTube Thumbnail Downloader** is an indispensable tool for every content creator, marketer, and analyst. A video's thumbnail is its most critical marketing asset—it's the first thing viewers see and the primary driver of the **Click-Through Rate (CTR)**.</p>
 
         <h4>How This Tool Empowers Your Content Strategy (Approx. 600-700 Words Total)</h4>
@@ -245,9 +278,22 @@
 
         <p><strong>A Friendly Reminder on Usage:</strong></p>
         <p>This tool is designed for educational, analytical, and personal promotional use. Please respect copyright laws. Only download and use thumbnails that you have the right to use, such as your own content, or content used purely for non-commercial research purposes (like analyzing design). We are here to provide the technical means; ethical use is your responsibility.</p>
-        
+
         <p><strong>Get Started:</strong> Paste your YouTube video URL into the box above and click **"Get Thumbnail"** to instantly download the highest quality image available!</p>
     </div>
+    
+    <div class="ad-container">
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="9818547241"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    
 </div>
 
 <script>
@@ -264,52 +310,57 @@
       const thumbnailImg = document.getElementById("thumbnail");
       const downloadLink = document.getElementById("downloadLink");
       const outputSection = document.getElementById("output");
+      const adAfterResults = document.getElementById("ad-after-results"); // Naya Ad container
       const container = document.querySelector('.container');
       const explanationSection = document.getElementById('explanation-section');
-      
+
       // Clear previous results
       thumbnailImg.src = "";
       outputSection.style.display = "none";
+      adAfterResults.style.display = "none"; // Ad ko pehle chhupa dein
 
       if (!videoId) {
         alert("Please enter a valid YouTube URL!");
         // Ensure explanation section is visible if error
         if (!container.contains(explanationSection)) {
-            container.appendChild(explanationSection);
+             container.appendChild(explanationSection);
         }
         return;
       }
 
-      // 1. Move Explanation Section BELOW the Output/Results
+      // 1. Explanation Section ko Output ke neeche le aayen
       if (explanationSection && container.contains(explanationSection)) {
-          // Move explanation section to the end of the container (after output)
           container.appendChild(explanationSection);
       }
-      
+
       // Target the highest available resolution
       const thumbnailURL = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
-      // 2. Display the Result
+      // 2. Display the Result and the Ad
       thumbnailImg.src = thumbnailURL;
       downloadLink.href = thumbnailURL;
       outputSection.style.display = "block";
-      
+      adAfterResults.style.display = "block"; // Jab result dikhe, tab ad bhi dikhao
+
       // Optional: Force a small scroll to the result if it's below the fold
       outputSection.scrollIntoView({ behavior: 'smooth' });
 
       // Note: If maxresdefault is not available, YouTube will automatically serve a lower resolution (e.g., hqdefault).
     }
 
-    // Ensure initial state is correct (Explanation is visible)
+    // Ensure initial state is correct (Explanation and the Ad after results is hidden)
     document.addEventListener('DOMContentLoaded', () => {
         const outputSection = document.getElementById("output");
+        const adAfterResults = document.getElementById("ad-after-results");
         outputSection.style.display = "none";
-        
+        adAfterResults.style.display = "none";
+
+
         // ==========================================================
-        // 4. DARK MODE PERSISTENCE LOGIC (The fix for your problem)
+        // 4. DARK MODE PERSISTENCE LOGIC
         // ==========================================================
         const body = document.body;
-        
+
         function applyThemeFromLocalStorage() {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') {
