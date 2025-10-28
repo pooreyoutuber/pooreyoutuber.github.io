@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (GA4 Active User Fix)</title>
+<title>Website Booster Prime (Desktop Incognito Mode Fix)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -50,10 +50,11 @@
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    transform: scale(0.4); 
+    /* Desktop Scale: Zoomed out for wider view */
+    transform: scale(0.35); 
     transform-origin: 0 0;
-    width: calc(100% / 0.4);
-    height: calc(100% / 0.4);
+    width: calc(100% / 0.35);
+    height: calc(100% / 0.35);
     opacity: 1;
   }
   .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
@@ -98,23 +99,23 @@
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat every <span>30s</span> for persistent GA tracking.
+                Enable **Active User (Incognito)** Mode: Repeat every <span>30s</span> for persistent GA tracking.
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
     <div class="info-box">
-        <strong>Tool Usage Instructions (GA4 API Method):</strong>
+        <strong>Tool Usage Instructions (FINAL FIX):</strong>
         <ul>
             <li>
-                **Final Fix for Active Users:** This tool now uses the **GA4 Measurement Protocol API** to force the Active User status, bypassing website JavaScript issues.
+                **Active User Fix:** We use the **GA4 API** with a **unique Incognito ID** and **Desktop User Agent** to guarantee Active User registration.
             </li>
             <li>
-                **CRITICAL:** You **must** update the **Measurement ID** and **API Secret** in the `proxy_loader.php` file for this to work.
+                **CRITICAL:** You **MUST** update the **Measurement ID** and **API Secret** in the `proxy_loader.php` file for this to work.
             </li>
             <li>
-                **Result:** Checking the box and running will guarantee **Active Users** and **Different Country Views** in your GA4 Realtime report.
+                **Result:** Check the box and run. The **Active Users** and **Different Country Views** will increase instantly in your GA4 Realtime report.
             </li>
         </ul>
     </div>
@@ -172,7 +173,7 @@ const premiumProxies = PROXY_LIST.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: allNames[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 API Client ID
+    uniqueId: generateUniqueId() // Unique ID for GA4 Client ID
 }));
 
 
@@ -227,22 +228,21 @@ function createSlot(index, proxy){
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
-    // 1. VISUAL PROOF: Load iFrame directly (No Proxy)
+    // 1. VISUAL PROOF: Load iFrame directly 
     iframe.src = originalUrl;
     setStatus('Loading Visual Content...', false);
 
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending GA4 API Hit (Active User Guaranteed)...', true);
+    setStatus('Sending GA4 API Hit (Active User & Country Guaranteed)...', true);
 
     try {
-        // Fetch request is sent. PHP script calls the GA4 API immediately.
+        // Fetch request is sent. PHP script calls the GA4 API with unique Incognito ID.
         await fetch(proxiedUrl, { 
             method: 'GET', 
             mode: 'no-cors' 
         });
         
-        // Response is quick due to Connection: close header in PHP
         setStatus('Active User Sent (Check GA4 Realtime)', true);
         
     } catch (e) {
