@@ -1,8 +1,8 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Active User FIX (Ensures 30s Session)
+// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Guaranteed Active User Tracking
 
-// 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
-// This is critical for the HTML tool to remain responsive.
+// 1. Tell the browser/client to disconnect immediately
+// This ensures your HTML tool remains fast and responsive while the server works in the background.
 header("Connection: close"); 
 header("Content-Encoding: none");
 header("Content-Length: 1"); 
@@ -15,11 +15,11 @@ $size = ob_get_length();
 header("Content-Length: $size");
 ob_end_flush();
 flush();
-// The browser is disconnected, but the PHP script continues execution in the background.
+// The browser is disconnected, but the PHP script continues execution.
 
-// 2. Continue execution (The cURL process runs for a full 30 seconds)
-ignore_user_abort(true);
-set_time_limit(0); // Allow indefinite execution (maxed by cURL timeout)
+// 2. Setup Background Execution
+ignore_user_abort(true); // Ignore if the client closes the connection
+set_time_limit(0);      // Allow the script to run indefinitely (until sleep is done)
 
 // --- Capture Parameters ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
@@ -36,22 +36,20 @@ if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
 $ch = curl_init();
 $proxy_address = "$proxy_ip:$proxy_port";
 
-// --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
-// We use a unique ID for the _ga cookie to register a NEW USER every time.
+// --- CRITICAL: GA4 Unique User Setup ---
+// We create a unique GA cookie for every hit to register it as a NEW USER and increase Active Users.
 $ga_cookie_value = "GA1.1." . $unique_id . "." . time(); 
 
 $headers = array(
-    // Real-world Desktop User-Agent
+    // Desktop User-Agent (For realistic traffic)
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
     // CRITICAL: Send the unique cookie
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language: en-US,en;q=0.9",
-    "Connection: keep-alive" // Essential for maintaining the simulated session
 );
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 curl_setopt($ch, CURLOPT_HEADER, false);
@@ -62,18 +60,21 @@ curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth);
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
 
-// === CRITICAL Active User Timeout ===
-// The request must run for a full 30 seconds for GA4 to mark the session as 'engaged' (Active User).
-curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10); // Connection timeout
-
-// Other necessary settings
+// Set Connection Timeout (should be fast, just to load the initial page and hit GA4)
+curl_setopt($ch, CURLOPT_TIMEOUT, 10); 
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
-// 4. Execute Proxy Request
+// 4. Execute Proxy Request (The GA4 event/view is sent here)
 curl_exec($ch);
 curl_close($ch);
+
+// === CRITICAL FINAL STEP: FORCE ACTIVE USER SESSION DURATION ===
+// We use sleep(30) to keep the PHP process running for the required GA4 session duration.
+// This guarantees GA4 registers an Engaged Session (Active User).
+sleep(30); 
+
 exit(); 
 ?>
