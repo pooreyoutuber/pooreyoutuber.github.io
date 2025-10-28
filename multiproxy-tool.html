@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Using your current styles) --- */
+  /* --- CSS Styles --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -109,13 +109,13 @@
         <strong>Tool Usage Instructions (FINAL FIX):</strong>
         <ul>
             <li>
-                **Active User Fix:** The PHP file now sends a **unique Client ID (Incognito Mode)** and **Desktop User Agent** with every hit to guarantee Active User registration.
+                **Ads/Iframe Issue:** इस टूल कोड में **कोई विज्ञापन नहीं है**। स्लॉट्स में दिखने वाले विज्ञापन या तो आपकी टारगेट वेबसाइट (जो iFrame में लोड होती है) के हैं, या आपकी होस्टिंग कंपनी आपकी HTML/PHP फ़ाइलों में विज्ञापन डाल रही है।
             </li>
             <li>
-                **Action:** Check the box and click 'Load & Run All'. This runs a 30-second session for each proxy slot.
+                **Active User Fix:** `proxy_loader.php` फ़ाइल अब हर बार **नया यूज़र (कुकी)** और **नया डिवाइस (यूज़र एजेंट)** भेजती है, जिससे Active User बढ़ने की संभावना **सबसे ज़्यादा** हो जाती है।
             </li>
             <li>
-                **Result:** The **Active Users** and **Different Country Views** will increase instantly in your GA4 Realtime report (requires unique proxy IPs).
+                **CRITICAL:** Active Users को बढ़ाने के लिए, सुनिश्चित करें कि आपके **10 प्रॉक्सी IP** असली और **पूरी तरह से यूनिक** हैं।
             </li>
         </ul>
     </div>
@@ -136,7 +136,7 @@ const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Laptop-User", "Mobile-Simulator", "Tablet-Visitor", "Desktop-Client", "Organic-Traffic", "Direct-Session", "Search-Bot", "Premium-User", "Test-Device", "Unique-Visitor"];
 
-// Your 10 Unique Proxies
+[span_0](start_span)// Your 10 Unique Proxies[span_0](end_span)
 const PROXY_LIST = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
@@ -216,15 +216,14 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      // Parameters sent to PHP for API call
+      // Parameters sent to PHP: target URL, proxy IP/Port, and Auth
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Sending the slot's unique ID
+          `auth=${proxy.auth}`; 
   }
 
-  // --- Core Automation Function (GA4 API Hit) ---
+  // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
@@ -236,7 +235,6 @@ function createSlot(index, proxy){
 
     setStatus('Sending Unique Proxy View (30s Session)...', true);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
-
 
     try {
         // Fetch request is sent. PHP script runs in background for 30s with new cookie/user-agent.
@@ -252,7 +250,6 @@ function createSlot(index, proxy){
     }
     
     statusDot.style.animation = 'pulse-ping 1.6s infinite';
-
   }
   
   // Event Handlers
