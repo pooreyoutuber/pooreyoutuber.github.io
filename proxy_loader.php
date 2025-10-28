@@ -1,82 +1,81 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - Static Proxy Mode with Secure Auth (GA4 Fix)
+/**
+ * proxy_loader.php — Secure backend proxy executor for Website Booster
+ */
 
-// 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
-header("Connection: close");
-header("Content-Encoding: none");
-header("Content-Length: 1"); 
-header("Content-Type: text/plain");
+$username = "admin";       // login for security
+$password = "secure123";   // change this
 
-// Send minimal response back to the client immediately
+// --- Basic Auth ---
+if (!isset($_SERVER['PHP_AUTH_USER'])) {
+    header('WWW-Authenticate: Basic realm="Protected Area"');
+    header('HTTP/1.0 401 Unauthorized');
+    echo "Auth required.";
+    exit;
+}
+if ($_SERVER['PHP_AUTH_USER'] !== $username || $_SERVER['PHP_AUTH_PW'] !== $password) {
+    header('HTTP/1.0 403 Forbidden');
+    echo "Invalid credentials.";
+    exit;
+}
+
+// --- Early close connection ---
+header('Connection: close');
+ignore_user_abort(true);
 ob_start();
-echo '1'; 
+echo 'OK';
 $size = ob_get_length();
 header("Content-Length: $size");
 ob_end_flush();
 flush();
-// The browser is disconnected, but the PHP script continues execution in the background for 30 seconds.
+if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
 
-// 2. Continue execution (The cURL process runs in the background)
-ignore_user_abort(true);
-set_time_limit(0); 
+// --- Get parameters ---
+$target_url = $_GET['url'] ?? '';
+$slot = $_GET['slot'] ?? rand(0,9);
+if (!$target_url) exit;
 
-// --- Secure Hardcoded Proxy Authentication (Hidden from Frontend) ---
-// Your Webshare Static Proxy User:Pass is hardcoded here for security:
-// NOTE: Use the static user/pass if available, otherwise using the rotating one:
-$proxy_auth = "bqctypvz:399xb3kxqv6i"; 
-// -----------------------------------------------------------------
+// --- Load proxies ---
+$proxyList = json_decode(file_get_contents(__DIR__.'/static_proxies.json'), true);
+$proxy = $proxyList[$slot % count($proxyList)];
 
-// --- Capture Parameters from HTML ---
-$target_url = isset($_GET['target']) ? $_GET['target'] : null;
-$proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null; // Static IP is now sent from HTML
-$proxy_port = isset($_GET['port']) ? $_GET['port'] : null; // Static Port is now sent from HTML
-$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
+// --- Proxy credentials (from provider) ---
+$proxy_user = 'bqctypvz';
+$proxy_pass = '399xb3kxqv6i';
+$proxy_auth = "$proxy_user:$proxy_pass";
+$proxy_addr = $proxy['ip'] . ':' . $proxy['port'];
 
-// Only check for target URL, IP, Port, and unique ID
-if (!$target_url || !$proxy_ip || !$proxy_port || !$unique_id) {
-    exit(); 
-}
+// --- Random UA & Cookie ---
+$unique_id = substr(md5(uniqid()),0,8);
+$userAgents = [
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15",
+  "Mozilla/5.0 (Windows NT 10.0; Win64; rv:122.0) Gecko/20100101 Firefox/122.0"
+];
+$ua = $userAgents[array_rand($userAgents)];
 
-// 3. Initialize PHP cURL
+// --- Curl setup ---
 $ch = curl_init();
-$proxy_address = "$proxy_ip:$proxy_port";
+curl_setopt_array($ch, [
+    CURLOPT_URL => $target_url,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_PROXY => $proxy_addr,
+    CURLOPT_PROXYUSERPWD => $proxy_auth,
+    CURLOPT_HTTPHEADER => [
+        "User-Agent: $ua",
+        "Accept-Language: en-US,en;q=0.9",
+        "Cookie: _ga=GS1.1.$unique_id." . time()
+    ],
+    CURLOPT_CONNECTTIMEOUT => 15,
+    CURLOPT_TIMEOUT => 35,
+]);
 
-// --- CRITICAL GA4 FIXES ---
-// 1. Unique Cookie (Active User Fix)
-$ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
-
-$headers = array(
-    // 2. Real-world User-Agent 
-    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
-    // 3. Send the unique cookie
-    "Cookie: _ga=" . $ga_cookie_value . ";",
-    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "Accept-Language: en-US,en;q=0.9"
-);
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-// --------------------------------------------------------------------------
-
-curl_setopt($ch, CURLOPT_URL, $target_url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-curl_setopt($ch, CURLOPT_HEADER, false);
-
-// --- Proxy Configuration and Authentication ---
-curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
-curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); // Using hardcoded secure auth
-curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
-curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
-
-// === Active User Timeout ===
-// 30 seconds is necessary for a successful GA4 Session to register and prevent 'Not Set'.
-curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
-
-// Other necessary settings
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
-curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-
-// 4. Execute Proxy Request
 curl_exec($ch);
+$error = curl_error($ch);
 curl_close($ch);
-exit(); // End the background script
+
+// --- Logging (optional) ---
+$log = date("Y-m-d H:i:s")." | Slot $slot | {$proxy['country']} | {$proxy_addr} | ".($error ?: 'OK')."\n";
+file_put_contents(__DIR__.'/log.txt', $log, FILE_APPEND);
 ?>
