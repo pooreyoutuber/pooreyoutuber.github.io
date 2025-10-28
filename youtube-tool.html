@@ -332,6 +332,15 @@ const ctas = [
     "Your support helps us create more free tutorials like this!"
 ];
 
+// Array of paragraphs for detailed body content
+const body_paragraphs = [
+    "In this comprehensive tutorial, we break down every essential step, making complex concepts easy to understand. We spent hours researching and testing to bring you the most accurate and practical advice on this subject.",
+    "The journey to mastering this skill starts here! We dive into common mistakes and provide quick fixes that will immediately improve your results. Make sure to implement these strategies right away!",
+    "This guide covers everything from the basics to advanced techniques. We discuss the necessary tools, preparation tips, and secret hacks that seasoned professionals use to achieve excellence in this niche.",
+    "Understanding the 'why' is just as important as the 'how'. We explain the underlying principles and concepts, ensuring you gain a solid foundation to confidently apply what you learn in the video.",
+    "Looking for the fastest way to achieve your goal? We've structured this video to be time-efficient, but the description below provides all the extended resources and links you need to go further."
+];
+
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -363,40 +372,61 @@ function generate() {
         container.appendChild(explanationSection);
     }
 
-    // --- UPDATED AI-like generation logic ---
-    const baseTags = ["Tutorial", "Guide", "Tips", "Tricks", "Review", "HowTo", "Vlog", "DIY", "Unboxing", "SEO"]; 
+    // --- UPDATED AI-like generation logic with LONGER Descriptions ---
+    const baseTags = ["Tutorial", "Guide", "Tips", "Tricks", "Review", "HowTo", "Vlog", "DIY", "Unboxing", "SEO", "2024"]; 
     const titleWords = title.toLowerCase().split(/\s+/).filter(word => word.length > 2 && !["a", "an", "the", "in", "for", "with", "is", "of", "and"].includes(word));
     const mainKeyword = titleWords.length > 0 ? titleWords[0] : title; // Main Keyword
 
     const results = [];
+    
+    // Shuffle all arrays for maximum variety
     const shuffledIntros = shuffleArray([...intros]);
     const shuffledCtas = shuffleArray([...ctas]);
+    const shuffledBody = shuffleArray([...body_paragraphs]);
 
     for (let i = 0; i < 10; i++) {
         const intro = shuffledIntros[i % shuffledIntros.length];
         const cta = shuffledCtas[i % shuffledCtas.length];
+        const body_para = shuffledBody[i % shuffledBody.length]; // Use a unique body paragraph
 
-        // Dynamic description structure with more variety
+        // Dynamic description structure with more detail (Multiple paragraphs and sections)
         const description =
+            // 1. Hook/Intro (First line is crucial for YouTube)
             `${intro} **"${title}"**.\n\n` +
-            `In this video, we'll cover the ${i % 2 === 0 ? 'essential steps' : 'pro secrets'} to mastering ${mainKeyword}. Whether you're a beginner or an expert, this guide has something for everyone. This topic is crucial for anyone looking to ${titleWords.slice(0, 2).join(' ')}.\n\n` +
-            `🔗 **Useful Links:**\n- [Your Website Link]\n- [Previous Related Video Link]\n\n` +
-            `🔔 ${cta}\n\n` +
-            `---\n` +
-            `*Time Stamps Placeholder*`;
+            
+            // 2. Detailed Body/Summary Paragraph
+            `${body_para.replace('mainKeyword', mainKeyword)}\n\n` + 
+            
+            // 3. Time Stamps (SEO benefit and user experience)
+            `--- **Time Stamps (Jump to section)** ---\n` +
+            `0:00 - Introduction & Hook\n` +
+            `1:30 - Key Point 1: ${mainKeyword}\n` +
+            `4:00 - Step 2: Advanced ${titleWords.slice(1, 2).join(' ')}\n` +
+            `7:15 - Tips & Mistakes to Avoid\n` +
+            `9:45 - Conclusion & Final Thoughts\n\n` +
+            
+            // 4. Social & Call-to-Action Section
+            `--- **Connect with us!** ---\n` +
+            `🔔 ${cta}\n` +
+            `🔗 Subscribe Here: [Your Subscription Link]\n` +
+            `📸 Instagram: [Your Instagram Link]\n` +
+            `🌐 Official Website: [Your Website Link]\n\n` +
+            
+            // 5. Relevant Keywords (Long-tail SEO at the end)
+            `#${mainKeyword} #${titleWords.slice(0, 2).join('')}Tutorial #VideoGuide #${baseTags[i % baseTags.length]}`;
         
         // Dynamic tags generation with more randomness and relevance
-        let generatedTags = new Set([title, mainKeyword, `${mainKeyword} tutorial`, `${mainKeyword} ${new Date().getFullYear()}`]);
+        let generatedTags = new Set([title, mainKeyword, `${mainKeyword} tutorial`, `${mainKeyword} guide`]);
         
-        // Add 3 random relevant words from the title
-        shuffleArray(titleWords).slice(0, 3).forEach(tag => generatedTags.add(tag));
+        // Add 4 random relevant words from the title
+        shuffleArray(titleWords).slice(0, 4).forEach(tag => generatedTags.add(tag));
         
-        // Add 3 random base tags
-        shuffleArray(baseTags).slice(0, 3).forEach(tag => generatedTags.add(tag));
+        // Add 4 random base tags
+        shuffleArray(baseTags).slice(0, 4).forEach(tag => generatedTags.add(tag));
 
-        // Add broad and long-tail tags for more reach
+        // Add specific long-tail tags
         if (i % 3 === 0) generatedTags.add(`${mainKeyword} tips and tricks`);
-        if (i % 4 === 0) generatedTags.add(`how to get ${mainKeyword}`);
+        if (i % 2 === 0) generatedTags.add(`how to get ${mainKeyword}`);
         
         results.push({ description, tags: [...generatedTags] });
     }
