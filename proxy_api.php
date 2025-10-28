@@ -1,5 +1,5 @@
 <?php
-// proxy_api.php - Handles both 'content' (iframe) loading and 'session' (background hit) functionality.
+// proxy_api.php - White Screen Fix: Removed PHP background execution logic
 
 // 1. Get Mode
 $mode = isset($_GET['mode']) ? $_GET['mode'] : null;
@@ -13,11 +13,11 @@ $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null;
 $custom_user_agent = isset($_GET['ua']) ? $_GET['ua'] : 'Mozilla/5.0 (Default)'; 
 
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
-    if ($mode == 'content') {
-        die("Error: Missing proxy parameters.");
-    } else {
+    if ($mode == 'session') {
+        // 'session' mode mein, parameters missing hone par chupchaap exit ho jao
         exit(); 
     }
+    die("Error: Missing proxy parameters.");
 }
 
 // 2. Initialize cURL common settings
@@ -30,7 +30,6 @@ $headers = array(
     "User-Agent: " . $custom_user_agent, 
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept-Language: en-US,en;q=0.9",
-    // Simulates a real click from Google Search
     "Referer: https://www.google.com/search?q=" . urlencode(parse_url($target_url, PHP_URL_HOST))
 );
 
@@ -66,25 +65,22 @@ switch ($mode) {
             $error_message = curl_error($ch);
             $output = "Error: Proxy Load Failure. cURL Error: " . htmlspecialchars($error_message);
         } else {
-            // Extract base URL for the <base> tag
+            // Content stripping and Base64 encoding for iframe (Unchanged)
             $url_parts = parse_url($target_url);
             $base_scheme = isset($url_parts['scheme']) ? $url_parts['scheme'] : 'http';
             $base_host = isset($url_parts['host']) ? $url_parts['host'] : '';
             $base_path = $base_scheme . '://' . $base_host . '/';
 
-            // MAXIMUM AGGRESSIVE STRIPPING (Prevent iframe breaking scripts)
             if (!empty($body)) {
                 $body = preg_replace('/<meta http-equiv=["\'](X-Frame-Options|Content-Security-Policy)["\'].*?>/i', '', $body);
                 $body = preg_replace('/<script\b[^>]*>([\s\S]*?)<\/script>/i', '', $body);
                 $body = preg_replace('/ on[a-z]+=["\'][^"\']*["\']/i', '', $body);
                 $body = preg_replace('/if ?\( ?self\.location ?!= ?top\.location ?\).*;?/i', '', $body);
                 
-                // Inject <base> Tag
                 $base_tag = '<base href="' . $base_path . '">';
                 $body = preg_replace('/<head>/i', '<head>' . $base_tag, $body, 1);
             }
 
-            // Base64 Encode the modified content for iframe
             $output = base64_encode($body);
         }
 
@@ -94,38 +90,25 @@ switch ($mode) {
 
     case 'session':
         // ===============================================
-        // MODE: SESSION (For background hit - Long Timeout)
+        // MODE: SESSION (White Screen Fix: Fast Hit)
         // ===============================================
 
-        // CRITICAL: Immediate Disconnect Logic
-        header("Connection: close");
-        header("Content-Encoding: none");
-        header("Content-Length: 1"); 
-        header("Content-Type: text/plain");
+        // 💡 FIX: Removed all headers/functions that cause server background execution to fail (like Connection: close, flush(), etc.)
+        // Now, this script runs quickly and returns immediately.
         
-        // Send minimal response back to the client immediately
-        ob_start();
-        echo '1'; 
-        $size = ob_get_length();
-        header("Content-Length: $size");
-        ob_end_flush();
-        flush();
-        // Browser is disconnected, script continues to prevent white screen
+        // cURL timeout set to 5 seconds. This is just an immediate page hit (view count).
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5); 
         
-        ignore_user_abort(true);
-        set_time_limit(0); 
+        // Only fetch headers, not the full body, to make it faster
+        curl_setopt($ch, CURLOPT_NOBODY, true);
 
-        // Set long timeout for background session (30 seconds is the minimum GA4 session)
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
-
-        // Execute Proxy Request (The actual view/session hit)
+        // Execute Proxy Request (The actual view hit)
         curl_exec($ch); 
         curl_close($ch);
         
-        // Add forced delay (10 to 25s) AFTER fetching the page to guarantee the session count.
-        $sleep_time = rand(10, 25);
-        sleep($sleep_time); 
-
+        // Send a simple 'OK' and exit immediately.
+        // The 30-second waiting period for GA session will now be managed by the JavaScript in index.html.
+        echo "OK";
         exit();
         break;
 
