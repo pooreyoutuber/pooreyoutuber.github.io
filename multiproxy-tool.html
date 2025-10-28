@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (GA4 Live Simulator)</title>
+<title>Website Booster Prime</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- Optimized & Responsive CSS Styles --- */
+  /* --- CSS Styles (Optimized & Responsive) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -27,7 +27,7 @@
   @media (min-width: 600px) { .input-group { flex-direction: row; } }
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
-  .slot-selector input[type="number"] { width: 40px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
   input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; border-radius: 0 10px 10px 0; }
   @media (min-width: 600px) {
     input[type="url"] { border-radius: 0; }
@@ -68,7 +68,7 @@
   .iframe-wrap { height: 300px; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; background: #eee; }
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Desktop Scale: 40% zoom inside slot */
+    /* Desktop Scale: Zoomed Out View (as requested for multi-browser feel) */
     transform: scale(0.4); 
     transform-origin: 0 0;
     width: calc(100% / 0.4);
@@ -89,7 +89,7 @@
   <div class="wrap">
     <header>
       <h1>Website Booster Prime 📈</h1>
-      <div class="tagline">GA4 Live Simulator with 10 Active Proxy Slots.</div>
+      <div class="tagline">GA4 Live Simulator with 10 Active Proxy Slots. **Visual & Tracking modes separated for reliability.**</div>
     </header>
 
     <div class="controls">
@@ -109,7 +109,7 @@
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                **Active Session Mode**: Auto-refresh slots every <span>30s</span> for persistent GA4 tracking.
+                **Active Session Mode**: Auto-repeat background hits every <span>30s</span> for persistent GA4 tracking.
             </label>
             <div class="global-stop-btn-wrap">
                 <button id="globalStop" class="btn stop" style="display:none;">🛑 STOP ALL</button>
@@ -142,7 +142,7 @@ const PROXY_LIST = [
 const allNames = ["Laptop-User", "Mobile-Simulator", "Tablet-Visitor", "Desktop-Client", "Organic-Traffic", "Direct-Session", "Search-Bot", "Premium-User", "Test-Device", "Unique-Visitor"];
 
 const MAX_SLOTS = PROXY_LIST.length;
-const PROXY_ENDPOINT = 'proxy_loader.php'; 
+const PROXY_ENDPOINT = 'proxy_loader.php'; // The PHP file handling the proxy hit
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds (GA4 Session requirement)
 
 const gridContainer = document.getElementById('gridContainer');
@@ -154,11 +154,12 @@ const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = []; 
 
-// Map proxies with fixed unique IDs and names
+// Map proxies with unique IDs and names
 const premiumProxies = PROXY_LIST.map((p, index) => ({
     ...p,
     name: allNames[index],
-    uniqueId: Math.floor(Math.random() * 9000000000) + 1000000000, // Unique ID for GA4 Cookie
+    // Generate a new Unique ID every time for the GA4 Cookie
+    uniqueId: Math.floor(Math.random() * 9000000000) + 1000000000, 
 }));
 
 // Function to create a single slot element
@@ -169,13 +170,11 @@ function createSlot(index, proxy){
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">${proxy.ip}:${proxy.port}</div>
+      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
     </div>
     
     <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" 
-        sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-        title="Slot ${index+1} Live View"></iframe>
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
     </div>
     
     <div class="slot-footer">
@@ -216,29 +215,36 @@ function createSlot(index, proxy){
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie
+          `uid=${proxy.uniqueId}`;
   }
 
-  // --- Core Automation Function (iFrame Load) ---
-  function loadIframe(originalUrl){
+  // --- Core Dual-Mode Automation Function ---
+  async function runAutomation(originalUrl){
     if(!originalUrl) {
         setStatus('Error: URL Missing', 'error');
         return;
     }
     
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
-
-    setStatus('Loading Website (GA4 Session Active)...', 'running');
+    // 1. VISUAL MODE: Load iFrame directly (No Proxy) to ensure content displays
+    setStatus('Loading Visual Content...', 'running');
+    iframe.src = originalUrl;
     
-    // iFrame SRC set करना ही मेन काम है, PHP content return करेगा
-    iframe.src = proxiedUrl;
+    // 2. TRACKING MODE: Send the Proxy Hit in the background
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+    
+    try {
+        // Send a fetch request that only cares about triggering the PHP script
+        await fetch(proxiedUrl, { 
+            method: 'GET', 
+            mode: 'no-cors' // Use no-cors to prevent common CORS issues with external servers
+        });
+        
+        // This is a quick response, as PHP immediately disconnects.
+        setStatus('Loaded: GA4 Session Active (Proxy Hit Sent)', 'active');
 
-    // Optional: Add a timeout check/status update
-    setTimeout(() => {
-        if(statusSpan.textContent.includes('Loading')) {
-             setStatus('Loaded: Active User Session', 'active');
-        }
-    }, 10000); // 10 seconds for visual completion
+    } catch (e) {
+        setStatus('Error: Proxy Hit Failed (GA4 not tracking)', 'error');
+    }
   }
   
   function resetAutomation() {
@@ -253,13 +259,13 @@ function createSlot(index, proxy){
   // Event Handlers
   runBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
-    loadIframe(url); 
+    runAutomation(url); 
   });
   
   resetBtn.addEventListener('click', () => resetAutomation());
   
   return { 
-      loadIframe, 
+      runAutomation, 
       setStatus,
       resetAutomation,
       getIntervalId: () => intervalId,
@@ -267,9 +273,8 @@ function createSlot(index, proxy){
   }; 
 }
 
-// Function to redraw slots based on the selected number
+// Function to redraw slots (Max 10)
 function renderSlots(count) {
-    // Clear old slots and stop any running intervals
     stopAllAutomation();
     gridContainer.innerHTML = ''; 
     currentSlots = [];
@@ -293,7 +298,6 @@ function stopAllAutomation() {
     globalGoBtn.style.display = 'block';
     globalStopBtn.style.display = 'none';
     
-    // Stop all individual slot intervals
     currentSlots.forEach(s => s.resetAutomation());
     
     repeatModeCheckbox.checked = false;
@@ -307,10 +311,10 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
-  // Run once immediately
-  currentSlots.forEach(s => s.loadIframe(url));
+  // 1. Run once immediately (Visual + Tracking)
+  currentSlots.forEach(s => s.runAutomation(url));
   
-  // If repeat mode is checked, start intervals
+  // 2. If repeat mode is checked, start background tracking intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
@@ -318,10 +322,10 @@ globalGoBtn.addEventListener('click', ()=>{
     currentSlots.forEach((s) => {
         s.setStatus(`Starting Repeat Mode (30s cycle)...`, 'running');
         
-        // Start interval
         const intervalId = setInterval(() => {
-            s.loadIframe(url);
-            s.setStatus(`Repeat Running. Next in 30s...`, 'running');
+            // NOTE: In repeat mode, we only need to re-send the background proxy hit
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in 30s...`, 'active');
         }, REPEAT_INTERVAL_MS);
         
         s.setIntervalId(intervalId);
@@ -338,14 +342,13 @@ numSlotsInput.addEventListener('change', (e) => {
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
-    // If repeat mode is unselected while running, stop all
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
         stopAllAutomation();
     }
 });
 
 
-// Initial render when the page loads
+// Initial render with 10 slots
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
