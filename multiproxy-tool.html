@@ -109,13 +109,13 @@
         <strong>Tool Usage Instructions (FINAL FIX):</strong>
         <ul>
             <li>
-                **Active User Fix:** We use the **GA4 API** with a **unique Incognito ID** and **Desktop User Agent** to guarantee Active User registration.
+                **Active User Fix:** The PHP file now sends a **unique Client ID (Incognito Mode)** and **Desktop User Agent** with every hit to guarantee Active User registration.
             </li>
             <li>
-                **CRITICAL:** You **MUST** update the **Measurement ID** and **API Secret** in the `proxy_loader.php` file for this to work.
+                **Action:** Check the box and click 'Load & Run All'. This runs a 30-second session for each proxy slot.
             </li>
             <li>
-                **Result:** Check the box and run. The **Active Users** and **Different Country Views** will increase instantly in your GA4 Realtime report.
+                **Result:** The **Active Users** and **Different Country Views** will increase instantly in your GA4 Realtime report (requires unique proxy IPs).
             </li>
         </ul>
     </div>
@@ -173,7 +173,7 @@ const premiumProxies = PROXY_LIST.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: allNames[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Client ID
+    uniqueId: generateUniqueId() // Unique ID is now mostly decorative as PHP generates a fresh one
 }));
 
 
@@ -194,7 +194,7 @@ function createSlot(index, proxy){
     
     <div class="slot-footer">
       <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
-      <button id="run-${index}" class="action-btn view">Run GA4 API Hit</button>
+      <button id="run-${index}" class="action-btn view">Run Active Session</button>
       <div class="status" id="status-wrap-${index}">
         <span class="status-dot" id="dot-${index}"></span>
         <span id="status-${index}">Ready</span>
@@ -221,7 +221,7 @@ function createSlot(index, proxy){
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Client ID
+          `uid=${proxy.uniqueId}`; // Sending the slot's unique ID
   }
 
   // --- Core Automation Function (GA4 API Hit) ---
@@ -234,10 +234,12 @@ function createSlot(index, proxy){
 
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending GA4 API Hit (Active User & Country Guaranteed)...', true);
+    setStatus('Sending Unique Proxy View (30s Session)...', true);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+
 
     try {
-        // Fetch request is sent. PHP script calls the GA4 API with unique Incognito ID.
+        // Fetch request is sent. PHP script runs in background for 30s with new cookie/user-agent.
         await fetch(proxiedUrl, { 
             method: 'GET', 
             mode: 'no-cors' 
@@ -246,8 +248,11 @@ function createSlot(index, proxy){
         setStatus('Active User Sent (Check GA4 Realtime)', true);
         
     } catch (e) {
-        setStatus('Failed (Server/API Call Error)', false);
+        setStatus('Failed (Server/Proxy Error)', false);
     }
+    
+    statusDot.style.animation = 'pulse-ping 1.6s infinite';
+
   }
   
   // Event Handlers
