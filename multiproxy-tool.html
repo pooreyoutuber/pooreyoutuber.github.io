@@ -1,79 +1,110 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Website Booster Prime — Slot Version</title>
+<meta charset="utf-8">
+<title>Slots + Proxy Input — Simple</title>
 <style>
-body{font-family:'Inter',sans-serif;background:#f8fafc;margin:0;padding:20px}
-h1{text-align:center;color:#0f4f7f}
-.controls{text-align:center;margin-bottom:20px}
-input[type=url]{width:60%;padding:10px;border:1px solid #ccc;border-radius:6px}
-button{background:#0ea5e9;color:#fff;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
-.slot{background:#fff;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.05);padding:10px;display:flex;flex-direction:column}
-.slot h3{margin:0 0 6px;color:#0f4f7f;font-size:14px}
-.iframe-box{flex:1;border:1px solid #ddd;border-radius:6px;overflow:hidden}
-iframe{width:100%;height:200px;border:0;transform:scale(0.7);transform-origin:0 0;width:calc(100%/0.7);height:calc(100%/0.7)}
-.status{margin-top:6px;font-size:12px;color:#555}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+body{font-family:Inter,Arial;background:#f6f8fb;padding:20px}
+.header{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+input[type=url], input[type=text]{padding:8px;border:1px solid #ccc;border-radius:6px}
+button{padding:8px 12px;background:#0ea5e9;border:0;color:#fff;border-radius:6px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.slot{background:#fff;padding:10px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.slot h4{margin:0 0 6px;color:#0f4f7f}
+.iframe-box{border:1px solid #eee;height:180px;overflow:hidden;border-radius:6px}
+iframe{width:100%;height:100%;border:0;transform:scale(0.6);transform-origin:0 0;width:calc(100%/0.6);height:calc(100%/0.6)}
+.status{margin-top:8px;font-size:13px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
 .green{background:#16a34a}
 .gray{background:#ccc}
+.small{font-size:13px;padding:6px 8px}
 </style>
 </head>
 <body>
-
-<h1>🌍 Website Booster Prime</h1>
-<div class="controls">
-  <input id="urlInput" type="url" placeholder="Enter your website URL (https://example.com)">
-  <button id="runAll">Run 10 Slots</button>
+<div class="header">
+  <input id="mainUrl" type="url" placeholder="https://your-site.example" style="width:50%">
+  <input id="mainProxy" type="text" placeholder="Optional: proxy ip:port (e.g. 1.2.3.4:8080)" style="width:30%">
+  <button id="runAll">Run All</button>
 </div>
 
-<div class="grid" id="slotGrid"></div>
+<div class="grid" id="grid"></div>
 
 <script>
-const grid = document.getElementById('slotGrid');
+const grid = document.getElementById('grid');
 const countries = ["US","DE","GB","FR","IN","CA","AU","NL","ES","SG"];
-for(let i=0;i<10;i++){
-  const div=document.createElement('div');
-  div.className='slot';
-  div.innerHTML=`
-    <h3>Slot ${i+1} (${countries[i]})</h3>
-    <div class="iframe-box"><iframe id="if${i}" src="about:blank"></iframe></div>
-    <div class="status"><span class="dot gray" id="dot${i}"></span><span id="status${i}">Idle</span></div>`;
+
+// Create 10 slots
+for (let i=0;i<10;i++) {
+  const div = document.createElement('div');
+  div.className = 'slot';
+  div.innerHTML = `
+    <h4>Slot ${i+1} — ${countries[i]}</h4>
+    <div>
+      <input id="url-${i}" type="url" placeholder="Leave empty to use main URL" style="width:100%;margin-bottom:6px">
+      <input id="proxy-${i}" type="text" placeholder="Optional per-slot proxy ip:port" style="width:100%;margin-bottom:6px">
+    </div>
+    <div class="iframe-box"><iframe id="iframe-${i}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups"></iframe></div>
+    <div class="status"><span id="dot-${i}" class="dot gray"></span><span id="status-${i}">Idle</span></div>
+    <div style="margin-top:8px">
+      <button class="small" onclick="runSlot(${i})">Run Slot</button>
+    </div>
+  `;
   grid.appendChild(div);
 }
 
-async function runSlot(i,url){
-  const dot=document.getElementById('dot'+i);
-  const st=document.getElementById('status'+i);
-  const iframe=document.getElementById('if'+i);
-  iframe.src=url;
-  dot.className='dot gray';
-  st.textContent='Sending via Proxy...';
-  try{
-    const res=await fetch(`proxy_loader.php?url=${encodeURIComponent(url)}&slot=${i}`,{
-      headers:{
-        'Authorization':'Basic '+btoa('admin:secure123') // match PHP creds
+// Helper to call PHP: uses basic auth header hardcoded (change if needed)
+function authHeader() {
+  // WARNING: storing credentials in client-side JS is insecure — this is for convenience/testing only.
+  // Better: remove this header and use server-side session auth. Or rely on browser BasicAuth prompt.
+  return 'Basic ' + btoa('admin:secure123'); // must match proxy_loader.php API_USER/API_PASS
+}
+
+async function runSlot(i) {
+  const mainUrl = document.getElementById('mainUrl').value.trim();
+  const mainProxy = document.getElementById('mainProxy').value.trim();
+  const urlField = document.getElementById('url-'+i).value.trim();
+  const proxyField = document.getElementById('proxy-'+i).value.trim();
+
+  const target = urlField || mainUrl;
+  if (!target) { alert('Enter URL in main input or slot'); return; }
+
+  // choose proxy: per-slot override > main proxy > empty (server will pick fallback)
+  const proxyVal = proxyField || mainProxy || '';
+
+  const dot = document.getElementById('dot-'+i);
+  const status = document.getElementById('status-'+i);
+  const iframe = document.getElementById('iframe-'+i);
+
+  // set iframe preview (this loads in user's browser)
+  iframe.src = target;
+
+  dot.className = 'dot gray';
+  status.textContent = 'Sending...';
+
+  try {
+    const url = 'proxy_loader.php?url=' + encodeURIComponent(target) + '&proxy=' + encodeURIComponent(proxyVal) + '&slot=' + i;
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': authHeader()
       }
     });
-    if(res.ok){
-      dot.className='dot green';
-      st.textContent='Proxy View Sent';
-    }else{
-      st.textContent='Error '+res.status;
+    if (resp.ok) {
+      dot.className = 'dot green';
+      status.textContent = 'Proxy request dispatched';
+    } else {
+      status.textContent = 'Server error ' + resp.status;
     }
-  }catch(e){
-    st.textContent='Failed';
+  } catch (e) {
+    status.textContent = 'Network error';
   }
 }
 
-document.getElementById('runAll').onclick=()=>{
-  const url=document.getElementById('urlInput').value.trim();
-  if(!url){alert('Enter a valid URL');return;}
-  for(let i=0;i<10;i++){
-    setTimeout(()=>runSlot(i,url), i*2000);
+document.getElementById('runAll').addEventListener('click', ()=> {
+  for (let i=0;i<10;i++){
+    setTimeout(()=>runSlot(i), i*1200); // small stagger
   }
-};
+});
 </script>
 </body>
 </html>
