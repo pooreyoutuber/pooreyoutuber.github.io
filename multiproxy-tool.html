@@ -106,16 +106,13 @@
     </div>
     
     <div class="info-box">
-        <strong>Tool Usage Instructions (FINAL FIX):</strong>
+        <strong>टूल उपयोग निर्देश (Active User & Ad Note):</strong>
         <ul>
             <li>
-                **Ads/Iframe Issue:** इस टूल कोड में **कोई विज्ञापन नहीं है**। स्लॉट्स में दिखने वाले विज्ञापन या तो आपकी टारगेट वेबसाइट (जो iFrame में लोड होती है) के हैं, या आपकी होस्टिंग कंपनी आपकी HTML/PHP फ़ाइलों में विज्ञापन डाल रही है।
+                **विज्ञापन:** स्लॉट्स के अंदर दिखने वाले विज्ञापन **आपकी टारगेट वेबसाइट** के हैं, जो iFrame में लोड हो रही है। इस टूल कोड में कोई विज्ञापन नहीं है।
             </li>
             <li>
-                **Active User Fix:** `proxy_loader.php` फ़ाइल अब हर बार **नया यूज़र (कुकी)** और **नया डिवाइस (यूज़र एजेंट)** भेजती है, जिससे Active User बढ़ने की संभावना **सबसे ज़्यादा** हो जाती है।
-            </li>
-            <li>
-                **CRITICAL:** Active Users को बढ़ाने के लिए, सुनिश्चित करें कि आपके **10 प्रॉक्सी IP** असली और **पूरी तरह से यूनिक** हैं।
+                **1-User Fix:** Active User की समस्या **GA4 बॉट डिटेक्शन** के कारण है। `proxy_loader.php` अब हर बार **पूरी तरह से नया User** (कुकी और User-Agent) भेजता है, जो PHP की सीमा में **सबसे अच्छा** समाधान है।
             </li>
         </ul>
     </div>
@@ -136,7 +133,7 @@ const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Laptop-User", "Mobile-Simulator", "Tablet-Visitor", "Desktop-Client", "Organic-Traffic", "Direct-Session", "Search-Bot", "Premium-User", "Test-Device", "Unique-Visitor"];
 
-[span_0](start_span)// Your 10 Unique Proxies[span_0](end_span)
+// Your 10 Unique Proxies
 const PROXY_LIST = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
@@ -173,7 +170,7 @@ const premiumProxies = PROXY_LIST.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: allNames[index],
-    uniqueId: generateUniqueId() // Unique ID is now mostly decorative as PHP generates a fresh one
+    uniqueId: generateUniqueId() 
 }));
 
 
