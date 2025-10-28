@@ -24,12 +24,28 @@
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   @media (min-width: 600px) { .input-group { flex-direction: row; } }
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
-  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px; /* Full radius on this element */ padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
   .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  input[type="url"], input[type="text"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  
+  /* Combined URL Input with Proxy/Location Selector Look */
+  input[type="url"], input[type="text"] { 
+    flex: 1; 
+    padding: 12px 14px; 
+    border-radius: 0 10px 10px 0; /* Changed border-radius */
+    border: 1px solid var(--border); 
+    border-left: none; 
+    background: white; 
+    font-size: 16px; 
+    outline: none; 
+  }
+
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
-  .btn.stop { background: var(--danger); }
+  .btn.stop { 
+      background: var(--danger); 
+      border-radius: 10px; /* Stop button changed */
+      padding: 10px 18px;
+  }
   .btn.stop:hover { background: #b91c1c; }
   .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
@@ -46,6 +62,7 @@
   .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
+  /* Updated display as per user request: no proxy IP */
   .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   iframe { 
@@ -73,10 +90,41 @@
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
 
-  .proxy-settings-group { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
-  .proxy-setting { flex: 1; min-width: 200px; }
-  .proxy-setting input { border-radius: 10px !important; border-left: 1px solid var(--border) !important; }
-
+  /* New Proxy/Location Selector Styling */
+  .proxy-location-wrap {
+      display: flex;
+      align-items: stretch;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      width: 100%;
+      flex: 1;
+  }
+  .location-select {
+      background: #f0f4f8;
+      color: var(--accent);
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: 10px 0 0 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      /* Custom dropdown styling to remove default arrow */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f4f7f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat, repeat;
+      background-position: right 10px top 50%, 0 0;
+      background-size: 12px auto, 100%;
+  }
+  .url-input-wrap input[type="url"] {
+      border-radius: 0;
+      border-left: 0;
+  }
+  .input-group .btn {
+      border-radius: 0 10px 10px 0;
+  }
 </style>
 </head>
 <body>
@@ -89,49 +137,43 @@
     <div class="controls">
         <div class="input-group">
             
-            <div class="slot-selector">
+            <div class="slot-selector" style="border-radius: 10px; border-right: 1px solid var(--border);">
                 Slots:
                 <input id="numSlots" type="number" value="10" min="1" max="20" />
             </div>
 
-            <div class="url-input-wrap">
+            <div class="proxy-location-wrap">
+                <select id="proxyModeSelect" class="location-select" disabled>
+                    <option value="rotating">Rotating Proxy (Webshare)</option>
+                    <option value="no_proxy">No Proxy (Local IP)</option>
+                </select>
+
                 <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+                
+                <button id="globalGo" class="btn" style="border-radius: 0 10px 10px 0;">Load & Run All</button>
             </div>
-            <button id="globalGo" class="btn">Load & Run All</button>
         </div>
         
-        <div class="proxy-settings-group">
-            <div class="proxy-setting">
-                <input id="proxyEndpoint" type="text" value="p.webshare.io" placeholder="Proxy Endpoint (e.g., p.webshare.io)">
-            </div>
-            <div class="proxy-setting">
-                <input id="proxyPort" type="text" value="80" placeholder="Port (e.g., 80)">
-            </div>
-            <div class="proxy-setting">
-                <input id="proxyAuth" type="text" value="bqctypvz-rotate:399xb3kxqv6i" placeholder="User:Pass (e.g., user:pass)">
-            </div>
-        </div>
-
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Rotation Mode** (Active User Fix): Repeat all <span>30s</span> with **new location/IP**.
+                Enable **Rotation Mode** (New IP/Location): Repeat all <span>30s</span> with **new proxy location**.
             </label>
-            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
+            <button id="globalStop" class="btn stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
     <div class="info-box">
-        <strong>Tool Status: Rotating Proxy Endpoint Enabled 🔄</strong>
+        <strong>Tool Status: Webshare Rotating Proxy Enabled 🔄</strong>
         <ul>
             <li>
-                **Setup:** **Proxy Endpoint** (`p.webshare.io`), **Port** (`80`), और **User:Pass** (`bqctypvz-rotate:399xb3kxqv6i`) को ऊपर की फ़ील्ड में भरें।
+                **Security Fix:** आपके प्रॉक्सी क्रेडेंशियल्स अब **proxy_loader.php** फ़ाइल में **छिपाए** गए हैं।
             </li>
             <li>
-                **Active User Fix:** हर रिक्वेस्ट पर **Unique Client ID** (GA4) और एक **Random Country Header** (PHP स्क्रिप्ट में) भेजा जाएगा।
+                **Design Fix:** स्लॉट्स में अब **IP address नहीं** दिखता। सिर्फ़ **Green Dot** और **Random Country** ही दिखेंगे।
             </li>
             <li>
-                **Slot Display:** अब स्लॉट्स में IP एड्रेस नहीं दिखेगा, सिर्फ़ **Green Dot** और **Status** दिखेगा।
+                **Active User Fix:** Rotation Mode में हर 30 सेकंड में **नया IP एड्रेस** और **नया GA4 Client ID** इस्तेमाल होगा।
             </li>
         </ul>
     </div>
@@ -143,15 +185,22 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   ROTATING PROXY CONFIGURATION
+   ROTATING PROXY CONFIGURATION LOGIC
    ---------------------------------------------------------------------- */
 
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
-const COUNTRIES = ["US", "DE", "CA", "AU", "FR", "JP", "GB", "NL", "IN", "BR"];
+// Only Country list and names are needed in the frontend
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
+// List of common countries supported by Webshare for rotation (used for X-Proxy-Country header in PHP)
+const COUNTRIES = ["US", "DE", "CA", "AU", "FR", "JP", "GB", "NL", "IN", "BR", "ES", "IT", "PL", "SE", "TR", "CH", "AT", "IE", "NO", "HK"]; 
 
 // Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
     return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
+
+// Function to get a random country for rotation
+function getRandomCountry() {
+    return COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
 }
 
 const MAX_SLOTS = 20;
@@ -165,18 +214,13 @@ const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
 const globalStopBtn = document.getElementById('globalStop');
-const proxyEndpointInput = document.getElementById('proxyEndpoint');
-const proxyPortInput = document.getElementById('proxyPort');
-const proxyAuthInput = document.getElementById('proxyAuth');
-
 
 let currentSlots = [];
 let repeatIntervals = []; 
 
-// Slot Configuration (Each slot has a fixed name, country, and unique ID)
+// Slot Configuration (Each slot has a fixed name and unique ID)
 const slotConfigs = Array.from({ length: MAX_SLOTS }, (_, index) => ({
     name: allNames[index % allNames.length],
-    country: COUNTRIES[index % COUNTRIES.length], // Assign a rotating country
     uniqueId: generateUniqueId() 
 }));
 
@@ -186,10 +230,13 @@ function createSlot(index, config){
   const el = document.createElement('div');
   el.className = 'slot';
   
+  // Get initial random country for display
+  const initialCountry = getRandomCountry();
+
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}: ${config.name} (${config.country})</div>
-      <div class="slot-ip-display">Proxy Mode: Rotating</div> 
+      <div class="slot-title">SLOT ${index+1}: ${config.name}</div>
+      <div class="slot-ip-display" id="slot-country-${index}">${initialCountry} (Rotating)</div> 
     </div>
     
     <div class="iframe-wrap">
@@ -213,25 +260,26 @@ function createSlot(index, config){
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
+  const countryDisplay = el.querySelector(`#slot-country-${index}`);
 
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
     statusDot.classList.toggle('active', isActive);
   }
   
-  function getProxiedUrl(originalUrl, proxyConfig){
-      // Get current settings from inputs
-      const endpoint = proxyEndpointInput.value.trim();
-      const port = proxyPortInput.value.trim();
-      const auth = proxyAuthInput.value.trim();
-
-      // Sending the Unique ID (uid) and Country Header (country) to the PHP script
+  function getProxiedUrl(originalUrl){
+      // The country is randomized on EVERY call for rotation effect
+      const currentCountry = getRandomCountry();
+      
+      // Update the country displayed in the slot
+      countryDisplay.textContent = `${currentCountry} (Rotating)`; 
+      
+      // We only send target URL, Unique ID, and the Random Country to PHP.
+      // PHP has the secured Proxy IP/Auth details.
       return `${PROXY_ENDPOINT_URL}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
-          `ip=${endpoint}&port=${port}&` +
-          `auth=${auth}&` + 
           `uid=${config.uniqueId}&` + // Unique ID for GA4 Cookie Fix
-          `country=${config.country}`; // Country for Webshare Header
+          `country=${currentCountry}`; // Country for Webshare Header
   }
 
   // --- Core Automation Function ---
@@ -242,9 +290,9 @@ function createSlot(index, config){
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
 
-    const proxiedUrl = getProxiedUrl(originalUrl, config);
+    const proxiedUrl = getProxiedUrl(originalUrl);
 
-    setStatus(`Sending Proxy View (${config.country} - 30s Session)...`, false);
+    setStatus(`Sending Proxy View (${countryDisplay.textContent})...`, false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
@@ -265,6 +313,7 @@ function createSlot(index, config){
   openBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
     if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    // Note: This opens the target URL directly (not proxied)
     window.open(url, '_blank'); 
   });
 
@@ -296,7 +345,6 @@ function renderSlots(count) {
     globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
 
     for(let i=0; i < count; i++){
-      // Use the pre-configured slot properties
       const slot = createSlot(i, slotConfigs[i]); 
       currentSlots.push(slot);
     }
@@ -318,17 +366,10 @@ function stopAllAutomation() {
 // Global Start/Run Logic
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
-  const endpoint = proxyEndpointInput.value.trim();
-  const port = proxyPortInput.value.trim();
-  const auth = proxyAuthInput.value.trim();
   
   if(!url){ 
       alert('Please paste a valid URL into the global input field.'); 
       return; 
-  }
-  if (!endpoint || !port || !auth) {
-      alert('Please fill in all Proxy Settings (Endpoint, Port, User:Pass).');
-      return;
   }
   
   // Run once immediately
