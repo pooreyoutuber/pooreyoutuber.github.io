@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Proxyium Style)</title>
+<title>Geo-Location Proxy Tool (Proxyium Style)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Responsive Design) --- */
+  /* --- CSS Styles --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -15,109 +15,64 @@
     --primary-blue: #0ea5e9;--danger: #dc2626;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
-  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
+  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; padding: 20px; }
+  .wrap { max-width: 1400px; margin: 0px auto; padding: 12px; } 
   header { margin-bottom: 20px; text-align: center; }
   h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
   .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
-  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   @media (min-width: 600px) { .input-group { flex-direction: row; } }
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
-  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
-  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
-  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
-  .btn:hover { background: #0c8cd8; }
-  .btn.stop { background: var(--danger); }
-  .btn.stop:hover { background: #b91c1c; }
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
-  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
-  .repeat-control label { flex-shrink: 0; }
-  .repeat-control span { color: var(--accent); font-weight: 600; }
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; }
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
   .info-box ul li { margin-bottom: 6px; }
-  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
-  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
-  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
-  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
-  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
-  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
-  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-  iframe { 
-    width: 100%; height: 100%; border: 0; display: block; background: white; 
-    transform: scale(0.4); 
-    transform-origin: 0 0;
-    width: calc(100% / 0.4);
-    height: calc(100% / 0.4);
-    opacity: 1;
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .slot { 
+      background: var(--card); border-radius: var(--radius); padding: 15px; 
+      box-shadow: var(--shadow); 
+      display: flex; flex-direction: column; 
+      justify-content: space-between;
+      border-left: 5px solid var(--primary-blue);
   }
-  .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
-  .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
-  .action-btn.view { background: var(--success); color: white; }
-  .action-btn.view:hover { background: #047857; }
-  .action-btn.new-tab { 
-      background: #f90;
-      color: white; 
-      flex-grow: 1;
-      font-size: 12px;
-      padding: 8px 10px;
+  .slot-top { margin-bottom: 10px; }
+  .slot-title { font-weight: 700; font-size: 16px; color: var(--accent); }
+  .slot-ip-display { font-size: 13px; color: var(--muted); font-weight: 500; margin-top: 4px;} 
+  .action-btn { 
+      background: var(--success); color: white; padding: 10px 15px; border-radius: 8px; 
+      border: 0; cursor: pointer; font-weight: 600; font-size: 14px; 
+      width: 100%; margin-top: 10px;
+      transition: background-color 0.2s; 
   }
-  .action-btn.new-tab:hover { background: #e80; }
-  .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
-  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
-  .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
-  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+  .action-btn:hover { background: #047857; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>Website Booster Prime</h1>
-      <div class="tagline">Global Traffic Simulation System.</div>
+      <h1>Geo-Location Proxy Slot Tool (Project Mode)</h1>
+      <div class="tagline">URLs open directly via Proxy IP in a new tab's search bar.</div>
     </header>
 
     <div class="controls">
         <div class="input-group">
-            
-            <div class="slot-selector">
-                Slots:
-                <input id="numSlots" type="number" value="10" min="1" max="20" />
-            </div>
-
-            <div class="url-input-wrap">
-                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
-            </div>
-            <button id="globalGo" class="btn">Load & Run All</button>
-        </div>
-        
-        <div class="repeat-control">
-            <input type="checkbox" id="repeatMode" />
-            <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all <span>30s</span> for better GA tracking.
-            </label>
-            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
+            <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
         </div>
     </div>
     
     <div class="info-box">
-        <strong>Tool Usage Instructions:</strong>
+        <strong>Project Demonstration:</strong>
         <ul>
             <li>
-                <strong>Geo-Location Change:</strong> Every request is sent from a different Proxy IP, simulating traffic from different countries/locations.
+                <strong>Action:</strong> Paste your URL above, then click **'Load via Proxy'** on the desired location slot.
             </li>
             <li>
-                <strong>Active User Fix:</strong> This tool sends a **unique Client ID (Cookie)** with every request to count it as a unique Active User in GA4.
+                **Result:** A new tab will open, and the **Proxy IP Address** will be clearly visible in the browser's search bar as part of the URL.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This repeats the request every 30 seconds (required session time).
-            </li>
-            <li>
-                **CRITICAL:** The script currently uses only 10 unique IPs. To use all 20 slots effectively, replace the last 10 dummy entries in the JS code with 10 more unique Proxy IPs.
+                This proves that the request is being routed through that proxy, successfully changing the **geo-location**.
             </li>
         </ul>
     </div>
@@ -129,82 +84,40 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION - UPDATED WITH YOUR WEB SHARE PROXIES
+   PROXY DATA and CONFIGURATION
    ---------------------------------------------------------------------- */
 
 const COMMON_USER = "bqctypvz"; // Your common username
 const COMMON_PASS = "399xb3kxqv6i"; // Your common password
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
-
-// Function to generate a simple unique ID (used for GA4 cookie)
-function generateUniqueId() {
-    // Generates a random 10-digit number string
-    return Math.floor(Math.random() * 9000000000) + 1000000000;
-}
-
-function getRandomNames(count) {
-    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-}
-
-// =========================================================================
-// 10 UNIQUE PROXIES from your Webshare list
-// =========================================================================
-const ORIGINAL_PROXIES = [
-  { ip: "142.111.48.253", port: "7030", country: "US" },
-  { ip: "31.59.20.176", port: "6754", country: "DE" },
-  { ip: "23.95.150.145", port: "6114", country: "US" },
-  { ip: "198.23.239.134", port: "6540", country: "US" },
-  { ip: "45.38.107.97", port: "6014", country: "US" },
-  { ip: "107.172.163.27", port: "6543", country: "CA" },
-  { ip: "64.137.96.74", port: "6641", country: "US" },
-  { ip: "216.10.27.159", port: "6837", country: "AU" },
-  { ip: "142.111.67.146", port: "5611", country: "US" },
-  { ip: "142.147.128.93", port: "6593", country: "CA" },
-];
-
-// Duplicate the 10 proxies to fill the 20-slot structure. 
-// For better results, replace these 10 dummy entries with 10 more UNIQUE IPs.
-const DUMMY_PROXIES = [
-    ...ORIGINAL_PROXIES,
-    { ip: "142.111.48.253", port: "7031", country: "US (Dummy 2)" },
-    { ip: "31.59.20.176", port: "6755", country: "DE (Dummy 2)" },
-    { ip: "23.95.150.145", port: "6115", country: "US (Dummy 2)" },
-    { ip: "198.23.239.134", port: "6541", country: "US (Dummy 2)" },
-    { ip: "45.38.107.97", port: "6015", country: "US (Dummy 2)" },
-    { ip: "107.172.163.27", port: "6544", country: "CA (Dummy 2)" },
-    { ip: "64.137.96.74", port: "6642", country: "US (Dummy 2)" },
-    { ip: "216.10.27.159", port: "6838", country: "AU (Dummy 2)" },
-    { ip: "142.111.67.146", port: "5612", country: "US (Dummy 2)" },
-    { ip: "142.147.128.93", port: "6594", country: "CA (Dummy 2)" },
-];
-// =========================================================================
-
-const MAX_SLOTS = 20;
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
+
+// 10 UNIQUE PROXIES from your Webshare list
+const PROXIES = [
+  { ip: "142.111.48.253", port: "7030", country: "United States (US)" },
+  { ip: "31.59.20.176", port: "6754", country: "Germany (DE)" },
+  { ip: "23.95.150.145", port: "6114", country: "United States (US)" },
+  { ip: "198.23.239.134", port: "6540", country: "United States (US)" },
+  { ip: "45.38.107.97", port: "6014", country: "United States (US)" },
+  { ip: "107.172.163.27", port: "6543", country: "Canada (CA)" },
+  { ip: "64.137.96.74", port: "6641", country: "United States (US)" },
+  { ip: "216.10.27.159", port: "6837", country: "Australia (AU)" },
+  { ip: "142.111.67.146", port: "5611", country: "United States (US)" },
+  { ip: "142.147.128.93", port: "6593", country: "Canada (CA)" },
+];
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
-const numSlotsInput = document.getElementById('numSlots');
-const globalGoBtn = document.getElementById('globalGo');
-const repeatModeCheckbox = document.getElementById('repeatMode');
-const globalStopBtn = document.getElementById('globalStop');
 
-let currentSlots = [];
-let repeatIntervals = []; 
-let randomNamesList = getRandomNames(MAX_SLOTS); 
-
-// Map proxies with fixed unique IDs
-const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
-    ...p,
-    auth: COMMON_AUTH,
-    name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
-}));
-
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds
+// Function to generate the proxied URL string
+function getProxiedUrl(originalUrl, proxy){
+    // This URL format clearly shows the proxy details for the project demo
+    return `${PROXY_ENDPOINT}?` + 
+        `target=${encodeURIComponent(originalUrl)}&` +
+        `ip=${proxy.ip}&port=${proxy.port}&` +
+        `auth=${proxy.auth}`; 
+}
 
 // Function to create a single slot element
 function createSlot(index, proxy){
@@ -213,173 +126,39 @@ function createSlot(index, proxy){
   
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
+      <div class="slot-title">SLOT ${index+1}: ${proxy.country}</div>
+      <div class="slot-ip-display">Proxy: ${proxy.ip}:${proxy.port}</div>
     </div>
     
-    <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-    </div>
-    
-    <div class="slot-footer">
-      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
-      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
-      <div class="status" id="status-wrap-${index}">
-        <span class="status-dot" id="dot-${index}"></span>
-        <span id="status-${index}">Ready</span>
-      </div>
-    </div>
+    <button class="action-btn" id="load-btn-${index}">Load via Proxy (New Tab)</button>
   `;
   
   gridContainer.appendChild(el);
 
-  const iframe = el.querySelector(`#iframe-${index}`);
-  const openBtn = el.querySelector(`#open-${index}`);
-  const runBtn = el.querySelector(`#run-${index}`);
-  const statusSpan = el.querySelector(`#status-${index}`);
-  const statusDot = el.querySelector(`#dot-${index}`);
+  const loadBtn = el.querySelector(`#load-btn-${index}`);
 
-  function setStatus(text, isActive = false){
-    statusSpan.textContent = text;
-    statusDot.classList.toggle('active', isActive);
-  }
-  
-  function getProxiedUrl(originalUrl, proxy){
-      // Sending the Unique ID (uid) to the PHP script
-      return `${PROXY_ENDPOINT}?` + 
-          `target=${encodeURIComponent(originalUrl)}&` +
-          `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
-  }
-
-  // --- Core Automation Function ---
-  async function runAutomation(originalUrl){
-    if(!originalUrl) return;
-    
-    // 1. iFrame Load (Visible preview) - Optional for visual check
-    iframe.src = originalUrl; 
-    setStatus('Loading Content...', false);
-
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
-
-    setStatus('Sending Unique Proxy View (30s Session)...', false);
-    statusDot.style.animation = 'pulse-ping 0.5s infinite';
-
-    try {
-        // Fetch request is sent. PHP script runs in background for 30s.
-        await fetch(proxiedUrl, { mode: 'no-cors' });
-        
-        // Response is quick due to Connection: close header in PHP
-        setStatus('View Sent (BG Session Active)', true);
-        
-    } catch (e) {
-        // This catch is usually for network issues from the client side
-        setStatus('Failed (Client Network/Proxy Error)', false);
-    }
-    
-    statusDot.style.animation = 'none';
-  }
-  
-  // Event Handlers
-  openBtn.addEventListener('click', ()=> {
+  // Event Handler
+  loadBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    window.open(url, '_blank'); 
-  });
-
-  runBtn.addEventListener('click', ()=> {
-    const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    runAutomation(url); 
-  });
-  
-  setStatus('Ready', true);
-
-  return { 
-      runAutomation, 
-      setStatus
-  }; 
-}
-
-// Function to redraw slots based on the selected number
-function renderSlots(count) {
-    gridContainer.innerHTML = ''; 
-    currentSlots = [];
-
-    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
-    if (count < 1 || count > maxCount) {
-        count = Math.min(Math.max(count, 1), maxCount);
-        numSlotsInput.value = count;
+    if(!url){ 
+        alert('Please paste a Target URL into the input field first.'); 
+        return; 
     }
     
-    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
-
-    for(let i=0; i < count; i++){
-      const slot = createSlot(i, premiumProxies[i]);
-      currentSlots.push(slot);
-    }
-    stopAllAutomation();
-}
-
-// Global Stop Function
-function stopAllAutomation() {
-    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
-    repeatIntervals = [];
-    globalGoBtn.style.display = 'block';
-    globalStopBtn.style.display = 'none';
-    
-    currentSlots.forEach(s => s.setStatus('Ready (Stopped)', true));
-    
-    repeatModeCheckbox.checked = false;
-}
-
-// Global Start/Run Logic
-globalGoBtn.addEventListener('click', ()=>{
-  const url = globalUrlInput.value.trim();
-  if(!url){ 
-      alert('Please paste a valid URL into the global input field.'); 
-      return; 
-  }
-  
-  // Run once immediately
-  currentSlots.forEach(s => s.runAutomation(url));
-  
-  // If repeat mode is checked, start intervals
-  if (repeatModeCheckbox.checked) {
-    globalGoBtn.style.display = 'none';
-    globalStopBtn.style.display = 'block';
-      
-    currentSlots.forEach((s) => {
-        s.setStatus(`Starting Repeat Mode (30s cycle)...`, true);
-        
-        const intervalId = setInterval(() => {
-            s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in 30s...`, true);
-        }, REPEAT_INTERVAL_MS);
-        
-        repeatIntervals.push(intervalId);
+    const finalUrl = getProxiedUrl(url, {
+        ...proxy,
+        auth: COMMON_AUTH // Attach common auth credentials
     });
-  }
-});
-
-// Event listeners
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
-    renderSlots(count);
-});
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
-repeatModeCheckbox.addEventListener('change', () => {
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
+    
+    // Open the PHP proxy URL directly in a new tab
+    window.open(finalUrl, '_blank'); 
+  });
+}
 
 // Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
+PROXIES.forEach((proxy, index) => {
+    createSlot(index, proxy);
+});
 </script>
 </body>
 </html>
