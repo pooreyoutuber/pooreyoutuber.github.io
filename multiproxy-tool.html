@@ -1,16 +1,12 @@
 <?php
 // PHP code to define the list of available GEOs for the dropdown
 $available_geos = [
+    'CYCLE' => '🔄 Cycle Through All 10 IPs', // Set as default/primary option
     'US' => '🇺🇸 United States (6 IPs)',
     'GB' => '🇬🇧 United Kingdom (2 IPs)',
     'ES' => '🇪🇸 Spain (1 IP)',
     'JP' => '🇯🇵 Japan (1 IP)',
-    'CYCLE' => '🔄 Cycle Through All 10 IPs' // New option for cycling
 ];
-
-// Determine the starting proxy list for JavaScript's internal tracking (only GEO codes)
-// This list will be used by JS to know the sequence of GEOs for cycling.
-$proxy_cycle_sequence = ['US', 'GB', 'US', 'GB', 'ES', 'JP', 'US', 'US', 'CA', 'AU']; // A simplified example sequence for 10 slots
 ?>
 <!doctype html>
 <html lang="en">
@@ -21,7 +17,9 @@ $proxy_cycle_sequence = ['US', 'GB', 'US', 'GB', 'ES', 'JP', 'US', 'US', 'CA', '
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as before, but ensure it is included) --- */
+/* ==============================================
+   UI/Layout Fixes Applied Here (CSS)
+   ============================================== */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -37,15 +35,51 @@ $proxy_cycle_sequence = ['US', 'GB', 'US', 'GB', 'ES', 'JP', 'US', 'US', 'CA', '
   .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   @media (min-width: 600px) { .input-group { flex-direction: row; } }
-  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
-  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  
+  /* Slot Selector Fix */
+  .slot-selector { 
+    display: flex; align-items: center; border: 1px solid var(--border); 
+    border-radius: 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; 
+    color: var(--accent); font-size: 14px; white-space: nowrap; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* Added shadow for consistency */
+    flex-shrink: 0; /* Important for alignment */
+    height: 48px; /* Height adjustment */
+}
   .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
   
   /* Combined URL Input with Proxy/Location Selector Look */
+  .proxy-location-wrap {
+      display: flex;
+      align-items: stretch;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      width: 100%;
+      flex: 1; /* Allows it to take up the rest of the space */
+  }
+  .location-select {
+      background: #f0f4f8;
+      color: var(--accent);
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: 10px 0 0 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f4f7f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat, repeat;
+      background-position: right 10px top 50%, 0 0;
+      background-size: 12px auto, 100%;
+      min-width: 150px; /* Ensure selector is visible */
+  }
+
   input[type="url"], input[type="text"] { 
     flex: 1; 
     padding: 12px 14px; 
-    border-radius: 0 10px 10px 0; 
+    border-radius: 0;
     border: 1px solid var(--border); 
     border-left: none; 
     background: white; 
@@ -57,7 +91,7 @@ $proxy_cycle_sequence = ['US', 'GB', 'US', 'GB', 'ES', 'JP', 'US', 'US', 'CA', '
   .btn:hover { background: #0c8cd8; }
   .btn.stop { 
       background: var(--danger); 
-      border-radius: 10px; 
+      border-radius: 10px; 
       padding: 10px 18px;
   }
   .btn.stop:hover { background: #b91c1c; }
@@ -102,41 +136,6 @@ $proxy_cycle_sequence = ['US', 'GB', 'US', 'GB', 'ES', 'JP', 'US', 'US', 'CA', '
   .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
-
-  /* New Proxy/Location Selector Styling */
-  .proxy-location-wrap {
-      display: flex;
-      align-items: stretch;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      width: 100%;
-      flex: 1;
-  }
-  .location-select {
-      background: #f0f4f8;
-      color: var(--accent);
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-right: none;
-      border-radius: 10px 0 0 10px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f4f7f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-      background-repeat: no-repeat, repeat;
-      background-position: right 10px top 50%, 0 0;
-      background-size: 12px auto, 100%;
-  }
-  .url-input-wrap input[type="url"] {
-      border-radius: 0;
-      border-left: 0;
-  }
-  .input-group .btn {
-      border-radius: 0 10px 10px 0;
-  }
 </style>
 </head>
 <body>
@@ -148,7 +147,7 @@ $proxy_cycle_sequence = ['US', 'GB', 'US', 'GB', 'ES', 'JP', 'US', 'US', 'CA', '
 
     <div class="controls">
         <div class="input-group">
-            <div class="slot-selector" style="border-radius: 10px; border-right: 1px solid var(--border);">
+            <div class="slot-selector">
                 Slots:
                 <input id="numSlots" type="number" value="10" min="1" max="10" />
             </div>
@@ -165,7 +164,7 @@ $proxy_cycle_sequence = ['US', 'GB', 'US', 'GB', 'ES', 'JP', 'US', 'US', 'CA', '
 
                 <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
                 
-                <button id="globalGo" class="btn" style="border-radius: 0 10px 10px 0;">Load & Run All</button>
+                <button id="globalGo" class="btn">Load & Run All</button>
             </div>
         </div>
         
@@ -199,7 +198,7 @@ $proxy_cycle_sequence = ['US', 'GB', 'US', 'GB', 'ES', 'JP', 'US', 'US', 'CA', '
 
 <script>
 /* ----------------------------------------------------------------------
-   JAVASCRIPT LOGIC (Updated for Cycling)
+   JAVASCRIPT LOGIC (From previous response - ensures geo cycling works)
    ---------------------------------------------------------------------- */
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
@@ -296,10 +295,8 @@ function createSlot(index, config){
       let displayGeo = geoCode;
       if (geoCode === 'CYCLE') {
           // In repeat mode, we show the current cycle position
-          displayGeo = PROXY_CYCLE_SEQUENCE[currentCycleIndexForInterval % MAX_SLOTS];
-      } else if (geoCode.length > 2 && geoCode.includes('-')) {
-          // For initial setup/single runs, show the specific code
-          displayGeo = geoCode;
+          const cycleCode = PROXY_CYCLE_SEQUENCE[currentCycleIndexForInterval % MAX_SLOTS];
+          displayGeo = cycleCode;
       }
       countryDisplay.textContent = `${displayGeo} (Geo Code)`; 
 
