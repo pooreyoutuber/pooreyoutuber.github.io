@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Multi-Browser Dashboard</title>
 <style>
+    /* CSS कोड वही रहेगा, इसमें कोई बदलाव नहीं है */
     body {
         margin: 0;
         font-family: Arial, sans-serif;
@@ -114,7 +115,6 @@
 </div>
 
 <div id="browsers">
-    <!-- 10 slots -->
     <div class="slot">
         <div class="slot-header">
             <input type="text" placeholder="Enter URL or search query" id="input1">
@@ -197,30 +197,50 @@
 </div>
 
 <script>
-function formatUrl(input){
-    input = input.trim();
-    if (!input) return '';
-    if (!/^https?:\/\//i.test(input)){
-        input = 'https://' + input;
+function formatInput(input){
+    let val = input.trim();
+    if (!val) return '';
+
+    // Check if it's a URL
+    if (val.includes('.') && val.length > 5){
+        if (!/^https?:\/\//i.test(val)){
+            val = 'https://' + val;
+        }
+        return val; // Returns the URL
+    } else {
+        // If it's not a clear URL, treat it as a search query
+        return 'https://www.google.com/search?q=' + encodeURIComponent(val);
     }
-    return input;
 }
 
 // Global search updates all slots
 function updateAllSlots(){
-    let val = formatUrl(document.getElementById('global-input').value);
+    let inputElement = document.getElementById('global-input');
+    let val = formatInput(inputElement.value);
+
     if (!val) return;
+    
+    // Update the input field with the formatted URL/Search URL for clarity
+    inputElement.value = val;
+
     for(let i=1; i<=10; i++){
         document.getElementById('iframe'+i).src = val;
-        document.getElementById('input'+i).value = val;
+        // Optionally update the individual slot input fields too
+        document.getElementById('input'+i).value = val; 
     }
 }
 
 // Individual slot update
 function updateSlot(slot){
-    let input = formatUrl(document.getElementById('input'+slot).value);
-    if (!input) return;
-    document.getElementById('iframe'+slot).src = input;
+    let inputElement = document.getElementById('input'+slot);
+    let url = formatInput(inputElement.value);
+    
+    if (!url) return;
+    
+    // Update the input field with the formatted URL/Search URL for clarity
+    inputElement.value = url;
+    
+    document.getElementById('iframe'+slot).src = url;
 }
 </script>
 
