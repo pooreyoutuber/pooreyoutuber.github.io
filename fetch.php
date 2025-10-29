@@ -1,6 +1,8 @@
 <?php
+// fetch.php
 header('Content-Type: application/json; charset=utf-8');
 
+// --- Proxies with credentials (keep safe; do NOT commit publicly) ---
 $PROXIES = [
   ['server' => '142.111.48.253:7030', 'username' => 'bqctypvz', 'password' => '399xb3kxqv6i'],
   ['server' => '31.59.20.176:6754', 'username' => 'bqctypvz', 'password' => '399xb3kxqv6i'],
@@ -14,58 +16,90 @@ $PROXIES = [
   ['server' => '142.147.128.93:6593', 'username' => 'bqctypvz', 'password' => '399xb3kxqv6i']
 ];
 
-$data = json_decode(file_get_contents('php://input'), true);
+// read request
+$raw = file_get_contents('php://input');
+$data = json_decode($raw, true);
 if (!$data || empty($data['url'])) {
-  echo json_encode(['ok'=>false, 'error'=>'Missing URL']);
-  exit;
+    http_response_code(400);
+    echo json_encode(['ok'=>false, 'error'=>'Missing URL in request']);
+    exit;
 }
 
 $url = $data['url'];
-$index = intval($data['proxyIndex']);
+$index = isset($data['proxyIndex']) ? intval($data['proxyIndex']) : 0;
 if ($index < 0 || $index >= count($PROXIES)) $index = 0;
-$p = $PROXIES[$index];
+$proxy = $PROXIES[$index];
 
-$ch = curl_init();
-curl_setopt_array($ch, [
-  CURLOPT_URL => $url,
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_FOLLOWLOCATION => true,
-  CURLOPT_TIMEOUT => 20,
-  CURLOPT_PROXY => $p['server'],
-  CURLOPT_PROXYUSERPWD => "{$p['username']}:{$p['password']}",
-  CURLOPT_PROXYTYPE => CURLPROXY_HTTP,
-  CURLOPT_HTTPPROXYTUNNEL => true,
-  CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/117 Safari/537.36'
-]);
-$content = curl_exec($ch);
-$error = curl_error($ch);
-curl_close($ch);
-
-if ($error) {
-  echo json_encode(['ok'=>false, 'error'=>$error]);
-  exit;
+// validate url
+if (!filter_var($url, FILTER_VALIDATE_URL)) {
+    http_response_code(400);
+    echo json_encode(['ok'=>false, 'error'=>'Invalid URL']);
+    exit;
 }
 
-// IP check through proxy
+// prepare cURL
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_HEADER, false);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+curl_setopt($ch, CURLOPT_TIMEOUT, 25);
+
+// proxy settings
+curl_setopt($ch, CURLOPT_PROXY, $proxy['server']);
+curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy['username'] . ':' . $proxy['password']);
+curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, true);
+
+// headers
+$headers = [
+    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117 Safari/537.36',
+    'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language: en-US,en;q=0.9'
+];
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+$response = curl_exec($ch);
+$curlErr = curl_error($ch);
+$info = curl_getinfo($ch);
+curl_close($ch);
+
+if ($curlErr) {
+    http_response_code(500);
+    echo json_encode(['ok'=>false, 'error'=>'cURL error: '.$curlErr, 'info'=>$info]);
+    exit;
+}
+
+// ip check via proxy (best-effort)
+$ipInfo = ['error'=>'unknown'];
 $ch2 = curl_init('https://api.ipify.org?format=json');
-curl_setopt_array($ch2, [
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_PROXY => $p['server'],
-  CURLOPT_PROXYUSERPWD => "{$p['username']}:{$p['password']}",
-  CURLOPT_PROXYTYPE => CURLPROXY_HTTP,
-  CURLOPT_HTTPPROXYTUNNEL => true
-]);
+curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch2, CURLOPT_PROXY, $proxy['server']);
+curl_setopt($ch2, CURLOPT_PROXYUSERPWD, $proxy['username'] . ':' . $proxy['password']);
+curl_setopt($ch2, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+curl_setopt($ch2, CURLOPT_HTTPPROXYTUNNEL, true);
+curl_setopt($ch2, CURLOPT_TIMEOUT, 8);
 $ipResp = curl_exec($ch2);
-$ipInfo = json_decode($ipResp, true);
+if ($ipResp && !curl_errno($ch2)) {
+    $j = json_decode($ipResp, true);
+    if ($j) $ipInfo = $j;
+    else $ipInfo = ['raw' => substr($ipResp,0,200)];
+} else {
+    $ipInfo = ['error' => 'ip check failed: ' . curl_error($ch2)];
+}
 curl_close($ch2);
 
-$banner = "<div style='background:#0ea5e9;color:white;padding:8px;font-weight:bold;'>".
-          "Proxy: {$p['server']} | IP: ".($ipInfo['ip'] ?? 'Unknown').
-          "</div>";
+// insert banner showing proxy and ip
+$banner = "<div style='background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;'>"
+        . "Fetched via proxy: {$proxy['server']}  |  Outgoing IP: " . htmlspecialchars($ipInfo['ip'] ?? json_encode($ipInfo))
+        . "</div>";
 
-if (stripos($content, '<body') !== false)
-  $content = preg_replace('/<body([^>]*)>/i', '<body$1>'.$banner, $content, 1);
-else
-  $content = $banner . $content;
+if (stripos($response, '<body') !== false) {
+    $response = preg_replace('/<body([^>]*)>/i', '<body$1>'.$banner, $response, 1);
+} else {
+    $response = $banner . $response;
+}
 
-echo json_encode(['ok'=>true, 'ipInfo'=>$ipInfo, 'content'=>$content]);
+// return JSON
+echo json_encode(['ok'=>true, 'ipInfo'=>$ipInfo, 'info'=>$info, 'content'=>$response], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
