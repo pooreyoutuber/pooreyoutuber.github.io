@@ -1,122 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <title>Geo Browser Tool (Frontend)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    body { font-family: Inter, system-ui, sans-serif; background:#f4f6f9; color:#111; padding:18px; }
-    .card { background:#fff; max-width:900px; margin:auto; padding:18px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
-    label{display:block;margin-top:10px;font-weight:600;}
-    input[type=url], select { width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; }
-    button { margin-top:12px; padding:10px 14px; background:#0ea5e9; color:#fff; border:0; border-radius:8px; cursor:pointer; font-weight:700; }
-    pre { background:#0b1220; color:#dbeafe; padding:12px; border-radius:8px; max-height:200px; overflow:auto; white-space:pre-wrap; }
-    iframe { width:100%; height:600px; border:1px solid #e5e7eb; border-radius:8px; margin-top:12px; }
-    .muted { color:#6b7280; font-size:13px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌍 Geo Browser Tool</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+h1 { color: #333; }
+input, select, button { padding: 8px; margin: 5px 0; width: 100%; }
+#logs { background: #fff; padding: 10px; margin-top: 10px; height: 150px; overflow-y: auto; border: 1px solid #ccc; }
+#result { margin-top: 10px; border: 1px solid #ccc; height: 500px; width: 100%; }
+</style>
 </head>
 <body>
-  <div class="card">
-    <h2>🌍 Geo Browser Tool</h2>
-    <p class="muted">Paste your target URL, select a proxy, and view the fetched result (server-side proxy fetch).</p>
 
-    <label>Target URL</label>
-    <input id="urlInput" type="url" placeholder="https://example.com" value="https://pooreyoutuber.github.io" />
+<h1>🌍 Geo Browser Tool</h1>
 
-    <label>Choose Proxy / Geo Location</label>
-    <select id="proxySelect"><option>Loading proxies...</option></select>
+<label>Target URL</label>
+<input type="text" id="targetUrl" placeholder="https://example.com" value="https://pooreyoutuber.github.io">
 
-    <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
-      <button id="fetchBtn">Open via Selected Proxy</button>
-      <div class="muted" id="status">Status: idle</div>
-    </div>
+<label>Choose Proxy / Geo Location</label>
+<select id="proxySelect">
+  <option value="142.111.48.253:7030">Proxy 1 - 142.111.48.253:7030</option>
+  <option value="31.59.20.176:6754">Proxy 2 - 31.59.20.176:6754</option>
+  <option value="23.95.150.145:6114">Proxy 3 - 23.95.150.145:6114</option>
+  <option value="198.23.239.134:6540">Proxy 4 - 198.23.239.134:6540</option>
+  <option value="45.38.107.97:6014">Proxy 5 - 45.38.107.97:6014</option>
+  <option value="107.172.163.27:6543">Proxy 6 - 107.172.163.27:6543</option>
+  <option value="64.137.96.74:6641">Proxy 7 - 64.137.96.74:6641</option>
+  <option value="216.10.27.159:6837">Proxy 8 - 216.10.27.159:6837</option>
+  <option value="142.111.67.146:5611">Proxy 9 - 142.111.67.146:5611</option>
+  <option value="142.147.128.93:6593">Proxy 10 - 142.147.128.93:6593</option>
+</select>
 
-    <h3 style="margin-top:14px">Logs</h3>
-    <pre id="log">No logs yet...</pre>
+<label>Hold (ms)</label>
+<input type="number" id="holdMs" value="3000">
 
-    <h3 style="margin-top:12px">Result</h3>
-    <iframe id="resultFrame" sandbox="allow-same-origin allow-forms allow-popups"></iframe>
-  </div>
+<button id="openBtn">Open via Selected Proxy</button>
+
+<h3>Logs</h3>
+<div id="logs"></div>
+
+<h3>Result</h3>
+<iframe id="result"></iframe>
 
 <script>
-const logEl = document.getElementById('log');
-const statusEl = document.getElementById('status');
-function log(msg){
-  logEl.textContent = new Date().toLocaleTimeString() + ' › ' + msg + '\n' + logEl.textContent;
+const logs = document.getElementById('logs');
+const resultFrame = document.getElementById('result');
+
+function log(msg) {
+    const time = new Date().toLocaleTimeString();
+    logs.innerHTML += `[${time}] › ${msg}<br>`;
+    logs.scrollTop = logs.scrollHeight;
 }
 
-async function loadProxies(){
-  statusEl.textContent = 'Status: loading proxies...';
-  try {
-    const r = await fetch('proxies.php', {cache: 'no-store'});
-    if (!r.ok) throw new Error('HTTP ' + r.status + ' when fetching proxies.php');
-    const txt = await r.text();
-    // try parse JSON safely and show helpful error if not JSON
-    let list;
-    try { list = JSON.parse(txt); } 
-    catch(e) { throw new Error('Invalid JSON from proxies.php — server returned HTML or error.\nResponse preview:\n' + txt.slice(0,800)); }
+// For frontend-only demo, we cannot really change the IP/proxy due to browser CORS.
+// We'll simulate proxy behavior by showing which proxy is selected and opening the URL in iframe.
+document.getElementById('openBtn').addEventListener('click', () => {
+    const url = document.getElementById('targetUrl').value.trim();
+    const proxy = document.getElementById('proxySelect').value;
+    const hold = parseInt(document.getElementById('holdMs').value) || 3000;
 
-    const sel = document.getElementById('proxySelect');
-    sel.innerHTML = '';
-    list.forEach((p, i) => {
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = p.label || ('Proxy ' + (i+1));
-      sel.appendChild(opt);
-    });
-    statusEl.textContent = 'Status: proxies loaded';
-    log('Loaded ' + list.length + ' proxies.');
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = 'Status: failed to load proxies';
-    log('Error loading proxies: ' + err.message);
-    // keep existing option to show error
-    const sel = document.getElementById('proxySelect');
-    sel.innerHTML = '<option>Failed to load proxies</option>';
-  }
-}
+    if (!url) { log("Error: URL is empty"); return; }
 
-document.getElementById('fetchBtn').addEventListener('click', async () => {
-  const url = document.getElementById('urlInput').value.trim();
-  const proxyIndex = document.getElementById('proxySelect').value;
-  if (!url) { alert('Enter a valid URL'); return; }
-  statusEl.textContent = 'Status: fetching...';
-  log('Fetching ' + url + ' via proxy #' + proxyIndex);
-  try {
-    const res = await fetch('fetch.php', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ url, proxyIndex })
-    });
-    const txt = await res.text();
-    // server should return JSON. If not, show preview
-    let json;
-    try { json = JSON.parse(txt); } 
-    catch(e) {
-      log('Server did not return JSON. Response preview (first 1000 chars):\n' + txt.slice(0,1000));
-      statusEl.textContent = 'Status: server returned non-JSON';
-      return;
-    }
-    if (!json.ok) {
-      log('Server error: ' + (json.error || JSON.stringify(json)));
-      statusEl.textContent = 'Status: error';
-      return;
-    }
-    log('Fetched. Outgoing IP: ' + (json.ipInfo && (json.ipInfo.ip || JSON.stringify(json.ipInfo))));
-    statusEl.textContent = 'Status: fetched OK';
-    const frame = document.getElementById('resultFrame');
-    const doc = frame.contentWindow.document;
-    doc.open();
-    doc.write(json.content);
-    doc.close();
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = 'Status: request failed';
-    log('Request failed: ' + err.message);
-  }
+    log(`Simulating fetch via proxy ${proxy} with hold ${hold}ms...`);
+
+    setTimeout(() => {
+        log(`Opening ${url} in iframe...`);
+        resultFrame.src = url;
+    }, hold);
 });
-
-loadProxies();
 </script>
+
 </body>
 </html>
