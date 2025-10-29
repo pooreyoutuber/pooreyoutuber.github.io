@@ -56,6 +56,21 @@
     height: calc(100% / 0.4);
     opacity: 1;
   }
+  
+  /* --- NEW CSS for Auto-Scrolling --- */
+  @keyframes scroll {
+    0% { transform: translate(0, 0) scale(0.4); } 
+    50% { transform: translate(0, -200%) scale(0.4); } /* Scrolls down 200% */
+    100% { transform: translate(0, 0) scale(0.4); } 
+  }
+
+  .slot.scrolling iframe {
+    /* Override iframe's default transform if needed and apply animation */
+    transform: translate(0, 0) scale(0.4); 
+    animation: scroll 15s ease-in-out infinite; /* 15 seconds duration */
+  }
+  /* ---------------------------------- */
+  
   .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
   .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
   .action-btn.view { background: var(--success); color: white; }
@@ -99,6 +114,11 @@
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
                 Enable **Active User** Mode: Repeat all <span>30s</span> for better GA tracking.
+            </label>
+            
+            <input type="checkbox" id="autoScrollMode" />
+            <label for="autoScrollMode">
+                Enable **Auto Scroll** (Simulated)
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
@@ -185,6 +205,8 @@ const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
+// 👇 NEW ELEMENT REFERENCE
+const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = [];
@@ -255,6 +277,14 @@ function createSlot(index, proxy){
     // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
+    
+    // 👇 NEW: Apply/Remove scrolling class
+    if (autoScrollModeCheckbox.checked) {
+        el.classList.add('scrolling');
+    } else {
+        el.classList.remove('scrolling');
+    }
+    // 👆 NEW: Apply/Remove scrolling class
 
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
@@ -290,9 +320,11 @@ function createSlot(index, proxy){
   
   setStatus('Ready', true);
 
+  // Expose the slot element to allow toggling scrolling globally on existing slots
   return { 
       runAutomation, 
-      setStatus
+      setStatus,
+      element: el // Added to access the slot div later
   }; 
 }
 
@@ -323,7 +355,10 @@ function stopAllAutomation() {
     globalGoBtn.style.display = 'block';
     globalStopBtn.style.display = 'none';
     
-    currentSlots.forEach(s => s.setStatus('Ready (Stopped)', true));
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
+    });
     
     repeatModeCheckbox.checked = false;
 }
@@ -363,6 +398,17 @@ numSlotsInput.addEventListener('change', (e) => {
     if (isNaN(count)) count = 1; 
     renderSlots(count);
 });
+
+// 👇 NEW EVENT LISTENER FOR AUTO-SCROLL CHECKBOX
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    // Toggles the scrolling class on all current slots when the checkbox changes
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        // Ensure that scrolling is only applied if it's checked
+        s.element.classList.toggle('scrolling', isScrolling);
+    });
+});
+// 👆 NEW EVENT LISTENER FOR AUTO-SCROLL CHECKBOX
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
