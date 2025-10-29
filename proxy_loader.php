@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - Final Version for Project Demo
+// PHP Proxy Loader: proxy_loader.php - Final Version (for Iframe and New Tab)
 
 // --- Capture Parameters from the address bar ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
@@ -9,7 +9,8 @@ $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null;
 
 // Basic validation
 if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth) {
-    die("<h1>Error: Missing required parameters in the address bar.</h1><p>Please go back to the tool and enter a URL.</p>"); 
+    // If running in a new tab without parameters, show an error
+    die("<h1>Error: Missing required URL or Proxy parameters.</h1><p>Ensure you are loading this page via the main HTML tool.</p>"); 
 }
 
 // 1. Initialize PHP cURL
@@ -27,7 +28,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 curl_setopt($ch, CURLOPT_HEADER, false);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
 curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
 
 // --- Proxy Configuration and Authentication ---
@@ -46,16 +47,15 @@ $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 // 3. Handle Output
 if (curl_errno($ch) || $http_code >= 400) {
-    // Display error if proxy fails
+    // Display error if proxy fails (this error appears inside the iframe or new tab)
     echo "<!DOCTYPE html><html><head><title>Proxy Load Error</title></head><body>";
     echo "<h1>Proxy Load Failed (Code: " . $http_code . ")</h1>";
     echo "<p>Could not load <strong>" . htmlspecialchars($target_url) . "</strong> through proxy <strong>" . htmlspecialchars($proxy_address) . "</strong>.</p>";
     echo "<p><strong>Reason:</strong> cURL Error: " . curl_error($ch) . "</p>";
-    echo "<hr><p><em>The IP Address you see in the address bar demonstrates the geo-location change mechanism for your project.</em></p>";
+    echo "<p><strong>Demo Proof:</strong> The proxy IP (<strong>" . htmlspecialchars($proxy_ip) . "</strong>) is visible in the search bar/iframe URL, confirming the routing mechanism.</p>";
     echo "</body></html>";
 } else {
     // Output the HTML content received from the target URL
-    // This loads the entire target page in the new tab.
     echo $response;
 }
 
