@@ -31,9 +31,10 @@
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
-  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
-  .repeat-control label { flex-shrink: 0; }
+  .repeat-control { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  .repeat-control input[type="checkbox"],
+  .repeat-control input[type="radio"] { transform: scale(1.2); }
+  .repeat-control label { flex-shrink: 0; display: flex; align-items: center; gap: 5px; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
@@ -60,14 +61,13 @@
   /* --- NEW CSS for Auto-Scrolling --- */
   @keyframes scroll {
     0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, -200%) scale(0.4); } /* Scrolls down 200% */
+    50% { transform: translate(0, -200%) scale(0.4); }
     100% { transform: translate(0, 0) scale(0.4); } 
   }
 
   .slot.scrolling iframe {
-    /* Override iframe's default transform if needed and apply animation */
     transform: translate(0, 0) scale(0.4); 
-    animation: scroll 3s ease-in-out infinite; /* CHANGED: 3 seconds duration (10 cycles in 30s) */
+    animation: scroll 3s ease-in-out infinite; 
   }
   /* ---------------------------------- */
   
@@ -111,20 +111,31 @@
         </div>
         
         <div class="repeat-control">
-            <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all <span id="repeatIntervalText">30s</span> for better GA tracking.
+                <input type="checkbox" id="repeatMode" />
+                Enable **Active User** Mode (Session Looping)
             </label>
             
-            <input type="checkbox" id="shortIntervalMode" /> 
-            <label for="shortIntervalMode">
-                Enable **15s Reload** (Short Session)
+            <span style="color:var(--accent); font-weight:700;">|</span>
+
+            <label>Reload Interval:</label>
+            <label for="interval30s">
+                <input type="radio" id="interval30s" name="reloadInterval" value="30000" checked />
+                30s Reload
             </label>
             
-            <input type="checkbox" id="autoScrollMode" />
+            <label for="interval15s">
+                <input type="radio" id="interval15s" name="reloadInterval" value="15000" />
+                15s Reload
+            </label>
+            
+            <span style="color:var(--accent); font-weight:700;">|</span>
+
             <label for="autoScrollMode">
-                Enable **Auto Scroll** (Simulated)
+                <input type="checkbox" id="autoScrollMode" />
+                Enable **Auto Scroll**
             </label>
+            
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
@@ -136,7 +147,7 @@
                 <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every <span id="infoIntervalText">30 seconds</span> (which is the required session time).
+                <strong>Action:</strong> Check the **'Enable Active User Mode'**, select **15s** or **30s**, and click 'Load & Run All'. The selected interval will be the session time.
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -213,11 +224,10 @@ const repeatModeCheckbox = document.getElementById('repeatMode');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
-// --- NEW ELEMENTS ---
-const shortIntervalModeCheckbox = document.getElementById('shortIntervalMode');
-const repeatIntervalText = document.getElementById('repeatIntervalText');
-const infoIntervalText = document.getElementById('infoIntervalText'); // For the info box
-// --------------------
+// --- NEW/UPDATED ELEMENTS ---
+const interval30sRadio = document.getElementById('interval30s');
+const interval15sRadio = document.getElementById('interval15s');
+// ----------------------------
 
 let currentSlots = [];
 let repeatIntervals = []; 
@@ -298,9 +308,11 @@ function createSlot(index, proxy){
 
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    // Dynamic status text based on selected interval
-    const intervalSeconds = shortIntervalModeCheckbox.checked ? '15s' : '30s';
-    setStatus(`Sending Unique Proxy View (${intervalSeconds} Session)...`, false);
+    // Get the dynamically selected interval value
+    const selectedIntervalElement = document.querySelector('input[name="reloadInterval"]:checked');
+    const intervalSeconds = selectedIntervalElement ? (parseInt(selectedIntervalElement.value) / 1000) : 'N/A';
+    
+    setStatus(`Sending Unique Proxy View (${intervalSeconds}s Session)...`, false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
@@ -336,7 +348,7 @@ function createSlot(index, proxy){
   return { 
       runAutomation, 
       setStatus,
-      element: el // Added to access the slot div later
+      element: el 
   }; 
 }
 
@@ -381,11 +393,17 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
-  // Determine the interval based ONLY on the shortIntervalModeCheckbox
-  const interval = shortIntervalModeCheckbox.checked ? SHORT_INTERVAL_MS : REPEAT_INTERVAL_MS;
+  // Determine the interval by finding the checked radio button
+  const selectedIntervalElement = document.querySelector('input[name="reloadInterval"]:checked');
+  if (!selectedIntervalElement) {
+      alert('Please select a Reload Interval (15s or 30s).');
+      return;
+  }
+  
+  const interval = parseInt(selectedIntervalElement.value); 
   const intervalSeconds = interval / 1000;
   
-  // Run once immediately
+  // Run once immediately (all slots reload)
   currentSlots.forEach(s => s.runAutomation(url));
   
   // If repeat mode is checked, start intervals
@@ -399,7 +417,7 @@ globalGoBtn.addEventListener('click', ()=>{
         const intervalId = setInterval(() => {
             s.runAutomation(url);
             s.setStatus(`Repeat Running. Next in ${intervalSeconds}s...`, true);
-        }, interval);
+        }, interval); // Use the selected interval (15000 or 30000)
         
         repeatIntervals.push(intervalId);
     });
@@ -418,26 +436,9 @@ autoScrollModeCheckbox.addEventListener('change', (e) => {
     // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
-
-// --- UPDATED Event listener for Short Interval (15s Reload) checkbox ---
-shortIntervalModeCheckbox.addEventListener('change', (e) => {
-    const newIntervalText = e.target.checked ? '15s' : '30s';
-    
-    // Update display text for both the control area and the info box
-    repeatIntervalText.textContent = newIntervalText;
-    infoIntervalText.textContent = `${newIntervalText} seconds`; // Update info box text
-    
-    // Automatically stop all intervals if they are running to apply the new time
-    if (globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-        alert(`Repeat Mode has been stopped. Click "Load & Run All" again to start the new ${newIntervalText} cycle.`);
-    }
-});
-// --------------------------------------------------------------------
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
 
