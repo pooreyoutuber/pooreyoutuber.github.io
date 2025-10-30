@@ -113,7 +113,12 @@
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all <span>30s</span> for better GA tracking.
+                Enable **Active User** Mode: Repeat all <span id="repeatIntervalText">30s</span> for better GA tracking.
+            </label>
+            
+            <input type="checkbox" id="shortIntervalMode" /> 
+            <label for="shortIntervalMode">
+                Enable **15s Reload** (Short Session)
             </label>
             
             <input type="checkbox" id="autoScrollMode" />
@@ -131,7 +136,7 @@
                 <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30 seconds (which is the required session time).
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30 seconds (or 15 seconds if '15s Reload' is selected).
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -205,9 +210,13 @@ const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
-// 👇 NEW ELEMENT REFERENCE
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
+
+// --- NEW ELEMENTS ---
+const shortIntervalModeCheckbox = document.getElementById('shortIntervalMode');
+const repeatIntervalText = document.getElementById('repeatIntervalText');
+// --------------------
 
 let currentSlots = [];
 let repeatIntervals = []; 
@@ -218,10 +227,11 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
+    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
 }));
 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds
+const REPEAT_INTERVAL_MS = 30000; // 30 seconds (Standard)
+const SHORT_INTERVAL_MS = 15000; // 15 seconds (New Short Session)
 
 // Function to create a single slot element
 function createSlot(index, proxy){
@@ -278,21 +288,22 @@ function createSlot(index, proxy){
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
-    // 👇 NEW: Apply/Remove scrolling class
+    // Apply/Remove scrolling class
     if (autoScrollModeCheckbox.checked) {
         el.classList.add('scrolling');
     } else {
         el.classList.remove('scrolling');
     }
-    // 👆 NEW: Apply/Remove scrolling class
 
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    // Dynamic status text based on selected interval
+    const intervalSeconds = shortIntervalModeCheckbox.checked ? '15s' : '30s';
+    setStatus(`Sending Unique Proxy View (${intervalSeconds} Session)...`, false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for 30s.
+        // Fetch request is sent. PHP script runs in background for the session duration.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         // Response is quick due to Connection: close header in PHP
@@ -360,7 +371,7 @@ function stopAllAutomation() {
         s.element.classList.remove('scrolling'); // Stop scrolling on all slots
     });
     
-    repeatModeCheckbox.checked = false;
+    // repeatModeCheckbox.checked = false; // Don't uncheck, user might want to re-run
 }
 
 // Global Start/Run Logic
@@ -371,6 +382,10 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
+  // Determine the interval
+  const interval = shortIntervalModeCheckbox.checked ? SHORT_INTERVAL_MS : REPEAT_INTERVAL_MS;
+  const intervalSeconds = interval / 1000;
+  
   // Run once immediately
   currentSlots.forEach(s => s.runAutomation(url));
   
@@ -380,12 +395,12 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        s.setStatus(`Starting Repeat Mode (30s cycle)...`, true);
+        s.setStatus(`Starting Repeat Mode (${intervalSeconds}s cycle)...`, true);
         
         const intervalId = setInterval(() => {
             s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in 30s...`, true);
-        }, REPEAT_INTERVAL_MS);
+            s.setStatus(`Repeat Running. Next in ${intervalSeconds}s...`, true);
+        }, interval);
         
         repeatIntervals.push(intervalId);
     });
@@ -399,7 +414,7 @@ numSlotsInput.addEventListener('change', (e) => {
     renderSlots(count);
 });
 
-// 👇 NEW EVENT LISTENER FOR AUTO-SCROLL CHECKBOX
+// Event listener for Auto-Scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
     // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
@@ -408,7 +423,21 @@ autoScrollModeCheckbox.addEventListener('change', (e) => {
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
-// 👆 NEW EVENT LISTENER FOR AUTO-SCROLL CHECKBOX
+
+// --- NEW Event listener for Short Interval (15s Reload) checkbox ---
+shortIntervalModeCheckbox.addEventListener('change', (e) => {
+    if (e.target.checked) {
+        repeatIntervalText.textContent = '15s';
+    } else {
+        repeatIntervalText.textContent = '30s';
+    }
+    // Automatically stop all intervals if they are running to apply the new time
+    if (globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+        alert('Repeat Mode has been stopped. Click "Load & Run All" again to apply the new 15s/30s interval.');
+    }
+});
+// --------------------------------------------------------------------
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
