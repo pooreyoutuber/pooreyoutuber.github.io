@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
+  /* --- CSS Styles (No change in visual style) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -58,7 +58,7 @@
     opacity: 1;
   }
   
-  /* --- NEW CSS for Auto-Scrolling --- */
+  /* --- CSS for Auto-Scrolling --- */
   @keyframes scroll {
     0% { transform: translate(0, 0) scale(0.4); } 
     50% { transform: translate(0, -200%) scale(0.4); }
@@ -121,12 +121,12 @@
             <label>Reload Interval:</label>
             <label for="interval30s">
                 <input type="radio" id="interval30s" name="reloadInterval" value="30000" checked />
-                30s Reload
+                30s-40s Random
             </label>
             
             <label for="interval15s">
                 <input type="radio" id="interval15s" name="reloadInterval" value="15000" />
-                15s Reload
+                15s-20s Random
             </label>
             
             <span>|</span>
@@ -136,9 +136,9 @@
                 Enable **Auto Scroll**
             </label>
 
-            <label for="simulateFocusMode">
-                <input type="checkbox" id="simulateFocusMode" />
-                Simulate **User Focus** (Advanced)
+            <label for="simulateClickMode">
+                <input type="checkbox" id="simulateClickMode" />
+                Simulate **Ad Click Delay** (5s)
             </label>
             
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
@@ -149,13 +149,10 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
+                **Engagement Boost:** Check **'Simulate Ad Click Delay'** to simulate user interaction (Focus + Scroll Start) 5 seconds after the page loads. This helps boost engagement metrics for ad networks.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'**, select **15s** or **30s**, and click 'Load & Run All'. The selected interval will be the session time.
-            </li>
-            <li>
-                **NEW FOCUS:** For better simulation, check **'Simulate User Focus'**. This helps the browser register interaction.
+                **Active User Fix:** This tool sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -179,9 +176,7 @@ const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
-// Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
-    // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -228,7 +223,7 @@ const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
-const simulateFocusModeCheckbox = document.getElementById('simulateFocusMode'); // NEW Element
+const simulateClickModeCheckbox = document.getElementById('simulateClickMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
 const interval30sRadio = document.getElementById('interval30s');
@@ -237,13 +232,14 @@ const interval15sRadio = document.getElementById('interval15s');
 let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
+let clickDelayTimers = []; 
 
 // Map proxies with fixed unique IDs
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
+    uniqueId: generateUniqueId() 
 }));
 
 // Function to create a single slot element
@@ -295,31 +291,51 @@ function createSlot(index, proxy){
   // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
-    
-    // 1. iFrame Load (Visible preview)
+
+    // --- STEP 1: UI Update & Setup ---
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
-    // Apply/Remove scrolling class
-    el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
+    // Clear any existing delayed click timer for this slot
+    const existingTimerIndex = clickDelayTimers.findIndex(t => t.index === index);
+    if(existingTimerIndex !== -1) {
+        clearTimeout(clickDelayTimers[existingTimerIndex].timerId);
+        clickDelayTimers.splice(existingTimerIndex, 1);
+    }
+    
+    // Remove scrolling class initially (it will be added again on delay)
+    el.classList.remove('scrolling');
 
-    // NEW: Simulate Focus
-    if (simulateFocusModeCheckbox.checked) {
-        // This attempts to give focus to the iframe, mimicking a click/interaction
-        // Note: Browser security might limit its effectiveness on cross-origin iframes
-        iframe.focus(); 
-        setStatus('Focusing Frame...', false);
+    // --- STEP 2: Simulate Click Delay (Engagement Boost) ---
+    if (simulateClickModeCheckbox.checked) {
+        setStatus('Waiting 5s for Simulated Click...', false);
+        const timerId = setTimeout(() => {
+            // After 5 seconds, simulate the user action
+            iframe.focus(); 
+            el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
+            setStatus('Simulated Click Done. Sending View...', false);
+        }, 5000); // 5000 milliseconds = 5 seconds
+        
+        // Store the timer so we can clear it if needed
+        clickDelayTimers.push({ index, timerId });
+    } else {
+        // If delay is off, apply scroll/focus instantly 
+        el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
     }
 
+
+    // --- STEP 3: Send Proxy View Request (The main action) ---
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    const selectedIntervalElement = document.querySelector('input[name="reloadInterval"]:checked');
-    const intervalSeconds = selectedIntervalElement ? (parseInt(selectedIntervalElement.value) / 1000) : 'N/A';
+    // Get the calculated interval for status display (if in repeat mode)
+    const activeInterval = repeatIntervals.find(i => i.slotIndex === index);
+    const intervalSeconds = activeInterval ? activeInterval.seconds : 'N/A';
     
     setStatus(`Sending Unique Proxy View (${intervalSeconds}s Session)...`, false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
+        // We use fetch to fire the request using the proxy backend
         await fetch(proxiedUrl, { mode: 'no-cors' });
         setStatus('View Sent (BG Session Active)', true);
         
@@ -349,7 +365,7 @@ function createSlot(index, proxy){
       runAutomation, 
       setStatus,
       element: el,
-      iframe: iframe // Return iframe element for focus access
+      iframe: iframe 
   }; 
 }
 
@@ -375,8 +391,12 @@ function renderSlots(count) {
 
 // Global Stop Function
 function stopAllAutomation() {
-    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals.forEach(item => clearInterval(item.intervalId));
     repeatIntervals = [];
+    
+    clickDelayTimers.forEach(t => clearTimeout(t.timerId));
+    clickDelayTimers = []; // Clear all stored timers
+
     globalGoBtn.style.display = 'block';
     globalStopBtn.style.display = 'none';
     
@@ -396,12 +416,24 @@ globalGoBtn.addEventListener('click', ()=>{
   
   const selectedIntervalElement = document.querySelector('input[name="reloadInterval"]:checked');
   if (!selectedIntervalElement) {
-      alert('Please select a Reload Interval (15s or 30s).');
+      alert('Please select a Reload Interval (15s-20s or 30s-40s).');
       return;
   }
   
-  const interval = parseInt(selectedIntervalElement.value); 
-  const intervalSeconds = interval / 1000;
+  const intervalBase = parseInt(selectedIntervalElement.value); 
+  let intervalMin, intervalMax;
+  
+  // --- Define Random Range Based on Base Value ---
+  if (intervalBase === 15000) {
+      intervalMin = 15000; // 15s
+      intervalMax = 20000; // 20s
+  } else if (intervalBase === 30000) {
+      intervalMin = 30000; // 30s
+      intervalMax = 40000; // 40s
+  } else {
+      intervalMin = 30000;
+      intervalMax = 40000;
+  }
   
   // Run once immediately (all slots reload)
   currentSlots.forEach(s => s.runAutomation(url));
@@ -411,15 +443,24 @@ globalGoBtn.addEventListener('click', ()=>{
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
       
-    currentSlots.forEach((s) => {
+    currentSlots.forEach((s, index) => {
+        // --- Calculate a unique random interval for THIS slot ---
+        const randomInterval = Math.floor(Math.random() * (intervalMax - intervalMin + 1)) + intervalMin;
+        const intervalSeconds = (randomInterval / 1000).toFixed(1);
+
         s.setStatus(`Starting Repeat Mode (${intervalSeconds}s cycle)...`, true);
         
         const intervalId = setInterval(() => {
             s.runAutomation(url);
             s.setStatus(`Repeat Running. Next in ${intervalSeconds}s...`, true);
-        }, interval); 
+        }, randomInterval); 
         
-        repeatIntervals.push(intervalId);
+        // Store interval ID along with the calculated seconds for display
+        repeatIntervals.push({ 
+            intervalId: intervalId, 
+            seconds: intervalSeconds, 
+            slotIndex: index 
+        });
     });
   }
 });
@@ -431,26 +472,7 @@ numSlotsInput.addEventListener('change', (e) => {
     renderSlots(count);
 });
 
-// Event listener for Auto-Scroll checkbox
+// Event listener for Auto-Scroll checkbox 
 autoScrollModeCheckbox.addEventListener('change', (e) => {
     const isScrolling = e.target.checked;
-    currentSlots.forEach(s => {
-        s.element.classList.toggle('scrolling', isScrolling);
-    });
-});
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
-
-// If repeat mode is unchecked, it should stop all automation
-repeatModeCheckbox.addEventListener('change', () => {
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
-
-// Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
-</script>
-</body>
-</html>
+    // Only apply instant scroll if "Si
