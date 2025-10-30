@@ -67,7 +67,7 @@ function generateClientId() {
 const getOptimalDelay = (totalViews) => {
     // Target 1 hour (3600 seconds) for all views to complete.
     const targetDurationMs = 3600000; 
-    const avgDelayMs = targetDurationMs / totalViews;
+    const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
     
     // Set min/max bounds for natural variance
     const minDelay = Math.max(1000, avgDelayMs * 0.7); // Minimum 1 second delay
@@ -89,11 +89,11 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         });
 
         if (response.status === 204) { 
-            // console.log(`[View ${currentViewId}] SUCCESS ✅ | Event: ${eventType}`);
+            // SUCCESS: Google accepted the data
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            // Only log errors for debugging, not successful events
+            // FAILURE: Google returned an error (e.g., bad key or ID)
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
             return { success: false };
         }
@@ -105,11 +105,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 
 /**
  * Simulates a single view session with search, scroll, and engagement events.
- * @param {string} gaId - GA4 Measurement ID
- * @param {string} apiSecret - GA4 API Secret
- * @param {string} url - The target page URL
- * @param {string} searchKeyword - Optional search keyword for referrer simulation
- * @param {string} viewCount - The current view number for logging
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); // Unique Client ID for the session
@@ -130,7 +125,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         events[1].params.page_title = searchKeyword; // Set title to keyword for search context
     } else {
          // Add a standard referrer if not search (e.g., from a blog or social)
-         if (Math.random() < 0.3) { // 30% chance of non-search referral
+         if (Math.random() < 0.3) { 
             referrer = Math.random() < 0.5 ? "https://t.co/random" : "https://exampleblog.com/post-link";
             events[1].params.page_referrer = referrer;
          }
@@ -214,7 +209,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - UPDATED LOGIC
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - NON-BLOCKING
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -229,12 +224,13 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
+    // Send ACKNOWLEDGEMENT immediately before starting long process
     res.json({ 
         status: 'accepted', 
         message: `Request for ${viewPlan.length} high-engagement views accepted. Processing started. Estimated completion time: ~1 hour. CHECK DEBUGVIEW NOW!`
     });
 
-    // Start the heavy, time-consuming simulation in the background
+    // Start the heavy, time-consuming simulation in the background (NON-BLOCKING)
     (async () => {
         const totalViews = viewPlan.length;
         console.log(`[BOOSTER START] Starting real simulation for ${totalViews} views. Targeting 1-hour completion.`);
@@ -258,7 +254,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT (UPDATED LANGUAGE LOGIC)
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT (STABLE)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     
@@ -272,7 +268,6 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (description) is required.' });
     }
     
-    // **PROMPT MODIFIED**: 6 English + 4 Foreign Captions
     const prompt = `Generate exactly 10 unique, highly trending, and viral Instagram Reels captions. The reel topic is: "${description}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
@@ -307,7 +302,7 @@ app.post('/api/caption-generate', async (req, res) => {
 
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT (API: /api/caption-edit) - Same
+// 3. AI INSTA CAPTION EDITOR ENDPOINT (STABLE)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     
@@ -358,3 +353,4 @@ app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
 
+            
