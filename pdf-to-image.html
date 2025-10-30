@@ -2,50 +2,128 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDF to Image Converter</title>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
+     crossorigin="anonymous"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>
+    // Set worker source for PDF.js (Necessary for proper functioning)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  </script>
+
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
     input { margin: 10px; }
-    button { padding: 10px 20px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button { padding: 10px 20px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; margin-bottom: 15px; }
     button:hover { background: #1e7e34; }
-    canvas { margin-top: 20px; border: 1px solid #ccc; }
+    canvas { margin-top: 20px; border: 1px solid #ccc; max-width: 100%; height: auto; display: none; /* Initially hide canvas */ }
+    .ad-container { margin: 20px auto; max-width: 728px; text-align: center; }
   </style>
 </head>
 <body>
   <h2>PDF to Image Converter</h2>
+  
+  <div class="ad-container">
+    <ins class="adsbygoogle"
+         style="display:block; text-align:center;"
+         data-ad-layout="in-article"
+         data-ad-format="fluid"
+         data-ad-client="ca-pub-9877532310172541"
+         data-ad-slot="3376304110"></ins>
+  </div>
   <input type="file" id="upload" accept="application/pdf"><br>
-  <button onclick="convertPDF()">Convert</button>
+  <button onclick="convertPDF()">Convert PDF Page to Image</button>
+
+  <div class="ad-container">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-format="fluid"
+         data-ad-layout-key="-fb+5w+4e-db+86"
+         data-ad-client="ca-pub-9877532310172541"
+         data-ad-slot="2823330849"></ins>
+  </div>
   <div>
     <canvas id="pdf-canvas"></canvas>
+    <p id="download-link" style="margin-top: 15px; display: none;">
+      <a id="download-anchor" href="#" download="pdf_image.png" style="color: #0b78d1; font-weight: bold; text-decoration: none;">⬇️ Download Image</a>
+    </p>
   </div>
-
+  
+  <div class="ad-container">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-9877532310172541"
+         data-ad-slot="2118228617"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
+  <div class="ad-container" style="margin-top: 40px;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-format="autorelaxed"
+         data-ad-client="ca-pub-9877532310172541"
+         data-ad-slot="6399436165"></ins>
+  </div>
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Adsense
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    });
+
     function convertPDF() {
       const file = document.getElementById("upload").files[0];
+      const canvas = document.getElementById("pdf-canvas");
+      const downloadLink = document.getElementById("download-link");
+      const downloadAnchor = document.getElementById("download-anchor");
+
       if (!file) {
         alert("Please upload a PDF file!");
         return;
       }
 
+      // Hide previous results
+      canvas.style.display = 'none';
+      downloadLink.style.display = 'none';
+
       const fileReader = new FileReader();
       fileReader.onload = function() {
         const typedarray = new Uint8Array(this.result);
 
-        pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+        // Load PDF document
+        pdfjsLib.getDocument({ data: typedarray }).promise.then(function(pdf) {
+          // Get the first page
           pdf.getPage(1).then(function(page) {
             const scale = 1.5;
             const viewport = page.getViewport({ scale: scale });
-            const canvas = document.getElementById("pdf-canvas");
             const context = canvas.getContext("2d");
+            
+            // Set canvas size
             canvas.width = viewport.width;
             canvas.height = viewport.height;
 
-            page.render({
+            // Render PDF page onto canvas
+            const renderContext = {
               canvasContext: context,
               viewport: viewport
+            };
+            
+            page.render(renderContext).promise.then(function() {
+              // Once rendering is complete
+              canvas.style.display = 'block'; // Show canvas
+              
+              // Create download link for the image
+              const dataURL = canvas.toDataURL("image/png");
+              downloadAnchor.href = dataURL;
+              downloadLink.style.display = 'block';
             });
+          }).catch(function(error) {
+            alert("Error rendering PDF page: " + error.message);
           });
+        }).catch(function(error) {
+          alert("Error loading PDF document: " + error.message);
         });
       };
       fileReader.readAsArrayBuffer(file);
