@@ -57,17 +57,16 @@
     opacity: 1;
   }
   
-  /* --- NEW CSS for Auto-Scrolling --- */
+  /* --- CSS for Auto-Scrolling --- */
   @keyframes scroll {
     0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, -200%) scale(0.4); } /* Scrolls down 200% */
+    50% { transform: translate(0, -200%) scale(0.4); } 
     100% { transform: translate(0, 0) scale(0.4); } 
   }
 
   .slot.scrolling iframe {
-    /* Override iframe's default transform if needed and apply animation */
     transform: translate(0, 0) scale(0.4); 
-    animation: scroll 3s ease-in-out infinite; /* CHANGED: 3 seconds duration (10 cycles in 30s) */
+    animation: scroll 3s ease-in-out infinite;
   }
   /* ---------------------------------- */
   
@@ -113,7 +112,7 @@
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all <span>30s</span> for better GA tracking.
+                Enable **Active User** Mode: Repeat all <span>30-40s</span> for better GA tracking.
             </label>
             
             <input type="checkbox" id="autoScrollMode" />
@@ -131,7 +130,7 @@
                 <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30 seconds (which is the required session time).
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30-40 seconds (**staggered**) for the required session time.
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -169,8 +168,6 @@ function getRandomNames(count) {
 // =========================================================================
 // !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
 // =========================================================================
-// NOTE: I've kept the 10 proxies from your screenshot and duplicated them
-// for the structure, BUT YOU MUST REPLACE THEM WITH 20 UNIQUE IPs
 const DUMMY_PROXIES = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
@@ -184,16 +181,16 @@ const DUMMY_PROXIES = [
   { ip: "142.147.128.93", port: "6593", country: "CA" },
   
   // DUPLICATES BELOW: REPLACE THESE 10 ENTRIES WITH 10 MORE UNIQUE IPs
-  { ip: "142.111.48.254", port: "7031", country: "US" }, // Dummy Change 11
-  { ip: "31.59.20.177", port: "6755", country: "DE" },  // Dummy Change 12
-  { ip: "38.170.176.178", port: "5573", country: "CA" }, // Dummy Change 13
-  { ip: "198.23.239.135", port: "6541", country: "US" }, // Dummy Change 14
-  { ip: "45.38.107.98", port: "6015", country: "US" }, // Dummy Change 15
-  { ip: "107.172.163.28", port: "6544", country: "CA" }, // Dummy Change 16
-  { ip: "64.137.96.75", port: "6642", country: "US" }, // Dummy Change 17
-  { ip: "216.10.27.160", port: "6838", country: "AU" }, // Dummy Change 18
-  { ip: "142.111.67.147", port: "5612", country: "US" }, // Dummy Change 19
-  { ip: "142.147.128.94", port: "6594", country: "CA" }, // Dummy Change 20
+  { ip: "142.111.48.254", port: "7031", country: "US" }, 
+  { ip: "31.59.20.177", port: "6755", country: "DE" },  
+  { ip: "38.170.176.178", port: "5573", country: "CA" }, 
+  { ip: "198.23.239.135", port: "6541", country: "US" }, 
+  { ip: "45.38.107.98", port: "6015", country: "US" }, 
+  { ip: "107.172.163.28", port: "6544", country: "CA" }, 
+  { ip: "64.137.96.75", port: "6642", country: "US" }, 
+  { ip: "216.10.27.160", port: "6838", country: "AU" }, 
+  { ip: "142.111.67.147", port: "5612", country: "US" }, 
+  { ip: "142.147.128.94", port: "6594", country: "CA" }, 
 ];
 // =========================================================================
 
@@ -205,7 +202,6 @@ const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
-// 👇 NEW ELEMENT REFERENCE
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
@@ -221,7 +217,15 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
 }));
 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds
+const REPEAT_INTERVAL_MS = 30000; // 30 seconds - (Baseline)
+
+// 👇 नया फ़ंक्शन: 30s और 40s के बीच एक यादृच्छिक देरी उत्पन्न करता है
+function getRandomDelay() {
+    const minMs = 30000; // 30 seconds
+    const maxMs = 40000; // 40 seconds
+    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+}
+// 👆 नया फ़ंक्शन
 
 // Function to create a single slot element
 function createSlot(index, proxy){
@@ -278,14 +282,13 @@ function createSlot(index, proxy){
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
-    // 👇 NEW: Apply/Remove scrolling class
+    // Apply/Remove scrolling class
     if (autoScrollModeCheckbox.checked) {
         el.classList.add('scrolling');
     } else {
         el.classList.remove('scrolling');
     }
-    // 👆 NEW: Apply/Remove scrolling class
-
+    
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
     setStatus('Sending Unique Proxy View (30s Session)...', false);
@@ -324,7 +327,7 @@ function createSlot(index, proxy){
   return { 
       runAutomation, 
       setStatus,
-      element: el // Added to access the slot div later
+      element: el 
   }; 
 }
 
@@ -363,7 +366,7 @@ function stopAllAutomation() {
     repeatModeCheckbox.checked = false;
 }
 
-// Global Start/Run Logic
+// Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -380,12 +383,16 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        s.setStatus(`Starting Repeat Mode (30s cycle)...`, true);
+        // 👇 CRITICAL CHANGE: Get a random delay for each slot (30s to 40s)
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
         
         const intervalId = setInterval(() => {
             s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in 30s...`, true);
-        }, REPEAT_INTERVAL_MS);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, randomDelay); // Use the random delay here
         
         repeatIntervals.push(intervalId);
     });
@@ -399,7 +406,7 @@ numSlotsInput.addEventListener('change', (e) => {
     renderSlots(count);
 });
 
-// 👇 NEW EVENT LISTENER FOR AUTO-SCROLL CHECKBOX
+// Event listener for auto-scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
     // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
@@ -408,7 +415,6 @@ autoScrollModeCheckbox.addEventListener('change', (e) => {
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
-// 👆 NEW EVENT LISTENER FOR AUTO-SCROLL CHECKBOX
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
@@ -422,4 +428,4 @@ repeatModeCheckbox.addEventListener('change', () => {
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
-</html> 
+</html>
