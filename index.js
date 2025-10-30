@@ -118,7 +118,8 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     // 1. SESSION START / PAGE VIEW EVENT
     let referrer = "direct"; // Default referrer
     let events = [
-        { name: "session_start" },
+        // CRITICAL FIX: Adding debug_mode: true to force events into DebugView
+        { name: "session_start", params: { debug_mode: true } },
         { name: "page_view", params: { page_location: url } }
     ];
     
@@ -230,7 +231,7 @@ app.post('/boost-mp', async (req, res) => {
 
     res.json({ 
         status: 'accepted', 
-        message: `Request for ${viewPlan.length} high-engagement views accepted. Processing started. Estimated completion time: ~1 hour.`
+        message: `Request for ${viewPlan.length} high-engagement views accepted. Processing started. Estimated completion time: ~1 hour. CHECK DEBUGVIEW NOW!`
     });
 
     // Start the heavy, time-consuming simulation in the background
