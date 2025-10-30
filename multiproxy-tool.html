@@ -35,7 +35,7 @@
   .repeat-control input[type="checkbox"],
   .repeat-control input[type="radio"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; display: flex; align-items: center; gap: 5px; }
-  .repeat-control span { color: var(--accent); font-weight: 600; }
+  .repeat-control span { color: var(--accent); font-weight: 700; }
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
@@ -116,7 +116,7 @@
                 Enable **Active User** Mode (Session Looping)
             </label>
             
-            <span style="color:var(--accent); font-weight:700;">|</span>
+            <span>|</span>
 
             <label>Reload Interval:</label>
             <label for="interval30s">
@@ -129,11 +129,16 @@
                 15s Reload
             </label>
             
-            <span style="color:var(--accent); font-weight:700;">|</span>
+            <span>|</span>
 
             <label for="autoScrollMode">
                 <input type="checkbox" id="autoScrollMode" />
                 Enable **Auto Scroll**
+            </label>
+
+            <label for="simulateFocusMode">
+                <input type="checkbox" id="simulateFocusMode" />
+                Simulate **User Focus** (Advanced)
             </label>
             
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
@@ -148,6 +153,9 @@
             </li>
             <li>
                 <strong>Action:</strong> Check the **'Enable Active User Mode'**, select **15s** or **30s**, and click 'Load & Run All'. The selected interval will be the session time.
+            </li>
+            <li>
+                **NEW FOCUS:** For better simulation, check **'Simulate User Focus'**. This helps the browser register interaction.
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -185,8 +193,6 @@ function getRandomNames(count) {
 // =========================================================================
 // !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
 // =========================================================================
-// NOTE: I've kept the 10 proxies from your screenshot and duplicated them
-// for the structure, BUT YOU MUST REPLACE THEM WITH 20 UNIQUE IPs
 const DUMMY_PROXIES = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
@@ -200,16 +206,16 @@ const DUMMY_PROXIES = [
   { ip: "142.147.128.93", port: "6593", country: "CA" },
   
   // DUPLICATES BELOW: REPLACE THESE 10 ENTRIES WITH 10 MORE UNIQUE IPs
-  { ip: "142.111.48.254", port: "7031", country: "US" }, // Dummy Change 11
-  { ip: "31.59.20.177", port: "6755", country: "DE" },  // Dummy Change 12
-  { ip: "38.170.176.178", port: "5573", country: "CA" }, // Dummy Change 13
-  { ip: "198.23.239.135", port: "6541", country: "US" }, // Dummy Change 14
-  { ip: "45.38.107.98", port: "6015", country: "US" }, // Dummy Change 15
-  { ip: "107.172.163.28", port: "6544", country: "CA" }, // Dummy Change 16
-  { ip: "64.137.96.75", port: "6642", country: "US" }, // Dummy Change 17
-  { ip: "216.10.27.160", port: "6838", country: "AU" }, // Dummy Change 18
-  { ip: "142.111.67.147", port: "5612", country: "US" }, // Dummy Change 19
-  { ip: "142.147.128.94", port: "6594", country: "CA" }, // Dummy Change 20
+  { ip: "142.111.48.254", port: "7031", country: "US" }, 
+  { ip: "31.59.20.177", port: "6755", country: "DE" },  
+  { ip: "38.170.176.178", port: "5573", country: "CA" }, 
+  { ip: "198.23.239.135", port: "6541", country: "US" }, 
+  { ip: "45.38.107.98", port: "6015", country: "US" }, 
+  { ip: "107.172.163.28", port: "6544", country: "CA" }, 
+  { ip: "64.137.96.75", port: "6642", country: "US" }, 
+  { ip: "216.10.27.160", port: "6838", country: "AU" }, 
+  { ip: "142.111.67.147", port: "5612", country: "US" }, 
+  { ip: "142.147.128.94", port: "6594", country: "CA" }, 
 ];
 // =========================================================================
 
@@ -222,12 +228,11 @@ const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
+const simulateFocusModeCheckbox = document.getElementById('simulateFocusMode'); // NEW Element
 const globalStopBtn = document.getElementById('globalStop');
 
-// --- NEW/UPDATED ELEMENTS ---
 const interval30sRadio = document.getElementById('interval30s');
 const interval15sRadio = document.getElementById('interval15s');
-// ----------------------------
 
 let currentSlots = [];
 let repeatIntervals = []; 
@@ -241,9 +246,6 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
 }));
 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds (Standard)
-const SHORT_INTERVAL_MS = 15000; // 15 seconds (New Short Session)
-
 // Function to create a single slot element
 function createSlot(index, proxy){
   const el = document.createElement('div');
@@ -256,7 +258,7 @@ function createSlot(index, proxy){
     </div>
     
     <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox" tabindex="-1"></iframe> 
     </div>
     
     <div class="slot-footer">
@@ -283,12 +285,11 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      // Sending the Unique ID (uid) to the PHP script
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+          `uid=${proxy.uniqueId}`; 
   }
 
   // --- Core Automation Function ---
@@ -300,15 +301,18 @@ function createSlot(index, proxy){
     setStatus('Loading Content...', false);
     
     // Apply/Remove scrolling class
-    if (autoScrollModeCheckbox.checked) {
-        el.classList.add('scrolling');
-    } else {
-        el.classList.remove('scrolling');
+    el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
+
+    // NEW: Simulate Focus
+    if (simulateFocusModeCheckbox.checked) {
+        // This attempts to give focus to the iframe, mimicking a click/interaction
+        // Note: Browser security might limit its effectiveness on cross-origin iframes
+        iframe.focus(); 
+        setStatus('Focusing Frame...', false);
     }
 
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    // Get the dynamically selected interval value
     const selectedIntervalElement = document.querySelector('input[name="reloadInterval"]:checked');
     const intervalSeconds = selectedIntervalElement ? (parseInt(selectedIntervalElement.value) / 1000) : 'N/A';
     
@@ -316,10 +320,7 @@ function createSlot(index, proxy){
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for the session duration.
         await fetch(proxiedUrl, { mode: 'no-cors' });
-        
-        // Response is quick due to Connection: close header in PHP
         setStatus('View Sent (BG Session Active)', true);
         
     } catch (e) {
@@ -344,11 +345,11 @@ function createSlot(index, proxy){
   
   setStatus('Ready', true);
 
-  // Expose the slot element to allow toggling scrolling globally on existing slots
   return { 
       runAutomation, 
       setStatus,
-      element: el 
+      element: el,
+      iframe: iframe // Return iframe element for focus access
   }; 
 }
 
@@ -381,7 +382,7 @@ function stopAllAutomation() {
     
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
+        s.element.classList.remove('scrolling'); 
     });
 }
 
@@ -393,7 +394,6 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
-  // Determine the interval by finding the checked radio button
   const selectedIntervalElement = document.querySelector('input[name="reloadInterval"]:checked');
   if (!selectedIntervalElement) {
       alert('Please select a Reload Interval (15s or 30s).');
@@ -417,7 +417,7 @@ globalGoBtn.addEventListener('click', ()=>{
         const intervalId = setInterval(() => {
             s.runAutomation(url);
             s.setStatus(`Repeat Running. Next in ${intervalSeconds}s...`, true);
-        }, interval); // Use the selected interval (15000 or 30000)
+        }, interval); 
         
         repeatIntervals.push(intervalId);
     });
@@ -433,7 +433,6 @@ numSlotsInput.addEventListener('change', (e) => {
 
 // Event listener for Auto-Scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
         s.element.classList.toggle('scrolling', isScrolling);
