@@ -136,7 +136,7 @@
                 <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30 seconds (or 15 seconds if '15s Reload' is selected).
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every <span id="infoIntervalText">30 seconds</span> (which is the required session time).
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -216,6 +216,7 @@ const globalStopBtn = document.getElementById('globalStop');
 // --- NEW ELEMENTS ---
 const shortIntervalModeCheckbox = document.getElementById('shortIntervalMode');
 const repeatIntervalText = document.getElementById('repeatIntervalText');
+const infoIntervalText = document.getElementById('infoIntervalText'); // For the info box
 // --------------------
 
 let currentSlots = [];
@@ -370,8 +371,6 @@ function stopAllAutomation() {
         s.setStatus('Ready (Stopped)', true);
         s.element.classList.remove('scrolling'); // Stop scrolling on all slots
     });
-    
-    // repeatModeCheckbox.checked = false; // Don't uncheck, user might want to re-run
 }
 
 // Global Start/Run Logic
@@ -382,7 +381,7 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
-  // Determine the interval
+  // Determine the interval based ONLY on the shortIntervalModeCheckbox
   const interval = shortIntervalModeCheckbox.checked ? SHORT_INTERVAL_MS : REPEAT_INTERVAL_MS;
   const intervalSeconds = interval / 1000;
   
@@ -424,22 +423,25 @@ autoScrollModeCheckbox.addEventListener('change', (e) => {
     });
 });
 
-// --- NEW Event listener for Short Interval (15s Reload) checkbox ---
+// --- UPDATED Event listener for Short Interval (15s Reload) checkbox ---
 shortIntervalModeCheckbox.addEventListener('change', (e) => {
-    if (e.target.checked) {
-        repeatIntervalText.textContent = '15s';
-    } else {
-        repeatIntervalText.textContent = '30s';
-    }
+    const newIntervalText = e.target.checked ? '15s' : '30s';
+    
+    // Update display text for both the control area and the info box
+    repeatIntervalText.textContent = newIntervalText;
+    infoIntervalText.textContent = `${newIntervalText} seconds`; // Update info box text
+    
     // Automatically stop all intervals if they are running to apply the new time
     if (globalStopBtn.style.display === 'block') {
         stopAllAutomation();
-        alert('Repeat Mode has been stopped. Click "Load & Run All" again to apply the new 15s/30s interval.');
+        alert(`Repeat Mode has been stopped. Click "Load & Run All" again to start the new ${newIntervalText} cycle.`);
     }
 });
 // --------------------------------------------------------------------
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
+
+// If repeat mode is unchecked, it should stop all automation
 repeatModeCheckbox.addEventListener('change', () => {
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
         stopAllAutomation();
