@@ -3,7 +3,6 @@ const { GoogleGenAI } = require('@google/genai');
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-// 🔑 Crypto मॉड्यूल को शामिल करें, जो generateClientId के लिए ज़रूरी है
 const crypto = require('crypto'); 
 
 const app = express();
@@ -12,11 +11,9 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
-    // यह तरीका Cloud Environment (जैसे Kubernetes Secrets) के लिए है
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback: Environment Variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -29,23 +26,19 @@ let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
-    // Mock AI object if key is missing to prevent crash
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
 // --- MIDDLEWARE & UTILITIES ---
-// 🔒 CORS को सही ढंग से सेट करें
 app.use(cors({
-    // यदि आप लोकलहोस्ट पर परीक्षण कर रहे हैं, तो 'origin' को अपने लोकलहोस्ट URL में बदलें
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
     credentials: true
 }));
-// 💾 बॉडी पार्सिंग (Payload size limit को 5MB तक बढ़ाया गया)
 app.use(express.json({ limit: '5mb' }));
 
 app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running!'); // Health Check
+    res.status(200).send('PooreYouTuber Combined API is running!'); 
 });
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -61,28 +54,26 @@ function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
 }
 
-// Function to generate a unique Client ID for GA4 simulation (must be a UUID)
 function generateClientId() {
-    // 💡 सुनिश्चित करें कि आपने ऊपर 'const crypto = require('crypto');' जोड़ा है
     return crypto.randomUUID(); 
 }
 
 /**
- * Calculates the optimal random delay to ensure all views complete within 1 hour (3600 seconds).
+ * Calculates the optimal random delay to ensure all views complete within 2 hours (7200 seconds).
  * @param {number} totalViews 
  * @returns {number} Delay in milliseconds.
  */
 const getOptimalDelay = (totalViews) => {
-    // Target 1 hour (3600 seconds) for all views to complete.
-    const targetDurationMs = 3600000; 
+    // ✅ MODIFICATION: Target 2 hours (7200 seconds) for all views to complete.
+    const targetDurationMs = 7200000; 
     const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
     
     // Set min/max bounds for natural variance
     const minDelay = Math.max(1000, avgDelayMs * 0.7); // Minimum 1 second delay
     const maxDelay = avgDelayMs * 1.3;
     
-    // यदि totalViews बहुत कम है (जैसे 10), तो अधिकतम 10 मिनट प्रति व्यू तक कैप करें
-    const finalMaxDelay = Math.min(maxDelay, 600000); 
+    // यदि totalViews बहुत कम है (जैसे 10), तो अधिकतम 20 मिनट प्रति व्यू तक कैप करें (1200000ms)
+    const finalMaxDelay = Math.min(maxDelay, 1200000); 
 
     return randomInt(minDelay, finalMaxDelay);
 };
@@ -103,12 +94,10 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         });
 
         if (response.status === 204) { 
-            // SUCCESS: Google accepted the data
             console.log(`[View ${currentViewId}] SUCCESS ✅ | Sent: ${eventType}`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            // FAILURE: Google returned an error (e.g., bad key or ID)
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
             return { success: false };
         }
@@ -122,38 +111,32 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
  * Simulates a single view session with search, scroll, and engagement events.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
-    const cid = generateClientId(); // Unique Client ID for the session
-    const geo = getRandomGeo(); // Random geographical location
+    const cid = generateClientId(); 
+    const geo = getRandomGeo(); 
     
-    // User Properties जो हर Event के साथ जाते हैं
     const userProperties = {
         country: { value: geo.country },
         region: { value: geo.region },
-        // 👍 टाइमज़ोन जोड़ें, जो GA4 के लिए एक अच्छा संकेत है
         user_timezone: { value: geo.timezone } 
     };
 
     // 1. SESSION START / PAGE VIEW EVENT
     let referrer = "direct"; 
     let events = [
-        // CRITICAL FIX: Adding debug_mode: true to force events into DebugView
         { name: "session_start", params: { debug_mode: true } },
         { name: "page_view", params: { page_location: url } }
     ];
     
     if (searchKeyword) {
-        // Simulate organic search traffic from Google
         referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
         events[1].params.page_referrer = referrer;
-        events[1].params.page_title = searchKeyword; // Set title to keyword for search context
+        events[1].params.page_title = searchKeyword; 
     } else {
-         // Add a standard referrer if not search (e.g., from a blog or social)
          if (Math.random() < 0.3) { 
             referrer = Math.random() < 0.5 ? "https://t.co/random" : "https://exampleblog.com/post-link";
             events[1].params.page_referrer = referrer;
          }
     }
-
 
     const pageViewPayload = {
         client_id: cid,
@@ -165,42 +148,35 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     
     console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}) on ${url}. ---`);
 
-    // Send the first payload (session_start and page_view)
     let result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'session_start/page_view');
     if (!result.success) allSuccess = false;
 
-    // Simulate 3-8 seconds of user reading time on the page
     const firstWait = randomInt(3000, 8000);
     await new Promise(resolve => setTimeout(resolve, firstWait));
-    // console.log(`[View ${viewCount}] Waited ${firstWait/1000}s.`);
 
     // 2. SCROLL EVENT
     const scrollPayload = {
         client_id: cid,
-        user_properties: userProperties, // हर Event में user_properties भेजना अच्छा अभ्यास है
+        user_properties: userProperties, 
         events: [{ name: "scroll" }]
     };
     result = await sendData(gaId, apiSecret, scrollPayload, viewCount, 'scroll');
     if (!result.success) allSuccess = false;
 
-    // Simulate another 3-8 seconds of user interaction
     const secondWait = randomInt(3000, 8000);
     await new Promise(resolve => setTimeout(resolve, secondWait));
-    // console.log(`[View ${viewCount}] Waited ${secondWait/1000}s.`);
 
-
-    // 3. USER ENGAGEMENT (Simulates a click and a session duration > 10s)
-    const engagementTime = firstWait + secondWait + randomInt(5000, 20000); // सुनिश्चित करें कि 15s से अधिक हो
+    // 3. USER ENGAGEMENT
+    const engagementTime = firstWait + secondWait + randomInt(5000, 20000); 
     
     const engagementPayload = {
         client_id: cid,
-        user_properties: userProperties, // हर Event में user_properties भेजना अच्छा अभ्यास है
+        user_properties: userProperties, 
         events: [
             { 
                 name: "user_engagement", 
                 params: { 
                     engagement_time_msec: engagementTime, 
-                    // 💡 interaction_type एक अच्छा कस्टम पैरामीटर है
                     interaction_type: "click_simulated" 
                 } 
             }
@@ -219,7 +195,6 @@ function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
     
-    // 💡 Percentages के लिए थोड़ी सी टॉलरेंस (Tolerance) रखें (99.9% से 100.1%)
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         console.error(`Distribution Failed: Total percentage is ${totalPercentage.toFixed(1)}%. Should be 100%.`);
         return [];
@@ -255,17 +230,17 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    // 📣 ACKNOWLEDGEMENT तुरंत भेजें (यही कारण है कि क्लाइंट "reloading" दिखाना बंद कर देगा)
+    // ACKNOWLEDGEMENT तुरंत भेजें
     res.json({ 
         status: 'accepted', 
-        message: `Request for ${viewPlan.length} high-engagement views accepted. Processing started in the background. Estimated completion time: ~1 hour. CHECK DEBUGVIEW NOW!`
+        message: `Request for ${viewPlan.length} high-engagement views accepted. Processing started in the background. Estimated completion time: ~2 hours. CHECK DEBUGVIEW NOW!`
     });
 
-    // 🖥️ Start the heavy, time-consuming simulation in the background (NON-BLOCKING)
+    // Start the heavy, time-consuming simulation in the background
     (async () => {
         const totalViews = viewPlan.length;
         console.log(`\n=================================================`);
-        console.log(`[BOOSTER START] Starting real simulation for ${totalViews} views.`);
+        console.log(`[BOOSTER START] Starting real simulation for ${totalViews} views. Target duration: 2 hours.`);
         console.log(`=================================================`);
 
 
@@ -273,10 +248,8 @@ app.post('/boost-mp', async (req, res) => {
             const url = viewPlan[i];
             const currentView = i + 1;
 
-            // 1. Run the engagement simulation
             await simulateView(ga_id, api_key, url, search_keyword, currentView);
 
-            // 2. Wait for the optimal, calculated delay before starting the next view
             const delay = getOptimalDelay(totalViews);
             console.log(`[View ${currentView}/${totalViews}] Waiting for ${Math.round(delay / 1000)}s...`);
             await new Promise(resolve => setTimeout(resolve, delay));
@@ -291,6 +264,7 @@ app.post('/boost-mp', async (req, res) => {
 
 // ===================================================================
 // 2. AI INSTA CAPTION GENERATOR ENDPOINT (STABLE)
+// (नो चेंज)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     
@@ -304,7 +278,6 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (description) is required.' });
     }
     
-    // 📝 प्रॉम्प्ट में एक छोटा सा सुधार - इसे और स्पष्ट बनाना
     const prompt = `Generate exactly 10 unique, highly trending, and viral Instagram Reels captions. The reel topic is: "${description}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
@@ -340,6 +313,7 @@ app.post('/api/caption-generate', async (req, res) => {
 
 // ===================================================================
 // 3. AI INSTA CAPTION EDITOR ENDPOINT (STABLE)
+// (नो चेंज)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     
@@ -389,4 +363,3 @@ Requested Change: "${requestedChange}"`;
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-                
