@@ -1,248 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Multi-Browser Dashboard</title>
-<style>
-    /* CSS कोड वही रहेगा, इसमें कोई बदलाव नहीं है */
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background-color: #f4f4f9;
-    }
-    header {
-        background-color: #1e90ff;
-        color: white;
-        text-align: center;
-        padding: 12px 0;
-        font-size: 22px;
-        font-weight: bold;
-    }
-    #global-search {
-        display: flex;
-        justify-content: center;
-        margin: 10px;
-    }
-    #global-search input {
-        width: 60%;
-        padding: 10px;
-        border-radius: 5px 0 0 5px;
-        border: 1px solid #ccc;
-        outline: none;
-        font-size: 16px;
-    }
-    #global-search button {
-        padding: 10px 20px;
-        border: none;
-        background-color: #ff6347;
-        color: white;
-        font-size: 16px;
-        border-radius: 0 5px 5px 0;
-        cursor: pointer;
-    }
-    #browsers {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 10px;
-        padding: 10px;
-        flex: 1;
-        overflow-y: auto;
-    }
-    .slot {
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        display: flex;
-        flex-direction: column;
-        height: 400px;
-    }
-    .slot-header {
-        display: flex;
-        padding: 5px;
-        background-color: #f0f0f0;
-        align-items: center;
-    }
-    .slot-header input {
-        flex: 1;
-        padding: 6px;
-        font-size: 14px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        outline: none;
-    }
-    .slot-header button {
-        margin-left: 5px;
-        padding: 6px 10px;
-        font-size: 14px;
-        background-color: #1e90ff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    iframe {
-        flex: 1;
-        border: none;
-        width: 100%;
-    }
-
-    /* Mobile adjustments */
-    @media(max-width: 600px){
-        #global-search input {
-            width: 70%;
+    <title>Proxy Launcher</title>
+    <style>
+        body { font-family: Arial, sans-serif; width: 300px; padding: 15px; background-color: #f4f4f9; border-radius: 5px; }
+        h3 { color: #007bff; margin-top: 0; }
+        input[type="text"] { width: 93%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 4px; }
+        label { display: block; margin-bottom: 8px; font-size: 14px; }
+        input[type="checkbox"] { margin-right: 5px; }
+        button { 
+            padding: 10px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 15px; 
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
-        #global-search button {
-            padding: 10px 10px;
+        button:hover {
+            background-color: #218838;
         }
-        .slot {
-            height: 300px;
-        }
-    }
-</style>
+    </style>
 </head>
 <body>
-
-<header>Multi-Browser Dashboard</header>
-
-<div id="global-search">
-    <input type="text" id="global-input" placeholder="Enter URL or search query for all slots">
-    <button onclick="updateAllSlots()">Go</button>
-</div>
-
-<div id="browsers">
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input1">
-            <button onclick="updateSlot(1)">Go</button>
-        </div>
-        <iframe id="iframe1" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input2">
-            <button onclick="updateSlot(2)">Go</button>
-        </div>
-        <iframe id="iframe2" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input3">
-            <button onclick="updateSlot(3)">Go</button>
-        </div>
-        <iframe id="iframe3" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input4">
-            <button onclick="updateSlot(4)">Go</button>
-        </div>
-        <iframe id="iframe4" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input5">
-            <button onclick="updateSlot(5)">Go</button>
-        </div>
-        <iframe id="iframe5" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input6">
-            <button onclick="updateSlot(6)">Go</button>
-        </div>
-        <iframe id="iframe6" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input7">
-            <button onclick="updateSlot(7)">Go</button>
-        </div>
-        <iframe id="iframe7" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input8">
-            <button onclick="updateSlot(8)">Go</button>
-        </div>
-        <iframe id="iframe8" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input9">
-            <button onclick="updateSlot(9)">Go</button>
-        </div>
-        <iframe id="iframe9" src="https://example.com"></iframe>
-    </div>
-
-    <div class="slot">
-        <div class="slot-header">
-            <input type="text" placeholder="Enter URL or search query" id="input10">
-            <button onclick="updateSlot(10)">Go</button>
-        </div>
-        <iframe id="iframe10" src="https://example.com"></iframe>
-    </div>
-</div>
-
-<script>
-function formatInput(input){
-    let val = input.trim();
-    if (!val) return '';
-
-    // Check if it's a URL
-    if (val.includes('.') && val.length > 5){
-        if (!/^https?:\/\//i.test(val)){
-            val = 'https://' + val;
-        }
-        return val; // Returns the URL
-    } else {
-        // If it's not a clear URL, treat it as a search query
-        return 'https://www.google.com/search?q=' + encodeURIComponent(val);
-    }
-}
-
-// Global search updates all slots
-function updateAllSlots(){
-    let inputElement = document.getElementById('global-input');
-    let val = formatInput(inputElement.value);
-
-    if (!val) return;
+    <h3>🌐 CroxyProxy Auto Tool</h3>
     
-    // Update the input field with the formatted URL/Search URL for clarity
-    inputElement.value = val;
-
-    for(let i=1; i<=10; i++){
-        document.getElementById('iframe'+i).src = val;
-        // Optionally update the individual slot input fields too
-        document.getElementById('input'+i).value = val; 
-    }
-}
-
-// Individual slot update
-function updateSlot(slot){
-    let inputElement = document.getElementById('input'+slot);
-    let url = formatInput(inputElement.value);
+    <label for="userUrl">Target URL:</label>
+    <input type="text" id="userUrl" placeholder="https://youtube.com/..." required>
     
-    if (!url) return;
+    <label>Options:</label>
+    <input type="checkbox" id="autoScroll">
+    <label for="autoScroll" style="display: inline;">Auto Scrolling (On/Off)</label><br>
     
-    // Update the input field with the formatted URL/Search URL for clarity
-    inputElement.value = url;
+    <input type="checkbox" id="autoRefresh">
+    <label for="autoRefresh" style="display: inline;">30 Sec Page Refresh (On/Off)</label>
     
-    document.getElementById('iframe'+slot).src = url;
-}
-</script>
+    <button id="launchBtn">🚀 Launch in CroxyProxy</button>
 
+    <script src="popup.js"></script>
 </body>
 </html>
