@@ -135,10 +135,10 @@
                 **CRITICAL:** Ensure **'Active User Mode'** and **'Auto Scroll'** are checked for best results.
             </li>
             <li>
-                **Unique User:** Every slot uses a **Unique Proxy IP** and a **Unique Client ID** to register as a separate user in GA4.
+                **Unique User Fix:** यह वर्जन URL के अंत में एक रैंडम पैरामीटर जोड़ता है ताकि GA4 सभी 10 व्यू को **अलग-अलग यूजर्स** के रूप में काउंट करे।
             </li>
             <li>
-                **Session Time:** Min/Max timer ensures the view is refreshed/repeated, sustaining a **>30 second session** (which GA4 needs to count an active user).
+                **Session Time:** Min/Max timer सुनिश्चित करता है कि >30 सेकंड का सेशन बने (जो GA4 को Active User के लिए चाहिए)।
             </li>
         </ul>
     </div>
@@ -173,7 +173,6 @@ function getRandomNames(count) {
 // =========================================================================
 // !!! CRITICAL STEP: UPDATED PROXIES (Total 10 Slots) !!!
 // (These are your new, fresh proxy IPs)
-//
 // =========================================================================
 const DUMMY_PROXIES = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
@@ -192,8 +191,8 @@ const DUMMY_PROXIES = [
 const MAX_SLOTS = 10; 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // !!! CRITICAL: REPLACE THIS WITH YOUR NEW RENDER PHP WEB SERVICE URL !!!
-// जैसे: 'https://my-proxy-backend-123.onrender.com/proxy_loader.php'
-const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy_loader.php'; 
+// इसे अपने Render Web Service URL से बदलें (उदाहरण: 'https://my-proxy-backend-123.onrender.com/proxy_loader.php')
+const PROXY_ENDPOINT = 'http://YOUR-NEW-RENDER-BACKEND-URL/proxy_loader.php'; 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 const gridContainer = document.getElementById('gridContainer');
@@ -283,8 +282,11 @@ function createSlot(index, proxy){
     if(!originalUrl) return;
     
     // 1. iFrame Load (Visible preview)
-    // IMPORTANT: Loading the real URL here helps simulate the initial page load event in the browser
-    iframe.src = originalUrl; 
+    // CRITICAL FIX: Add a unique parameter to the URL for iframe src AND for the proxy request.
+    // This ensures GA4/caching mechanisms on the target site treat it as a new visit, fixing the 1 Active User issue.
+    const uniqueOriginalUrl = originalUrl + (originalUrl.includes('?') ? '&' : '?') + 'ga_unique=' + Date.now() + Math.random().toString(36).substring(2);
+    
+    iframe.src = uniqueOriginalUrl; 
     setStatus('Loading Content...', false);
     
     // Apply/Remove scrolling class
@@ -294,7 +296,8 @@ function createSlot(index, proxy){
         el.classList.remove('scrolling');
     }
     
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+    // NOTE: Send the unique URL to the PHP backend.
+    const proxiedUrl = getProxiedUrl(uniqueOriginalUrl, proxy);
 
     setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
@@ -302,7 +305,6 @@ function createSlot(index, proxy){
     try {
         // Fetch request is sent. PHP script runs in background for 30s.
         // This is the CRITICAL call that keeps the session active via proxy.
-        // NOTE: The 'no-cors' mode is crucial here.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         // Response is quick due to Connection: close header in PHP
