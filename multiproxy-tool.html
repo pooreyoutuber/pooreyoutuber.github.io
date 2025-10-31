@@ -24,17 +24,45 @@
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   @media (min-width: 600px) { .input-group { flex-direction: row; } }
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
-  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector { flex-shrink: 0; display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
   .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
   input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  .repeat-control { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
+  
+  /* NEW: Style for Time Input Group */
+  .time-input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #f0f4f8;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .time-input-group input {
+    width: 40px;
+    padding: 4px 0;
+    border: none;
+    text-align: center;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    outline: none;
+  }
+  .time-input-group span {
+    font-weight: 400;
+    color: var(--muted);
+  }
+  /* END NEW */
+  
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
@@ -112,9 +140,17 @@
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all <span>30-40s</span> for better GA tracking.
+                Enable **Active User** Mode: Repeat all 
             </label>
             
+            <div class="time-input-group">
+                <label for="repeatTimeMin">Cycle Time:</label>
+                <input id="repeatTimeMin" type="number" value="30" min="30" max="60" />
+                <span>s</span>
+                <label for="repeatTimeMax">to</label>
+                <input id="repeatTimeMax" type="number" value="40" min="30" max="60" />
+                <span>s</span>
+            </div>
             <input type="checkbox" id="autoScrollMode" />
             <label for="autoScrollMode">
                 Enable **Auto Scroll** (Simulated)
@@ -130,7 +166,7 @@
                 <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30-40 seconds (**staggered**) for the required session time.
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every **30-60 seconds** (**staggered**) based on your setting for the required session time.
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -194,7 +230,7 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const MAX_SLOTS = 20;
+const MAX_SLOTS = 20; // Maximum slots set to 20
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
 const gridContainer = document.getElementById('gridContainer');
@@ -204,6 +240,10 @@ const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
+
+// Get the new time inputs
+const repeatTimeMinInput = document.getElementById('repeatTimeMin');
+const repeatTimeMaxInput = document.getElementById('repeatTimeMax');
 
 let currentSlots = [];
 let repeatIntervals = []; 
@@ -217,15 +257,31 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
 }));
 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds - (Baseline)
 
-// 👇 नया फ़ंक्शन: 30s और 40s के बीच एक यादृच्छिक देरी उत्पन्न करता है
+// FUNCTION: Get custom delay range (ensuring 30s to 60s limit)
 function getRandomDelay() {
-    const minMs = 30000; // 30 seconds
-    const maxMs = 40000; // 40 seconds
+    let minSeconds = parseInt(repeatTimeMinInput.value) || 30;
+    let maxSeconds = parseInt(repeatTimeMaxInput.value) || 40;
+    
+    // Enforce inputs are within the 30-60 second range and min <= max
+    minSeconds = Math.min(Math.max(minSeconds, 30), 60);
+    maxSeconds = Math.min(Math.max(maxSeconds, 30), 60);
+    
+    // Ensure min is not greater than max (for valid range)
+    if (minSeconds > maxSeconds) {
+        [minSeconds, maxSeconds] = [maxSeconds, minSeconds]; // Swap if min > max
+    }
+    
+    // Convert to milliseconds
+    const minMs = minSeconds * 1000; 
+    const maxMs = maxSeconds * 1000; 
+    
+    // Set the corrected values back to the inputs (for visual feedback)
+    repeatTimeMinInput.value = minSeconds;
+    repeatTimeMaxInput.value = maxSeconds;
+    
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
-// 👆 नया फ़ंक्शन
 
 // Function to create a single slot element
 function createSlot(index, proxy){
@@ -363,7 +419,10 @@ function stopAllAutomation() {
         s.element.classList.remove('scrolling'); // Stop scrolling on all slots
     });
     
-    repeatModeCheckbox.checked = false;
+    // Only uncheck if the user didn't stop it manually by unchecking the box
+    if(repeatModeCheckbox.checked){
+        repeatModeCheckbox.checked = false;
+    }
 }
 
 // Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
@@ -383,7 +442,7 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // 👇 CRITICAL CHANGE: Get a random delay for each slot (30s to 40s)
+        // CRITICAL CHANGE: Get a random delay for each slot (from user-defined min/max)
         const randomDelay = getRandomDelay(); 
         const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
@@ -417,15 +476,12 @@ autoScrollModeCheckbox.addEventListener('change', (e) => {
 });
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
+
+// If repeat mode is unchecked while running, stop all
 repeatModeCheckbox.addEventListener('change', () => {
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
         stopAllAutomation();
     }
 });
 
-
-// Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
-</script>
-</body>
-</html>
+// NEW: Event listeners to enforce the 30-60 second bounda
