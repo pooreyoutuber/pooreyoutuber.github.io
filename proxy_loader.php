@@ -1,8 +1,9 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL CODE (The Ultimate GA4 Bypass Fix v5)
+// PHP Proxy Loader: proxy_loader.php - FINAL CODE (Rotating Residential Proxy FIX)
 
-// --- CRITICAL AUTHENTICATION DATA (No Change) ---
-$auth_user = "bqctypvz";
+// --- CRITICAL AUTHENTICATION DATA (UPDATED FOR ROTATING PROXY) ---
+// Note: Username has been updated to match the rotating proxy format.
+$auth_user = "bqctypvz-rotate";
 $auth_pass = "399xb3kxqv6i";
 $expected_auth = $auth_user . ":" . $auth_pass;
 
@@ -38,7 +39,12 @@ $proxy_address = $proxy_ip . ":" . $proxy_port;
 // 3. Initialize PHP cURL
 $ch = curl_init();
 
-// --- ACTIVE USER FIX v5: Advanced Spoofing & Session Reset ---
+// --- ACTIVE USER FIX v7: Advanced Spoofing & Session Reset ---
+
+// Function to generate a completely random IPv4 address (X-Forwarded-For Spoofing)
+function generateRandomIP() {
+    return rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255);
+}
 
 // 1. Random User-Agent 
 $user_agents = array(
@@ -71,15 +77,15 @@ $random_ua = $user_agents[array_rand($user_agents)];
 $random_referer = $fake_referers[array_rand($fake_referers)];
 $random_lang_header = $random_languages[array_rand($random_languages)];
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
+$random_x_forwarded_ip = generateRandomIP();
 
 $headers = array(
     "User-Agent: " . $random_ua,
-    // CRITICAL: We explicitly send a unique Cookie, but we reset cURL's cookie engine below.
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "Accept-Language: " . $random_lang_header,
-    // DNT header
-    "DNT: 1" 
+    "DNT: 1",
+    "X-Forwarded-For: " . $random_x_forwarded_ip 
 );
 
 // Referer Header (Only add if it's not empty)
@@ -90,20 +96,18 @@ if (!empty($random_referer)) {
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 // --- ULTIMATE SESSION RESET ---
-// यह cURL को हर बार कुकी को अनदेखा करने और एक नया सेशन शुरू करने के लिए मजबूर करता है
 curl_setopt($ch, CURLOPT_COOKIESESSION, true); 
 curl_setopt($ch, CURLOPT_COOKIEJAR, ''); 
 curl_setopt($ch, CURLOPT_COOKIEFILE, ''); 
-// ------------------------------
 
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 curl_setopt($ch, CURLOPT_HEADER, false);
 
-// --- PROXY CONFIGURATION (No Change) ---
+// --- PROXY CONFIGURATION ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
-curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
+curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
 // === Active User Timeout (No Change) ===
