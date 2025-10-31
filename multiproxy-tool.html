@@ -35,6 +35,7 @@
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } /* Added style for new inputs */
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
@@ -100,7 +101,8 @@
             
             <div class="slot-selector">
                 Slots:
-                <input id="numSlots" type="number" value="10" min="1" max="20" /> </div>
+                <input id="numSlots" type="number" value="10" min="1" max="20" />
+            </div>
 
             <div class="url-input-wrap">
                 <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
@@ -111,7 +113,13 @@
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" />
             <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all <span>30-60s</span> for better GA tracking. </label>
+                Enable **Active User** Mode: Repeat all 
+                <label for="minTime">Min:</label>
+                <input id="minTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <label for="maxTime">Max:</label>
+                <input id="maxTime" type="number" value="60" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <span>seconds cycle</span> for better GA tracking.
+            </label>
             
             <input type="checkbox" id="autoScrollMode" />
             <label for="autoScrollMode">
@@ -128,7 +136,7 @@
                 <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every 30-60 seconds (**staggered**) for the required session time.
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request between the Min/Max seconds (**staggered**) for the required session time.
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -192,7 +200,7 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const MAX_SLOTS = 20; // UPDATED: Maximum slots set to 20
+const MAX_SLOTS = 20; // Maximum slots set to 20
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
 const gridContainer = document.getElementById('gridContainer');
@@ -200,6 +208,8 @@ const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
+const minTimeInput = document.getElementById('minTime'); // New
+const maxTimeInput = document.getElementById('maxTime'); // New
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
@@ -217,10 +227,17 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
 
 const REPEAT_INTERVAL_MS = 30000; // 30 seconds - (Baseline)
 
-// 👇 नया फ़ंक्शन: 30s और 60s के बीच एक यादृच्छिक देरी उत्पन्न करता है (UPDATED)
+// 👇 नया फ़ंक्शन: अब मिन और मैक्स टाइम इनपुट फील्ड्स से वैल्यू लेता है
 function getRandomDelay() {
-    const minMs = 30000; // 30 seconds
-    const maxMs = 60000; // 60 seconds (Updated from 40000)
+    // Get values from new input fields (convert seconds to milliseconds)
+    const minSec = parseInt(minTimeInput.value);
+    const maxSec = parseInt(maxTimeInput.value);
+    
+    // Ensure valid range
+    const minMs = Math.min(minSec, maxSec) * 1000;
+    const maxMs = Math.max(minSec, maxSec) * 1000;
+    
+    // Generate random delay
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 // 👆 नया फ़ंक्शन
@@ -381,7 +398,7 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // 👇 CRITICAL CHANGE: Get a random delay for each slot (30s to 60s)
+        // 👇 CRITICAL CHANGE: Get a random delay from the user-defined min/max time
         const randomDelay = getRandomDelay(); 
         const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
