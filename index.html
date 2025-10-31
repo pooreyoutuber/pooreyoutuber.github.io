@@ -1,294 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PooreYouTuber Tools | Free Online YouTube & Utility Tools</title>
-
-<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="shortcut icon" href="/favicon.ico" />
-
-<meta name="description" content="PooreYouTuber free online tools - Multi YouTube viewer, thumbnail maker, PDF converter, image resizer, and more. Fast, private, and 100% secure." />
-<meta name="keywords" content="YouTube tools, Multi YouTube viewer, YouTube thumbnail, PDF converter, image resize, free online tools, secure online utilities" />
-<meta name="robots" content="index, follow" />
-<meta property="og:title" content="PooreYouTuber Tools | Free Online Tools" />
-<meta property="og:description" content="Explore free tools for YouTube, PDF, and images. Fast, safe, and private utilities — no data collection, no sign-up required." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://pooreyoutuber.github.io/" />
-<meta property="og:image" content="https://pooreyoutuber.github.io/thumbnail.png" />
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-ZPMC525FGT');
-</script>
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541" crossorigin="anonymous"></script>
-
-<style>
-    :root {
-        --yt-red: #ff0000;
-        --yt-dark-red: #c40000;
-        --yt-black: #0f0f0f;
-        --yt-light-bg: #f9f9f9;
-        --yt-card: #ffffff;
-        --yt-border: #ddd;
-        --yt-text: #202020;
-    }
-
-    body.dark-mode {
-        --yt-light-bg: #0f0f0f;
-        --yt-card: #181818;
-        --yt-text: #f1f1f1;
-        --yt-border: #333;
-    }
-
-    body {
-        font-family: 'Roboto', Arial, sans-serif;
-        margin: 0;
-        background: var(--yt-light-bg);
-        color: var(--yt-text);
-        transition: background 0.3s, color 0.3s;
-    }
-
-    header {
-        background: var(--yt-red);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 25px;
-        flex-wrap: wrap;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
-    .logo-container { display: flex; align-items: center; gap: 10px; }
-    .logo { height: 38px; border-radius: 6px; }
-    .home-link { color: #fff; font-size: 22px; font-weight: bold; text-decoration: none; }
-
-    nav { display: flex; gap: 18px; flex-wrap: wrap; }
-    nav a { color: white; text-decoration: none; font-weight: 500; transition: opacity 0.2s; }
-    nav a:hover { opacity: 0.8; }
-
-    #dark-mode-toggle {
-        background: white;
-        color: var(--yt-black);
-        border: none;
-        padding: 8px 12px;
-        border-radius: 5px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.3s, color 0.3s;
-    }
-    body.dark-mode #dark-mode-toggle { background: #333; color: #fff; }
-
-    .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; text-align: center; }
-
-    h1 { color: var(--yt-red); font-size: 2rem; margin-bottom: 10px; }
-
-    h2.section-heading {
-        color: var(--yt-red);
-        margin-top: 40px;
-        border-bottom: 2px solid var(--yt-red);
-        display: inline-block;
-        padding-bottom: 5px;
-    }
-
-    .tools {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
-    }
-
-    .tool {
-        background: var(--yt-card);
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-        border: 1px solid var(--yt-border);
-    }
-
-    .tool:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
-    .tool h3 { margin: 0; font-size: 1.2rem; }
-
-    .tool a {
-        display: inline-block;
-        margin-top: 12px;
-        background: var(--yt-red);
-        color: #fff;
-        text-decoration: none;
-        padding: 10px 18px;
-        border-radius: 6px;
-        font-weight: bold;
-        transition: background 0.3s;
-    }
-    .tool a:hover { background: var(--yt-dark-red); }
-
-    .seo-description {
-        background: var(--yt-card);
-        color: var(--yt-text);
-        border: 1px solid var(--yt-border);
-        border-radius: 12px;
-        padding: 30px;
-        line-height: 1.7;
-        text-align: left;
-        margin-top: 60px;
-    }
-    .seo-description h2 { color: var(--yt-red); margin-bottom: 15px; }
-
-    footer {
-        background: var(--yt-card);
-        border-top: 1px solid var(--yt-border);
-        padding: 20px;
-        text-align: center;
-        color: var(--yt-text);
-    }
-
-    footer a {
-        color: var(--yt-red);
-        text-decoration: none;
-        margin: 0 8px;
-        font-weight: 500;
-    }
-    footer a:hover { text-decoration: underline; }
-
-    .mobile-feed-ad { display: none; }
-
-    @media (max-width: 768px) {
-        header { flex-direction: column; align-items: flex-start; gap: 10px; }
-        nav { justify-content: center; width: 100%; }
-        #dark-mode-toggle { align-self: center; width: 100%; }
-        .container { margin-top: 20px; padding: 0 10px; }
-        .tools { grid-template-columns: 1fr; }
-        .mobile-feed-ad { display: block; }
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA4 Active User Booster (Residential Fix)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #00bcd4;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: calc(100% - 110px);
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #3c3c3c;
+            color: #d4d4d4;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #proxy-container {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .proxy-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .proxy-card h3 {
+            margin-top: 0;
+            color: #FFC107;
+            font-size: 1.1em;
+        }
+        .proxy-card p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .proxy-card span {
+            font-weight: bold;
+            color: #00bcd4;
+        }
+    </style>
 </head>
 <body>
-<header>
-    <div class="logo-container">
-        <a href="index.html"><img src="logo.png" alt="PooreYouTuber Logo" class="logo"></a>
-        <a href="index.html" class="home-link">PooreYouTuber Tools</a>
-    </div>
-    <div class="nav-controls">
-        <nav>
-            <a href="about.html">About</a>
-            <a href="privacy.html">Privacy</a>
-            <a href="contact.html">Contact</a>
-            <a href="disclaimer.html">Disclaimer</a>
-            <a href="Articals.html">Articles</a>
-        </nav>
-        <button id="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
-    </div>
-</header>
 
 <div class="container">
-    <h1>🚀 PooreYouTuber All Free Tools</h1>
-    <p>Empower your YouTube journey and digital workflow with our fast, secure, and free online tools.</p>
-
-    <h2 class="section-heading">🔥 YouTube & Content Tools</h2>
-    <div class="tools">
-        <div class="tool"><h3>Multi YouTube Live Viewer</h3><a href="multi-live.html">Open Tool</a></div>
-        <div class="tool"><h3>YouTube Shorts Views</h3><a href="youtube-short-preview.html">Open Tool</a></div>
-        <div class="tool"><h3>YouTube Video Views</h3><a href="youtube-view-checker.html">Open Tool</a></div>
-        <div class="tool"><h3>Multi Browser</h3><a href="multi-browser.html">Open Tool</a></div>
-        <div class="tool"><h3>YouTube Thumbnail</h3><a href="youtube-thumbnail.html">Open Tool</a></div>
-        <div class="tool"><h3>YouTube Description & Tags Generator</h3><a href="youtube-tool.html">Open Tool</a></div>
-        <div class="tool"><h3>YouTube Audit</h3><a href="youtube-channel-audit.html">Open Tool</a></div>
-        <div class="tool"><h3>Multi View</h3><a href="multi-view.html">Open Tool</a></div>
-    </div>
-
-    <div class="ad-section" style="margin:20px 0;">
-        <ins class="adsbygoogle"
-              style="display:block"
-              data-ad-client="ca-pub-9877532310172541"
-              data-ad-slot="8809504326"
-              data-ad-format="auto"
-              data-full-width-responsive="true"></ins>
-    </div>
-
-    <h2 class="section-heading">⚙️ PDF, Image & Web Utilities</h2>
-    <div class="tools">
-        <div class="tool"><h3>Image Resize</h3><a href="image-resize.html">Open Tool</a></div>
-        <div class="tool"><h3>Instagram Boost</h3><a href="instagram.html">Open Tool</a></div>
-        <div class="tool"><h3>Instagram Ai caption</h3><a href="insta-tool.html">Open Tool</a></div>
-        <div class="tool"><h3>Photo to PDF</h3><a href="photo-to-pdf.html">Open Tool</a></div>
-        <div class="tool"><h3>PDF to Image</h3><a href="pdf-to-image.html">Open Tool</a></div>
-        <div class="tool"><h3>Website Booster</h3><a href="website-booster.html">Open Tool</a></div>
-        <div class="tool"><h3>Website Booster Pro</h3><a href="multiproxy-tool.html">Open Tool</a></div>
-    </div>
-
-    <div class="ad-section" style="margin:20px 0;">
-        <ins class="adsbygoogle"
-              style="display:block"
-              data-ad-client="ca-pub-9877532310172541"
-              data-ad-slot="5235685858"
-              data-ad-format="auto"
-              data-full-width-responsive="true"></ins>
-    </div>
-
-    <div class="mobile-feed-ad" style="margin:20px 0;">
-        <ins class="adsbygoogle"
-              style="display:block"
-              data-ad-format="fluid"
-              data-ad-layout-key="-fb+5w+4e-db+86"
-              data-ad-client="ca-pub-9877532310172541"
-              data-ad-slot="8241957297"></ins>
-    </div>
-        <div class="ad-section" style="margin:20px 0;">
-        <ins class="adsbygoogle"
-              style="display:block"
-              data-ad-client="ca-pub-9877532310172541"
-              data-ad-slot="8809504326"
-              data-ad-format="auto"
-              data-full-width-responsive="true"></ins>
-        
-    <div class="seo-description">
-        <h2>Trusted & Secure Free Online Tools for Everyone</h2>
-        <p><strong>PooreYouTuber Tools</strong> offers a modern collection of browser-based utilities that make digital life easier for everyone — from YouTubers and content creators to students, freelancers, and professionals. Our mission is to make high-quality tools accessible without downloads, subscriptions, or hidden costs. Every feature is optimized for speed, privacy, and simplicity, letting you focus on what matters most: your creativity and productivity.</p>
-
-        <p><strong>YouTube Tools for Creators:</strong> Whether you’re a beginner or a professional YouTuber, our suite of YouTube-focused tools helps streamline your workflow. You can monitor multiple live streams using the <em>Multi YouTube Live Viewer</em>, analyze engagement through the <em>YouTube Video View Checker</em>, or experiment with layouts via the <em>Multi Browser</em> tool. Our <em>YouTube Thumbnail Maker</em> helps you design eye-catching thumbnails that grab attention instantly. Additionally, the <em>YouTube Channel Audit</em> feature provides actionable insights to boost channel growth effectively.</p>
-
-        <p><strong>PDF & Image Utilities:</strong> Handle documents and media effortlessly with our fast PDF converters and image tools. Convert photos to PDFs or PDFs to images in seconds, resize images for any platform, and optimize your content without losing quality. Our tools work completely in-browser, ensuring privacy and eliminating the need for third-party apps.</p>
-
-        <p><strong>Fast, Secure, & Free:</strong> PooreYouTuber Tools is designed with user safety in mind. All operations happen locally in your browser, guaranteeing your data remains private. No sign-ups, no hidden trackers, just free tools designed to save time and enhance productivity.</p>
+    <h1>GA4 Active User Booster (Residential Fix)</h1>
+    <p style="color: #FF6666;">**अंतिम उपाय: GA4 में 10 Active User के लिए रोटेटिंग प्रॉक्सी आवश्यक है।**</p>
+    
+    <div class="input-group">
+        <label for="global-url" style="color: #d4d4d4;">Target Website URL (GA4 लगा हो):</label>
+        <div style="display: flex; margin-top: 5px;">
+            <input type="text" id="global-url" placeholder="उदाहरण: https://www.apniwebsite.com/">
+            <button onclick="loadAndRunAll()">Load & Run All (10 Sessions)</button>
+        </div>
     </div>
     
-    <div class="ad-section" style="margin:30px 0;">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-format="autorelaxed"
-             data-ad-client="ca-pub-9877532310172541"
-             data-ad-slot="2730819749"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
-    </div>
-
-<footer>
-    <p>&copy; 2025 PooreYouTuber. All Rights Reserved.</p>
-    <p>
-        <a href="privacy.html">Privacy</a> | 
-        <a href="disclaimer.html">Disclaimer</a> | 
-        <a href="contact.html">Contact</a>
-    </p>
-</footer>
+    <div id="proxy-container">
+        </div>
+</div>
 
 <script>
-    // Dark Mode Toggle
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        const btn = document.getElementById('dark-mode-toggle');
-        btn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // !!! CRITICAL STEP 1: RENDER PHP WEB SERVICE URL HERE !!!
+    // इस URL को अपने Render Backend के सही URL से बदलें (जो आपने पहले उपयोग किया था)
+    const PROXY_ENDPOINT = 'http://YOUR-RENDER-BACKEND-URL/proxy_loader.php'; 
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // =========================================================================
+    // !!! CRITICAL STEP 2: ROTATING PROXY CONFIGURATION (Webshare Residential) !!!
+    // =========================================================================
+    const ROTATING_PROXY = {
+        ip: "p.webshare.io",
+        port: "80",
+        // Username and Password combined for PHP backend format
+        auth: "bqctypvz-rotate:399xb3kxqv6i" 
+    };
+    // =========================================================================
+
+    const PROXY_COUNT = 10; // 10 Active Users के लिए 10 हिट
+
+    async function runProxyRequest(targetUrl, proxyConfig, index) {
+        // UNIQUE CLIENT ID FIX: हर रिक्वेस्ट के लिए एक नया और यूनिक ID (GA4 को तोड़ने के लिए)
+        const uniqueId = Date.now().toString() + index.toString() + Math.floor(Math.random() * 10000);
+        
+        // Render Backend को एक ही Rotating Endpoint के लिए 10 बार कॉल करना
+        const fetchUrl = `${PROXY_ENDPOINT}?target=${encodeURIComponent(targetUrl)}&ip=${proxyConfig.ip}&port=${proxyConfig.port}&auth=${proxyConfig.auth}&uid=${uniqueId}&location=${index}`;
+
+        try {
+            const startTime = Date.now();
+            
+            // Note: 'no-cors' मोड का उपयोग करें
+            const response = await fetch(fetchUrl, {
+                method: 'GET',
+                mode: 'no-cors',
+                cache: 'no-store'
+            });
+
+            const duration = (Date.now() - startTime) / 1000;
+            
+            // Status Update
+            document.getElementById(`status-${index}`).innerHTML = `<span style="color: #4CAF50;">View Sent (BG Session Active)</span><br>${duration.toFixed(2)}s`;
+
+        } catch (error) {
+            document.getElementById(`status-${index}`).innerHTML = `<span style="color: #FF6666;">Failed (Network Error)</span><br>Check Render Backend or URL`;
+            console.error(`Proxy Request Failed for index ${index}:`, error);
+        }
     }
 
-    // Initialize Ads
-    (adsbygoogle = window.adsbygoogle || []).push({});
+    async function loadAndRunAll() {
+        const targetUrl = document.getElementById('global-url').value;
+        if (!targetUrl) {
+            alert("Please enter a valid Target URL.");
+            return;
+        }
+        
+        // Render URL चेक करना
+        if (PROXY_ENDPOINT.includes('YOUR-RENDER-BACKEND-URL')) {
+            alert("ERROR: Please update the 'PROXY_ENDPOINT' variable in the code with your actual Render URL.");
+            return;
+        }
+
+
+        const container = document.getElementById('proxy-container');
+        container.innerHTML = ''; // Clear previous results
+
+        // 10 अलग-अलग यूजर्स/सेशंस को बनाने के लिए 10 बार लूप करें
+        for (let i = 0; i < PROXY_COUNT; i++) {
+            const index = i + 1;
+            
+            // HTML कार्ड बनाना
+            const card = document.createElement('div');
+            card.className = 'proxy-card';
+            card.innerHTML = `
+                <h3>Session ${index}</h3>
+                <p>Proxy Type: <span style="color: #FFC107;">Rotating Residential</span></p>
+                <p>Endpoint: ${ROTATING_PROXY.ip}:${ROTATING_PROXY.port}</p>
+                <p>Status: <span id="status-${index}">Running...</span></p>
+            `;
+            container.appendChild(card);
+
+            // Fetch को कॉल करें, लेकिन 100ms का छोटा डिले दें
+            setTimeout(() => {
+                runProxyRequest(targetUrl, ROTATING_PROXY, index);
+            }, i * 100); 
+        }
+    }
 </script>
+
 </body>
 </html>
