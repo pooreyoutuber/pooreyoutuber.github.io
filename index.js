@@ -3,6 +3,8 @@ const { GoogleGenAI } = require('@google/genai');
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
+// 🔑 Crypto मॉड्यूल को शामिल करें, जो generateClientId के लिए ज़रूरी है
+const crypto = require('crypto'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -10,9 +12,11 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
+    // यह तरीका Cloud Environment (जैसे Kubernetes Secrets) के लिए है
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
+    // Fallback: Environment Variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -30,12 +34,15 @@ if (GEMINI_KEY) {
 }
 
 // --- MIDDLEWARE & UTILITIES ---
+// 🔒 CORS को सही ढंग से सेट करें
 app.use(cors({
+    // यदि आप लोकलहोस्ट पर परीक्षण कर रहे हैं, तो 'origin' को अपने लोकलहोस्ट URL में बदलें
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
     credentials: true
 }));
-app.use(express.json());
+// 💾 बॉडी पार्सिंग (Payload size limit को 5MB तक बढ़ाया गया)
+app.use(express.json({ limit: '5mb' }));
 
 app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Combined API is running!'); // Health Check
@@ -44,11 +51,11 @@ app.get('/', (req, res) => {
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 const geoLocations = [
-    { country: "United States", region: "California" },
-    { country: "India", region: "Maharashtra" },
-    { country: "United Kingdom", region: "London" },
-    { country: "Germany", region: "Bavaria" },
-    { country: "Japan", region: "Tokyo" },
+    { country: "United States", region: "California", timezone: "America/Los_Angeles" },
+    { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
+    { country: "United Kingdom", region: "London", timezone: "Europe/London" },
+    { country: "Germany", region: "Bavaria", timezone: "Europe/Berlin" },
+    { country: "Japan", region: "Tokyo", timezone: "Asia/Tokyo" },
 ];
 function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
@@ -56,7 +63,8 @@ function getRandomGeo() {
 
 // Function to generate a unique Client ID for GA4 simulation (must be a UUID)
 function generateClientId() {
-    return crypto.randomUUID();
+    // 💡 सुनिश्चित करें कि आपने ऊपर 'const crypto = require('crypto');' जोड़ा है
+    return crypto.randomUUID(); 
 }
 
 /**
@@ -73,13 +81,19 @@ const getOptimalDelay = (totalViews) => {
     const minDelay = Math.max(1000, avgDelayMs * 0.7); // Minimum 1 second delay
     const maxDelay = avgDelayMs * 1.3;
     
-    return randomInt(minDelay, maxDelay);
+    // यदि totalViews बहुत कम है (जैसे 10), तो अधिकतम 10 मिनट प्रति व्यू तक कैप करें
+    const finalMaxDelay = Math.min(maxDelay, 600000); 
+
+    return randomInt(minDelay, finalMaxDelay);
 };
 
 
 // --- GA4 DATA SENDING (STABLE) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
+
+    // Payload में 'timestamp_micros' जोड़ें ताकि यह सुनिश्चित हो सके कि Event Order सही है 
+    payload.timestamp_micros = String(Date.now() * 1000); 
 
     try {
         const response = await nodeFetch(gaEndpoint, { 
@@ -90,15 +104,16 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 
         if (response.status === 204) { 
             // SUCCESS: Google accepted the data
+            console.log(`[View ${currentViewId}] SUCCESS ✅ | Sent: ${eventType}`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
             // FAILURE: Google returned an error (e.g., bad key or ID)
-            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. GA4 Error: ${errorText.substring(0, 50)}`);
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
             return { success: false };
         }
     } catch (error) {
-        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
+        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Event: ${eventType}. Connection Failed: ${error.message}`);
         return { success: false };
     }
 }
@@ -109,9 +124,17 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); // Unique Client ID for the session
     const geo = getRandomGeo(); // Random geographical location
+    
+    // User Properties जो हर Event के साथ जाते हैं
+    const userProperties = {
+        country: { value: geo.country },
+        region: { value: geo.region },
+        // 👍 टाइमज़ोन जोड़ें, जो GA4 के लिए एक अच्छा संकेत है
+        user_timezone: { value: geo.timezone } 
+    };
 
     // 1. SESSION START / PAGE VIEW EVENT
-    let referrer = "direct"; // Default referrer
+    let referrer = "direct"; 
     let events = [
         // CRITICAL FIX: Adding debug_mode: true to force events into DebugView
         { name: "session_start", params: { debug_mode: true } },
@@ -134,52 +157,59 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 
     const pageViewPayload = {
         client_id: cid,
-        user_properties: {
-            country: { value: geo.country },
-            region: { value: geo.region }
-        },
+        user_properties: userProperties,
         events: events
     };
 
     let allSuccess = true;
     
-    console.log(`[View ${viewCount}] Starting session (${geo.country}) on ${url}.`);
+    console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}) on ${url}. ---`);
 
     // Send the first payload (session_start and page_view)
     let result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'session_start/page_view');
     if (!result.success) allSuccess = false;
 
     // Simulate 3-8 seconds of user reading time on the page
-    await new Promise(resolve => setTimeout(resolve, randomInt(3000, 8000)));
+    const firstWait = randomInt(3000, 8000);
+    await new Promise(resolve => setTimeout(resolve, firstWait));
+    // console.log(`[View ${viewCount}] Waited ${firstWait/1000}s.`);
 
     // 2. SCROLL EVENT
     const scrollPayload = {
         client_id: cid,
+        user_properties: userProperties, // हर Event में user_properties भेजना अच्छा अभ्यास है
         events: [{ name: "scroll" }]
     };
     result = await sendData(gaId, apiSecret, scrollPayload, viewCount, 'scroll');
     if (!result.success) allSuccess = false;
 
     // Simulate another 3-8 seconds of user interaction
-    await new Promise(resolve => setTimeout(resolve, randomInt(3000, 8000)));
+    const secondWait = randomInt(3000, 8000);
+    await new Promise(resolve => setTimeout(resolve, secondWait));
+    // console.log(`[View ${viewCount}] Waited ${secondWait/1000}s.`);
+
 
     // 3. USER ENGAGEMENT (Simulates a click and a session duration > 10s)
+    const engagementTime = firstWait + secondWait + randomInt(5000, 20000); // सुनिश्चित करें कि 15s से अधिक हो
+    
     const engagementPayload = {
         client_id: cid,
+        user_properties: userProperties, // हर Event में user_properties भेजना अच्छा अभ्यास है
         events: [
             { 
                 name: "user_engagement", 
                 params: { 
-                    engagement_time_msec: randomInt(15000, 45000), // Session lasted 15-45 seconds
-                    interaction_type: "click" // Custom parameter to indicate a click action
+                    engagement_time_msec: engagementTime, 
+                    // 💡 interaction_type एक अच्छा कस्टम पैरामीटर है
+                    interaction_type: "click_simulated" 
                 } 
             }
         ]
     };
-    result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement/click');
+    result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
     if (!result.success) allSuccess = false;
 
-    console.log(`[View ${viewCount}] Completed session. (Success: ${allSuccess ? 'Yes' : 'No'})`);
+    console.log(`[View ${viewCount}] Completed session. Total Time: ${Math.round(engagementTime/1000)}s. (Success: ${allSuccess ? 'Yes' : 'No'})`);
 
     return allSuccess;
 }
@@ -187,15 +217,16 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 // --- VIEW PLAN GENERATION (Same) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
-    const totalPercentage = pages.reduce((sum, page) => sum + (page.percent || 0), 0);
+    const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
     
+    // 💡 Percentages के लिए थोड़ी सी टॉलरेंस (Tolerance) रखें (99.9% से 100.1%)
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
-        console.error(`Distribution Failed: Total percentage is ${totalPercentage}%. Should be 100%.`);
+        console.error(`Distribution Failed: Total percentage is ${totalPercentage.toFixed(1)}%. Should be 100%.`);
         return [];
     }
     
     pages.forEach(page => {
-        const viewsForPage = Math.round(totalViews * (page.percent / 100));
+        const viewsForPage = Math.round(totalViews * (parseFloat(page.percent) / 100));
         for (let i = 0; i < viewsForPage; i++) {
             if (page.url) { 
                 viewPlan.push(page.url);
@@ -224,16 +255,19 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    // Send ACKNOWLEDGEMENT immediately before starting long process
+    // 📣 ACKNOWLEDGEMENT तुरंत भेजें (यही कारण है कि क्लाइंट "reloading" दिखाना बंद कर देगा)
     res.json({ 
         status: 'accepted', 
-        message: `Request for ${viewPlan.length} high-engagement views accepted. Processing started. Estimated completion time: ~1 hour. CHECK DEBUGVIEW NOW!`
+        message: `Request for ${viewPlan.length} high-engagement views accepted. Processing started in the background. Estimated completion time: ~1 hour. CHECK DEBUGVIEW NOW!`
     });
 
-    // Start the heavy, time-consuming simulation in the background (NON-BLOCKING)
+    // 🖥️ Start the heavy, time-consuming simulation in the background (NON-BLOCKING)
     (async () => {
         const totalViews = viewPlan.length;
-        console.log(`[BOOSTER START] Starting real simulation for ${totalViews} views. Targeting 1-hour completion.`);
+        console.log(`\n=================================================`);
+        console.log(`[BOOSTER START] Starting real simulation for ${totalViews} views.`);
+        console.log(`=================================================`);
+
 
         for (let i = 0; i < totalViews; i++) {
             const url = viewPlan[i];
@@ -248,7 +282,9 @@ app.post('/boost-mp', async (req, res) => {
             await new Promise(resolve => setTimeout(resolve, delay));
         }
         
+        console.log(`\n=================================================`);
         console.log(`[BOOSTER COMPLETE] Successfully finished ${totalViews} view simulations.`);
+        console.log(`=================================================\n`);
     })();
 });
 
@@ -268,6 +304,7 @@ app.post('/api/caption-generate', async (req, res) => {
         return res.status(400).json({ error: 'Reel topic (description) is required.' });
     }
     
+    // 📝 प्रॉम्प्ट में एक छोटा सा सुधार - इसे और स्पष्ट बनाना
     const prompt = `Generate exactly 10 unique, highly trending, and viral Instagram Reels captions. The reel topic is: "${description}". The style should be: "${style || 'Catchy and Funny'}". 
 
 --- CRITICAL INSTRUCTION ---
@@ -352,5 +389,4 @@ Requested Change: "${requestedChange}"`;
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-
-            
+                
