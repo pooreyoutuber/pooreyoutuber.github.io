@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL CODE (The Ultimate GA4 Bypass Fix)
+// PHP Proxy Loader: proxy_loader.php - FINAL CODE (The Ultimate GA4 Bypass Fix v5)
 
 // --- CRITICAL AUTHENTICATION DATA (No Change) ---
 $auth_user = "bqctypvz";
@@ -38,9 +38,9 @@ $proxy_address = $proxy_ip . ":" . $proxy_port;
 // 3. Initialize PHP cURL
 $ch = curl_init();
 
-// --- ACTIVE USER FIX v4: Random User-Agent and DNT Header ---
+// --- ACTIVE USER FIX v5: Advanced Spoofing & Session Reset ---
 
-// 1. Random User-Agent (ब्राउज़र और OS पहचान को रैंडम करने के लिए)
+// 1. Random User-Agent 
 $user_agents = array(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15",
@@ -50,16 +50,16 @@ $user_agents = array(
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1.15"
 );
 
-// 2. Random Referer Array (Source Fix)
+// 2. Random Referer Array 
 $fake_referers = array(
     "https://www.google.com/",
     "https://www.bing.com/",
     "https://t.co/",
     "https://duckduckgo.com/",
-    "" // Empty Referer
+    ""
 );
 
-// 3. Random Language Array (Regional Fix)
+// 3. Random Language Array 
 $random_languages = array(
     "en-US,en;q=0.9", "hi-IN,hi;q=0.9", "es-ES,es;q=0.9", "fr-FR,fr;q=0.9", 
     "de-DE,de;q=0.9", "it-IT,it;q=0.9", "ja-JP,ja;q=0.9", "zh-CN,zh;q=0.9", 
@@ -73,11 +73,12 @@ $random_lang_header = $random_languages[array_rand($random_languages)];
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
-    "User-Agent: " . $random_ua, // अब यह हर रिक्वेस्ट पर अलग होगा
+    "User-Agent: " . $random_ua,
+    // CRITICAL: We explicitly send a unique Cookie, but we reset cURL's cookie engine below.
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "Accept-Language: " . $random_lang_header,
-    // CRITICAL: DNT header को 1 पर सेट करें ताकि ट्रैकिंग को रोका जा सके
+    // DNT header
     "DNT: 1" 
 );
 
@@ -87,6 +88,13 @@ if (!empty($random_referer)) {
 }
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+// --- ULTIMATE SESSION RESET ---
+// यह cURL को हर बार कुकी को अनदेखा करने और एक नया सेशन शुरू करने के लिए मजबूर करता है
+curl_setopt($ch, CURLOPT_COOKIESESSION, true); 
+curl_setopt($ch, CURLOPT_COOKIEJAR, ''); 
+curl_setopt($ch, CURLOPT_COOKIEFILE, ''); 
+// ------------------------------
 
 curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
