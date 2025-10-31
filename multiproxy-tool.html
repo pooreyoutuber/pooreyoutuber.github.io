@@ -132,13 +132,13 @@
         <strong>Tool Usage Instructions (For Real GA4 Impact):</strong>
         <ul>
             <li>
-                <strong>CRITICAL:</strong> Ensure **'Active User Mode'** and **'Auto Scroll'** are checked for best results.
+                **CRITICAL:** Ensure **'Active User Mode'** and **'Auto Scroll'** are checked for best results.
             </li>
             <li>
-                <strong>Unique User:</strong> Every slot uses a **Unique Proxy IP** and a **Unique Client ID** to register as a separate user in GA4.
+                **Unique User:** Every slot uses a **Unique Proxy IP** and a **Unique Client ID** to register as a separate user in GA4.
             </li>
             <li>
-                <strong>Session Time:</strong> Min/Max timer ensures the view is refreshed/repeated, sustaining a **>30 second session** (which GA4 needs to count an active user).
+                **Session Time:** Min/Max timer ensures the view is refreshed/repeated, sustaining a **>30 second session** (which GA4 needs to count an active user).
             </li>
         </ul>
     </div>
@@ -172,9 +172,9 @@ function getRandomNames(count) {
 
 // =========================================================================
 // !!! CRITICAL STEP: UPDATED PROXIES (Total 10 Slots) !!!
+// (These are your new, fresh proxy IPs)
 // =========================================================================
 const DUMMY_PROXIES = [
-  // 10 FRESH, UNIQUE PROXIES (from your list)
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
   { ip: "23.95.150.145", port: "6114", country: "US" }, 
@@ -188,8 +188,12 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const MAX_SLOTS = 10; // Maximum slots set to 10
-const PROXY_ENDPOINT = 'http://pooreyoutuber.gt.tc/proxy_loader.php'; 
+const MAX_SLOTS = 10; 
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// !!! CRITICAL: REPLACE THIS WITH YOUR NEW RENDER PHP WEB SERVICE URL !!!
+// जैसे: 'https://my-proxy-backend-123.onrender.com/proxy_loader.php'
+const PROXY_ENDPOINT = 'http://YOUR-NEW-RENDER-BACKEND-URL/proxy_loader.php'; 
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -297,13 +301,15 @@ function createSlot(index, proxy){
     try {
         // Fetch request is sent. PHP script runs in background for 30s.
         // This is the CRITICAL call that keeps the session active via proxy.
+        // NOTE: The 'no-cors' mode is crucial here.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         // Response is quick due to Connection: close header in PHP
         setStatus('View Sent (BG Session Active)', true);
         
     } catch (e) {
-        setStatus('Failed (Network/Proxy Error)', false);
+        // Error here means the PHP server did not respond at all.
+        setStatus('Failed (Network/Proxy Error) - Check Render Backend', false);
     }
     
     statusDot.style.animation = 'none';
@@ -337,9 +343,8 @@ function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
 
-    const maxCount = Math.min(MAX_SLOTS, DUMMY_PROXIES.length); // Use DUMMY_PROXIES.length to match the available 10
+    const maxCount = Math.min(MAX_SLOTS, DUMMY_PROXIES.length); 
     
-    // Ensure input value matches the effective maximum slots available (10)
     if (count < 1 || count > maxCount) {
         count = maxCount;
         numSlotsInput.value = count;
@@ -365,8 +370,6 @@ function stopAllAutomation() {
         s.setStatus('Ready (Stopped)', true);
         s.element.classList.remove('scrolling'); // Stop scrolling on all slots
     });
-    
-    // Resetting the checkbox state when manually stopped is optional, leaving it as is.
 }
 
 // Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
