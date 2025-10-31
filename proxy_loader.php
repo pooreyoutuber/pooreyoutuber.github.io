@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Code for Render
+// PHP Proxy Loader: proxy_loader.php - FINAL Code for Render (Active User Fix v2)
 
 // --- CRITICAL AUTHENTICATION DATA ---
 // NOTE: This must match the COMMON_USER and COMMON_PASS in your index.html
@@ -46,12 +46,23 @@ $ch = curl_init();
 // --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
+// --- ACTIVE USER FIX v2: Randomize Accept-Language Header ---
+// यह सुनिश्चित करता है कि GA4 प्रत्येक रिक्वेस्ट को अलग-अलग क्षेत्र/ब्राउज़र से मानता है
+$random_languages = array(
+    "en-US,en;q=0.9", "hi-IN,hi;q=0.9", "es-ES,es;q=0.9", "fr-FR,fr;q=0.9", 
+    "de-DE,de;q=0.9", "it-IT,it;q=0.9", "ja-JP,ja;q=0.9", "zh-CN,zh;q=0.9", 
+    "pt-PT,pt;q=0.9", "ru-RU,ru;q=0.9"
+);
+$random_lang_header = $random_languages[array_rand($random_languages)];
+
 $headers = array(
+    // User-Agent: इसे static रखें
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
     // CRITICAL: Send the unique GA4 cookie
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "Accept-Language: en-US,en;q=0.9"
+    // यह हर रिक्वेस्ट पर अलग-अलग होगा (Active User Fix)
+    "Accept-Language: " . $random_lang_header
 );
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
