@@ -3,182 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Active User Booster (Residential Fix)</title>
+    <title>PooreYouTuber All Free Tools</title>
+
     <style>
+        /* Basic Reset aur Fonts */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        }
+
+        /* Dark Theme Variables */
+        :root {
+            --bg-color-dark: #121212; /* Poora background */
+            --card-bg-dark: #1e1e1e; /* Card aur Nav bar ka background */
+            --text-color-light: #f0f0f0; 
+            --text-color-secondary: #aaaaaa;
+            --accent-color: #ff0000; /* YouTube Red color */
+            --open-tool-color: #333333; /* Open Tool button ka background */
+            --border-color: #333333;
+            --mobile-nav-height: 60px;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-light);
+            line-height: 1.6;
+            /* Mobile fixed footer ke liye jagah */
+            padding-bottom: var(--mobile-nav-height); 
         }
+
         .container {
-            max-width: 800px;
-            margin: auto;
-            background-color: #252526;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
-        h1 {
-            color: #00bcd4;
-            text-align: center;
+
+        /* --- Navbar (Top Bar) --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--card-bg-dark);
+            border-bottom: 1px solid var(--border-color);
         }
-        .input-group {
-            margin-bottom: 20px;
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2em;
+            color: var(--accent-color);
         }
-        input[type="text"] {
-            width: calc(100% - 110px);
-            padding: 10px;
-            margin-right: 10px;
-            border: 1px solid #555;
+
+        .nav-links a, .back-mode-btn {
+            color: var(--text-color-secondary);
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 0.9em;
+            padding: 5px 10px;
             border-radius: 4px;
-            background-color: #3c3c3c;
-            color: #d4d4d4;
+            transition: color 0.3s;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
+
+        .back-mode-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
             cursor: pointer;
-            font-size: 16px;
+            color: var(--text-color-secondary);
         }
-        button:hover {
-            background-color: #45a049;
+
+        /* Hide desktop nav links on mobile */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .navbar {
+                justify-content: center; /* Logo ko center mein lane ke liye */
+            }
         }
-        #proxy-container {
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+        /* Show desktop nav links on desktop */
+        @media (min-width: 769px) {
+            .mobile-nav {
+                display: none !important;
+            }
         }
-        .proxy-card {
-            background-color: #333;
-            padding: 15px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+        /* --- Hero Section (Main Heading) --- */
+        .hero-section {
+            text-align: center;
+            padding: 40px 20px 20px; /* Neeche padding kam ki */
         }
-        .proxy-card h3 {
-            margin-top: 0;
-            color: #FFC107;
+
+        .main-title {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-color-secondary);
             font-size: 1.1em;
         }
-        .proxy-card p {
-            margin: 5px 0;
-            font-size: 0.9em;
+
+        /* --- Tool Sections --- */
+        .section-title {
+            font-size: 1.3em;
+            margin: 30px 0 15px 0;
+            color: var(--text-color-light);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
         }
-        .proxy-card span {
-            font-weight: bold;
-            color: #00bcd4;
+
+        /* Tool Card Grid Layout */
+        .tool-grid {
+            display: grid;
+            /* Mobile mein 2 columns, Desktop mein 3-4 columns */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 10px;
+        }
+
+        .tool-card {
+            background-color: var(--card-bg-dark);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tool-card h3 {
+            font-size: 0.9em; /* Mobile friendly font size */
+            margin-bottom: 10px;
+            min-height: 30px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .open-tool-btn {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            background-color: var(--open-tool-color);
+            color: var(--text-color-light);
+            border: none;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        
+        /* --- Proxy Banner Styling --- */
+        .proxy-banner {
+            background-color: #3a2a2a; 
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .proxy-banner h3 {
+            margin-bottom: 5px;
+            color: #f77;
+        }
+
+        .proxy-banner p {
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        /* --- Mobile Fixed Navigation Bar (Footer) --- */
+        .mobile-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--mobile-nav-height);
+            background-color: var(--card-bg-dark);
+            border-top: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-align: center;
+            font-size: 0.7em;
+            color: var(--text-color-secondary);
+            text-decoration: none;
+            padding: 5px;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        .nav-item i {
+            font-size: 1.5em;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        /* Placeholder icons - real icons ke liye aapko FontAwesome ya koi aur library jodni hogi */
+        .icon::before {
+            content: "🏠"; /* Home */
+        }
+        .icon.shorts::before {
+            content: "▶️"; /* Shorts */
+        }
+        .icon.add::before {
+            content: "+"; /* Add */
+            font-size: 2em;
+            line-height: 0.5;
+        }
+        .icon.subs::before {
+            content: "🔔"; /* Subscriptions */
+        }
+        .icon.you::before {
+            content: "⚙️"; /* You / Tools */
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>GA4 Active User Booster (Residential Fix)</h1>
-    <p style="color: #FF6666;">**अंतिम उपाय: GA4 में 10 Active User के लिए रोटेटिंग प्रॉक्सी आवश्यक है।**</p>
-    
-    <div class="input-group">
-        <label for="global-url" style="color: #d4d4d4;">Target Website URL (GA4 लगा हो):</label>
-        <div style="display: flex; margin-top: 5px;">
-            <input type="text" id="global-url" placeholder="उदाहरण: https://www.apniwebsite.com/">
-            <button onclick="loadAndRunAll()">Load & Run All (10 Sessions)</button>
-        </div>
-    </div>
-    
-    <div id="proxy-container">
-        </div>
-</div>
-
-<script>
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    // !!! CRITICAL STEP 1: RENDER PHP WEB SERVICE URL HERE !!!
-    // इस URL को अपने Render Backend के सही URL से बदलें (जो आपने पहले उपयोग किया था)
-    const PROXY_ENDPOINT = 'http://YOUR-RENDER-BACKEND-URL/proxy_loader.php'; 
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    // =========================================================================
-    // !!! CRITICAL STEP 2: ROTATING PROXY CONFIGURATION (Webshare Residential) !!!
-    // =========================================================================
-    const ROTATING_PROXY = {
-        ip: "p.webshare.io",
-        port: "80",
-        // Username and Password combined for PHP backend format
-        auth: "bqctypvz-rotate:399xb3kxqv6i" 
-    };
-    // =========================================================================
-
-    const PROXY_COUNT = 10; // 10 Active Users के लिए 10 हिट
-
-    async function runProxyRequest(targetUrl, proxyConfig, index) {
-        // UNIQUE CLIENT ID FIX: हर रिक्वेस्ट के लिए एक नया और यूनिक ID (GA4 को तोड़ने के लिए)
-        const uniqueId = Date.now().toString() + index.toString() + Math.floor(Math.random() * 10000);
+    <header class="navbar">
+        <div class="logo">PooreYouTuber **Tools**</div>
         
-        // Render Backend को एक ही Rotating Endpoint के लिए 10 बार कॉल करना
-        const fetchUrl = `${PROXY_ENDPOINT}?target=${encodeURIComponent(targetUrl)}&ip=${proxyConfig.ip}&port=${proxyConfig.port}&auth=${proxyConfig.auth}&uid=${uniqueId}&location=${index}`;
+        <nav class="nav-links">
+            <a href="about.html">About</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="contact.html">Contact</a>
+            <a href="disclaimer.html">Disclaimer</a>
+            <a href="articles.html">Articles</a>
+            <button class="back-mode-btn">Back Mode</button>
+        </nav>
+    </header>
 
-        try {
-            const startTime = Date.now();
-            
-            // Note: 'no-cors' मोड का उपयोग करें
-            const response = await fetch(fetchUrl, {
-                method: 'GET',
-                mode: 'no-cors',
-                cache: 'no-store'
-            });
+    <main class="container">
+        <div class="hero-section">
+            <h1 class="main-title">🚀 PooreYouTuber All Free Tools</h1>
+            <p class="subtitle">Empower your content creation and digital workflow with our powerful, free online utilities.</p>
+        </div>
 
-            const duration = (Date.now() - startTime) / 1000;
-            
-            // Status Update
-            document.getElementById(`status-${index}`).innerHTML = `<span style="color: #4CAF50;">View Sent (BG Session Active)</span><br>${duration.toFixed(2)}s`;
+        <section class="tool-section">
+            <h2 class="section-title">🔥 YouTube & Content Strategy Tools</h2>
+            <div class="tool-grid">
+                
+                <div class="tool-card">
+                    <h3>Multi YouTube Live Viewer</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
 
-        } catch (error) {
-            document.getElementById(`status-${index}`).innerHTML = `<span style="color: #FF6666;">Failed (Network Error)</span><br>Check Render Backend or URL`;
-            console.error(`Proxy Request Failed for index ${index}:`, error);
-        }
-    }
+                <div class="tool-card">
+                    <h3>YouTube Shorts Views</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
 
-    async function loadAndRunAll() {
-        const targetUrl = document.getElementById('global-url').value;
-        if (!targetUrl) {
-            alert("Please enter a valid Target URL.");
-            return;
-        }
-        
-        // Render URL चेक करना
-        if (PROXY_ENDPOINT.includes('YOUR-RENDER-BACKEND-URL')) {
-            alert("ERROR: Please update the 'PROXY_ENDPOINT' variable in the code with your actual Render URL.");
-            return;
-        }
+                <div class="tool-card">
+                    <h3>YouTube Video Views</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
+                
+                <div class="tool-card">
+                    <h3>Multi Browser</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
 
+                <div class="tool-card">
+                    <h3>YouTube Thumbnail</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
 
-        const container = document.getElementById('proxy-container');
-        container.innerHTML = ''; // Clear previous results
+                <div class="tool-card">
+                    <h3>YouTube Audit</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
+                
+                <div class="tool-card">
+                    <h3>YouTube Tools</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
+                
+                </div>
+        </section>
 
-        // 10 अलग-अलग यूजर्स/सेशंस को बनाने के लिए 10 बार लूप करें
-        for (let i = 0; i < PROXY_COUNT; i++) {
-            const index = i + 1;
-            
-            // HTML कार्ड बनाना
-            const card = document.createElement('div');
-            card.className = 'proxy-card';
-            card.innerHTML = `
-                <h3>Session ${index}</h3>
-                <p>Proxy Type: <span style="color: #FFC107;">Rotating Residential</span></p>
-                <p>Endpoint: ${ROTATING_PROXY.ip}:${ROTATING_PROXY.port}</p>
-                <p>Status: <span id="status-${index}">Running...</span></p>
-            `;
-            container.appendChild(card);
+        <div class="proxy-banner">
+            <h3>Unlimited Residential Proxy</h3>
+            <p>Mango Proxies You Can Rely On: Residential, Server, and ISP starting at just $0.6 per GB</p>
+        </div>
 
-            // Fetch को कॉल करें, लेकिन 100ms का छोटा डिले दें
-            setTimeout(() => {
-                runProxyRequest(targetUrl, ROTATING_PROXY, index);
-            }, i * 100); 
-        }
-    }
-</script>
-
+        <section class="tool-section">
+            <h2 class="section-title">⚙️ Image, PDF & Web Utility Tools</h2>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <h3>Image Resize</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
+                
+                <div class="tool-card">
+                    <h3>Instagram Boost</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
+                
+                <div class="tool-card">
+                    <h3>Photo to PDF</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
+                
+                <div class="tool-card">
+                    <h3>Boost Website</h3>
+                    <button class="open-tool-btn">Open Tool</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="mobile-nav">
+        <a href="#" class="nav-item active">
+            <span class="icon home"></span>Home
+        </a>
+        <a href="#" class="nav-item">
+            <span class="icon shorts"></span>Shorts
+        </a>
+        <a href="#" class="nav-item">
+            <span class="icon add"></span>
+        </a>
+        <a href="#" class="nav-item">
+            <span class="icon subs"></span>Subscriptions
+        </a>
+        <a href="#" class="nav-item">
+            <span class="icon you"></span>You
+        </a>
+    </footer>
+    
 </body>
 </html>
