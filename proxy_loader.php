@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL CODE (Active User Fix v3: Referer Spoofing)
+// PHP Proxy Loader: proxy_loader.php - FINAL CODE (The Ultimate GA4 Bypass Fix)
 
 // --- CRITICAL AUTHENTICATION DATA (No Change) ---
 $auth_user = "bqctypvz";
@@ -38,20 +38,28 @@ $proxy_address = $proxy_ip . ":" . $proxy_port;
 // 3. Initialize PHP cURL
 $ch = curl_init();
 
-// --- ACTIVE USER FIX v3: Custom Headers (The Final Push) ---
+// --- ACTIVE USER FIX v4: Random User-Agent and DNT Header ---
 
-// Random Referer Array (Traffic Source Fix)
-$fake_referers = array(
-    "https://www.google.com/",
-    "https://www.bing.com/search?q=youtube+booster",
-    "https://facebook.com/ads/...",
-    "https://t.co/random-tweet",
-    "https://duckduckgo.com/",
-    "https://not-a-real-site-123.com/", // कभी-कभी खाली Referer से भी काम होता है
-    ""
+// 1. Random User-Agent (ब्राउज़र और OS पहचान को रैंडम करने के लिए)
+$user_agents = array(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:109.0) Gecko/20100101 Firefox/116.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1.15"
 );
 
-// Random Language Array (Regional Fix)
+// 2. Random Referer Array (Source Fix)
+$fake_referers = array(
+    "https://www.google.com/",
+    "https://www.bing.com/",
+    "https://t.co/",
+    "https://duckduckgo.com/",
+    "" // Empty Referer
+);
+
+// 3. Random Language Array (Regional Fix)
 $random_languages = array(
     "en-US,en;q=0.9", "hi-IN,hi;q=0.9", "es-ES,es;q=0.9", "fr-FR,fr;q=0.9", 
     "de-DE,de;q=0.9", "it-IT,it;q=0.9", "ja-JP,ja;q=0.9", "zh-CN,zh;q=0.9", 
@@ -59,15 +67,18 @@ $random_languages = array(
 );
 
 // Headers Preparation
+$random_ua = $user_agents[array_rand($user_agents)];
 $random_referer = $fake_referers[array_rand($fake_referers)];
 $random_lang_header = $random_languages[array_rand($random_languages)];
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 $headers = array(
-    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
+    "User-Agent: " . $random_ua, // अब यह हर रिक्वेस्ट पर अलग होगा
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "Accept-Language: " . $random_lang_header
+    "Accept-Language: " . $random_lang_header,
+    // CRITICAL: DNT header को 1 पर सेट करें ताकि ट्रैकिंग को रोका जा सके
+    "DNT: 1" 
 );
 
 // Referer Header (Only add if it's not empty)
