@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime</title>
+<title>Website Booster Prime (GA4 Optimized)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
+  /* --- CSS Styles (No changes in UI/UX) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -26,7 +26,7 @@
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
   .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0 10px 10px 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; } /* Updated border-radius for URL input */
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
@@ -35,15 +35,17 @@
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
-  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } /* Added style for new inputs */
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } 
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
   .info-box ul li { margin-bottom: 6px; }
+  /* Updated Grid Layout for max 10 slots (max 5 columns) */
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
   @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
   @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
+  /* End Grid Update */
   .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
@@ -92,8 +94,8 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Website Booster Prime</h1>
-      <div class="tagline">Global Traffic Simulation System.</div>
+      <h1>Website Booster Prime (GA4 Optimized)</h1>
+      <div class="tagline">Global Traffic Simulation System. Designed for Active Users.</div>
     </header>
 
     <div class="controls">
@@ -101,8 +103,7 @@
             
             <div class="slot-selector">
                 Slots:
-                <input id="numSlots" type="number" value="10" min="1" max="20" />
-            </div>
+                <input id="numSlots" type="number" value="10" min="1" max="10" /> </div>
 
             <div class="url-input-wrap">
                 <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
@@ -111,35 +112,33 @@
         </div>
         
         <div class="repeat-control">
-            <input type="checkbox" id="repeatMode" />
-            <label for="repeatMode">
+            <input type="checkbox" id="repeatMode" checked /> <label for="repeatMode">
                 Enable **Active User** Mode: Repeat all 
                 <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <input id="minTime" type="number" value="30" min="25" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
                 <label for="maxTime">Max:</label>
-                <input id="maxTime" type="number" value="60" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <input id="maxTime" type="number" value="60" min="30" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
                 <span>seconds cycle</span> for better GA tracking.
             </label>
             
-            <input type="checkbox" id="autoScrollMode" />
-            <label for="autoScrollMode">
-                Enable **Auto Scroll** (Simulated)
+            <input type="checkbox" id="autoScrollMode" checked /> <label for="autoScrollMode">
+                Enable **Auto Scroll** (Simulated Engagement)
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
     <div class="info-box">
-        <strong>Tool Usage Instructions:</strong>
+        <strong>Tool Usage Instructions (For Real GA4 Impact):</strong>
         <ul>
             <li>
-                <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
+                <strong>CRITICAL:</strong> Ensure **'Active User Mode'** and **'Auto Scroll'** are checked for best results.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request between the Min/Max seconds (**staggered**) for the required session time.
+                <strong>Unique User:</strong> Every slot uses a **Unique Proxy IP** and a **Unique Client ID** to register as a separate user in GA4.
             </li>
             <li>
-                **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
+                <strong>Session Time:</strong> Min/Max timer ensures the view is refreshed/repeated, sustaining a **>30 second session** (which GA4 needs to count an active user).
             </li>
         </ul>
     </div>
@@ -172,36 +171,24 @@ function getRandomNames(count) {
 }
 
 // =========================================================================
-// !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
+// !!! CRITICAL STEP: UPDATED PROXIES (Total 10 Slots) !!!
 // =========================================================================
 const DUMMY_PROXIES = [
+  // 10 FRESH, UNIQUE PROXIES (from your list)
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
-  { ip: "38.170.176.177", port: "5572", country: "CA" },
+  { ip: "23.95.150.145", port: "6114", country: "US" }, 
   { ip: "198.23.239.134", port: "6540", country: "US" },
   { ip: "45.38.107.97", port: "6014", country: "US" },
   { ip: "107.172.163.27", port: "6543", country: "CA" },
   { ip: "64.137.96.74", port: "6641", country: "US" },
   { ip: "216.10.27.159", port: "6837", country: "AU" },
   { ip: "142.111.67.146", port: "5611", country: "US" },
-  { ip: "142.147.128.93", port: "6593", country: "CA" },
-  
-  // DUPLICATES BELOW: REPLACE THESE 10 ENTRIES WITH 10 MORE UNIQUE IPs
-  { ip: "142.111.48.254", port: "7031", country: "US" }, 
-  { ip: "31.59.20.177", port: "6755", country: "DE" },  
-  { ip: "38.170.176.178", port: "5573", country: "CA" }, 
-  { ip: "198.23.239.135", port: "6541", country: "US" }, 
-  { ip: "45.38.107.98", port: "6015", country: "US" }, 
-  { ip: "107.172.163.28", port: "6544", country: "CA" }, 
-  { ip: "64.137.96.75", port: "6642", country: "US" }, 
-  { ip: "216.10.27.160", port: "6838", country: "AU" }, 
-  { ip: "142.111.67.147", port: "5612", country: "US" }, 
-  { ip: "142.147.128.94", port: "6594", country: "CA" }, 
+  { ip: "142.147.128.93", port: "6593", country: "CA" }, 
 ];
 // =========================================================================
 
-const MAX_SLOTS = 20; // Maximum slots set to 20
-// 👇 यह लाइन अपडेट की गई है, ध्यान दें
+const MAX_SLOTS = 10; // Maximum slots set to 10
 const PROXY_ENDPOINT = 'http://pooreyoutuber.gt.tc/proxy_loader.php'; 
 
 const gridContainer = document.getElementById('gridContainer');
@@ -209,8 +196,8 @@ const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
-const minTimeInput = document.getElementById('minTime'); // New
-const maxTimeInput = document.getElementById('maxTime'); // New
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
@@ -226,22 +213,18 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
 }));
 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds - (Baseline)
-
-// 👇 नया फ़ंक्शन: अब मिन और मैक्स टाइम इनपुट फील्ड्स से वैल्यू लेता है
 function getRandomDelay() {
     // Get values from new input fields (convert seconds to milliseconds)
     const minSec = parseInt(minTimeInput.value);
     const maxSec = parseInt(maxTimeInput.value);
     
-    // Ensure valid range
+    // Ensure valid range and min/max time are GA4 compliant
     const minMs = Math.min(minSec, maxSec) * 1000;
     const maxMs = Math.max(minSec, maxSec) * 1000;
     
     // Generate random delay
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
-// 👆 नया फ़ंक्शन
 
 // Function to create a single slot element
 function createSlot(index, proxy){
@@ -295,7 +278,8 @@ function createSlot(index, proxy){
     if(!originalUrl) return;
     
     // 1. iFrame Load (Visible preview)
-    iframe.src = originalUrl;
+    // IMPORTANT: Loading the real URL here helps simulate the initial page load event in the browser
+    iframe.src = originalUrl; 
     setStatus('Loading Content...', false);
     
     // Apply/Remove scrolling class
@@ -312,6 +296,7 @@ function createSlot(index, proxy){
 
     try {
         // Fetch request is sent. PHP script runs in background for 30s.
+        // This is the CRITICAL call that keeps the session active via proxy.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         // Response is quick due to Connection: close header in PHP
@@ -352,9 +337,11 @@ function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
 
-    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    const maxCount = Math.min(MAX_SLOTS, DUMMY_PROXIES.length); // Use DUMMY_PROXIES.length to match the available 10
+    
+    // Ensure input value matches the effective maximum slots available (10)
     if (count < 1 || count > maxCount) {
-        count = Math.min(Math.max(count, 1), maxCount);
+        count = maxCount;
         numSlotsInput.value = count;
     }
     
@@ -379,7 +366,7 @@ function stopAllAutomation() {
         s.element.classList.remove('scrolling'); // Stop scrolling on all slots
     });
     
-    repeatModeCheckbox.checked = false;
+    // Resetting the checkbox state when manually stopped is optional, leaving it as is.
 }
 
 // Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
@@ -399,7 +386,7 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // 👇 CRITICAL CHANGE: Get a random delay from the user-defined min/max time
+        // 👇 CRITICAL: Get a random delay from the user-defined min/max time
         const randomDelay = getRandomDelay(); 
         const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
@@ -433,12 +420,6 @@ autoScrollModeCheckbox.addEventListener('change', (e) => {
 });
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
-repeatModeCheckbox.addEventListener('change', () => {
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
 
 // Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
