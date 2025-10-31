@@ -1,0 +1,18 @@
+# This file tells Render how to deploy your Web Service
+services:
+  - type: web
+    name: proxy-backend-service
+    # <--- इसे अपनी नई GitHub Repo के नाम से बदलें --->
+    repo: YOUR_BACKEND_REPO_NAME_HERE 
+    branch: main
+    # Tells Render to use the Dockerfile in the root directory
+    rootDir: . 
+    # Use Docker to build the service
+    runtime: docker
+    # Free tier instance
+    plan: free 
+    # Render will listen on this port
+    envVars:
+      - key: PORT
+        value: "80"
+        
