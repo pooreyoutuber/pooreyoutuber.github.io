@@ -6,7 +6,7 @@
     <title>PooreYouTuber All Free Tools</title>
 
     <style>
-        /* Basic Reset aur Fonts */
+        /* Basic Reset and Fonts */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -14,23 +14,22 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
         }
 
-        /* Dark Theme Variables */
+        /* Light Theme Variables */
         :root {
-            --bg-color-dark: #121212; /* Poora background */
-            --card-bg-dark: #1e1e1e; /* Card aur Nav bar ka background */
-            --text-color-light: #f0f0f0; 
-            --text-color-secondary: #aaaaaa;
-            --accent-color: #ff0000; /* YouTube Red color */
-            --open-tool-color: #333333; /* Open Tool button ka background */
-            --border-color: #333333;
+            --bg-color-light: #ffffff;
+            --card-bg-light: #f7f7f7;
+            --text-color-dark: #1f1f1f; 
+            --text-color-secondary: #555555;
+            --accent-color: #ff0000;
+            --open-tool-color: #e0e0e0;
+            --border-color: #dddddd;
             --mobile-nav-height: 60px;
         }
 
         body {
-            background-color: var(--bg-color-dark);
-            color: var(--text-color-light);
+            background-color: var(--bg-color-light);
+            color: var(--text-color-dark);
             line-height: 1.6;
-            /* Mobile fixed footer ke liye jagah */
             padding-bottom: var(--mobile-nav-height); 
         }
 
@@ -43,46 +42,39 @@
         /* --- Navbar (Top Bar) --- */
         .navbar {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             padding: 15px 20px;
-            background-color: var(--card-bg-dark);
+            background-color: var(--bg-color-light);
             border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .logo {
             font-weight: 700;
             font-size: 1.2em;
             color: var(--accent-color);
+            margin-right: 20px;
         }
 
-        .nav-links a, .back-mode-btn {
+        .nav-links a {
             color: var(--text-color-secondary);
             text-decoration: none;
-            margin-left: 15px;
+            margin-right: 15px;
             font-size: 0.9em;
-            padding: 5px 10px;
-            border-radius: 4px;
+            padding: 5px 0;
             transition: color 0.3s;
         }
-
-        .back-mode-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            color: var(--text-color-secondary);
-        }
-
+        
         /* Hide desktop nav links on mobile */
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
             }
-            .navbar {
-                justify-content: center; /* Logo ko center mein lane ke liye */
-            }
         }
-        /* Show desktop nav links on desktop */
+        /* Hide mobile nav on desktop */
         @media (min-width: 769px) {
             .mobile-nav {
                 display: none !important;
@@ -92,39 +84,60 @@
         /* --- Hero Section (Main Heading) --- */
         .hero-section {
             text-align: center;
-            padding: 40px 20px 20px; /* Neeche padding kam ki */
-        }
-
-        .main-title {
-            font-size: 2em;
-            margin-bottom: 10px;
+            padding: 20px 20px 20px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .subtitle {
             color: var(--text-color-secondary);
             font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        /* --- Tool Sections --- */
+        .section-title-container {
+            text-align: center;
+            padding: 10px 0;
+            margin: 20px 0;
         }
 
-        /* --- Tool Sections --- */
         .section-title {
-            font-size: 1.3em;
-            margin: 30px 0 15px 0;
-            color: var(--text-color-light);
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--border-color);
-            text-transform: uppercase;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-color-secondary);
+            position: relative;
+            display: inline-block;
         }
+
+        /* Center line effect jaisa ki image mein hai */
+        .section-title::before, .section-title::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 50px;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .section-title::before { left: -60px; }
+        .section-title::after { right: -60px; }
 
         /* Tool Card Grid Layout */
         .tool-grid {
             display: grid;
-            /* Mobile mein 2 columns, Desktop mein 3-4 columns */
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            padding: 10px 0;
+        }
+        
+        @media (min-width: 600px) {
+            .tool-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
         }
 
         .tool-card {
-            background-color: var(--card-bg-dark);
+            background-color: var(--card-bg-light);
             padding: 15px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -132,12 +145,13 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .tool-card h3 {
-            font-size: 0.9em; /* Mobile friendly font size */
+            font-size: 0.9em; 
             margin-bottom: 10px;
-            min-height: 30px; 
+            min-height: 40px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -149,32 +163,38 @@
             width: 100%;
             padding: 8px;
             background-color: var(--open-tool-color);
-            color: var(--text-color-light);
-            border: none;
+            color: var(--text-color-dark);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             text-transform: uppercase;
             font-weight: 600;
             cursor: pointer;
             font-size: 0.8em;
+            text-decoration: none; /* Link ke liye zaroori */
         }
         
+        .open-tool-btn:hover {
+            background-color: #d8d8d8;
+        }
+
         /* --- Proxy Banner Styling --- */
         .proxy-banner {
-            background-color: #3a2a2a; 
-            padding: 20px;
+            background-color: #fcebeb;
+            padding: 15px;
             border-radius: 8px;
             margin: 30px 0;
-            border-left: 5px solid var(--accent-color);
+            border: 1px solid #ffcccc;
         }
 
         .proxy-banner h3 {
             margin-bottom: 5px;
-            color: #f77;
+            color: #cc0000;
+            font-size: 1.1em;
         }
 
         .proxy-banner p {
-            font-size: 0.9em;
-            color: #ccc;
+            font-size: 0.85em;
+            color: var(--text-color-secondary);
         }
 
         /* --- Mobile Fixed Navigation Bar (Footer) --- */
@@ -187,7 +207,7 @@
             left: 0;
             width: 100%;
             height: var(--mobile-nav-height);
-            background-color: var(--card-bg-dark);
+            background-color: var(--bg-color-light);
             border-top: 1px solid var(--border-color);
             z-index: 1000;
         }
@@ -204,30 +224,12 @@
             color: var(--accent-color);
         }
 
-        .nav-item i {
-            font-size: 1.5em;
-            display: block;
-            margin-bottom: 3px;
-        }
-
-        /* Placeholder icons - real icons ke liye aapko FontAwesome ya koi aur library jodni hogi */
-        .icon::before {
-            content: "🏠"; /* Home */
-        }
-        .icon.shorts::before {
-            content: "▶️"; /* Shorts */
-        }
-        .icon.add::before {
-            content: "+"; /* Add */
-            font-size: 2em;
-            line-height: 0.5;
-        }
-        .icon.subs::before {
-            content: "🔔"; /* Subscriptions */
-        }
-        .icon.you::before {
-            content: "⚙️"; /* You / Tools */
-        }
+        /* Placeholder Icons (Real icons ke liye FontAwesome jodne ki zaroorat padegi) */
+        .icon-home::before { content: "🏠"; font-size: 1.5em; display: block; margin-bottom: 3px;}
+        .icon-shorts::before { content: "▶️"; font-size: 1.5em; display: block; margin-bottom: 3px;}
+        .icon-add::before { content: "+"; font-size: 2em; line-height: 0.5; display: block; margin-bottom: 3px;}
+        .icon-subs::before { content: "🔔"; font-size: 1.5em; display: block; margin-bottom: 3px;}
+        .icon-you::before { content: "👤"; font-size: 1.5em; display: block; margin-bottom: 3px;}
     </style>
 </head>
 <body>
@@ -241,56 +243,50 @@
             <a href="contact.html">Contact</a>
             <a href="disclaimer.html">Disclaimer</a>
             <a href="articles.html">Articles</a>
-            <button class="back-mode-btn">Back Mode</button>
         </nav>
     </header>
 
     <main class="container">
         <div class="hero-section">
-            <h1 class="main-title">🚀 PooreYouTuber All Free Tools</h1>
-            <p class="subtitle">Empower your content creation and digital workflow with our powerful, free online utilities.</p>
+            <p class="subtitle">Empower your YouTube journey and digital workflow with our fast, secure, and free online tools.</p>
         </div>
 
         <section class="tool-section">
-            <h2 class="section-title">🔥 YouTube & Content Strategy Tools</h2>
+            <div class="section-title-container">
+                <span class="section-title">▶️ YouTube & Content Tools</span>
+            </div>
             <div class="tool-grid">
                 
                 <div class="tool-card">
                     <h3>Multi YouTube Live Viewer</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="multi-browser.html" class="open-tool-btn">Open Tool</a>
                 </div>
 
                 <div class="tool-card">
                     <h3>YouTube Shorts Views</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="youtube-view-checker.html" class="open-tool-btn">Open Tool</a>
                 </div>
 
                 <div class="tool-card">
                     <h3>YouTube Video Views</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="youtube-view-checker.html" class="open-tool-btn">Open Tool</a>
                 </div>
                 
                 <div class="tool-card">
                     <h3>Multi Browser</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="multi-browser.html" class="open-tool-btn">Open Tool</a>
                 </div>
 
                 <div class="tool-card">
                     <h3>YouTube Thumbnail</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="youtube-thumbnail.html" class="open-tool-btn">Open Tool</a>
                 </div>
 
                 <div class="tool-card">
                     <h3>YouTube Audit</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="youtube-channel-audit.html" class="open-tool-btn">Open Tool</a>
                 </div>
-                
-                <div class="tool-card">
-                    <h3>YouTube Tools</h3>
-                    <button class="open-tool-btn">Open Tool</button>
-                </div>
-                
-                </div>
+            </div>
         </section>
 
         <div class="proxy-banner">
@@ -299,46 +295,48 @@
         </div>
 
         <section class="tool-section">
-            <h2 class="section-title">⚙️ Image, PDF & Web Utility Tools</h2>
+            <div class="section-title-container">
+                <span class="section-title">⚙️ PDF, Image & Web Utilities</span>
+            </div>
             <div class="tool-grid">
                 <div class="tool-card">
                     <h3>Image Resize</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="image-resize.html" class="open-tool-btn">Open Tool</a>
                 </div>
                 
                 <div class="tool-card">
                     <h3>Instagram Boost</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="insta-tool.html" class="open-tool-btn">Open Tool</a>
                 </div>
                 
                 <div class="tool-card">
                     <h3>Photo to PDF</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="photo-to-pdf.html" class="open-tool-btn">Open Tool</a>
                 </div>
                 
                 <div class="tool-card">
                     <h3>Boost Website</h3>
-                    <button class="open-tool-btn">Open Tool</button>
+                    <a href="website-booster.html" class="open-tool-btn">Open Tool</a>
                 </div>
             </div>
         </section>
     </main>
     
     <footer class="mobile-nav">
-        <a href="#" class="nav-item active">
-            <span class="icon home"></span>Home
+        <a href="index.html" class="nav-item active">
+            <span class="icon-home"></span>Home
         </a>
         <a href="#" class="nav-item">
-            <span class="icon shorts"></span>Shorts
+            <span class="icon-shorts"></span>Shorts
         </a>
         <a href="#" class="nav-item">
-            <span class="icon add"></span>
+            <span class="icon-add"></span>
         </a>
         <a href="#" class="nav-item">
-            <span class="icon subs"></span>Subscriptions
+            <span class="icon-subs"></span>Subscriptions
         </a>
         <a href="#" class="nav-item">
-            <span class="icon you"></span>You
+            <span class="icon-you"></span>You
         </a>
     </footer>
     
