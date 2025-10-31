@@ -1,6 +1,13 @@
 <?php
 // PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Active User Tracking (GA4 Fix)
 
+// --- CRITICAL AUTHENTICATION DATA ---
+// NOTE: This must match the COMMON_USER and COMMON_PASS in your index.html
+$auth_user = "bqctypvz";
+$auth_pass = "399xb3kxqv6i";
+$expected_auth = $auth_user . ":" . $auth_pass;
+
+
 // 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
 header("Content-Encoding: none");
@@ -20,20 +27,23 @@ flush();
 ignore_user_abort(true);
 set_time_limit(0); 
 
-// --- Capture Parameters ---
+// --- Capture Parameters from JavaScript ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
 $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null;
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
-$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
-$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // NEW: Capture unique ID
+$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; // Should be bqctypvz:399xb3kxqv6i
+$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // Unique ID for GA4 Cookie
 
-if (!$target_url || !$proxy_ip || !$proxy_port || !$proxy_auth || !$unique_id) {
+// Basic Validation
+if (!$target_url || !$proxy_ip || !$proxy_port || $proxy_auth !== $expected_auth || !$unique_id) {
+    // If any data is missing or auth fails, stop the background process immediately.
     exit(); 
 }
 
+$proxy_address = $proxy_ip . ":" . $proxy_port;
+
 // 3. Initialize PHP cURL
 $ch = curl_init();
-$proxy_address = "$proxy_ip:$proxy_port";
 
 // --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
 // CRITICAL: We create a unique GA cookie for every hit to register it as a NEW USER.
@@ -55,8 +65,8 @@ curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 curl_setopt($ch, CURLOPT_HEADER, false);
 
-// --- Proxy Configuration and Authentication ---
-curl_setopt($ch, CURLOPT_PROXY, $proxy_address);
+// --- PROXY CONFIGURATION IS BACK (Necessary to use the proxy IP) ---
+curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
