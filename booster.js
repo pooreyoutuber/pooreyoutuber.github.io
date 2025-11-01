@@ -1,5 +1,5 @@
-// booster.js (Geo Location के साथ अपडेटेड)
-// 🌐 Backend Root — सुनिश्चित करें कि यह आपके Render Service का सही URL है
+// booster.js
+// 🌐 Backend Root — अपने Render Service का सही URL यहाँ डालें
 const RENDER_BACKEND_ROOT = "https://pooreyoutuber-github-io-blmp.onrender.com";
 
 // 🔁 Proxy List (10 proxies) - यह सूची इस्तेमाल की जाएगी
@@ -73,7 +73,7 @@ function init() {
 // 🧠 Store selected proxy index
 let currentSelectedProxyIndex = 0;
 
-async function setSelectedProxyDisplay(idx) { // <--- Geo Location के लिए async
+async function setSelectedProxyDisplay(idx) { 
   currentSelectedProxyIndex = idx;
   const p = PROXY_POOL[idx];
   const uri = proxyToUri(p);
@@ -130,7 +130,6 @@ async function handleLoad() {
     // 404 या किसी अन्य त्रुटि को हैंडल करना
     if (!resp.ok) {
       const body = await resp.text();
-      // 404 की जगह अब यह index.js से 502 एरर दिखाएगा
       $("proxyInfo").innerHTML = `<span style="color:red;font-weight:bold;">❌ Backend Error ${resp.status}</span><br><pre>${escapeHtml(
         body
       )}</pre>`;
