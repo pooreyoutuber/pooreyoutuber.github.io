@@ -1,4 +1,4 @@
-// index.js (यह आपका नया, मर्ज किया हुआ और फिक्स किया हुआ कोड है)
+// index.js (यह आपका अंतिम, फिक्स किया हुआ और मर्ज किया हुआ कोड है)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -6,8 +6,8 @@ const nodeFetch = require('node-fetch');
 const cors = require('cors'); 
 const fs = require('fs'); 
 const crypto = require('crypto'); 
-const axios = require('axios');          // ✅ NEW: Proxy Fetching के लिए
-const { HttpsProxyAgent } = require('https-proxy-agent'); // ✅ NEW: Proxy Agent के लिए
+const axios = require('axios');          
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -46,11 +46,36 @@ app.get('/', (req, res) => {
 });
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// 🔥 GLOBAL NAMES (USA/EUROPE FOCUS)
+const FIRST_NAMES = [
+    "John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", 
+    "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", 
+    "George", "Nicole", "Mark", "Olivia", "Charles", "Sophia", "Daniel", "Chloe"
+];
+
+const LAST_NAMES = [
+    "Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", 
+    "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark",
+    "Lewis", "Walker", "Hall", "Allen", "Young", "Scott", "Adams", "Baker"
+];
+
+function generateRealName() {
+    const firstName = FIRST_NAMES[randomInt(0, FIRST_NAMES.length - 1)];
+    const lastName = LAST_NAMES[randomInt(0, LAST_NAMES.length - 1)];
+    return { first_name: firstName, last_name: lastName };
+}
+
+
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
     { country: "Japan", region: "Tokyo", timezone: "Asia/Tokyo" },
     { country: "Australia", region: "New South Wales", timezone: "Australia/Sydney" },
+    { country: "Germany", region: "Bavaria", timezone: "Europe/Berlin" },
+    { country: "France", region: "Ile-de-France", timezone: "Europe/Paris" },
+    { country: "United Kingdom", region: "England", timezone: "Europe/London" },
+    { country: "Canada", region: "Ontario", timezone: "America/Toronto" }
 ];
 function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
@@ -67,17 +92,25 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING ---
+// --- GA4 DATA SENDING (User-Agent FIX के साथ) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
+    // Add timestamp_micros
     payload.timestamp_micros = String(Date.now() * 1000); 
+    
+    // 🔥 FIX: GA4 को यह बताने के लिए User-Agent जोड़ें
+    const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36";
+
 
     try {
         const response = await nodeFetch(gaEndpoint, { 
             method: 'POST',
             body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'User-Agent': USER_AGENT // <--- महत्वपूर्ण फिक्स
+            }
         });
 
         if (response.status === 204) { 
@@ -140,12 +173,16 @@ async function validateKeys(gaId, apiSecret, cid) {
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const geo = getRandomGeo(); 
+    const name = generateRealName(); // <-- नया नाम जनरेट करें
     const session_id = Date.now(); 
     
+    // 🔥 CRITICAL FIX: User Properties में नाम जोड़ें
     const userProperties = {
         country: { value: geo.country },
         region: { value: geo.region },
-        user_timezone: { value: geo.timezone } 
+        user_timezone: { value: geo.timezone },
+        first_name: { value: name.first_name }, // <-- नाम
+        last_name: { value: name.last_name }    // <-- सरनेम
     };
 
     let referrer = "direct"; 
@@ -176,7 +213,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 
     let allSuccess = true;
     
-    console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}). Session ID: ${session_id} ---`);
+    console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}, User: ${name.first_name} ${name.last_name}). Session ID: ${session_id} ---`);
 
     // Send SESSION START
     let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'session_start');
@@ -474,13 +511,4 @@ app.get('/proxy', async (req, res) => {
         console.error('Proxy Fetch Error:', error.message);
         const errorMessage = `Proxy Error (502): The proxy or target URL failed to respond. Details: ${error.message}`;
         res.status(502).send(errorMessage);
-    }
-});
-
-
-// ===================================================================
-// START THE SERVER
-// ===================================================================
-app.listen(PORT, () => {
-    console.log(`Combined API Server listening on port ${PORT}.`);
-});
+            
