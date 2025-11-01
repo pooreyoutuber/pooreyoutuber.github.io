@@ -1,6 +1,6 @@
 // booster.js
 // 🌐 Backend Root — अपना Render backend URL डालो (no trailing slash)
-// **ज़रूरी:** सुनिश्चित करें कि यह URL सही है और Render पर आपकी सेवा Active है।
+// **ज़रूरी:** Render URL सही है, पर सुनिश्चित करें कि आपकी Render सर्विस Active है।
 const RENDER_BACKEND_ROOT = "https://pooreyoutuber-github-io-blmp.onrender.com";
 
 // 🔁 Proxy List (10 proxies)
@@ -79,7 +79,6 @@ function setSelectedProxyDisplay(idx) {
   const p = PROXY_POOL[idx];
   const uri = proxyToUri(p);
   $("proxyString").value = uri;
-  // HTML को अपडेट करें, जो स्क्रीनशॉट में दिख रहे टेक्स्ट की जगह लेगा
   $("proxyInfo").innerHTML = `Selected proxy: <b>${escapeHtml(
     shortName(p)
   )}</b> (Auto-rotate active)`;
@@ -109,26 +108,22 @@ async function handleLoad() {
   try {
     const resp = await fetch(endpoint, { method: "GET" });
     
-    // यदि Response OK नहीं है (जैसे 404, 500)
+    // 404 या किसी अन्य त्रुटि को हैंडल करना
     if (!resp.ok) {
       const body = await resp.text();
-      // त्रुटि को स्क्रीनशॉट के अनुसार HTML में दिखाएँ
-      $("proxyInfo").innerHTML = `<span class="error-text">Backend error ${resp.status}</span><br><pre>${escapeHtml(
+      $("proxyInfo").innerHTML = `<span style="color:red;font-weight:bold;">❌ Backend error ${resp.status}</span><br><pre>${escapeHtml(
         body
       )}</pre>`;
-      // Frame को लोड करने का प्रयास न करें
       $("proxyFrame").src = "about:blank"; 
       return;
     }
 
-    // सफल Response के लिए, iframe को लोड करें।
-    // Note: यदि बैकएंड केवल iframe में लोड होने वाला HTML नहीं दे रहा है, तो भी समस्या हो सकती है।
-    $("proxyFrame").src = endpoint; 
+    $("proxyFrame").src = endpoint;
     $("proxyInfo").innerHTML = `✅ Loaded via proxy <b>${escapeHtml(
       shortName(PROXY_POOL[currentSelectedProxyIndex])
     )}</b>`;
   } catch (err) {
-    $("proxyInfo").innerHTML = `<span class="error-text">❌ Network error: ${escapeHtml(
+    $("proxyInfo").innerHTML = `<span style="color:red;font-weight:bold;">❌ Network error: ${escapeHtml(
       err.message
     )}</span>`;
     $("proxyFrame").src = "about:blank";
@@ -147,4 +142,4 @@ function copyProxyToClipboard() {
     .catch(() => {
       alert("⚠️ Copy failed — please copy manually.");
     });
-        }
+}
