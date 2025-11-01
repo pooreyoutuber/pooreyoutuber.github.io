@@ -1,12 +1,12 @@
 <?php
 // PHP Proxy Loader: proxy_loader.php - FINAL CODE (GA4 Measurement Protocol)
 
-// --- CRITICAL AUTHENTICATION DATA (UPDATED FOR ROTATING PROXY) ---
+// --- CRITICAL AUTHENTICATION DATA (Rotating Proxy) ---
 $auth_user = "bqctypvz-rotate";
 $auth_pass = "399xb3kxqv6i";
 $expected_auth = $auth_user . ":" . $auth_pass;
 
-// 1. NON-BLOCKING EXECUTION
+// 1. NON-BLOCKING EXECUTION (Frontend connection is closed quickly)
 header("Connection: close");
 header("Content-Encoding: none");
 header("Content-Length: 1"); 
@@ -18,7 +18,7 @@ header("Content-Length: $size");
 ob_end_flush();
 flush();
 
-// 2. CONTINUE EXECUTION
+// 2. CONTINUE EXECUTION (Background work starts)
 ignore_user_abort(true);
 set_time_limit(0); 
 
@@ -27,11 +27,12 @@ $target_url = isset($_GET['target']) ? $_GET['target'] : null;
 $proxy_ip = isset($_GET['ip']) ? $_GET['ip'] : null;
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
-$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; 
+$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // CRITICAL: This is the GA4 Client ID
 // 👇 NEW GA4 PARAMETERS
 $GA4_MEASUREMENT_ID = isset($_GET['ga4_id']) ? $_GET['ga4_id'] : null; 
 $API_SECRET_KEY = isset($_GET['ga4_secret']) ? $_GET['ga4_secret'] : null; 
 
+// Validate all critical inputs
 if (!$target_url || !$proxy_ip || !$proxy_port || $proxy_auth !== $expected_auth || !$unique_id || !$GA4_MEASUREMENT_ID || !$API_SECRET_KEY) {
     exit(); 
 }
@@ -39,14 +40,9 @@ if (!$target_url || !$proxy_ip || !$proxy_port || $proxy_auth !== $expected_auth
 $proxy_address = $proxy_ip . ":" . $proxy_port;
 $GA4_ENDPOINT = "https://www.google-analytics.com/mp/collect";
 
-// --- Active User Spoofing Functions ---
+// --- Spoofing Data ---
 
-// Function to generate a completely random IPv4 address (X-Forwarded-For Spoofing)
-function generateRandomIP() {
-    return rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255);
-}
-
-// 1. Random User-Agent (Used in GA4 payload)
+// Random User-Agent (Used in GA4 payload)
 $user_agents = array(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15",
@@ -55,12 +51,15 @@ $user_agents = array(
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1.15"
 );
+function generateRandomIP() {
+    return rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255);
+}
 
-// --- GA4 Send Function (Uses Proxy) ---
+// --- GA4 Send Function (Uses Proxy to send events) ---
 function send_ga4_event($endpoint, $measurement_id, $secret_key, $payload, $proxy_address, $proxy_auth) {
     $ch = curl_init();
     
-    // The GA4 MP URL structure
+    // Build the GA4 MP URL
     $url = $endpoint . "?measurement_id=" . $measurement_id . "&api_secret=" . $secret_key;
     
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -68,7 +67,7 @@ function send_ga4_event($endpoint, $measurement_id, $secret_key, $payload, $prox
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     
-    // 👇 CRITICAL: Use the proxy to send the request to Google
+    // 👇 CRITICAL: Request to Google is routed through the client's residential proxy.
     curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
     curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
     
@@ -77,13 +76,12 @@ function send_ga4_event($endpoint, $measurement_id, $secret_key, $payload, $prox
     curl_close($ch);
 }
 
-// --- Active User Simulation Logic ---
+// --- ACTIVE USER SIMULATION: 2-Event Sequence ---
 
-// Get a consistent session ID for both events
 $session_id = time(); 
 $random_ua = $user_agents[array_rand($user_agents)];
 
-// 1. First Hit: page_view event (Session Start)
+// 1. Send 'page_view' (Session Start)
 $page_view_data = [
     'client_id' => $unique_id,
     'events' => [
@@ -94,30 +92,29 @@ $page_view_data = [
                 'engagement_time_msec' => '1000', 
                 'page_location' => $target_url,
                 'user_agent' => $random_ua, 
-                'ip_override' => generateRandomIP() // Optional IP Spoofing
+                'ip_override' => generateRandomIP() 
             ],
         ],
     ],
 ];
 send_ga4_event($GA4_ENDPOINT, $GA4_MEASUREMENT_ID, $API_SECRET_KEY, $page_view_data, $proxy_address, $proxy_auth);
 
-// 2. Wait and Send Scroll Event (Simulates engagement > 10s)
-// CRITICAL: Block PHP execution to simulate user time on page
+// 2. Wait (Simulates user time on page)
 $time_delay = rand(15, 25); 
 sleep($time_delay); 
 
-// 3. Send scroll event (Marks the user as 'Engaged/Active')
+// 3. Send 'scroll' (Registers as 'Engaged/Active User' - >10 seconds engagement)
 $scroll_data = [
     'client_id' => $unique_id,
     'events' => [
         [
             'name' => 'scroll', 
             'params' => [
-                'session_id' => $session_id, // Same session ID
-                'engagement_time_msec' => '20000', // Add a large chunk of engagement time
+                'session_id' => $session_id, 
+                'engagement_time_msec' => '20000', // Adds 20s engagement
                 'page_location' => $target_url,
                 'user_agent' => $random_ua, 
-                'ip_override' => generateRandomIP() // New IP spoof
+                'ip_override' => generateRandomIP() 
             ],
         ],
     ],
