@@ -1,4 +1,4 @@
-// index.js (यह आपका नया, मर्ज किया हुआ कोड है)
+// index.js (यह आपका नया, मर्ज किया हुआ और फिक्स किया हुआ कोड है)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
@@ -12,7 +12,7 @@ const { HttpsProxyAgent } = require('https-proxy-agent'); // ✅ NEW: Proxy Agen
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- GEMINI KEY CONFIGURATION (Same as before) ---
+// --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
@@ -33,7 +33,7 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- MIDDLEWARE & UTILITIES (Same as before) ---
+// --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
@@ -42,7 +42,7 @@ app.use(cors({
 app.use(express.json({ limit: '5mb' }));
 
 app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running!'); 
+    res.status(200).send('PooreYouTuber Combined API is running! Access tools via GitHub Pages.'); 
 });
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -67,12 +67,10 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (MODIFIED FOR VALIDATION) ---
+// --- GA4 DATA SENDING ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
-    // 💡 Collect endpoint, not validate
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
-    // Add timestamp_micros
     payload.timestamp_micros = String(Date.now() * 1000); 
 
     try {
@@ -96,7 +94,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// 💡 NEW: Validation function before starting the slow loop
+// Validation function before starting the slow loop
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
@@ -119,7 +117,6 @@ async function validateKeys(gaId, apiSecret, cid) {
             if (errors.length > 0) {
                 const message = errors[0].description;
                 console.error(`[VALIDATION FAILED] Key/ID Invalid. Google says: ${message}`);
-                // GA ID या API Secret गलत होने पर Google यह त्रुटि लौटाता है
                 if (message.includes("Invalid measurement_id") || message.includes("API Secret is not valid")) {
                     return { valid: false, message: "GA ID or API Secret is invalid. Please check keys." };
                 }
@@ -198,7 +195,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
                 page_referrer: referrer, 
                 session_id: session_id, 
                 debug_mode: true,
-                language: "en-US" // FINAL CRITICAL FIX
+                language: "en-US" 
             } 
         }
     ];
@@ -255,7 +252,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 }
 
 
-// --- VIEW PLAN GENERATION (Same) ---
+// --- VIEW PLAN GENERATION ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -279,12 +276,12 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) 
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
     const totalViewsRequested = parseInt(views);
-    const clientIdForValidation = generateClientId(); // Use a fresh client ID
+    const clientIdForValidation = generateClientId();
 
     if (!ga_id || !api_key || !totalViewsRequested || totalViewsRequested < 1 || totalViewsRequested > 500 || !Array.isArray(pages) || pages.length === 0) {
         return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
@@ -295,18 +292,17 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    // 🔑 STEP 1: VALIDATE KEYS BEFORE STARTING THE LOOP
+    // 🔑 STEP 1: VALIDATE KEYS 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
     
     if (!validationResult.valid) {
-         // Send Error response back to frontend (Frontend now sees an error)
          return res.status(400).json({ 
             status: 'error', 
             message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
         });
     }
 
-    // STEP 2: ACKNOWLEDGEMENT (Keys are validated and accepted)
+    // STEP 2: ACKNOWLEDGEMENT
     res.json({ 
         status: 'accepted', 
         message: `✨ Request accepted. Keys validated. Processing started in the background (~2 hours). CHECK DEBUGVIEW NOW!`
@@ -339,10 +335,9 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2 & 3. AI INSTA CAPTION GENERATOR/EDITOR ENDPOINTS 
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
-    // ... (No change)
     if (!GEMINI_KEY) {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
@@ -383,8 +378,10 @@ app.post('/api/caption-generate', async (req, res) => {
     }
 });
 
+// ===================================================================
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL
+// ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
-    // ... (No change)
     if (!GEMINI_KEY) {
         return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
     }
@@ -425,7 +422,7 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PROXY TOOL ENDPOINT (NEW: /proxy) - 404 FIX
+// 4. WEBSITE BOOSTER PROXY TOOL ENDPOINT (NEW: /proxy) - iFrame FIX
 // ===================================================================
 app.get('/proxy', async (req, res) => {
     const targetUrl = req.query.url;
@@ -447,13 +444,30 @@ app.get('/proxy', async (req, res) => {
             timeout: 15000 // 15 सेकंड का टाइमआउट
         });
 
-        // लक्ष्य वेबसाइट के Content Type हेडर को कॉपी करें
+        
+        // 🔥 CRITICAL FIX: iFrame के अंदर नेविगेशन सक्षम करने के लिए
+        
+        // 1. ब्राउज़र को सुरक्षा हेडर्स भेजने से रोकें
+        // (Render/Express HTTP HEADERS को अक्षम/हटा दें)
+        delete response.headers['x-frame-options'];
+        delete response.headers['content-security-policy'];
+        delete response.headers['transfer-encoding']; 
+        
+        // 2. Content Type सेट करें
         if (response.headers['content-type']) {
             res.setHeader('Content-Type', response.headers['content-type']);
         }
         
-        // यह सुनिश्चित करें कि IFRAME में सामग्री ठीक से लोड हो
-        res.send(response.data);
+        // 3. यदि सामग्री HTML है, तो एक BASE tag इंजेक्ट करें
+        // यह आंतरिक लिंक (relative links) को ठीक से काम करने में मदद करता है।
+        let data = response.data;
+        if (typeof data === 'string' && data.toLowerCase().includes('<html')) {
+            // BASE tag जोड़ें ताकि iFrame में सभी relative links सही URL पर जाएँ
+            data = data.replace(/<\s*head/i, `<head><base href="${targetUrl}">`);
+        }
+        
+        // प्राप्त कंटेंट क्लाइंट (आपके iframe) को भेजें
+        res.send(data);
 
     } catch (error) {
         // प्रॉक्सी या फ़ेच में कोई त्रुटि होने पर
@@ -463,10 +477,10 @@ app.get('/proxy', async (req, res) => {
     }
 });
 
+
 // ===================================================================
 // START THE SERVER
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
-         
