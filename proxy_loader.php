@@ -1,5 +1,5 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Dynamic Proxy Input and SOCKS5
+// PHP Proxy Loader: proxy_loader.php - NO CHANGE NEEDED from previous dynamic version.
 
 // 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
@@ -38,7 +38,6 @@ $proxy_address = $proxy_domain . ":" . $proxy_port;
 $ch = curl_init();
 
 // --- GA4 Active User FIX: Unique Client ID as a Cookie Header ---
-// This is the core logic to make GA4 count multiple users even with the same rotating proxy IP 
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 // Add a list of common referrers for better realism
@@ -67,9 +66,9 @@ curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 curl_setopt($ch, CURLOPT_HEADER, false);
 
-// --- DYNAMIC SOCKS5 PROXY CONFIGURATION ---
+// --- DYNAMIC SOCKS5 PROXY CONFIGURATION (Now uses fixed/direct IP) ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
-curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); // Uses the user:pass captured from URL
+curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
 
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
