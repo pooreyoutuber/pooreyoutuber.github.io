@@ -3,182 +3,434 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GA4 Active User Booster (Residential Fix)</title>
+    <title>YouTube Long Video Multi Viewer | Watch Multiple Shorts Together</title>
+
+    <meta name="description" content="Free YouTube Shorts Multi Viewer tool. Paste any Shorts URL and watch multiple Shorts videos simultaneously.">
+    <meta name="keywords" content="YouTube Shorts viewer, multi Shorts player, watch multiple Shorts, YouTube multi viewer, free Shorts tool, Shorts autoplay">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" content="YouTube Shorts Multi Viewer">
+    <meta property="og:description" content="Paste a YouTube Shorts link and watch multiple Shorts videos at the same time with this free tool.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourwebsite.com/shorts-multi-viewer">
+    <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
+        crossorigin="anonymous"></script>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
+        /* (The CSS remains the same as before) */
+        /* ================================================= */
+        /* 1. DARK MODE CSS VARIABLES */
+        /* ================================================= */
+        :root {
+            /* Light Mode Variables (Default) */
+            --bg-color: #f4f6f9;
+            --container-bg: #fff;
+            --text-color: #333;
+            --secondary-text-color: #555;
+            --input-border: #ccc;
+            --youtube-red: #ff0000;
+            --youtube-dark-red: #cc0000;
+            --blue-accent: #007bff;
+            --blue-accent-hover: #0056b3;
+            --result-border: #eee;
+            --explanation-bg: #f8f9fa;
+            --warning-bg: #e6f7ff;
+            --warning-border: #b3d9ff;
         }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background-color: #252526;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+
+        /* Dark Mode Variables (Applied when body has dark-mode class) */
+        body.dark-mode {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --secondary-text-color: #b0b0b0;
+            --input-border: #444;
+            --youtube-dark-red: #8b0000;
+            --blue-accent: #3498db;
+            --blue-accent-hover: #2980b9;
+            --result-border: #333;
+            --explanation-bg: #2d2d2d; 
+            --warning-bg: #1c2e4a; 
+            --warning-border: #3498db;
+        }
+
+        /* ================================================= */
+        /* 2. BASE STYLES & DARK MODE APPLICATION */
+        /* ================================================= */
+        body {
+            font-family: 'Arial', sans-serif; 
+            background: var(--bg-color); 
+            text-align: center; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+        }
+        .container-wrapper {
+            width: 90%;
+            max-width: 1400px;
+            margin: 30px auto;
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: background 0.3s, box-shadow 0.3s;
         }
         h1 {
-            color: #00bcd4;
-            text-align: center;
+            color: var(--youtube-red); 
+            margin-top:0; 
+            font-size: 2.2em;
         }
-        .input-group {
-            margin-bottom: 20px;
+        p.subtitle {
+            color: var(--secondary-text-color); 
+            margin-bottom: 25px;
         }
-        input[type="text"] {
-            width: calc(100% - 110px);
-            padding: 10px;
-            margin-right: 10px;
-            border: 1px solid #555;
-            border-radius: 4px;
-            background-color: #3c3c3c;
-            color: #d4d4d4;
+
+        /* Input & Button Styles */
+        #input-section { 
+            display: flex; 
+            justify-content: center; 
+            gap: 10px; 
+            margin-bottom: 30px; 
+            flex-wrap: wrap;
+        }
+        input, button {
+          padding:12px 15px;
+          margin:0;
+          border-radius:6px;
+          border:1px solid var(--input-border);
+          font-size:16px;
+          box-sizing: border-box;
+          transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        input { 
+            width: 350px; 
+            background: var(--container-bg);
+            color: var(--text-color);
+        }
+        input[type="number"] { 
+            width: 150px; 
         }
         button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
+          background: var(--blue-accent);
+          color: #fff;
+          cursor:pointer;
+          border: 1px solid var(--blue-accent);
+          font-weight: bold;
         }
-        button:hover {
-            background-color: #45a049;
+        button:hover { 
+            background: var(--blue-accent-hover); 
+            border-color: var(--blue-accent-hover); 
         }
-        #proxy-container {
-            margin-top: 20px;
+
+        /* Players Container Styles */
+        #players {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+            border-top: 2px solid var(--result-border);
+            margin-bottom: 30px;
+            transition: border-top 0.3s;
         }
-        .proxy-card {
-            background-color: #333;
-            padding: 15px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        iframe {
+            width: 100%;
+            height: 480px;
+            border: none;
+            border-radius:12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: black;
         }
-        .proxy-card h3 {
+
+        /* Ad Unit Spacing */
+        .ad-unit {
+            margin: 25px 0;
+            text-align: center;
+        }
+        .ad-top {
+            margin-bottom: 25px;
+        }
+
+        /* Utility Explanation Section */
+        .utility-explanation {
+            text-align: left;
+            padding: 25px;
+            background-color: var(--explanation-bg); 
+            border-radius: 10px;
+            border: 1px solid var(--input-border); 
+            line-height: 1.6;
+            color: var(--secondary-text-color);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .utility-explanation h3 {
+            color: var(--blue-accent);
+            border-bottom: 2px solid var(--blue-accent);
+            padding-bottom: 5px;
             margin-top: 0;
-            color: #FFC107;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .utility-explanation strong { 
+            color: var(--text-color); 
+            transition: color 0.3s;
+        }
+        
+        /* Crucial Warning Highlight */
+        .warning-note {
+            background-color: var(--warning-bg); 
+            color: var(--text-color); 
+            border: 1px solid var(--warning-border);
+            border-left: 5px solid var(--blue-accent); 
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            transition: background 0.3s, border-color 0.3s, color 0.3s;
+        }
+        .warning-note strong {
             font-size: 1.1em;
+            color: var(--text-color); 
+            transition: color 0.3s;
         }
-        .proxy-card p {
-            margin: 5px 0;
-            font-size: 0.9em;
-        }
-        .proxy-card span {
-            font-weight: bold;
-            color: #00bcd4;
+
+        /* ================================================= */
+        /* 3. MOBILE RESPONSIVENESS FIX */
+        /* ================================================= */
+        @media (max-width: 650px) {
+            body {
+                padding: 10px;
+            }
+            .container-wrapper {
+                margin: 15px auto;
+                padding: 15px;
+                width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+
+            /* Stack Input and Button on Mobile */
+            #input-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+            input, button {
+                width: 100%;
+                border-radius: 6px; 
+            }
+            input[type="number"] {
+                 width: 100%;
+            }
+
+            /* Players container adjustments */
+            #players {
+                /* Force single column for better vertical viewing experience of Shorts */
+                grid-template-columns: 1fr; 
+                gap: 15px;
+            }
+            iframe {
+                 /* Make Short player slightly shorter for smaller screens */
+                 height: 420px; 
+            }
+
+            .utility-explanation {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>GA4 Active User Booster (Residential Fix)</h1>
-    <p style="color: #FF6666;">**अंतिम उपाय: GA4 में 10 Active User के लिए रोटेटिंग प्रॉक्सी आवश्यक है।**</p>
-    
-    <div class="input-group">
-        <label for="global-url" style="color: #d4d4d4;">Target Website URL (GA4 लगा हो):</label>
-        <div style="display: flex; margin-top: 5px;">
-            <input type="text" id="global-url" placeholder="उदाहरण: https://www.apniwebsite.com/">
-            <button onclick="loadAndRunAll()">Load & Run All (10 Sessions)</button>
-        </div>
+<div class="container-wrapper">
+    <h1>🚀 YouTube Longh Video Multi Viewer</h1>
+    <p class="subtitle">Paste a Long Video URL and choose how many players you want to generate.</p>
+
+    <div class="ad-unit ad-top">
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-format="fluid"
+            data-ad-layout-key="-fb+5w+4e-db+86"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="7558349440"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
     
-    <div id="proxy-container">
+    <div id="input-section">
+        <input type="text" id="shortUrl" placeholder="Paste YouTube Shorts URL">
+        <input type="number" id="count" placeholder="Number of players" value="10" min="1">
+        <button onclick="generatePlayers()">Play</button>
+    </div>
+
+    <div class="container" id="players"></div>
+    
+    <div class="ad-unit">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-format="autorelaxed"
+             data-ad-client="ca-pub-9877532310172541"
+             data-ad-slot="2730819749"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    <div class="ad-unit">
+        <ins class="adsbygoogle"
+            style="display:block; text-align:center;"
+            data-ad-layout="in-article"
+            data-ad-format="fluid"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="4932186104"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    
+    <div id="explanation-section" class="utility-explanation">
+        <h3>✨ The Power of YouTube Longh Video Multi Viewing</h3>
+        
+        <p>Welcome to the **YouTube Longh Video Multi Viewer**, a unique tool designed to help you analyze and boost your content's initial performance. In the world of short-form video, early views and engagement are crucial for signaling to the algorithm that your content is worth promoting.</p>
+
+        <div class="warning-note">
+            <p>
+                🤝 **A Friendly Tip:** Feel free to use this tool for an early view boost! Just remember that YouTube Studio needs time to process data. You'll see the **real and verified analytics** (views, watch time) updated accurately in your official YouTube Studio **2 to 4 hours** after using the tool. Until then, enjoy monitoring your videos right here!
+            </p>
         </div>
+        
+        <h4>How This Tool Works and Why It's Beneficial (Approx. 650 Words Total)</h4>
+        
+        <p>This tool creates multiple embedded instances of your Shorts video on a single page. By rapidly loading and interacting with these players, you can generate an initial burst of views. This simulated boost helps create early momentum for your video, which can be particularly effective in pushing new Shorts into broader distribution.</p>
+
+        <p><strong>Key Advantages for Creators:</strong></p>
+        <ul>
+            <li><strong>Initial View Boost:</strong> Gain immediate traction, helping your Shorts pass the critical first-hour testing phase set by the algorithm.</li>
+            <li><strong>Rapid Testing:</strong> Quickly check if your video is loading correctly and ensure the sound/visual quality is consistent across different embeds.</li>
+            <li><strong>SEO Analysis:</strong> Test how quickly embedded players load, which can be a minor factor in content distribution speed.</li>
+            <li><strong>Custom Control:</b> You choose the exact number of players, giving you control over the level of initial exposure you wish to generate for testing purposes.</li>
+        </ul>
+
+        <p><strong>Ethical Use and Strategy:</strong></p>
+        <p>We advocate for ethical usage. This tool is best used for **initial analytical testing and personal promotion** of your own content. While it can generate views, sustainable growth always depends on the **quality and virality** of the content itself. Views generated by any multi-viewer tool are subject to YouTube's strict anti-spam filters and validation processes. Always treat this as a testing environment, not a guaranteed view generation system.</p>
+        
+        <p>The core mechanism of this tool involves embedding the standard YouTube player code (`https://www.youtube.com/embed/...`) multiple times. We recommend setting the player count reasonably (e.g., between 5 and 20) and ensuring your browser can handle loading multiple video players simultaneously without slowing down.</p>
+        
+        <p><strong>A Final Thought:</strong> Remember, the real measure of your content's success is determined by **viewer satisfaction** (Watch Time, Likes, Shares) over the long term. Use this tool as a springboard, but focus your energy on creating engaging, high-retention content that keeps viewers coming back for more!</p>
+        
+        <p>To begin, paste your Shorts URL above, enter the desired number of viewers (players), and click **"Play"**.</p>
+    </div>
+
+    <div class="ad-unit">
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-9877532310172541"
+            data-ad-slot="2497594456"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
 </div>
 
 <script>
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    // !!! CRITICAL STEP 1: RENDER PHP WEB SERVICE URL HERE !!!
-    // इस URL को अपने Render Backend के सही URL से बदलें (जो आपने पहले उपयोग किया था)
-    const PROXY_ENDPOINT = 'http://YOUR-RENDER-BACKEND-URL/proxy_loader.php'; 
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    // =========================================================================
-    // !!! CRITICAL STEP 2: ROTATING PROXY CONFIGURATION (Webshare Residential) !!!
-    // =========================================================================
-    const ROTATING_PROXY = {
-        ip: "p.webshare.io",
-        port: "80",
-        // Username and Password combined for PHP backend format
-        auth: "bqctypvz-rotate:399xb3kxqv6i" 
-    };
-    // =========================================================================
-
-    const PROXY_COUNT = 10; // 10 Active Users के लिए 10 हिट
-
-    async function runProxyRequest(targetUrl, proxyConfig, index) {
-        // UNIQUE CLIENT ID FIX: हर रिक्वेस्ट के लिए एक नया और यूनिक ID (GA4 को तोड़ने के लिए)
-        const uniqueId = Date.now().toString() + index.toString() + Math.floor(Math.random() * 10000);
-        
-        // Render Backend को एक ही Rotating Endpoint के लिए 10 बार कॉल करना
-        const fetchUrl = `${PROXY_ENDPOINT}?target=${encodeURIComponent(targetUrl)}&ip=${proxyConfig.ip}&port=${proxyConfig.port}&auth=${proxyConfig.auth}&uid=${uniqueId}&location=${index}`;
-
-        try {
-            const startTime = Date.now();
-            
-            // Note: 'no-cors' मोड का उपयोग करें
-            const response = await fetch(fetchUrl, {
-                method: 'GET',
-                mode: 'no-cors',
-                cache: 'no-store'
-            });
-
-            const duration = (Date.now() - startTime) / 1000;
-            
-            // Status Update
-            document.getElementById(`status-${index}`).innerHTML = `<span style="color: #4CAF50;">View Sent (BG Session Active)</span><br>${duration.toFixed(2)}s`;
-
-        } catch (error) {
-            document.getElementById(`status-${index}`).innerHTML = `<span style="color: #FF6666;">Failed (Network Error)</span><br>Check Render Backend or URL`;
-            console.error(`Proxy Request Failed for index ${index}:`, error);
-        }
+    function extractVideoId(url) {
+        // Updated regex to handle all common Shorts and standard video formats
+        const shortsRegex = /(?:youtu\.be\/|youtube\.com\/(?:shorts\/|watch\?v=))([0-9A-Za-z_-]{11})/;
+        const match = url.match(shortsRegex);
+        return match ? match[1] : null;
     }
 
-    async function loadAndRunAll() {
-        const targetUrl = document.getElementById('global-url').value;
-        if (!targetUrl) {
-            alert("Please enter a valid Target URL.");
-            return;
-        }
+    function generatePlayers() {
+        const url = document.getElementById('shortUrl').value.trim();
+        const count = parseInt(document.getElementById('count').value);
+        const playersDiv = document.getElementById('players');
+        const container = document.querySelector('.container-wrapper');
+        const explanationSection = document.getElementById('explanation-section');
         
-        // Render URL चेक करना
-        if (PROXY_ENDPOINT.includes('YOUR-RENDER-BACKEND-URL')) {
-            alert("ERROR: Please update the 'PROXY_ENDPOINT' variable in the code with your actual Render URL.");
+        playersDiv.innerHTML = '';
+        playersDiv.style.display = 'grid'; // Ensure it is visible
+
+        if (!url || isNaN(count) || count <= 0 || count > 50) {
+            alert("Please enter a valid YouTube Shorts URL and a number between 1 and 50.");
+            playersDiv.style.display = 'none';
+            // Reposition explanation section back up if an error occurs
+            if (explanationSection.parentNode !== container) {
+                 container.insertBefore(explanationSection, playersDiv); 
+            }
             return;
         }
 
-
-        const container = document.getElementById('proxy-container');
-        container.innerHTML = ''; // Clear previous results
-
-        // 10 अलग-अलग यूजर्स/सेशंस को बनाने के लिए 10 बार लूप करें
-        for (let i = 0; i < PROXY_COUNT; i++) {
-            const index = i + 1;
-            
-            // HTML कार्ड बनाना
-            const card = document.createElement('div');
-            card.className = 'proxy-card';
-            card.innerHTML = `
-                <h3>Session ${index}</h3>
-                <p>Proxy Type: <span style="color: #FFC107;">Rotating Residential</span></p>
-                <p>Endpoint: ${ROTATING_PROXY.ip}:${ROTATING_PROXY.port}</p>
-                <p>Status: <span id="status-${index}">Running...</span></p>
-            `;
-            container.appendChild(card);
-
-            // Fetch को कॉल करें, लेकिन 100ms का छोटा डिले दें
-            setTimeout(() => {
-                runProxyRequest(targetUrl, ROTATING_PROXY, index);
-            }, i * 100); 
+        const videoId = extractVideoId(url);
+        if (!videoId) {
+            alert("Invalid YouTube Shorts URL format. Please ensure it links directly to a video.");
+            playersDiv.style.display = 'none';
+            if (explanationSection.parentNode !== container) {
+                 container.insertBefore(explanationSection, playersDiv); 
+            }
+            return;
         }
+        
+        // 1. Move Explanation Section BELOW the Output/Results (Ad Unit 2 is also between)
+        if (explanationSection) {
+            // Find Ad Unit 3's placement for correct insertion order
+            const adUnit3 = document.querySelector('.ad-unit:last-of-type');
+            if (adUnit3) {
+                container.insertBefore(explanationSection, adUnit3);
+            } else {
+                container.appendChild(explanationSection);
+            }
+        }
+
+        // 2. Generate Players
+        for (let i=0; i<count; i++) {
+            const iframe = document.createElement('iframe');
+            // Using 'autoplay=0' so the user controls when the views start counting.
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&disablekb=1&controls=1`; 
+            iframe.allowFullscreen = true;
+            iframe.title = `YouTube Shorts Player ${i + 1}`;
+            playersDiv.appendChild(iframe);
+        }
+
+        // Optional: Scroll to the players section for better UX
+        playersDiv.scrollIntoView({ behavior: 'smooth' });
     }
+
+    // Initial check: Ensure players container is hidden on load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('players').style.display = 'none';
+        
+        // ==========================================================
+        // DARK MODE PERSISTENCE LOGIC
+        // ==========================================================
+        const body = document.body;
+        
+        function applyThemeFromLocalStorage() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+        }
+
+        // Apply theme on load
+        applyThemeFromLocalStorage();
+        
+        // Initialize all ads on page load
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    });
 </script>
-
 </body>
-</html>
+        </html>
+        
