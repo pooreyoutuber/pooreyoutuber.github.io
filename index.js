@@ -1,5 +1,6 @@
 // index.js (यह आपका अंतिम, फिक्स किया हुआ और मर्ज किया हुआ कोड है)
 
+// --- Imports (Node.js Modules) ---
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const nodeFetch = require('node-fetch'); 
@@ -15,9 +16,11 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
+    // Attempt to read key from Render Secrets File
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
+    // Fallback to Environment Variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -47,7 +50,7 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// 🔥 GLOBAL NAMES (USA/EUROPE FOCUS)
+// 🔥 GLOBAL NAMES (USA/EUROPE FOCUS) for GA4
 const FIRST_NAMES = [
     "John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", 
     "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", 
@@ -453,7 +456,8 @@ Requested Change: "${requestedChange}"`;
 
     } catch (error) {
         console.error('Gemini API Error (Edit):', error.message);
-        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
+        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` }
+    );
     }
 });
 
@@ -509,6 +513,4 @@ app.get('/proxy', async (req, res) => {
     } catch (error) {
         // प्रॉक्सी या फ़ेच में कोई त्रुटि होने पर
         console.error('Proxy Fetch Error:', error.message);
-        const errorMessage = `Proxy Error (502): The proxy or target URL failed to respond. Details: ${error.message}`;
-        res.status(502).send(errorMessage);
-            
+        const errorMe
