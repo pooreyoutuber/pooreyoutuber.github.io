@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime - Dynamic Proxy Input Edition</title>
+<title>Website Booster Prime - Final Dynamic Proxy Input</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -28,38 +28,28 @@
     h1 { font-size: 32px; margin: 0; color: var(--accent); letter-spacing: -1px; font-weight: 700; } 
     .tagline { color: var(--muted); font-size: 16px; margin-top: 4px; font-weight: 500; }
     .controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-    .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-    @media (min-width: 768px) { 
-        .input-group { flex-direction: row; flex-wrap: wrap; }
-        .url-input-wrap, .proxy-input-wrap { flex: 1 1 45%; } 
-        .slot-selector { border-radius: 10px 0 0 10px; }
-        .btn { border-radius: 0 10px 10px 0; }
-    }
-    @media (min-width: 1024px) {
-        .url-proxy-row { display: flex; gap: 10px; flex: 1; }
-        .url-proxy-row > div { flex: 1; }
-        .input-group { flex-direction: column; }
-    }
-
-    /* Input & Button Styling */
-    .url-input-wrap, .proxy-input-wrap { display: flex; border-radius: 10px; overflow: hidden; }
+    
+    /* Main Control Layout */
+    .main-control-row { display: flex; gap: 10px; align-items: stretch; }
+    .url-input-wrap, .proxy-input-wrap { flex: 1; display: flex; border-radius: 10px; overflow: hidden; }
     .input-label { background: #e5e7eb; padding: 12px; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; display: flex; align-items: center; }
     input[type="url"], input[type="text"] { flex: 1; padding: 12px 14px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; border-left: none; }
-    .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; padding: 0 12px; background: #e5e7eb; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+    .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; padding: 0 12px; background: #e5e7eb; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; border-radius: 10px; }
     .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 700; color: var(--accent); outline: none; }
     .btn { background: var(--primary-blue); color: white; padding: 12px 20px; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; flex-shrink: 0; border-radius: 10px; }
     .btn:hover { background: #2563eb; }
-    .btn.start-btn { border-radius: 0 10px 10px 0; }
     .btn.stop { background: var(--danger); border-radius: 10px; }
     .btn.stop:hover { background: #b91c1c; }
 
     /* Settings Bar Styling */
-    .repeat-control { display: flex; align-items: center; justify-content: flex-start; gap: 15px; font-size: 14px; color: var(--muted); background: var(--card); padding: 12px 20px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+    .settings-bar { display: flex; gap: 10px; width: 100%; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+    .repeat-control { flex: 1; display: flex; align-items: center; justify-content: flex-start; gap: 15px; font-size: 14px; color: var(--muted); background: var(--card); padding: 12px 20px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
     .repeat-control label { font-weight: 500; display: flex; align-items: center; gap: 5px; }
     .repeat-control input[type="checkbox"] { transform: scale(1.1); margin: 0; }
     .repeat-control span { color: var(--accent); font-weight: 600; }
     .repeat-control input[type="number"] { font-size: 14px; text-align: center; border: 1px solid var(--border); padding: 5px; border-radius: 4px; width: 50px; }
     
+    /* Info Box */
     .info-box { background: #fef3c7; color: #92400e; padding: 16px; border-radius: 10px; font-size: 14px; border: 1px solid #fcd34d; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .info-box strong { font-weight: 700; color: #b45309; }
     .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
@@ -70,8 +60,7 @@
     @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
     @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } } 
     @media (min-width: 1200px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
-    .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; transition: all 0.3s ease; }
-    .slot:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+    .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
     .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); }
     .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
@@ -84,27 +73,14 @@
         height: calc(100% / 0.4);
         opacity: 1;
     }
-    /* Auto-Scrolling & Footer Styles (Rest of CSS is same as previous) */
-    @keyframes scroll {
-        0% { transform: translate(0, 0) scale(0.4); } 
-        50% { transform: translate(0, -200%) scale(0.4); } 
-        100% { transform: translate(0, 0) scale(0.4); } 
-    }
-    .slot.scrolling iframe {
-        transform: translate(0, 0) scale(0.4); 
-        animation: scroll 3s ease-in-out infinite;
-    }
+    /* Auto-Scrolling & Footer Styles */
+    @keyframes scroll { 0% { transform: translate(0, 0) scale(0.4); }  50% { transform: translate(0, -200%) scale(0.4); }  100% { transform: translate(0, 0) scale(0.4); } }
+    .slot.scrolling iframe { transform: translate(0, 0) scale(0.4);  animation: scroll 3s ease-in-out infinite; }
     .slot-footer { display: flex; gap: 8px; align-items: center; margin-top: 10px; justify-content: space-between; flex-wrap: wrap; }
     .action-btn { padding: 8px 12px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 12px; white-space: nowrap; transition: background-color 0.2s; }
     .action-btn.view { background: var(--success); color: white; }
     .action-btn.view:hover { background: #059669; }
-    .action-btn.new-tab { 
-        background: #f97316;
-        color: white; 
-        flex-grow: 1;
-        font-size: 12px;
-        padding: 8px 12px;
-    }
+    .action-btn.new-tab { background: #f97316; color: white; flex-grow: 1; font-size: 12px; padding: 8px 12px; }
     .action-btn.new-tab:hover { background: #ea580c; }
     .status { font-size: 12px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
     .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
@@ -120,38 +96,37 @@
     </header>
 
     <div class="controls">
-        <div class="input-group">
-            <div class="url-proxy-row">
-                <div class="url-input-wrap" style="border-radius: 10px 0 0 10px;">
-                    <div class="input-label" style="border-radius: 10px 0 0 10px;">Target URL:</div>
-                    <input id="globalUrl" type="url" placeholder="https://yourwebsite.com" style="border-radius: 0;"/>
-                </div>
-
-                <div class="proxy-input-wrap">
-                    <div class="input-label">Proxy (User:Pass@IP:Port):</div>
-                    <input id="proxyDetails" type="text" placeholder="user:pass@p.webshare.io:80" value="bqctypvz-rotate:399xb3kxqv6i@p.webshare.io:80" />
-                </div>
+        <div class="main-control-row">
+            <div class="url-input-wrap" style="border-radius: 10px;">
+                <div class="input-label" style="border-radius: 10px 0 0 10px;">Target URL:</div>
+                <input id="globalUrl" type="url" placeholder="https://yourwebsite.com" style="border-radius: 0 10px 10px 0; border-left: 1px solid var(--border);" />
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 10px; width: 100%;">
-                <div class="slot-selector" style="border-radius: 10px;">
-                    Slots:
-                    <input id="numSlots" type="number" value="10" min="1" max="20" />
-                </div>
-                <button id="globalGo" class="btn start-btn" style="flex: 1; border-radius: 10px;">Load & Run All</button>
-                <button id="globalStop" class="btn stop" style="display:none; flex: 1;">🔴 STOP ALL</button>
+            <div class="proxy-input-wrap" style="border-radius: 10px;">
+                <div class="input-label" style="border-radius: 10px 0 0 10px;">Proxy (U:P@I:P):</div>
+                <input id="proxyDetails" type="text" placeholder="user:pass@ip:port (e.g. bqctypvz-rotate:399xb3kxqv6i@p.webshare.io:80)" value="bqctypvz-rotate:399xb3kxqv6i@p.webshare.io:80" style="border-radius: 0 10px 10px 0; border-left: 1px solid var(--border);" />
             </div>
-        </div>
+        </div>
+        
+        <div class="settings-bar">
+            <div class="slot-selector">
+                Slots:
+                <input id="numSlots" type="number" value="10" min="1" max="20" />
+            </div>
+            
+            <button id="globalGo" class="btn" style="flex: 1;">Load & Run All</button>
+            <button id="globalStop" class="btn stop" style="display:none; flex: 1;">🔴 STOP ALL</button>
+        </div>
         
         <div class="repeat-control">
-            <input type="checkbox" id="repeatMode" />
+            <input type="checkbox" id="repeatMode" checked />
             <label for="repeatMode">
                 Enable **Active User** Mode: Repeat all 
                 <label for="minTime">Min:</label>
                 <input id="minTime" type="number" value="30" min="10" max="120" />
                 <label for="maxTime">Max:</label>
                 <input id="maxTime" type="number" value="60" min="10" max="120" />
-                <span>seconds cycle</span> for better GA tracking.
+                <span>seconds cycle</span> (for GA4).
             </label>
             
             <input type="checkbox" id="autoScrollMode" />
@@ -162,16 +137,16 @@
     </div>
     
     <div class="info-box">
-        <strong>💡 Dynamic Input Instructions:</strong>
+        <strong>✅ FINAL FIX & INSTRUCTIONS:</strong>
         <ul>
             <li>
-                **New Feature:** Paste your target URL and your proxy details (format: **user:pass@ip:port**) directly into the new input fields.
+                **Dynamic Input:** Enter your **Target URL** and **Proxy Details** (`user:pass@ip:port`) above. The tool will parse and use them for all slots.
             </li>
             <li>
-                The tool will automatically parse the proxy details and pass them to all slots for the GA4 tracking logic.
+                **GA4 Logic:** Every repeat cycle uses the **Rotating Proxy** (for a new IP) + a **Unique Client ID** (for a new user) + **30 seconds timeout** (for a successful session).
             </li>
             <li>
-                **Active User Fix:** Ensures a **unique Client ID** and the **rotating IP** from your proxy are used for each session.
+                **Testing:** Click 'Load & Run All' with 'Active User Mode' checked. Check your GA4 Real-time report after 1 minute.
             </li>
         </ul>
     </div>
@@ -202,7 +177,7 @@ const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
-const proxyDetailsInput = document.getElementById('proxyDetails'); // NEW INPUT
+const proxyDetailsInput = document.getElementById('proxyDetails'); 
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
@@ -254,7 +229,6 @@ function createSlot(index, config){
   const el = document.createElement('div');
   el.className = 'slot';
 
-    // Get current proxy details from the input field
     const proxyDetails = proxyDetailsInput.value.trim();
     const parsedProxy = parseProxyDetails(proxyDetails);
 
@@ -294,6 +268,7 @@ function createSlot(index, config){
   }
   
   function getProxiedUrl(originalUrl, uniqueId, proxy) {
+      // All proxy details are now passed as URL parameters
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
@@ -313,7 +288,6 @@ function createSlot(index, config){
         return;
     }
 
-    // Update the IP display in the slot
     ipDisplay.textContent = `Proxy: ${parsedProxy.ip}:${parsedProxy.port}`;
     
     iframe.src = originalUrl;
@@ -331,6 +305,7 @@ function createSlot(index, config){
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
+        // Fetch request runs PHP in background for 30s
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         setStatus('View Sent (BG Session Active)', true);
