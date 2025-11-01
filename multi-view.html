@@ -1,45 +1,184 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Proxy Launcher</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA4 Active User Booster (Residential Fix)</title>
     <style>
-        body { font-family: Arial, sans-serif; width: 300px; padding: 15px; background-color: #f4f4f9; border-radius: 5px; }
-        h3 { color: #007bff; margin-top: 0; }
-        input[type="text"] { width: 93%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 4px; }
-        label { display: block; margin-bottom: 8px; font-size: 14px; }
-        input[type="checkbox"] { margin-right: 5px; }
-        button { 
-            padding: 10px; 
-            background-color: #28a745; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-top: 15px; 
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #00bcd4;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: calc(100% - 110px);
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #3c3c3c;
+            color: #d4d4d4;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #218838;
+            background-color: #45a049;
+        }
+        #proxy-container {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .proxy-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .proxy-card h3 {
+            margin-top: 0;
+            color: #FFC107;
+            font-size: 1.1em;
+        }
+        .proxy-card p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .proxy-card span {
+            font-weight: bold;
+            color: #00bcd4;
         }
     </style>
 </head>
 <body>
-    <h3>🌐 CroxyProxy Auto Tool</h3>
-    
-    <label for="userUrl">Target URL:</label>
-    <input type="text" id="userUrl" placeholder="https://youtube.com/..." required>
-    
-    <label>Options:</label>
-    <input type="checkbox" id="autoScroll">
-    <label for="autoScroll" style="display: inline;">Auto Scrolling (On/Off)</label><br>
-    
-    <input type="checkbox" id="autoRefresh">
-    <label for="autoRefresh" style="display: inline;">30 Sec Page Refresh (On/Off)</label>
-    
-    <button id="launchBtn">🚀 Launch in CroxyProxy</button>
 
-    <script src="popup.js"></script>
+<div class="container">
+    <h1>GA4 Active User Booster (Residential Fix)</h1>
+    <p style="color: #FF6666;">**अंतिम उपाय: GA4 में 10 Active User के लिए रोटेटिंग प्रॉक्सी आवश्यक है।**</p>
+    
+    <div class="input-group">
+        <label for="global-url" style="color: #d4d4d4;">Target Website URL (GA4 लगा हो):</label>
+        <div style="display: flex; margin-top: 5px;">
+            <input type="text" id="global-url" placeholder="उदाहरण: https://www.apniwebsite.com/">
+            <button onclick="loadAndRunAll()">Load & Run All (10 Sessions)</button>
+        </div>
+    </div>
+    
+    <div id="proxy-container">
+        </div>
+</div>
+
+<script>
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // !!! CRITICAL STEP 1: RENDER PHP WEB SERVICE URL HERE !!!
+    // इस URL को अपने Render Backend के सही URL से बदलें (जो आपने पहले उपयोग किया था)
+    const PROXY_ENDPOINT = 'http://YOUR-RENDER-BACKEND-URL/proxy_loader.php'; 
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // =========================================================================
+    // !!! CRITICAL STEP 2: ROTATING PROXY CONFIGURATION (Webshare Residential) !!!
+    // =========================================================================
+    const ROTATING_PROXY = {
+        ip: "p.webshare.io",
+        port: "80",
+        // Username and Password combined for PHP backend format
+        auth: "bqctypvz-rotate:399xb3kxqv6i" 
+    };
+    // =========================================================================
+
+    const PROXY_COUNT = 10; // 10 Active Users के लिए 10 हिट
+
+    async function runProxyRequest(targetUrl, proxyConfig, index) {
+        // UNIQUE CLIENT ID FIX: हर रिक्वेस्ट के लिए एक नया और यूनिक ID (GA4 को तोड़ने के लिए)
+        const uniqueId = Date.now().toString() + index.toString() + Math.floor(Math.random() * 10000);
+        
+        // Render Backend को एक ही Rotating Endpoint के लिए 10 बार कॉल करना
+        const fetchUrl = `${PROXY_ENDPOINT}?target=${encodeURIComponent(targetUrl)}&ip=${proxyConfig.ip}&port=${proxyConfig.port}&auth=${proxyConfig.auth}&uid=${uniqueId}&location=${index}`;
+
+        try {
+            const startTime = Date.now();
+            
+            // Note: 'no-cors' मोड का उपयोग करें
+            const response = await fetch(fetchUrl, {
+                method: 'GET',
+                mode: 'no-cors',
+                cache: 'no-store'
+            });
+
+            const duration = (Date.now() - startTime) / 1000;
+            
+            // Status Update
+            document.getElementById(`status-${index}`).innerHTML = `<span style="color: #4CAF50;">View Sent (BG Session Active)</span><br>${duration.toFixed(2)}s`;
+
+        } catch (error) {
+            document.getElementById(`status-${index}`).innerHTML = `<span style="color: #FF6666;">Failed (Network Error)</span><br>Check Render Backend or URL`;
+            console.error(`Proxy Request Failed for index ${index}:`, error);
+        }
+    }
+
+    async function loadAndRunAll() {
+        const targetUrl = document.getElementById('global-url').value;
+        if (!targetUrl) {
+            alert("Please enter a valid Target URL.");
+            return;
+        }
+        
+        // Render URL चेक करना
+        if (PROXY_ENDPOINT.includes('YOUR-RENDER-BACKEND-URL')) {
+            alert("ERROR: Please update the 'PROXY_ENDPOINT' variable in the code with your actual Render URL.");
+            return;
+        }
+
+
+        const container = document.getElementById('proxy-container');
+        container.innerHTML = ''; // Clear previous results
+
+        // 10 अलग-अलग यूजर्स/सेशंस को बनाने के लिए 10 बार लूप करें
+        for (let i = 0; i < PROXY_COUNT; i++) {
+            const index = i + 1;
+            
+            // HTML कार्ड बनाना
+            const card = document.createElement('div');
+            card.className = 'proxy-card';
+            card.innerHTML = `
+                <h3>Session ${index}</h3>
+                <p>Proxy Type: <span style="color: #FFC107;">Rotating Residential</span></p>
+                <p>Endpoint: ${ROTATING_PROXY.ip}:${ROTATING_PROXY.port}</p>
+                <p>Status: <span id="status-${index}">Running...</span></p>
+            `;
+            container.appendChild(card);
+
+            // Fetch को कॉल करें, लेकिन 100ms का छोटा डिले दें
+            setTimeout(() => {
+                runProxyRequest(targetUrl, ROTATING_PROXY, index);
+            }, i * 100); 
+        }
+    }
+</script>
+
 </body>
 </html>
