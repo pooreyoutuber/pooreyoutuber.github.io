@@ -1,18 +1,36 @@
-# This file tells Render how to deploy your Web Service
+# Render Blueprint Specification v1
+
 services:
   - type: web
-    name: proxy-backend-service
-    # <--- इसे अपनी नई GitHub Repo के नाम से बदलें --->
-    repo: YOUR_BACKEND_REPO_NAME_HERE 
-    branch: main
-    # Tells Render to use the Dockerfile in the root directory
-    rootDir: . 
-    # Use Docker to build the service
-    runtime: docker
-    # Free tier instance
-    plan: free 
-    # Render will listen on this port
+    name: ws-proxy-php-tool
+    # आपका Git रिपॉजिटरी URL (जैसे GitHub, GitLab)
+    repo: YOUR_GIT_REPOSITORY_URL
+    
+    # PHP के लिए आवश्यक
+    runtime: php
+
+    # PHP और Apache सर्वर को शुरू करने के लिए स्टैंडर्ड कमांड
+    buildCommand: ""
+    startCommand: "vendor/bin/heroku-php-apache2" 
+    
+    # --- Environment Variables (सुरक्षित प्रॉक्सी क्रेडेंशियल्स) ---
     envVars:
-      - key: PORT
-        value: "80"
-        
+      - key: PROXY_DOMAIN
+        value: "p.webshare.io" # Webshare का रोटेटिंग प्रॉक्सी डोमेन
+      
+      - key: PROXY_PORT
+        value: "80" # Webshare प्रॉक्सी पोर्ट
+      
+      - key: PROXY_USERNAME
+        value: "YOUR_WEBSHARE_USERNAME" # 🔴 अपना वास्तविक यूज़रनेम यहाँ डालें 🔴
+      
+      - key: PROXY_PASSWORD
+        value: "YOUR_WEBSHARE_PASSWORD" # 🔴 अपना वास्तविक पासवर्ड यहाँ डालें 🔴
+      
+      # Apache को index.html को रूट (/) पर सर्व करने के लिए
+      - key: WEB_DOCUMENT_ROOT
+        value: "." 
+
+    # फ्री प्लान का उपयोग करें
+    plan: free 
+    
