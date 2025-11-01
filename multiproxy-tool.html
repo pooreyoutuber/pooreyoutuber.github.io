@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Single Slot View & Background GA4)</title>
+<title>Website Booster Prime (Final: Single View, Multi-User GA4)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -44,13 +44,12 @@
   .iframe-wrap { position: relative; overflow: hidden; height: 100%; min-height: 480px; border-radius: 6px; border: 1px solid var(--border); }
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Manually controlled iframe does not need scaling or hidden scrolling */
   }
 
   /* Status Grid for Background Users */
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); background: var(--card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
   @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1000px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1000px) { .grid-template-columns: repeat(4, 1fr); } }
 
   .slot-status { background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); margin-bottom: 5px; }
@@ -64,8 +63,8 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Website Booster Prime (Single View, Multi-User GA4)</h1>
-      <div class="tagline">Control 1 slot manually; Generate 10 Active Users in background.</div>
+      <h1>Website Booster Prime (Final: Single View, Multi-User GA4)</h1>
+      <div class="tagline">Control 1 slot manually; Generate up to 10 Active Users in background.</div>
     </header>
 
     <div class="controls">
@@ -107,7 +106,7 @@
         </div>
     </div>
     
-    <h2>Background Active User Status (${MAX_SLOTS} Slots)</h2>
+    <h2>Background Active User Status (<span id="slotCountDisplay">10</span> Slots)</h2>
     <div class="grid-container" id="gridContainer">
         </div>
     
@@ -115,9 +114,9 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION (No Change)
+   PROXY DATA and CONFIGURATION
    ---------------------------------------------------------------------- */
-// ... (COMMON_USER, COMMON_PASS, DUMMY_PROXIES, PROXY_ENDPOINT, etc. from previous response)
+
 const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
@@ -125,6 +124,7 @@ const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
 function generateUniqueId() {
+    // Generates a unique 10-digit ID for the GA4 client_id
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -133,6 +133,10 @@ function getRandomNames(count) {
     return shuffled.slice(0, count);
 }
 
+// =========================================================================
+// !!! PROXIES (Total 10 Slots) !!!
+// =========================================================================
+// If you face a '1 Active User' issue, change this list to new, fresh IPs.
 const DUMMY_PROXIES = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
@@ -145,13 +149,15 @@ const DUMMY_PROXIES = [
   { ip: "142.111.67.146", port: "5611", country: "US" },
   { ip: "142.147.128.93", port: "6593", country: "CA" }, 
 ];
+// =========================================================================
 
 const MAX_SLOTS = 10; 
+// !!! CRITICAL: REPLACE THIS WITH YOUR NEW RENDER PHP WEB SERVICE URL !!!
 const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy_loader.php'; 
-/* ----------------------------------------------------------------------
-   END OF PROXY DATA
-   ---------------------------------------------------------------------- */
 
+/* ----------------------------------------------------------------------
+   DOM Element References
+   ---------------------------------------------------------------------- */
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
@@ -164,6 +170,7 @@ const ga4IdInput = document.getElementById('ga4Id');
 const ga4SecretInput = document.getElementById('ga4Secret');
 const loadSingleBtn = document.getElementById('loadSingle');
 const mainIframe = document.getElementById('mainIframe');
+const slotCountDisplay = document.getElementById('slotCountDisplay');
 
 let currentSlots = [];
 let repeatIntervals = []; 
@@ -234,6 +241,7 @@ function createSlot(index, proxy){
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
+        // Fetch request is sent. PHP script handles the GA4 Measurement Protocol calls and the sleep delay.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         setStatus('Active User View Sent (2 Events Logged)', true);
     } catch (e) {
@@ -260,6 +268,7 @@ function renderSlots(count) {
     }
     
     globalGoBtn.textContent = `Start All Active Users (${count} Slots)`;
+    slotCountDisplay.textContent = count;
 
     for(let i=0; i < count; i++){
       const slot = createSlot(i, premiumProxies[i]);
@@ -297,8 +306,10 @@ globalGoBtn.addEventListener('click', ()=>{
   
   stopAllAutomation();
 
+  // Run once immediately
   currentSlots.forEach(s => s.runAutomation(url));
   
+  // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
@@ -326,8 +337,18 @@ loadSingleBtn.addEventListener('click', () => {
         alert('Please paste a URL into the global input field first.');
         return;
     }
+    // Load the URL into the main visible iFrame
     mainIframe.src = url;
 });
+
+// Event listeners for slot count change
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
 
 // Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
