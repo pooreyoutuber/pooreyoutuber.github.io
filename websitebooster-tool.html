@@ -3,31 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Website Booster Proxy Tool</title>
+  <title>🚀 Website Booster Proxy Tool</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
-    input, select, button { padding: 8px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
-    iframe { width: 100%; height: 500px; margin-top: 15px; border: 2px solid #000; border-radius: 8px; }
-    #proxyInfo { background: #fff; padding: 10px; border-radius: 6px; margin-top: 10px; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+    h1 { color: #333; text-align: center; }
+    input, select, button { padding: 10px; margin: 8px 4px; border-radius: 6px; border: 1px solid #ccc; }
+    input[type="url"] { width: 65%; box-sizing: border-box; }
+    select { width: 25%; }
+    button { background-color: #007bff; color: white; cursor: pointer; border: none; transition: background-color 0.3s; }
+    button:hover { background-color: #0056b3; }
+    iframe { width: 100%; height: 600px; border: 1px solid #ccc; margin-top: 20px; border-radius: 4px; }
+    .disclaimer { color: gray; font-size: 12px; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <h2>🌐 Website Booster Proxy Tool</h2>
+  <div class="container">
+    <h1>🚀 Website Booster Proxy Tool</h1>
 
-  <input id="targetUrl" type="text" placeholder="Enter any URL (e.g. https://example.com)" style="width:60%" />
-  <button id="loadBtn">Load via Proxy</button>
-  <br>
+    <div id="proxyInfo"></div>
 
-  <label for="proxySelector">Select Proxy:</label>
-  <select id="proxySelector"></select>
-  <br>
+    <input type="url" id="targetUrl" placeholder="URL डालें (जैसे https://youtube.com/)" required />
+    <select id="proxySelector">
+      <option value="auto">Auto Proxy (Rotate)</option>
+    </select>
+    <button id="loadBtn">Load via Proxy</button>
+    <button id="copyProxyBtn">Copy Proxy</button>
 
-  <input id="proxyString" type="text" readonly style="width:60%" />
-  <button id="copyProxyBtn">Copy Proxy</button>
+    <input type="text" id="proxyString" readonly style="width:100%;margin-top:10px;font-size:12px;color:#333;background:#f8f8f8;" />
 
-  <div id="proxyInfo"></div>
+    <iframe id="proxyFrame" name="proxyFrame"></iframe>
 
-  <iframe id="proxyFrame"></iframe>
+    <div class="disclaimer">
+      *Note: Proxy rotation and backend fetching Render (index.js) पर होता है।*
+    </div>
+  </div>
 
   <script src="booster.js"></script>
 </body>
