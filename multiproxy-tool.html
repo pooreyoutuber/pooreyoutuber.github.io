@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Final: 10 Proxy Slots)</title>
+<title>Website Booster Prime (Final: Rotating Proxy & GA4 MP)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- Minimal CSS Styles --- (CSS from previous responses, adapted for grid) */
+  /* --- Minimal CSS Styles --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -16,7 +16,7 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
-  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
+  .wrap { max-width: 1000px; margin: 24px auto; padding: 12px; } 
   header { margin-bottom: 20px; text-align: center; }
   h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
   .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
@@ -31,48 +31,60 @@
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
   
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  
   .repeat-control { display: flex; align-items: center; gap: 15px; font-size: 14px; color: var(--muted); flex-wrap: wrap; margin-top: 10px; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control span { color: var(--accent); font-weight: 600; }
   .repeat-control input[type="number"] { font-size: 14px; text-align: center; width: 50px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); } 
 
-  /* Grid Layout for 10 Slots */
-  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
-  @media (min-width: 768px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1200px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
-  
-  .slot-wrap { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-  .slot-header { padding: 10px 15px; background: #f0f4f8; border-bottom: 1px solid var(--border); }
-  .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); margin: 0; }
-  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; }
-  .iframe-container { width: 100%; height: 300px; position: relative; }
-  iframe { width: 100%; height: 100%; border: 0; display: block; background: white; }
+  /* Status Grid */
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); background: var(--card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
+  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
+
+  .slot-status { background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+  .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); margin-bottom: 5px; }
+  .status { font-size: 12px; color: #111827; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
+  .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
+  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>Website Booster Prime (10 Proxy-Injected Slots)</h1>
-      <div class="tagline">Loads 10 instances of your site, each via a separate Proxy IP.</div>
+      <h1>Website Booster Prime (Rotating Proxy - GA4 MP)</h1>
+      <div class="tagline">Uses single Rotating Proxy Endpoint to generate multiple Active Users.</div>
     </header>
 
     <div class="controls">
         <div class="input-group">
+            <div class="slot-selector">
+                Active Users:
+                <input id="numSlots" type="number" value="10" min="1" max="50" /> 
+            </div>
             <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
-            <button id="globalGo" class="btn">Load 10 Proxy Slots</button>
-            <button id="globalStop" class="btn stop" style="display:none;">STOP ALL (Auto-Reload)</button>
+            <button id="globalGo" class="btn">Start All Active Users</button>
         </div>
 
+        <div class="input-group">
+            <input id="ga4Id" type="text" placeholder="GA4 Measurement ID (G-XXXXXXX)" />
+            <input id="ga4Secret" type="text" placeholder="GA4 API Secret Key" />
+        </div>
+        
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" checked /> 
             <label for="repeatMode">
-                Enable **Auto-Reload** Mode: Repeat cycle every
+                Enable **Active User** Mode: Repeat cycle every
                 <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="30" min="20" max="120" />
+                <input id="minTime" type="number" value="30" min="25" max="120" />
                 <label for="maxTime">Max:</label>
                 <input id="maxTime" type="number" value="60" min="30" max="120" />
                 <span>seconds</span>.
             </label>
+            <button id="globalStop" class="btn stop" style="display:none; margin-left: auto;">STOP ALL</button>
         </div>
     </div>
     
@@ -85,61 +97,65 @@
 /* ----------------------------------------------------------------------
    PROXY DATA and CONFIGURATION
    ---------------------------------------------------------------------- */
-// NOTE: We don't need GA4 keys here since tracking happens on the website itself.
-
-const COMMON_USER = "bqctypvz";
-const COMMON_PASS = "399xb3kxqv6i";
-const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; // Used by PHP
+// Since we are using a rotating proxy, we only need the endpoint, not a list of IPs.
+// We pass the UID (uniqueId) for GA4 client_id tracking.
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+const MAX_SLOTS = 50; // Increased max slots for rotating proxy
+
+function generateUniqueId() {
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
 
 function getRandomNames(count) {
     const shuffled = [...allNames].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+    // Ensure we have enough names by repeating the list if needed
+    const finalNames = [];
+    for (let i = 0; i < count; i++) {
+        finalNames.push(shuffled[i % shuffled.length]);
+    }
+    return finalNames;
 }
 
-// =========================================================================
-// !!! PROXIES (Total 10 Slots) !!!
-// =========================================================================
-const DUMMY_PROXIES = [
-  { ip: "142.111.48.253", port: "7030", country: "US" },
-  { ip: "31.59.20.176", port: "6754", country: "DE" },
-  { ip: "23.95.150.145", port: "6114", country: "US" }, 
-  { ip: "198.23.239.134", port: "6540", country: "US" },
-  { ip: "45.38.107.97", port: "6014", country: "US" },
-  { ip: "107.172.163.27", port: "6543", country: "CA" },
-  { ip: "64.137.96.74", port: "6641", country: "US" },
-  { ip: "216.10.27.159", port: "6837", country: "AU" },
-  { ip: "142.111.67.146", port: "5611", country: "US" },
-  { ip: "142.147.128.93", port: "6593", country: "CA" }, 
-];
-// =========================================================================
+// ---------------------------------------------------
+// 🔥 Only ONE Entry needed for Rotating Proxy
+// ---------------------------------------------------
+const ROTATING_PROXY = {
+    name: "Webshare Rotating Residential",
+    country: "World/Random",
+    ip: "d-webshare.io", // Host is passed to PHP
+    port: 80, // Port is passed to PHP
+};
+// ---------------------------------------------------
 
-const MAX_SLOTS = 10; 
-// !!! CRITICAL: REPLACE THIS WITH YOUR RENDER PHP WEB SERVICE URL !!!
-// Ensure this is the correct URL for the new 'proxy_loader.php'
+
 const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy_loader.php'; 
 
 /* ----------------------------------------------------------------------
-   DOM Element References and Global Variables
+   DOM Element References and Setup
    ---------------------------------------------------------------------- */
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
+const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
 const minTimeInput = document.getElementById('minTime'); 
 const maxTimeInput = document.getElementById('maxTime'); 
 const globalStopBtn = document.getElementById('globalStop');
+const ga4IdInput = document.getElementById('ga4Id');
+const ga4SecretInput = document.getElementById('ga4Secret');
 
 let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 
-const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
-    ...p,
-    auth: COMMON_AUTH,
+// Create virtual slots based on the single rotating proxy
+const virtualSlots = Array.from({ length: MAX_SLOTS }).map((_, index) => ({
+    ...ROTATING_PROXY,
     name: randomNamesList[index],
+    uniqueId: generateUniqueId() // Unique ID for GA4 Client ID
 }));
+
 
 function getRandomDelay() {
     const minSec = parseInt(minTimeInput.value);
@@ -149,79 +165,127 @@ function getRandomDelay() {
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
-// Function to generate the proxied URL for the iFrame src
-function getProxiedUrl(originalUrl, proxy){
-    // This URL hits the PHP script, which then fetches the originalUrl via the proxy.
-    return `${PROXY_ENDPOINT}?` + 
-        `target=${encodeURIComponent(originalUrl)}&` +
-        `ip=${proxy.ip}&port=${proxy.port}`;
-}
-
-// Function to create and return a single iFrame slot element
-function createSlot(index, proxy){
+// Function to create a single status slot element
+function createSlot(index, slotData){
   const el = document.createElement('div');
-  el.className = 'slot-wrap';
+  el.className = 'slot-status';
   
   el.innerHTML = `
-    <div class="slot-header">
-      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
-    </div>
-    <div class="iframe-container">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    <div class="slot-title">SLOT ${index+1}: ${slotData.name} (${slotData.country})</div>
+    <div class="status" id="status-wrap-${index}">
+        <span class="status-dot" id="dot-${index}"></span>
+        <span id="status-${index}">Ready</span>
     </div>
   `;
   
   gridContainer.appendChild(el);
-  const iframe = el.querySelector(`#iframe-${index}`);
 
-  function loadUrl(url) {
-      if (!url) {
-          iframe.src = 'about:blank';
-          return;
-      }
-      const proxiedUrl = getProxiedUrl(url, proxy);
-      iframe.src = proxiedUrl;
+  const statusSpan = el.querySelector(`#status-${index}`);
+  const statusDot = el.querySelector(`#dot-${index}`);
+
+  function setStatus(text, isActive = false){
+    statusSpan.textContent = text;
+    statusDot.classList.toggle('active', isActive);
   }
   
-  return { loadUrl }; 
+  // This builds the URL that hits the PHP script
+  function getProxiedUrl(originalUrl, slotData){
+      const ga4Id = ga4IdInput.value.trim();
+      const ga4Secret = ga4SecretInput.value.trim();
+
+      // We pass the rotating proxy host/port instead of individual IPs
+      return `${PROXY_ENDPOINT}?` + 
+          `target=${encodeURIComponent(originalUrl)}&` +
+          `ip=${slotData.ip}&port=${slotData.port}&` + // Rotating Endpoint
+          `uid=${slotData.uniqueId}&` + // CRITICAL: Pass the Unique Client ID
+          `ga4_id=${ga4Id}&` +
+          `ga4_secret=${ga4Secret}`;
+  }
+
+  // --- Core Automation Function (Sends GA4 Data via PHP) ---
+  async function runAutomation(originalUrl){
+    if (!ga4IdInput.value.trim() || !ga4SecretInput.value.trim()) {
+         setStatus('Error: Missing GA4 Keys!', false);
+         return;
+    }
+
+    const proxiedUrl = getProxiedUrl(originalUrl, slotData);
+    setStatus('Sending GA4 Session (Engaging for ~20s)...', false);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+
+    try {
+        // Fetch request is sent. PHP script handles the GA4 MP calls and the sleep delay (60s timeout).
+        await fetch(proxiedUrl, { mode: 'no-cors' });
+        
+        setStatus('Active User View Sent (2 Events Logged)', true);
+        
+    } catch (e) {
+        // This will catch network errors (e.g., if Render is down or completely blocked)
+        setStatus('Failed (Network/Render Error)', false);
+    }
+    
+    statusDot.style.animation = 'none';
+  }
+  
+  setStatus('Ready', true);
+
+  return { 
+      runAutomation, 
+      setStatus
+  }; 
 }
 
-// Function to render all 10 slots
-function renderSlots() {
+// Function to redraw slots based on the selected number
+function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
 
-    for(let i=0; i < MAX_SLOTS; i++){
-      const slot = createSlot(i, premiumProxies[i]);
+    const maxCount = Math.min(count, MAX_SLOTS);
+    numSlotsInput.value = maxCount;
+    
+    globalGoBtn.textContent = `Start All Active Users (${maxCount} Slots)`;
+
+    for(let i=0; i < maxCount; i++){
+      const slot = createSlot(i, virtualSlots[i]);
       currentSlots.push(slot);
     }
     stopAllAutomation();
 }
 
-// Global Stop Function (clears auto-reload intervals)
+// Global Stop Function
 function stopAllAutomation() {
     repeatIntervals.forEach(intervalId => clearInterval(intervalId));
     repeatIntervals = [];
     globalGoBtn.style.display = 'block';
     globalStopBtn.style.display = 'none';
+    
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+    });
 }
 
-// Global Start/Run Logic - Loads all slots and starts auto-reload
+// Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
+  const ga4Id = ga4IdInput.value.trim();
+  const ga4Secret = ga4SecretInput.value.trim();
 
   if(!url){ 
       alert('Please paste a valid URL.'); 
       return; 
   }
+  if (!ga4Id || !ga4Secret) {
+      alert('CRITICAL: Please fill in both GA4 ID and Secret Key.');
+      return;
+  }
   
+  // Stop existing intervals first
   stopAllAutomation();
 
-  // Load once immediately
-  currentSlots.forEach(s => s.loadUrl(url));
+  // Run once immediately
+  currentSlots.forEach(s => s.runAutomation(url));
   
-  // If repeat mode is checked, start auto-reload intervals
+  // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
@@ -230,9 +294,11 @@ globalGoBtn.addEventListener('click', ()=>{
         const randomDelay = getRandomDelay(); 
         const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
         const intervalId = setInterval(() => {
-            // Reload the slot to generate a new page_view event
-            s.loadUrl(url); 
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
         }, randomDelay); 
         
         repeatIntervals.push(intervalId);
@@ -240,8 +306,17 @@ globalGoBtn.addEventListener('click', ()=>{
   }
 });
 
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+
 // Initial render when the page loads
-renderSlots();
+renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
 </html>
