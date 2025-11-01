@@ -3,49 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌐 Geo-Location Changer (Proxy Tool) - PHP Backend</title>
+    <title>🌐 कॉलेज प्रोजेक्ट: Geo-Location Changer Tool</title>
     <style>
-        /* CSS स्टाइलिंग वही रहेगी, जैसा कि पिछले जवाब में था */
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
-        .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        input[type="url"] { width: 97%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
-        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px; }
-        button:hover { background-color: #0056b3; }
-        #results { margin-top: 30px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background-color: #e9ecef; }
-        .success { color: green; font-weight: bold; }
-        .error { color: red; font-weight: bold; }
-        pre { background: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;}
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #e6f7ff; }
+        .container { max-width: 800px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; border-bottom: 3px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+        p { color: #555; text-align: center; margin-bottom: 30px; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
+        input[type="url"] { width: 95%; padding: 12px; margin-top: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        button { background-color: #28a745; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; margin-top: 25px; font-size: 18px; font-weight: bold; width: 100%; transition: background-color 0.3s; }
+        button:hover:not(:disabled) { background-color: #1e7e34; }
+        button:disabled { background-color: #95d5a9; cursor: not-allowed; }
+        #results { margin-top: 40px; padding: 20px; border: 2px solid #007bff; border-radius: 8px; background-color: #f0f8ff; }
+        h3 { color: #007bff; margin-top: 0; }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        pre { background: #f8f9fa; padding: 15px; border: 1px solid #dee2e6; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; max-height: 200px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🌐 कॉलेज प्रोजेक्ट: PHP प्रॉक्सी रोटेटर टूल</h1>
-        <p>URL डालें। Backend (PHP) Webshare की Rotating Proxy का उपयोग करके रिक्वेस्ट भेजेगा, जिससे Geo-Location बदल जाएगा।</p>
+        <h1>🌎 Webshare प्रॉक्सी Geo-Location चेंजर </h1>
+        <p>URL डालें और देखें कि Render पर डिप्लॉय किया गया PHP Backend Rotating Proxy का उपयोग करके रिक्वेस्ट कैसे भेजता है।</p>
         
         <form id="proxyForm">
             <label for="urlInput">टारगेट URL:</label>
             <input type="url" id="urlInput" placeholder="जैसे: https://www.google.com/search?q=my+ip+address" required>
             
-            <button type="submit" id="submitBtn">🚀 प्रॉक्सी रिक्वेस्ट भेजें</button>
+            <button type="submit" id="submitBtn">🚀 प्रॉक्सी रिक्वेस्ट भेजें (IP रोटेट होगा)</button>
         </form>
 
         <div id="results">
             <h3>📊 परिणाम:</h3>
-            <p id="message">यहां परिणाम दिखाई देगा...</p>
-            <p><strong>प्रॉक्सी द्वारा उपयोग किया गया IP:</strong> <span id="ipUsed">...</span></p>
-            <p><strong>URL स्टेटस कोड:</strong> <span id="statusCode">...</span></p>
+            <p id="message">URL डालकर रिक्वेस्ट भेजें।</p>
+            <p><strong>प्रॉक्सी द्वारा उपयोग किया गया IP:</strong> <span id="ipUsed">---</span></p>
+            <p><strong>URL स्टेटस कोड:</strong> <span id="statusCode">---</span></p>
             <h4>कंटेंट प्रीव्यू (पहला 500 वर्ण):</h4>
-            <pre id="contentPreview">...</pre>
+            <pre id="contentPreview">---</pre>
         </div>
     </div>
 
     <script>
-        // --- 🔴 यहाँ आपको अपना Render Backend URL डालना होगा 🔴 ---
-        // उदाहरण: https://your-project-name.onrender.com/api.php
-        const RENDER_BACKEND_URL = "https://pooreyoutuber-github-io-blmp.onrender.com/api.php"; 
+        // --- ⚠️ यहाँ आपको अपना Render Backend URL डालना होगा ⚠️ ---
+        // उदाहरण के लिए: const RENDER_BACKEND_URL = "https://my-proxy-tool.onrender.com/api.php";
+        const RENDER_BACKEND_URL = "YOUR_RENDER_URL/api.php"; // 🔴 इसे भरें
         // -------------------------------------------------------------
 
         document.getElementById('proxyForm').addEventListener('submit', async function(e) {
@@ -58,7 +60,7 @@
             const contentPreviewEl = document.getElementById('contentPreview');
             const submitBtn = document.getElementById('submitBtn');
 
-            // UI अपडेट करें
+            // UI अपडेट करें (Loading State)
             messageEl.textContent = '...रिक्वेस्ट भेजा जा रहा है (प्रॉक्सी रोटेट हो रहा है)...';
             messageEl.className = '';
             ipUsedEl.textContent = '...';
@@ -80,19 +82,18 @@
                 if (data.status === 'success') {
                     messageEl.textContent = data.message;
                     messageEl.className = 'success';
-                    ipUsedEl.textContent = data.ip_used;
-                    statusCodeEl.textContent = data.url_status_code;
-                    contentPreviewEl.textContent = data.content_preview;
                 } else {
-                    messageEl.textContent = `त्रुटि: ${data.message}`;
+                    messageEl.textContent = `❌ त्रुटि: ${data.message}`;
                     messageEl.className = 'error';
-                    ipUsedEl.textContent = data.ip_used;
-                    statusCodeEl.textContent = data.url_status_code || 'N/A';
-                    contentPreviewEl.textContent = 'Backend से त्रुटि प्राप्त हुई।';
                 }
+                
+                // दोनों ही स्थितियों में IP और स्टेटस कोड दिखाएँ
+                ipUsedEl.textContent = data.ip_used || 'N/A';
+                statusCodeEl.textContent = data.url_status_code || 'N/A';
+                contentPreviewEl.textContent = data.content_preview || 'कोई कंटेंट नहीं।';
 
             } catch (error) {
-                messageEl.textContent = `नेटवर्क त्रुटि: Backend तक नहीं पहुँच सका। Render URL (${RENDER_BACKEND_URL}) की जाँच करें।`;
+                messageEl.textContent = `🔴 नेटवर्क त्रुटि: Backend तक नहीं पहुँच सका। कृपया Render URL (${RENDER_BACKEND_URL}) की जाँच करें।`;
                 messageEl.className = 'error';
                 ipUsedEl.textContent = 'N/A';
                 statusCodeEl.textContent = 'N/A';
