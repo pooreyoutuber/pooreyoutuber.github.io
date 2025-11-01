@@ -1,46 +1,412 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Python Geo-Location Spoofing Proxy Tool</title>
-    <style>
-        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 50px; background-color: #f4f4f9; }
-        .container { width: 90%; max-width: 900px; }
-        h1 { color: #007bff; }
-        form { display: flex; margin-bottom: 20px; }
-        input[type="text"] { flex-grow: 1; padding: 12px; border: 2px solid #007bff; border-radius: 5px 0 0 5px; font-size: 16px; }
-        button { padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 0 5px 5px 0; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
-        button:hover { background-color: #0056b3; }
-        .iframe-container { margin-top: 20px; border: 1px solid #ccc; background-color: white; border-radius: 8px; overflow: hidden; }
-        .error { color: red; font-weight: bold; padding: 10px; background-color: #ffe0e0; border: 1px solid red; border-radius: 5px; margin-bottom: 15px;}
-        h2 { background-color: #e9ecef; padding: 10px; margin: 0; border-bottom: 1px solid #ccc; font-size: 1.2em; }
-        iframe { width: 100%; height: 600px; border: none; display: block; }
-        .success-message { padding: 10px; background-color: #d4edda; color: #155724; margin: 0;}
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Website Booster Prime - Rotating Proxy Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* --- CSS Styles (Same as previous responsive version) --- */
+  :root{
+    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
+    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
+    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
+    --primary-blue: #0ea5e9;--danger: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
+  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
+  header { margin-bottom: 20px; text-align: center; }
+  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
+  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover { background: #0c8cd8; }
+  .btn.stop { background: var(--danger); }
+  .btn.stop:hover { background: #b91c1c; }
+  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
+  .repeat-control label { flex-shrink: 0; }
+  .repeat-control span { color: var(--accent); font-weight: 600; }
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } 
+  .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .info-box strong { font-weight: 700; color: var(--accent); }
+  .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
+  .info-box ul li { margin-bottom: 6px; }
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
+  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
+  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
+  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
+  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+  iframe { 
+    width: 100%; height: 100%; border: 0; display: block; background: white; 
+    transform: scale(0.4); 
+    transform-origin: 0 0;
+    width: calc(100% / 0.4);
+    height: calc(100% / 0.4);
+    opacity: 1;
+  }
+  
+  /* --- CSS for Auto-Scrolling --- */
+  @keyframes scroll {
+    0% { transform: translate(0, 0) scale(0.4); } 
+    50% { transform: translate(0, -200%) scale(0.4); } 
+    100% { transform: translate(0, 0) scale(0.4); } 
+  }
+
+  .slot.scrolling iframe {
+    transform: translate(0, 0) scale(0.4); 
+    animation: scroll 3s ease-in-out infinite;
+  }
+  /* ---------------------------------- */
+  
+  .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
+  .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
+  .action-btn.view { background: var(--success); color: white; }
+  .action-btn.view:hover { background: #047857; }
+  .action-btn.new-tab { 
+      background: #f90;
+      color: white; 
+      flex-grow: 1;
+      font-size: 12px;
+      padding: 8px 10px;
+  }
+  .action-btn.new-tab:hover { background: #e80; }
+  .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
+  .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
+  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🐍 कॉलेज प्रॉजेक्ट: Python Geo-Location प्रॉक्सी</h1>
-        <p>URL डालें, और उसे Webshare प्रॉक्सी के माध्यम से लोड करें।</p>
-        
-        <form action="/" method="GET">
-            <input type="text" name="url" placeholder="वह URL डालें जिसे आप प्रॉक्सी के माध्यम से खोलना चाहते हैं (e.g., https://example.com)" 
-                   value="{{ target_url if target_url }}" required>
-            <button type="submit">🚀 प्रॉक्सी से खोलो</button>
-        </form>
+  <div class="wrap">
+    <header>
+      <h1>Website Booster Prime</h1>
+      <div class="tagline">Global Traffic Simulation System - Using Rotating Proxies.</div>
+    </header>
 
-        {% if target_url %}
-            {% if error %}
-                <div class="error">❌ प्रॉक्सी कनेक्शन त्रुटि: {{ error }}</div>
-            {% else %}
-                <div class="iframe-container">
-                    <h2>🌐 फेच किया गया कंटेंट: {{ target_url }}</h2>
-                    <iframe sandbox="allow-scripts allow-forms allow-same-origin" srcdoc="{{ content_to_render | safe }}"></iframe>
-                    <p class="success-message">✅ Geo-location Spoofing सफल। Google Analytics अब प्रॉक्सी का स्थान रिकॉर्ड करेगा।</p>
-                </div>
-            {% endif %}
-        {% endif %}
+    <div class="controls">
+        <div class="input-group">
+            
+            <div class="slot-selector">
+                Slots:
+                <input id="numSlots" type="number" value="10" min="1" max="20" />
+            </div>
 
-    </div>
+            <div class="url-input-wrap">
+                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+            </div>
+            <button id="globalGo" class="btn">Load & Run All</button>
+        </div>
+        
+        <div class="repeat-control">
+            <input type="checkbox" id="repeatMode" />
+            <label for="repeatMode">
+                Enable **Active User** Mode: Repeat all 
+                <label for="minTime">Min:</label>
+                <input id="minTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <label for="maxTime">Max:</label>
+                <input id="maxTime" type="number" value="60" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <span>seconds cycle</span> for better GA tracking.
+            </label>
+            
+            <input type="checkbox" id="autoScrollMode" />
+            <label for="autoScrollMode">
+                Enable **Auto Scroll** (Simulated)
+            </label>
+            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
+        </div>
+    </div>
+    
+    <div class="info-box">
+        <strong>Tool Usage Instructions (Rotating Proxy Fix):</strong>
+        <ul>
+            <li>
+                <strong>New Logic:</strong> The tool now uses a **Rotating Proxy Endpoint** (`p.webshare.io`). Every request from any slot will receive a new IP, ensuring a unique Active User for GA4.
+            </li>
+            <li>
+                <strong>Active User Fix:</strong> Each request sends a **unique Client ID (Cookie)** combined with a **new IP** from the rotating proxy.
+            </li>
+            <li>
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request between the Min/Max seconds (**staggered**).
+            </li>
+        </ul>
+    </div>
+
+    <div class="grid-container" id="gridContainer">
+        </div>
+    
+  </div>
+
+<script>
+/* ----------------------------------------------------------------------
+   PROXY DATA and CONFIGURATION (UPDATED FOR ROTATING PROXY)
+   ---------------------------------------------------------------------- */
+
+// ⚠️ CHANGE THESE VALUES to your actual credentials if they differ
+const PROXY_DOMAIN = "p.webshare.io";
+const PROXY_PORT = "80";
+const PROXY_USER = "bqctypvz-rotate"; 
+const PROXY_PASS = "399xb3kxqv6i";
+const PROXY_AUTH = `${PROXY_USER}:${PROXY_PASS}`;
+
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+
+// Function to generate a simple unique ID (used for GA4 cookie)
+function generateUniqueId() {
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
+
+function getRandomNames(count) {
+    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
+const MAX_SLOTS = 20; 
+const PROXY_ENDPOINT = 'proxy_loader.php'; 
+
+const gridContainer = document.getElementById('gridContainer');
+const globalUrlInput = document.getElementById('globalUrl');
+const numSlotsInput = document.getElementById('numSlots');
+const globalGoBtn = document.getElementById('globalGo');
+const repeatModeCheckbox = document.getElementById('repeatMode');
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
+const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
+const globalStopBtn = document.getElementById('globalStop');
+
+let currentSlots = [];
+let repeatIntervals = []; 
+let randomNamesList = getRandomNames(MAX_SLOTS); 
+
+// Map slot data with fixed unique IDs
+const slotConfigs = [];
+for (let i = 0; i < MAX_SLOTS; i++) {
+    slotConfigs.push({
+        name: randomNamesList[i],
+        uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
+    });
+}
+
+
+// Function to get a random delay from the user-defined min/max time
+function getRandomDelay() {
+    const minSec = parseInt(minTimeInput.value);
+    const maxSec = parseInt(maxTimeInput.value);
+    
+    const minMs = Math.min(minSec, maxSec) * 1000;
+    const maxMs = Math.max(minSec, maxSec) * 1000;
+    
+    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+}
+
+// Function to create a single slot element
+function createSlot(index, config){
+  const el = document.createElement('div');
+  el.className = 'slot';
+  
+  el.innerHTML = `
+    <div class="slot-top">
+      <div class="slot-title">SLOT ${index+1}: ${config.name}</div>
+      <div class="slot-ip-display">Proxy Endpoint: ${PROXY_DOMAIN}:${PROXY_PORT}</div>
+    </div>
+    
+    <div class="iframe-wrap">
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    </div>
+    
+    <div class="slot-footer">
+      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
+      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
+      <div class="status" id="status-wrap-${index}">
+        <span class="status-dot" id="dot-${index}"></span>
+        <span id="status-${index}">Ready</span>
+      </div>
+    </div>
+  `;
+  
+  gridContainer.appendChild(el);
+
+  const iframe = el.querySelector(`#iframe-${index}`);
+  const openBtn = el.querySelector(`#open-${index}`);
+  const runBtn = el.querySelector(`#run-${index}`);
+  const statusSpan = el.querySelector(`#status-${index}`);
+  const statusDot = el.querySelector(`#dot-${index}`);
+
+  function setStatus(text, isActive = false){
+    statusSpan.textContent = text;
+    statusDot.classList.toggle('active', isActive);
+  }
+  
+  function getProxiedUrl(originalUrl, uniqueId){
+      // Sending all proxy details and Unique ID to the PHP script
+      return `${PROXY_ENDPOINT}?` + 
+          `target=${encodeURIComponent(originalUrl)}&` +
+          `ip=${PROXY_DOMAIN}&port=${PROXY_PORT}&` +
+          `auth=${PROXY_AUTH}&` + 
+          `uid=${uniqueId}&` + // Unique ID for GA4 Cookie Fix
+            `protocol=SOCKS5`; // Inform PHP script about SOCKS5 protocol
+  }
+
+  // --- Core Automation Function ---
+  async function runAutomation(originalUrl){
+    if(!originalUrl) return;
+    
+    // 1. iFrame Load (Visible preview)
+    iframe.src = originalUrl;
+    setStatus('Loading Content...', false);
+    
+    // Apply/Remove scrolling class
+    if (autoScrollModeCheckbox.checked) {
+        el.classList.add('scrolling');
+    } else {
+        el.classList.remove('scrolling');
+    }
+    
+    const proxiedUrl = getProxiedUrl(originalUrl, config.uniqueId);
+
+    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+
+    try {
+        // Fetch request is sent. PHP script runs in background for 30s.
+        await fetch(proxiedUrl, { mode: 'no-cors' });
+        
+        // Response is quick due to Connection: close header in PHP
+        setStatus('View Sent (BG Session Active)', true);
+        
+    } catch (e) {
+        setStatus('Failed (Network/Proxy Error)', false);
+    }
+    
+    statusDot.style.animation = 'none';
+  }
+  
+  // Event Handlers
+  openBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    window.open(url, '_blank'); 
+  });
+
+  runBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    runAutomation(url); 
+  });
+  
+  setStatus('Ready', true);
+
+  return { 
+      runAutomation, 
+      setStatus,
+      element: el 
+  }; 
+}
+
+// Function to redraw slots based on the selected number
+function renderSlots(count) {
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+
+    const maxCount = MAX_SLOTS;
+    if (count < 1 || count > maxCount) {
+        count = Math.min(Math.max(count, 1), maxCount);
+        numSlotsInput.value = count;
+    }
+    
+    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+
+    for(let i=0; i < count; i++){
+      const slot = createSlot(i, slotConfigs[i]); // Use the simplified slotConfigs
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+// Global Stop Function
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+    
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); 
+    });
+    
+    repeatModeCheckbox.checked = false;
+}
+
+// Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  if(!url){ 
+      alert('Please paste a valid URL into the global input field.'); 
+      return; 
+  }
+  
+  // Run once immediately
+  currentSlots.forEach(s => s.runAutomation(url));
+  
+  // If repeat mode is checked, start intervals
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+      
+    currentSlots.forEach((s) => {
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, randomDelay); 
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
+
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+// Event listener for auto-scroll checkbox
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        s.element.classList.toggle('scrolling', isScrolling);
+    });
+});
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
 </body>
 </html>
