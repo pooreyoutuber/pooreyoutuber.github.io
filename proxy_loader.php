@@ -1,12 +1,7 @@
 <?php
-// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Rotating Proxy and SOCKS5
+// PHP Proxy Loader: proxy_loader.php - FINAL Optimized for Dynamic Proxy Input and SOCKS5
 
-// ⚠️ IMPORTANT: Match the authentication data from index.html
-$auth_user = "bqctypvz-rotate";
-$auth_pass = "399xb3kxqv6i";
-$expected_auth = $auth_user . ":" . $auth_pass;
-
-// 1. Tell the browser/client to disconnect immediately
+// 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
 header("Connection: close");
 header("Content-Encoding: none");
 header("Content-Length: 1"); 
@@ -27,13 +22,14 @@ set_time_limit(0); 
 
 // --- Capture Parameters from JavaScript ---
 $target_url = isset($_GET['target']) ? $_GET['target'] : null;
-$proxy_domain = isset($_GET['ip']) ? $_GET['ip'] : null; // Now captures domain: p.webshare.io
+$proxy_domain = isset($_GET['ip']) ? $_GET['ip'] : null;
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
-$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
+$proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; // Now captures user:pass
 $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // Unique ID for GA4 Cookie
 
-// Basic Validation
-if (!$target_url || !$proxy_domain || !$proxy_port || $proxy_auth !== $expected_auth || !$unique_id) {
+// Basic Validation - Proxy Auth is CRITICAL
+if (!$target_url || !$proxy_domain || !$proxy_port || !$proxy_auth || !$unique_id) {
+    // If any data is missing, stop the background process immediately.
     exit(); 
 }
 
@@ -58,6 +54,7 @@ $random_referrer = $referrers[array_rand($referrers)];
 
 $headers = array(
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
+    // CRITICAL: Send the unique cookie
     "Cookie: _ga=" . $ga_cookie_value . ";",
     "Referer: " . $random_referrer, 
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -71,14 +68,16 @@ curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 curl_setopt($ch, CURLOPT_HEADER, false);
 
-// --- ROTATING SOCKS5 PROXY CONFIGURATION (Uses Domain/Port/Auth) ---
+// --- DYNAMIC SOCKS5 PROXY CONFIGURATION ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
-curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
+curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); // Uses the user:pass captured from URL
+
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
 
 // === Active User Timeout ===
+// 30 seconds for a successful GA4 Session
 curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
 
 // Other necessary settings
