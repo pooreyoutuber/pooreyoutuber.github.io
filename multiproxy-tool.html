@@ -110,6 +110,13 @@
             </div>
             <button id="globalGo" class="btn">Load & Run All</button>
         </div>
+
+        <div class="input-group">
+            <input id="ga4Id" type="text" placeholder="GA4 Measurement ID (G-XXXXXXX)" 
+                style="flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none;" />
+            <input id="ga4Secret" type="text" placeholder="GA4 API Secret Key" 
+                style="flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none;" />
+        </div>
         
         <div class="repeat-control">
             <input type="checkbox" id="repeatMode" checked /> <label for="repeatMode">
@@ -132,13 +139,13 @@
         <strong>Tool Usage Instructions (For Real GA4 Impact):</strong>
         <ul>
             <li>
-                **CRITICAL:** Ensure **'Active User Mode'** and **'Auto Scroll'** are checked for best results.
+                **CRITICAL:** **GA4 Measurement ID (G-XXXXXXX)** और **API Secret Key** को अवश्य डालें। यह GA4 Active User को बढ़ाने का नया तरीका है।
             </li>
             <li>
-                **Unique User Fix:** यह वर्जन URL के अंत में एक रैंडम पैरामीटर जोड़ता है ताकि GA4 सभी 10 व्यू को **अलग-अलग यूजर्स** के रूप में काउंट करे।
+                **New Logic:** अब यह टूल सीधे GA4 Measurement Protocol का उपयोग करता है ताकि हर व्यू को एक **सक्रिय उपयोगकर्ता** के रूप में रजिस्टर किया जा सके (30 सेकंड से अधिक का सेशन टाइम सिमुलेट करके)।
             </li>
             <li>
-                **Session Time:** Min/Max timer सुनिश्चित करता है कि >30 सेकंड का सेशन बने (जो GA4 को Active User के लिए चाहिए)।
+                **Session Time:** Min/Max timer का उपयोग GA4 को यह बताने के लिए किया जाता है कि अगले 'सक्रिय' इवेंट को कब भेजना है।
             </li>
         </ul>
     </div>
@@ -159,7 +166,7 @@ const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
-// Function to generate a simple unique ID (used for GA4 cookie)
+// Function to generate a simple unique ID (used for GA4 client_id)
 function generateUniqueId() {
     // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
@@ -171,8 +178,7 @@ function getRandomNames(count) {
 }
 
 // =========================================================================
-// !!! CRITICAL STEP: UPDATED PROXIES (Total 10 Slots) !!!
-// (These are your new, fresh proxy IPs)
+// !!! PROXIES (Total 10 Slots) !!!
 // =========================================================================
 const DUMMY_PROXIES = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
@@ -191,7 +197,6 @@ const DUMMY_PROXIES = [
 const MAX_SLOTS = 10; 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // !!! CRITICAL: REPLACE THIS WITH YOUR NEW RENDER PHP WEB SERVICE URL !!!
-// इसे अपने Render Web Service URL से बदलें (उदाहरण: 'https://my-proxy-backend-123.onrender.com/proxy_loader.php')
 const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy_loader.php'; 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -205,6 +210,10 @@ const maxTimeInput = document.getElementById('maxTime');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
+// 👇 NEW GA4 Inputs
+const ga4IdInput = document.getElementById('ga4Id');
+const ga4SecretInput = document.getElementById('ga4Secret');
+
 let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
@@ -214,19 +223,14 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
+    uniqueId: generateUniqueId() // Unique ID for GA4 Client ID
 }));
 
 function getRandomDelay() {
-    // Get values from new input fields (convert seconds to milliseconds)
     const minSec = parseInt(minTimeInput.value);
     const maxSec = parseInt(maxTimeInput.value);
-    
-    // Ensure valid range and min/max time are GA4 compliant
     const minMs = Math.min(minSec, maxSec) * 1000;
     const maxMs = Math.max(minSec, maxSec) * 1000;
-    
-    // Generate random delay
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
@@ -268,26 +272,39 @@ function createSlot(index, proxy){
     statusDot.classList.toggle('active', isActive);
   }
   
+  // 👇 UPDATED: Pass GA4 ID and Secret
   function getProxiedUrl(originalUrl, proxy){
-      // Sending the Unique ID (uid) to the PHP script
+      const ga4Id = ga4IdInput.value.trim();
+      const ga4Secret = ga4SecretInput.value.trim();
+
+      if (!ga4Id || !ga4Secret) {
+          alert('Error: Please enter both GA4 Measurement ID and API Secret Key.');
+          return null;
+      }
+      
+      // We no longer need the unique URL parameter here as the PHP script simulates engagement
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+          `uid=${proxy.uniqueId}&` +
+          `ga4_id=${ga4Id}&` +
+          `ga4_secret=${ga4Secret}`;
   }
 
   // --- Core Automation Function ---
   async function runAutomation(originalUrl){
-    if(!originalUrl) return;
-    
-    // 1. iFrame Load (Visible preview)
-    // CRITICAL FIX: Add a unique parameter to the URL for iframe src AND for the proxy request.
-    // This ensures GA4/caching mechanisms on the target site treat it as a new visit, fixing the 1 Active User issue.
-    const uniqueOriginalUrl = originalUrl + (originalUrl.includes('?') ? '&' : '?') + 'ga_unique=' + Date.now() + Math.random().toString(36).substring(2);
-    
-    iframe.src = uniqueOriginalUrl; 
-    setStatus('Loading Content...', false);
+    // Check for critical GA4 inputs
+    if (!ga4IdInput.value.trim() || !ga4SecretInput.value.trim()) {
+         alert('CRITICAL: Please fill in both GA4 ID and Secret Key to proceed with Active User simulation.');
+         return;
+    }
+
+    // 1. iFrame Load (Visible preview - still needed for visual confirmation)
+    // We add a unique param to the iframe src to prevent browser caching.
+    const uniqueIframeUrl = originalUrl + (originalUrl.includes('?') ? '&' : '?') + 'iframe_cache=' + Date.now();
+    iframe.src = uniqueIframeUrl; 
+    setStatus('Loading Content (Visual)...', false);
     
     // Apply/Remove scrolling class
     if (autoScrollModeCheckbox.checked) {
@@ -296,19 +313,18 @@ function createSlot(index, proxy){
         el.classList.remove('scrolling');
     }
     
-    // NOTE: Send the unique URL to the PHP backend.
-    const proxiedUrl = getProxiedUrl(uniqueOriginalUrl, proxy);
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+    if (!proxiedUrl) return; // Stop if GA4 keys are missing
 
-    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    setStatus('Sending GA4 Active User Session (Simulating 15-25s Engagement)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for 30s.
-        // This is the CRITICAL call that keeps the session active via proxy.
+        // Fetch request is sent. PHP script handles the GA4 Measurement Protocol calls and the sleep delay.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         // Response is quick due to Connection: close header in PHP
-        setStatus('View Sent (BG Session Active)', true);
+        setStatus('Active User View Sent (2 Events Logged to GA4)', true);
         
     } catch (e) {
         // Error here means the PHP server did not respond at all.
@@ -378,9 +394,16 @@ function stopAllAutomation() {
 // Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
+  const ga4Id = ga4IdInput.value.trim();
+  const ga4Secret = ga4SecretInput.value.trim();
+
   if(!url){ 
       alert('Please paste a valid URL into the global input field.'); 
       return; 
+  }
+  if (!ga4Id || !ga4Secret) {
+      alert('CRITICAL: Please fill in both GA4 ID (G-XXXXXXX) and API Secret Key.');
+      return;
   }
   
   // Run once immediately
@@ -392,7 +415,6 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // 👇 CRITICAL: Get a random delay from the user-defined min/max time
         const randomDelay = getRandomDelay(); 
         const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
@@ -401,7 +423,7 @@ globalGoBtn.addEventListener('click', ()=>{
         const intervalId = setInterval(() => {
             s.runAutomation(url);
             s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
-        }, randomDelay); // Use the random delay here
+        }, randomDelay); 
         
         repeatIntervals.push(intervalId);
     });
@@ -417,10 +439,8 @@ numSlotsInput.addEventListener('change', (e) => {
 
 // Event listener for auto-scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
