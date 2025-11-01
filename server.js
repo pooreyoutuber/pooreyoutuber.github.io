@@ -1,13 +1,10 @@
-// File: server.js (Node.js backend code)
+// File: index.js (Node.js/Express)
 
 const express = require('express');
-const request = require('request'); // Proxy handling ke liye zaroori library
-const cors = require('cors'); // CORS enable karne ke liye (Front-end se request accept karne ke liye)
-
+const request = require('request');
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-app.use(cors()); 
+const path = require('path');
 
 // ***********************************************
 // ⚠️ PROXY LIST DEFINITION (Aapki 10 proxies)
@@ -26,11 +23,79 @@ const PROXIES = [
 ];
 // ***********************************************
 
+// Homepage route - Front-end UI dikhana
+app.get('/', (req, res) => {
+    // Random proxy location choose karna sirf display ke liye
+    const randomProxy = PROXIES[Math.floor(Math.random() * PROXIES.length)];
+    const proxyInfo = `Selected Proxy Location (Display): <b>${randomProxy.country}</b>. (Rotation Active)`;
+    
+    // Front-end HTML code
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="hi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Website Booster Proxy Tool</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; }
+            .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+            h1 { color: #333; text-align: center; }
+            #proxyInfo { margin: 15px 0; padding: 10px; background-color: #e6f7ff; border: 1px solid #91d5ff; border-radius: 4px; font-weight: bold; }
+            input[type="url"], button { padding: 10px; margin-right: 10px; border-radius: 4px; border: 1px solid #ccc; }
+            input[type="url"] { width: 70%; box-sizing: border-box; }
+            button { background-color: #007bff; color: white; cursor: pointer; border: none; transition: background-color 0.3s; }
+            button:hover { background-color: #0056b3; }
+            iframe { width: 100%; height: 600px; border: 1px solid #ccc; margin-top: 20px; border-radius: 4px; }
+        </style>
+    </head>
+    <body>
 
+        <div class="container">
+            <h1>🚀 Website Booster Proxy Tool</h1>
+
+            <div id="proxyInfo">${proxyInfo}</div>
+            
+            <input 
+                type="url" 
+                id="targetUrl" 
+                placeholder="Apni URL daalein (Jaise: https://youtube.com/)" 
+                required
+            >
+            
+            <button onclick="loadProxiedPage()">
+                Proxy Ke Zariye Load Karein
+            </button>
+
+            <iframe id="proxyFrame" name="proxyFrame"></iframe>
+        </div>
+
+        <script>
+            function loadProxiedPage() {
+                const urlInput = document.getElementById('targetUrl').value.trim();
+                const frame = document.getElementById('proxyFrame');
+                
+                if (!urlInput) {
+                    alert('Kripya koi URL daalein.');
+                    return;
+                }
+
+                // Front-end ab seedhe /proxy route ko call karega
+                const finalProxyUrl = \`/proxy?url=\${encodeURIComponent(urlInput)}\`;
+                frame.src = finalProxyUrl;
+            }
+        </script> 
+    </body>
+    </html>
+    `;
+    res.send(htmlContent);
+});
+
+// Proxy Route - Backend logic yahan chalta hai
 app.get('/proxy', (req, res) => {
     const targetUrl = req.query.url;
     if (!targetUrl) {
-        return res.status(400).send("<h1>Error 400: URL parameter is missing.</h1>");
+        return res.status(400).send("<h1>Error: URL parameter missing.</h1>");
     }
 
     // 1. Random Proxy Select karna (Rotation)
@@ -39,26 +104,28 @@ app.get('/proxy', (req, res) => {
     // 2. Proxy Auth URL banana (Username:Password@IP:Port format)
     const proxyUrl = `http://${selectedProxy.user}:${selectedProxy.pass}@${selectedProxy.ip}:${selectedProxy.port}`;
 
-    // 3. Request library ka use karke proxy ke zariye request bhejna
+    // 3. Proxy ke zariye request bhejna
     request({
         url: targetUrl,
         proxy: proxyUrl, 
-        timeout: 25000, // 25 seconds timeout
+        timeout: 25000, 
         rejectUnauthorized: false, 
+        followAllRedirects: true, // Zaroori taaki redirects handle ho sakein
         headers: {
             'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0' 
         }
     }, (error, response, body) => {
         if (error) {
             console.error('Proxy Error:', error);
-            const errorMessage = `<h1>Proxy Connection Failed!</h1><p>Error Code: ${error.code}. Check proxy credentials or if proxy is down.</p><p>Proxy Used: ${selectedProxy.country} (${selectedProxy.ip}:${selectedProxy.port})</p>`;
+            const errorMessage = `<h1>Proxy Failed!</h1><p>Error: ${error.code}. Proxy Used: ${selectedProxy.country} (${selectedProxy.ip}:${selectedProxy.port})</p>`;
             return res.status(500).send(errorMessage);
         }
 
-        // 4. Content Type aur Status Code wapas bhejna
-        res.status(response.statusCode);
-        // Content-Encoding header ko hata dete hain taaki iframe mein content theek se dikhe
+        // Content-Encoding header ko hata dete hain (zaroori)
         delete response.headers['content-encoding']; 
+        
+        // Headers set karna aur content wapas bhejna
+        res.status(response.statusCode);
         res.set(response.headers); 
         res.send(body);
     });
