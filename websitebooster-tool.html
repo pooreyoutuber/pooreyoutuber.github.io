@@ -6,113 +6,38 @@
     <title>🌐 प्रॉक्सी जियोलोकेशन स्पूफर (कॉलेज प्रोजेक्ट)</title>
     <style>
         /* CSS for a Clean, Professional Look */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f2f5;
-            color: #333;
-        }
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #007bff;
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-            font-size: 24px;
-        }
-        .input-group {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        #urlInput {
-            flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px 0 0 6px;
-            font-size: 16px;
-        }
-        #loadButton {
-            padding: 12px 25px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 0 6px 6px 0;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        #loadButton:hover {
-            background-color: #218838;
-        }
-        #loadingIndicator {
-            text-align: center;
-            color: #ffc107;
-            margin-bottom: 15px;
-            font-weight: bold;
-            display: none; /* Initially hidden */
-        }
-        #displayFrame {
-            width: 100%;
-            height: 650px;
-            border: 2px solid #007bff;
-            border-radius: 8px;
-            background-color: #eee;
-        }
-        .note {
-            background-color: #e0f7fa;
-            color: #005662;
-            padding: 15px;
-            border-left: 5px solid #00bcd4;
-            border-radius: 6px;
-            margin-top: 25px;
-            font-size: 14px;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border: 1px solid #f5c6cb;
-            border-radius: 6px;
-            margin-top: 15px;
-            text-align: center;
-            display: none;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); }
+        h2 { text-align: center; color: #007bff; padding-bottom: 10px; margin-bottom: 25px; font-size: 24px; }
+        .input-group { display: flex; margin-bottom: 20px; }
+        #urlInput { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px 0 0 6px; font-size: 16px; }
+        #loadButton { padding: 12px 25px; background-color: #28a745; color: white; border: none; border-radius: 0 6px 6px 0; cursor: pointer; font-size: 16px; font-weight: bold; transition: background-color 0.3s; }
+        #loadButton:hover { background-color: #218838; }
+        #loadingIndicator { text-align: center; color: #ffc107; margin-bottom: 15px; font-weight: bold; display: none; }
+        #displayFrame { width: 100%; height: 650px; border: 2px solid #007bff; border-radius: 8px; background-color: #eee; }
+        .note { background-color: #e0f7fa; color: #005662; padding: 15px; border-left: 5px solid #00bcd4; border-radius: 6px; margin-top: 25px; font-size: 14px; }
+        .error { background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 6px; margin-top: 15px; text-align: center; display: none; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h2>🌐 प्रॉक्सी व्यूअर | जियोलोकेशन चेंजर (कॉलेज प्रोजेक्ट)</h2>
-        <p>लक्ष्य URL (Target URL) दर्ज करें जिसे आप Webshare Rotating Proxy के माध्यम से देखना चाहते हैं:</p>
-        
+        <p>लक्ष्य URL दर्ज करें जिसे आप Webshare Rotating Proxy के माध्यम से देखना चाहते हैं।</p>
         <div class="input-group">
             <input type="url" id="urlInput" placeholder="उदाहरण: https://www.google.com/search?q=my+ip+address" value="" required>
             <button id="loadButton" onclick="loadProxiedUrl()">प्रॉक्सी द्वारा लोड करें</button>
         </div>
-
         <div id="loadingIndicator">⏳ वेबसाइट प्रॉक्सी सर्वर के माध्यम से लोड हो रही है...</div>
         <div id="errorDisplay" class="error"></div>
-
-        <iframe id="displayFrame" src="" title="प्रॉक्सी व्यूअर"></iframe>
-
+        <iframe id="displayFrame" src="about:blank" title="प्रॉक्सी व्यूअर"></iframe>
         <div class="note">
-            **⚙️ प्रोजेक्ट विवरण:** यह टूल आपके द्वारा दर्ज किए गए URL को Render पर डिप्लॉय किए गए Python Backend सर्वर पर भेजता है। Backend सर्वर **Webshare Rotating Proxy** का उपयोग करके उस URL को रिक्वेस्ट करता है, जिससे वेबसाइट को आपका **जियोलोकेशन बदला हुआ** दिखाई देता है।
+            **⚙️ प्रोजेक्ट विवरण:** यह टूल Render पर डिप्लॉय किए गए Python Backend सर्वर का उपयोग करता है, जो Webshare Rotating Proxy के माध्यम से जियोलोकेशन बदलकर कंटेंट दिखाता है।
         </div>
-
     </div>
-
     <script>
-        // आपका Render URL: https://pooreyoutuber-github-io-blmp.onrender.com
-        const RENDER_PROXY_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy'; 
+        // आपका Render URL
+        const RENDER_BASE_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com';
+        const RENDER_PROXY_ENDPOINT = RENDER_BASE_URL + '/proxy';
         
         const urlInput = document.getElementById('urlInput');
         const loadButton = document.getElementById('loadButton');
@@ -120,7 +45,6 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorDisplay = document.getElementById('errorDisplay');
 
-        // URL को साफ करता है और HTTPS सुनिश्चित करता है
         function sanitizeUrl(url) {
             let sanitizedUrl = url.trim();
             if (!sanitizedUrl.startsWith('http://') && !sanitizedUrl.startsWith('https://')) {
@@ -131,23 +55,21 @@
 
         async function loadProxiedUrl() {
             const targetUrl = sanitizeUrl(urlInput.value);
-
             if (!targetUrl) {
                 alert("कृपया एक वैध URL दर्ज करें।");
                 return;
             }
 
-            // UI को अपडेट करना (लोडिंग शुरू)
+            // UI अपडेट करना
             loadButton.disabled = true;
+            loadButton.textContent = 'लोड हो रहा है...';
             loadingIndicator.style.display = 'block';
             errorDisplay.style.display = 'none';
-            displayFrame.src = 'about:blank'; // iFrame को साफ करना
-
-            console.log(`Sending request to backend for: ${targetUrl}`);
+            displayFrame.srcdoc = ''; 
 
             try {
                 // Backend API को URL भेजना
-                const response = await fetch(RENDER_PROXY_URL, {
+                const response = await fetch(RENDER_PROXY_ENDPOINT, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -159,28 +81,25 @@
 
                 if (response.ok && data.html) {
                     // Backend से प्राप्त HTML को iFrame में लोड करना
-                    // यह HTML सुरक्षित रूप से Rendered Content के रूप में लोड होगा
                     displayFrame.srcdoc = data.html;
                 } else {
                     // Backend से त्रुटि मिली
-                    const errorMessage = data.error || "प्रोक्सी सर्वर से त्रुटि मिली। कृपया URL या Backend लॉग्स जांचें।";
-                    errorDisplay.textContent = '❌ ' + errorMessage;
+                    const errorMessage = data.error || "प्रोक्सी सर्वर से त्रुटि मिली। Render लॉग्स जांचें।";
+                    errorDisplay.textContent = '❌ प्रॉक्सी त्रुटि: ' + errorMessage;
                     errorDisplay.style.display = 'block';
-                    displayFrame.srcdoc = '';
                 }
 
             } catch (error) {
                 // नेटवर्क या सर्वर से कनेक्शन त्रुटि
-                console.error('Network Error:', error);
-                errorDisplay.textContent = '❌ नेटवर्क त्रुटि: Render सर्वर तक पहुंचने में विफल। क्या Backend चल रहा है?';
+                errorDisplay.textContent = '❌ कनेक्शन त्रुटि: Render सर्वर तक पहुंचने में विफल। क्या यह चल रहा है?';
                 errorDisplay.style.display = 'block';
             } finally {
-                // UI को अपडेट करना (लोडिंग समाप्त)
+                // UI को वापस सामान्य करना
                 loadButton.disabled = false;
+                loadButton.textContent = 'प्रॉक्सी द्वारा लोड करें';
                 loadingIndicator.style.display = 'none';
             }
         }
     </script>
-
 </body>
 </html>
