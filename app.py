@@ -7,12 +7,12 @@ app = Flask(__name__)
 
 # --- Webshare Proxy Configuration (महत्वपूर्ण: इसे बदलें) ---
 # **Webshare Proxy details को अपनी details से बदलें**
-PROXY_USERNAME = os.environ.get('PROXY_USER', 'YOUR_WEBSHARE_USERNAME_HERE')
-PROXY_PASSWORD = os.environ.get('PROXY_PASS', 'YOUR_WEBSHARE_PASSWORD_HERE')
-PROXY_HOST = os.environ.get('PROXY_HOST', 'domain.webshare.io') # Webshare का Rotating Proxy Host
-PROXY_PORT = os.environ.get('PROXY_PORT', '80')
+PROXY_USERNAME = os.environ.get('bqctypvz-rotate', 'YOUR_WEBSHARE_USERNAME_HERE')
+PROXY_PASSWORD = os.environ.get('399xb3kxqv6i', 'YOUR_WEBSHARE_PASSWORD_HERE')
+PROXY_HOST = os.environ.get('p.webshare.io', 'domain.webshare.io') # Webshare का Rotating Proxy Host
+PROXY_PORT = os.environ.get('80', '80')
 
-PROXY_AUTH_URL = f'http://{PROXY_USERNAME}:{PROXY_PASSWORD}@{PROXY_HOST}:{PROXY_PORT}'
+PROXY_AUTH_URL = f'http://{399xb3kxqv6i}:{bqctypvz-rotate}@{p.webshare.io}:{80}'
 
 # CORS Headers को सेट करना (यह Render और फ्रंटएंड कम्युनिकेशन के लिए ज़रूरी है)
 @app.after_request
