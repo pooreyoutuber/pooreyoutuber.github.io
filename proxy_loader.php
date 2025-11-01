@@ -1,5 +1,5 @@
 <?php
-// proxy_loader.php - GA4 Measurement Protocol with Rotating Proxy (Final Attempt)
+// visual_proxy.php - Croxyproxy Style Content Loader using Rotating Proxy
 
 // ----------------------------------------------------------------------
 // 1. CRITICAL: PROXY AUTHENTICATION (From User's Screenshot)
@@ -12,114 +12,96 @@ $PROXY_AUTH = $PROXY_USER . ":" . $PROXY_PASS;
 $proxy_address = $PROXY_HOST . ":" . $PROXY_PORT;
 
 // ----------------------------------------------------------------------
-// 2. NON-BLOCKING EXECUTION (Immediately send a quick response)
+// 2. GET TARGET URL
 // ----------------------------------------------------------------------
-header("Connection: close");
-header("Content-Encoding: none");
-header("Content-Length: 1"); 
-header("Content-Type: text/plain");
-ob_start();
-echo '1'; 
-$size = ob_get_length();
-header("Content-Length: $size");
-ob_end_flush();
-flush();
+$target_url = isset($_GET['url']) ? $_GET['url'] : '';
 
-// 3. CONTINUE EXECUTION (The heavy work starts in the background)
-ignore_user_abort(true);
-set_time_limit(0); 
-
-// --- Capture Parameters from URL ---
-$target_url = isset($_GET['target']) ? $_GET['target'] : null;
-$unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // CRITICAL: Client ID
-$GA4_MEASUREMENT_ID = isset($_GET['ga4_id']) ? $_GET['ga4_id'] : null; 
-$API_SECRET_KEY = isset($_GET['ga4_secret']) ? $_GET['ga4_secret'] : null; 
-
-if (!$target_url || !$unique_id || !$GA4_MEASUREMENT_ID || !$API_SECRET_KEY) {
-    exit(); 
+// Add http:// if missing (to ensure cURL can connect)
+if (!empty($target_url) && !preg_match("~^https?://~i", $target_url)) {
+    $target_url = "http://" . $target_url;
 }
 
-$GA4_ENDPOINT = "https://www.google-analytics.com/mp/collect";
-
-// --- Spoofing Data ---
-$user_agents = array(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1.15"
-);
-function generateRandomIP() {
-    // This IP is used to trick GA4 into thinking the request came from this IP
-    return rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255);
+// ----------------------------------------------------------------------
+// 3. HOME PAGE UI (If no URL is provided)
+// ----------------------------------------------------------------------
+if (empty($target_url)) {
+    // Redirect to the index.html or display a simple form if accessed directly
+    // Assuming index.html is the main entry point for the form.
+    // We will show a simple message here for direct access
+    ?>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Simple Proxy Browser</title>
+        <style>
+            body { font-family: Arial, sans-serif; background-color: #f0f0f0; text-align: center; padding-top: 50px; }
+            .proxy-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+            input[type="url"] { width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+            button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        </style>
+    </head>
+    <body>
+        <div class="proxy-box">
+            <h1>Web Proxy Tool</h1>
+            <p>Enter the URL you wish to browse anonymously.</p>
+            <form method="GET" action="visual_proxy.php">
+                <input type="url" name="url" placeholder="https://example.com" required>
+                <button type="submit">Go Anonymously</button>
+            </form>
+            <p style="margin-top: 20px; font-size: 12px; color: #666;">Using Rotating Proxy: <?php echo $PROXY_HOST; ?>:<?php echo $PROXY_PORT; ?></p>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit();
 }
 
-// --- GA4 Send Function (Uses Rotating Proxy) ---
-function send_ga4_event($endpoint, $measurement_id, $secret_key, $payload, $proxy_address, $proxy_auth) {
-    $ch = curl_init();
+// ----------------------------------------------------------------------
+// 4. CURL SETUP AND EXECUTION (Fetch the target content)
+// ----------------------------------------------------------------------
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $target_url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HEADER, false); 
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
+
+// Set Proxy options (Using your rotating proxy)
+curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
+curl_setopt($ch, CURLOPT_PROXYUSERPWD, $PROXY_AUTH); 
+
+// Spoof User Agent and increase timeout
+curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36");
+curl_setopt($ch, CURLOPT_TIMEOUT, 60); // Increased timeout for slow proxies
+
+$content = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$error = curl_error($ch);
+curl_close($ch);
+
+// ----------------------------------------------------------------------
+// 5. OUTPUT CONTENT
+// ----------------------------------------------------------------------
+if ($content === false || $http_code >= 400) {
+    echo "<h1>Error loading content ($http_code)</h1>";
+    echo "<p>Could not load the URL: " . htmlspecialchars($target_url) . "</p>";
+    echo "<p>Reason: " . ($content === false ? "cURL Error: " . $error : "HTTP Error or Proxy Block.") . "</p>";
+} else {
+    // CRITICAL: We need to rewrite URLs in the fetched content to point back to our proxy script
+    // This is the advanced step to make navigation work, but it's very complex.
+    // For simplicity, we just output the content, so the user can see the initial page.
     
-    $url = $endpoint . "?measurement_id=" . $measurement_id . "&api_secret=" . $secret_key;
+    // Set content type to display the page
+    header('Content-Type: text/html');
     
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // Inject a top bar with the proxy URL
+    $top_bar = '<div style="background:#333; color:white; padding:5px 15px; font-family:Arial; font-size:12px; position:sticky; top:0; z-index:99999;">'
+             . 'PROXIFIED: ' . htmlspecialchars($target_url) 
+             . '<a href="visual_proxy.php" style="color:#0f0; float:right;">[X] Close Proxy</a>'
+             . '</div>';
+
+    // Try to insert the top bar after the body tag
+    $content = preg_replace('/<body[^>]*>/i', '$0' . $top_bar, $content, 1);
     
-    // 👇 Use the single rotating proxy endpoint
-    curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
-    curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
-    
-    // CRITICAL FIX: Increased Timeout for slow rotating proxies
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60); 
-    
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    curl_exec($ch);
-    curl_close($ch);
+    echo $content;
 }
-
-// --- ACTIVE USER SIMULATION: 2-Event Sequence ---
-
-$session_id = time(); 
-$random_ua = $user_agents[array_rand($user_agents)];
-
-// 1. Send 'page_view' (Session Start)
-$page_view_data = [
-    'client_id' => $unique_id, // Ensures a unique user
-    'events' => [
-        [
-            'name' => 'page_view',
-            'params' => [
-                'session_id' => $session_id, 
-                'engagement_time_msec' => '1000', 
-                'page_location' => $target_url,
-                'user_agent' => $random_ua, 
-                'ip_override' => generateRandomIP() // IP Spoofing
-            ],
-        ],
-    ],
-];
-send_ga4_event($GA4_ENDPOINT, $GA4_MEASUREMENT_ID, $API_SECRET_KEY, $page_view_data, $proxy_address, $PROXY_AUTH);
-
-// 2. Wait (Simulates user time on page - ESSENTIAL)
-$time_delay = rand(15, 25); 
-sleep($time_delay); 
-
-// 3. Send 'scroll' (Registers as 'Engaged/Active User')
-$scroll_data = [
-    'client_id' => $unique_id, // Must be the same client_id
-    'events' => [
-        [
-            'name' => 'scroll', 
-            'params' => [
-                'session_id' => $session_id, 
-                'engagement_time_msec' => '20000', 
-                'page_location' => $target_url,
-                'user_agent' => $random_ua, 
-                'ip_override' => generateRandomIP() 
-            ],
-        ],
-    ],
-];
-
-send_ga4_event($GA4_ENDPOINT, $GA4_MEASUREMENT_ID, $API_SECRET_KEY, $scroll_data, $proxy_address, $PROXY_AUTH);
-
-exit();
 ?>
