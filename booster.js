@@ -1,6 +1,6 @@
 // booster.js
 // ⚠️ IMPORTANT: यहाँ पर RENDER_BACKEND_ROOT को अपनी backend URL से बदलो (no trailing slash).
-const RENDER_BACKEND_ROOT = "https://your-proxy-backend.onrender.com";
+const RENDER_BACKEND_ROOT = "https://pooreyoutuber-github-io-blmp.onrender.com";
 
 // PROXY_POOL — screenshot के आधार पर 10 proxies (host, port, username, password).
 // अगर तुम्हारे पास अलग proxies हों, इन्हें edit कर लो।
