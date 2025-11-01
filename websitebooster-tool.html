@@ -1,67 +1,471 @@
-<!DOCTYPE html>
-<html lang="hi">
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Simple College Proxy Tool</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Website Booster Prime - Final Direct Connection (HTTP Proxy)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-body {
-  font-family:'Inter',system-ui;
-  background:#f3f4f6;
-  margin:0; padding:40px;
-  color:#111827;
-}
-.container {
-  max-width:700px; margin:auto;
-  background:#fff; padding:20px;
-  border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1);
-}
-input[type="text"] {
-  width:100%; padding:12px;
-  font-size:16px;
-  border:1px solid #ccc;
-  border-radius:6px;
-  margin-bottom:10px;
-}
-button {
-  background:#2563eb; color:white;
-  border:none; padding:10px 18px;
-  border-radius:6px; font-size:16px;
-  cursor:pointer;
-}
-button:hover { background:#1d4ed8; }
-iframe {
-  width:100%; height:500px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  margin-top:15px;
-}
-.note {
-  background:#fff7ed;
-  border-left:4px solid #f59e0b;
-  padding:10px; margin-top:15px;
-  border-radius:8px; font-size:14px;
-}
+    /* --- CSS Styles (UI Enhancements) --- */
+    :root{
+        --bg: #f3f4f6;
+        --card: #ffffff;
+        --muted: #6b7280; 
+        --accent: #0f4f7f;
+        --success: #10b981;
+        --border: #d1d5db;
+        --shadow: 0 4px 12px rgba(0,0,0,0.06);
+        --radius: 12px;
+        --gap: 16px; 
+        --primary-blue: #3b82f6;
+        --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #1f2937; line-height: 1.5; }
+    .wrap { max-width: 1200px; margin: 32px auto; padding: 16px; } 
+    header { margin-bottom: 30px; text-align: center; }
+    h1 { font-size: 32px; margin: 0; color: var(--accent); letter-spacing: -1px; font-weight: 700; } 
+    .tagline { color: var(--muted); font-size: 16px; margin-top: 4px; font-weight: 500; }
+    .controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+    
+    .main-control-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap;}
+    .url-input-wrap { flex: 1; min-width: 400px; display: flex; border-radius: 10px; overflow: hidden; }
+    .input-label { background: #e5e7eb; padding: 12px; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; display: flex; align-items: center; }
+    input[type="url"] { flex: 1; padding: 12px 14px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; border-left: none; }
+    .proxy-list-wrap { flex: 1; min-width: 400px; }
+    .proxy-list-wrap textarea {
+        width: 100%;
+        min-height: 100px; 
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-family: 'Inter', monospace;
+        font-size: 14px;
+        resize: vertical;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; padding: 0 12px; background: #e5e7eb; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; border-radius: 10px; height: 44px; }
+    .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 700; color: var(--accent); outline: none; }
+    .btn { background: var(--primary-blue); color: white; padding: 12px 20px; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; flex-shrink: 0; border-radius: 10px; height: 44px; }
+    .btn:hover { background: #2563eb; }
+    .btn.stop { background: var(--danger); border-radius: 10px; }
+    .btn.stop:hover { background: #b91c1c; }
+
+    .settings-bar { display: flex; gap: 10px; width: 100%; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+    .repeat-control { flex: 1; display: flex; align-items: center; justify-content: flex-start; gap: 15px; font-size: 14px; color: var(--muted); background: var(--card); padding: 12px 20px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+    .repeat-control label { font-weight: 500; display: flex; align-items: center; gap: 5px; }
+    .repeat-control input[type="checkbox"] { transform: scale(1.1); margin: 0; }
+    .repeat-control span { color: var(--accent); font-weight: 600; }
+    .repeat-control input[type="number"] { font-size: 14px; text-align: center; border: 1px solid var(--border); padding: 5px; border-radius: 4px; width: 50px; }
+    
+    .info-box { background: #fef3c7; color: #92400e; padding: 16px; border-radius: 10px; font-size: 14px; border: 1px solid #fcd34d; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .info-box strong { font-weight: 700; color: #b45309; }
+    .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
+    .info-box ul li { margin-bottom: 6px; }
+
+    /* Slot Grid Styling */
+    .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
+    @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } } 
+    @media (min-width: 1200px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+    .slot { background: var(--card); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
+    .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); }
+    .slot-ip-display { font-size: 12px; color: var(--muted); font-weight: 500; } 
+    .iframe-wrap { flex: 1; border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; background: #f9fafb; }
+    iframe { 
+        width: 100%; height: 100%; border: 0; display: block; background: white; 
+        transform: scale(0.4); 
+        transform-origin: 0 0;
+        width: calc(100% / 0.4);
+        height: calc(100% / 0.4);
+        opacity: 1;
+    }
+    @keyframes scroll { 0% { transform: translate(0, 0) scale(0.4); }  50% { transform: translate(0, -200%) scale(0.4); }  100% { transform: translate(0, 0) scale(0.4); } }
+    .slot.scrolling iframe { transform: translate(0, 0) scale(0.4);  animation: scroll 3s ease-in-out infinite; }
+    .slot-footer { display: flex; gap: 8px; align-items: center; margin-top: 10px; justify-content: space-between; flex-wrap: wrap; }
+    .action-btn { padding: 8px 12px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 12px; white-space: nowrap; transition: background-color 0.2s; }
+    .action-btn.view { background: var(--success); color: white; }
+    .action-btn.view:hover { background: #059669; }
+    .action-btn.new-tab { background: #f97316; color: white; flex-grow: 1; font-size: 12px; padding: 8px 12px; }
+    .action-btn.new-tab:hover { background: #ea580c; }
+    .status { font-size: 12px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
+    .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
+    @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🌐 College Proxy Tool</h1>
-    <input type="text" id="urlInput" placeholder="यहाँ वेबसाइट का URL डालें (उदा. https://example.com)">
-    <button onclick="openSite()">Open via Proxy</button>
-    <iframe id="viewer" src=""></iframe>
-    <div class="note">
-      ⚙️ यह टूल सिर्फ़ कॉलेज प्रोजेक्ट और डेमो के लिए है। यह आपके सर्वर के ज़रिए वेबसाइट लोड करता है, किसी साइट का misuse नहीं करता।
-    </div>
-  </div>
+  <div class="wrap">
+    <header>
+      <h1>Website Booster Prime 🚀</h1>
+      <div class="tagline">Direct Connection Mode - Maximize GA4 Active Users. (Using HTTP Protocol)</div>
+    </header>
+
+    <div class="controls">
+        <div class="main-control-row">
+            <div class="url-input-wrap">
+                <div class="input-label" style="border-radius: 10px 0 0 10px;">Target URL:</div>
+                <input id="globalUrl" type="url" placeholder="https://yourwebsite.com" style="border-radius: 0 10px 10px 0; border-left: 1px solid var(--border);" />
+            </div>
+
+            <div class="proxy-list-wrap">
+                <textarea id="proxyList" placeholder="Paste your proxy list here (one per line). Format: IP:Port:User:Pass">142.111.48.253:7030:bqctypvz-rotate:399xb3kxqv6i
+31.59.20.176:6754:bqctypvz-rotate:399xb3kxqv6i
+23.95.150.145:6114:bqctypvz-rotate:399xb3kxqv6i
+198.23.239.134:6540:bqctypvz-rotate:399xb3kxqv6i
+45.38.107.97:6014:bqctypvz-rotate:399xb3kxqv6i
+107.172.163.27:6543:bqctypvz-rotate:399xb3kxqv6i
+64.137.96.74:6641:bqctypvz-rotate:399xb3kxqv6i
+216.10.27.159:6837:bqctypvz-rotate:399xb3kxqv6i
+142.111.67.146:5611:bqctypvz-rotate:399xb3kxqv6i
+142.147.128.93:6593:bqctypvz-rotate:399xb3kxqv6i</textarea>
+            </div>
+        </div>
+        
+        <div class="settings-bar">
+            <div class="slot-selector">
+                Slots:
+                <input id="numSlots" type="number" value="10" min="1" max="20" />
+            </div>
+            
+            <button id="globalGo" class="btn" style="flex: 1;">Load & Run All</button>
+            <button id="globalStop" class="btn stop" style="display:none; flex: 1;">🔴 STOP ALL</button>
+        </div>
+        
+        <div class="repeat-control">
+            <input type="checkbox" id="repeatMode" checked />
+            <label for="repeatMode">
+                Enable **Active User** Mode: Repeat all 
+                <label for="minTime">Min:</label>
+                <input id="minTime" type="number" value="30" min="10" max="120" />
+                <label for="maxTime">Max:</label>
+                <input id="maxTime" type="number" value="60" min="10" max="120" />
+                <span>seconds cycle</span> (for GA4).
+            </label>
+            
+            <input type="checkbox" id="autoScrollMode" />
+            <label for="autoScrollMode">
+                Enable **Auto Scroll** (Simulated)
+            </label>
+        </div>
+    </div>
+    
+    <div class="info-box">
+        <strong>✅ FINAL CONFIGURATION (HTTP Protocol):</strong>
+        <ul>
+            <li>
+                **Protocol:** The backend (`proxy_loader.php`) is now set to use **HTTP Proxies**, which is often more reliable than SOCKS5.
+            </li>
+            <li>
+                **Unique Users:** Each slot uses a **Unique IP** (from your list) + a **Unique GA4 Client ID** to ensure accurate active user counts.
+            </li>
+            <li>
+                **Testing:** Click 'Load & Run All' with 'Active User Mode' checked. Check your GA4 Real-time report after 1 minute.
+            </li>
+        </ul>
+    </div>
+
+    <div class="grid-container" id="gridContainer">
+        </div>
+    
+  </div>
 
 <script>
-function openSite(){
-  const url = document.getElementById("urlInput").value.trim();
-  if(!url){ alert("कृपया कोई URL डालें"); return; }
-  document.getElementById("viewer").src = "proxy.php?url=" + encodeURIComponent(url);
+/* ----------------------------------------------------------------------
+   JAVASCRIPT LOGIC (Proxy List Handling)
+   ---------------------------------------------------------------------- */
+
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+
+function generateUniqueId() {
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
+
+function getRandomNames(count) {
+    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
+const MAX_SLOTS = 20; 
+const PROXY_ENDPOINT = 'proxy_loader.php'; 
+
+const gridContainer = document.getElementById('gridContainer');
+const globalUrlInput = document.getElementById('globalUrl');
+const proxyListTextarea = document.getElementById('proxyList'); 
+const numSlotsInput = document.getElementById('numSlots');
+const globalGoBtn = document.getElementById('globalGo');
+const repeatModeCheckbox = document.getElementById('repeatMode');
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
+const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
+const globalStopBtn = document.getElementById('globalStop');
+
+let currentSlots = [];
+let repeatIntervals = []; 
+let randomNamesList = getRandomNames(MAX_SLOTS); 
+let parsedProxies = []; 
+
+const slotConfigs = [];
+for (let i = 0; i < MAX_SLOTS; i++) {
+    slotConfigs.push({
+        name: randomNamesList[i],
+        uniqueId: generateUniqueId() 
+    });
+}
+
+function parseProxyList(proxyListString) {
+    const lines = proxyListString.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    // Format: IP:Port:User:Pass
+    const regex = /(.*?):(\d+):(.+?):(.+)/; 
+
+    return lines.map(line => {
+        const match = line.match(regex);
+        if (match) {
+            return {
+                ip: match[1],
+                port: match[2],
+                user: match[3],
+                pass: match[4],
+                auth: `${match[3]}:${match[4]}`
+            };
+        }
+        return null; 
+    }).filter(proxy => proxy !== null);
+}
+
+function getRandomDelay() {
+    const minSec = parseInt(minTimeInput.value);
+    const maxSec = parseInt(maxTimeInput.value);
+    
+    const minMs = Math.min(minSec, maxSec) * 1000;
+    const maxMs = Math.max(minSec, maxSec) * 1000;
+    
+    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+}
+
+function createSlot(index, config, proxy){
+  const el = document.createElement('div');
+  el.className = 'slot';
+
+    const defaultProxyDisplay = proxy ? `${proxy.ip}:${proxy.port}` : 'N/A';
+
+  el.innerHTML = `
+    <div class="slot-top">
+      <div class="slot-title">SLOT ${index+1}: ${config.name}</div>
+      <div class="slot-ip-display">Proxy: ${defaultProxyDisplay}</div>
+    </div>
+    
+    <div class="iframe-wrap">
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    </div>
+    
+    <div class="slot-footer">
+      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
+      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
+      <div class="status" id="status-wrap-${index}">
+        <span class="status-dot" id="dot-${index}"></span>
+        <span id="status-${index}">Ready</span>
+      </div>
+    </div>
+  `;
+  
+  gridContainer.appendChild(el);
+
+  const iframe = el.querySelector(`#iframe-${index}`);
+  const openBtn = el.querySelector(`#open-${index}`);
+  const runBtn = el.querySelector(`#run-${index}`);
+  const statusSpan = el.querySelector(`#status-${index}`);
+  const statusDot = el.querySelector(`#dot-${index}`);
+  const ipDisplay = el.querySelector('.slot-ip-display');
+
+  el.dataset.proxyIp = proxy ? proxy.ip : '';
+  el.dataset.proxyPort = proxy ? proxy.port : '';
+  el.dataset.proxyAuth = proxy ? proxy.auth : '';
+
+
+  function setStatus(text, isActive = false){
+    statusSpan.textContent = text;
+    statusDot.classList.toggle('active', isActive);
+  }
+  
+  function getProxiedUrl(originalUrl, uniqueId, proxy) {
+      // Passing all proxy details and protocol (HTTP) via URL parameters
+      return `${PROXY_ENDPOINT}?` + 
+          `target=${encodeURIComponent(originalUrl)}&` +
+          `ip=${proxy.ip}&port=${proxy.port}&` +
+          `auth=${proxy.auth}&` + 
+          `uid=${uniqueId}`; 
+  }
+
+  async function runAutomation(originalUrl){
+    if(!originalUrl) return;
+
+    const slotProxy = {
+        ip: el.dataset.proxyIp,
+        port: el.dataset.proxyPort,
+        auth: el.dataset.proxyAuth
+    };
+
+    if (!slotProxy.ip || !slotProxy.auth) {
+        setStatus('Error: No proxy assigned to slot!', false);
+        return;
+    }
+    
+    ipDisplay.textContent = `Proxy: ${slotProxy.ip}:${slotProxy.port}`;
+    
+    iframe.src = originalUrl;
+    setStatus('Loading Content...', false);
+    
+    if (autoScrollModeCheckbox.checked) {
+        el.classList.add('scrolling');
+    } else {
+        el.classList.remove('scrolling');
+    }
+    
+    const proxiedUrl = getProxiedUrl(originalUrl, config.uniqueId, slotProxy);
+
+    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+
+    try {
+        // Fetch request runs PHP in background for 30s
+        await fetch(proxiedUrl, { mode: 'no-cors' });
+        
+        setStatus('View Sent (BG Session Active)', true);
+        
+    } catch (e) {
+        setStatus('Failed (Network/Proxy Error)', false);
+    }
+    
+    statusDot.style.animation = 'none';
+  }
+  
+  openBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    window.open(url, '_blank'); 
+  });
+
+  runBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    runAutomation(url); 
+  });
+  
+  setStatus('Ready', true);
+
+  return { 
+      runAutomation, 
+      setStatus,
+      element: el 
+  }; 
+}
+
+function renderSlots(count) {
+    const listString = proxyListTextarea.value;
+    parsedProxies = parseProxyList(listString);
+
+    if (parsedProxies.length === 0) {
+        gridContainer.innerHTML = '<div class="info-box" style="margin-top:20px; text-align:center;"><strong>Error:</strong> Please enter a valid proxy list (IP:Port:User:Pass format).</div>';
+        currentSlots = [];
+        return;
+    }
+
+    const actualCount = Math.min(count, parsedProxies.length);
+    numSlotsInput.value = actualCount; 
+    
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+    globalGoBtn.textContent = `Load & Run All (${actualCount} Slots)`;
+    
+    for(let i=0; i < actualCount; i++){
+      const slot = createSlot(i, slotConfigs[i], parsedProxies[i]); 
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+    
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); 
+    });
+    
+    repeatModeCheckbox.checked = false;
+}
+
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  
+  if(!url){ 
+      alert('Please paste a valid Target URL.'); 
+      return; 
+  }
+  if(currentSlots.length === 0){
+    renderSlots(parseInt(numSlotsInput.value));
+    if (currentSlots.length === 0) {
+        alert('Please enter a valid proxy list and select slots.');
+        return;
+    }
+  }
+
+  currentSlots.forEach(s => s.runAutomation(url));
+  
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+      
+    currentSlots.forEach((s) => {
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, randomDelay); 
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
+
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+proxyListTextarea.addEventListener('change', () => {
+    renderSlots(parseInt(numSlotsInput.value));
+});
+
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        s.element.classList.toggle('scrolling', isScrolling);
+    });
+});
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
 </html>
