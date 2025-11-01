@@ -2,29 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Geo-Location Spoofing Proxy Tool</title>
+    <title>Python Geo-Location Spoofing Proxy Tool</title>
     <style>
-        /* CSS Styling */
         body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 50px; background-color: #f4f4f9; }
         .container { width: 90%; max-width: 900px; }
+        h1 { color: #007bff; }
         form { display: flex; margin-bottom: 20px; }
         input[type="text"] { flex-grow: 1; padding: 12px; border: 2px solid #007bff; border-radius: 5px 0 0 5px; font-size: 16px; }
         button { padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 0 5px 5px 0; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
         button:hover { background-color: #0056b3; }
-        iframe { width: 100%; height: 600px; border: 1px solid #ccc; background-color: white; margin-top: 20px;}
+        .iframe-container { margin-top: 20px; border: 1px solid #ccc; background-color: white; border-radius: 8px; overflow: hidden; }
+        .error { color: red; font-weight: bold; padding: 10px; background-color: #ffe0e0; border: 1px solid red; border-radius: 5px; margin-bottom: 15px;}
+        h2 { background-color: #e9ecef; padding: 10px; margin: 0; border-bottom: 1px solid #ccc; font-size: 1.2em; }
+        iframe { width: 100%; height: 600px; border: none; display: block; }
+        .success-message { padding: 10px; background-color: #d4edda; color: #155724; margin: 0;}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌎 कॉलेज प्रॉजेक्ट: Geo-Location प्रॉक्सी</h1>
-        <p>URL डालें, और उसे Webshare प्रॉक्सी के साथ लोड करें। Google Analytics में Geo-location प्रॉक्सी IP के स्थान पर दिखेगा।</p>
+        <h1>🐍 कॉलेज प्रॉजेक्ट: Python Geo-Location प्रॉक्सी</h1>
+        <p>URL डालें, और उसे Webshare प्रॉक्सी के माध्यम से लोड करें।</p>
         
-        <form action="proxy.php" method="GET" target="proxy_frame">
-            <input type="text" name="url" placeholder="वह URL डालें जिसे आप प्रॉक्सी के माध्यम से खोलना चाहते हैं (e.g., https://example.com)" required>
+        <form action="/" method="GET">
+            <input type="text" name="url" placeholder="वह URL डालें जिसे आप प्रॉक्सी के माध्यम से खोलना चाहते हैं (e.g., https://example.com)" 
+                   value="{{ target_url if target_url }}" required>
             <button type="submit">🚀 प्रॉक्सी से खोलो</button>
         </form>
 
-        <iframe name="proxy_frame" id="proxyFrame"></iframe>
+        {% if target_url %}
+            {% if error %}
+                <div class="error">❌ प्रॉक्सी कनेक्शन त्रुटि: {{ error }}</div>
+            {% else %}
+                <div class="iframe-container">
+                    <h2>🌐 फेच किया गया कंटेंट: {{ target_url }}</h2>
+                    <iframe sandbox="allow-scripts allow-forms allow-same-origin" srcdoc="{{ content_to_render | safe }}"></iframe>
+                    <p class="success-message">✅ Geo-location Spoofing सफल। Google Analytics अब प्रॉक्सी का स्थान रिकॉर्ड करेगा।</p>
+                </div>
+            {% endif %}
+        {% endif %}
+
     </div>
 </body>
 </html>
