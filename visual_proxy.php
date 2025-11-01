@@ -2,9 +2,8 @@
 // index.php - Final Simple Croxyproxy Style Tool (HTML + PHP)
 
 // ----------------------------------------------------------------------
-// 1. CRITICAL: PROXY AUTHENTICATION (From User's Screenshot)
+// 1. CRITICAL: PROXY AUTHENTICATION 
 // ----------------------------------------------------------------------
-// Please verify these credentials from Webshare if you still face errors.
 $PROXY_HOST = "d-webshare.io";
 $PROXY_PORT = 80;
 $PROXY_USER = "bqctypvz-rotate";
@@ -26,7 +25,6 @@ if (!empty($target_url) && !preg_match("~^https?://~i", $target_url)) {
 // 3. HOME PAGE UI (If no URL is provided, display the form)
 // ----------------------------------------------------------------------
 if (empty($target_url)) {
-    // We send a normal HTML header
     header('Content-Type: text/html');
     ?>
     <!DOCTYPE html>
@@ -92,7 +90,6 @@ curl_close($ch);
 // 5. OUTPUT CONTENT
 // ----------------------------------------------------------------------
 if ($content === false || $http_code >= 400) {
-    // Send standard HTML header for error page
     header('Content-Type: text/html');
     echo "<h1 style='color:red; text-align:center; padding-top:50px;'>Error loading content ($http_code)</h1>";
     echo "<p style='text-align:center;'>Could not load the URL: " . htmlspecialchars($target_url) . "</p>";
