@@ -2,7 +2,6 @@
 // PHP Proxy Loader: proxy_loader.php - FINAL CODE (Rotating Residential Proxy FIX)
 
 // --- CRITICAL AUTHENTICATION DATA (UPDATED FOR ROTATING PROXY) ---
-// Note: Username has been updated to match the rotating proxy format.
 $auth_user = "bqctypvz-rotate";
 $auth_pass = "399xb3kxqv6i";
 $expected_auth = $auth_user . ":" . $auth_pass;
@@ -107,7 +106,7 @@ curl_setopt($ch, CURLOPT_HEADER, false);
 // --- PROXY CONFIGURATION ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
-curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP); // HTTP प्रोटोकॉल
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
 // === Active User Timeout (No Change) ===
