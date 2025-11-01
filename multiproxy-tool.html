@@ -1,26 +1,312 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Proxy Tool Redirect</title>
-    <script>
-        // यह पेज लोड होते ही ब्राउज़र को index.php पर रीडायरेक्ट कर देगा।
-        // index.php वह फ़ाइल है जिसमें प्रॉक्सी टूल और फ़ॉर्म है।
-        window.onload = function() {
-            window.location.replace("index.php");
-        };
-    </script>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding-top: 100px; 
-            background-color: #f6f8fb; 
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Website Booster Prime (GA4 Tracking Only)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* --- CSS Styles (For status grid) --- */
+  :root{
+    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
+    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
+    --shadow: 0 4px 10px rgba(0,0,0,0.05);--radius: 12px;--gap: 16px; 
+    --primary-blue: #0ea5e9;--danger: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
+  .wrap { max-width: 1000px; margin: 24px auto; padding: 12px; } 
+  header { margin-bottom: 20px; text-align: center; }
+  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
+  
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; background: var(--card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
+  
+  input[type="url"], input[type="text"] { flex: 1; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; } 
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover { background: #0c8cd8; }
+  .btn.stop { background: var(--danger); }
+  .btn.stop:hover { background: #b91c1c; }
+  
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  
+  .repeat-control { display: flex; align-items: center; gap: 15px; font-size: 14px; color: var(--muted); flex-wrap: wrap; margin-top: 10px; }
+  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
+  .repeat-control span { color: var(--accent); font-weight: 600; }
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; width: 50px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); } 
+
+  /* Status Grid */
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); background: var(--card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
+  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
+
+  .slot-status { background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+  .slot-title { font-weight: 700; font-size: 14px; color: var(--accent); margin-bottom: 5px; }
+  .status { font-size: 12px; color: #111827; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
+  .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
+  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+</style>
 </head>
 <body>
-    <p>Loading Proxy Tool...</p>
+  <div class="wrap">
+    <header>
+      <h1>Website Booster Prime (GA4 Tracking)</h1>
+      <div class="tagline">Sends GA4 Active Users via Render PHP Service.</div>
+    </header>
+
+    <div class="controls">
+        <div class="input-group">
+            <div class="slot-selector">
+                Active Users:
+                <input id="numSlots" type="number" value="10" min="1" max="50" /> 
+            </div>
+            <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+            <button id="globalGo" class="btn">Start All Active Users</button>
+        </div>
+
+        <div class="input-group">
+            <input id="ga4Id" type="text" placeholder="GA4 Measurement ID (G-XXXXXXX)" />
+            <input id="ga4Secret" type="text" placeholder="GA4 API Secret Key" />
+        </div>
+        
+        <div class="repeat-control">
+            <input type="checkbox" id="repeatMode" checked /> 
+            <label for="repeatMode">
+                Enable **Active User** Mode: Repeat cycle every
+                <label for="minTime">Min:</label>
+                <input id="minTime" type="number" value="30" min="25" max="120" />
+                <label for="maxTime">Max:</label>
+                <input id="maxTime" type="number" value="60" min="30" max="120" />
+                <span>seconds</span>.
+            </label>
+            <button id="globalStop" class="btn stop" style="display:none; margin-left: auto;">STOP ALL</button>
+        </div>
+    </div>
+    
+    <div class="grid-container" id="gridContainer">
+        </div>
+    
+  </div>
+
+<script>
+/* ----------------------------------------------------------------------
+   CONFIGURATION
+   ---------------------------------------------------------------------- */
+
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+const MAX_SLOTS = 50; 
+
+function generateUniqueId() {
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
+
+function getRandomNames(count) {
+    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
+    const finalNames = [];
+    for (let i = 0; i < count; i++) {
+        finalNames.push(shuffled[i % shuffled.length]);
+    }
+    return finalNames;
+}
+
+const ROTATING_PROXY = {
+    name: "Webshare Rotating Residential",
+    country: "World/Random",
+    ip: "d-webshare.io",
+    port: 80, 
+};
+
+// !!! CRITICAL: THE PHP FILE ON YOUR RENDER SERVICE !!!
+// The file that needs to be executed to send GA4 data.
+const PROXY_ENDPOINT = 'index.php'; 
+
+/* ----------------------------------------------------------------------
+   DOM Element References and Setup
+   ---------------------------------------------------------------------- */
+const gridContainer = document.getElementById('gridContainer');
+const globalUrlInput = document.getElementById('globalUrl');
+const numSlotsInput = document.getElementById('numSlots');
+const globalGoBtn = document.getElementById('globalGo');
+const repeatModeCheckbox = document.getElementById('repeatMode');
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
+const globalStopBtn = document.getElementById('globalStop');
+const ga4IdInput = document.getElementById('ga4Id');
+const ga4SecretInput = document.getElementById('ga4Secret');
+
+let currentSlots = [];
+let repeatIntervals = []; 
+let randomNamesList = getRandomNames(MAX_SLOTS); 
+
+// Create virtual slots 
+const virtualSlots = Array.from({ length: MAX_SLOTS }).map((_, index) => ({
+    ...ROTATING_PROXY,
+    name: randomNamesList[index],
+    uniqueId: generateUniqueId() // Unique ID for GA4 Client ID
+}));
+
+
+function getRandomDelay() {
+    const minSec = parseInt(minTimeInput.value);
+    const maxSec = parseInt(maxTimeInput.value);
+    const minMs = Math.min(minSec, maxSec) * 1000;
+    const maxMs = Math.max(minSec, maxSec) * 1000;
+    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+}
+
+// Function to create a single status slot element
+function createSlot(index, slotData){
+  const el = document.createElement('div');
+  el.className = 'slot-status';
+  
+  el.innerHTML = `
+    <div class="slot-title">SLOT ${index+1}: ${slotData.name} (${slotData.country})</div>
+    <div class="status" id="status-wrap-${index}">
+        <span class="status-dot" id="dot-${index}"></span>
+        <span id="status-${index}">Ready</span>
+    </div>
+  `;
+  
+  gridContainer.appendChild(el);
+
+  const statusSpan = el.querySelector(`#status-${index}`);
+  const statusDot = el.querySelector(`#dot-${index}`);
+
+  function setStatus(text, isActive = false){
+    statusSpan.textContent = text;
+    statusDot.classList.toggle('active', isActive);
+  }
+  
+  // This builds the URL that hits the PHP script
+  function getProxiedUrl(originalUrl, slotData){
+      const ga4Id = ga4IdInput.value.trim();
+      const ga4Secret = ga4SecretInput.value.trim();
+
+      // We call the index.php file (which must contain the PHP logic)
+      return `${PROXY_ENDPOINT}?` + 
+          `target=${encodeURIComponent(originalUrl)}&` +
+          `ip=${slotData.ip}&port=${slotData.port}&` + 
+          `uid=${slotData.uniqueId}&` + 
+          `ga4_id=${ga4Id}&` +
+          `ga4_secret=${ga4Secret}`;
+  }
+
+  // --- Core Automation Function (Sends GA4 Data via PHP) ---
+  async function runAutomation(originalUrl){
+    if (!ga4IdInput.value.trim() || !ga4SecretInput.value.trim()) {
+         setStatus('Error: Missing GA4 Keys!', false);
+         return;
+    }
+
+    const proxiedUrl = getProxiedUrl(originalUrl, slotData);
+    setStatus('Sending GA4 Session (Engaging for ~20s)...', false);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+
+    try {
+        // We use fetch which runs in the background
+        await fetch(proxiedUrl, { mode: 'no-cors' }); 
+        
+        setStatus('Active User View Sent (2 Events Logged)', true);
+        
+    } catch (e) {
+        setStatus('Failed (Network/Render PHP Error)', false);
+    }
+    
+    statusDot.style.animation = 'none';
+  }
+  
+  setStatus('Ready', true);
+
+  return { 
+      runAutomation, 
+      setStatus
+  }; 
+}
+
+// Function to redraw slots based on the selected number
+function renderSlots(count) {
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+
+    const maxCount = Math.min(count, MAX_SLOTS);
+    numSlotsInput.value = maxCount;
+    
+    globalGoBtn.textContent = `Start All Active Users (${maxCount} Slots)`;
+
+    for(let i=0; i < maxCount; i++){
+      const slot = createSlot(i, virtualSlots[i]);
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+// Global Stop Function
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+    
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+    });
+}
+
+// Global Start/Run Logic
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  const ga4Id = ga4IdInput.value.trim();
+  const ga4Secret = ga4SecretInput.value.trim();
+
+  if(!url){ 
+      alert('Please paste a valid URL.'); 
+      return; 
+  }
+  if (!ga4Id || !ga4Secret) {
+      alert('CRITICAL: Please fill in both GA4 ID and Secret Key.');
+      return;
+  }
+  
+  stopAllAutomation();
+
+  currentSlots.forEach(s => s.runAutomation(url));
+  
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+      
+    currentSlots.forEach((s) => {
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, randomDelay); 
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
+
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
 </body>
 </html>
