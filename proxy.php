@@ -10,9 +10,9 @@ $proxyHost = 'rotating.webshare.io';
 // Webshare का पोर्ट (आमतौर पर 80 या 444)
 $proxyPort = '80'; 
 // Webshare प्रॉक्सी यूज़रनेम
-$proxyUsername = 'YOUR_WEBSHARE_USERNAME'; 
+$proxyUsername = 'bqctypvz-rotate'; 
 // Webshare प्रॉक्सी पासवर्ड
-$proxyPassword = 'YOUR_WEBSHARE_PASSWORD'; 
+$proxyPassword = '399xb3kxqv6i'; 
 // ====================================================
 
 
@@ -47,8 +47,8 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // SSL त्रुटियो
 curl_setopt($ch, CURLOPT_PROXY, "$proxyHost:$proxyPort");
 
 // प्रॉक्सी Authentication (यूज़रनेम और पासवर्ड) सेट करें
-$auth = "$proxyUsername:$proxyPassword";
-curl_setopt($ch, CURLOPT_PROXYUSERPWD, $auth);
+$auth = "bqctypvz-rotate:$399xb3kxqv6i";
+curl_setopt($ch, CURLOPT_bqctypvz-rotate399xb3kxqv6i, $auth);
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
 // ----------------------------------------------------
 
