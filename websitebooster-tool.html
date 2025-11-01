@@ -1,105 +1,29 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌐 प्रॉक्सी जियोलोकेशन स्पूफर (कॉलेज प्रोजेक्ट)</title>
+    <title>Geo-Location Spoofing Proxy Tool</title>
     <style>
-        /* CSS for a Clean, Professional Look */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); }
-        h2 { text-align: center; color: #007bff; padding-bottom: 10px; margin-bottom: 25px; font-size: 24px; }
-        .input-group { display: flex; margin-bottom: 20px; }
-        #urlInput { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px 0 0 6px; font-size: 16px; }
-        #loadButton { padding: 12px 25px; background-color: #28a745; color: white; border: none; border-radius: 0 6px 6px 0; cursor: pointer; font-size: 16px; font-weight: bold; transition: background-color 0.3s; }
-        #loadButton:hover { background-color: #218838; }
-        #loadingIndicator { text-align: center; color: #ffc107; margin-bottom: 15px; font-weight: bold; display: none; }
-        #displayFrame { width: 100%; height: 650px; border: 2px solid #007bff; border-radius: 8px; background-color: #eee; }
-        .note { background-color: #e0f7fa; color: #005662; padding: 15px; border-left: 5px solid #00bcd4; border-radius: 6px; margin-top: 25px; font-size: 14px; }
-        .error { background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 6px; margin-top: 15px; text-align: center; display: none; }
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 50px; background-color: #f4f4f9; }
+        .container { width: 90%; max-width: 800px; }
+        form { display: flex; margin-bottom: 20px; }
+        input[type="text"] { flex-grow: 1; padding: 10px; border: 2px solid #ccc; border-radius: 5px 0 0 5px; font-size: 16px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 0 5px 5px 0; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        iframe { width: 100%; height: 600px; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🌐 प्रॉक्सी व्यूअर | जियोलोकेशन चेंजर (कॉलेज प्रोजेक्ट)</h2>
-        <p>लक्ष्य URL दर्ज करें जिसे आप Webshare Rotating Proxy के माध्यम से देखना चाहते हैं।</p>
-        <div class="input-group">
-            <input type="url" id="urlInput" placeholder="उदाहरण: https://www.google.com/search?q=my+ip+address" value="" required>
-            <button id="loadButton" onclick="loadProxiedUrl()">प्रॉक्सी द्वारा लोड करें</button>
-        </div>
-        <div id="loadingIndicator">⏳ वेबसाइट प्रॉक्सी सर्वर के माध्यम से लोड हो रही है...</div>
-        <div id="errorDisplay" class="error"></div>
-        <iframe id="displayFrame" src="about:blank" title="प्रॉक्सी व्यूअर"></iframe>
-        <div class="note">
-            **⚙️ प्रोजेक्ट विवरण:** यह टूल Render पर डिप्लॉय किए गए Python Backend सर्वर का उपयोग करता है, जो Webshare Rotating Proxy के माध्यम से जियोलोकेशन बदलकर कंटेंट दिखाता है।
-        </div>
-    </div>
-    <script>
-        // आपका Render URL
-        const RENDER_BASE_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com';
-        const RENDER_PROXY_ENDPOINT = RENDER_BASE_URL + '/proxy';
+        <h1>🌎 कॉलेज प्रॉजेक्ट: Geo-Location प्रॉक्सी</h1>
+        <p>URL डालें, और उसे Webshare प्रॉक्सी के साथ लोड करें ताकि Google Analytics में Geo-location बदल जाए।</p>
         
-        const urlInput = document.getElementById('urlInput');
-        const loadButton = document.getElementById('loadButton');
-        const displayFrame = document.getElementById('displayFrame');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const errorDisplay = document.getElementById('errorDisplay');
+        <form action="proxy.php" method="GET" target="proxy_frame">
+            <input type="text" name="url" placeholder="वह URL डालें जिसे आप प्रॉक्सी के माध्यम से खोलना चाहते हैं (e.g., https://example.com)" required>
+            <button type="submit">🚀 प्रॉक्सी से खोलो</button>
+        </form>
 
-        function sanitizeUrl(url) {
-            let sanitizedUrl = url.trim();
-            if (!sanitizedUrl.startsWith('http://') && !sanitizedUrl.startsWith('https://')) {
-                sanitizedUrl = 'https://' + sanitizedUrl;
-            }
-            return sanitizedUrl;
-        }
-
-        async function loadProxiedUrl() {
-            const targetUrl = sanitizeUrl(urlInput.value);
-            if (!targetUrl) {
-                alert("कृपया एक वैध URL दर्ज करें।");
-                return;
-            }
-
-            // UI अपडेट करना
-            loadButton.disabled = true;
-            loadButton.textContent = 'लोड हो रहा है...';
-            loadingIndicator.style.display = 'block';
-            errorDisplay.style.display = 'none';
-            displayFrame.srcdoc = ''; 
-
-            try {
-                // Backend API को URL भेजना
-                const response = await fetch(RENDER_PROXY_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ url: targetUrl })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.html) {
-                    // Backend से प्राप्त HTML को iFrame में लोड करना
-                    displayFrame.srcdoc = data.html;
-                } else {
-                    // Backend से त्रुटि मिली
-                    const errorMessage = data.error || "प्रोक्सी सर्वर से त्रुटि मिली। Render लॉग्स जांचें।";
-                    errorDisplay.textContent = '❌ प्रॉक्सी त्रुटि: ' + errorMessage;
-                    errorDisplay.style.display = 'block';
-                }
-
-            } catch (error) {
-                // नेटवर्क या सर्वर से कनेक्शन त्रुटि
-                errorDisplay.textContent = '❌ कनेक्शन त्रुटि: Render सर्वर तक पहुंचने में विफल। क्या यह चल रहा है?';
-                errorDisplay.style.display = 'block';
-            } finally {
-                // UI को वापस सामान्य करना
-                loadButton.disabled = false;
-                loadButton.textContent = 'प्रॉक्सी द्वारा लोड करें';
-                loadingIndicator.style.display = 'none';
-            }
-        }
-    </script>
+        <iframe name="proxy_frame" id="proxyFrame"></iframe>
+    </div>
 </body>
 </html>
