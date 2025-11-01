@@ -49,7 +49,8 @@
         }
         #proxy-container {
             margin-top: 20px;
-            display: grid;
+            /* 10 सेशन को 2 कॉलम में दिखाने के लिए */
+            display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
@@ -78,7 +79,7 @@
 
 <div class="container">
     <h1>GA4 Active User Booster (Residential Fix)</h1>
-    <p style="color: #FF6666;">**अंतिम उपाय: GA4 में 10 Active User के लिए रोटेटिंग प्रॉक्सी आवश्यक है।**</p>
+    <p style="color: #FF6666;">**अंतिम उपाय: रोटेटिंग प्रॉक्सी GA4 बॉट पहचान को तोड़ देगी।**</p>
     
     <div class="input-group">
         <label for="global-url" style="color: #d4d4d4;">Target Website URL (GA4 लगा हो):</label>
@@ -95,13 +96,13 @@
 <script>
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // !!! CRITICAL STEP 1: RENDER PHP WEB SERVICE URL HERE !!!
-    // इस URL को अपने Render Backend के सही URL से बदलें (जो आपने पहले उपयोग किया था)
-    const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy_loader.php'; 
+    // यहां अपने Render Backend के URL को पेस्ट करें। 
+    const PROXY_ENDPOINT = 'http://YOUR-RENDER-BACKEND-URL/proxy_loader.php'; 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // =========================================================================
     // !!! CRITICAL STEP 2: ROTATING PROXY CONFIGURATION (Webshare Residential) !!!
-    // =========================================================================
+    // इस कॉन्फ़िगरेशन को न बदलें।
     const ROTATING_PROXY = {
         ip: "p.webshare.io",
         port: "80",
@@ -122,7 +123,6 @@
         try {
             const startTime = Date.now();
             
-            // Note: 'no-cors' मोड का उपयोग करें
             const response = await fetch(fetchUrl, {
                 method: 'GET',
                 mode: 'no-cors',
@@ -131,7 +131,7 @@
 
             const duration = (Date.now() - startTime) / 1000;
             
-            // Status Update
+            // Status Update: 'no-cors' में response status चेक नहीं किया जा सकता, इसलिए हम सिर्फ success मानेंगे।
             document.getElementById(`status-${index}`).innerHTML = `<span style="color: #4CAF50;">View Sent (BG Session Active)</span><br>${duration.toFixed(2)}s`;
 
         } catch (error) {
@@ -168,7 +168,7 @@
                 <h3>Session ${index}</h3>
                 <p>Proxy Type: <span style="color: #FFC107;">Rotating Residential</span></p>
                 <p>Endpoint: ${ROTATING_PROXY.ip}:${ROTATING_PROXY.port}</p>
-                <p>Status: <span id="status-${index}">Running...</span></p>
+                <p>Status: <span id="status-${index}">Waiting...</span></p>
             `;
             container.appendChild(card);
 
