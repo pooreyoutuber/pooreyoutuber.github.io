@@ -1,9 +1,8 @@
-// booster.js
-// 🌐 Backend Root — अपना Render backend URL डालो (no trailing slash)
-// **ज़रूरी:** Render URL सही है, पर सुनिश्चित करें कि आपकी Render सर्विस Active है।
+// booster.js (Geo Location के साथ अपडेटेड)
+// 🌐 Backend Root — सुनिश्चित करें कि यह आपके Render Service का सही URL है
 const RENDER_BACKEND_ROOT = "https://pooreyoutuber-github-io-blmp.onrender.com";
 
-// 🔁 Proxy List (10 proxies)
+// 🔁 Proxy List (10 proxies) - यह सूची इस्तेमाल की जाएगी
 const PROXY_POOL = [
   { host: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
   { host: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i" },
@@ -74,14 +73,34 @@ function init() {
 // 🧠 Store selected proxy index
 let currentSelectedProxyIndex = 0;
 
-function setSelectedProxyDisplay(idx) {
+async function setSelectedProxyDisplay(idx) { // <--- Geo Location के लिए async
   currentSelectedProxyIndex = idx;
   const p = PROXY_POOL[idx];
   const uri = proxyToUri(p);
   $("proxyString").value = uri;
-  $("proxyInfo").innerHTML = `Selected proxy: <b>${escapeHtml(
+  
+  // Geo Location Fetch करना
+  const ip = p.host;
+  let locationText = 'Fetching location...';
+  
+  try {
+    const geoResponse = await fetch(`http://ip-api.com/json/${ip}`); 
+    const geoData = await geoResponse.json();
+    
+    if (geoData.status === 'success') {
+        locationText = `🌍 Location: <b>${escapeHtml(geoData.country)}, ${escapeHtml(geoData.city)}</b> | IP: ${ip}`;
+    } else {
+        locationText = `Location not found for IP: ${ip}`;
+    }
+
+  } catch (err) {
+    locationText = `Location error: ${err.message}`;
+  }
+  
+  // Display को अपडेट करना
+  $("proxyInfo").innerHTML = `Selected Proxy: <b>${escapeHtml(
     shortName(p)
-  )}</b> (Auto-rotate active)`;
+  )}</b> | ${locationText}`;
 }
 
 // 🔁 Load via Proxy
@@ -111,7 +130,8 @@ async function handleLoad() {
     // 404 या किसी अन्य त्रुटि को हैंडल करना
     if (!resp.ok) {
       const body = await resp.text();
-      $("proxyInfo").innerHTML = `<span style="color:red;font-weight:bold;">❌ Backend error ${resp.status}</span><br><pre>${escapeHtml(
+      // 404 की जगह अब यह index.js से 502 एरर दिखाएगा
+      $("proxyInfo").innerHTML = `<span style="color:red;font-weight:bold;">❌ Backend Error ${resp.status}</span><br><pre>${escapeHtml(
         body
       )}</pre>`;
       $("proxyFrame").src = "about:blank"; 
@@ -121,7 +141,8 @@ async function handleLoad() {
     $("proxyFrame").src = endpoint;
     $("proxyInfo").innerHTML = `✅ Loaded via proxy <b>${escapeHtml(
       shortName(PROXY_POOL[currentSelectedProxyIndex])
-    )}</b>`;
+    )}</b> | Status: OK`;
+    
   } catch (err) {
     $("proxyInfo").innerHTML = `<span style="color:red;font-weight:bold;">❌ Network error: ${escapeHtml(
       err.message
