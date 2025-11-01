@@ -6,7 +6,7 @@ $auth_user = "bqctypvz-rotate";
 $auth_pass = "399xb3kxqv6i";
 $expected_auth = $auth_user . ":" . $auth_pass;
 
-// 1. Tell the browser/client to disconnect immediately (to prevent client-side timeouts)
+// 1. Tell the browser/client to disconnect immediately
 header("Connection: close");
 header("Content-Encoding: none");
 header("Content-Length: 1"); 
@@ -19,7 +19,7 @@ $size = ob_get_length();
 header("Content-Length: $size");
 ob_end_flush();
 flush();
-// The browser is disconnected, but the PHP script continues execution in the background.
+// The PHP script continues execution in the background.
 
 // 2. Continue execution (The cURL process runs in the background)
 ignore_user_abort(true);
@@ -31,11 +31,9 @@ $proxy_domain = isset($_GET['ip']) ? $_GET['ip'] : null; // Now captures domain:
 $proxy_port = isset($_GET['port']) ? $_GET['port'] : null;
 $proxy_auth = isset($_GET['auth']) ? $_GET['auth'] : null; 
 $unique_id = isset($_GET['uid']) ? $_GET['uid'] : null; // Unique ID for GA4 Cookie
-$proxy_protocol = isset($_GET['protocol']) ? $_GET['protocol'] : 'SOCKS5'; // Added protocol
 
 // Basic Validation
 if (!$target_url || !$proxy_domain || !$proxy_port || $proxy_auth !== $expected_auth || !$unique_id) {
-    // If any data is missing or auth fails, stop the background process immediately.
     exit(); 
 }
 
@@ -45,7 +43,6 @@ $proxy_address = $proxy_domain . ":" . $proxy_port;
 $ch = curl_init();
 
 // --- GA4 Active User FIX: Setting Unique Client ID as a Cookie Header ---
-// CRITICAL: We create a unique GA cookie for every hit to register it as a NEW USER.
 $ga_cookie_value = "GS1.1." . $unique_id . "." . time(); 
 
 // Add a list of common referrers for better realism
@@ -53,18 +50,16 @@ $referrers = [
     "https://www.google.com/",
     "https://www.bing.com/",
     "https://www.facebook.com/",
-    "https://t.co/", // Twitter
+    "https://t.co/", 
     "https://www.youtube.com/",
     "https://search.yahoo.com/"
 ];
 $random_referrer = $referrers[array_rand($referrers)];
 
 $headers = array(
-    // Real-world User-Agent (Essential for not getting flagged)
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
-    // CRITICAL: Send the unique cookie
     "Cookie: _ga=" . $ga_cookie_value . ";",
-    "Referer: " . $random_referrer, // Send random referrer
+    "Referer: " . $random_referrer, 
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "Accept-Language: en-US,en;q=0.9"
 );
@@ -76,17 +71,14 @@ curl_setopt($ch, CURLOPT_URL, $target_url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 curl_setopt($ch, CURLOPT_HEADER, false);
 
-// --- ROTATING SOCKS5 PROXY CONFIGURATION (Based on your image) ---
+// --- ROTATING SOCKS5 PROXY CONFIGURATION (Uses Domain/Port/Auth) ---
 curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
-
-// Use SOCKS5 protocol as requested
 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5); 
 curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC); 
 
 
 // === Active User Timeout ===
-// 30 seconds is necessary for a successful GA4 Session to register and prevent 'Not Set'.
 curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
 
 // Other necessary settings
@@ -98,5 +90,5 @@ curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_exec($ch); 
 
 curl_close($ch);
-exit(); // End the background script
+exit(); 
 ?>
