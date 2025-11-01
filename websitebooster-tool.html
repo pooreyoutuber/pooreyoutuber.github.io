@@ -1,52 +1,33 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Website Booster Tool</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Website Booster Proxy Tool</title>
   <style>
-    body { font-family: Inter, Arial, sans-serif; margin:0; padding:18px; background:#f3f6f9; }
-    .container { max-width:1000px; margin: auto; background:#fff; padding:20px; border-radius:10px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
-    h1 { text-align:center; color:#111; margin-bottom:10px; }
-    .row { display:flex; gap:8px; align-items:center; margin-top:12px; }
-    input[type="url"] { padding:10px; border-radius:8px; border:1px solid #d0d7df; flex:1; font-size:15px; }
-    select, button { padding:10px 12px; border-radius:8px; border:1px solid #cfd8e3; font-size:15px; }
-    button { background:#0066ff; color:#fff; border:none; cursor:pointer; }
-    button:hover { background:#0052cc; }
-    #proxyString { width:320px; padding:10px; border-radius:8px; border:1px dashed #bfcbdc; background:#fbfdff; font-size:13px; }
-    iframe { width:100%; height:640px; margin-top:16px; border-radius:8px; border:1px solid #e1e8f0; }
-    #proxyInfo { margin-top:12px; padding:10px; background:#e9f5ff; border:1px solid #bfe0ff; border-radius:6px; font-weight:600; }
-    .small { color:#666; font-size:13px; margin-top:8px; }
-    label { font-size:13px; color:#333; margin-right:6px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
+    input, select, button { padding: 8px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
+    iframe { width: 100%; height: 500px; margin-top: 15px; border: 2px solid #000; border-radius: 8px; }
+    #proxyInfo { background: #fff; padding: 10px; border-radius: 6px; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🚀 Website Booster Proxy Tool</h1>
+  <h2>🌐 Website Booster Proxy Tool</h2>
 
-    <div id="proxyInfo">Proxy list loaded. Page reload पर एक proxy स्वतः चुना जाएगा और नीचे दिखेगा.</div>
+  <input id="targetUrl" type="text" placeholder="Enter any URL (e.g. https://example.com)" style="width:60%" />
+  <button id="loadBtn">Load via Proxy</button>
+  <br>
 
-    <div class="row" style="margin-top:14px;">
-      <input id="targetUrl" type="url" placeholder="Apni URL daalein — jaise https://example.com/" />
-      <select id="proxySelector" title="Select proxy (or Auto)">
-        <option value="auto">Auto (Random rotate)</option>
-      </select>
-      <button id="loadBtn">Proxy Ke Zariye Load Karein</button>
-    </div>
+  <label for="proxySelector">Select Proxy:</label>
+  <select id="proxySelector"></select>
+  <br>
 
-    <div class="row" style="margin-top:8px;">
-      <label for="proxyString">Selected Proxy (auto-fill):</label>
-      <input id="proxyString" type="text" readonly />
-      <button id="copyProxyBtn" style="width:110px">Copy Proxy</button>
-    </div>
+  <input id="proxyString" type="text" readonly style="width:60%" />
+  <button id="copyProxyBtn">Copy Proxy</button>
 
-    <iframe id="proxyFrame" name="proxyFrame" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+  <div id="proxyInfo"></div>
 
-    <div class="small">
-      *Note: Backend ko `/proxy?url=...&proxy=PROXY_URI` parameter принимать होना चाहिए और backend उस proxy के जरिए target fetch कर के response rewrite करे। कुछ साइटें iframe में embed न होने देंगी (X-Frame-Options / CSP).
-    </div>
-  </div>
+  <iframe id="proxyFrame"></iframe>
 
   <script src="booster.js"></script>
 </body>
