@@ -1,42 +1,125 @@
-// File: booster.js
+// booster.js
+// ⚠️ IMPORTANT: यहाँ पर RENDER_BACKEND_ROOT को अपनी backend URL से बदलो (no trailing slash).
+const RENDER_BACKEND_ROOT = "https://your-proxy-backend.onrender.com";
 
-// ⚠️ Zaroori: Agar aapne Render par apna URL badal diya hai, to isse bhi badal dein!
-const RENDER_BACKEND_URL = "https://pooreyoutuber-github-io-blmp.onrender.com/proxy"; 
-
-// Sirf front-end display ke liye locations
-const PROXY_LOCATIONS = [
-    { country: 'US (United States)' }, 
-    { country: 'UK (United Kingdom)' }, 
-    { country: 'JP (Japan)' }, 
-    { country: 'ES (Spain)' }
+// PROXY_POOL — screenshot के आधार पर 10 proxies (host, port, username, password).
+// अगर तुम्हारे पास अलग proxies हों, इन्हें edit कर लो।
+// NOTE: credentials यहाँ client-side रखने से security risk है — production में server-side store करो।
+const PROXY_POOL = [
+  { host: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "31.59.20.176",  port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "23.95.150.145", port: "6114", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "198.23.239.134", port: "6540", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "45.38.107.97",  port: "6014", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "107.172.163.27", port: "6543", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "64.137.96.74",  port: "6641", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "216.10.27.159", port: "6837", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "142.111.67.146", port: "5611", user: "bqctypvz", pass: "399xb3kxqv6i" },
+  { host: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i" }
 ];
 
-document.addEventListener('DOMContentLoaded', selectRandomCountry);
+// Helpers
+function proxyToUri(p){
+  // HTTP proxy URI with basic auth
+  return `http://${encodeURIComponent(p.user)}:${encodeURIComponent(p.pass)}@${p.host}:${p.port}`;
+}
+function shortName(p){
+  return `${p.host}:${p.port}`;
+}
+function $(id){ return document.getElementById(id); }
+function escapeHtml(s){ return s ? s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : ''; }
 
-// Har baar page load ya refresh karne par random location dikhana
-function selectRandomCountry() {
-    const randomIndex = Math.floor(Math.random() * PROXY_LOCATIONS.length);
-    const info = `Selected Proxy Location (Display): <b>${PROXY_LOCATIONS[randomIndex].country}</b>. (Rotation Active)`;
-    document.getElementById('proxyInfo').innerHTML = info; 
+document.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  const selector = $('proxySelector');
+  // fill selector with proxies
+  PROXY_POOL.forEach((p, idx) => {
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = `${shortName(p)} (${p.user})`;
+    selector.appendChild(opt);
+  });
+
+  // On load select random proxy by default (auto rotate)
+  const randomIndex = Math.floor(Math.random() * PROXY_POOL.length);
+  // We set selector to 'auto' but show selected proxy string in proxyString input
+  selector.value = 'auto';
+  setSelectedProxyDisplay(randomIndex);
+
+  // If user manually chooses proxy, update display
+  selector.addEventListener('change', () => {
+    if(selector.value === 'auto'){
+      const r = Math.floor(Math.random() * PROXY_POOL.length);
+      setSelectedProxyDisplay(r);
+    } else {
+      setSelectedProxyDisplay(parseInt(selector.value,10));
+    }
+  });
+
+  // Buttons
+  $('loadBtn').addEventListener('click', handleLoad);
+  $('copyProxyBtn').addEventListener('click', copyProxyToClipboard);
+
+  // Also auto-update selected proxy every time the page reloads (above done)
 }
 
-// Button dabane par ya manual control par yeh function chalta hai
-function loadProxiedPage() {
-    const urlInput = document.getElementById('targetUrl').value.trim();
-    const frame = document.getElementById('proxyFrame');
-    
-    if (!urlInput) {
-        alert('Kripya koi URL daalein.');
-        return;
+// Store current selected index (for display / use)
+let currentSelectedProxyIndex = 0;
+function setSelectedProxyDisplay(idx){
+  currentSelectedProxyIndex = idx;
+  const p = PROXY_POOL[idx];
+  const uri = proxyToUri(p);
+  $('proxyString').value = uri;
+  $('proxyInfo').innerHTML = `Selected proxy (display): <b>${escapeHtml(shortName(p))}</b>. Proxy credentials shown in box. (Auto-rotate active)`;
+}
+
+async function handleLoad(){
+  const url = $('targetUrl').value.trim();
+  if(!url){
+    alert('Kripya pehle URL daalein.');
+    return;
+  }
+  let proxyParam = '';
+  const selectorVal = $('proxySelector').value;
+  if(selectorVal === 'auto'){
+    // pick the currentSelectedProxyIndex (set on load)
+    proxyParam = proxyToUri(PROXY_POOL[currentSelectedProxyIndex]);
+  } else {
+    const idx = parseInt(selectorVal, 10);
+    proxyParam = proxyToUri(PROXY_POOL[idx]);
+  }
+
+  // Build backend endpoint: backend must accept &proxy=PROXY_URI parameter
+  const endpoint = `${RENDER_BACKEND_ROOT}/proxy?url=${encodeURIComponent(url)}&proxy=${encodeURIComponent(proxyParam)}`;
+
+  // Show temporary info
+  $('proxyInfo').innerHTML = `Requesting backend... <br><small style="color:#333">${escapeHtml(endpoint)}</small>`;
+
+  try{
+    // Quick GET to confirm backend reachable — backend should respond ok for this URL
+    const resp = await fetch(endpoint, { method: 'GET' });
+    if(!resp.ok){
+      const body = await resp.text().catch(()=>'<no body>');
+      $('proxyInfo').innerHTML = `<span style="color:#a00">Backend error: ${resp.status} ${resp.statusText}</span><br><pre style="white-space:pre-wrap">${escapeHtml(body)}</pre>`;
+      return;
     }
 
-    // Proxy location ko refresh karein
-    selectRandomCountry();
+    // If ok, set iframe src so browser renders proxied page
+    $('proxyFrame').src = endpoint;
+    $('proxyInfo').innerHTML = `Loaded via proxy <b>${escapeHtml(shortName(PROXY_POOL[currentSelectedProxyIndex]))}</b>. If iframe blank, open developer console to check CSP/X-Frame issues.`;
+  }catch(err){
+    console.error(err);
+    $('proxyInfo').innerHTML = `<span style="color:#a00">Network error: ${escapeHtml(err.message)}</span>`;
+  }
+}
 
-    // Render backend ko call karte hain. Backend hi proxy select karke page fetch karega.
-    const finalProxyUrl = `${RENDER_BACKEND_URL}?url=${encodeURIComponent(urlInput)}`;
-
-    // Iframe mein load karna
-    frame.src = finalProxyUrl;
-    console.log("Request sent to Render backend:", finalProxyUrl);
+function copyProxyToClipboard(){
+  const txt = $('proxyString').value;
+  if(!txt) return;
+  navigator.clipboard.writeText(txt).then(()=> {
+    alert('Proxy copied to clipboard');
+  }).catch(()=> {
+    alert('Copy failed — please copy manually.');
+  });
 }
