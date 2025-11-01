@@ -1,9 +1,13 @@
+// index.js (यह आपका नया, मर्ज किया हुआ कोड है)
+
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
 const crypto = require('crypto'); 
+const axios = require('axios');          // ✅ NEW: Proxy Fetching के लिए
+const { HttpsProxyAgent } = require('https-proxy-agent'); // ✅ NEW: Proxy Agent के लिए
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -275,7 +279,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - WITH KEY VALIDATION
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) 
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -335,7 +339,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2 & 3. AI INSTA CAPTION GENERATOR/EDITOR ENDPOINTS (Same as before)
+// 2 & 3. AI INSTA CAPTION GENERATOR/EDITOR ENDPOINTS 
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     // ... (No change)
@@ -421,8 +425,48 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
+// 4. WEBSITE BOOSTER PROXY TOOL ENDPOINT (NEW: /proxy) - 404 FIX
+// ===================================================================
+app.get('/proxy', async (req, res) => {
+    const targetUrl = req.query.url;
+    const proxyUri = req.query.proxy;
+
+    if (!targetUrl || !proxyUri) {
+        return res.status(400).send("URL और Proxy पैरामीटर आवश्यक हैं।");
+    }
+
+    try {
+        // प्रॉक्सी एजेंट सेट करें
+        const agent = new HttpsProxyAgent(proxyUri);
+        
+        // प्रॉक्सी के माध्यम से लक्ष्य URL को फ़ेच करें
+        const response = await axios.get(targetUrl, {
+            httpsAgent: agent,
+            httpAgent: agent, // HTTP और HTTPS दोनों के लिए
+            responseType: 'text', // HTML/Text के रूप में प्राप्त करें
+            timeout: 15000 // 15 सेकंड का टाइमआउट
+        });
+
+        // लक्ष्य वेबसाइट के Content Type हेडर को कॉपी करें
+        if (response.headers['content-type']) {
+            res.setHeader('Content-Type', response.headers['content-type']);
+        }
+        
+        // यह सुनिश्चित करें कि IFRAME में सामग्री ठीक से लोड हो
+        res.send(response.data);
+
+    } catch (error) {
+        // प्रॉक्सी या फ़ेच में कोई त्रुटि होने पर
+        console.error('Proxy Fetch Error:', error.message);
+        const errorMessage = `Proxy Error (502): The proxy or target URL failed to respond. Details: ${error.message}`;
+        res.status(502).send(errorMessage);
+    }
+});
+
+// ===================================================================
 // START THE SERVER
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`Combined API Server listening on port ${PORT}.`);
 });
+         
