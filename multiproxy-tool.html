@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Final: Rotating Proxy & GA4 MP)</title>
+<title>Website Booster Prime (Rotating Proxy - GA4 MP)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- Minimal CSS Styles --- */
+  /* --- CSS Styles (Same as previous, for status grid) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -97,11 +97,9 @@
 /* ----------------------------------------------------------------------
    PROXY DATA and CONFIGURATION
    ---------------------------------------------------------------------- */
-// Since we are using a rotating proxy, we only need the endpoint, not a list of IPs.
-// We pass the UID (uniqueId) for GA4 client_id tracking.
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
-const MAX_SLOTS = 50; // Increased max slots for rotating proxy
+const MAX_SLOTS = 50; 
 
 function generateUniqueId() {
     return Math.floor(Math.random() * 9000000000) + 1000000000;
@@ -109,7 +107,6 @@ function generateUniqueId() {
 
 function getRandomNames(count) {
     const shuffled = [...allNames].sort(() => 0.5 - Math.random());
-    // Ensure we have enough names by repeating the list if needed
     const finalNames = [];
     for (let i = 0; i < count; i++) {
         finalNames.push(shuffled[i % shuffled.length]);
@@ -117,18 +114,15 @@ function getRandomNames(count) {
     return finalNames;
 }
 
-// ---------------------------------------------------
-// 🔥 Only ONE Entry needed for Rotating Proxy
-// ---------------------------------------------------
+// 🔥 Use the single rotating proxy endpoint
 const ROTATING_PROXY = {
     name: "Webshare Rotating Residential",
     country: "World/Random",
-    ip: "d-webshare.io", // Host is passed to PHP
-    port: 80, // Port is passed to PHP
+    ip: "d-webshare.io",
+    port: 80, 
 };
-// ---------------------------------------------------
 
-
+// !!! CRITICAL: REPLACE THIS WITH YOUR RENDER PHP WEB SERVICE URL !!!
 const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy_loader.php'; 
 
 /* ----------------------------------------------------------------------
@@ -193,7 +187,6 @@ function createSlot(index, slotData){
       const ga4Id = ga4IdInput.value.trim();
       const ga4Secret = ga4SecretInput.value.trim();
 
-      // We pass the rotating proxy host/port instead of individual IPs
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${slotData.ip}&port=${slotData.port}&` + // Rotating Endpoint
@@ -214,13 +207,11 @@ function createSlot(index, slotData){
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script handles the GA4 MP calls and the sleep delay (60s timeout).
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         setStatus('Active User View Sent (2 Events Logged)', true);
         
     } catch (e) {
-        // This will catch network errors (e.g., if Render is down or completely blocked)
         setStatus('Failed (Network/Render Error)', false);
     }
     
@@ -264,7 +255,7 @@ function stopAllAutomation() {
     });
 }
 
-// Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
+// Global Start/Run Logic
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   const ga4Id = ga4IdInput.value.trim();
@@ -279,13 +270,10 @@ globalGoBtn.addEventListener('click', ()=>{
       return;
   }
   
-  // Stop existing intervals first
   stopAllAutomation();
 
-  // Run once immediately
   currentSlots.forEach(s => s.runAutomation(url));
   
-  // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
