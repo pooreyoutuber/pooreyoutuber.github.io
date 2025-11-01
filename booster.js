@@ -1,6 +1,8 @@
 // booster.js
+// 🌐 Backend Root — अपना Render backend URL डालो (no trailing slash)
 const RENDER_BACKEND_ROOT = "https://pooreyoutuber-github-io-blmp.onrender.com";
 
+// 🔁 Proxy List (10 proxies)
 const PROXY_POOL = [
   { host: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
   { host: "31.59.20.176", port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i" },
@@ -14,6 +16,7 @@ const PROXY_POOL = [
   { host: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i" }
 ];
 
+// 🧩 Utility Functions
 function proxyToUri(p) {
   return `http://${encodeURIComponent(p.user)}:${encodeURIComponent(p.pass)}@${p.host}:${p.port}`;
 }
@@ -21,25 +24,40 @@ function shortName(p) {
   return `${p.host}:${p.port}`;
 }
 function $(id) { return document.getElementById(id); }
-function escapeHtml(s) { return s ? s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])) : ''; }
+function escapeHtml(s) {
+  return s
+    ? s.replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[m]))
+    : "";
+}
 
-document.addEventListener('DOMContentLoaded', init);
+// 🚀 Initialize Page
+document.addEventListener("DOMContentLoaded", init);
 
 function init() {
-  const selector = $('proxySelector');
+  const selector = $("proxySelector");
+
+  // 🔹 Proxy dropdown भरना
   PROXY_POOL.forEach((p, idx) => {
-    const opt = document.createElement('option');
+    const opt = document.createElement("option");
     opt.value = String(idx);
     opt.textContent = `${shortName(p)} (${p.user})`;
     selector.appendChild(opt);
   });
 
+  // 🔹 Random proxy auto-select
   const randomIndex = Math.floor(Math.random() * PROXY_POOL.length);
-  selector.value = 'auto';
+  selector.value = "auto";
   setSelectedProxyDisplay(randomIndex);
 
-  selector.addEventListener('change', () => {
-    if (selector.value === 'auto') {
+  // 🔹 Proxy selector listener
+  selector.addEventListener("change", () => {
+    if (selector.value === "auto") {
       const r = Math.floor(Math.random() * PROXY_POOL.length);
       setSelectedProxyDisplay(r);
     } else {
@@ -47,54 +65,76 @@ function init() {
     }
   });
 
-  $('loadBtn').addEventListener('click', handleLoad);
-  $('copyProxyBtn').addEventListener('click', copyProxyToClipboard);
+  // 🔹 Buttons
+  $("loadBtn").addEventListener("click", handleLoad);
+  $("copyProxyBtn").addEventListener("click", copyProxyToClipboard);
 }
 
+// 🧠 Store selected proxy index
 let currentSelectedProxyIndex = 0;
+
 function setSelectedProxyDisplay(idx) {
   currentSelectedProxyIndex = idx;
   const p = PROXY_POOL[idx];
   const uri = proxyToUri(p);
-  $('proxyString').value = uri;
-  $('proxyInfo').innerHTML = `Selected proxy (display): <b>${escapeHtml(shortName(p))}</b>. (Auto-rotate active)`;
+  $("proxyString").value = uri;
+  $("proxyInfo").innerHTML = `Selected proxy: <b>${escapeHtml(
+    shortName(p)
+  )}</b> (Auto-rotate active)`;
 }
 
+// 🔁 Load via Proxy
 async function handleLoad() {
-  const url = $('targetUrl').value.trim();
+  const url = $("targetUrl").value.trim();
   if (!url) {
-    alert('कृपया कोई URL डालें।');
+    alert("कृपया कोई URL डालें।");
     return;
   }
 
-  const selectorVal = $('proxySelector').value;
-  const proxyParam = selectorVal === 'auto'
-    ? proxyToUri(PROXY_POOL[currentSelectedProxyIndex])
-    : proxyToUri(PROXY_POOL[parseInt(selectorVal, 10)]);
+  const selectorVal = $("proxySelector").value;
+  const proxyParam =
+    selectorVal === "auto"
+      ? proxyToUri(PROXY_POOL[currentSelectedProxyIndex])
+      : proxyToUri(PROXY_POOL[parseInt(selectorVal, 10)]);
 
-  const endpoint = `${RENDER_BACKEND_ROOT}/proxy?url=${encodeURIComponent(url)}&proxy=${encodeURIComponent(proxyParam)}`;
+  // 🔗 Backend endpoint
+  const endpoint = `${RENDER_BACKEND_ROOT}/proxy?url=${encodeURIComponent(
+    url
+  )}&proxy=${encodeURIComponent(proxyParam)}`;
 
-  $('proxyInfo').innerHTML = `Loading from backend...<br><small>${escapeHtml(endpoint)}</small>`;
+  $("proxyInfo").innerHTML = `⏳ Loading from backend...<br><small>${escapeHtml(endpoint)}</small>`;
 
   try {
-    const resp = await fetch(endpoint, { method: 'GET' });
+    const resp = await fetch(endpoint, { method: "GET" });
     if (!resp.ok) {
       const body = await resp.text();
-      $('proxyInfo').innerHTML = `<span style="color:red">Backend error ${resp.status}</span><pre>${escapeHtml(body)}</pre>`;
+      $("proxyInfo").innerHTML = `<span style="color:red">Backend error ${resp.status}</span><br><pre>${escapeHtml(
+        body
+      )}</pre>`;
       return;
     }
 
-    $('proxyFrame').src = endpoint;
-    $('proxyInfo').innerHTML = `Loaded via proxy <b>${escapeHtml(shortName(PROXY_POOL[currentSelectedProxyIndex]))}</b>.`;
+    $("proxyFrame").src = endpoint;
+    $("proxyInfo").innerHTML = `✅ Loaded via proxy <b>${escapeHtml(
+      shortName(PROXY_POOL[currentSelectedProxyIndex])
+    )}</b>`;
   } catch (err) {
-    $('proxyInfo').innerHTML = `<span style="color:red">Network error: ${escapeHtml(err.message)}</span>`;
+    $("proxyInfo").innerHTML = `<span style="color:red">❌ Network error: ${escapeHtml(
+      err.message
+    )}</span>`;
   }
 }
 
+// 📋 Copy proxy URI to clipboard
 function copyProxyToClipboard() {
-  const txt = $('proxyString').value;
+  const txt = $("proxyString").value;
   if (!txt) return;
-  navigator.clipboard.writeText(txt).then(() => {
-    alert('Proxy copied to clipboard!');
-  });
+  navigator.clipboard
+    .writeText(txt)
+    .then(() => {
+      alert("✅ Proxy copied to clipboard!");
+    })
+    .catch(() => {
+      alert("⚠️ Copy failed — please copy manually.");
+    });
 }
