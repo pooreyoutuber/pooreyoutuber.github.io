@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (GA4 Optimized)</title>
+<title>Website Booster Prime (Single Slot View & Background GA4)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (No changes in UI/UX) --- */
+  /* --- CSS Styles --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -16,77 +16,47 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
-  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
+  .wrap { max-width: 1200px; margin: 24px auto; padding: 12px; } 
   header { margin-bottom: 20px; text-align: center; }
   h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
   .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
-  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; background: var(--card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
   .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   @media (min-width: 600px) { .input-group { flex-direction: row; } }
-  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
-  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
-  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0 10px 10px 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; } /* Updated border-radius for URL input */
-  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  
+  input[type="url"], input[type="text"] { flex: 1; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; } 
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  
+  .repeat-control { display: flex; align-items: center; gap: 15px; font-size: 14px; color: var(--muted); flex-wrap: wrap; margin-top: 10px; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
-  .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
-  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } 
-  .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-  .info-box strong { font-weight: 700; color: var(--accent); }
-  .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
-  .info-box ul li { margin-bottom: 6px; }
-  /* Updated Grid Layout for max 10 slots (max 5 columns) */
-  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
-  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
-  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
-  /* End Grid Update */
-  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
-  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
-  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
-  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; width: 50px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); } 
+
+  /* Single Slot View */
+  .single-slot-container {
+    background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); 
+    min-height: 500px; margin-bottom: 20px;
+  }
+  .iframe-wrap { position: relative; overflow: hidden; height: 100%; min-height: 480px; border-radius: 6px; border: 1px solid var(--border); }
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    transform: scale(0.4); 
-    transform-origin: 0 0;
-    width: calc(100% / 0.4);
-    height: calc(100% / 0.4);
-    opacity: 1;
-  }
-  
-  /* --- CSS for Auto-Scrolling --- */
-  @keyframes scroll {
-    0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, -200%) scale(0.4); } 
-    100% { transform: translate(0, 0) scale(0.4); } 
+    /* Manually controlled iframe does not need scaling or hidden scrolling */
   }
 
-  .slot.scrolling iframe {
-    transform: translate(0, 0) scale(0.4); 
-    animation: scroll 3s ease-in-out infinite;
-  }
-  /* ---------------------------------- */
-  
-  .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
-  .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
-  .action-btn.view { background: var(--success); color: white; }
-  .action-btn.view:hover { background: #047857; }
-  .action-btn.new-tab { 
-      background: #f90;
-      color: white; 
-      flex-grow: 1;
-      font-size: 12px;
-      padding: 8px 10px;
-  }
-  .action-btn.new-tab:hover { background: #e80; }
-  .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
-  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
+  /* Status Grid for Background Users */
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); background: var(--card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
+  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+
+  .slot-status { background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); margin-bottom: 5px; }
+  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 8px; } 
+  .status { font-size: 12px; color: #111827; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
 </style>
@@ -94,62 +64,50 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Website Booster Prime (GA4 Optimized)</h1>
-      <div class="tagline">Global Traffic Simulation System. Designed for Active Users.</div>
+      <h1>Website Booster Prime (Single View, Multi-User GA4)</h1>
+      <div class="tagline">Control 1 slot manually; Generate 10 Active Users in background.</div>
     </header>
 
     <div class="controls">
         <div class="input-group">
-            
-            <div class="slot-selector">
-                Slots:
-                <input id="numSlots" type="number" value="10" min="1" max="10" /> </div>
-
-            <div class="url-input-wrap">
-                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
-            </div>
-            <button id="globalGo" class="btn">Load & Run All</button>
+            <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+            <button id="loadSingle" class="btn" style="flex-grow: 0; background: #f90;">Load Manually</button>
         </div>
-
+        
         <div class="input-group">
-            <input id="ga4Id" type="text" placeholder="GA4 Measurement ID (G-XXXXXXX)" 
-                style="flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none;" />
-            <input id="ga4Secret" type="text" placeholder="GA4 API Secret Key" 
-                style="flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none;" />
+            <input id="ga4Id" type="text" placeholder="GA4 Measurement ID (G-XXXXXXX)" />
+            <input id="ga4Secret" type="text" placeholder="GA4 API Secret Key" />
+        </div>
+        
+        <div class="input-group" style="align-items: center;">
+            <div class="slot-selector" style="flex-grow: 0;">
+                Hidden Users:
+                <input id="numSlots" type="number" value="10" min="1" max="10" /> 
+            </div>
+            <button id="globalGo" class="btn" style="flex-grow: 1;">Start All Active Users</button>
+            <button id="globalStop" class="btn stop" style="display:none; flex-grow: 1;">STOP ALL</button>
         </div>
         
         <div class="repeat-control">
-            <input type="checkbox" id="repeatMode" checked /> <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all 
+            <input type="checkbox" id="repeatMode" checked /> 
+            <label for="repeatMode">
+                Enable **Active User** Mode: Repeat cycle every
                 <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="30" min="25" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <input id="minTime" type="number" value="30" min="25" max="120" />
                 <label for="maxTime">Max:</label>
-                <input id="maxTime" type="number" value="60" min="30" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
-                <span>seconds cycle</span> for better GA tracking.
+                <input id="maxTime" type="number" value="60" min="30" max="120" />
+                <span>seconds</span>.
             </label>
-            
-            <input type="checkbox" id="autoScrollMode" checked /> <label for="autoScrollMode">
-                Enable **Auto Scroll** (Simulated Engagement)
-            </label>
-            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
-    <div class="info-box">
-        <strong>Tool Usage Instructions (For Real GA4 Impact):</strong>
-        <ul>
-            <li>
-                **CRITICAL:** **GA4 Measurement ID (G-XXXXXXX)** और **API Secret Key** को अवश्य डालें। यह GA4 Active User को बढ़ाने का नया तरीका है।
-            </li>
-            <li>
-                **New Logic:** अब यह टूल सीधे GA4 Measurement Protocol का उपयोग करता है ताकि हर व्यू को एक **सक्रिय उपयोगकर्ता** के रूप में रजिस्टर किया जा सके (30 सेकंड से अधिक का सेशन टाइम सिमुलेट करके)।
-            </li>
-            <li>
-                **Session Time:** Min/Max timer का उपयोग GA4 को यह बताने के लिए किया जाता है कि अगले 'सक्रिय' इवेंट को कब भेजना है।
-            </li>
-        </ul>
+    <div class="single-slot-container">
+        <div class="iframe-wrap">
+            <iframe id="mainIframe" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+        </div>
     </div>
-
+    
+    <h2>Background Active User Status (${MAX_SLOTS} Slots)</h2>
     <div class="grid-container" id="gridContainer">
         </div>
     
@@ -157,18 +115,16 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION
+   PROXY DATA and CONFIGURATION (No Change)
    ---------------------------------------------------------------------- */
-
+// ... (COMMON_USER, COMMON_PASS, DUMMY_PROXIES, PROXY_ENDPOINT, etc. from previous response)
 const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
-// Function to generate a simple unique ID (used for GA4 client_id)
 function generateUniqueId() {
-    // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -177,9 +133,6 @@ function getRandomNames(count) {
     return shuffled.slice(0, count);
 }
 
-// =========================================================================
-// !!! PROXIES (Total 10 Slots) !!!
-// =========================================================================
 const DUMMY_PROXIES = [
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
@@ -192,13 +145,12 @@ const DUMMY_PROXIES = [
   { ip: "142.111.67.146", port: "5611", country: "US" },
   { ip: "142.147.128.93", port: "6593", country: "CA" }, 
 ];
-// =========================================================================
 
 const MAX_SLOTS = 10; 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// !!! CRITICAL: REPLACE THIS WITH YOUR NEW RENDER PHP WEB SERVICE URL !!!
 const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy_loader.php'; 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/* ----------------------------------------------------------------------
+   END OF PROXY DATA
+   ---------------------------------------------------------------------- */
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -207,18 +159,16 @@ const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
 const minTimeInput = document.getElementById('minTime'); 
 const maxTimeInput = document.getElementById('maxTime'); 
-const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
-
-// 👇 NEW GA4 Inputs
 const ga4IdInput = document.getElementById('ga4Id');
 const ga4SecretInput = document.getElementById('ga4Secret');
+const loadSingleBtn = document.getElementById('loadSingle');
+const mainIframe = document.getElementById('mainIframe');
 
 let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 
-// Map proxies with fixed unique IDs
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
@@ -234,36 +184,23 @@ function getRandomDelay() {
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
-// Function to create a single slot element
+// Function to create a single status slot element for BACKGROUND users
 function createSlot(index, proxy){
   const el = document.createElement('div');
-  el.className = 'slot';
+  el.className = 'slot-status';
   
   el.innerHTML = `
-    <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
-    </div>
+    <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
+    <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
     
-    <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-    </div>
-    
-    <div class="slot-footer">
-      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
-      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
-      <div class="status" id="status-wrap-${index}">
+    <div class="status" id="status-wrap-${index}">
         <span class="status-dot" id="dot-${index}"></span>
         <span id="status-${index}">Ready</span>
-      </div>
     </div>
   `;
   
   gridContainer.appendChild(el);
 
-  const iframe = el.querySelector(`#iframe-${index}`);
-  const openBtn = el.querySelector(`#open-${index}`);
-  const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
 
@@ -272,92 +209,45 @@ function createSlot(index, proxy){
     statusDot.classList.toggle('active', isActive);
   }
   
-  // 👇 UPDATED: Pass GA4 ID and Secret
   function getProxiedUrl(originalUrl, proxy){
       const ga4Id = ga4IdInput.value.trim();
       const ga4Secret = ga4SecretInput.value.trim();
 
-      if (!ga4Id || !ga4Secret) {
-          alert('Error: Please enter both GA4 Measurement ID and API Secret Key.');
-          return null;
-      }
-      
-      // We no longer need the unique URL parameter here as the PHP script simulates engagement
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}&` +
+          `uid=${proxy.uniqueId}&` + // CRITICAL: Pass the Unique Client ID
           `ga4_id=${ga4Id}&` +
           `ga4_secret=${ga4Secret}`;
   }
 
-  // --- Core Automation Function ---
+  // --- Core Automation Function (Sends GA4 Data via PHP) ---
   async function runAutomation(originalUrl){
-    // Check for critical GA4 inputs
     if (!ga4IdInput.value.trim() || !ga4SecretInput.value.trim()) {
-         alert('CRITICAL: Please fill in both GA4 ID and Secret Key to proceed with Active User simulation.');
+         setStatus('Error: Missing GA4 Keys!', false);
          return;
     }
 
-    // 1. iFrame Load (Visible preview - still needed for visual confirmation)
-    // We add a unique param to the iframe src to prevent browser caching.
-    const uniqueIframeUrl = originalUrl + (originalUrl.includes('?') ? '&' : '?') + 'iframe_cache=' + Date.now();
-    iframe.src = uniqueIframeUrl; 
-    setStatus('Loading Content (Visual)...', false);
-    
-    // Apply/Remove scrolling class
-    if (autoScrollModeCheckbox.checked) {
-        el.classList.add('scrolling');
-    } else {
-        el.classList.remove('scrolling');
-    }
-    
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
-    if (!proxiedUrl) return; // Stop if GA4 keys are missing
-
-    setStatus('Sending GA4 Active User Session (Simulating 15-25s Engagement)...', false);
+    setStatus('Sending GA4 Session (Engaging for ~20s)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script handles the GA4 Measurement Protocol calls and the sleep delay.
         await fetch(proxiedUrl, { mode: 'no-cors' });
-        
-        // Response is quick due to Connection: close header in PHP
-        setStatus('Active User View Sent (2 Events Logged to GA4)', true);
-        
+        setStatus('Active User View Sent (2 Events Logged)', true);
     } catch (e) {
-        // Error here means the PHP server did not respond at all.
-        setStatus('Failed (Network/Proxy Error) - Check Render Backend', false);
+        setStatus('Failed (Network/Proxy Error)', false);
     }
     
     statusDot.style.animation = 'none';
   }
   
-  // Event Handlers
-  openBtn.addEventListener('click', ()=> {
-    const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    window.open(url, '_blank'); 
-  });
-
-  runBtn.addEventListener('click', ()=> {
-    const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    runAutomation(url); 
-  });
-  
   setStatus('Ready', true);
-
-  // Expose the slot element to allow toggling scrolling globally on existing slots
-  return { 
-      runAutomation, 
-      setStatus,
-      element: el 
-  }; 
+  return { runAutomation, setStatus }; 
 }
 
-// Function to redraw slots based on the selected number
+// Function to redraw status slots (for background users)
 function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
@@ -369,7 +259,7 @@ function renderSlots(count) {
         numSlotsInput.value = count;
     }
     
-    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+    globalGoBtn.textContent = `Start All Active Users (${count} Slots)`;
 
     for(let i=0; i < count; i++){
       const slot = createSlot(i, premiumProxies[i]);
@@ -387,29 +277,28 @@ function stopAllAutomation() {
     
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
     });
 }
 
-// Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
+// Global Start/Run Logic - Starts BACKGROUND users
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   const ga4Id = ga4IdInput.value.trim();
   const ga4Secret = ga4SecretInput.value.trim();
 
   if(!url){ 
-      alert('Please paste a valid URL into the global input field.'); 
+      alert('Please paste a valid URL.'); 
       return; 
   }
   if (!ga4Id || !ga4Secret) {
-      alert('CRITICAL: Please fill in both GA4 ID (G-XXXXXXX) and API Secret Key.');
+      alert('CRITICAL: Please fill in both GA4 ID and Secret Key.');
       return;
   }
   
-  // Run once immediately
+  stopAllAutomation();
+
   currentSlots.forEach(s => s.runAutomation(url));
   
-  // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
@@ -430,22 +319,15 @@ globalGoBtn.addEventListener('click', ()=>{
   }
 });
 
-// Event listeners
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
-    renderSlots(count);
+// Manual Slot Load Function
+loadSingleBtn.addEventListener('click', () => {
+    const url = globalUrlInput.value.trim();
+    if (!url) {
+        alert('Please paste a URL into the global input field first.');
+        return;
+    }
+    mainIframe.src = url;
 });
-
-// Event listener for auto-scroll checkbox
-autoScrollModeCheckbox.addEventListener('change', (e) => {
-    const isScrolling = e.target.checked;
-    currentSlots.forEach(s => {
-        s.element.classList.toggle('scrolling', isScrolling);
-    });
-});
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
 
 // Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
