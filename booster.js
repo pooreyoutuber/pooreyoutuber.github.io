@@ -1,10 +1,8 @@
 // booster.js
-// ⚠️ IMPORTANT: यहाँ पर RENDER_BACKEND_ROOT को अपनी backend URL से बदलो (no trailing slash).
+// ⚠️ IMPORTANT: यहाँ पर अपने backend का सही Render URL भरो (no trailing slash).
 const RENDER_BACKEND_ROOT = "https://pooreyoutuber-github-io-blmp.onrender.com";
 
-// PROXY_POOL — screenshot के आधार पर 10 proxies (host, port, username, password).
-// अगर तुम्हारे पास अलग proxies हों, इन्हें edit कर लो।
-// NOTE: credentials यहाँ client-side रखने से security risk है — production में server-side store करो।
+// 🔒 PROXY_POOL — तुम्हारे दिए Webshare.io वाले proxies
 const PROXY_POOL = [
   { host: "142.111.48.253", port: "7030", user: "bqctypvz", pass: "399xb3kxqv6i" },
   { host: "31.59.20.176",  port: "6754", user: "bqctypvz", pass: "399xb3kxqv6i" },
@@ -18,108 +16,112 @@ const PROXY_POOL = [
   { host: "142.147.128.93", port: "6593", user: "bqctypvz", pass: "399xb3kxqv6i" }
 ];
 
-// Helpers
-function proxyToUri(p){
-  // HTTP proxy URI with basic auth
+// 🔧 Helper Functions
+function proxyToUri(p) {
   return `http://${encodeURIComponent(p.user)}:${encodeURIComponent(p.pass)}@${p.host}:${p.port}`;
 }
-function shortName(p){
+function shortName(p) {
   return `${p.host}:${p.port}`;
 }
-function $(id){ return document.getElementById(id); }
-function escapeHtml(s){ return s ? s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : ''; }
+function $(id) {
+  return document.getElementById(id);
+}
+function escapeHtml(s) {
+  return s
+    ? s.replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]))
+    : "";
+}
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener("DOMContentLoaded", init);
 
-function init(){
-  const selector = $('proxySelector');
-  // fill selector with proxies
+function init() {
+  const selector = $("proxySelector");
+
+  // Fill selector with proxies
   PROXY_POOL.forEach((p, idx) => {
-    const opt = document.createElement('option');
+    const opt = document.createElement("option");
     opt.value = String(idx);
     opt.textContent = `${shortName(p)} (${p.user})`;
     selector.appendChild(opt);
   });
 
-  // On load select random proxy by default (auto rotate)
-  const randomIndex = Math.floor(Math.random() * PROXY_POOL.length);
-  // We set selector to 'auto' but show selected proxy string in proxyString input
-  selector.value = 'auto';
-  setSelectedProxyDisplay(randomIndex);
+  // Add Auto-rotate option
+  const autoOpt = document.createElement("option");
+  autoOpt.value = "auto";
+  autoOpt.textContent = "Auto (Random Proxy)";
+  selector.insertBefore(autoOpt, selector.firstChild);
 
-  // If user manually chooses proxy, update display
-  selector.addEventListener('change', () => {
-    if(selector.value === 'auto'){
+  // Default: Auto proxy
+  selector.value = "auto";
+  setSelectedProxyDisplay(Math.floor(Math.random() * PROXY_POOL.length));
+
+  // On manual change
+  selector.addEventListener("change", () => {
+    if (selector.value === "auto") {
       const r = Math.floor(Math.random() * PROXY_POOL.length);
       setSelectedProxyDisplay(r);
     } else {
-      setSelectedProxyDisplay(parseInt(selector.value,10));
+      setSelectedProxyDisplay(parseInt(selector.value, 10));
     }
   });
 
-  // Buttons
-  $('loadBtn').addEventListener('click', handleLoad);
-  $('copyProxyBtn').addEventListener('click', copyProxyToClipboard);
-
-  // Also auto-update selected proxy every time the page reloads (above done)
+  $("loadBtn").addEventListener("click", handleLoad);
+  $("copyProxyBtn").addEventListener("click", copyProxyToClipboard);
 }
 
-// Store current selected index (for display / use)
+// Store current proxy index
 let currentSelectedProxyIndex = 0;
-function setSelectedProxyDisplay(idx){
+function setSelectedProxyDisplay(idx) {
   currentSelectedProxyIndex = idx;
   const p = PROXY_POOL[idx];
   const uri = proxyToUri(p);
-  $('proxyString').value = uri;
-  $('proxyInfo').innerHTML = `Selected proxy (display): <b>${escapeHtml(shortName(p))}</b>. Proxy credentials shown in box. (Auto-rotate active)`;
+  $("proxyString").value = uri;
+  $("proxyInfo").innerHTML = `Selected proxy: <b>${escapeHtml(shortName(p))}</b> (${escapeHtml(p.user)})`;
 }
 
-async function handleLoad(){
-  const url = $('targetUrl').value.trim();
-  if(!url){
-    alert('Kripya pehle URL daalein.');
+async function handleLoad() {
+  const url = $("targetUrl").value.trim();
+  if (!url) {
+    alert("कृपया पहले कोई URL डालें।");
     return;
   }
-  let proxyParam = '';
-  const selectorVal = $('proxySelector').value;
-  if(selectorVal === 'auto'){
-    // pick the currentSelectedProxyIndex (set on load)
+
+  let proxyParam = "";
+  const selectorVal = $("proxySelector").value;
+  if (selectorVal === "auto") {
     proxyParam = proxyToUri(PROXY_POOL[currentSelectedProxyIndex]);
   } else {
     const idx = parseInt(selectorVal, 10);
     proxyParam = proxyToUri(PROXY_POOL[idx]);
   }
 
-  // Build backend endpoint: backend must accept &proxy=PROXY_URI parameter
   const endpoint = `${RENDER_BACKEND_ROOT}/proxy?url=${encodeURIComponent(url)}&proxy=${encodeURIComponent(proxyParam)}`;
 
-  // Show temporary info
-  $('proxyInfo').innerHTML = `Requesting backend... <br><small style="color:#333">${escapeHtml(endpoint)}</small>`;
+  $("proxyInfo").innerHTML = `🔄 Requesting backend... <br><small>${escapeHtml(endpoint)}</small>`;
 
-  try{
-    // Quick GET to confirm backend reachable — backend should respond ok for this URL
-    const resp = await fetch(endpoint, { method: 'GET' });
-    if(!resp.ok){
-      const body = await resp.text().catch(()=>'<no body>');
-      $('proxyInfo').innerHTML = `<span style="color:#a00">Backend error: ${resp.status} ${resp.statusText}</span><br><pre style="white-space:pre-wrap">${escapeHtml(body)}</pre>`;
+  try {
+    const resp = await fetch(endpoint, { method: "GET" });
+
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "<no body>");
+      $("proxyInfo").innerHTML = `<span style="color:#a00">Backend error: ${resp.status} ${resp.statusText}</span><br><pre>${escapeHtml(body)}</pre>`;
       return;
     }
 
-    // If ok, set iframe src so browser renders proxied page
-    $('proxyFrame').src = endpoint;
-    $('proxyInfo').innerHTML = `Loaded via proxy <b>${escapeHtml(shortName(PROXY_POOL[currentSelectedProxyIndex]))}</b>. If iframe blank, open developer console to check CSP/X-Frame issues.`;
-  }catch(err){
+    // Load the proxied site into iframe
+    $("proxyFrame").src = endpoint;
+    $("proxyInfo").innerHTML = `✅ Loaded via proxy: <b>${escapeHtml(shortName(PROXY_POOL[currentSelectedProxyIndex]))}</b>`;
+  } catch (err) {
     console.error(err);
-    $('proxyInfo').innerHTML = `<span style="color:#a00">Network error: ${escapeHtml(err.message)}</span>`;
+    $("proxyInfo").innerHTML = `<span style="color:#a00">Network error: ${escapeHtml(err.message)}</span>`;
   }
 }
 
-function copyProxyToClipboard(){
-  const txt = $('proxyString').value;
-  if(!txt) return;
-  navigator.clipboard.writeText(txt).then(()=> {
-    alert('Proxy copied to clipboard');
-  }).catch(()=> {
-    alert('Copy failed — please copy manually.');
-  });
+function copyProxyToClipboard() {
+  const txt = $("proxyString").value;
+  if (!txt) return;
+  navigator.clipboard
+    .writeText(txt)
+    .then(() => alert("✅ Proxy copied to clipboard"))
+    .catch(() => alert("❌ Copy failed — please copy manually."));
 }
