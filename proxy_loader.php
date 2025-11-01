@@ -1,5 +1,5 @@
 <?php
-// proxy_loader.php - GA4 Measurement Protocol with Rotating Proxy
+// proxy_loader.php - GA4 Measurement Protocol with Rotating Proxy (Final Attempt)
 
 // ----------------------------------------------------------------------
 // 1. CRITICAL: PROXY AUTHENTICATION (From User's Screenshot)
@@ -48,6 +48,7 @@ $user_agents = array(
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1.15"
 );
 function generateRandomIP() {
+    // This IP is used to trick GA4 into thinking the request came from this IP
     return rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255) . "." . rand(1, 255);
 }
 
@@ -66,7 +67,7 @@ function send_ga4_event($endpoint, $measurement_id, $secret_key, $payload, $prox
     curl_setopt($ch, CURLOPT_PROXY, $proxy_address); 
     curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy_auth); 
     
-    // 👇 CRITICAL FIX: Increased Timeout for slow rotating proxies
+    // CRITICAL FIX: Increased Timeout for slow rotating proxies
     curl_setopt($ch, CURLOPT_TIMEOUT, 60); 
     
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
