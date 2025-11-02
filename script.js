@@ -14,16 +14,16 @@ document.getElementById('proxyForm').addEventListener('submit', async function(e
     websiteContainer.innerHTML = '<div class="info-message">📡 प्रॉक्सी के माध्यम से वेबसाइट लोड हो रही है...</div>';
     
     try {
-        // POST data to the backend endpoint
+        // Send data to the backend endpoint using POST method
         const response = await fetch('/proxy', {
-            method: 'POST',
+            method: 'POST', // Crucial: This must be POST
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ url, proxyIp })
         });
         
-        // Handle server errors (e.g., 400 or 500 status codes)
+        // Handle server errors
         if (!response.ok) {
             const errorText = await response.text();
             websiteContainer.innerHTML = `<div class="info-message" style="color: red;">**त्रुटि:** ${errorText}</div>`;
@@ -34,7 +34,8 @@ document.getElementById('proxyForm').addEventListener('submit', async function(e
         
         // Create and display the content in a secure iframe
         const iframe = document.createElement('iframe');
-        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms'); // Added sandbox for better security
+        // Sandbox is added for security in a proxy environment
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms'); 
         
         websiteContainer.innerHTML = ''; // Clear loading message
         websiteContainer.appendChild(iframe);
@@ -45,7 +46,7 @@ document.getElementById('proxyForm').addEventListener('submit', async function(e
         iframe.contentWindow.document.close();
 
     } catch (error) {
-        // Handle network or fetch errors
+        // Handle network or fetch errors (e.g., if the server is offline)
         websiteContainer.innerHTML = `<div class="info-message" style="color: red;">**नेटवर्क त्रुटि:** सर्वर से कनेक्शन नहीं हो पाया। ${error.message}</div>`;
     }
 });
