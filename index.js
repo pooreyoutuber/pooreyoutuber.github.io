@@ -513,11 +513,14 @@ app.get('/proxy', async (req, res) => {
     } catch (error) {
         // प्रॉक्सी या फ़ेच में कोई त्रुटि होने पर
         console.error('Proxy Fetch Error:', error.message);
-        // एक क्लाइंट
-    res.status(500).send(`Error fetching URL via proxy: ${error.message}`);
+        // एक क्लाइंट-फ्रेंडली एरर भेजें।
+        res.status(500).send(`Error fetching URL via proxy: ${error.message}`);
     }
-}); // <-- यह क्लोजिंग ब्रैकेट जोड़ा गया था
+}); 
 
-// --- SERVER START ---
+// ===================================================================
+// --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
+// ===================================================================
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
+});
