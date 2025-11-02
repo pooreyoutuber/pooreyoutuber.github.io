@@ -1,4 +1,4 @@
-// index.js (फाइनल, सभी टूल्स के साथ मर्ज किया हुआ और सबसे मजबूत फिक्स के साथ)
+// index.js (फाइनल, प्रॉक्सी ऑथेंटिकेशन बायपास के लिए संशोधित)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -394,12 +394,13 @@ app.get('/api/proxies', (req, res) => {
     if (proxies.length === 0) {
         return res.status(500).json({ error: 'Proxy list not loaded on the server.' });
     }
+    // 🔥 यहाँ हमने 'user' और 'pass' को हटा दिया है, ताकि फ्रंटएंड केवल IP:Port भेज सके
     const safeProxies = proxies.map((p, index) => ({
         id: index,
         ip: p.ip,
         port: p.port,
         country: p.country,
-        fullString: `${p.ip}:${p.port}:${p.user}:${p.pass}`
+        fullString: `${p.ip}:${p.port}` // <-- केवल IP:Port भेजा जा रहा है
     }));
     res.json(safeProxies);
 });
@@ -414,12 +415,13 @@ app.post('/api/load', async (req, res) => {
     return res.status(400).json({ error: 'Target URL and Proxy are required' });
   }
 
-  const [ip, port, user, pass] = proxyString.split(':');
+  // 🔥 केवल IP और Port को पार्स करें (User/Pass को नज़रअंदाज़ करें)
+  const [ip, port] = proxyString.split(':');
   
-  console.log(`[PROXY LOAD] Final Attempt to load ${targetUrl} via proxy: ${ip}:${port}`);
+  console.log(`[PROXY LOAD] Attempting to load ${targetUrl} via public proxy: ${ip}:${port}`);
   
-  // 🔥 ऑथेंटिकेशन को URL में सीधे एन्कोड किया गया है
-  const proxyUrl = `http://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${ip}:${port}`;
+  // 🔥 कोई ऑथेंटिकेशन नहीं, केवल IP:Port
+  const proxyUrl = `http://${ip}:${port}`;
   
   const agent = new HttpsProxyAgent(proxyUrl);
 
@@ -435,7 +437,7 @@ app.post('/api/load', async (req, res) => {
         'Host': new URL(targetUrl).host,
         'Connection': 'keep-alive' 
       },
-      timeout: 15000, // 🔥 टाइमआउट को 15 सेकंड तक कम किया गया है
+      timeout: 15000, // टाइमआउट 15 सेकंड
       maxRedirects: 5
     });
 
@@ -453,7 +455,7 @@ app.post('/api/load', async (req, res) => {
     });
 
   } catch (error) {
-    console.error(`[PROXY LOAD] Final Proxy Fetch Error: ${error.message}. Target URL: ${targetUrl}`);
+    console.error(`[PROXY LOAD] Public Proxy Fetch Error: ${error.message}. Target URL: ${targetUrl}`);
     
     // विशिष्ट Axios त्रुटियों को कैप्चर करें
     let detailMessage = error.message;
@@ -462,13 +464,14 @@ app.post('/api/load', async (req, res) => {
     } else if (error.code === 'ETIMEDOUT') {
         detailMessage = 'Proxy connection timed out (15 seconds). Proxy is too slow or non-responsive.';
     } else if (error.response && error.response.status === 407) {
-        detailMessage = 'Proxy Authentication Required (407). Authentication failed.';
+        // अब 407 (Authentication Required) का मतलब है कि यह प्रॉक्सी सार्वजनिक नहीं है!
+        detailMessage = 'Proxy is not public and requires credentials. Please use a different proxy.';
     } else if (error.response && error.response.status === 403) {
         detailMessage = 'Target site blocked proxy (403 Forbidden).';
     }
 
     res.status(500).json({ 
-      error: 'Proxy Load Failed. (Final Check Failed)', 
+      error: 'Proxy Load Failed. (Public Check)', 
       details: detailMessage 
     });
   }
