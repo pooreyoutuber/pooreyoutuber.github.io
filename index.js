@@ -7,7 +7,7 @@ const nodeFetch = require('node-fetch');
 const cors = require('cors'); 
 const fs = require('fs'); 
 const crypto = require('crypto'); 
-const axios = require('axios');          
+const axios = require('axios'); // <-- Website Booster ke liye iska upyog karenge 
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
@@ -36,7 +36,7 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- MIDDLEWARE & UTILITIES ---
+// --- MIDDLEWARE & UTILITIES (ORIGINAL CODE) ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
@@ -316,7 +316,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL (ORIGINAL)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -329,17 +329,17 @@ app.post('/boost-mp', async (req, res) => {
     
     const viewPlan = generateViewPlan(totalViewsRequested, pages.filter(p => p.percent > 0)); 
     if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
+           return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
     // 🔑 STEP 1: VALIDATE KEYS 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
     
     if (!validationResult.valid) {
-         return res.status(400).json({ 
-            status: 'error', 
-            message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
-        });
+           return res.status(400).json({ 
+             status: 'error', 
+             message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
+         });
     }
 
     // STEP 2: ACKNOWLEDGEMENT
@@ -375,7 +375,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (ORIGINAL)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -419,7 +419,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (ORIGINAL)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -456,10 +456,117 @@ Requested Change: "${requestedChange}"`;
 
     } catch (error) {
         console.error('Gemini API Error (Edit):', error.message);
-        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` }
-    );
+        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
+
+// ***********************************************
+// 🚀 4. WEBSITE BOOSTER PRIME (PROXY ROTATOR) LOGIC - NEW
+// ***********************************************
+
+// PROXY LIST (Same as before, since it's the working set)
+const PROXIES = [
+    { ip: '142.111.48.253', port: 7030, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' },
+    { ip: '31.59.20.176', port: 6754, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'UK' },
+    { ip: '23.95.150.145', port: 6114, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' },
+    { ip: '198.23.239.134', port: 6540, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' },
+    { ip: '45.38.107.97', port: 6014, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'UK' },
+    { ip: '107.172.163.27', port: 6543, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' },
+    { ip: '64.137.96.74', port: 6641, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'Spain' },
+    { ip: '216.10.27.159', port: 6837, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' },
+    { ip: '142.111.67.146', port: 5611, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'Japan' },
+    { ip: '142.147.128.93', port: 6593, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' }
+];
+
+app.get('/proxy', async (req, res) => {
+    const targetUrl = req.query.url;
+    const proxyIndex = req.query.index; // Front-end se aane wala specific index
+    
+    if (!targetUrl) {
+        return res.status(400).send("<h1>Error 400: URL parameter missing.</h1>");
+    }
+
+    let selectedProxy;
+    let isRotation = true;
+
+    // Proxy Selection Logic
+    if (proxyIndex && PROXIES[parseInt(proxyIndex)]) {
+        selectedProxy = PROXIES[parseInt(proxyIndex)];
+        isRotation = false;
+    } else {
+        // Auto/Rotation
+        selectedProxy = PROXIES[randomInt(0, PROXIES.length - 1)];
+    }
+
+    // Proxy string banana
+    const proxyAuth = `${selectedProxy.user}:${selectedProxy.pass}`;
+    const proxyUrl = `http://${proxyAuth}@${selectedProxy.ip}:${selectedProxy.port}`;
+
+    // HttpsProxyAgent ka upyog karna, kyunki aapne 'request' ki jagah 'axios' use kiya hai.
+    const agent = new HttpsProxyAgent(proxyUrl);
+    
+    console.log(`[PROXY START] Loading ${targetUrl} via ${isRotation ? 'ROTATION' : 'MANUAL'} proxy: ${selectedProxy.country}`);
+
+    try {
+        // 1. Proxy ke zariye request bhejna
+        const response = await axios({
+            method: 'get',
+            url: targetUrl,
+            httpsAgent: agent, // Proxy agent use karna
+            httpAgent: agent,  // HTTP request ke liye bhi (agar target HTTP ho)
+            timeout: 25000, 
+            responseType: 'arraybuffer', // Response ko buffer mein padhna
+            maxRedirects: 5,
+            validateStatus: (status) => status >= 200 && status < 400, // Sirf successful status codes ko handle karna
+            headers: {
+                // Front-end ke User-Agent ko bhejna
+                'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0'
+            }
+        });
+
+        // 🛑 GA4/IFRAME FIX: Headers remove karna
+        let responseHeaders = response.headers;
+        delete responseHeaders['content-encoding']; 
+        delete responseHeaders['content-security-policy']; 
+        delete responseHeaders['x-frame-options'];         
+        delete responseHeaders['transfer-encoding'];        
+        delete responseHeaders['connection'];             
+
+        // Headers set karna aur content wapas bhejna
+        res.status(response.status);
+        res.set(responseHeaders); 
+        res.send(response.data); // Buffer ko client ko bhejna
+
+    } catch (error) {
+        console.error(`[PROXY FAIL] Error Code: ${error.code || 'UNKNOWN'}. Proxy: ${selectedProxy.country}.`);
+        
+        // ERROR HANDLING: Proxy fail hone par seedhe load karne ki koshish (GA4 support ke liye)
+        if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED' || error.code === 'ERR_PROXY_CONNECTION' || error.code === 'ERR_TUNNEL_TIMEOUT') {
+             console.log('[PROXY FAIL] Attempting direct connection...');
+             
+             try {
+                // Direct connection attempt
+                const directResponse = await axios.get(targetUrl, {
+                    timeout: 15000,
+                    responseType: 'arraybuffer',
+                    headers: { 'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0' }
+                });
+                
+                // Direct connection successful
+                delete directResponse.headers['content-encoding']; 
+                return res.status(directResponse.status).set(directResponse.headers).send(directResponse.data);
+
+             } catch (directError) {
+                // Direct connection bhi fail
+                return res.status(500).send(`<h1>Proxy and Direct Connection Failed!</h1><p>Both methods failed. Check target URL and proxy validity. Error: ${directError.message.substring(0, 80)}...</p>`);
+             }
+        }
+        
+        // Other critical errors
+        return res.status(500).send(`<h1>Critical Error!</h1><p>Proxy Failed: ${error.message.substring(0, 80)}...</p>`);
+    }
+});
+
 // ===================================================================
 // --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
 // ===================================================================
