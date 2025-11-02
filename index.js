@@ -1,4 +1,4 @@
-// index.js (यह आपका अंतिम, फिक्स किया हुआ और मर्ज किया हुआ कोड है)
+// index.js (यह फाइनल, सभी टूल्स के साथ मर्ज किया हुआ और फिक्स्ड कोड है)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -7,8 +7,8 @@ const nodeFetch = require('node-fetch');
 const cors = require('cors'); 
 const fs = require('fs'); 
 const crypto = require('crypto'); 
-const axios = require('axios'); // <-- प्रॉक्सी लोडिंग के लिए आवश्यक
-const { HttpsProxyAgent } = require('https-proxy-agent'); // <-- यदि आवश्यकता हो
+const axios = require('axios'); 
+const { HttpsProxyAgent } = require('https-proxy-agent'); // <-- 🔥 अब उपयोग होगा
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -112,7 +112,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             body: JSON.stringify(payload),
             headers: { 
                 'Content-Type': 'application/json',
-                'User-Agent': USER_AGENT // <--- महत्वपूर्ण फिक्स
+                'User-Agent': USER_AGENT 
             }
         });
 
@@ -176,7 +176,7 @@ async function validateKeys(gaId, apiSecret, cid) {
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const geo = getRandomGeo(); 
-    const name = generateRealName(); // <-- नया नाम जनरेट करें
+    const name = generateRealName(); 
     const session_id = Date.now(); 
     
     // 🔥 CRITICAL FIX: User Properties में नाम जोड़ें
@@ -184,8 +184,8 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         country: { value: geo.country },
         region: { value: geo.region },
         user_timezone: { value: geo.timezone },
-        first_name: { value: name.first_name }, // <-- नाम
-        last_name: { value: name.last_name }    // <-- सरनेम
+        first_name: { value: name.first_name }, 
+        last_name: { value: name.last_name }    
     };
 
     let referrer = "direct"; 
@@ -456,8 +456,7 @@ Requested Change: "${requestedChange}"`;
 
     } catch (error) {
         console.error('Gemini API Error (Edit):', error.message);
-        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` }
-    );
+        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
 
@@ -482,13 +481,13 @@ app.get('/api/proxies', (req, res) => {
     if (proxies.length === 0) {
         return res.status(500).json({ error: 'Proxy list not loaded on the server.' });
     }
-    // प्रॉक्सी में से यूज़र/पासवर्ड को हटाकर सुरक्षित रूप में फ्रंटएंड को भेजें
+    // प्रॉक्सी में से यूज़र/पासवर्ड को सुरक्षित रूप में फ्रंटएंड को भेजें
     const safeProxies = proxies.map((p, index) => ({
         id: index,
         ip: p.ip,
         port: p.port,
         country: p.country,
-        fullString: `${p.ip}:${p.port}:${p.user}:${p.pass}` // fullString में auth डिटेल शामिल है, जो केवल बैकएंड इस्तेमाल करेगा।
+        fullString: `${p.ip}:${p.port}:${p.user}:${p.pass}`
     }));
     res.json(safeProxies);
 });
@@ -506,29 +505,31 @@ app.post('/api/load', async (req, res) => {
   // प्रॉक्सी स्ट्रिंग को IP, Port, User, Pass में पार्स करें
   const [ip, port, user, pass] = proxyString.split(':');
   
-  console.log(`[PROXY LOAD] Loading ${targetUrl} via proxy: ${ip}:${port}`);
+  console.log(`[PROXY LOAD] Attempting to load ${targetUrl} via proxy: ${ip}:${port}`);
+  
+  // प्रॉक्सी URL को HttpsProxyAgent के लिए तैयार करें
+  const proxyUrl = `http://${user}:${pass}@${ip}:${port}`;
+  
+  // 🔥 HttpsProxyAgent का उपयोग करें (HTTPS/SSL साइट्स को HTTP प्रॉक्सी से रूट करने के लिए फिक्स)
+  const agent = new HttpsProxyAgent(proxyUrl);
 
   try {
-    // Axios का उपयोग प्रॉक्सी के माध्यम से अनुरोध भेजने के लिए
     const response = await axios.get(targetUrl, {
-      proxy: {
-        protocol: 'http',
-        host: ip,
-        port: parseInt(port),
-        auth: { username: user, password: pass },
-      },
+      httpsAgent: agent, // <-- HTTPS साइट्स के लिए
+      httpAgent: agent,  // <-- HTTP साइट्स के लिए 
+
       responseType: 'text', 
       headers: {
-        // यह हेडर टार्गेट वेबसाइट को प्रॉक्सी IP दिखाता है
         'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36',
-        'Accept-Encoding': 'identity', // compression को हटाएँ
-        'Host': new URL(targetUrl).host // Host हेडर सेट करें
+        'Accept-Encoding': 'identity', 
+        'Host': new URL(targetUrl).host 
       },
-      timeout: 15000 // 15 सेकंड का टाइमआउट
+      timeout: 20000 // 20 सेकंड का टाइमआउट
     });
 
     // प्रॉक्सी की जानकारी के साथ कंटेंट वापस भेजें
     const usedProxy = proxies.find(p => p.ip === ip) || { country: 'Unknown' };
+    console.log(`[PROXY LOAD] SUCCESS: ${targetUrl} loaded via ${usedProxy.country}`);
 
     res.json({
       htmlContent: response.data,
@@ -541,10 +542,19 @@ app.post('/api/load', async (req, res) => {
     });
 
   } catch (error) {
-    console.error(`[PROXY LOAD] Proxy Fetch Error: ${error.message}. URL: ${targetUrl}`);
+    console.error(`[PROXY LOAD] Proxy Fetch Error: ${error.message}. Target URL: ${targetUrl}`);
+    
+    // विशिष्ट Axios त्रुटियों को कैप्चर करें
+    let detailMessage = error.message;
+    if (error.code === 'ECONNREFUSED' || error.code === 'ECONNRESET') {
+        detailMessage = 'Proxy connection refused or reset. Proxy may be offline.';
+    } else if (error.code === 'ETIMEDOUT') {
+        detailMessage = 'Proxy connection timed out.';
+    }
+
     res.status(500).json({ 
-      error: 'Proxy Load Failed. (Proxy may be down or URL is HTTPS/Blocked)', 
-      details: error.message 
+      error: 'Proxy Load Failed. (Likely HTTPS/SSL or Proxy is down)', 
+      details: detailMessage 
     });
   }
 });
