@@ -510,11 +510,7 @@ app.get('/proxy', async (req, res) => {
         // प्राप्त कंटेंट क्लाइंट (आपके iframe) को भेजें
         res.send(data);
 
-        } catch (error) {
+    } catch (error) {
         // प्रॉक्सी या फ़ेच में कोई त्रुटि होने पर
         console.error('Proxy Fetch Error:', error.message);
-        // const errorMe (यह लाइन हटा दी गई है)
-        const errorMessage = `Proxy Error (502): The proxy or target URL failed to respond. Details: ${error.message}`; 
-        res.status(502).send(errorMessage);
-    }
-    
+        // 'const err
