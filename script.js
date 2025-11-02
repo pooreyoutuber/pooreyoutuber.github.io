@@ -34,7 +34,6 @@ document.getElementById('proxyForm').addEventListener('submit', async function(e
         
         // Create and display the content in a secure iframe
         const iframe = document.createElement('iframe');
-        // Sandbox is added for security in a proxy environment
         iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms'); 
         
         websiteContainer.innerHTML = ''; // Clear loading message
@@ -46,7 +45,7 @@ document.getElementById('proxyForm').addEventListener('submit', async function(e
         iframe.contentWindow.document.close();
 
     } catch (error) {
-        // Handle network or fetch errors (e.g., if the server is offline)
+        // Handle network or fetch errors
         websiteContainer.innerHTML = `<div class="info-message" style="color: red;">**नेटवर्क त्रुटि:** सर्वर से कनेक्शन नहीं हो पाया। ${error.message}</div>`;
     }
 });
