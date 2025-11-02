@@ -1,4 +1,4 @@
-// index.js (यह आपका अंतिम, फिक्स किया हुआ और मर्ज किया हुआ कोड है)
+// index.js (यह आपका अंतिम और पूरी तरह से फिक्स किया हुआ कोड है)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -34,7 +34,7 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- MIDDLEWARE & UTILITIES (ORIGINAL) ---
+// --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
@@ -42,13 +42,18 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '5mb' }));
 
+// 🎯 STATIC FILE FIX 1: 'public' folder se HTML, CSS, JS files serve karega.
+app.use(express.static('public')); 
+
+// 🎯 STATIC FILE FIX 2: Root URL ('/') par 'index.html' ko serve karega.
 app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running! Access tools via GitHub Pages.'); 
+    // Kripya sunischit karein ki 'public/index.html' file maujood hai.
+    res.sendFile(__dirname + '/public/index.html');
 });
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// GA4 Helper functions (ORIGINAL)
+// --- GA4 Helper functions (ORIGINAL - NO CHANGE) ---
 const FIRST_NAMES = ["John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", "George", "Nicole", "Mark", "Olivia", "Charles", "Sophia", "Daniel", "Chloe"];
 const LAST_NAMES = ["Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark", "Lewis", "Walker", "Hall", "Allen", "Young", "Scott", "Adams", "Baker"];
 function generateRealName() {
@@ -81,9 +86,8 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING, Validation, simulateView, generateViewPlan functions (ORIGINAL) ---
+// --- GA4 DATA SENDING FUNCTIONS (ORIGINAL - NO CHANGE) ---
 
-// sendData function
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
@@ -112,7 +116,6 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// validateKeys function
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const testPayload = {
@@ -145,7 +148,6 @@ async function validateKeys(gaId, apiSecret, cid) {
     }
 }
 
-// simulateView function
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const geo = getRandomGeo(); 
@@ -197,7 +199,6 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     return allSuccess;
 }
 
-// generateViewPlan function
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -221,7 +222,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL (ORIGINAL)
+// 1. GA4 BOOSTER ENDPOINT (API: /boost-mp) - GEO LOCATION CHANGE
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -363,10 +364,10 @@ Requested Change: "${requestedChange}"`;
 });
 
 // ***********************************************
-// 🚀 4. WEBSITE BOOSTER PRIME (PROXY ROTATOR) LOGIC - FIXED
+// 🚀 4. WEBSITE BOOSTER PRIME (PROXY ROTATOR) LOGIC - FINAL FIX FOR ADS & GA SCRIPTS
 // ***********************************************
 
-// PROXY LIST
+// PROXY LIST (Geo Location Change Proxy IPs)
 const PROXIES = [
     { ip: '142.111.48.253', port: 7030, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' },
     { ip: '31.59.20.176', port: 6754, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'UK' },
@@ -411,7 +412,7 @@ app.get('/proxy', async (req, res) => {
             httpsAgent: agent, 
             httpAgent: agent,  
             timeout: 25000, 
-            responseType: 'text', // FIXED: 'arraybuffer' se 'text' kiya
+            responseType: 'text', // Ads aur GA scripts chalane ke liye zaroori.
             maxRedirects: 5,
             validateStatus: (status) => status >= 200 && status < 400, 
             headers: {
@@ -419,7 +420,7 @@ app.get('/proxy', async (req, res) => {
             }
         });
 
-        // 🛑 GA4/IFRAME FIX: Headers remove karna
+        // 🛑 CRITICAL FIX: Security Headers (CSP, X-Frame-Options) aur Encoding hatao taaki Ads aur iframes chal sakein.
         let responseHeaders = response.headers;
         delete responseHeaders['content-encoding']; 
         delete responseHeaders['content-security-policy']; 
@@ -435,8 +436,7 @@ app.get('/proxy', async (req, res) => {
         // Headers set karna aur content wapas bhejna
         res.status(response.status);
         res.set(responseHeaders); 
-        // 🎯 SYNTAX ERROR FIXED HERE
-        res.send(response.data); 
+        res.send(response.data); // Syntax Error Fixed
 
     } catch (error) {
         console.error(`[PROXY FAIL] Error Code: ${error.code || 'UNKNOWN'}. Proxy: ${selectedProxy.country}.`);
