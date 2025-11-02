@@ -26,7 +26,7 @@ async function fetchAndPopulateProxies() {
 
         availableProxies.forEach(p => {
             const option = document.createElement('option');
-            // p.fullString में IP:Port:User:Pass शामिल है
+            // p.fullString में IP:Port:User:Pass शामिल है (जो बैकएंड को चाहिए)
             option.value = p.fullString; 
             option.textContent = `${p.country} (${p.ip}:${p.port})`;
             proxySelector.appendChild(option);
@@ -34,7 +34,7 @@ async function fetchAndPopulateProxies() {
 
     } catch (error) {
         console.error("Error fetching proxies:", error);
-        proxyInfoDiv.innerHTML = '<p style="color: red;">Error: Could not connect to Render API to load proxies.</p>';
+        proxyInfoDiv.innerHTML = '<p style="color: red; font-weight: bold;">Error: Could not connect to Render API to load proxies. Check RENDER_BACKEND_URL.</p>';
     }
 }
 
@@ -77,7 +77,7 @@ async function loadUrl() {
                 <h2>Proxy Error!</h2>
                 <p><strong>Error:</strong> ${data.error}</p>
                 <p><strong>Details:</strong> ${detail}</p>
-                <p><strong>Suggestion:</strong> Try a different proxy location or check the URL protocol.</p>
+                <p><strong>Suggestion:</strong> Try a different proxy location or ensure the proxy is not blocked.</p>
             </div>`;
             proxyInfoDiv.innerHTML = `<p style="color: red; font-weight: bold; margin: 5px 0;">❌ Load Failed!</p>`;
         } else {
@@ -96,12 +96,13 @@ async function loadUrl() {
                         Open Site in New Tab (IFrame Block Fix)
                 </button>
             `;
+            // यह पूरा प्रॉक्सी स्ट्रिंग कॉपी करने के लिए छिपा हुआ है
             proxyStringInput.value = data.usedProxy.fullString;
         }
 
     } catch (error) {
         console.error('Network Error:', error);
-        proxyFrame.srcdoc = '<div style="padding: 20px; color: red;">Critical Network Error: Could not connect to the Render API Server.</div>';
+        proxyFrame.srcdoc = '<div style="padding: 20px; color: red; text-align: center;">Critical Network Error: Could not connect to the Render API Server.</div>';
     } finally {
         loadBtn.textContent = 'Load via Proxy';
         loadBtn.disabled = false;
@@ -109,7 +110,7 @@ async function loadUrl() {
 }
 
 // 3. नया फ़ंक्शन: नए टैब में खोलने के लिए (IFrame ब्लॉकिंग को बायपास करता है)
-// यह केवल एक चेतावनी दिखाता है क्योंकि ब्राउज़र सीधे प्रॉक्सी लागू नहीं कर सकता।
+// चेतावनी के साथ, क्योंकि ब्राउज़र प्रॉक्सी को सीधे नए टैब में लागू नहीं करता है।
 function openInNewTab(url, proxyString) {
     alert(`The site is now opening in a new tab. Note: To guarantee the proxy IP is used, you must manually set your browser's proxy settings to: ${proxyString} before visiting the page.`);
     window.open(url, '_blank');
@@ -119,7 +120,7 @@ function openInNewTab(url, proxyString) {
 function copyProxyString() {
     if (proxyStringInput.value) {
         navigator.clipboard.writeText(proxyStringInput.value);
-        alert("Proxy string (IP:Port:User:Pass) copied to clipboard!");
+        alert("Proxy string (IP:Port:User:Pass) copied to clipboard! Use it for manual browser configuration.");
     } else {
         alert("No proxy selected or loaded yet to copy.");
     }
@@ -129,5 +130,5 @@ function copyProxyString() {
 loadBtn.addEventListener('click', loadUrl);
 copyProxyBtn.addEventListener('click', copyProxyString);
 
-// प्रॉक्सी लिस्ट लोड करें
+// प्रॉक्सी लिस्ट लोड करें जब पेज लोड होता है
 fetchAndPopulateProxies();
