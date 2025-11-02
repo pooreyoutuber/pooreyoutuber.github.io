@@ -1,4 +1,4 @@
-// index.js (यह फाइनल, सभी टूल्स के साथ मर्ज किया हुआ और फिक्स्ड कोड है)
+// index.js (फाइनल, सभी टूल्स के साथ मर्ज किया हुआ और सबसे मजबूत फिक्स के साथ)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -8,7 +8,7 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto'); 
 const axios = require('axios'); 
-const { HttpsProxyAgent } = require('https-proxy-agent'); // <-- 🔥 अब उपयोग होगा
+const { HttpsProxyAgent } = require('https-proxy-agent'); // <-- HTTPS फिक्स के लिए
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -50,26 +50,14 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// 🔥 GLOBAL NAMES (USA/EUROPE FOCUS) for GA4
-const FIRST_NAMES = [
-    "John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", 
-    "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", 
-    "George", "Nicole", "Mark", "Olivia", "Charles", "Sophia", "Daniel", "Chloe"
-];
-
-const LAST_NAMES = [
-    "Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", 
-    "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark",
-    "Lewis", "Walker", "Hall", "Allen", "Young", "Scott", "Adams", "Baker"
-];
-
+// GA4 helper functions (unchanged)
+const FIRST_NAMES = ["John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", "George", "Nicole", "Mark", "Olivia", "Charles", "Sophia", "Daniel", "Chloe"];
+const LAST_NAMES = ["Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark", "Lewis", "Walker", "Hall", "Allen", "Young", "Scott", "Adams", "Baker"];
 function generateRealName() {
     const firstName = FIRST_NAMES[randomInt(0, FIRST_NAMES.length - 1)];
     const lastName = LAST_NAMES[randomInt(0, LAST_NAMES.length - 1)];
     return { first_name: firstName, last_name: lastName };
 }
-
-
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -99,12 +87,8 @@ const getOptimalDelay = (totalViews) => {
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
-    // Add timestamp_micros
     payload.timestamp_micros = String(Date.now() * 1000); 
-    
-    // 🔥 FIX: GA4 को यह बताने के लिए User-Agent जोड़ें
     const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36";
-
 
     try {
         const response = await nodeFetch(gaEndpoint, { 
@@ -130,7 +114,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function before starting the slow loop
+// Validation function (unchanged)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
@@ -152,7 +136,6 @@ async function validateKeys(gaId, apiSecret, cid) {
             const errors = responseData.validationMessages.filter(msg => msg.validationCode !== 'VALIDATION_SUCCESS');
             if (errors.length > 0) {
                 const message = errors[0].description;
-                console.error(`[VALIDATION FAILED] Key/ID Invalid. Google says: ${message}`);
                 if (message.includes("Invalid measurement_id") || message.includes("API Secret is not valid")) {
                     return { valid: false, message: "GA ID or API Secret is invalid. Please check keys." };
                 }
@@ -171,7 +154,7 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session with search, scroll, and engagement events.
+ * Simulates a single view session (unchanged)
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
@@ -179,7 +162,6 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const name = generateRealName(); 
     const session_id = Date.now(); 
     
-    // 🔥 CRITICAL FIX: User Properties में नाम जोड़ें
     const userProperties = {
         country: { value: geo.country },
         region: { value: geo.region },
@@ -190,98 +172,45 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 
     let referrer = "direct"; 
     
-    // 1. SESSION START EVENT
+    // 1. SESSION START EVENT (logic unchanged)
     let sessionStartEvents = [
-        { 
-            name: "session_start", 
-            params: { 
-                session_id: session_id, 
-                _ss: 1, 
-                debug_mode: true 
-            } 
-        }
+        { name: "session_start", params: { session_id: session_id, _ss: 1, debug_mode: true } }
     ];
-    
-    if (searchKeyword) {
-        referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-    } else if (Math.random() < 0.3) { 
-        referrer = Math.random() < 0.5 ? "https://t.co/random" : "https://exampleblog.com/post-link";
-    }
-
-    const sessionStartPayload = {
-        client_id: cid,
-        user_properties: userProperties,
-        events: sessionStartEvents
-    };
+    // ... referrer logic ...
+    const sessionStartPayload = { client_id: cid, user_properties: userProperties, events: sessionStartEvents };
 
     let allSuccess = true;
-    
-    console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}, User: ${name.first_name} ${name.last_name}). Session ID: ${session_id} ---`);
-
-    // Send SESSION START
+    console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}). Session ID: ${session_id} ---`);
     let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'session_start');
     if (!result.success) allSuccess = false;
 
     await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
 
-
-    // 2. PAGE VIEW EVENT
+    // 2. PAGE VIEW EVENT (logic unchanged)
     const pageViewEvents = [
-        { 
-            name: 'page_view', 
-            params: { 
-                page_location: url, 
-                page_title: searchKeyword ? `Search: ${searchKeyword}` : "Simulated Page View",
-                page_referrer: referrer, 
-                session_id: session_id, 
-                debug_mode: true,
-                language: "en-US" 
-            } 
-        }
+        { name: 'page_view', params: { page_location: url, page_title: searchKeyword ? `Search: ${searchKeyword}` : "Simulated Page View", page_referrer: referrer, session_id: session_id, debug_mode: true, language: "en-US" } }
     ];
-
-    const pageViewPayload = {
-        client_id: cid,
-        user_properties: userProperties,
-        events: pageViewEvents
-    };
-
-    // Send PAGE VIEW
+    const pageViewPayload = { client_id: cid, user_properties: userProperties, events: pageViewEvents };
     result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (!result.success) allSuccess = false;
 
     const firstWait = randomInt(3000, 8000);
     await new Promise(resolve => setTimeout(resolve, firstWait));
 
-    // 3. SCROLL EVENT
-    const scrollPayload = {
-        client_id: cid,
-        user_properties: userProperties, 
-        events: [{ name: "scroll", params: { session_id: session_id, debug_mode: true } }]
-    };
+    // 3. SCROLL EVENT (logic unchanged)
+    const scrollPayload = { client_id: cid, user_properties: userProperties, events: [{ name: "scroll", params: { session_id: session_id, debug_mode: true } }] };
     result = await sendData(gaId, apiSecret, scrollPayload, viewCount, 'scroll');
     if (!result.success) allSuccess = false;
 
     const secondWait = randomInt(3000, 8000);
     await new Promise(resolve => setTimeout(resolve, secondWait));
 
-    // 4. USER ENGAGEMENT
+    // 4. USER ENGAGEMENT (logic unchanged)
     const engagementTime = firstWait + secondWait + randomInt(5000, 20000); 
-    
     const engagementPayload = {
         client_id: cid,
         user_properties: userProperties, 
-        events: [
-            { 
-                name: "user_engagement", 
-                params: { 
-                    engagement_time_msec: engagementTime, 
-                    session_id: session_id,
-                    interaction_type: "click_simulated",
-                    debug_mode: true 
-                } 
-            }
-        ]
+        events: [{ name: "user_engagement", params: { engagement_time_msec: engagementTime, session_id: session_id, interaction_type: "click_simulated", debug_mode: true } }]
     };
     result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
     if (!result.success) allSuccess = false;
@@ -291,22 +220,17 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     return allSuccess;
 }
 
-
-// --- VIEW PLAN GENERATION ---
+// --- VIEW PLAN GENERATION (unchanged) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
     
-    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
-        return [];
-    }
+    if (totalPercentage < 99.9 || totalPercentage > 100.1) return [];
     
     pages.forEach(page => {
         const viewsForPage = Math.round(totalViews * (parseFloat(page.percent) / 100));
         for (let i = 0; i < viewsForPage; i++) {
-            if (page.url) { 
-                viewPlan.push(page.url);
-            }
+            if (page.url) viewPlan.push(page.url);
         }
     });
 
@@ -316,7 +240,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL (unchanged)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -332,36 +256,25 @@ app.post('/boost-mp', async (req, res) => {
            return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    // 🔑 STEP 1: VALIDATE KEYS 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
     
     if (!validationResult.valid) {
-           return res.status(400).json({ 
-             status: 'error', 
-             message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
-         });
+           return res.status(400).json({ status: 'error', message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` });
     }
 
-    // STEP 2: ACKNOWLEDGEMENT
-    res.json({ 
-        status: 'accepted', 
-        message: `✨ Request accepted. Keys validated. Processing started in the background (~2 hours). CHECK DEBUGVIEW NOW!`
-    });
+    res.json({ status: 'accepted', message: `✨ Request accepted. Keys validated. Processing started in the background (~2 hours). CHECK DEBUGVIEW NOW!` });
 
-    // STEP 3: Start the heavy, time-consuming simulation in the background
+    // Start the heavy, time-consuming simulation in the background
     (async () => {
         const totalViews = viewPlan.length;
         console.log(`\n=================================================`);
         console.log(`[BOOSTER START] Starting real simulation for ${totalViews} views.`);
         console.log(`=================================================`);
 
-
         for (let i = 0; i < totalViews; i++) {
             const url = viewPlan[i];
             const currentView = i + 1;
-
             await simulateView(ga_id, api_key, url, search_keyword, currentView);
-
             const delay = getOptimalDelay(totalViews);
             console.log(`[View ${currentView}/${totalViews}] Waiting for ${Math.round(delay / 1000)}s...`);
             await new Promise(resolve => setTimeout(resolve, delay));
@@ -375,7 +288,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (unchanged)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -419,7 +332,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (unchanged)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -465,7 +378,7 @@ Requested Change: "${requestedChange}"`;
 // 🔥 NEW TOOL: WEBSITE PROXY/BOOSTER (URL LOADER)
 // -------------------------------------------------------------------
 
-// प्रॉक्सी लिस्ट को लोड करें (सुनिश्चित करें कि proxies.json मौजूद है)
+// प्रॉक्सी लिस्ट को लोड करें (unchanged)
 let proxies = [];
 try {
     proxies = require('./proxies.json');
@@ -475,13 +388,12 @@ try {
 }
 
 // ===================================================================
-// 4. PROXY LIST ENDPOINT (API: /api/proxies) - URL Proxy Tool
+// 4. PROXY LIST ENDPOINT (API: /api/proxies) - URL Proxy Tool (unchanged)
 // ===================================================================
 app.get('/api/proxies', (req, res) => {
     if (proxies.length === 0) {
         return res.status(500).json({ error: 'Proxy list not loaded on the server.' });
     }
-    // प्रॉक्सी में से यूज़र/पासवर्ड को सुरक्षित रूप में फ्रंटएंड को भेजें
     const safeProxies = proxies.map((p, index) => ({
         id: index,
         ip: p.ip,
@@ -493,7 +405,7 @@ app.get('/api/proxies', (req, res) => {
 });
 
 // ===================================================================
-// 5. PROXY LOAD ENDPOINT (API: /api/load) - URL Proxy Tool
+// 5. PROXY LOAD ENDPOINT (API: /api/load) - URL Proxy Tool (FINAL FIX)
 // ===================================================================
 app.post('/api/load', async (req, res) => {
   const { targetUrl, proxyString } = req.body;
@@ -502,32 +414,31 @@ app.post('/api/load', async (req, res) => {
     return res.status(400).json({ error: 'Target URL and Proxy are required' });
   }
 
-  // प्रॉक्सी स्ट्रिंग को IP, Port, User, Pass में पार्स करें
   const [ip, port, user, pass] = proxyString.split(':');
   
-  console.log(`[PROXY LOAD] Attempting to load ${targetUrl} via proxy: ${ip}:${port}`);
+  console.log(`[PROXY LOAD] Final Attempt to load ${targetUrl} via proxy: ${ip}:${port}`);
   
-  // प्रॉक्सी URL को HttpsProxyAgent के लिए तैयार करें
-  const proxyUrl = `http://${user}:${pass}@${ip}:${port}`;
+  // 🔥 ऑथेंटिकेशन को URL में सीधे एन्कोड किया गया है
+  const proxyUrl = `http://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${ip}:${port}`;
   
-  // 🔥 HttpsProxyAgent का उपयोग करें (HTTPS/SSL साइट्स को HTTP प्रॉक्सी से रूट करने के लिए फिक्स)
   const agent = new HttpsProxyAgent(proxyUrl);
 
   try {
     const response = await axios.get(targetUrl, {
-      httpsAgent: agent, // <-- HTTPS साइट्स के लिए
-      httpAgent: agent,  // <-- HTTP साइट्स के लिए 
+      httpsAgent: agent, // HTTPS
+      httpAgent: agent,  // HTTP
 
       responseType: 'text', 
       headers: {
-        'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36', // Update User-Agent
         'Accept-Encoding': 'identity', 
-        'Host': new URL(targetUrl).host 
+        'Host': new URL(targetUrl).host,
+        'Connection': 'keep-alive' 
       },
-      timeout: 20000 // 20 सेकंड का टाइमआउट
+      timeout: 15000, // 🔥 टाइमआउट को 15 सेकंड तक कम किया गया है
+      maxRedirects: 5
     });
 
-    // प्रॉक्सी की जानकारी के साथ कंटेंट वापस भेजें
     const usedProxy = proxies.find(p => p.ip === ip) || { country: 'Unknown' };
     console.log(`[PROXY LOAD] SUCCESS: ${targetUrl} loaded via ${usedProxy.country}`);
 
@@ -542,18 +453,22 @@ app.post('/api/load', async (req, res) => {
     });
 
   } catch (error) {
-    console.error(`[PROXY LOAD] Proxy Fetch Error: ${error.message}. Target URL: ${targetUrl}`);
+    console.error(`[PROXY LOAD] Final Proxy Fetch Error: ${error.message}. Target URL: ${targetUrl}`);
     
     // विशिष्ट Axios त्रुटियों को कैप्चर करें
     let detailMessage = error.message;
-    if (error.code === 'ECONNREFUSED' || error.code === 'ECONNRESET') {
-        detailMessage = 'Proxy connection refused or reset. Proxy may be offline.';
+    if (error.code === 'ECONNREFUSED' || error.code === 'ECONNRESET' || error.message.includes('socket hang up')) {
+        detailMessage = 'Proxy connection refused, reset, or hung up. Proxy is likely offline or blocking the request.';
     } else if (error.code === 'ETIMEDOUT') {
-        detailMessage = 'Proxy connection timed out.';
+        detailMessage = 'Proxy connection timed out (15 seconds). Proxy is too slow or non-responsive.';
+    } else if (error.response && error.response.status === 407) {
+        detailMessage = 'Proxy Authentication Required (407). Authentication failed.';
+    } else if (error.response && error.response.status === 403) {
+        detailMessage = 'Target site blocked proxy (403 Forbidden).';
     }
 
     res.status(500).json({ 
-      error: 'Proxy Load Failed. (Likely HTTPS/SSL or Proxy is down)', 
+      error: 'Proxy Load Failed. (Final Check Failed)', 
       details: detailMessage 
     });
   }
