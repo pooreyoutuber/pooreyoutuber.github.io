@@ -460,3 +460,9 @@ Requested Change: "${requestedChange}"`;
     );
     }
 });
+// ===================================================================
+// --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
+// ===================================================================
+app.listen(PORT, () => {
+    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
+});
