@@ -82,8 +82,6 @@ const getOptimalDelay = (totalViews) => {
 };
 
 // --- GA4 DATA SENDING, Validation, simulateView, generateViewPlan functions (ORIGINAL) ---
-// Note: Full GA4 functions (sendData, validateKeys, simulateView, generateViewPlan) 
-// are assumed to be copied here from the previous full code block.
 
 // sendData function
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
@@ -365,7 +363,7 @@ Requested Change: "${requestedChange}"`;
 });
 
 // ***********************************************
-// 🚀 4. WEBSITE BOOSTER PRIME (PROXY ROTATOR) LOGIC - NEW AND FIXED
+// 🚀 4. WEBSITE BOOSTER PRIME (PROXY ROTATOR) LOGIC - FIXED
 // ***********************************************
 
 // PROXY LIST
@@ -413,7 +411,7 @@ app.get('/proxy', async (req, res) => {
             httpsAgent: agent, 
             httpAgent: agent,  
             timeout: 25000, 
-            responseType: 'text', // ✅ FIXED: 'arraybuffer' se 'text' kiya
+            responseType: 'text', // FIXED: 'arraybuffer' se 'text' kiya
             maxRedirects: 5,
             validateStatus: (status) => status >= 200 && status < 400, 
             headers: {
@@ -429,7 +427,7 @@ app.get('/proxy', async (req, res) => {
         delete responseHeaders['transfer-encoding'];        
         delete responseHeaders['connection'];  
         
-        // ✅ FIX: Content Type ko confirm karna taaki JS/Ads chal sakein
+        // FIX: Content Type ko confirm karna
         if (!responseHeaders['content-type'] || !responseHeaders['content-type'].includes('text/html')) {
             responseHeaders['content-type'] = 'text/html; charset=utf-8';
         }
@@ -437,8 +435,10 @@ app.get('/proxy', async (req, res) => {
         // Headers set karna aur content wapas bhejna
         res.status(response.status);
         res.set(responseHeaders); 
-        res.send(respo
-} catch (error) {
+        // 🎯 SYNTAX ERROR FIXED HERE
+        res.send(response.data); 
+
+    } catch (error) {
         console.error(`[PROXY FAIL] Error Code: ${error.code || 'UNKNOWN'}. Proxy: ${selectedProxy.country}.`);
         
         // ERROR HANDLING: Proxy fail hone par seedhe load karne ki koshish
@@ -448,7 +448,7 @@ app.get('/proxy', async (req, res) => {
              try {
                 const directResponse = await axios.get(targetUrl, {
                     timeout: 15000,
-                    responseType: 'text', // 'text' use karein
+                    responseType: 'text',
                     headers: { 'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0' }
                 });
                 
