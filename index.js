@@ -438,3 +438,38 @@ app.get('/proxy', async (req, res) => {
         res.status(response.status);
         res.set(responseHeaders); 
         res.send(respo
+} catch (error) {
+        console.error(`[PROXY FAIL] Error Code: ${error.code || 'UNKNOWN'}. Proxy: ${selectedProxy.country}.`);
+        
+        // ERROR HANDLING: Proxy fail hone par seedhe load karne ki koshish
+        if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED' || error.code === 'ERR_PROXY_CONNECTION' || error.code === 'ERR_TUNNEL_TIMEOUT' || error.code === 'EHOSTUNREACH') {
+             console.log('[PROXY FAIL] Attempting direct connection...');
+             
+             try {
+                const directResponse = await axios.get(targetUrl, {
+                    timeout: 15000,
+                    responseType: 'text', // 'text' use karein
+                    headers: { 'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0' }
+                });
+                
+                delete directResponse.headers['content-encoding']; 
+                 if (!directResponse.headers['content-type'] || !directResponse.headers['content-type'].includes('text/html')) {
+                    directResponse.headers['content-type'] = 'text/html; charset=utf-8';
+                }
+                return res.status(directResponse.status).set(directResponse.headers).send(directResponse.data);
+
+             } catch (directError) {
+                return res.status(500).send(`<h1>Proxy and Direct Connection Failed!</h1><p>Both methods failed. Error: ${directError.message.substring(0, 80)}...</p>`);
+             }
+        }
+        
+        return res.status(500).send(`<h1>Critical Error!</h1><p>Proxy Failed: ${error.message.substring(0, 80)}...</p>`);
+    }
+});
+
+// ===================================================================
+// --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
+// ===================================================================
+app.listen(PORT, () => {
+    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
+});
