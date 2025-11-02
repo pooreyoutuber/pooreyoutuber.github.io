@@ -1,0 +1,51 @@
+document.getElementById('proxyForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const url = document.getElementById('url').value.trim();
+    const proxyIp = document.getElementById('proxyIp').value.trim();
+    const websiteContainer = document.getElementById('websiteContainer');
+    
+    // Input validation
+    if (!url || !proxyIp) {
+        websiteContainer.innerHTML = '<div class="info-message" style="color: red;">कृपया दोनों फ़ील्ड्स भरें।</div>';
+        return;
+    }
+    
+    websiteContainer.innerHTML = '<div class="info-message">📡 प्रॉक्सी के माध्यम से वेबसाइट लोड हो रही है...</div>';
+    
+    try {
+        // POST data to the backend endpoint
+        const response = await fetch('/proxy', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url, proxyIp })
+        });
+        
+        // Handle server errors (e.g., 400 or 500 status codes)
+        if (!response.ok) {
+            const errorText = await response.text();
+            websiteContainer.innerHTML = `<div class="info-message" style="color: red;">**त्रुटि:** ${errorText}</div>`;
+            return;
+        }
+
+        const htmlContent = await response.text();
+        
+        // Create and display the content in a secure iframe
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms'); // Added sandbox for better security
+        
+        websiteContainer.innerHTML = ''; // Clear loading message
+        websiteContainer.appendChild(iframe);
+        
+        // Write the received HTML content into the iframe
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(htmlContent);
+        iframe.contentWindow.document.close();
+
+    } catch (error) {
+        // Handle network or fetch errors
+        websiteContainer.innerHTML = `<div class="info-message" style="color: red;">**नेटवर्क त्रुटि:** सर्वर से कनेक्शन नहीं हो पाया। ${error.message}</div>`;
+    }
+});
