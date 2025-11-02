@@ -7,20 +7,18 @@ const nodeFetch = require('node-fetch');
 const cors = require('cors'); 
 const fs = require('fs'); 
 const crypto = require('crypto'); 
-const axios = require('axios'); // <-- Website Booster ke liye iska upyog karenge 
+const axios = require('axios'); // Proxying ke liye
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- GEMINI KEY CONFIGURATION ---
+// --- GEMINI KEY CONFIGURATION (ORIGINAL) ---
 let GEMINI_KEY;
 try {
-    // Attempt to read key from Render Secrets File
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback to Environment Variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -36,7 +34,7 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- MIDDLEWARE & UTILITIES (ORIGINAL CODE) ---
+// --- MIDDLEWARE & UTILITIES (ORIGINAL) ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
@@ -50,26 +48,14 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// 🔥 GLOBAL NAMES (USA/EUROPE FOCUS) for GA4
-const FIRST_NAMES = [
-    "John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", 
-    "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", 
-    "George", "Nicole", "Mark", "Olivia", "Charles", "Sophia", "Daniel", "Chloe"
-];
-
-const LAST_NAMES = [
-    "Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", 
-    "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark",
-    "Lewis", "Walker", "Hall", "Allen", "Young", "Scott", "Adams", "Baker"
-];
-
+// GA4 Helper functions (ORIGINAL)
+const FIRST_NAMES = ["John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", "George", "Nicole", "Mark", "Olivia", "Charles", "Sophia", "Daniel", "Chloe"];
+const LAST_NAMES = ["Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark", "Lewis", "Walker", "Hall", "Allen", "Young", "Scott", "Adams", "Baker"];
 function generateRealName() {
     const firstName = FIRST_NAMES[randomInt(0, FIRST_NAMES.length - 1)];
     const lastName = LAST_NAMES[randomInt(0, LAST_NAMES.length - 1)];
     return { first_name: firstName, last_name: lastName };
 }
-
-
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -95,16 +81,15 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (User-Agent FIX के साथ) ---
+// --- GA4 DATA SENDING, Validation, simulateView, generateViewPlan functions (ORIGINAL) ---
+// Note: Full GA4 functions (sendData, validateKeys, simulateView, generateViewPlan) 
+// are assumed to be copied here from the previous full code block.
+
+// sendData function
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
-
-    // Add timestamp_micros
     payload.timestamp_micros = String(Date.now() * 1000); 
-    
-    // 🔥 FIX: GA4 को यह बताने के लिए User-Agent जोड़ें
     const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36";
-
 
     try {
         const response = await nodeFetch(gaEndpoint, { 
@@ -112,10 +97,9 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             body: JSON.stringify(payload),
             headers: { 
                 'Content-Type': 'application/json',
-                'User-Agent': USER_AGENT // <--- महत्वपूर्ण फिक्स
+                'User-Agent': USER_AGENT 
             }
         });
-
         if (response.status === 204) { 
             console.log(`[View ${currentViewId}] SUCCESS ✅ | Sent: ${eventType}`);
             return { success: true };
@@ -130,10 +114,9 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function before starting the slow loop
+// validateKeys function
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
-
     const testPayload = {
         client_id: cid,
         events: [{ name: "test_event", params: { debug_mode: true, language: "en-US" } }]
@@ -145,7 +128,6 @@ async function validateKeys(gaId, apiSecret, cid) {
             body: JSON.stringify(testPayload),
             headers: { 'Content-Type': 'application/json' }
         });
-        
         const responseData = await response.json();
         
         if (responseData.validationMessages && responseData.validationMessages.length > 0) {
@@ -153,13 +135,9 @@ async function validateKeys(gaId, apiSecret, cid) {
             if (errors.length > 0) {
                 const message = errors[0].description;
                 console.error(`[VALIDATION FAILED] Key/ID Invalid. Google says: ${message}`);
-                if (message.includes("Invalid measurement_id") || message.includes("API Secret is not valid")) {
-                    return { valid: false, message: "GA ID or API Secret is invalid. Please check keys." };
-                }
-                return { valid: false, message: `Validation Error: ${message.substring(0, 80)}` };
+                return { valid: false, message: (message.includes("Invalid measurement_id") || message.includes("API Secret is not valid")) ? "GA ID or API Secret is invalid. Please check keys." : `Validation Error: ${message.substring(0, 80)}` };
             }
         }
-        
         console.log("[VALIDATION SUCCESS] Keys and basic payload passed Google's check.");
         return { valid: true };
 
@@ -169,130 +147,59 @@ async function validateKeys(gaId, apiSecret, cid) {
     }
 }
 
-
-/**
- * Simulates a single view session with search, scroll, and engagement events.
- */
+// simulateView function
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const geo = getRandomGeo(); 
-    const name = generateRealName(); // <-- नया नाम जनरेट करें
+    const name = generateRealName(); 
     const session_id = Date.now(); 
     
-    // 🔥 CRITICAL FIX: User Properties में नाम जोड़ें
     const userProperties = {
         country: { value: geo.country },
         region: { value: geo.region },
         user_timezone: { value: geo.timezone },
-        first_name: { value: name.first_name }, // <-- नाम
-        last_name: { value: name.last_name }    // <-- सरनेम
+        first_name: { value: name.first_name },
+        last_name: { value: name.last_name }
     };
+    let referrer = searchKeyword ? `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}` : (Math.random() < 0.3 ? (Math.random() < 0.5 ? "https://t.co/random" : "https://exampleblog.com/post-link") : "direct");
 
-    let referrer = "direct"; 
-    
-    // 1. SESSION START EVENT
-    let sessionStartEvents = [
-        { 
-            name: "session_start", 
-            params: { 
-                session_id: session_id, 
-                _ss: 1, 
-                debug_mode: true 
-            } 
-        }
-    ];
-    
-    if (searchKeyword) {
-        referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-    } else if (Math.random() < 0.3) { 
-        referrer = Math.random() < 0.5 ? "https://t.co/random" : "https://exampleblog.com/post-link";
-    }
-
-    const sessionStartPayload = {
-        client_id: cid,
-        user_properties: userProperties,
-        events: sessionStartEvents
-    };
+    let sessionStartEvents = [{name: "session_start", params: { session_id: session_id, _ss: 1, debug_mode: true }}];
+    const sessionStartPayload = { client_id: cid, user_properties: userProperties, events: sessionStartEvents };
 
     let allSuccess = true;
-    
     console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}, User: ${name.first_name} ${name.last_name}). Session ID: ${session_id} ---`);
 
-    // Send SESSION START
     let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'session_start');
     if (!result.success) allSuccess = false;
-
     await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
 
+    const pageViewEvents = [{ name: 'page_view', params: { page_location: url, page_title: searchKeyword ? `Search: ${searchKeyword}` : "Simulated Page View", page_referrer: referrer, session_id: session_id, debug_mode: true, language: "en-US" }}];
+    const pageViewPayload = { client_id: cid, user_properties: userProperties, events: pageViewEvents };
 
-    // 2. PAGE VIEW EVENT
-    const pageViewEvents = [
-        { 
-            name: 'page_view', 
-            params: { 
-                page_location: url, 
-                page_title: searchKeyword ? `Search: ${searchKeyword}` : "Simulated Page View",
-                page_referrer: referrer, 
-                session_id: session_id, 
-                debug_mode: true,
-                language: "en-US" 
-            } 
-        }
-    ];
-
-    const pageViewPayload = {
-        client_id: cid,
-        user_properties: userProperties,
-        events: pageViewEvents
-    };
-
-    // Send PAGE VIEW
     result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (!result.success) allSuccess = false;
 
     const firstWait = randomInt(3000, 8000);
     await new Promise(resolve => setTimeout(resolve, firstWait));
 
-    // 3. SCROLL EVENT
-    const scrollPayload = {
-        client_id: cid,
-        user_properties: userProperties, 
-        events: [{ name: "scroll", params: { session_id: session_id, debug_mode: true } }]
-    };
+    const scrollPayload = { client_id: cid, user_properties: userProperties, events: [{ name: "scroll", params: { session_id: session_id, debug_mode: true } }] };
     result = await sendData(gaId, apiSecret, scrollPayload, viewCount, 'scroll');
     if (!result.success) allSuccess = false;
 
     const secondWait = randomInt(3000, 8000);
     await new Promise(resolve => setTimeout(resolve, secondWait));
 
-    // 4. USER ENGAGEMENT
-    const engagementTime = firstWait + secondWait + randomInt(5000, 20000); 
+    const engagementTime = firstWait + secondWait + randomInt(5000, 20000);
+    const engagementPayload = { client_id: cid, user_properties: userProperties, events: [{ name: "user_engagement", params: { engagement_time_msec: engagementTime, session_id: session_id, interaction_type: "click_simulated", debug_mode: true } }] };
     
-    const engagementPayload = {
-        client_id: cid,
-        user_properties: userProperties, 
-        events: [
-            { 
-                name: "user_engagement", 
-                params: { 
-                    engagement_time_msec: engagementTime, 
-                    session_id: session_id,
-                    interaction_type: "click_simulated",
-                    debug_mode: true 
-                } 
-            }
-        ]
-    };
     result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
     if (!result.success) allSuccess = false;
 
     console.log(`[View ${viewCount}] Completed session. Total Time: ${Math.round(engagementTime/1000)}s. (Success: ${allSuccess ? 'Yes' : 'No'})`);
-
     return allSuccess;
 }
 
-
-// --- VIEW PLAN GENERATION ---
+// generateViewPlan function
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -332,7 +239,6 @@ app.post('/boost-mp', async (req, res) => {
            return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    // 🔑 STEP 1: VALIDATE KEYS 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
     
     if (!validationResult.valid) {
@@ -342,19 +248,16 @@ app.post('/boost-mp', async (req, res) => {
          });
     }
 
-    // STEP 2: ACKNOWLEDGEMENT
     res.json({ 
         status: 'accepted', 
         message: `✨ Request accepted. Keys validated. Processing started in the background (~2 hours). CHECK DEBUGVIEW NOW!`
     });
 
-    // STEP 3: Start the heavy, time-consuming simulation in the background
     (async () => {
         const totalViews = viewPlan.length;
         console.log(`\n=================================================`);
         console.log(`[BOOSTER START] Starting real simulation for ${totalViews} views.`);
         console.log(`=================================================`);
-
 
         for (let i = 0; i < totalViews; i++) {
             const url = viewPlan[i];
@@ -456,15 +359,16 @@ Requested Change: "${requestedChange}"`;
 
     } catch (error) {
         console.error('Gemini API Error (Edit):', error.message);
-        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
+        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` }
+    );
     }
 });
 
 // ***********************************************
-// 🚀 4. WEBSITE BOOSTER PRIME (PROXY ROTATOR) LOGIC - NEW
+// 🚀 4. WEBSITE BOOSTER PRIME (PROXY ROTATOR) LOGIC - NEW AND FIXED
 // ***********************************************
 
-// PROXY LIST (Same as before, since it's the working set)
+// PROXY LIST
 const PROXIES = [
     { ip: '142.111.48.253', port: 7030, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' },
     { ip: '31.59.20.176', port: 6754, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'UK' },
@@ -480,46 +384,39 @@ const PROXIES = [
 
 app.get('/proxy', async (req, res) => {
     const targetUrl = req.query.url;
-    const proxyIndex = req.query.index; // Front-end se aane wala specific index
+    const proxyIndex = req.query.index; 
     
     if (!targetUrl) {
         return res.status(400).send("<h1>Error 400: URL parameter missing.</h1>");
     }
 
     let selectedProxy;
-    let isRotation = true;
-
+    
     // Proxy Selection Logic
-    if (proxyIndex && PROXIES[parseInt(proxyIndex)]) {
+    if (proxyIndex && PROXIES[parseInt(proxyIndex)] !== undefined) {
         selectedProxy = PROXIES[parseInt(proxyIndex)];
-        isRotation = false;
     } else {
-        // Auto/Rotation
         selectedProxy = PROXIES[randomInt(0, PROXIES.length - 1)];
     }
 
-    // Proxy string banana
     const proxyAuth = `${selectedProxy.user}:${selectedProxy.pass}`;
     const proxyUrl = `http://${proxyAuth}@${selectedProxy.ip}:${selectedProxy.port}`;
-
-    // HttpsProxyAgent ka upyog karna, kyunki aapne 'request' ki jagah 'axios' use kiya hai.
     const agent = new HttpsProxyAgent(proxyUrl);
     
-    console.log(`[PROXY START] Loading ${targetUrl} via ${isRotation ? 'ROTATION' : 'MANUAL'} proxy: ${selectedProxy.country}`);
+    console.log(`[PROXY START] Loading ${targetUrl} via ${selectedProxy.country} (${selectedProxy.ip})`);
 
     try {
         // 1. Proxy ke zariye request bhejna
         const response = await axios({
             method: 'get',
             url: targetUrl,
-            httpsAgent: agent, // Proxy agent use karna
-            httpAgent: agent,  // HTTP request ke liye bhi (agar target HTTP ho)
+            httpsAgent: agent, 
+            httpAgent: agent,  
             timeout: 25000, 
-            responseType: 'arraybuffer', // Response ko buffer mein padhna
+            responseType: 'text', // ✅ FIXED: 'arraybuffer' se 'text' kiya
             maxRedirects: 5,
-            validateStatus: (status) => status >= 200 && status < 400, // Sirf successful status codes ko handle karna
+            validateStatus: (status) => status >= 200 && status < 400, 
             headers: {
-                // Front-end ke User-Agent ko bhejna
                 'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0'
             }
         });
@@ -530,46 +427,14 @@ app.get('/proxy', async (req, res) => {
         delete responseHeaders['content-security-policy']; 
         delete responseHeaders['x-frame-options'];         
         delete responseHeaders['transfer-encoding'];        
-        delete responseHeaders['connection'];             
+        delete responseHeaders['connection'];  
+        
+        // ✅ FIX: Content Type ko confirm karna taaki JS/Ads chal sakein
+        if (!responseHeaders['content-type'] || !responseHeaders['content-type'].includes('text/html')) {
+            responseHeaders['content-type'] = 'text/html; charset=utf-8';
+        }
 
         // Headers set karna aur content wapas bhejna
         res.status(response.status);
         res.set(responseHeaders); 
-        res.send(response.data); // Buffer ko client ko bhejna
-
-    } catch (error) {
-        console.error(`[PROXY FAIL] Error Code: ${error.code || 'UNKNOWN'}. Proxy: ${selectedProxy.country}.`);
-        
-        // ERROR HANDLING: Proxy fail hone par seedhe load karne ki koshish (GA4 support ke liye)
-        if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED' || error.code === 'ERR_PROXY_CONNECTION' || error.code === 'ERR_TUNNEL_TIMEOUT') {
-             console.log('[PROXY FAIL] Attempting direct connection...');
-             
-             try {
-                // Direct connection attempt
-                const directResponse = await axios.get(targetUrl, {
-                    timeout: 15000,
-                    responseType: 'arraybuffer',
-                    headers: { 'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0' }
-                });
-                
-                // Direct connection successful
-                delete directResponse.headers['content-encoding']; 
-                return res.status(directResponse.status).set(directResponse.headers).send(directResponse.data);
-
-             } catch (directError) {
-                // Direct connection bhi fail
-                return res.status(500).send(`<h1>Proxy and Direct Connection Failed!</h1><p>Both methods failed. Check target URL and proxy validity. Error: ${directError.message.substring(0, 80)}...</p>`);
-             }
-        }
-        
-        // Other critical errors
-        return res.status(500).send(`<h1>Critical Error!</h1><p>Proxy Failed: ${error.message.substring(0, 80)}...</p>`);
-    }
-});
-
-// ===================================================================
-// --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
-// ===================================================================
-app.listen(PORT, () => {
-    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
-});
+        res.send(respo
