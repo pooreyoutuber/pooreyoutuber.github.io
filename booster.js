@@ -1,10 +1,9 @@
-// File: booster.js
+// public/booster.js
 
-// ⚠️ RENDER BACKEND URL (Yeh aapke index.js file ko call karega)
-const RENDER_BACKEND_URL = "https://pooreyoutuber-github-io-blmp.onrender.com/proxy"; 
+// 🛑 IMPORTANT: Replace this with your actual Render deployment URL (e.g., https://your-app-name.onrender.com)
+const BASE_API_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com'; 
 
-// Proxy list (Hardcoded for Front-end display and selection)
-// NOTE: Actual rotation backend (index.js) mein hoga.
+// Proxy list jise hum frontend me dikhayenge (backend mein bhi yahi list hai)
 const PROXIES = [
     { ip: '142.111.48.253', port: 7030, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' },
     { ip: '31.59.20.176', port: 6754, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'UK' },
@@ -18,85 +17,97 @@ const PROXIES = [
     { ip: '142.147.128.93', port: 6593, user: 'bqctypvz', pass: '399xb3kxqv6i', country: 'US' }
 ];
 
-document.addEventListener('DOMContentLoaded', initializeTool);
+document.addEventListener('DOMContentLoaded', () => {
+    const proxySelector = document.getElementById('proxySelector');
+    const loadBtn = document.getElementById('loadBtn');
+    const copyProxyBtn = document.getElementById('copyProxyBtn');
+    const targetUrlInput = document.getElementById('targetUrl');
+    const proxyFrame = document.getElementById('proxyFrame');
+    const proxyStringInput = document.getElementById('proxyString');
+    const proxyInfoDiv = document.getElementById('proxyInfo');
 
-function initializeTool() {
-    populateProxySelector();
-    document.getElementById('loadBtn').addEventListener('click', loadProxiedPage);
-    document.getElementById('copyProxyBtn').addEventListener('click', copyProxyString);
-    updateProxyInfo();
-    updateProxyString();
-    document.getElementById('proxySelector').addEventListener('change', updateProxyString);
-}
-
-function populateProxySelector() {
-    const selector = document.getElementById('proxySelector');
-    // 'Auto Proxy' pehle se hai
-    
+    // 1. Proxy Selector ko proxies se bharna
     PROXIES.forEach((proxy, index) => {
         const option = document.createElement('option');
-        // Option value mein index + 1 rakhein (0 auto ke liye hai)
-        option.value = index; 
-        option.textContent = `${proxy.country} - ${proxy.ip}`;
-        selector.appendChild(option);
+        option.value = index;
+        option.textContent = `${proxy.country} - ${proxy.ip} (Index: ${index})`;
+        proxySelector.appendChild(option);
     });
-}
 
-function updateProxyInfo() {
-    const infoDiv = document.getElementById('proxyInfo');
-    const randomIndex = Math.floor(Math.random() * PROXIES.length);
-    const selectedProxy = PROXIES[randomIndex];
-    infoDiv.innerHTML = `Current Proxy: <b>${selectedProxy.ip}:${selectedProxy.port}</b> (${selectedProxy.country}).`;
-}
+    // 2. Load Button Event Handler
+    loadBtn.addEventListener('click', loadProxiedWebsite);
 
-function updateProxyString() {
-    const selector = document.getElementById('proxySelector');
-    const index = selector.value;
-    const proxyStringInput = document.getElementById('proxyString');
-    
-    if (index === 'auto') {
-        // 'Auto' select hone par, front-end koi bhi string nahi dikha sakta, isliye placeholder
-        proxyStringInput.value = 'Auto Proxy (Rotation) is selected. Use the Load button.';
-    } else {
-        const proxy = PROXIES[parseInt(index)];
-        // Proxy string format: user:pass@ip:port
-        proxyStringInput.value = `${proxy.user}:${proxy.pass}@${proxy.ip}:${proxy.port}`;
+    // 3. Proxy Selector change hone par proxy string update karna
+    proxySelector.addEventListener('change', updateProxyString);
+
+    // 4. Copy Proxy Button Event Handler
+    copyProxyBtn.addEventListener('click', copyProxyString);
+
+    // Default URL daal dein
+    targetUrlInput.value = "https://pooreyoutuber.github.io/test-ads.html";
+
+    // Initial proxy string set karna
+    updateProxyString();
+
+    function loadProxiedWebsite() {
+        const websiteUrl = targetUrlInput.value.trim();
+        const selectedIndex = proxySelector.value;
+        
+        if (!websiteUrl) {
+            alert("Kripya website URL daalein.");
+            return;
+        }
+
+        // URL ko encode karna
+        const encodedUrl = encodeURIComponent(websiteUrl);
+        
+        // Proxy URL banana
+        let proxyCallUrl = `${BASE_API_URL}/proxy?url=${encodedUrl}`;
+
+        if (selectedIndex !== 'auto') {
+            // Agar user ne specific proxy chuna hai
+            proxyCallUrl += `&index=${selectedIndex}`;
+            const selectedProxy = PROXIES[parseInt(selectedIndex)];
+            proxyInfoDiv.innerHTML = `<strong>🌐 Loading via:</strong> ${selectedProxy.country} (${selectedProxy.ip}:${selectedProxy.port})`;
+        } else {
+            // Agar Auto chuna hai, index nahi bhejenge, backend random chunegea
+            proxyInfoDiv.innerHTML = `<strong>🔄 Loading via:</strong> Auto-Rotate Proxy (Random Geo)`;
+        }
+
+        // Iframe mein URL load karna
+        proxyFrame.src = proxyCallUrl;
+        loadBtn.textContent = "Loading...";
+        loadBtn.disabled = true;
+
+        // Iframe load hone ke baad button wapas enable karna
+        proxyFrame.onload = () => {
+            loadBtn.textContent = "Load via Proxy";
+            loadBtn.disabled = false;
+        };
+        
+        proxyFrame.onerror = () => {
+            proxyInfoDiv.innerHTML = `<strong>❌ Error:</strong> Website load nahi ho payi.`;
+            loadBtn.textContent = "Load via Proxy";
+            loadBtn.disabled = false;
+        };
     }
-}
 
-function loadProxiedPage() {
-    const urlInput = document.getElementById('targetUrl').value.trim();
-    const frame = document.getElementById('proxyFrame');
-    const selector = document.getElementById('proxySelector');
-    
-    if (!urlInput) {
-        alert('Kripya URL daalein.');
-        return;
+    function updateProxyString() {
+        const selectedIndex = proxySelector.value;
+        let proxyString = "";
+        
+        if (selectedIndex !== 'auto') {
+            const proxy = PROXIES[parseInt(selectedIndex)];
+            proxyString = `http://${proxy.user}:${proxy.pass}@${proxy.ip}:${proxy.port}`;
+        } else {
+            proxyString = "Proxy Rotation is handled by the backend /proxy API.";
+        }
+        proxyStringInput.value = proxyString;
     }
 
-    // Proxy selector ki value
-    const proxyIndex = selector.value;
-    
-    // Front-end par URL banane ka logic
-    let finalProxyUrl = `${RENDER_BACKEND_URL}?url=${encodeURIComponent(urlInput)}`;
-
-    if (proxyIndex !== 'auto') {
-        // Agar user ne koi specific proxy chuni hai, to uska index backend ko bhejte hain
-        finalProxyUrl += `&index=${proxyIndex}`;
+    function copyProxyString() {
+        proxyStringInput.select();
+        document.execCommand('copy');
+        alert("Proxy String copied to clipboard!");
     }
-    
-    // Update proxy info (Taki user ko pata chale ki rotation ho raha hai)
-    updateProxyInfo();
-
-    // Iframe mein load karna
-    frame.src = finalProxyUrl;
-    console.log("Request sent to Render backend:", finalProxyUrl);
-}
-
-function copyProxyString() {
-    const proxyStringInput = document.getElementById('proxyString');
-    proxyStringInput.select();
-    proxyStringInput.setSelectionRange(0, 99999); // Mobile devices ke liye
-    navigator.clipboard.writeText(proxyStringInput.value);
-    alert("Proxy string copied to clipboard!");
-}
+});
