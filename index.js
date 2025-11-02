@@ -1,16 +1,19 @@
-// index.js (यह आपका अंतिम, फिक्स किया हुआ और मर्ज किया हुआ कोड है)
+// index.js (Corrected and Refactored Code)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
+// node-fetch is deprecated, but since you used v2.6.7, we'll keep it for consistency.
+// Note: Node.js has a built-in 'fetch' since v18, but we stick to the module for safety.
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-const crypto = require('crypto'); 
-const axios = require('axios');          
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
+const crypto = require('crypto'); // Built-in in Node.js
+const axios = require('axios'); // For any future HTTP need
+const { HttpsProxyAgent } = require('https-proxy-agent'); // If you need proxy later (not used currently)
 
 const app = express();
+// Render environment provides PORT, use 10000 as a fallback (though Render sets it dynamically)
 const PORT = process.env.PORT || 10000; 
 
 // --- GEMINI KEY CONFIGURATION ---
@@ -31,8 +34,10 @@ try {
 
 let ai;
 if (GEMINI_KEY) {
+    // Initialize AI client only if key is available
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
+    // Mock the AI client to fail gracefully if the key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -84,14 +89,16 @@ function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
 }
 function generateClientId() {
+    // Using built-in crypto.randomUUID for client_id
     return crypto.randomUUID(); 
 }
 const getOptimalDelay = (totalViews) => {
-    const targetDurationMs = 7200000; // 2 Hours
+    // Logic to spread views over a 2-hour window (7,200,000 ms)
+    const targetDurationMs = 7200000; 
     const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
     const minDelay = Math.max(1000, avgDelayMs * 0.7); 
     const maxDelay = avgDelayMs * 1.3;
-    const finalMaxDelay = Math.min(maxDelay, 1200000); 
+    const finalMaxDelay = Math.min(maxDelay, 1200000); // Capped at 20 minutes max delay
     return randomInt(minDelay, finalMaxDelay);
 };
 
@@ -176,7 +183,7 @@ async function validateKeys(gaId, apiSecret, cid) {
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const geo = getRandomGeo(); 
-    const name = generateRealName(); // <-- नया नाम जनरेट करें
+    const name = generateRealName(); 
     const session_id = Date.now(); 
     
     // 🔥 CRITICAL FIX: User Properties में नाम जोड़ें
@@ -184,8 +191,8 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         country: { value: geo.country },
         region: { value: geo.region },
         user_timezone: { value: geo.timezone },
-        first_name: { value: name.first_name }, // <-- नाम
-        last_name: { value: name.last_name }    // <-- सरनेम
+        first_name: { value: name.first_name }, 
+        last_name: { value: name.last_name }    
     };
 
     let referrer = "direct"; 
@@ -197,7 +204,8 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
             params: { 
                 session_id: session_id, 
                 _ss: 1, 
-                debug_mode: true 
+                debug_mode: true,
+                sc: 'start' // <--- GA4 FIX: यह session context के लिए महत्वपूर्ण है
             } 
         }
     ];
@@ -297,6 +305,7 @@ function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
     
+    // Check if total percentage is roughly 100
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         return [];
     }
@@ -310,6 +319,7 @@ function generateViewPlan(totalViews, pages) {
         }
     });
 
+    // Shuffle the array to randomize the order of URLs
     viewPlan.sort(() => Math.random() - 0.5);
     return viewPlan;
 }
@@ -414,6 +424,7 @@ app.post('/api/caption-generate', async (req, res) => {
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
+        // Use a generic error message for external clients
         res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
