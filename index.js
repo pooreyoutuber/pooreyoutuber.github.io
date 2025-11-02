@@ -7,8 +7,8 @@ const nodeFetch = require('node-fetch');
 const cors = require('cors'); 
 const fs = require('fs'); 
 const crypto = require('crypto'); 
-const axios = require('axios');          
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
+const axios = require('axios'); // <-- प्रॉक्सी लोडिंग के लिए आवश्यक
+const { HttpsProxyAgent } = require('https-proxy-agent'); // <-- यदि आवश्यकता हो
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -329,17 +329,17 @@ app.post('/boost-mp', async (req, res) => {
     
     const viewPlan = generateViewPlan(totalViewsRequested, pages.filter(p => p.percent > 0)); 
     if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
+           return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
     // 🔑 STEP 1: VALIDATE KEYS 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
     
     if (!validationResult.valid) {
-         return res.status(400).json({ 
-            status: 'error', 
-            message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
-        });
+           return res.status(400).json({ 
+             status: 'error', 
+             message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
+         });
     }
 
     // STEP 2: ACKNOWLEDGEMENT
@@ -460,6 +460,95 @@ Requested Change: "${requestedChange}"`;
     );
     }
 });
+
+
+// -------------------------------------------------------------------
+// 🔥 NEW TOOL: WEBSITE PROXY/BOOSTER (URL LOADER)
+// -------------------------------------------------------------------
+
+// प्रॉक्सी लिस्ट को लोड करें (सुनिश्चित करें कि proxies.json मौजूद है)
+let proxies = [];
+try {
+    proxies = require('./proxies.json');
+    console.log(`[PROXY TOOL] Loaded ${proxies.length} proxies.`);
+} catch (e) {
+    console.error("[PROXY TOOL] FATAL: proxies.json not found or invalid. Proxy tool will fail.");
+}
+
+// ===================================================================
+// 4. PROXY LIST ENDPOINT (API: /api/proxies) - URL Proxy Tool
+// ===================================================================
+app.get('/api/proxies', (req, res) => {
+    if (proxies.length === 0) {
+        return res.status(500).json({ error: 'Proxy list not loaded on the server.' });
+    }
+    // प्रॉक्सी में से यूज़र/पासवर्ड को हटाकर सुरक्षित रूप में फ्रंटएंड को भेजें
+    const safeProxies = proxies.map((p, index) => ({
+        id: index,
+        ip: p.ip,
+        port: p.port,
+        country: p.country,
+        fullString: `${p.ip}:${p.port}:${p.user}:${p.pass}` // fullString में auth डिटेल शामिल है, जो केवल बैकएंड इस्तेमाल करेगा।
+    }));
+    res.json(safeProxies);
+});
+
+// ===================================================================
+// 5. PROXY LOAD ENDPOINT (API: /api/load) - URL Proxy Tool
+// ===================================================================
+app.post('/api/load', async (req, res) => {
+  const { targetUrl, proxyString } = req.body;
+  
+  if (!targetUrl || !proxyString) {
+    return res.status(400).json({ error: 'Target URL and Proxy are required' });
+  }
+
+  // प्रॉक्सी स्ट्रिंग को IP, Port, User, Pass में पार्स करें
+  const [ip, port, user, pass] = proxyString.split(':');
+  
+  console.log(`[PROXY LOAD] Loading ${targetUrl} via proxy: ${ip}:${port}`);
+
+  try {
+    // Axios का उपयोग प्रॉक्सी के माध्यम से अनुरोध भेजने के लिए
+    const response = await axios.get(targetUrl, {
+      proxy: {
+        protocol: 'http',
+        host: ip,
+        port: parseInt(port),
+        auth: { username: user, password: pass },
+      },
+      responseType: 'text', 
+      headers: {
+        // यह हेडर टार्गेट वेबसाइट को प्रॉक्सी IP दिखाता है
+        'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36',
+        'Accept-Encoding': 'identity', // compression को हटाएँ
+        'Host': new URL(targetUrl).host // Host हेडर सेट करें
+      },
+      timeout: 15000 // 15 सेकंड का टाइमआउट
+    });
+
+    // प्रॉक्सी की जानकारी के साथ कंटेंट वापस भेजें
+    const usedProxy = proxies.find(p => p.ip === ip) || { country: 'Unknown' };
+
+    res.json({
+      htmlContent: response.data,
+      usedProxy: {
+        ip,
+        port,
+        country: usedProxy.country,
+        fullString: proxyString
+      }
+    });
+
+  } catch (error) {
+    console.error(`[PROXY LOAD] Proxy Fetch Error: ${error.message}. URL: ${targetUrl}`);
+    res.status(500).json({ 
+      error: 'Proxy Load Failed. (Proxy may be down or URL is HTTPS/Blocked)', 
+      details: error.message 
+    });
+  }
+});
+
 // ===================================================================
 // --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
 // ===================================================================
