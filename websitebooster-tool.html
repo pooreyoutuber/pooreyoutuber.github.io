@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime - Fixed</title>
+<title>Website Booster Prime</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -56,21 +56,29 @@
     width: calc(100% / 0.4);
     height: calc(100% / 0.4);
     opacity: 1;
-    /* Added transition for smoother scroll animation */
-    transition: transform 0.2s ease-out; 
+    transition: transform 0.1s ease; /* Smooth transition for non-scrolling state */
   }
   
-  /* --- CSS for Randomized Auto-Scrolling --- */
-  @keyframes scroll-staggered {
+  /* --- CSS for Auto-Scrolling: UPWARD --- */
+  @keyframes scroll-up {
     0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, var(--scroll-distance)) scale(0.4); } 
+    50% { transform: translate(0, -200%) scale(0.4); } 
     100% { transform: translate(0, 0) scale(0.4); } 
   }
+  
+  /* --- CSS for Auto-Scrolling: DOWNWARD --- */
+  @keyframes scroll-down {
+    0% { transform: translate(0, -200%) scale(0.4); } 
+    50% { transform: translate(0, 0) scale(0.4); } 
+    100% { transform: translate(0, -200%) scale(0.4); } 
+  }
 
-  .slot.scrolling iframe {
-    animation-name: scroll-staggered;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
+  .slot.scroll-up iframe {
+    animation: scroll-up 8s ease-in-out infinite; /* Slower, more natural scroll */
+  }
+  
+  .slot.scroll-down iframe {
+    animation: scroll-down 8s ease-in-out infinite; /* Slower, more natural scroll */
   }
   /* ---------------------------------- */
   
@@ -118,15 +126,15 @@
             <label for="repeatMode">
                 Enable **Active User** Mode: Repeat all 
                 <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="15" min="10" max="60" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <input id="minTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
                 <label for="maxTime">Max:</label>
-                <input id="maxTime" type="number" value="30" min="10" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <input id="maxTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
                 <span>seconds cycle</span> for better GA tracking.
             </label>
             
             <input type="checkbox" id="autoScrollMode" />
             <label for="autoScrollMode">
-                Enable **Auto Scroll** (Simulated - Staggered)
+                Enable **Dynamic Auto Scroll** (Simulated)
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
@@ -161,10 +169,11 @@ const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
 // Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
+    // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -202,7 +211,7 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const MAX_SLOTS = 20; 
+const MAX_SLOTS = 20; // Maximum slots set to 20
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
 const gridContainer = document.getElementById('gridContainer');
@@ -210,8 +219,8 @@ const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
-const minTimeInput = document.getElementById('minTime'); 
-const maxTimeInput = document.getElementById('maxTime'); 
+const minTimeInput = document.getElementById('minTime'); // New
+const maxTimeInput = document.getElementById('maxTime'); // New
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
@@ -219,37 +228,31 @@ let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 
+// Map proxies with fixed unique IDs
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() 
+    uniqueId: generateUniqueId(), // Unique ID for GA4 Cookie Fix
+    // ADDED: Random scroll direction for each proxy
+    scrollDirection: (index % 2 === 0) ? 'scroll-up' : 'scroll-down' 
 }));
 
+// Function to get a random delay from the user-defined min/max time
 function getRandomDelay() {
-    // Get values from input fields (convert seconds to milliseconds)
-    // Ensure min <= max, use Math.max to enforce min limit if user manually changes the input
-    const minSec = Math.max(parseInt(minTimeInput.value) || 10, 10);
-    const maxSec = Math.min(parseInt(maxTimeInput.value) || 30, 30); // Enforce max 30
+    // Get values from new input fields (convert seconds to milliseconds)
+    const minSec = parseInt(minTimeInput.value);
+    const maxSec = parseInt(maxTimeInput.value);
     
+    // Ensure valid range
     const minMs = Math.min(minSec, maxSec) * 1000;
     const maxMs = Math.max(minSec, maxSec) * 1000;
     
+    // Generate random delay
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
-function getRandomScrollProps() {
-    // Random duration between 4s and 8s for a smoother scroll
-    const duration = (Math.random() * 4 + 4).toFixed(1) + 's'; 
-    // Random delay between 0s and 3s
-    const delay = (Math.random() * 3).toFixed(1) + 's';
-    // Random distance for scrolling (e.g., between -100% and -300%)
-    const distanceFactor = (Math.random() * 2 + 1).toFixed(2); 
-    const distance = `-${distanceFactor}0%`; 
-    
-    return { duration, delay, distance };
-}
-
+// Function to create a single slot element
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -281,8 +284,6 @@ function createSlot(index, proxy){
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
-  
-  const scrollProps = getRandomScrollProps();
 
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
@@ -290,42 +291,39 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
+      // Sending the Unique ID (uid) to the PHP script
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; 
+          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
   }
 
+  // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
-    // 1. iFrame Load (Visible preview) - Load the URL into the iframe
+    // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
-    // Apply/Remove scrolling class and set unique animation properties
+    // Apply/Remove scrolling class (UPDATED LOGIC)
+    el.classList.remove('scroll-up', 'scroll-down');
     if (autoScrollModeCheckbox.checked) {
-        el.classList.add('scrolling');
-        el.style.setProperty('--scroll-distance', scrollProps.distance);
-        iframe.style.animationDuration = scrollProps.duration;
-        iframe.style.animationDelay = scrollProps.delay;
-        iframe.style.animationPlayState = 'running';
-
-    } else {
-        el.classList.remove('scrolling');
-        iframe.style.animation = 'none';
+        // Use the pre-determined random scroll direction
+        el.classList.add(proxy.scrollDirection); 
     }
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending Unique Proxy View (Session)...', false);
+    setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. 
+        // Fetch request is sent. PHP script runs in background for session time.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
+        // Response is quick due to Connection: close header in PHP
         setStatus('View Sent (BG Session Active)', true);
         
     } catch (e) {
@@ -350,14 +348,16 @@ function createSlot(index, proxy){
   
   setStatus('Ready', true);
 
+  // Expose the slot element to allow toggling scrolling globally on existing slots
   return { 
       runAutomation, 
       setStatus,
       element: el,
-      scrollProps 
+      proxy: proxy // Keep proxy object accessible for scroll toggle
   }; 
 }
 
+// Function to redraw slots based on the selected number
 function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
@@ -377,6 +377,7 @@ function renderSlots(count) {
     stopAllAutomation();
 }
 
+// Global Stop Function
 function stopAllAutomation() {
     repeatIntervals.forEach(intervalId => clearInterval(intervalId));
     repeatIntervals = [];
@@ -385,13 +386,14 @@ function stopAllAutomation() {
     
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); 
-        // Reset iframe src to blank and stop animation completely
-        s.element.querySelector('iframe').src = 'about:blank';
-        s.element.querySelector('iframe').style.animation = 'none'; 
+        // Stop scrolling on all slots
+        s.element.classList.remove('scroll-up', 'scroll-down'); 
     });
+    
+    // repeatModeCheckbox.checked = false; // Keep checked state if user wants to stop/restart
 }
 
+// Global Start/Run Logic
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -402,37 +404,24 @@ globalGoBtn.addEventListener('click', ()=>{
   // Run once immediately
   currentSlots.forEach(s => s.runAutomation(url));
   
+  // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // Function to set up the next interval with a random delay
-        const setupNextInterval = (slot, initialDelay) => {
-            const delayInSeconds = (initialDelay / 1000).toFixed(1);
-            slot.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        // CRITICAL CHANGE: Get a random delay from the user-defined min/max time
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
-            const intervalId = setInterval(() => {
-                slot.runAutomation(url);
-                // After running, stop the current interval and set up the next one immediately
-                clearInterval(intervalId);
-                const nextRandomDelay = getRandomDelay();
-                setupNextInterval(slot, nextRandomDelay); // Recursively set up the next one
-            }, initialDelay); 
-            
-            // Keep track of the current active interval ID for stopping
-            const indexToReplace = repeatIntervals.findIndex(id => id === slot.currentIntervalId);
-            if (indexToReplace > -1) {
-                repeatIntervals[indexToReplace] = intervalId;
-            } else {
-                repeatIntervals.push(intervalId);
-            }
-            slot.currentIntervalId = intervalId; // Store the current ID in the slot object
-        };
-
-        s.currentIntervalId = null; // Initialize current interval tracker
-        setupNextInterval(s, getRandomDelay());
-        s.setStatus(`Starting Repeat Mode...`, true);
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, randomDelay); // Use the random delay here
+        
+        repeatIntervals.push(intervalId);
     });
   }
 });
@@ -444,13 +433,32 @@ numSlotsInput.addEventListener('change', (e) => {
     renderSlots(count);
 });
 
+// Event listener for auto-scroll checkbox (UPDATED LOGIC)
 autoScrollModeCheckbox.addEventListener('change', (e) => {
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
-        const iframe = s.element.querySelector('iframe');
+        // Clear both classes first
+        s.element.classList.remove('scroll-up', 'scroll-down');
+        
         if (isScrolling) {
-            s.element.classList.add('scrolling');
-            s.element.style.setProperty('--scroll-distance', s.scrollProps.distance);
-            iframe.style.animationDuration = s.scrollProps.duration;
-            iframe.style.animationDelay = s.scrollProps.delay;
-    
+            // Apply the pre-determined direction for the slot
+            s.element.classList.add(s.proxy.scrollDirection); 
+        }
+    });
+});
+
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    // If repeat mode is unchecked while running, stop all.
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
+</body>
+</html>
