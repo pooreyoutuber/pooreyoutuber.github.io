@@ -1,4 +1,4 @@
-// index.js (Modified Code with GA4 Fixes for better reporting)
+// index.js (FINAL VERSION - Replit Logic Integrated for Client ID/Session ID)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -16,11 +16,9 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
-    // Attempt to read key from Render Secrets File
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback to Environment Variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -31,10 +29,8 @@ try {
 
 let ai;
 if (GEMINI_KEY) {
-    // Initialize AI client only if key is available
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
-    // Mock the AI client to fail gracefully if the key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -52,26 +48,22 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// 🔥 GLOBAL NAMES (USA/EUROPE FOCUS) for GA4
+// Global Name & Geo Data (Remains the same for realism)
 const FIRST_NAMES = [
     "John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", 
     "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", 
     "George", "Nicole", "Mark", "Olivia", "Charles", "Sophia", "Daniel", "Chloe"
 ];
-
 const LAST_NAMES = [
     "Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", 
     "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark",
     "Lewis", "Walker", "Hall", "Allen", "Young", "Scott", "Adams", "Baker"
 ];
-
 function generateRealName() {
     const firstName = FIRST_NAMES[randomInt(0, FIRST_NAMES.length - 1)];
     const lastName = LAST_NAMES[randomInt(0, LAST_NAMES.length - 1)];
     return { first_name: firstName, last_name: lastName };
 }
-
-
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -85,19 +77,18 @@ const geoLocations = [
 function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
 }
+
+// 🔥 REPLIT HACK: Client ID Generation (Simple, non-UUID style)
 function generateClientId() {
-    return crypto.randomUUID(); 
+    return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// 🔥 CRITICAL FIX: Max delay को 4 घंटे की विंडो में फैला दिया गया है
+// Spreads views over a 4-hour window (14,400,000 ms)
 const getOptimalDelay = (totalViews) => {
-    // 4-hour window (14,400,000 ms)
     const targetDurationMs = 14400000; 
     const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
-    // Delay variance 50% से 150% तक, minimum 5 seconds
     const minDelay = Math.max(5000, avgDelayMs * 0.5); 
     const maxDelay = avgDelayMs * 1.5;
-    // Capped at 30 minutes max delay
     const finalMaxDelay = Math.min(maxDelay, 1800000); 
     return randomInt(minDelay, finalMaxDelay);
 };
@@ -108,7 +99,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 
     payload.timestamp_micros = String(Date.now() * 1000); 
     
-    // 🔥 FIX: User-Agent, इसे Real Browser की तरह दिखाने के लिए
+    // Updated User-Agent
     const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
 
 
@@ -136,7 +127,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function before starting the slow loop
+// Validation function (No major changes)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
@@ -177,44 +168,20 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session with search, scroll, and engagement events.
- * * 🔥 MAJOR FIXES: Enhanced Source/Medium Logic and Increased Engagement Time.
+ * Simulates a single view session using Replit's minimalist approach.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
+    // 🔥 REPLIT HACK 1: Simple Client ID & Session ID
     const cid = generateClientId(); 
+    const session_id = Date.now(); 
+    
     const geo = getRandomGeo(); 
     const name = generateRealName(); 
-    const session_id = Date.now() + randomInt(100, 999); 
     
-    // 🔥 NEW LOGIC: Source, Medium, Referrer का डायनामिक निर्धारण
-    let referrer = "direct"; 
-    let source = "(direct)";
-    let medium = "(none)";
+    // Engagement Time (30s to 120s) - Replit's range
+    const engagementTime = randomInt(30000, 120000); 
 
-    if (searchKeyword) {
-        referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-        source = "google";
-        medium = "organic";
-    } else if (Math.random() < 0.4) { 
-        // 40% chance of Referral/Social Traffic
-        const isSocial = Math.random() < 0.6;
-        if (isSocial) {
-            referrer = Math.random() < 0.5 ? "https://t.co/random" : "https://m.facebook.com/random";
-            source = Math.random() < 0.5 ? "twitter.com" : "facebook.com";
-            medium = "social";
-        } else {
-            referrer = "https://exampleblog.com/post-link";
-            source = "exampleblog.com";
-            medium = "referral";
-        }
-    } else {
-        // Direct traffic
-        referrer = "direct"; 
-        source = "(direct)";
-        medium = "(none)";
-    }
-    
-    // User Properties में नाम और Geo-Data जोड़ें
+    // User Properties (Adding more realism than Replit, but keeping source simple)
     const userProperties = {
         country: { value: geo.country },
         region: { value: geo.region },
@@ -222,29 +189,24 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         first_name: { value: name.first_name }, 
         last_name: { value: name.last_name }    
     };
-
+    
+    // For console logging only (Source is always 'direct/none' in this minimalist hack)
+    const source = "(direct)";
+    const medium = "(none)";
     let allSuccess = true;
     
     console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}, User: ${name.first_name} ${name.last_name}). Source: ${source}/${medium} ---`);
 
     // 1. SESSION START EVENT
+    // 🔥 REPLIT HACK 2: Minimal parameters for session_start (No Source/Medium, No traffic_type)
     let sessionStartEvents = [
         { 
             name: "session_start", 
             params: { 
                 session_id: session_id, 
                 _ss: 1, 
-                debug_mode: true,
-                sc: 'start',
-                language: "en-US",
-                // 🔥 FIX 1: Source/Medium को session_start में जोड़ना 
-                ...(source !== "(direct)" && { 
-                    source: source,
-                    medium: medium,
-                    campaign: (medium === "organic" ? "(organic)" : medium)
-                }),
-                // optional session-level referrer for robustness
-                ...(referrer !== "direct" && { referrer: referrer }) 
+                debug_mode: true, // Keep debug mode for DebugView
+                language: "en-US" 
             } 
         }
     ];
@@ -259,21 +221,21 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'session_start');
     if (!result.success) allSuccess = false;
 
-    // Wait a short time before page view
     await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
 
 
     // 2. PAGE VIEW EVENT
+    // 🔥 Replit sends engagement_time_msec with page_view - we follow this pattern
     const pageViewEvents = [
         { 
             name: 'page_view', 
             params: { 
                 page_location: url, 
                 page_title: searchKeyword ? `Organic Search: ${searchKeyword}` : "Simulated Content View",
-                page_referrer: referrer === "direct" ? "" : referrer, 
                 session_id: session_id, 
                 debug_mode: true,
-                language: "en-US" 
+                language: "en-US",
+                engagement_time_msec: engagementTime // Replit Hack: Sending engagement time here
             } 
         }
     ];
@@ -288,27 +250,10 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (!result.success) allSuccess = false;
 
-    // 🔥 FIX 2: First Wait Time बढ़ाएँ (मिनिमम 10 सेकंड)
-    const firstWait = randomInt(10000, 20000); 
-    await new Promise(resolve => setTimeout(resolve, firstWait));
+    // 🔥 Skip Scroll and separate User Engagement events for 20-40 seconds
+    await new Promise(resolve => setTimeout(resolve, randomInt(20000, 40000)));
 
-    // 3. SCROLL EVENT
-    const scrollPayload = {
-        client_id: cid,
-        user_properties: userProperties, 
-        events: [{ name: "scroll", params: { session_id: session_id, debug_mode: true, percent_scrolled: randomInt(50, 95) } }] 
-    };
-    result = await sendData(gaId, apiSecret, scrollPayload, viewCount, 'scroll');
-    if (!result.success) allSuccess = false;
-
-    // 🔥 FIX 3: Second Wait Time बढ़ाएँ (मिनिमम 10 सेकंड)
-    const secondWait = randomInt(10000, 20000);
-    await new Promise(resolve => setTimeout(resolve, secondWait));
-
-    // 4. USER ENGAGEMENT
-    // 🔥 FIX 4: Total Engagement Time को बढ़ाएँ (30 सेकंड से 1.5 मिनट तक)
-    const totalEngagementTime = firstWait + secondWait + randomInt(10000, 50000); 
-    
+    // 3. USER ENGAGEMENT (The primary event for session completion)
     const engagementPayload = {
         client_id: cid,
         user_properties: userProperties, 
@@ -316,9 +261,8 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
             { 
                 name: "user_engagement", 
                 params: { 
-                    engagement_time_msec: totalEngagementTime, 
+                    engagement_time_msec: engagementTime, // Send it again for safety
                     session_id: session_id,
-                    interaction_type: "click_simulated",
                     debug_mode: true 
                 } 
             }
@@ -327,13 +271,14 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
     if (!result.success) allSuccess = false;
 
-    console.log(`[View ${viewCount}] Completed session. Total Time: ${Math.round(totalEngagementTime/1000)}s. (Success: ${allSuccess ? 'Yes' : 'No'})`);
+
+    console.log(`[View ${viewCount}] Completed session. Total Engagement Time: ${Math.round(engagementTime/1000)}s. (Success: ${allSuccess ? 'Yes' : 'No'})`);
 
     return allSuccess;
 }
 
 
-// --- VIEW PLAN GENERATION ---
+// --- VIEW PLAN GENERATION (No changes) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -401,13 +346,13 @@ app.post('/boost-mp', async (req, res) => {
             const url = viewPlan[i];
             const currentView = i + 1;
 
-            // Wait before the first view to spread load
             if (i > 0) {
                 const delay = getOptimalDelay(totalViews);
                 console.log(`[View ${currentView}/${totalViews}] Waiting for ${Math.round(delay / 1000)}s...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
 
+            // Using the new Replit-logic based simulateView
             await simulateView(ga_id, api_key, url, search_keyword, currentView);
         }
         
@@ -419,7 +364,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (No changes)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -463,7 +408,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (No changes)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -504,4 +449,10 @@ Requested Change: "${requestedChange}"`;
     );
     }
 });
-// ==========================================================
+// ===================================================================
+// --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
+// ===================================================================
+app.listen(PORT, () => {
+    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
+});
+                                                    
