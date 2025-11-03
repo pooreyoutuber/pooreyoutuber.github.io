@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Scroll styles are dynamic and unchanged from previous fix) --- */
+  /* --- CSS Styles (Same as previous responsive version) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -56,39 +56,20 @@
     width: calc(100% / 0.4);
     height: calc(100% / 0.4);
     opacity: 1;
-    /* Added CSS Variable for dynamic scroll duration */
-    transition: transform 0.1s ease; 
   }
   
-  /* --- CSS for Auto-Scrolling: UPWARD (Uses custom property for duration) --- */
-  @keyframes scroll-up {
+  /* --- CSS for Auto-Scrolling (Modified) --- */
+  @keyframes scroll {
     0% { transform: translate(0, 0) scale(0.4); } 
     50% { transform: translate(0, -200%) scale(0.4); } 
     100% { transform: translate(0, 0) scale(0.4); } 
   }
-  
-  /* --- CSS for Auto-Scrolling: DOWNWARD (Uses custom property for duration) --- */
-  @keyframes scroll-down {
-    0% { transform: translate(0, -200%) scale(0.4); } 
-    50% { transform: translate(0, 0) scale(0.4); } 
-    100% { transform: translate(0, -200%) scale(0.4); } 
-  }
 
-  /* Dynamic application of animation duration */
-  .slot.scroll-up iframe {
-    animation-name: scroll-up;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
-    /* Uses --scroll-duration variable set by JS */
-    animation-duration: var(--scroll-duration, 8s); 
-  }
-  
-  .slot.scroll-down iframe {
-    animation-name: scroll-down;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
-    /* Uses --scroll-duration variable set by JS */
-    animation-duration: var(--scroll-duration, 8s); 
+  .slot.scrolling iframe {
+    transform: translate(0, 0) scale(0.4); 
+    /* 3.5s duration for approx 8.5 cycles in 30s */
+    animation: scroll 3.5s ease-in-out infinite;
+    /* animation-delay is set via JavaScript for staggering */
   }
   /* ---------------------------------- */
   
@@ -144,7 +125,7 @@
             
             <input type="checkbox" id="autoScrollMode" />
             <label for="autoScrollMode">
-                Enable **Dynamic Auto Scroll** (Random Speed)
+                Enable **Auto Scroll** (Simulated & Staggered)
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
@@ -157,7 +138,7 @@
                 <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request between the Min/Max seconds (**staggered**) for the required session time.
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every **30 seconds**.
             </li>
             <li>
                 **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -191,17 +172,6 @@ function getRandomNames(count) {
     const shuffled = [...allNames].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
 }
-
-// Function to get a random scroll duration (4s to 12s)
-function getRandomScrollDuration() {
-    // Duration between 4000ms and 12000ms (4s and 12s)
-    const minMs = 4000;
-    const maxMs = 12000;
-    const duration = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
-    // Return duration in seconds string for CSS variable
-    return `${(duration / 1000).toFixed(1)}s`; 
-}
-
 
 // =========================================================================
 // !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
@@ -254,26 +224,16 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId(), 
-    // ADDED: Random scroll direction and speed for each proxy
-    scrollDirection: (index % 2 === 0) ? 'scroll-up' : 'scroll-down',
-    scrollDuration: getRandomScrollDuration() // Dynamic speed for this slot
+    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
 }));
 
-// Function to get the FIXED reload delay (30 seconds)
-function getFixedReloadDelay() {
-    // We will use the Min time value for the interval
-    const fixedSec = parseInt(minTimeInput.value); // Should be 30
-    return fixedSec * 1000;
+// Function to return fixed 30s delay for repeat mode
+function getRandomDelay() {
+    // Fixed cycle time: 30 seconds (30000 milliseconds)
+    return 30000;
 }
 
-// Function to get a small initial delay (0 to 5 seconds) for staggering
-function getInitialStaggerDelay() {
-    // 0 to 5000ms
-    return Math.floor(Math.random() * 5000); 
-}
-
-// Function to create a single slot element
+// Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -306,8 +266,12 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
-  // Set the CSS variable for scroll duration on the slot element
-  el.style.setProperty('--scroll-duration', proxy.scrollDuration);
+  // NEW: Apply a random, negative animation delay for staggered start
+  const scrollDuration = 3.5; // Matches the CSS animation duration
+  const randomScrollDelay = Math.random() * scrollDuration; 
+  // Set negative delay to start the animation at a random point in its cycle.
+  iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
+
 
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
@@ -331,20 +295,21 @@ function createSlot(index, proxy){
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
-    // Apply/Remove scrolling class 
-    el.classList.remove('scroll-up', 'scroll-down');
+    // Apply/Remove scrolling class
     if (autoScrollModeCheckbox.checked) {
-        // Use the pre-determined random scroll direction
-        el.classList.add(proxy.scrollDirection); 
+        el.classList.add('scrolling');
+    } else {
+        el.classList.remove('scrolling');
     }
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
+    // Changed status message to reflect fixed 30s
     setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for session time.
+        // Fetch request is sent. PHP script runs in background for 30s.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
         // Response is quick due to Connection: close header in PHP
@@ -376,8 +341,7 @@ function createSlot(index, proxy){
   return { 
       runAutomation, 
       setStatus,
-      element: el,
-      proxy: proxy // Keep proxy object accessible for scroll toggle
+      element: el 
   }; 
 }
 
@@ -410,12 +374,14 @@ function stopAllAutomation() {
     
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', true);
-        // Stop scrolling on all slots
-        s.element.classList.remove('scroll-up', 'scroll-down'); 
+        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
     });
+    
+    // Uncheck repeat mode if stopping
+    repeatModeCheckbox.checked = false;
 }
 
-// Global Start/Run Logic - UPDATED FOR FIXED 30S INTERVAL WITH INITIAL STAGGER
+// Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -430,25 +396,52 @@ globalGoBtn.addEventListener('click', ()=>{
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
-    
-    const fixedDelayMs = getFixedReloadDelay(); // 30000 ms
-
+      
     currentSlots.forEach((s) => {
-        // NEW LOGIC: Get a small random delay (0-5 seconds) for staggering the start
-        const initialStaggerDelay = getInitialStaggerDelay();
-        const fixedDelaySec = (fixedDelayMs / 1000).toFixed(0);
+        // CRITICAL CHANGE: Get a fixed 30s delay
+        const fixedDelay = getRandomDelay(); 
+        const delayInSeconds = (fixedDelay / 1000);
 
-        s.setStatus(`Starting Repeat Mode (${fixedDelaySec}s cycle)...`, true);
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
         
-        // Use setTimeout to create the initial stagger, then start the fixed interval
-        const timeoutId = setTimeout(() => {
-            // First run after stagger
+        const intervalId = setInterval(() => {
             s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${fixedDelaySec}s...`, true);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, fixedDelay); // Use the fixed delay here
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
 
-            // Now, start the fixed 30-second interval
-            const intervalId = setInterval(() => {
-                s.runAutomation(url);
-                s.setStatus(`Repeat Running. Next in ${fixedDelaySec}s...`, true);
-            }, fixedDelayMs); 
-         
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+// Event listener for auto-scroll checkbox
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    // Toggles the scrolling class on all current slots when the checkbox changes
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        // Ensure that scrolling is only applied if it's checked
+        s.element.classList.toggle('scrolling', isScrolling);
+    });
+});
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    // Stop automation if repeat mode is unchecked while running
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
+</body>
+</html>
