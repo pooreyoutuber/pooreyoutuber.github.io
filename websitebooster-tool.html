@@ -67,11 +67,45 @@
 
   .slot.scrolling iframe {
     transform: translate(0, 0) scale(0.4); 
-    /* 3.5s duration for approx 8.5 cycles in 30s */
     animation: scroll 3.5s ease-in-out infinite;
-    /* animation-delay is set via JavaScript for staggering */
   }
   /* ---------------------------------- */
+
+  /* --- NEW CSS for Mouse Cursor and Click Simulation --- */
+  .slot-click-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none; /* VERY IMPORTANT: Ensures cursor is just visual */
+      z-index: 10; 
+  }
+  .mouse-cursor {
+      position: absolute;
+      font-size: 20px;
+      transform: translate(-50%, -50%);
+      color: #0f4f7f; /* Accent color */
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+      transition: transform 0.5s ease-out; /* Smooth movement */
+      z-index: 11;
+      display: none; /* Hide by default */
+  }
+  .mouse-cursor::after {
+      content: "▶"; /* Simple arrow icon */
+      display: inline-block;
+      transform: rotate(45deg);
+  }
+  .mouse-cursor.active-mode {
+      display: block;
+  }
+  .mouse-cursor.clicked {
+      color: var(--danger); /* Change color on click: Red */
+      animation: clickPulse 0.1s ease-out;
+  }
+  @keyframes clickPulse {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.2); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+  }
+  /* --- End of NEW CSS --- */
   
   .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
   .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
@@ -126,6 +160,11 @@
             <input type="checkbox" id="autoScrollMode" />
             <label for="autoScrollMode">
                 Enable **Auto Scroll** (Simulated & Staggered)
+            </label>
+
+            <input type="checkbox" id="autoClickMode" />
+            <label for="autoClickMode">
+                Enable **Simulated Clicks** (10 clicks per cycle)
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
@@ -213,6 +252,7 @@ const repeatModeCheckbox = document.getElementById('repeatMode');
 const minTimeInput = document.getElementById('minTime'); 
 const maxTimeInput = document.getElementById('maxTime'); 
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
+const autoClickModeCheckbox = document.getElementById('autoClickMode'); // NEW: Click Mode Checkbox
 const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = [];
@@ -233,7 +273,7 @@ function getRandomDelay() {
     return 30000;
 }
 
-// Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
+// Function to create a single slot element (MODIFIED FOR CURSOR/CLICK)
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -246,6 +286,11 @@ function createSlot(index, proxy){
     
     <div class="iframe-wrap">
       <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+      
+      <div class="slot-click-overlay" id="overlay-${index}">
+          <span class="mouse-cursor" id="cursor-${index}"></span> 
+      </div>
+
     </div>
     
     <div class="slot-footer">
@@ -266,10 +311,41 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
-  // NEW: Apply a random, negative animation delay for staggered start
-  const scrollDuration = 3.5; // Matches the CSS animation duration
+  // NEW: Elements for Click Simulation
+  const overlay = el.querySelector(`#overlay-${index}`); 
+  const cursor = el.querySelector(`#cursor-${index}`);
+  let clickIntervalId = null; // To manage the click interval
+
+  // NEW: Function to simulate mouse movement and click (10 times in 30 seconds = every 3s)
+  function simulateMouseClick() {
+      if (!cursor || !overlay) return;
+
+      // 1. Calculate random new position (with padding)
+      const maxWidth = overlay.offsetWidth;
+      const maxHeight = overlay.offsetHeight;
+      const padding = 30; 
+      
+      const newX = Math.random() * (maxWidth - 2 * padding) + padding;
+      const newY = Math.random() * (maxHeight - 2 * padding) + padding;
+
+      // 2. Move the cursor
+      cursor.style.left = `${newX}px`;
+      cursor.style.top = `${newY}px`;
+      
+      // 3. Simulate the click pulse visually (after movement)
+      setTimeout(() => {
+          cursor.classList.add('clicked'); 
+      }, 500); 
+      
+      // 4. Reset click state
+      setTimeout(() => {
+          cursor.classList.remove('clicked');
+      }, 650); 
+  }
+
+  // Apply a random, negative animation delay for staggered scroll start
+  const scrollDuration = 3.5; 
   const randomScrollDelay = Math.random() * scrollDuration; 
-  // Set negative delay to start the animation at a random point in its cycle.
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
 
@@ -301,6 +377,10 @@ function createSlot(index, proxy){
     } else {
         el.classList.remove('scrolling');
     }
+
+    // NEW: Stop any previous click interval and hide cursor
+    if (clickIntervalId) clearInterval(clickIntervalId);
+    cursor.classList.remove('active-mode');
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
@@ -314,6 +394,21 @@ function createSlot(index, proxy){
         
         // Response is quick due to Connection: close header in PHP
         setStatus('View Sent (BG Session Active)', true);
+
+        // ----------------------------------------------------------------
+        // NEW: Click Automation Logic
+        // ----------------------------------------------------------------
+        if (repeatModeCheckbox.checked && autoClickModeCheckbox.checked) {
+            cursor.classList.add('active-mode'); // Show the cursor
+            
+            simulateMouseClick(); // First click immediately
+            
+            // Set up interval for subsequent clicks (Every 3 seconds)
+            clickIntervalId = setInterval(() => {
+                simulateMouseClick();
+            }, 3000); 
+        }
+        // ----------------------------------------------------------------
         
     } catch (e) {
         setStatus('Failed (Network/Proxy Error)', false);
@@ -337,11 +432,13 @@ function createSlot(index, proxy){
   
   setStatus('Ready', true);
 
-  // Expose the slot element to allow toggling scrolling globally on existing slots
+  // Expose the slot elements/IDs for global management
   return { 
       runAutomation, 
       setStatus,
-      element: el 
+      element: el,
+      clickIntervalId: clickIntervalId, // NEW
+      cursorElement: cursor            // NEW
   }; 
 }
 
@@ -365,83 +462,4 @@ function renderSlots(count) {
     stopAllAutomation();
 }
 
-// Global Stop Function
-function stopAllAutomation() {
-    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
-    repeatIntervals = [];
-    globalGoBtn.style.display = 'block';
-    globalStopBtn.style.display = 'none';
-    
-    currentSlots.forEach(s => {
-        s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
-    });
-    
-    // Uncheck repeat mode if stopping
-    repeatModeCheckbox.checked = false;
-}
-
-// Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
-globalGoBtn.addEventListener('click', ()=>{
-  const url = globalUrlInput.value.trim();
-  if(!url){ 
-      alert('Please paste a valid URL into the global input field.'); 
-      return; 
-  }
-  
-  // Run once immediately
-  currentSlots.forEach(s => s.runAutomation(url));
-  
-  // If repeat mode is checked, start intervals
-  if (repeatModeCheckbox.checked) {
-    globalGoBtn.style.display = 'none';
-    globalStopBtn.style.display = 'block';
-      
-    currentSlots.forEach((s) => {
-        // CRITICAL CHANGE: Get a fixed 30s delay
-        const fixedDelay = getRandomDelay(); 
-        const delayInSeconds = (fixedDelay / 1000);
-
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
-        
-        const intervalId = setInterval(() => {
-            s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
-        }, fixedDelay); // Use the fixed delay here
-        
-        repeatIntervals.push(intervalId);
-    });
-  }
-});
-
-// Event listeners
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
-    renderSlots(count);
-});
-
-// Event listener for auto-scroll checkbox
-autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
-    const isScrolling = e.target.checked;
-    currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
-        s.element.classList.toggle('scrolling', isScrolling);
-    });
-});
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
-repeatModeCheckbox.addEventListener('change', () => {
-    // Stop automation if repeat mode is unchecked while running
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
-
-// Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
-</script>
-</body>
-</html>
+// Global Stop Funct
