@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime</title>
+<title>Website Booster Prime - Fixed</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -56,19 +56,18 @@
     width: calc(100% / 0.4);
     height: calc(100% / 0.4);
     opacity: 1;
+    /* Added transition for smoother scroll animation */
+    transition: transform 0.2s ease-out; 
   }
   
   /* --- CSS for Randomized Auto-Scrolling --- */
-  /* Animation to scroll down and then back up a portion of the page */
   @keyframes scroll-staggered {
     0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, var(--scroll-distance)) scale(0.4); } /* Use CSS Variable for distance */
+    50% { transform: translate(0, var(--scroll-distance)) scale(0.4); } 
     100% { transform: translate(0, 0) scale(0.4); } 
   }
 
-  /* .scrolling class applied by JS, and it sets the animation properties dynamically */
   .slot.scrolling iframe {
-    /* Animation properties set by JS: animation: scroll-staggered [duration] ease-in-out infinite [delay]; */
     animation-name: scroll-staggered;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
@@ -119,9 +118,9 @@
             <label for="repeatMode">
                 Enable **Active User** Mode: Repeat all 
                 <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="30" min="30" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <input id="minTime" type="number" value="15" min="10" max="60" style="width: 50px; padding: 5px; border-radius: 4px;" />
                 <label for="maxTime">Max:</label>
-                <input id="maxTime" type="number" value="60" min="30" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <input id="maxTime" type="number" value="30" min="10" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" />
                 <span>seconds cycle</span> for better GA tracking.
             </label>
             
@@ -162,11 +161,10 @@ const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
 
 // Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
-    // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -204,7 +202,7 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const MAX_SLOTS = 20; // Maximum slots set to 20
+const MAX_SLOTS = 20; 
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
 const gridContainer = document.getElementById('gridContainer');
@@ -221,42 +219,37 @@ let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 
-// Map proxies with fixed unique IDs
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
+    uniqueId: generateUniqueId() 
 }));
 
-// Function to generate a random delay between min and max time (in milliseconds)
 function getRandomDelay() {
-    // Get values from new input fields (convert seconds to milliseconds)
-    const minSec = parseInt(minTimeInput.value);
-    const maxSec = parseInt(maxTimeInput.value);
+    // Get values from input fields (convert seconds to milliseconds)
+    // Ensure min <= max, use Math.max to enforce min limit if user manually changes the input
+    const minSec = Math.max(parseInt(minTimeInput.value) || 10, 10);
+    const maxSec = Math.min(parseInt(maxTimeInput.value) || 30, 30); // Enforce max 30
     
-    // Ensure valid range
     const minMs = Math.min(minSec, maxSec) * 1000;
     const maxMs = Math.max(minSec, maxSec) * 1000;
     
-    // Generate random delay
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
-// Function to generate randomized scrolling properties for each slot
 function getRandomScrollProps() {
-    // Random duration between 3s and 7s
-    const duration = (Math.random() * 4 + 3).toFixed(1) + 's';
-    // Random delay between 0s and 2s
-    const delay = (Math.random() * 2).toFixed(1) + 's';
+    // Random duration between 4s and 8s for a smoother scroll
+    const duration = (Math.random() * 4 + 4).toFixed(1) + 's'; 
+    // Random delay between 0s and 3s
+    const delay = (Math.random() * 3).toFixed(1) + 's';
     // Random distance for scrolling (e.g., between -100% and -300%)
-    const distanceFactor = (Math.random() * 2 + 1).toFixed(2); // Between 1.0 and 3.0
+    const distanceFactor = (Math.random() * 2 + 1).toFixed(2); 
     const distance = `-${distanceFactor}0%`; 
     
     return { duration, delay, distance };
 }
 
-// Function to create a single slot element
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -289,7 +282,6 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
-  // Get unique random scroll properties for this slot
   const scrollProps = getRandomScrollProps();
 
   function setStatus(text, isActive = false){
@@ -298,29 +290,27 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      // Sending the Unique ID (uid) to the PHP script
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+          `uid=${proxy.uniqueId}`; 
   }
 
-  // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
-    // 1. iFrame Load (Visible preview)
+    // 1. iFrame Load (Visible preview) - Load the URL into the iframe
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
     // Apply/Remove scrolling class and set unique animation properties
     if (autoScrollModeCheckbox.checked) {
         el.classList.add('scrolling');
-        // Set CSS variables for staggered animation
         el.style.setProperty('--scroll-distance', scrollProps.distance);
         iframe.style.animationDuration = scrollProps.duration;
         iframe.style.animationDelay = scrollProps.delay;
+        iframe.style.animationPlayState = 'running';
 
     } else {
         el.classList.remove('scrolling');
@@ -329,14 +319,13 @@ function createSlot(index, proxy){
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    setStatus('Sending Unique Proxy View (Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for 30s.
+        // Fetch request is sent. 
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        // Response is quick due to Connection: close header in PHP
         setStatus('View Sent (BG Session Active)', true);
         
     } catch (e) {
@@ -361,17 +350,14 @@ function createSlot(index, proxy){
   
   setStatus('Ready', true);
 
-  // Expose the slot element to allow toggling scrolling globally on existing slots
   return { 
       runAutomation, 
       setStatus,
       element: el,
-      // Pass the scroll properties back to the main logic
-      scrollProps
+      scrollProps 
   }; 
 }
 
-// Function to redraw slots based on the selected number
 function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
@@ -391,7 +377,6 @@ function renderSlots(count) {
     stopAllAutomation();
 }
 
-// Global Stop Function
 function stopAllAutomation() {
     repeatIntervals.forEach(intervalId => clearInterval(intervalId));
     repeatIntervals = [];
@@ -401,13 +386,12 @@ function stopAllAutomation() {
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', true);
         s.element.classList.remove('scrolling'); 
-        s.element.querySelector('iframe').style.animation = 'none'; // Ensure animation stops
+        // Reset iframe src to blank and stop animation completely
+        s.element.querySelector('iframe').src = 'about:blank';
+        s.element.querySelector('iframe').style.animation = 'none'; 
     });
-    
-    // repeatModeCheckbox.checked = false; // Keep repeat checkbox state independent of stop
 }
 
-// Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -418,28 +402,55 @@ globalGoBtn.addEventListener('click', ()=>{
   // Run once immediately
   currentSlots.forEach(s => s.runAutomation(url));
   
-  // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // Get a random delay from the user-defined min/max time
-        const randomDelay = getRandomDelay(); 
-        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+        // Function to set up the next interval with a random delay
+        const setupNextInterval = (slot, initialDelay) => {
+            const delayInSeconds = (initialDelay / 1000).toFixed(1);
+            slot.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
 
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
-        
-        // Use an IIFE or bind to capture the initial random delay for the interval message
-        (function(slot, delay) {
             const intervalId = setInterval(() => {
                 slot.runAutomation(url);
-                // After running, calculate the *next* random delay for the message
-                const nextRandomDelay = getRandomDelay();
-                const nextDelayInSeconds = (nextRandomDelay / 1000).toFixed(1);
-                
-                // IMPORTANT: Stop the current interval and start a new one with the new random time
+                // After running, stop the current interval and set up the next one immediately
                 clearInterval(intervalId);
-                const newIntervalId = setInterval(arguments.callee, nextRandomDelay);
-                
-                // Repla
+                const nextRandomDelay = getRandomDelay();
+                setupNextInterval(slot, nextRandomDelay); // Recursively set up the next one
+            }, initialDelay); 
+            
+            // Keep track of the current active interval ID for stopping
+            const indexToReplace = repeatIntervals.findIndex(id => id === slot.currentIntervalId);
+            if (indexToReplace > -1) {
+                repeatIntervals[indexToReplace] = intervalId;
+            } else {
+                repeatIntervals.push(intervalId);
+            }
+            slot.currentIntervalId = intervalId; // Store the current ID in the slot object
+        };
+
+        s.currentIntervalId = null; // Initialize current interval tracker
+        setupNextInterval(s, getRandomDelay());
+        s.setStatus(`Starting Repeat Mode...`, true);
+    });
+  }
+});
+
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        const iframe = s.element.querySelector('iframe');
+        if (isScrolling) {
+            s.element.classList.add('scrolling');
+            s.element.style.setProperty('--scroll-distance', s.scrollProps.distance);
+            iframe.style.animationDuration = s.scrollProps.duration;
+            iframe.style.animationDelay = s.scrollProps.delay;
+    
