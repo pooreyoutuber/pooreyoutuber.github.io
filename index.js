@@ -1,4 +1,4 @@
-// index.js (FINAL VERSION - Replit Logic Integrated for Client ID/Session ID)
+// index.js (FINAL VERSION - Replit Logic + Custom Geo Fix)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -8,17 +8,19 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
 // --- GEMINI KEY CONFIGURATION ---
+// PRODUCTION NOTE: Key should be securely loaded from a secret management service like Render's Secret Files
 let GEMINI_KEY;
 try {
+    // Attempt to load from Render Secret File (Preferred method)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
     console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
+    // Fallback to environment variable
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
     if (GEMINI_KEY) {
         console.log("Gemini Key loaded from Environment Variable (Fallback).");
@@ -48,22 +50,20 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// Global Name & Geo Data (Remains the same for realism)
+// Global Name & Geo Data (Used for simulating diverse users)
 const FIRST_NAMES = [
     "John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", 
-    "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary", 
-    "George", "Nicole", "Mark", "Olivia", "Charles", "Sophia", "Daniel", "Chloe"
+    "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary"
 ];
 const LAST_NAMES = [
-    "Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", 
-    "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark",
-    "Lewis", "Walker", "Hall", "Allen", "Young", "Scott", "Adams", "Baker"
+    "Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore"
 ];
 function generateRealName() {
     const firstName = FIRST_NAMES[randomInt(0, FIRST_NAMES.length - 1)];
     const lastName = LAST_NAMES[randomInt(0, LAST_NAMES.length - 1)];
     return { first_name: firstName, last_name: lastName };
 }
+
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -78,7 +78,7 @@ function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
 }
 
-// 🔥 REPLIT HACK: Client ID Generation (Simple, non-UUID style)
+// 🔥 REPLIT HACK 1: Client ID Generation (Simple, non-UUID style)
 function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
@@ -99,7 +99,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
 
     payload.timestamp_micros = String(Date.now() * 1000); 
     
-    // Updated User-Agent
+    // Updated User-Agent for realism
     const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
 
 
@@ -127,7 +127,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function (No major changes)
+// Validation function 
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
@@ -149,7 +149,6 @@ async function validateKeys(gaId, apiSecret, cid) {
             const errors = responseData.validationMessages.filter(msg => msg.validationCode !== 'VALIDATION_SUCCESS');
             if (errors.length > 0) {
                 const message = errors[0].description;
-                console.error(`[VALIDATION FAILED] Key/ID Invalid. Google says: ${message}`);
                 if (message.includes("Invalid measurement_id") || message.includes("API Secret is not valid")) {
                     return { valid: false, message: "GA ID or API Secret is invalid. Please check keys." };
                 }
@@ -168,10 +167,10 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session using Replit's minimalist approach.
+ * Simulates a single view session using Replit's minimalist approach and Custom Geo Fix.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
-    // 🔥 REPLIT HACK 1: Simple Client ID & Session ID
+    // 🔥 REPLIT HACK 1 & 2: Simple Client ID & Session ID
     const cid = generateClientId(); 
     const session_id = Date.now(); 
     
@@ -181,24 +180,21 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     // Engagement Time (30s to 120s) - Replit's range
     const engagementTime = randomInt(30000, 120000); 
 
-    // User Properties (Adding more realism than Replit, but keeping source simple)
+    // 🔥 GEO FIX: Use 'simulated_geo' user property to bypass (not set) country issues.
+    // NOTE: This requires GA4 Custom Dimension setup (User Scope, Property Name: 'simulated_geo')
     const userProperties = {
-        country: { value: geo.country },
-        region: { value: geo.region },
+        simulated_geo: { value: geo.country }, // <--- 🔥 This sends the Country name
         user_timezone: { value: geo.timezone },
         first_name: { value: name.first_name }, 
         last_name: { value: name.last_name }    
     };
     
-    // For console logging only (Source is always 'direct/none' in this minimalist hack)
-    const source = "(direct)";
-    const medium = "(none)";
     let allSuccess = true;
     
-    console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}, User: ${name.first_name} ${name.last_name}). Source: ${source}/${medium} ---`);
+    console.log(`\n--- [View ${viewCount}] Starting session (Simulated Geo: ${geo.country}). ---`);
 
     // 1. SESSION START EVENT
-    // 🔥 REPLIT HACK 2: Minimal parameters for session_start (No Source/Medium, No traffic_type)
+    // Minimal parameters for session_start (No Source/Medium)
     let sessionStartEvents = [
         { 
             name: "session_start", 
@@ -225,7 +221,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 
 
     // 2. PAGE VIEW EVENT
-    // 🔥 Replit sends engagement_time_msec with page_view - we follow this pattern
+    // Replit sends engagement_time_msec with page_view - we follow this pattern
     const pageViewEvents = [
         { 
             name: 'page_view', 
@@ -235,7 +231,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
                 session_id: session_id, 
                 debug_mode: true,
                 language: "en-US",
-                engagement_time_msec: engagementTime // Replit Hack: Sending engagement time here
+                engagement_time_msec: engagementTime // Replit Hack
             } 
         }
     ];
@@ -250,7 +246,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (!result.success) allSuccess = false;
 
-    // 🔥 Skip Scroll and separate User Engagement events for 20-40 seconds
+    // Skip Scroll and separate User Engagement events for 20-40 seconds
     await new Promise(resolve => setTimeout(resolve, randomInt(20000, 40000)));
 
     // 3. USER ENGAGEMENT (The primary event for session completion)
@@ -364,7 +360,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (No changes)
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -408,7 +404,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (No changes)
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -455,4 +451,4 @@ Requested Change: "${requestedChange}"`;
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-                                                    
+        
