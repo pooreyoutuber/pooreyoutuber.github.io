@@ -3,68 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi Browser for Website</title>
+    <title>Website Booster Prime</title>
     <style>
-        /* Basic Reset and Body Styling */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #333; display: flex; flex-direction: column; height: 100vh; }
-
-        /* Header (Tool Name) */
-        header { background-color: #007bff; color: white; padding: 15px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        header h1 { margin: 0; font-size: 1.8em; }
-
-        /* Control Panel - Top Section */
-        #top-control-panel { padding: 15px 20px; background-color: #ffffff; border-bottom: 1px solid #dee2e6; display: flex; gap: 15px; align-items: center; justify-content: center; }
-        #url-input { padding: 10px; border: 1px solid #ced4da; border-radius: 5px; width: 400px; font-size: 1em; }
-        #load-button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
-        #load-button:hover { background-color: #218838; }
-
-        /* Main Iframe Container (Grid Layout) */
-        #iframe-container { flex-grow: 1; padding: 10px; display: grid; 
-            grid-template-columns: repeat(5, 1fr); /* 5 Columns */
-            grid-template-rows: repeat(4, minmax(200px, 1fr)); /* 4 Rows, equal height */
-            gap: 10px; overflow-y: auto; background-color: #e9ecef; }
+        /* General Styles */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
         
-        /* Iframe Slot Styling */
-        .iframe-slot { border: 2px solid #adb5bd; border-radius: 8px; overflow: hidden; position: relative; cursor: pointer; background-color: white; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); transition: transform 0.2s, box-shadow 0.2s; }
-        .iframe-slot:hover { border-color: #007bff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); }
-        .iframe-slot iframe { width: 100%; height: 100%; border: none; display: block; }
+        /* Header and Control Panel */
+        #header-panel { background-color: #ffffff; border-bottom: 2px solid #ddd; padding: 15px 20px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+        h1 { margin-top: 0; font-size: 1.8em; color: #333; }
+        
+        /* URL Input Section */
+        .url-input-section { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .url-input-section input[type="text"] { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        .url-input-section button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        .url-input-section button:hover { background-color: #0056b3; }
+        
+        /* Optional Options Section */
+        #options-panel { background-color: #e9ecef; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; font-size: 0.9em; }
+        .option-group { display: flex; align-items: center; gap: 5px; }
+        
+        /* Main Grid Container */
+        #iframe-container { display: grid; 
+            grid-template-columns: repeat(4, 1fr); /* 4 columns for a cleaner desktop look */
+            grid-auto-rows: 350px; /* Fixed height for slots */
+            gap: 15px; padding: 20px; }
 
-        /* Bottom Control Panel (Optional Options) */
-        #bottom-options { padding: 10px 20px; background-color: #ffffff; border-top: 1px solid #dee2e6; display: flex; gap: 25px; align-items: center; justify-content: center; }
-        .option-label { display: flex; align-items: center; cursor: pointer; font-weight: 500; }
-        .option-label input[type="checkbox"] { margin-right: 8px; transform: scale(1.2); }
+        /* Iframe Slot Styling */
+        .slot { background-color: white; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); padding: 10px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .slot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #555; }
+        
+        /* Control bar within each slot */
+        .slot-controls { display: flex; gap: 5px; margin-top: 5px; }
+        .slot-controls button { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; font-size: 0.8em; }
+        .load-btn { background-color: #28a745; color: white; }
+        .load-btn:hover { background-color: #1e7e34; }
+        
+        /* Iframe itself - Desktop View Emulation */
+        .iframe-wrapper { flex-grow: 1; border: 1px solid #eee; overflow: hidden; position: relative; }
+        .iframe-wrapper iframe { 
+            /* Desktop Mode Emulation */
+            width: 1000px; /* Emulate desktop width */
+            height: 100%; 
+            border: none;
+            /* Scaling down the content to fit the smaller slot */
+            transform: scale(0.35); /* Adjust scale factor based on slot size */
+            transform-origin: 0 0; 
+            position: absolute;
+        }
 
         /* Focus Mode Styling */
-        .focus-mode-active #iframe-container { display: block; overflow: hidden; } /* Grid/Flex हटा दें */
-        .focus-mode-active .iframe-slot:not(.focused) { display: none !important; }
-        .focused { position: fixed; top: 0; left: 0; width: 100vw !important; height: 100vh !important; z-index: 9999; border: none !important; border-radius: 0 !important; }
+        .focus-mode-active #iframe-container { display: block; padding: 0; } 
+        .focus-mode-active .slot:not(.focused) { display: none !important; }
+        .focused { position: fixed; top: 0; left: 0; width: 100vw !important; height: 100vh !important; z-index: 9999; border: none !important; border-radius: 0 !important; padding: 0; }
+        .focused .iframe-wrapper iframe {
+            transform: scale(1.0); /* Remove scaling in focus mode */
+            width: 100%; 
+            height: 100%;
+        }
+        .focused .slot-header, .focused .slot-controls, .focused .slot-url-input { display: none; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Multi Browser for Website</h1>
-    </header>
+    <div id="header-panel">
+        <h1>Website Booster Prime</h1>
+        
+        <div class="url-input-section">
+            <input type="text" id="master-url-input" placeholder="Paste Target URL (e.g., https://yoursite.com)">
+            <button onclick="loadMasterURL()">Load & Run All 20 Slots</button>
+        </div>
 
-    <div id="top-control-panel">
-        <input type="text" id="url-input" placeholder="Enter URL (e.g., https://www.example.com)">
-        <button id="load-button" onclick="loadURL()">Load All 20 Iframes</button>
+        <div id="options-panel">
+            <div class="option-group">
+                <input type="checkbox" id="reload-toggle">
+                <label for="reload-toggle">Enable Auto Reload every 20 seconds</label>
+            </div>
+            <div class="option-group">
+                <input type="checkbox" id="scroll-toggle">
+                <label for="scroll-toggle">Enable Auto Scrolling</label>
+            </div>
+            <div class="option-group">
+                <input type="checkbox" id="focus-toggle" onclick="toggleFocusMode()">
+                <label for="focus-toggle">Focus Mode (Click to expand)</label>
+            </div>
+        </div>
     </div>
 
     <div id="iframe-container">
         </div>
-
-    <div id="bottom-options">
-        <label class="option-label">
-            <input type="checkbox" id="reload-toggle"> 20s Auto Reload
-        </label>
-        <label class="option-label">
-            <input type="checkbox" id="scroll-toggle"> Auto Scrolling
-        </label>
-        <label class="option-label">
-            <input type="checkbox" id="focus-toggle" onclick="toggleFocusMode()"> Focus Mode (Click Frame)
-        </label>
-    </div>
 
     <script>
         const NUM_SLOTS = 20;
@@ -75,24 +101,61 @@
         let reloadIntervalId = null;
         let scrollIntervalId = null;
         let focusedSlot = null;
+        
+        // --- Utility Function: Clean URL ---
+        function cleanURL(url) {
+            url = url.trim();
+            if (!url.startsWith('http://') && !url.startsWith('https://') && url !== 'about:blank') {
+                return 'https://' + url;
+            }
+            return url;
+        }
 
         // --- 1. Iframe Generation ---
         function generateIframes() {
             for (let i = 0; i < NUM_SLOTS; i++) {
                 const slot = document.createElement('div');
-                slot.className = 'iframe-slot';
+                slot.className = 'slot';
                 slot.id = 'slot-' + i;
+
+                const slotHeader = document.createElement('div');
+                slotHeader.className = 'slot-header';
+                slotHeader.textContent = `SLOT ${i + 1}`;
+                slot.appendChild(slotHeader);
+
+                const urlInput = document.createElement('input');
+                urlInput.type = 'text';
+                urlInput.className = 'slot-url-input';
+                urlInput.placeholder = 'Manual URL for Slot ' + (i + 1);
+                urlInput.value = ''; // Empty initially
+                slot.appendChild(urlInput);
+
+                const iframeWrapper = document.createElement('div');
+                iframeWrapper.className = 'iframe-wrapper';
                 
                 const iframe = document.createElement('iframe');
-                iframe.setAttribute('loading', 'lazy');
+                iframe.src = 'about:blank';
                 iframe.setAttribute('data-index', i);
-                iframe.src = 'about:blank'; // Start with a blank page
+                iframeWrapper.appendChild(iframe);
+                slot.appendChild(iframeWrapper);
 
-                slot.appendChild(iframe);
+                const controls = document.createElement('div');
+                controls.className = 'slot-controls';
+                
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'load-btn';
+                loadBtn.textContent = 'Load & Run';
+                loadBtn.onclick = () => loadSingleURL(iframe, urlInput.value);
+                controls.appendChild(loadBtn);
+                
+                slot.appendChild(controls);
+
                 iframeContainer.appendChild(slot);
                 
-                slot.addEventListener('click', function() {
-                    if (focusToggle.checked) {
+                // Focus Mode Event Listener
+                slot.addEventListener('click', function(e) {
+                    // Prevent focus when clicking inside input or buttons
+                    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && focusToggle.checked) {
                         setFocus(slot);
                     }
                 });
@@ -100,26 +163,39 @@
         }
         generateIframes();
 
-        // --- 2. Load URL Function ---
-        function loadURL() {
-            let url = document.getElementById('url-input').value.trim();
-            if (!url) {
-                alert('Please enter a valid URL!');
-                return;
-            }
+        // --- 2. Load Functions ---
+        
+        // Load URL to all slots
+        function loadMasterURL() {
+            const masterUrl = document.getElementById('master-url-input').value;
+            const clean = cleanURL(masterUrl);
+            if (!clean) return alert('Please enter a valid URL!');
 
-            // Ensure protocol is present
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                url = 'https://' + url;
-            }
-
-            const iframes = iframeContainer.querySelectorAll('iframe');
-            iframes.forEach(iframe => {
-                iframe.src = url;
+            const slots = iframeContainer.querySelectorAll('.slot');
+            slots.forEach(slot => {
+                const iframe = slot.querySelector('iframe');
+                const urlInput = slot.querySelector('.slot-url-input');
+                
+                // Update manual input field
+                urlInput.value = clean;
+                
+                // Load iframe
+                loadSingleURL(iframe, clean);
             });
         }
+        
+        // Load URL to a single slot
+        function loadSingleURL(iframeElement, url) {
+            const clean = cleanURL(url);
+            if (clean) {
+                iframeElement.src = clean;
+            } else {
+                iframeElement.src = 'about:blank';
+            }
+        }
 
-        // --- 3. 20s Auto Reload Feature ---
+
+        // --- 3. 20s Auto Reload Feature (Modified to use master interval) ---
         reloadToggle.addEventListener('change', function() {
             if (this.checked) {
                 if (reloadIntervalId) clearInterval(reloadIntervalId);
@@ -128,15 +204,13 @@
                     const iframes = iframeContainer.querySelectorAll('iframe');
                     iframes.forEach(iframe => {
                         try {
-                            // Tries to reload the iframe content
                             iframe.contentWindow.location.reload(true);
-                            console.log(`Iframe ${iframe.getAttribute('data-index')} reloaded.`);
                         } catch (e) {
-                            // Fallback if Same-Origin Policy blocks direct reload
+                            // Fallback for Same-Origin Policy
                             iframe.src = iframe.src; 
-                            console.warn(`Iframe ${iframe.getAttribute('data-index')} reloaded via src reset (Same-Origin Policy likely).`);
                         }
                     });
+                    console.log(`Auto Reload triggered for 20 slots.`);
                 }, 20000); // 20 seconds
 
             } else {
@@ -146,67 +220,5 @@
         });
 
         // --- 4. Auto Scrolling Feature ---
-        scrollToggle.addEventListener('change', function() {
-            if (this.checked) {
-                if (scrollIntervalId) clearInterval(scrollIntervalId);
-
-                // Scroll amount (50px) every 1 second
-                scrollIntervalId = setInterval(() => {
-                    const iframes = iframeContainer.querySelectorAll('iframe');
-                    iframes.forEach(iframe => {
-                        try {
-                            iframe.contentWindow.scrollBy(0, 50); 
-                        } catch (e) {
-                            console.warn('Scrolling blocked (Same-Origin Policy).');
-                        }
-                    });
-                }, 1000); 
-
-            } else {
-                clearInterval(scrollIntervalId);
-                scrollIntervalId = null;
-            }
-        });
-
-        // --- 5. Focus Mode Functions ---
-        function setFocus(slot) {
-            // Check if Focus Mode is active
-            if (!focusToggle.checked) return;
-
-            // If the same slot is clicked again, unfocus
-            if (slot.classList.contains('focused')) {
-                slot.classList.remove('focused');
-                iframeContainer.classList.remove('focus-mode-active');
-                focusedSlot = null;
-                // Scroll back to where it was
-                document.body.style.overflow = 'auto'; 
-            } 
-            // Focus the new slot
-            else {
-                if (focusedSlot) {
-                    focusedSlot.classList.remove('focused');
-                }
-                slot.classList.add('focused');
-                iframeContainer.classList.add('focus-mode-active');
-                focusedSlot = slot;
-                // Prevent body scrolling when focused
-                document.body.style.overflow = 'hidden'; 
-            }
-        }
-
-        function toggleFocusMode() {
-            if (!focusToggle.checked && focusedSlot) {
-                // If focus is turned OFF, remove existing focus
-                focusedSlot.classList.remove('focused');
-                iframeContainer.classList.remove('focus-mode-active');
-                focusedSlot = null;
-                document.body.style.overflow = 'auto';
-            }
-            if (focusToggle.checked) {
-                alert("Focus Mode is ON. Click on any iframe to expand it fully. Click it again to return to grid view.");
-            }
-        }
-        
-    </script>
-</body>
-</html>
+        scrollToggle.addEventListener('change', function()
+                                      
