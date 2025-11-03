@@ -1,19 +1,16 @@
-// index.js (Corrected and Refactored Code)
+// index.js (Modified Code with GA4 Fixes for better reporting)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
-// node-fetch is deprecated, but since you used v2.6.7, we'll keep it for consistency.
-// Note: Node.js has a built-in 'fetch' since v18, but we stick to the module for safety.
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
-const crypto = require('crypto'); // Built-in in Node.js
-const axios = require('axios'); // For any future HTTP need
-const { HttpsProxyAgent } = require('https-proxy-agent'); // If you need proxy later (not used currently)
+const crypto = require('crypto');
+const axios = require('axios');
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
-// Render environment provides PORT, use 10000 as a fallback (though Render sets it dynamically)
 const PORT = process.env.PORT || 10000; 
 
 // --- GEMINI KEY CONFIGURATION ---
@@ -89,16 +86,19 @@ function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
 }
 function generateClientId() {
-    // Using built-in crypto.randomUUID for client_id
     return crypto.randomUUID(); 
 }
+
+// 🔥 CRITICAL FIX: Max delay को 4 घंटे की विंडो में फैला दिया गया है
 const getOptimalDelay = (totalViews) => {
-    // Logic to spread views over a 2-hour window (7,200,000 ms)
-    const targetDurationMs = 7200000; 
+    // 4-hour window (14,400,000 ms)
+    const targetDurationMs = 14400000; 
     const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
-    const minDelay = Math.max(1000, avgDelayMs * 0.7); 
-    const maxDelay = avgDelayMs * 1.3;
-    const finalMaxDelay = Math.min(maxDelay, 1200000); // Capped at 20 minutes max delay
+    // Delay variance 50% से 150% तक, minimum 5 seconds
+    const minDelay = Math.max(5000, avgDelayMs * 0.5); 
+    const maxDelay = avgDelayMs * 1.5;
+    // Capped at 30 minutes max delay
+    const finalMaxDelay = Math.min(maxDelay, 1800000); 
     return randomInt(minDelay, finalMaxDelay);
 };
 
@@ -106,11 +106,10 @@ const getOptimalDelay = (totalViews) => {
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
 
-    // Add timestamp_micros
     payload.timestamp_micros = String(Date.now() * 1000); 
     
-    // 🔥 FIX: GA4 को यह बताने के लिए User-Agent जोड़ें
-    const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36";
+    // 🔥 FIX: User-Agent, इसे Real Browser की तरह दिखाने के लिए
+    const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
 
 
     try {
@@ -119,7 +118,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             body: JSON.stringify(payload),
             headers: { 
                 'Content-Type': 'application/json',
-                'User-Agent': USER_AGENT // <--- महत्वपूर्ण फिक्स
+                'User-Agent': USER_AGENT 
             }
         });
 
@@ -129,11 +128,11 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         } else {
             const errorText = await response.text(); 
             console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
-            return { success: false };
+            return { success: false, error: errorText };
         }
     } catch (error) {
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Event: ${eventType}. Connection Failed: ${error.message}`);
-        return { success: false };
+        return { success: false, error: error.message };
     }
 }
 
@@ -179,14 +178,43 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 /**
  * Simulates a single view session with search, scroll, and engagement events.
+ * * 🔥 MAJOR FIXES: Enhanced Source/Medium Logic and Increased Engagement Time.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const geo = getRandomGeo(); 
     const name = generateRealName(); 
-    const session_id = Date.now(); 
+    const session_id = Date.now() + randomInt(100, 999); 
     
-    // 🔥 CRITICAL FIX: User Properties में नाम जोड़ें
+    // 🔥 NEW LOGIC: Source, Medium, Referrer का डायनामिक निर्धारण
+    let referrer = "direct"; 
+    let source = "(direct)";
+    let medium = "(none)";
+
+    if (searchKeyword) {
+        referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
+        source = "google";
+        medium = "organic";
+    } else if (Math.random() < 0.4) { 
+        // 40% chance of Referral/Social Traffic
+        const isSocial = Math.random() < 0.6;
+        if (isSocial) {
+            referrer = Math.random() < 0.5 ? "https://t.co/random" : "https://m.facebook.com/random";
+            source = Math.random() < 0.5 ? "twitter.com" : "facebook.com";
+            medium = "social";
+        } else {
+            referrer = "https://exampleblog.com/post-link";
+            source = "exampleblog.com";
+            medium = "referral";
+        }
+    } else {
+        // Direct traffic
+        referrer = "direct"; 
+        source = "(direct)";
+        medium = "(none)";
+    }
+    
+    // User Properties में नाम और Geo-Data जोड़ें
     const userProperties = {
         country: { value: geo.country },
         region: { value: geo.region },
@@ -195,8 +223,10 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         last_name: { value: name.last_name }    
     };
 
-    let referrer = "direct"; 
+    let allSuccess = true;
     
+    console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}, User: ${name.first_name} ${name.last_name}). Source: ${source}/${medium} ---`);
+
     // 1. SESSION START EVENT
     let sessionStartEvents = [
         { 
@@ -205,16 +235,19 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
                 session_id: session_id, 
                 _ss: 1, 
                 debug_mode: true,
-                sc: 'start' // <--- GA4 FIX: यह session context के लिए महत्वपूर्ण है
+                sc: 'start',
+                language: "en-US",
+                // 🔥 FIX 1: Source/Medium को session_start में जोड़ना 
+                ...(source !== "(direct)" && { 
+                    source: source,
+                    medium: medium,
+                    campaign: (medium === "organic" ? "(organic)" : medium)
+                }),
+                // optional session-level referrer for robustness
+                ...(referrer !== "direct" && { referrer: referrer }) 
             } 
         }
     ];
-    
-    if (searchKeyword) {
-        referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-    } else if (Math.random() < 0.3) { 
-        referrer = Math.random() < 0.5 ? "https://t.co/random" : "https://exampleblog.com/post-link";
-    }
 
     const sessionStartPayload = {
         client_id: cid,
@@ -222,14 +255,11 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         events: sessionStartEvents
     };
 
-    let allSuccess = true;
-    
-    console.log(`\n--- [View ${viewCount}] Starting session (${geo.country}, User: ${name.first_name} ${name.last_name}). Session ID: ${session_id} ---`);
-
     // Send SESSION START
     let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'session_start');
     if (!result.success) allSuccess = false;
 
+    // Wait a short time before page view
     await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
 
 
@@ -239,8 +269,8 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
             name: 'page_view', 
             params: { 
                 page_location: url, 
-                page_title: searchKeyword ? `Search: ${searchKeyword}` : "Simulated Page View",
-                page_referrer: referrer, 
+                page_title: searchKeyword ? `Organic Search: ${searchKeyword}` : "Simulated Content View",
+                page_referrer: referrer === "direct" ? "" : referrer, 
                 session_id: session_id, 
                 debug_mode: true,
                 language: "en-US" 
@@ -258,23 +288,26 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (!result.success) allSuccess = false;
 
-    const firstWait = randomInt(3000, 8000);
+    // 🔥 FIX 2: First Wait Time बढ़ाएँ (मिनिमम 10 सेकंड)
+    const firstWait = randomInt(10000, 20000); 
     await new Promise(resolve => setTimeout(resolve, firstWait));
 
     // 3. SCROLL EVENT
     const scrollPayload = {
         client_id: cid,
         user_properties: userProperties, 
-        events: [{ name: "scroll", params: { session_id: session_id, debug_mode: true } }]
+        events: [{ name: "scroll", params: { session_id: session_id, debug_mode: true, percent_scrolled: randomInt(50, 95) } }] 
     };
     result = await sendData(gaId, apiSecret, scrollPayload, viewCount, 'scroll');
     if (!result.success) allSuccess = false;
 
-    const secondWait = randomInt(3000, 8000);
+    // 🔥 FIX 3: Second Wait Time बढ़ाएँ (मिनिमम 10 सेकंड)
+    const secondWait = randomInt(10000, 20000);
     await new Promise(resolve => setTimeout(resolve, secondWait));
 
     // 4. USER ENGAGEMENT
-    const engagementTime = firstWait + secondWait + randomInt(5000, 20000); 
+    // 🔥 FIX 4: Total Engagement Time को बढ़ाएँ (30 सेकंड से 1.5 मिनट तक)
+    const totalEngagementTime = firstWait + secondWait + randomInt(10000, 50000); 
     
     const engagementPayload = {
         client_id: cid,
@@ -283,7 +316,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
             { 
                 name: "user_engagement", 
                 params: { 
-                    engagement_time_msec: engagementTime, 
+                    engagement_time_msec: totalEngagementTime, 
                     session_id: session_id,
                     interaction_type: "click_simulated",
                     debug_mode: true 
@@ -294,7 +327,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
     if (!result.success) allSuccess = false;
 
-    console.log(`[View ${viewCount}] Completed session. Total Time: ${Math.round(engagementTime/1000)}s. (Success: ${allSuccess ? 'Yes' : 'No'})`);
+    console.log(`[View ${viewCount}] Completed session. Total Time: ${Math.round(totalEngagementTime/1000)}s. (Success: ${allSuccess ? 'Yes' : 'No'})`);
 
     return allSuccess;
 }
@@ -305,7 +338,6 @@ function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
     
-    // Check if total percentage is roughly 100
     if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         return [];
     }
@@ -319,7 +351,6 @@ function generateViewPlan(totalViews, pages) {
         }
     });
 
-    // Shuffle the array to randomize the order of URLs
     viewPlan.sort(() => Math.random() - 0.5);
     return viewPlan;
 }
@@ -355,7 +386,7 @@ app.post('/boost-mp', async (req, res) => {
     // STEP 2: ACKNOWLEDGEMENT
     res.json({ 
         status: 'accepted', 
-        message: `✨ Request accepted. Keys validated. Processing started in the background (~2 hours). CHECK DEBUGVIEW NOW!`
+        message: `✨ Request accepted. Keys validated. Processing started in the background (Approximate run time: ${Math.round(getOptimalDelay(totalViewsRequested) * totalViewsRequested / 3600000)} hours). CHECK DEBUGVIEW NOW!`
     });
 
     // STEP 3: Start the heavy, time-consuming simulation in the background
@@ -370,11 +401,14 @@ app.post('/boost-mp', async (req, res) => {
             const url = viewPlan[i];
             const currentView = i + 1;
 
-            await simulateView(ga_id, api_key, url, search_keyword, currentView);
+            // Wait before the first view to spread load
+            if (i > 0) {
+                const delay = getOptimalDelay(totalViews);
+                console.log(`[View ${currentView}/${totalViews}] Waiting for ${Math.round(delay / 1000)}s...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
 
-            const delay = getOptimalDelay(totalViews);
-            console.log(`[View ${currentView}/${totalViews}] Waiting for ${Math.round(delay / 1000)}s...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await simulateView(ga_id, api_key, url, search_keyword, currentView);
         }
         
         console.log(`\n=================================================`);
@@ -424,7 +458,6 @@ app.post('/api/caption-generate', async (req, res) => {
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
-        // Use a generic error message for external clients
         res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
@@ -471,9 +504,4 @@ Requested Change: "${requestedChange}"`;
     );
     }
 });
-// ===================================================================
-// --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
-// ===================================================================
-app.listen(PORT, () => {
-    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
-});
+// ==========================================================
