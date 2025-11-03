@@ -67,15 +67,17 @@
 
   .slot.scrolling iframe {
     transform: translate(0, 0) scale(0.4); 
+    /* 3.5s duration for approx 8.5 cycles in 30s */
     animation: scroll 3.5s ease-in-out infinite;
+    /* animation-delay is set via JavaScript for staggering */
   }
   /* ---------------------------------- */
 
-  /* --- NEW CSS for Mouse Cursor and Click Simulation --- */
+  /* --- NEW CSS for Mouse Cursor and Click Simulation (Added) --- */
   .slot-click-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      pointer-events: none; /* VERY IMPORTANT: Ensures cursor is just visual */
+      pointer-events: none; /* IMPORTANT: Clicks go to the iframe */
       z-index: 10; 
   }
   .mouse-cursor {
@@ -161,7 +163,7 @@
             <label for="autoScrollMode">
                 Enable **Auto Scroll** (Simulated & Staggered)
             </label>
-
+            
             <input type="checkbox" id="autoClickMode" />
             <label for="autoClickMode">
                 Enable **Simulated Clicks** (10 clicks per cycle)
@@ -371,7 +373,7 @@ function createSlot(index, proxy){
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
-    // Apply/Remove scrolling class
+    // Apply/Remove scrolling class (Existing Logic)
     if (autoScrollModeCheckbox.checked) {
         el.classList.add('scrolling');
     } else {
@@ -455,11 +457,4 @@ function renderSlots(count) {
     
     globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
 
-    for(let i=0; i < count; i++){
-      const slot = createSlot(i, premiumProxies[i]);
-      currentSlots.push(slot);
-    }
-    stopAllAutomation();
-}
-
-// Global Stop Funct
+    for(let i=0; i < count; i+
