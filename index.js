@@ -1,4 +1,4 @@
-// index.js (FINAL VERSION - Replit Logic + Custom Geo Fix)
+// index.js (ULTIMATE FINAL VERSION - Replit Hack + Geo Fix + Source/Medium Logic)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -13,20 +13,11 @@ const app = express();
 const PORT = process.env.PORT || 10000; 
 
 // --- GEMINI KEY CONFIGURATION ---
-// PRODUCTION NOTE: Key should be securely loaded from a secret management service like Render's Secret Files
 let GEMINI_KEY;
 try {
-    // Attempt to load from Render Secret File (Preferred method)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
-    console.log("Gemini Key loaded successfully from Secret File.");
 } catch (e) {
-    // Fallback to environment variable
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
-    if (GEMINI_KEY) {
-        console.log("Gemini Key loaded from Environment Variable (Fallback).");
-    } else {
-        console.error("FATAL: Gemini Key could not be loaded. AI Tools will fail.");
-    }
 }
 
 let ai;
@@ -50,20 +41,7 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// Global Name & Geo Data (Used for simulating diverse users)
-const FIRST_NAMES = [
-    "John", "Sarah", "David", "Emily", "Michael", "Jessica", "Robert", "Jennifer", 
-    "William", "Laura", "Thomas", "Lisa", "Chris", "Emma", "Paul", "Mary"
-];
-const LAST_NAMES = [
-    "Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore"
-];
-function generateRealName() {
-    const firstName = FIRST_NAMES[randomInt(0, FIRST_NAMES.length - 1)];
-    const lastName = LAST_NAMES[randomInt(0, LAST_NAMES.length - 1)];
-    return { first_name: firstName, last_name: lastName };
-}
-
+// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -83,7 +61,24 @@ function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// Spreads views over a 4-hour window (14,400,000 ms)
+// --- TRAFFIC SOURCE LOGIC (New/Fixed for Reports) ---
+const TRAFFIC_SOURCES = [
+    { source: "google", medium: "organic", referrer: "https://www.google.com" },
+    { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
+    { source: "facebook", medium: "social", referrer: "https://www.facebook.com" },
+    { source: "bing", medium: "organic", referrer: "https://www.bing.com" },
+    { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" },
+    { source: "(direct)", medium: "(none)", referrer: "" }
+];
+function getRandomTrafficSource() {
+    // 50% chance for direct traffic to ensure realism
+    if (Math.random() < 0.5) {
+        return TRAFFIC_SOURCES[5]; // (direct) / (none)
+    }
+    // Rest 50% chance for other sources
+    return TRAFFIC_SOURCES[randomInt(0, TRAFFIC_SOURCES.length - 2)]; 
+}
+// --- UTILITIES ---
 const getOptimalDelay = (totalViews) => {
     const targetDurationMs = 14400000; 
     const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
@@ -93,16 +88,12 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (User-Agent FIX के साथ) ---
+// --- GA4 DATA SENDING ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
-
     payload.timestamp_micros = String(Date.now() * 1000); 
-    
-    // Updated User-Agent for realism
     const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
-
-
+    
     try {
         const response = await nodeFetch(gaEndpoint, { 
             method: 'POST',
@@ -127,24 +118,21 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function 
+// Validation function (No Changes)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
-
     const testPayload = {
         client_id: cid,
         events: [{ name: "test_event", params: { debug_mode: true, language: "en-US" } }]
     };
-
+    // ... (Validation Logic Remains the same) ...
     try {
         const response = await nodeFetch(validationEndpoint, {
             method: 'POST',
             body: JSON.stringify(testPayload),
             headers: { 'Content-Type': 'application/json' }
         });
-        
         const responseData = await response.json();
-        
         if (responseData.validationMessages && responseData.validationMessages.length > 0) {
             const errors = responseData.validationMessages.filter(msg => msg.validationCode !== 'VALIDATION_SUCCESS');
             if (errors.length > 0) {
@@ -155,10 +143,8 @@ async function validateKeys(gaId, apiSecret, cid) {
                 return { valid: false, message: `Validation Error: ${message.substring(0, 80)}` };
             }
         }
-        
         console.log("[VALIDATION SUCCESS] Keys and basic payload passed Google's check.");
         return { valid: true };
-
     } catch (error) {
         console.error('Validation Connection Error:', error.message);
         return { valid: false, message: `Could not connect to Google validation server: ${error.message}` };
@@ -167,42 +153,39 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session using Replit's minimalist approach and Custom Geo Fix.
+ * Simulates a single view session with full attribution parameters.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
-    // 🔥 REPLIT HACK 1 & 2: Simple Client ID & Session ID
     const cid = generateClientId(); 
     const session_id = Date.now(); 
-    
     const geo = getRandomGeo(); 
-    const name = generateRealName(); 
-    
-    // Engagement Time (30s to 120s) - Replit's range
+    const traffic = getRandomTrafficSource(); // 🔥 New Traffic Logic
     const engagementTime = randomInt(30000, 120000); 
 
-    // 🔥 GEO FIX: Use 'simulated_geo' user property to bypass (not set) country issues.
-    // NOTE: This requires GA4 Custom Dimension setup (User Scope, Property Name: 'simulated_geo')
+    // 🔥 GEO FIX: Custom Dimension for Country
     const userProperties = {
-        simulated_geo: { value: geo.country }, // <--- 🔥 This sends the Country name
-        user_timezone: { value: geo.timezone },
-        first_name: { value: name.first_name }, 
-        last_name: { value: name.last_name }    
+        simulated_geo: { value: geo.country }, // GA4 Admin में 'simulated_geo' को User Scope Custom Dimension बनाना है
+        user_timezone: { value: geo.timezone }
     };
     
     let allSuccess = true;
     
-    console.log(`\n--- [View ${viewCount}] Starting session (Simulated Geo: ${geo.country}). ---`);
+    console.log(`\n--- [View ${viewCount}] Session (Geo: ${geo.country}, Source/Medium: ${traffic.source}/${traffic.medium}) ---`);
 
     // 1. SESSION START EVENT
-    // Minimal parameters for session_start (No Source/Medium)
+    // Add Source, Medium, and Referrer to Session Start
     let sessionStartEvents = [
         { 
             name: "session_start", 
             params: { 
                 session_id: session_id, 
                 _ss: 1, 
-                debug_mode: true, // Keep debug mode for DebugView
-                language: "en-US" 
+                debug_mode: true,
+                language: "en-US",
+                session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ? traffic.medium : "Direct",
+                source: traffic.source,         // 🔥 Added: google, youtube, etc.
+                medium: traffic.medium,         // 🔥 Added: organic, social, (none)
+                page_referrer: traffic.referrer  // 🔥 Added: Referrer URL
             } 
         }
     ];
@@ -213,7 +196,6 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         events: sessionStartEvents
     };
 
-    // Send SESSION START
     let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'session_start');
     if (!result.success) allSuccess = false;
 
@@ -221,17 +203,17 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 
 
     // 2. PAGE VIEW EVENT
-    // Replit sends engagement_time_msec with page_view - we follow this pattern
     const pageViewEvents = [
         { 
             name: 'page_view', 
             params: { 
                 page_location: url, 
-                page_title: searchKeyword ? `Organic Search: ${searchKeyword}` : "Simulated Content View",
+                page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : "Simulated Content View",
                 session_id: session_id, 
                 debug_mode: true,
                 language: "en-US",
-                engagement_time_msec: engagementTime // Replit Hack
+                engagement_time_msec: engagementTime,
+                page_referrer: traffic.referrer // Send referrer again
             } 
         }
     ];
@@ -242,14 +224,12 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         events: pageViewEvents
     };
 
-    // Send PAGE VIEW
     result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (!result.success) allSuccess = false;
 
-    // Skip Scroll and separate User Engagement events for 20-40 seconds
     await new Promise(resolve => setTimeout(resolve, randomInt(20000, 40000)));
 
-    // 3. USER ENGAGEMENT (The primary event for session completion)
+    // 3. USER ENGAGEMENT
     const engagementPayload = {
         client_id: cid,
         user_properties: userProperties, 
@@ -257,7 +237,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
             { 
                 name: "user_engagement", 
                 params: { 
-                    engagement_time_msec: engagementTime, // Send it again for safety
+                    engagement_time_msec: engagementTime, 
                     session_id: session_id,
                     debug_mode: true 
                 } 
@@ -268,7 +248,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     if (!result.success) allSuccess = false;
 
 
-    console.log(`[View ${viewCount}] Completed session. Total Engagement Time: ${Math.round(engagementTime/1000)}s. (Success: ${allSuccess ? 'Yes' : 'No'})`);
+    console.log(`[View ${viewCount}] Completed session. Total Engagement Time: ${Math.round(engagementTime/1000)}s.`);
 
     return allSuccess;
 }
@@ -314,7 +294,6 @@ app.post('/boost-mp', async (req, res) => {
          return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
-    // 🔑 STEP 1: VALIDATE KEYS 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
     
     if (!validationResult.valid) {
@@ -324,20 +303,16 @@ app.post('/boost-mp', async (req, res) => {
         });
     }
 
-    // STEP 2: ACKNOWLEDGEMENT
     res.json({ 
         status: 'accepted', 
         message: `✨ Request accepted. Keys validated. Processing started in the background (Approximate run time: ${Math.round(getOptimalDelay(totalViewsRequested) * totalViewsRequested / 3600000)} hours). CHECK DEBUGVIEW NOW!`
     });
 
-    // STEP 3: Start the heavy, time-consuming simulation in the background
+    // Start the heavy, time-consuming simulation in the background
     (async () => {
         const totalViews = viewPlan.length;
-        console.log(`\n=================================================`);
-        console.log(`[BOOSTER START] Starting real simulation for ${totalViews} views.`);
-        console.log(`=================================================`);
-
-
+        console.log(`\n[BOOSTER START] Starting real simulation for ${totalViews} views.`);
+        
         for (let i = 0; i < totalViews; i++) {
             const url = viewPlan[i];
             const currentView = i + 1;
@@ -348,19 +323,16 @@ app.post('/boost-mp', async (req, res) => {
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
 
-            // Using the new Replit-logic based simulateView
             await simulateView(ga_id, api_key, url, search_keyword, currentView);
         }
         
-        console.log(`\n=================================================`);
-        console.log(`[BOOSTER COMPLETE] Successfully finished ${totalViews} view simulations.`);
-        console.log(`=================================================\n`);
+        console.log(`\n[BOOSTER COMPLETE] Successfully finished ${totalViews} view simulations.`);
     })();
 });
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (No Changes)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -404,7 +376,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (No Changes)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -451,4 +423,4 @@ Requested Change: "${requestedChange}"`;
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-        
+                    
