@@ -280,6 +280,7 @@ function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
   
+  // *** START OF MODIFIED HTML FOR SLOT ***
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
@@ -304,6 +305,7 @@ function createSlot(index, proxy){
       </div>
     </div>
   `;
+  // *** END OF MODIFIED HTML FOR SLOT ***
   
   gridContainer.appendChild(el);
 
@@ -345,8 +347,8 @@ function createSlot(index, proxy){
       }, 650); 
   }
 
-  // Apply a random, negative animation delay for staggered scroll start
-  const scrollDuration = 3.5; 
+  // Apply a random, negative animation delay for staggered scroll start (Existing Logic)
+  const scrollDuration = 3.5; // Matches the CSS animation duration
   const randomScrollDelay = Math.random() * scrollDuration; 
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
@@ -365,7 +367,7 @@ function createSlot(index, proxy){
           `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
   }
 
-  // --- Core Automation Function ---
+  // --- Core Automation Function (MODIFIED) ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
@@ -386,15 +388,12 @@ function createSlot(index, proxy){
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    // Changed status message to reflect fixed 30s
     setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for 30s.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        // Response is quick due to Connection: close header in PHP
         setStatus('View Sent (BG Session Active)', true);
 
         // ----------------------------------------------------------------
@@ -419,7 +418,7 @@ function createSlot(index, proxy){
     statusDot.style.animation = 'none';
   }
   
-  // Event Handlers
+  // Event Handlers (Existing Logic)
   openBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
     if(!url){ alert('Please paste a URL into the global input field first.'); return; }
@@ -444,7 +443,7 @@ function createSlot(index, proxy){
   }; 
 }
 
-// Function to redraw slots based on the selected number
+// Function to redraw slots based on the selected number (Existing Logic)
 function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
@@ -457,4 +456,5 @@ function renderSlots(count) {
     
     globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
 
-    for(let i=0; i < count; i+
+    for(let i=0; i < count; i++){
+ 
