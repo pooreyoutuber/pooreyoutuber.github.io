@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
+  /* --- CSS Styles (Scroll styles are dynamic and unchanged from previous fix) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -56,29 +56,39 @@
     width: calc(100% / 0.4);
     height: calc(100% / 0.4);
     opacity: 1;
-    transition: transform 0.1s ease; /* Smooth transition for non-scrolling state */
+    /* Added CSS Variable for dynamic scroll duration */
+    transition: transform 0.1s ease; 
   }
   
-  /* --- CSS for Auto-Scrolling: UPWARD --- */
+  /* --- CSS for Auto-Scrolling: UPWARD (Uses custom property for duration) --- */
   @keyframes scroll-up {
     0% { transform: translate(0, 0) scale(0.4); } 
     50% { transform: translate(0, -200%) scale(0.4); } 
     100% { transform: translate(0, 0) scale(0.4); } 
   }
   
-  /* --- CSS for Auto-Scrolling: DOWNWARD --- */
+  /* --- CSS for Auto-Scrolling: DOWNWARD (Uses custom property for duration) --- */
   @keyframes scroll-down {
     0% { transform: translate(0, -200%) scale(0.4); } 
     50% { transform: translate(0, 0) scale(0.4); } 
     100% { transform: translate(0, -200%) scale(0.4); } 
   }
 
+  /* Dynamic application of animation duration */
   .slot.scroll-up iframe {
-    animation: scroll-up 8s ease-in-out infinite; /* Slower, more natural scroll */
+    animation-name: scroll-up;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    /* Uses --scroll-duration variable set by JS */
+    animation-duration: var(--scroll-duration, 8s); 
   }
   
   .slot.scroll-down iframe {
-    animation: scroll-down 8s ease-in-out infinite; /* Slower, more natural scroll */
+    animation-name: scroll-down;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    /* Uses --scroll-duration variable set by JS */
+    animation-duration: var(--scroll-duration, 8s); 
   }
   /* ---------------------------------- */
   
@@ -134,7 +144,7 @@
             
             <input type="checkbox" id="autoScrollMode" />
             <label for="autoScrollMode">
-                Enable **Dynamic Auto Scroll** (Simulated)
+                Enable **Dynamic Auto Scroll** (Random Speed)
             </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
@@ -182,6 +192,17 @@ function getRandomNames(count) {
     return shuffled.slice(0, count);
 }
 
+// Function to get a random scroll duration (4s to 12s)
+function getRandomScrollDuration() {
+    // Duration between 4000ms and 12000ms (4s and 12s)
+    const minMs = 4000;
+    const maxMs = 12000;
+    const duration = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+    // Return duration in seconds string for CSS variable
+    return `${(duration / 1000).toFixed(1)}s`; 
+}
+
+
 // =========================================================================
 // !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
 // =========================================================================
@@ -219,8 +240,8 @@ const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
-const minTimeInput = document.getElementById('minTime'); // New
-const maxTimeInput = document.getElementById('maxTime'); // New
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
@@ -233,23 +254,23 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId(), // Unique ID for GA4 Cookie Fix
-    // ADDED: Random scroll direction for each proxy
-    scrollDirection: (index % 2 === 0) ? 'scroll-up' : 'scroll-down' 
+    uniqueId: generateUniqueId(), 
+    // ADDED: Random scroll direction and speed for each proxy
+    scrollDirection: (index % 2 === 0) ? 'scroll-up' : 'scroll-down',
+    scrollDuration: getRandomScrollDuration() // Dynamic speed for this slot
 }));
 
-// Function to get a random delay from the user-defined min/max time
-function getRandomDelay() {
-    // Get values from new input fields (convert seconds to milliseconds)
-    const minSec = parseInt(minTimeInput.value);
-    const maxSec = parseInt(maxTimeInput.value);
-    
-    // Ensure valid range
-    const minMs = Math.min(minSec, maxSec) * 1000;
-    const maxMs = Math.max(minSec, maxSec) * 1000;
-    
-    // Generate random delay
-    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+// Function to get the FIXED reload delay (30 seconds)
+function getFixedReloadDelay() {
+    // We will use the Min time value for the interval
+    const fixedSec = parseInt(minTimeInput.value); // Should be 30
+    return fixedSec * 1000;
+}
+
+// Function to get a small initial delay (0 to 5 seconds) for staggering
+function getInitialStaggerDelay() {
+    // 0 to 5000ms
+    return Math.floor(Math.random() * 5000); 
 }
 
 // Function to create a single slot element
@@ -284,6 +305,9 @@ function createSlot(index, proxy){
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
+  
+  // Set the CSS variable for scroll duration on the slot element
+  el.style.setProperty('--scroll-duration', proxy.scrollDuration);
 
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
@@ -307,7 +331,7 @@ function createSlot(index, proxy){
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
-    // Apply/Remove scrolling class (UPDATED LOGIC)
+    // Apply/Remove scrolling class 
     el.classList.remove('scroll-up', 'scroll-down');
     if (autoScrollModeCheckbox.checked) {
         // Use the pre-determined random scroll direction
@@ -389,11 +413,9 @@ function stopAllAutomation() {
         // Stop scrolling on all slots
         s.element.classList.remove('scroll-up', 'scroll-down'); 
     });
-    
-    // repeatModeCheckbox.checked = false; // Keep checked state if user wants to stop/restart
 }
 
-// Global Start/Run Logic
+// Global Start/Run Logic - UPDATED FOR FIXED 30S INTERVAL WITH INITIAL STAGGER
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -408,57 +430,25 @@ globalGoBtn.addEventListener('click', ()=>{
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
-      
+    
+    const fixedDelayMs = getFixedReloadDelay(); // 30000 ms
+
     currentSlots.forEach((s) => {
-        // CRITICAL CHANGE: Get a random delay from the user-defined min/max time
-        const randomDelay = getRandomDelay(); 
-        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+        // NEW LOGIC: Get a small random delay (0-5 seconds) for staggering the start
+        const initialStaggerDelay = getInitialStaggerDelay();
+        const fixedDelaySec = (fixedDelayMs / 1000).toFixed(0);
 
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        s.setStatus(`Starting Repeat Mode (${fixedDelaySec}s cycle)...`, true);
         
-        const intervalId = setInterval(() => {
+        // Use setTimeout to create the initial stagger, then start the fixed interval
+        const timeoutId = setTimeout(() => {
+            // First run after stagger
             s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
-        }, randomDelay); // Use the random delay here
-        
-        repeatIntervals.push(intervalId);
-    });
-  }
-});
+            s.setStatus(`Repeat Running. Next in ${fixedDelaySec}s...`, true);
 
-// Event listeners
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
-    renderSlots(count);
-});
-
-// Event listener for auto-scroll checkbox (UPDATED LOGIC)
-autoScrollModeCheckbox.addEventListener('change', (e) => {
-    const isScrolling = e.target.checked;
-    currentSlots.forEach(s => {
-        // Clear both classes first
-        s.element.classList.remove('scroll-up', 'scroll-down');
-        
-        if (isScrolling) {
-            // Apply the pre-determined direction for the slot
-            s.element.classList.add(s.proxy.scrollDirection); 
-        }
-    });
-});
-
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
-repeatModeCheckbox.addEventListener('change', () => {
-    // If repeat mode is unchecked while running, stop all.
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
-
-// Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
-</script>
-</body>
-</html>
+            // Now, start the fixed 30-second interval
+            const intervalId = setInterval(() => {
+                s.runAutomation(url);
+                s.setStatus(`Repeat Running. Next in ${fixedDelaySec}s...`, true);
+            }, fixedDelayMs); 
+         
