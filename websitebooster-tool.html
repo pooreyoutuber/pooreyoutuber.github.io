@@ -414,4 +414,188 @@ function createSlot(index, proxy){
     if (autoScrollModeCheckbox.checked) {
         el.classList.add('scrolling');
     } else {
-        el.
+        el.classList.remove('scrolling');
+    }
+
+    // Apply/Remove clicking class (controls cursor visibility)
+    if (autoClickModeCheckbox.checked) {
+        // Only start click logic if the mode is checked AND the iframe has loaded the content.
+        // We'll start it after the fetch/session has been initiated for better timing.
+    } else {
+        stopAutoClick();
+    }
+    
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+
+    // Changed status message to reflect fixed 30s
+    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+
+    try {
+        // Fetch request is sent. PHP script runs in background for 30s.
+        await fetch(proxiedUrl, { mode: 'no-cors' });
+        
+        // Response is quick due to Connection: close header in PHP
+        setStatus('View Sent (BG Session Active)', true);
+        
+        // Start auto-click *after* the request is sent and session is 'active'
+        if (autoClickModeCheckbox.checked) {
+            startAutoClick();
+        }
+
+    } catch (e) {
+        setStatus('Failed (Network/Proxy Error)', false);
+        stopAutoClick(); // Stop clicking on error
+    }
+    
+    statusDot.style.animation = 'none';
+  }
+  
+  // Event Handlers
+  openBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    window.open(url, '_blank'); 
+  });
+
+  runBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    runAutomation(url); 
+  });
+  
+  setStatus('Ready', true);
+
+  // Expose the slot element to allow toggling scrolling/clicking globally on existing slots
+  return { 
+      runAutomation, 
+      setStatus,
+      element: el,
+      startAutoClick, // NEW
+      stopAutoClick   // NEW
+  }; 
+}
+
+// Function to redraw slots based on the selected number
+function renderSlots(count) {
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+
+    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    if (count < 1 || count > maxCount) {
+        count = Math.min(Math.max(count, 1), maxCount);
+        numSlotsInput.value = count;
+    }
+    
+    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+
+    for(let i=0; i < count; i++){
+      const slot = createSlot(i, premiumProxies[i]);
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+// Global Stop Function - UPDATED TO STOP CLICK INTERVALS
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+
+    clickIntervals.forEach(intervalId => clearInterval(intervalId)); // NEW
+    clickIntervals = []; // NEW
+
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+    
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
+        s.stopAutoClick(); // NEW: Stop auto-clicking on all slots
+    });
+    
+    // Uncheck repeat mode if stopping
+    repeatModeCheckbox.checked = false;
+    // Uncheck auto-click mode if stopping
+    autoClickModeCheckbox.checked = false; // NEW
+}
+
+// Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  if(!url){ 
+      alert('Please paste a valid URL into the global input field.'); 
+      return; 
+  }
+  
+  // Run once immediately
+  currentSlots.forEach(s => s.runAutomation(url));
+  
+  // If repeat mode is checked, start intervals
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+      
+    currentSlots.forEach((s) => {
+        // CRITICAL CHANGE: Get a fixed 30s delay
+        const fixedDelay = getRandomDelay(); 
+        const delayInSeconds = (fixedDelay / 1000);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, fixedDelay); // Use the fixed delay here
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
+
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+// Event listener for auto-scroll checkbox
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    // Toggles the scrolling class on all current slots when the checkbox changes
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        // Ensure that scrolling is only applied if it's checked
+        s.element.classList.toggle('scrolling', isScrolling);
+    });
+});
+
+// NEW: Event listener for auto-click checkbox
+// Note: This only shows/hides the cursor and enables the logic. 
+// The actual start/stop of the click interval is now handled inside runAutomation 
+// to align with the 30-second session.
+autoClickModeCheckbox.addEventListener('change', (e) => {
+    const isClicking = e.target.checked;
+    currentSlots.forEach(s => {
+        if (!isClicking) {
+            s.stopAutoClick();
+        }
+        // If 'isClicking' is true, the clicking will start when 'Load & Run All' is pressed
+        // and runAutomation is executed, ensuring it runs only during the active session.
+    });
+});
+
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    // Stop automation if repeat mode is unchecked while running
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
+</body>
+</html>
