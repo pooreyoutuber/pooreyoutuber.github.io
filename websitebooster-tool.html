@@ -422,4 +422,184 @@ function createSlot(index, proxy){
       }
       iframeWrap.classList.remove('clicking'); // Hide cursor
       // Reset cursor position/transform for next start
-      mouseCursor.style.transf
+      mouseCursor.style.transform = `translate(-50%, -50%)`;
+  }
+  // --- End UPDATED Auto Click Logic ---
+
+  // --- Core Automation Function ---
+  async function runAutomation(originalUrl){
+    if(!originalUrl) return;
+    
+    // 1. iFrame Load (Visible preview)
+    iframe.src = originalUrl;
+    setStatus('Loading Content...', false);
+    
+    // Apply/Remove scrolling class
+    if (autoScrollModeCheckbox.checked) {
+        el.classList.add('scrolling');
+    } else {
+        el.classList.remove('scrolling');
+    }
+
+    stopAutoClick(); // Stop existing click to restart correctly
+    
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+
+    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+
+    try {
+        await fetch(proxiedUrl, { mode: 'no-cors' });
+        
+        setStatus('View Sent (BG Session Active)', true);
+        
+        // Start auto-click *after* the request is sent and session is 'active'
+        if (autoClickModeCheckbox.checked) {
+            startAutoClick();
+        }
+
+    } catch (e) {
+        setStatus('Failed (Network/Proxy Error)', false);
+        stopAutoClick(); // Stop clicking on error
+    }
+    
+    statusDot.style.animation = 'none';
+  }
+  
+  // Event Handlers
+  openBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    window.open(url, '_blank'); 
+  });
+
+  runBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    runAutomation(url); 
+  });
+  
+  setStatus('Ready', true);
+
+  return { 
+      runAutomation, 
+      setStatus,
+      element: el,
+      startAutoClick,
+      stopAutoClick   
+  }; 
+}
+
+// Function to redraw slots based on the selected number
+function renderSlots(count) {
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+
+    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    if (count < 1 || count > maxCount) {
+        count = Math.min(Math.max(count, 1), maxCount);
+        numSlotsInput.value = count;
+    }
+    
+    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+
+    for(let i=0; i < count; i++){
+      const slot = createSlot(i, premiumProxies[i]);
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+// Global Stop Function
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+
+    clickIntervals.forEach(intervalId => clearInterval(intervalId));
+    clickIntervals = [];
+
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+    
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); 
+        s.stopAutoClick(); 
+    });
+    
+    repeatModeCheckbox.checked = false;
+    autoClickModeCheckbox.checked = false; 
+}
+
+// Global Start/Run Logic
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  if(!url){ 
+      alert('Please paste a valid URL into the global input field.'); 
+      return; 
+  }
+  
+  // Run once immediately
+  currentSlots.forEach(s => s.runAutomation(url));
+  
+  // If repeat mode is checked, start intervals
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+      
+    currentSlots.forEach((s) => {
+        const fixedDelay = getRandomDelay(); 
+        const delayInSeconds = (fixedDelay / 1000);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, fixedDelay); 
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
+
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+// Event listener for auto-scroll checkbox
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        s.element.classList.toggle('scrolling', isScrolling);
+    });
+});
+
+// Event listener for auto-click checkbox
+autoClickModeCheckbox.addEventListener('change', (e) => {
+    const isClicking = e.target.checked;
+    currentSlots.forEach(s => {
+        if (!isClicking) {
+            s.stopAutoClick();
+        }
+        // If checked, the logic will start when 'Load & Run All' (runAutomation) is pressed.
+    });
+});
+
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
+</body>
+</html>
