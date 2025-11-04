@@ -89,6 +89,25 @@
   .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
   .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+
+  /* --- NEW CSS for Auto-Click Mouse Arrow --- */
+  .mouse-cursor {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M12.414 10.414l5.657-5.657-2.828-2.828-5.657 5.657L1.293 2.172 0 3.465l10.414 10.414-2.828 2.828-2.121-2.121 1.414-1.414-2.828-2.828-1.414 1.414L0 17.657l3.465 3.465 10.414-10.414 2.828 2.828 2.121-2.121-1.414-1.414 2.828-2.828 1.414 1.414z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none; /* Make sure it doesn't interfere with clicks */
+    z-index: 9999; /* Ensure it's on top */
+    display: none; /* Hidden by default */
+    transform: translate(-50%, -50%); /* Center the cursor on the click point */
+    transition: transform 0.1s ease-out; /* Smooth movement */
+  }
+
+  .iframe-wrap.clicking .mouse-cursor {
+      display: block; /* Show when clicking */
+  }
 </style>
 </head>
 <body>
@@ -127,6 +146,14 @@
             <label for="autoScrollMode">
                 Enable **Auto Scroll** (Simulated & Staggered)
             </label>
+
+            <!-- NEW: Auto Click Checkbox -->
+            <input type="checkbox" id="autoClickMode" />
+            <label for="autoClickMode">
+                Enable **Auto Click** (Simulated & Random)
+            </label>
+            <!----------------------------->
+
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
@@ -213,10 +240,12 @@ const repeatModeCheckbox = document.getElementById('repeatMode');
 const minTimeInput = document.getElementById('minTime'); 
 const maxTimeInput = document.getElementById('maxTime'); 
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
+const autoClickModeCheckbox = document.getElementById('autoClickMode'); // NEW
 const globalStopBtn = document.getElementById('globalStop');
 
 let currentSlots = [];
 let repeatIntervals = []; 
+let clickIntervals = []; // NEW: To store click intervals
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 
 // Map proxies with fixed unique IDs
@@ -233,7 +262,7 @@ function getRandomDelay() {
     return 30000;
 }
 
-// Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
+// Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING & CLICKING)
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -246,6 +275,7 @@ function createSlot(index, proxy){
     
     <div class="iframe-wrap">
       <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+      <div class="mouse-cursor" id="mouse-cursor-${index}"></div> <!-- NEW: Mouse Cursor Element -->
     </div>
     
     <div class="slot-footer">
@@ -261,6 +291,8 @@ function createSlot(index, proxy){
   gridContainer.appendChild(el);
 
   const iframe = el.querySelector(`#iframe-${index}`);
+  const iframeWrap = el.querySelector('.iframe-wrap'); // NEW: Get the iframe wrapper
+  const mouseCursor = el.querySelector(`#mouse-cursor-${index}`); // NEW: Get the cursor element
   const openBtn = el.querySelector(`#open-${index}`);
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
@@ -287,6 +319,69 @@ function createSlot(index, proxy){
           `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
   }
 
+  // NEW: Auto Click Logic
+  let clickIntervalId = null;
+
+  function startAutoClick() {
+      if (clickIntervalId) clearInterval(clickIntervalId); // Clear existing
+      
+      iframeWrap.classList.add('clicking'); // Show cursor
+      
+      clickIntervalId = setInterval(() => {
+          try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+              if (!iframeDoc) {
+                  console.warn(`No document for iframe-${index}. Cannot click.`);
+                  return;
+              }
+
+              // Get actual dimensions after iframe scaling
+              const iframeWidth = iframe.offsetWidth / 0.4;
+              const iframeHeight = iframe.offsetHeight / 0.4;
+              
+              // Generate random coordinates within the iframe's content dimensions
+              const x = Math.floor(Math.random() * iframeWidth);
+              const y = Math.floor(Math.random() * iframeHeight);
+
+              // Update cursor position (relative to iframe-wrap, accounting for scaling)
+              mouseCursor.style.left = `${(x * 0.4)}px`;
+              mouseCursor.style.top = `${(y * 0.4)}px`;
+
+              // Create and dispatch a click event
+              const clickEvent = new MouseEvent('click', {
+                  bubbles: true,
+                  cancelable: true,
+                  view: iframe.contentWindow,
+                  clientX: x,
+                  clientY: y
+              });
+              iframeDoc.elementFromPoint(x, y)?.dispatchEvent(clickEvent); // Click the element at the point
+              
+              // Fallback to clicking on body if no specific element is found
+              if (!iframeDoc.elementFromPoint(x, y)) {
+                  iframeDoc.body?.dispatchEvent(clickEvent);
+              }
+
+              // console.log(`Clicked in slot ${index+1} at (${x}, ${y})`);
+
+          } catch (e) {
+              console.warn(`Error during auto-click in slot ${index+1}:`, e.message);
+              // This often happens due to same-origin policy if the iframe content is from a different domain
+              // You can't directly interact with cross-origin iframe content.
+              // For demonstration purposes, we'll keep the visual cursor moving.
+          }
+      }, 3000); // Click every 3 seconds
+  }
+
+  function stopAutoClick() {
+      if (clickIntervalId) {
+          clearInterval(clickIntervalId);
+          clickIntervalId = null;
+      }
+      iframeWrap.classList.remove('clicking'); // Hide cursor
+  }
+  // End NEW Auto Click Logic
+
   // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
@@ -300,6 +395,13 @@ function createSlot(index, proxy){
         el.classList.add('scrolling');
     } else {
         el.classList.remove('scrolling');
+    }
+
+    // Apply/Remove clicking class (controls cursor visibility)
+    if (autoClickModeCheckbox.checked) {
+        startAutoClick();
+    } else {
+        stopAutoClick();
     }
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
@@ -325,123 +427,4 @@ function createSlot(index, proxy){
   // Event Handlers
   openBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    window.open(url, '_blank'); 
-  });
-
-  runBtn.addEventListener('click', ()=> {
-    const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    runAutomation(url); 
-  });
-  
-  setStatus('Ready', true);
-
-  // Expose the slot element to allow toggling scrolling globally on existing slots
-  return { 
-      runAutomation, 
-      setStatus,
-      element: el 
-  }; 
-}
-
-// Function to redraw slots based on the selected number
-function renderSlots(count) {
-    gridContainer.innerHTML = ''; 
-    currentSlots = [];
-
-    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
-    if (count < 1 || count > maxCount) {
-        count = Math.min(Math.max(count, 1), maxCount);
-        numSlotsInput.value = count;
-    }
-    
-    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
-
-    for(let i=0; i < count; i++){
-      const slot = createSlot(i, premiumProxies[i]);
-      currentSlots.push(slot);
-    }
-    stopAllAutomation();
-}
-
-// Global Stop Function
-function stopAllAutomation() {
-    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
-    repeatIntervals = [];
-    globalGoBtn.style.display = 'block';
-    globalStopBtn.style.display = 'none';
-    
-    currentSlots.forEach(s => {
-        s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
-    });
-    
-    // Uncheck repeat mode if stopping
-    repeatModeCheckbox.checked = false;
-}
-
-// Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
-globalGoBtn.addEventListener('click', ()=>{
-  const url = globalUrlInput.value.trim();
-  if(!url){ 
-      alert('Please paste a valid URL into the global input field.'); 
-      return; 
-  }
-  
-  // Run once immediately
-  currentSlots.forEach(s => s.runAutomation(url));
-  
-  // If repeat mode is checked, start intervals
-  if (repeatModeCheckbox.checked) {
-    globalGoBtn.style.display = 'none';
-    globalStopBtn.style.display = 'block';
-      
-    currentSlots.forEach((s) => {
-        // CRITICAL CHANGE: Get a fixed 30s delay
-        const fixedDelay = getRandomDelay(); 
-        const delayInSeconds = (fixedDelay / 1000);
-
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
-        
-        const intervalId = setInterval(() => {
-            s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
-        }, fixedDelay); // Use the fixed delay here
-        
-        repeatIntervals.push(intervalId);
-    });
-  }
-});
-
-// Event listeners
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
-    renderSlots(count);
-});
-
-// Event listener for auto-scroll checkbox
-autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
-    const isScrolling = e.target.checked;
-    currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
-        s.element.classList.toggle('scrolling', isScrolling);
-    });
-});
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
-repeatModeCheckbox.addEventListener('change', () => {
-    // Stop automation if repeat mode is unchecked while running
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
-
-// Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
-</script>
-</body>
-</html>
+    if(!url){ alert('Please paste a URL into the global input field firs
