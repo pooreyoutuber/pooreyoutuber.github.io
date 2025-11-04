@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
+  /* --- CSS Styles (Existing) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -70,7 +70,7 @@
     animation: scroll 3.5s ease-in-out infinite;
   }
 
-  /* --- NEW CSS for Auto Clicker Mouse Cursor --- */
+  /* --- NEW CSS for Auto Clicker Mouse Cursor (Safely Added) --- */
   .cursor-dot {
     position: absolute;
     width: 8px; /* Mouse cursor size */
@@ -261,11 +261,10 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
 
 // Function to return fixed 30s delay for repeat mode
 function getRandomDelay() {
-    // Fixed cycle time: 30 seconds (30000 milliseconds)
     return 30000;
 }
 
-// Function to create a single slot element (MODIFIED FOR AUTO CLICKER)
+// Function to create a single slot element (MODIFIED to add cursor-dot)
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -300,12 +299,12 @@ function createSlot(index, proxy){
   const cursorDot = el.querySelector(`#cursor-${index}`); // NEW Cursor element
   const iframeWrap = el.querySelector('.iframe-wrap');
   
-  // NEW: Apply a random, negative animation delay for staggered scroll start
+  // Apply a random, negative animation delay for staggered scroll start
   const scrollDuration = 3.5; 
   const randomScrollDelay = Math.random() * scrollDuration; 
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
   
-  let clickTimeout = null; // NEW: Timer for random clicks
+  let clickTimeout = null; 
 
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
@@ -370,13 +369,13 @@ function createSlot(index, proxy){
   }
   // ------------------------------------
 
-  // --- Core Automation Function (Modified) ---
+  // --- Core Automation Function (Restored and Modified) ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
-    // 1. iFrame Load (Visible preview)
+    // 1. iFrame Load (This will try to load the site for preview)
     iframe.src = originalUrl;
-    setStatus('Loading Content...', false);
+    setStatus('Loading Content (Preview)...', false);
     
     // Apply/Remove scrolling class
     if (autoScrollModeCheckbox.checked) {
@@ -394,7 +393,7 @@ function createSlot(index, proxy){
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    // Changed status message to reflect fixed 30s
+    // 2. Proxy Request (Actual traffic boost happens here in background)
     setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
@@ -469,4 +468,5 @@ function stopAllAutomation() {
     globalStopBtn.style.display = 'none';
     
     currentSlots.forEach(s => {
-        s.setStatus('Re
+        s.setStatus('Ready (Stopped)', true);
+        
