@@ -418,64 +418,139 @@ Requested Change: "${requestedChange}"`;
 
 // ===================================================================
 // 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - NEW PROXY TOOL
-// ===================================================================
-
-// --- Proxy Credentials (Hardcoded from frontend for simplicity) ---
-// WARNING: In a production environment, never expose credentials like this. Use environment variables.
+// Frontend now sends ga_id and api_secret as optional query parameters
 const COMMON_AUTH_USER = "bqctypvz";
 const COMMON_AUTH_PASS = "399xb3kxqv6i";
 
 app.get('/proxy-request', async (req, res) => {
-    // 1. Get parameters from the frontend URL query
-    const { target, ip, port, auth, uid } = req.query;
+    
+    // 1. Get parameters from the frontend URL query (Added ga_id and api_secret)
+    const { target, ip, port, auth, uid, ga_id, api_secret } = req.query; // <<< CHANGED HERE
 
+    // Basic validation check (essential keys)
     if (!target || !ip || !port || !auth || !uid) {
         return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters from frontend.' });
     }
+
+    // Check if GA MP parameters are provided
+    const isGaMpEnabled = ga_id && api_secret; 
     
-    // The frontend sends the full 'user:pass' in 'auth' for compatibility, but we rely on hardcoded common credentials here
-    const proxyUrl = `http://${ip}:${port}`;
-    const proxyAuth = `${COMMON_AUTH_USER}:${COMMON_AUTH_PASS}`;
+    // --- Proper Proxy Setup ---
+    const proxyUrl = `http://${COMMON_AUTH_USER}:${COMMON_AUTH_PASS}@${ip}:${port}`;
+    const proxyAgent = new HttpsProxyAgent(proxyUrl);
+    
+    // --- GA4 MP Session Data Generation ---
+    const cid = uid; 
+    const session_id = Date.now(); 
+    const geo = getRandomGeo(); 
+    const traffic = getRandomTrafficSource();
+    const engagementTime = randomInt(30000, 120000); 
+
+    const userProperties = {
+        simulated_geo: { value: geo.country }, 
+        user_timezone: { value: geo.timezone }
+    };
+    
+    let eventCount = 0;
+
+    // --- FUNCTION TO SEND DATA VIA PROXY ---
+    async function sendDataViaProxy(payload, eventType) {
+        if (!isGaMpEnabled) {
+             console.log(`[PROXY MP SKIP] Keys missing. Skipped: ${eventType}.`);
+             return false; // Skip if keys are not provided
+        }
+        
+        // CRITICAL: Use the ga_id and api_secret from the request query
+        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; // <<< CHANGED HERE
+        payload.timestamp_micros = String(Date.now() * 1000); 
+        const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
+        
+        try {
+            const response = await nodeFetch(gaEndpoint, { 
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'User-Agent': USER_AGENT 
+                },
+                agent: proxyAgent // Use the proxy agent for the GA4 call
+            });
+
+            if (response.status === 204) { 
+                console.log(`[PROXY MP SUCCESS] Sent: ${eventType} via ${ip}:${port}`);
+                return true;
+            } else {
+                const errorText = await response.text(); 
+                console.error(`[PROXY MP FAILURE] Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
+                return false;
+            }
+        } catch (error) {
+            console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed: ${error.message}`);
+            return false;
+        }
+    }
+    // --- END: FUNCTION TO SEND DATA VIA PROXY ---
 
     try {
-        const proxyAgent = new HttpsProxyAgent(proxyUrl, {
-            auth: proxyAuth,
-            // You may need to enable this if your proxies use non-standard SSL:
-            // rejectUnauthorized: false 
-        });
-
-        // 2. GA4 Cookie Fix: Injecting the unique client ID (uid) into the cookie header
-        const timestamp = Math.floor(Date.now() / 1000);
-        // We use the uid (uniqueId from frontend) to generate the GA1.1 cookie value
-        const gaCookieValue = `_ga=GA1.1.${uid}.${timestamp}`;
-
-        const AXIOS_TIMEOUT = 10000; // 10 seconds timeout for connection
-
-        // Send a HEAD request via proxy (quickest way to start a session)
-        await axios.head(target, {
-            timeout: AXIOS_TIMEOUT,
-            httpAgent: proxyAgent,
-            httpsAgent: proxyAgent,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36',
-                'Cookie': gaCookieValue // Injecting the unique GA cookie
-            }
-        });
-
-        // 3. Send immediate success response back to the frontend
-        // The session time is simulated by the frontend's repeat interval.
-        res.status(200).json({ status: 'OK', message: 'Request sent successfully via proxy. Session active.' });
+        if (isGaMpEnabled) {
+            // 1. SESSION START EVENT
+            const sessionStartPayload = {
+                client_id: cid,
+                user_properties: userProperties,
+                events: [{ 
+                    name: "session_start", 
+                    params: { 
+                        session_id: session_id, 
+                        _ss: 1, 
+                        debug_mode: true,
+                        language: "en-US",
+                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : "Direct", 
+                        source: traffic.source,
+                        medium: traffic.medium,
+                        page_referrer: traffic.referrer
+                    } 
+                }]
+            };
+            if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
+            
+            // 2. PAGE VIEW EVENT
+            const pageViewPayload = {
+                client_id: cid,
+                user_properties: userProperties,
+                events: [{ 
+                    name: 'page_view', 
+                    params: { 
+                        page_location: target, 
+                        page_title: "Simulated Proxy View",
+                        session_id: session_id, 
+                        debug_mode: true,
+                        language: "en-US",
+                        engagement_time_msec: engagementTime,
+                        page_referrer: traffic.referrer 
+                    } 
+                }]
+            };
+            if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
+        }
         
-        console.log(`[PROXY SUCCESS] Target: ${target} via ${ip}:${port}. GA ID: ${uid}`);
+        // 3. Send success response back to the frontend
+        const message = isGaMpEnabled ? 
+                        `GA4 MP data sent successfully via proxy. Events: ${eventCount}.` : 
+                        'Request sent (No GA MP keys provided. Check iframe for loading).';
 
+        res.status(200).json({ 
+            status: 'OK', 
+            message: message,
+            eventsSent: eventCount
+        });
+        
     } catch (error) {
-        // Handle proxy connection errors, timeout errors, or target site errors
         const errorCode = error.code || error.message;
-        console.error(`[PROXY FAILED] ${ip}:${port}. Error:`, errorCode);
+        console.error(`[PROXY REQUEST HANDLER FAILED] Error:`, errorCode);
         
         res.status(502).json({ 
             status: 'FAILED', 
-            error: 'Proxy or Target Network Error', 
+            error: 'Internal Server Error during GA4 MP call', 
             details: errorCode
         });
     }
@@ -488,4 +563,3 @@ app.get('/proxy-request', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-           
