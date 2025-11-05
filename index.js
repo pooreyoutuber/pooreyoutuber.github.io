@@ -517,23 +517,25 @@ app.get('/proxy-request', async (req, res) => {
             };
             if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
             
-            // 2. PAGE VIEW EVENT
-            const pageViewPayload = {
+            // 2. PAGE VIEW EVET
+            // index.js में Page View Payload
+              const pageViewPayload = {
                 client_id: cid,
                 user_properties: userProperties,
-                events: [{ 
-                    name: 'page_view', 
-                    params: { 
-                        page_location: target, 
-                        page_title: "Simulated Proxy View",
-                        session_id: session_id, 
-                        debug_mode: true,
-                        language: "en-US",
-                        engagement_time_msec: engagementTime,
-                        page_referrer: traffic.referrer 
-                    } 
-                }]
-            };
+                 events: [{ 
+                  name: 'page_view', 
+                  params: { 
+                  page_location: target, // The actual URL sent from frontend
+                 page_title: target, // <<< CHANGED: Use the target URL as the title
+                 session_id: session_id, 
+                 debug_mode: true,
+                 language: "en-US",
+            engagement_time_msec: engagementTime,
+            page_referrer: traffic.referrer 
+        } 
+    }]
+};
+            
             if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
         }
         
