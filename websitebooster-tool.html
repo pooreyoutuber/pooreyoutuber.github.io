@@ -131,9 +131,9 @@
                 </span>
             </div>
             <div id="gaInputFields" style="display: none; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                 <label style="color:var(--accent); font-weight:600; flex-shrink: 0;">GA ID (G-XXXX):</label>
+                 <label for="gaIdInput" style="color:var(--accent); font-weight:600; flex-shrink: 0;">GA ID (G-XXXX):</label>
                  <input id="gaIdInput" type="text" placeholder="G-XXXXXXXXXX" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);" />
-                 <label style="color:var(--accent); font-weight:600; flex-shrink: 0;">API Secret:</label>
+                 <label for="apiSecretInput" style="color:var(--accent); font-weight:600; flex-shrink: 0;">API Secret:</label>
                  <input id="apiSecretInput" type="text" placeholder="Your_API_Secret" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);" />
             </div>
             <div style="font-size: 11px; color: var(--muted); margin-top: -5px;">
@@ -223,6 +223,7 @@ const DUMMY_PROXIES = [
   { ip: "142.147.128.93", port: "6593", country: "CA" },
   
   // DUPLICATES BELOW: REPLACE THESE 10 ENTRIES WITH 10 MORE UNIQUE IPs
+  // *** NOTE: THESE ARE LIKELY THE CAUSE OF YOUR PROXY/GA4 FAILURE ***
   { ip: "142.111.48.254", port: "7031", country: "US" }, 
   { ip: "31.59.20.177", port: "6755", country: "DE" },  
   { ip: "38.170.176.178", port: "5573", country: "CA" }, 
@@ -237,7 +238,7 @@ const DUMMY_PROXIES = [
 // =========================================================================
 
 const MAX_SLOTS = 20; 
-// 👇 UPDATED RENDER URL for the Node.js backend
+// !!! IMPORTANT: Replace with YOUR Render service URL if this is not correct !!!
 const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request'; 
 
 const gridContainer = document.getElementById('gridContainer');
@@ -250,7 +251,7 @@ const maxTimeInput = document.getElementById('maxTime');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
-// 👇 NEW GA4 INPUTS 
+// 👇 NEW GA4 INPUTS - Ensure IDs match the HTML
 const toggleGaInputs = document.getElementById('toggleGaInputs');
 const gaInputFields = document.getElementById('gaInputFields');
 const gaIdInput = document.getElementById('gaIdInput');
@@ -340,7 +341,7 @@ function createSlot(index, proxy){
     }
   }
   
-  // 👇 MODIFIED: Sending optional GA keys
+  // MODIFIED: Sending optional GA keys
   function getProxiedUrl(originalUrl, proxy){
       // Fetch GA keys from the new optional inputs
       const gaId = gaIdInput.value.trim();
@@ -367,6 +368,7 @@ function createSlot(index, proxy){
     const isGaMpEnabled = gaIdInput.value.trim() && apiSecretInput.value.trim();
     const gaStatus = isGaMpEnabled ? ' (GA MP Active)' : '';
 
+    // Step 1: Set up the iframe
     iframe.src = originalUrl;
     updateStatus(`Loading Content${gaStatus}...`, 'loading');
     
@@ -377,20 +379,33 @@ function createSlot(index, proxy){
     updateStatus(`Sending Proxy Request to Node.js${gaStatus}...`, 'loading');
 
     try {
-        // Fetch to the Node.js backend
+        // Step 2: Fetch to the Node.js backend
         const response = await fetch(proxiedUrl);
         const data = await response.json(); 
         
         if (response.ok && data.status === 'OK') {
-            const message = data.message;
-            updateStatus(message, 'active');
+            
+            // NEW LOGIC: Check for specific GA MP success/failure message from backend
+            let message = data.message;
+            let finalState = 'active';
+            
+            if (isGaMpEnabled && data.eventsSent === 0) {
+                 // If keys were provided but backend failed to send events (eventsSent: 0)
+                 message = `GA4 Failed: Check Keys or Proxy IP.`;
+                 finalState = 'failed';
+                 console.error(`Slot ${index+1} GA4 Failure:`, message);
+            }
+            
+            updateStatus(message, finalState);
+            
         } else {
-            updateStatus(`Failed: ${data.details || 'Unknown Error'}`, 'failed');
+            // General Backend/Network failure
+            updateStatus(`Failed: ${data.details || data.error || 'Unknown Error'}`, 'failed');
             console.error(`Slot ${index+1} Backend Error:`, data);
         }
         
     } catch (e) {
-        updateStatus('Failed (Network/CORS Error)', 'failed');
+        updateStatus('Failed (Network/CORS Error - Server unreachable?)', 'failed');
         console.error(`Slot ${index+1} Frontend Fetch Error:`, e);
     }
   }
@@ -428,7 +443,7 @@ function renderSlots(count) {
     
     globalGoBtn.textContent = `Load & Run All (${finalCount} Slots)`;
 
-    for(let i=0; i < finalCount; i++){
+  for(let i=0; i < finalCount; i++){
       const slot = createSlot(i, premiumProxies[i]);
       currentSlots.push(slot);
     }
@@ -462,6 +477,7 @@ globalGoBtn.addEventListener('click', ()=>{
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
     
+    // Clear any existing intervals before starting new ones
     stopAllAutomation();
       
     currentSlots.forEach((s) => {
@@ -516,7 +532,7 @@ repeatModeCheckbox.addEventListener('change', () => {
     }
 });
 
-// 👇 NEW: Optional GA Input Toggle Logic
+// 👇 NEW: Optional GA Input Toggle Logic - Corrected to use ID
 toggleGaInputs.addEventListener('click', () => {
     const isVisible = gaInputFields.style.display !== 'none' && gaInputFields.style.display !== '';
     gaInputFields.style.display = isVisible ? 'none' : 'flex';
@@ -525,8 +541,4 @@ toggleGaInputs.addEventListener('click', () => {
         : 'GA4 MP Boost Enabled (Click to Hide)';
 });
 
-
-renderSlots(parseInt(numSlotsInput.value));
-</script>
-</body>
-</html>
+  
