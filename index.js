@@ -492,4 +492,78 @@ app.get('/proxy-request', async (req, res) => {
             return false;
         }
     }
-    /
+    // -- END: FUNCTION TO SEND DATA VIA PROXY ---
+
+    try {
+        if (isGaMpEnabled) {
+            // 1. SESSION START EVENT
+            const sessionStartPayload = {
+                client_id: cid,
+                user_properties: userProperties,
+                events: [{ 
+                    name: "session_start", 
+                    params: { 
+                        session_id: session_id, 
+                        _ss: 1, 
+                        debug_mode: true,
+                        language: "en-US",
+                        // Note: The original code for session_default_channel_group was simplified here compared to /boost-mp
+                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : "Direct", 
+                        source: traffic.source,
+                        medium: traffic.medium,
+                        page_referrer: traffic.referrer
+                    } 
+                }]
+            };
+            if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
+            
+            // 2. PAGE VIEW EVENT
+            const pageViewPayload = {
+                client_id: cid,
+                user_properties: userProperties,
+                events: [{ 
+                    name: 'page_view', 
+                    params: { 
+                        page_location: target, 
+                        page_title: "Simulated Proxy View",
+                        session_id: session_id, 
+                        debug_mode: true,
+                        language: "en-US",
+                        engagement_time_msec: engagementTime,
+                        page_referrer: traffic.referrer 
+                    } 
+                }]
+            };
+            if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
+        }
+        
+        // 3. Send success response back to the frontend
+        const message = isGaMpEnabled ? 
+                        `GA4 MP data sent successfully via proxy. Events: ${eventCount}.` : 
+                        'Request sent (No GA MP keys provided. Check iframe for loading).';
+
+        res.status(200).json({ 
+            status: 'OK', 
+            message: message,
+            eventsSent: eventCount
+        });
+        
+    } catch (error) {
+        const errorCode = error.code || error.message;
+        console.error(`[PROXY REQUEST HANDLER FAILED] Error:`, errorCode);
+        
+        res.status(502).json({ 
+            status: 'FAILED', 
+            error: 'Internal Server Error during request handling', 
+            details: errorCode
+        });
+    }
+});
+
+
+// ===================================================================
+// --- SERVER START ---
+// ===================================================================
+app.listen(PORT, () => {
+    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
+});
