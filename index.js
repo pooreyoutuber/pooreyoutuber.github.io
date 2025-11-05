@@ -417,17 +417,114 @@ Requested Change: "${requestedChange}"`;
 });
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - NEW PROXY TOOL
-// Frontend now sends ga_id and api_secret as optional query parameters
+// 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - MODIFIED
+// ===================================================================
+const express = require('express');
+const bodyParser = require('body-parser');
+const nodeFetch = require('node-fetch');
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
+
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(express.static('public')); // Assuming you have a 'public' directory for index.html
+
+// Set CORS headers for all responses (CRITICAL for frontend calls)
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+// --- Helper Functions (GA4 MP) ---
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const geoData = [
+    { country: "India", timezone: "Asia/Kolkata" },
+    { country: "United States", timezone: "America/Los_Angeles" },
+    { country: "United States", timezone: "America/New_York" },
+    { country: "Canada", timezone: "America/Toronto" },
+    { country: "Germany", timezone: "Europe/Berlin" },
+    { country: "Australia", timezone: "Australia/Sydney" },
+    { country: "Japan", timezone: "Asia/Tokyo" },
+    { country: "United Kingdom", timezone: "Europe/London" },
+    { country: "Brazil", timezone: "America/Sao_Paulo" },
+    { country: "France", timezone: "Europe/Paris" }
+];
+
+function getRandomGeo() {
+    return geoData[randomInt(0, geoData.length - 1)];
+}
+
+const trafficSources = [
+    { source: "google", medium: "organic", referrer: "https://www.google.com/" },
+    { source: "direct", medium: "none", referrer: "" },
+    { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
+    { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
+    { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
+];
+
+function getRandomTrafficSource() {
+    return trafficSources[randomInt(0, trafficSources.length - 1)];
+}
+
+// --- END Helper Functions ---
+
+
+// ===================================================================
+// 1. LEGACY ENDPOINT (API: /boost-mp) - Kept for compatibility
+// This endpoint uses HARDCODED GA ID/Secret
+// ===================================================================
+
+const YOUR_GA4_ID = "G-XXXXXXX"; // Replace with your actual GA4 ID
+const YOUR_API_SECRET = "YOUR_API_SECRET"; // Replace with your actual API Secret
+
+app.post('/boost-mp', async (req, res) => {
+    // This function is kept for legacy POST requests (not used by the Prime Tool)
+    // The prime tool uses the GET /proxy-request endpoint below.
+    res.status(501).json({ status: 'ERROR', message: 'Legacy endpoint not in use.' });
+});
+
+
+// ===================================================================
+// 2 & 3. DUMMY CAPTION ENDPOINTS (Kept for compatibility)
+// ===================================================================
+
+app.post('/api/caption-generate', (req, res) => {
+    res.status(200).json({ 
+        success: true, 
+        caption: "Simulated Caption: Boost your views with this prime tool!",
+        duration: "10s"
+    });
+});
+
+app.post('/api/caption-edit', (req, res) => {
+    res.status(200).json({ 
+        success: true, 
+        editedCaption: req.body.caption + " - [Edited by Booster Prime]",
+        duration: "5s"
+    });
+});
+
+
+// ===================================================================
+// 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - CRITICAL
+// This endpoint uses GA ID/Secret provided by the frontend.
+// ===================================================================
 const COMMON_AUTH_USER = "bqctypvz";
 const COMMON_AUTH_PASS = "399xb3kxqv6i";
 
 app.get('/proxy-request', async (req, res) => {
     
-    // 1. Get parameters from the frontend URL query (Added ga_id and api_secret)
-    const { target, ip, port, auth, uid, ga_id, api_secret } = req.query; // <<< CHANGED HERE
+    // 1. Get parameters from the frontend URL query (Now includes optional ga_id and api_secret)
+    const { target, ip, port, auth, uid, ga_id, api_secret } = req.query; 
 
-    // Basic validation check (essential keys)
+    // Basic validation check (essential keys for iframe loading)
     if (!target || !ip || !port || !auth || !uid) {
         return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters from frontend.' });
     }
@@ -443,7 +540,7 @@ app.get('/proxy-request', async (req, res) => {
     const cid = uid; 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource();
+    const traffic = getRandomTrafficSource(); 
     const engagementTime = randomInt(30000, 120000); 
 
     const userProperties = {
@@ -461,7 +558,7 @@ app.get('/proxy-request', async (req, res) => {
         }
         
         // CRITICAL: Use the ga_id and api_secret from the request query
-        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; // <<< CHANGED HERE
+        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; 
         payload.timestamp_micros = String(Date.now() * 1000); 
         const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
         
