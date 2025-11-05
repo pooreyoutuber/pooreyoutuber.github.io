@@ -27,7 +27,11 @@
   .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
   .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
   .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  input[type="url"], input[type="text"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  
+  /* Reset the URL input border radius for standalone use */
+  .url-input-wrap input[type="url"] { border-radius: 0 10px 10px 0; border-left: 1px solid var(--border); }
+
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
   .btn:hover:not(:disabled) { background: #0c8cd8; }
   .btn:disabled { background: #94a3b8; cursor: not-allowed; }
@@ -120,6 +124,22 @@
             <button id="globalGo" class="btn">Load & Run All</button>
         </div>
         
+        <div id="gaControls" class="repeat-control" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+            <div style="font-weight: 700; color: var(--danger);">
+                <span id="toggleGaInputs" style="cursor:pointer; text-decoration: underline;">
+                    Optional: Enable GA4 Measurement Protocol Boost
+                </span>
+            </div>
+            <div id="gaInputFields" style="display: none; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                 <label style="color:var(--accent); font-weight:600; flex-shrink: 0;">GA ID (G-XXXX):</label>
+                 <input id="gaIdInput" type="text" placeholder="G-XXXXXXXXXX" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);" />
+                 <label style="color:var(--accent); font-weight:600; flex-shrink: 0;">API Secret:</label>
+                 <input id="apiSecretInput" type="text" placeholder="Your_API_Secret" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);" />
+            </div>
+            <div style="font-size: 11px; color: var(--muted); margin-top: -5px;">
+                *Required only if you want to see **Active Users** in Google Analytics Realtime report.
+            </div>
+        </div>
         <div class="repeat-control">
             <div class="repeat-control-group">
                 <input type="checkbox" id="repeatMode" />
@@ -230,6 +250,12 @@ const maxTimeInput = document.getElementById('maxTime');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
+// 👇 NEW GA4 INPUTS 
+const toggleGaInputs = document.getElementById('toggleGaInputs');
+const gaInputFields = document.getElementById('gaInputFields');
+const gaIdInput = document.getElementById('gaIdInput');
+const apiSecretInput = document.getElementById('apiSecretInput');
+
 let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
@@ -314,26 +340,41 @@ function createSlot(index, proxy){
     }
   }
   
+  // 👇 MODIFIED: Sending optional GA keys
   function getProxiedUrl(originalUrl, proxy){
-      // Sending data to Node.js backend
-      return `${PROXY_ENDPOINT}?` + 
-          `target=${encodeURIComponent(originalUrl)}&` +
+      // Fetch GA keys from the new optional inputs
+      const gaId = gaIdInput.value.trim();
+      const apiSecret = apiSecretInput.value.trim();
+      
+      let params = `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; 
+          `uid=${proxy.uniqueId}`;
+      
+      // Add optional GA parameters only if provided
+      if(gaId && apiSecret) {
+          params += `&ga_id=${gaId}&api_secret=${apiSecret}`;
+      }
+
+      // Sending data to Node.js backend
+      return `${PROXY_ENDPOINT}?${params}`; 
   }
 
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
+    // Check if GA keys are provided
+    const isGaMpEnabled = gaIdInput.value.trim() && apiSecretInput.value.trim();
+    const gaStatus = isGaMpEnabled ? ' (GA MP Active)' : '';
+
     iframe.src = originalUrl;
-    updateStatus('Loading Content...', 'loading');
+    updateStatus(`Loading Content${gaStatus}...`, 'loading');
     
     el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    updateStatus('Sending Proxy Request to Node.js...', 'loading');
+    updateStatus(`Sending Proxy Request to Node.js${gaStatus}...`, 'loading');
 
     try {
         // Fetch to the Node.js backend
@@ -341,7 +382,8 @@ function createSlot(index, proxy){
         const data = await response.json(); 
         
         if (response.ok && data.status === 'OK') {
-            updateStatus('View Sent (BG Session Active)', 'active');
+            const message = data.message;
+            updateStatus(message, 'active');
         } else {
             updateStatus(`Failed: ${data.details || 'Unknown Error'}`, 'failed');
             console.error(`Slot ${index+1} Backend Error:`, data);
@@ -472,6 +514,15 @@ repeatModeCheckbox.addEventListener('change', () => {
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
         stopAllAutomation();
     }
+});
+
+// 👇 NEW: Optional GA Input Toggle Logic
+toggleGaInputs.addEventListener('click', () => {
+    const isVisible = gaInputFields.style.display !== 'none' && gaInputFields.style.display !== '';
+    gaInputFields.style.display = isVisible ? 'none' : 'flex';
+    toggleGaInputs.textContent = isVisible 
+        ? 'Optional: Enable GA4 Measurement Protocol Boost' 
+        : 'GA4 MP Boost Enabled (Click to Hide)';
 });
 
 
