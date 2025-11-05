@@ -1,4 +1,4 @@
-// index.js (ULTIMATE FINAL VERSION - Replit Hack + Geo Fix + Source/Medium Logic)
+// index.js (ULTIMATE FINAL VERSION - Combined Tool Server)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -8,6 +8,8 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
+// New Import for Proxy:
+const { HttpsProxyAgent } = require('https-proxy-agent'); // Added for the new proxy tool
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -125,7 +127,6 @@ async function validateKeys(gaId, apiSecret, cid) {
         client_id: cid,
         events: [{ name: "test_event", params: { debug_mode: true, language: "en-US" } }]
     };
-    // ... (Validation Logic Remains the same) ...
     try {
         const response = await nodeFetch(validationEndpoint, {
             method: 'POST',
@@ -153,18 +154,17 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session with full attribution parameters.
+ * Simulates a single view session with full attribution parameters. (Used by /boost-mp)
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource(); // 🔥 New Traffic Logic
+    const traffic = getRandomTrafficSource();
     const engagementTime = randomInt(30000, 120000); 
 
-    // 🔥 GEO FIX: Custom Dimension for Country
     const userProperties = {
-        simulated_geo: { value: geo.country }, // GA4 Admin में 'simulated_geo' को User Scope Custom Dimension बनाना है
+        simulated_geo: { value: geo.country }, 
         user_timezone: { value: geo.timezone }
     };
     
@@ -173,7 +173,6 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     console.log(`\n--- [View ${viewCount}] Session (Geo: ${geo.country}, Source/Medium: ${traffic.source}/${traffic.medium}) ---`);
 
     // 1. SESSION START EVENT
-    // Add Source, Medium, and Referrer to Session Start
     let sessionStartEvents = [
         { 
             name: "session_start", 
@@ -183,9 +182,9 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
                 debug_mode: true,
                 language: "en-US",
                 session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ? traffic.medium : "Direct",
-                source: traffic.source,         // 🔥 Added: google, youtube, etc.
-                medium: traffic.medium,         // 🔥 Added: organic, social, (none)
-                page_referrer: traffic.referrer  // 🔥 Added: Referrer URL
+                source: traffic.source,
+                medium: traffic.medium,
+                page_referrer: traffic.referrer
             } 
         }
     ];
@@ -213,7 +212,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
                 debug_mode: true,
                 language: "en-US",
                 engagement_time_msec: engagementTime,
-                page_referrer: traffic.referrer // Send referrer again
+                page_referrer: traffic.referrer 
             } 
         }
     ];
@@ -247,7 +246,6 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
     if (!result.success) allSuccess = false;
 
-
     console.log(`[View ${viewCount}] Completed session. Total Engagement Time: ${Math.round(engagementTime/1000)}s.`);
 
     return allSuccess;
@@ -278,7 +276,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL (Existing)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -332,7 +330,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (No Changes)
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (Existing)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -376,7 +374,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (No Changes)
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (Existing)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -417,10 +415,77 @@ Requested Change: "${requestedChange}"`;
     );
     }
 });
+
+// ===================================================================
+// 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - NEW PROXY TOOL
+// ===================================================================
+
+// --- Proxy Credentials (Hardcoded from frontend for simplicity) ---
+// WARNING: In a production environment, never expose credentials like this. Use environment variables.
+const COMMON_AUTH_USER = "bqctypvz";
+const COMMON_AUTH_PASS = "399xb3kxqv6i";
+
+app.get('/proxy-request', async (req, res) => {
+    // 1. Get parameters from the frontend URL query
+    const { target, ip, port, auth, uid } = req.query;
+
+    if (!target || !ip || !port || !auth || !uid) {
+        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters from frontend.' });
+    }
+    
+    // The frontend sends the full 'user:pass' in 'auth' for compatibility, but we rely on hardcoded common credentials here
+    const proxyUrl = `http://${ip}:${port}`;
+    const proxyAuth = `${COMMON_AUTH_USER}:${COMMON_AUTH_PASS}`;
+
+    try {
+        const proxyAgent = new HttpsProxyAgent(proxyUrl, {
+            auth: proxyAuth,
+            // You may need to enable this if your proxies use non-standard SSL:
+            // rejectUnauthorized: false 
+        });
+
+        // 2. GA4 Cookie Fix: Injecting the unique client ID (uid) into the cookie header
+        const timestamp = Math.floor(Date.now() / 1000);
+        // We use the uid (uniqueId from frontend) to generate the GA1.1 cookie value
+        const gaCookieValue = `_ga=GA1.1.${uid}.${timestamp}`;
+
+        const AXIOS_TIMEOUT = 10000; // 10 seconds timeout for connection
+
+        // Send a HEAD request via proxy (quickest way to start a session)
+        await axios.head(target, {
+            timeout: AXIOS_TIMEOUT,
+            httpAgent: proxyAgent,
+            httpsAgent: proxyAgent,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36',
+                'Cookie': gaCookieValue // Injecting the unique GA cookie
+            }
+        });
+
+        // 3. Send immediate success response back to the frontend
+        // The session time is simulated by the frontend's repeat interval.
+        res.status(200).json({ status: 'OK', message: 'Request sent successfully via proxy. Session active.' });
+        
+        console.log(`[PROXY SUCCESS] Target: ${target} via ${ip}:${port}. GA ID: ${uid}`);
+
+    } catch (error) {
+        // Handle proxy connection errors, timeout errors, or target site errors
+        const errorCode = error.code || error.message;
+        console.error(`[PROXY FAILED] ${ip}:${port}. Error:`, errorCode);
+        
+        res.status(502).json({ 
+            status: 'FAILED', 
+            error: 'Proxy or Target Network Error', 
+            details: errorCode
+        });
+    }
+});
+
+
 // ===================================================================
 // --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-                    
+            
