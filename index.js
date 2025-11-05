@@ -420,7 +420,6 @@ Requested Change: "${requestedChange}"`;
 // 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - MODIFIED
 // ===================================================================
     return trafficSources[randomInt(0, trafficSources.length - 1)];
-}
 
 // --- END Helper Functions ---
 
