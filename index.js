@@ -1,4 +1,4 @@
-// index.js (ULTIMATE FINAL VERSION - Combined Tool Server)
+// index.js (ULTIMATE FINAL VERSION - Combined Tool Server - FIXED)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -8,8 +8,7 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
-// New Import for Proxy:
-const { HttpsProxyAgent } = require('https-proxy-agent'); // Added for the new proxy tool
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -120,7 +119,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function (No Changes)
+// Validation function 
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const testPayload = {
@@ -252,7 +251,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 }
 
 
-// --- VIEW PLAN GENERATION (No changes) ---
+// --- VIEW PLAN GENERATION ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -276,7 +275,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL (Existing)
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL 
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -330,7 +329,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (Existing)
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -374,7 +373,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (Existing)
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -417,51 +416,7 @@ Requested Change: "${requestedChange}"`;
 });
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - MODIFIED
-// =================================================================
-return trafficSources[randomInt(0, trafficSources.length - 1)
-
-// --- END Helper Functions ---
-
-
-// ===================================================================
-// 1. LEGACY ENDPOINT (API: /boost-mp) - Kept for compatibility
-// This endpoint uses HARDCODED GA ID/Secret
-// ===================================================================
-
-const YOUR_GA4_ID = "G-XXXXXXX"; // Replace with your actual GA4 ID
-const YOUR_API_SECRET = "YOUR_API_SECRET"; // Replace with your actual API Secret
-
-app.post('/boost-mp', async (req, res) => {
-    // This function is kept for legacy POST requests (not used by the Prime Tool)
-    // The prime tool uses the GET /proxy-request endpoint below.
-    res.status(501).json({ status: 'ERROR', message: 'Legacy endpoint not in use.' });
-});
-
-
-// ===================================================================
-// 2 & 3. DUMMY CAPTION ENDPOINTS (Kept for compatibility)
-// ===================================================================
-
-app.post('/api/caption-generate', (req, res) => {
-    res.status(200).json({ 
-        success: true, 
-        caption: "Simulated Caption: Boost your views with this prime tool!",
-        duration: "10s"
-    });
-});
-
-app.post('/api/caption-edit', (req, res) => {
-    res.status(200).json({ 
-        success: true, 
-        editedCaption: req.body.caption + " - [Edited by Booster Prime]",
-        duration: "5s"
-    });
-});
-
-
-// ===================================================================
-// 4.4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - MODIFIED
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) 
 // ===================================================================
 const COMMON_AUTH_USER = "bqctypvz";
 const COMMON_AUTH_PASS = "399xb3kxqv6i";
@@ -480,6 +435,9 @@ app.get('/proxy-request', async (req, res) => {
     const isGaMpEnabled = ga_id && api_secret; 
     
     // --- Proxy Setup ---
+    // Note: The original code used HttpsProxyAgent with an 'http://' URL, which may be incorrect for all proxies.
+    // For standard HTTP proxy, 'node-fetch' should handle it via 'agent' property.
+    // For now, keeping the original HttpsProxyAgent setup for compatibility with the provided code snippet logic.
     const proxyUrl = `http://${COMMON_AUTH_USER}:${COMMON_AUTH_PASS}@${ip}:${port}`;
     const proxyAgent = new HttpsProxyAgent(proxyUrl);
     
@@ -534,78 +492,4 @@ app.get('/proxy-request', async (req, res) => {
             return false;
         }
     }
-    // --- END: FUNCTION TO SEND DATA VIA PROXY ---
-
-    try {
-        if (isGaMpEnabled) {
-            // 1. SESSION START EVENT
-            const sessionStartPayload = {
-                client_id: cid,
-                user_properties: userProperties,
-                events: [{ 
-                    name: "session_start", 
-                    params: { 
-                        session_id: session_id, 
-                        _ss: 1, 
-                        debug_mode: true,
-                        language: "en-US",
-                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : "Direct", 
-                        source: traffic.source,
-                        medium: traffic.medium,
-                        page_referrer: traffic.referrer
-                    } 
-                }]
-            };
-            if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
-            
-            // 2. PAGE VIEW EVENT
-            const pageViewPayload = {
-                client_id: cid,
-                user_properties: userProperties,
-                events: [{ 
-                    name: 'page_view', 
-                    params: { 
-                        page_location: target, 
-                        page_title: "Simulated Proxy View",
-                        session_id: session_id, 
-                        debug_mode: true,
-                        language: "en-US",
-                        engagement_time_msec: engagementTime,
-                        page_referrer: traffic.referrer 
-                    } 
-                }]
-            };
-            if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
-        }
-        
-        // 3. Send success response back to the frontend
-        const message = isGaMpEnabled ? 
-                        `GA4 MP data sent successfully via proxy. Events: ${eventCount}.` : 
-                        'Request sent (No GA MP keys provided. Check iframe for loading).';
-
-        res.status(200).json({ 
-            status: 'OK', 
-            message: message,
-            eventsSent: eventCount
-        });
-        
-    } catch (error) {
-        const errorCode = error.code || error.message;
-        console.error(`[PROXY REQUEST HANDLER FAILED] Error:`, errorCode);
-        
-        res.status(502).json({ 
-            status: 'FAILED', 
-            error: 'Internal Server Error during request handling', 
-            details: errorCode
-        });
-    }
-});
-
-
-// ===================================================================
-// --- SERVER START ---
-// ===================================================================
-app.listen(PORT, () => {
-    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
-});
-                    
+    /
