@@ -419,57 +419,6 @@ Requested Change: "${requestedChange}"`;
 // ===================================================================
 // 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - MODIFIED
 // ===================================================================
-const express = require('express');
-const bodyParser = require('body-parser');
-const nodeFetch = require('node-fetch');
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
-
-const app = express();
-const PORT = process.env.PORT || 10000;
-
-// Middleware
-app.use(bodyParser.json());
-app.use(express.static('public')); // Assuming you have a 'public' directory for index.html
-
-// Set CORS headers for all responses (CRITICAL for frontend calls)
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
-
-// --- Helper Functions (GA4 MP) ---
-
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-const geoData = [
-    { country: "India", timezone: "Asia/Kolkata" },
-    { country: "United States", timezone: "America/Los_Angeles" },
-    { country: "United States", timezone: "America/New_York" },
-    { country: "Canada", timezone: "America/Toronto" },
-    { country: "Germany", timezone: "Europe/Berlin" },
-    { country: "Australia", timezone: "Australia/Sydney" },
-    { country: "Japan", timezone: "Asia/Tokyo" },
-    { country: "United Kingdom", timezone: "Europe/London" },
-    { country: "Brazil", timezone: "America/Sao_Paulo" },
-    { country: "France", timezone: "Europe/Paris" }
-];
-
-function getRandomGeo() {
-    return geoData[randomInt(0, geoData.length - 1)];
-}
-
-const trafficSources = [
-    { source: "google", medium: "organic", referrer: "https://www.google.com/" },
-    { source: "direct", medium: "none", referrer: "" },
-    { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
-    { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
-    { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
-];
-
-function getRandomTrafficSource() {
     return trafficSources[randomInt(0, trafficSources.length - 1)];
 }
 
@@ -513,26 +462,25 @@ app.post('/api/caption-edit', (req, res) => {
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - CRITICAL
-// This endpoint uses GA ID/Secret provided by the frontend.
+// 4.4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - MODIFIED
 // ===================================================================
 const COMMON_AUTH_USER = "bqctypvz";
 const COMMON_AUTH_PASS = "399xb3kxqv6i";
 
 app.get('/proxy-request', async (req, res) => {
     
-    // 1. Get parameters from the frontend URL query (Now includes optional ga_id and api_secret)
+    // 1. Get parameters from the frontend URL query (Includes optional ga_id and api_secret)
     const { target, ip, port, auth, uid, ga_id, api_secret } = req.query; 
 
-    // Basic validation check (essential keys for iframe loading)
+    // Basic validation check (Checks for essential proxy and target info)
     if (!target || !ip || !port || !auth || !uid) {
-        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters from frontend.' });
+        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, ip, port, auth, uid).' });
     }
 
     // Check if GA MP parameters are provided
     const isGaMpEnabled = ga_id && api_secret; 
     
-    // --- Proper Proxy Setup ---
+    // --- Proxy Setup ---
     const proxyUrl = `http://${COMMON_AUTH_USER}:${COMMON_AUTH_PASS}@${ip}:${port}`;
     const proxyAgent = new HttpsProxyAgent(proxyUrl);
     
@@ -554,7 +502,7 @@ app.get('/proxy-request', async (req, res) => {
     async function sendDataViaProxy(payload, eventType) {
         if (!isGaMpEnabled) {
              console.log(`[PROXY MP SKIP] Keys missing. Skipped: ${eventType}.`);
-             return false; // Skip if keys are not provided
+             return false; 
         }
         
         // CRITICAL: Use the ga_id and api_secret from the request query
@@ -582,6 +530,7 @@ app.get('/proxy-request', async (req, res) => {
                 return false;
             }
         } catch (error) {
+            // Logs critical error if proxy connection fails 
             console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed: ${error.message}`);
             return false;
         }
@@ -647,7 +596,7 @@ app.get('/proxy-request', async (req, res) => {
         
         res.status(502).json({ 
             status: 'FAILED', 
-            error: 'Internal Server Error during GA4 MP call', 
+            error: 'Internal Server Error during request handling', 
             details: errorCode
         });
     }
@@ -655,8 +604,9 @@ app.get('/proxy-request', async (req, res) => {
 
 
 // ===================================================================
-// --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
+// --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
+                    
