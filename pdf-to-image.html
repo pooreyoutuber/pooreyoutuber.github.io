@@ -15,18 +15,144 @@
   </script>
 
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
-    input { margin: 10px; }
-    button { padding: 10px 20px; background: #28a745; color: #fff; border: none; cursor: pointer; border-radius: 5px; margin-bottom: 15px; }
-    button:hover { background: #1e7e34; }
-    canvas { margin-top: 20px; border: 1px solid #ccc; max-width: 100%; height: auto; display: none; /* Initially hide canvas */ }
-    .ad-container { margin: 20px auto; max-width: 728px; text-align: center; }
+    /* Global Styles */
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        text-align: center; 
+        margin: 0; 
+        padding: 30px; 
+        background-color: #f4f7f6; /* Light background for modern look */
+        color: #333;
+    }
+    
+    h2 {
+        color: #007bff; /* Primary color for main heading */
+        margin-bottom: 20px;
+        font-size: 2.2em;
+    }
+
+    /* Input and Button Styling (Tool Area) */
+    input[type="file"] { 
+        margin: 20px 0 10px 0; 
+        padding: 10px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+    button { 
+        padding: 12px 25px; 
+        background: #007bff; /* Primary blue button */
+        color: #fff; 
+        border: none; 
+        cursor: pointer; 
+        border-radius: 8px; 
+        margin-bottom: 20px; 
+        font-size: 1.1em;
+        font-weight: bold;
+        transition: background-color 0.3s ease, transform 0.1s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    button:hover { 
+        background: #0056b3; 
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Ad and Canvas/Download Area */
+    canvas { 
+        margin-top: 30px; 
+        border: 4px solid #007bff; /* Highlight canvas border */
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        max-width: 100%; 
+        height: auto; 
+        display: none; 
+    }
+    
+    .ad-container { 
+        margin: 20px auto; 
+        max-width: 728px; 
+        text-align: center; 
+    }
+
+    /* Download Link Styling */
+    #download-link {
+        margin-top: 25px; 
+        font-size: 1.2em;
+    }
+    #download-anchor { 
+        color: #28a745; /* Success green color */
+        font-weight: bold; 
+        text-decoration: none;
+        padding: 10px 20px;
+        border: 2px solid #28a745;
+        border-radius: 5px;
+        display: inline-block;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    #download-anchor:hover {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    /* Description Box Styling (Improved) */
+    .description-box { 
+        text-align: left; 
+        max-width: 800px; /* Slightly wider for content */
+        margin: 30px auto; 
+        padding: 30px; 
+        border: none; 
+        border-radius: 12px; 
+        background: #fff; /* White background for description */
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Soft shadow */
+    }
+    .description-box h3 { 
+        text-align: center; 
+        color: #007bff; 
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+    .description-box h4 {
+        color: #28a745; /* Secondary accent color */
+        margin-top: 20px;
+    }
+    .description-box ol { 
+        margin-top: 15px;
+        padding-left: 20px;
+        list-style-type: decimal;
+    }
+    .description-box li {
+        margin-bottom: 8px;
+    }
+    .description-box p {
+        line-height: 1.6;
+        color: #555;
+    }
   </style>
 </head>
 <body>
-  <h2>PDF to Image Converter</h2>
+  <h2>✨ Online PDF to Image Converter</h2>
   
-  <div>
+  <div class="ad-container">
+    <ins class="adsbygoogle"
+         style="display:block; text-align:center;"
+         data-ad-layout="in-article"
+         data-ad-format="fluid"
+         data-ad-client="ca-pub-9877532310172541"
+         data-ad-slot="3376304110"></ins>
+  </div>
+  
+  <input type="file" id="upload" accept="application/pdf"><br>
+  <button onclick="convertPDF()">Convert PDF Page to Image</button>
+
+  <div class="description-box">
     <h3>Fast, Free, and Easy PDF to Image Conversion</h3>
     <p>Welcome to the **PDF to Image Converter**, your go-to online tool for transforming your Portable Document Format (PDF) files into high-quality image formats, effortlessly and for free. Whether you need to share a PDF page on social media, use a document page in a presentation, or simply save a page as a universally compatible image, our converter is designed to make the process **quick and simple**.</p>
     
@@ -45,23 +171,13 @@
   
   <div class="ad-container">
     <ins class="adsbygoogle"
-         style="display:block; text-align:center;"
-         data-ad-layout="in-article"
-         data-ad-format="fluid"
-         data-ad-client="ca-pub-9877532310172541"
-         data-ad-slot="3376304110"></ins>
-  </div>
-  <input type="file" id="upload" accept="application/pdf"><br>
-  <button onclick="convertPDF()">Convert PDF Page to Image</button>
-
-  <div class="ad-container">
-    <ins class="adsbygoogle"
          style="display:block"
          data-ad-format="fluid"
          data-ad-layout-key="-fb+5w+4e-db+86"
          data-ad-client="ca-pub-9877532310172541"
          data-ad-slot="2823330849"></ins>
   </div>
+  
   <div>
     <canvas id="pdf-canvas"></canvas>
     <p id="download-link" style="margin-top: 15px; display: none;">
@@ -81,70 +197,5 @@
     <ins class="adsbygoogle"
          style="display:block"
          data-ad-format="autorelaxed"
-         data-ad-client="ca-pub-9877532310172541"
-         data-ad-slot="6399436165"></ins>
-  </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Initialize Adsense
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    });
-
-    function convertPDF() {
-      const file = document.getElementById("upload").files[0];
-      const canvas = document.getElementById("pdf-canvas");
-      const downloadLink = document.getElementById("download-link");
-      const downloadAnchor = document.getElementById("download-anchor");
-
-      if (!file) {
-        alert("Please upload a PDF file!");
-        return;
-      }
-
-      // Hide previous results
-      canvas.style.display = 'none';
-      downloadLink.style.display = 'none';
-
-      const fileReader = new FileReader();
-      fileReader.onload = function() {
-        const typedarray = new Uint8Array(this.result);
-
-        // Load PDF document
-        pdfjsLib.getDocument({ data: typedarray }).promise.then(function(pdf) {
-          // Get the first page
-          pdf.getPage(1).then(function(page) {
-            const scale = 1.5;
-            const viewport = page.getViewport({ scale: scale });
-            const context = canvas.getContext("2d");
-            
-            // Set canvas size
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-
-            // Render PDF page onto canvas
-            const renderContext = {
-              canvasContext: context,
-              viewport: viewport
-            };
-            
-            page.render(renderContext).promise.then(function() {
-              // Once rendering is complete
-              canvas.style.display = 'block'; // Show canvas
-              
-              // Create download link for the image
-              const dataURL = canvas.toDataURL("image/png");
-              downloadAnchor.href = dataURL;
-              downloadLink.style.display = 'block';
-            });
-          }).catch(function(error) {
-            alert("Error rendering PDF page: " + error.message);
-          });
-        }).catch(function(error) {
-          alert("Error loading PDF document: " + error.message);
-        });
-      };
-      fileReader.readAsArrayBuffer(file);
-    }
-  </script>
-</body>
-</html>
+         data-ad-client="ca-pub-987
+      
