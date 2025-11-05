@@ -1,4 +1,4 @@
-// index.js (ULTIMATE FINAL VERSION - Proxy Booster Fix ONLY)
+// index.js (ULTIMATE FINAL VERSION - Combined Tool Server)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -8,12 +8,13 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
-const { HttpsProxyAgent } = require('https-proxy-agent'); // Keep this for the proxy tool
+// New Import for Proxy:
+const { HttpsProxyAgent } = require('https-proxy-agent'); // Added for the new proxy tool
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
-// --- GEMINI KEY CONFIGURATION (EXISTING CODE) ---
+// --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
@@ -28,7 +29,7 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- MIDDLEWARE & UTILITIES (EXISTING CODE) ---
+// --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
@@ -42,7 +43,7 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// --- GEOGRAPHIC DATA (EXISTING CODE) ---
+// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -57,12 +58,12 @@ function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
 }
 
-// 🔥 REPLIT HACK 1: Client ID Generation (EXISTING CODE)
+// 🔥 REPLIT HACK 1: Client ID Generation (Simple, non-UUID style)
 function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC (EXISTING CODE) ---
+// --- TRAFFIC SOURCE LOGIC (New/Fixed for Reports) ---
 const TRAFFIC_SOURCES = [
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
@@ -72,13 +73,14 @@ const TRAFFIC_SOURCES = [
     { source: "(direct)", medium: "(none)", referrer: "" }
 ];
 function getRandomTrafficSource() {
+    // 50% chance for direct traffic to ensure realism
     if (Math.random() < 0.5) {
-        return TRAFFIC_SOURCES[5];
+        return TRAFFIC_SOURCES[5]; // (direct) / (none)
     }
+    // Rest 50% chance for other sources
     return TRAFFIC_SOURCES[randomInt(0, TRAFFIC_SOURCES.length - 2)]; 
 }
-
-// --- UTILITIES (EXISTING CODE) ---
+// --- UTILITIES ---
 const getOptimalDelay = (totalViews) => {
     const targetDurationMs = 14400000; 
     const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
@@ -88,7 +90,7 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (EXISTING CODE) ---
+// --- GA4 DATA SENDING ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
@@ -105,20 +107,20 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
         });
 
         if (response.status === 204) { 
-            console.log(`[MP ${currentViewId}] SUCCESS ✅ | Sent: ${eventType}`);
+            console.log(`[View ${currentViewId}] SUCCESS ✅ | Sent: ${eventType}`);
             return { success: true };
         } else {
             const errorText = await response.text(); 
-            console.error(`[MP ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
             return { success: false, error: errorText };
         }
     } catch (error) {
-        console.error(`[MP ${currentViewId}] CRITICAL ERROR ⚠️ | Event: ${eventType}. Connection Failed: ${error.message}`);
+        console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Event: ${eventType}. Connection Failed: ${error.message}`);
         return { success: false, error: error.message };
     }
 }
 
-// Validation function (EXISTING CODE)
+// Validation function (No Changes)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const testPayload = {
@@ -152,7 +154,7 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session with full attribution parameters. (EXISTING CODE - NOT CHANGED)
+ * Simulates a single view session with full attribution parameters. (Used by /boost-mp)
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
@@ -250,7 +252,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 }
 
 
-// --- VIEW PLAN GENERATION (EXISTING CODE) ---
+// --- VIEW PLAN GENERATION (No changes) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -274,7 +276,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL (EXISTING CODE)
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL (Existing)
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -319,8 +321,7 @@ app.post('/boost-mp', async (req, res) => {
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
 
-            // Calls the original simulateView
-            await simulateView(ga_id, api_key, url, search_keyword || '', currentView);
+            await simulateView(ga_id, api_key, url, search_keyword, currentView);
         }
         
         console.log(`\n[BOOSTER COMPLETE] Successfully finished ${totalViews} view simulations.`);
@@ -329,7 +330,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (EXISTING CODE)
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL (Existing)
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -373,7 +374,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (EXISTING CODE)
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL (Existing)
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -415,83 +416,76 @@ Requested Change: "${requestedChange}"`;
     }
 });
 
-
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - FINAL HYBRID FIX (ONLY MODIFIED PART)
+// 4. WEBSITE BOOSTER PRIME ENDPOINT (API: /proxy-request) - NEW PROXY TOOL
 // ===================================================================
 
-// NOTE: You must update these with the correct values for your GA4 property!
-const GA_ID_PRIME_HYBRID = 'G-XXXXXXXXXX'; // <-- REPLACE THIS
-const API_SECRET_PRIME_HYBRID = 'XXXXXXXXXXXXXXXXXXXX'; // <-- REPLACE THIS
-const COMMON_AUTH_USER = "bqctypvz"; // Assuming this is correct
-const COMMON_AUTH_PASS = "399xb3kxqv6i"; // Assuming this is correct
-
-// Random headers for the proxy hit (for realism)
-const userAgents = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/117.0.5938.108 Mobile/15E148 Safari/604.1',
-];
-const acceptLanguages = [
-    'en-US,en;q=0.9,hi;q=0.8',
-    'en-GB,en;q=0.9,fr;q=0.8',
-    'ja-JP,ja;q=0.9,en;q=0.8',
-    'de-DE,de;q=0.9,en;q=0.8',
-];
-function getRandomItem(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-
+// --- Proxy Credentials (Hardcoded from frontend for simplicity) ---
+// WARNING: In a production environment, never expose credentials like this. Use environment variables.
+const COMMON_AUTH_USER = "bqctypvz";
+const COMMON_AUTH_PASS = "399xb3kxqv6i";
 
 app.get('/proxy-request', async (req, res) => {
-    
-    const { target, ip, port, auth, uid } = req.query; // uid is the unique client ID
+    // 1. Get parameters from the frontend URL query
+    const { target, ip, port, auth, uid } = req.query;
 
-    if (!target || !ip || !port || !uid) {
-        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters.' });
+    if (!target || !ip || !port || !auth || !uid) {
+        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters from frontend.' });
     }
     
+    // The frontend sends the full 'user:pass' in 'auth' for compatibility, but we rely on hardcoded common credentials here
     const proxyUrl = `http://${ip}:${port}`;
     const proxyAuth = `${COMMON_AUTH_USER}:${COMMON_AUTH_PASS}`;
-    const AXIOS_TIMEOUT = 12000; 
 
-    // 1. PERFORM PROXY HIT (FOR VISUAL/NETWORK EFFECT)
     try {
-        const proxyAgent = new HttpsProxyAgent(proxyUrl, { auth: proxyAuth });
+        const proxyAgent = new HttpsProxyAgent(proxyUrl, {
+            auth: proxyAuth,
+            // You may need to enable this if your proxies use non-standard SSL:
+            // rejectUnauthorized: false 
+        });
 
-        await axios.get(target, { 
+        // 2. GA4 Cookie Fix: Injecting the unique client ID (uid) into the cookie header
+        const timestamp = Math.floor(Date.now() / 1000);
+        // We use the uid (uniqueId from frontend) to generate the GA1.1 cookie value
+        const gaCookieValue = `_ga=GA1.1.${uid}.${timestamp}`;
+
+        const AXIOS_TIMEOUT = 10000; // 10 seconds timeout for connection
+
+        // Send a HEAD request via proxy (quickest way to start a session)
+        await axios.head(target, {
             timeout: AXIOS_TIMEOUT,
             httpAgent: proxyAgent,
             httpsAgent: proxyAgent,
             headers: {
-                'User-Agent': getRandomItem(userAgents), // Randomizing User-Agent
-                'Accept-Language': getRandomItem(acceptLanguages),
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36',
+                'Cookie': gaCookieValue // Injecting the unique GA cookie
             }
         });
-        console.log(`[PROXY SUCCESS] Target: ${target} via ${ip}:${port}.`);
+
+        // 3. Send immediate success response back to the frontend
+        // The session time is simulated by the frontend's repeat interval.
+        res.status(200).json({ status: 'OK', message: 'Request sent successfully via proxy. Session active.' });
+        
+        console.log(`[PROXY SUCCESS] Target: ${target} via ${ip}:${port}. GA ID: ${uid}`);
 
     } catch (error) {
+        // Handle proxy connection errors, timeout errors, or target site errors
         const errorCode = error.code || error.message;
         console.error(`[PROXY FAILED] ${ip}:${port}. Error:`, errorCode);
-        // We will continue to MP protocol even if proxy fails, to ensure Active User count increases.
+        
+        res.status(502).json({ 
+            status: 'FAILED', 
+            error: 'Proxy or Target Network Error', 
+            details: errorCode
+        });
     }
-    
-    // 2. GA4 MEASUREMENT PROTOCOL HIT (FOR ACTIVE USER COUNT)
-    // This runs in the background and does NOT wait for completion, ensuring a quick response.
-    res.status(200).json({ status: 'OK', message: 'Proxy attempt complete. MP session initiated.' });
-    
-    // Asynchronously initiate a full GA4 session using the existing high-success logic
-    (async () => {
-        // We call the original simulateView function but manually pass the unique client ID (uid)
-        // We must provide a GA_ID and API_SECRET to this function call
-        await simulateView(GA_ID_PRIME_HYBRID, API_SECRET_PRIME_HYBRID, target, '', 1);
-    })();
 });
 
+
+// ===================================================================
 // --- SERVER START (अंतिम और आवश्यक ब्लॉक) ---
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
+           
