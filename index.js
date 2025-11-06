@@ -1,4 +1,4 @@
-// index.js (ULTIMATE FINAL VERSION - Combined Tool Server - FIXED)
+// index.js (ULTIMATE FINAL VERSION - Consolidated and Fixed)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -9,6 +9,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
+// NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
+const http = require('http'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -36,6 +38,13 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '5mb' }));
 
+// General CORS headers
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.get('/', (req, res) => {
     res.status(200).send('PooreYouTuber Combined API is running! Access tools via GitHub Pages.'); 
 });
@@ -57,13 +66,15 @@ function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
 }
 
+
 // 🔥 REPLIT HACK 1: Client ID Generation (Simple, non-UUID style)
 function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC (New/Fixed for Reports) ---
-const TRAFFIC_SOURCES = [
+// --- TRAFFIC SOURCE LOGIC ---
+// Used by Tool 1 (/boost-mp)
+const TRAFFIC_SOURCES_GA4 = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
     { source: "facebook", medium: "social", referrer: "https://www.facebook.com" },
@@ -71,15 +82,27 @@ const TRAFFIC_SOURCES = [
     { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" },
     { source: "(direct)", medium: "(none)", referrer: "" }
 ];
-function getRandomTrafficSource() {
-    // 50% chance for direct traffic to ensure realism
-    if (Math.random() < 0.5) {
-        return TRAFFIC_SOURCES[5]; // (direct) / (none)
+// Used by Tool 4 (/proxy-request)
+const TRAFFIC_SOURCES_PROXY = [ 
+    { source: "google", medium: "organic", referrer: "https://www.google.com/" },
+    { source: "direct", medium: "none", referrer: "" },
+    { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
+    { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
+    { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
+];
+
+function getRandomTrafficSource(isProxyTool = false) {
+    if (isProxyTool) {
+        return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 1)];
     }
-    // Rest 50% chance for other sources
-    return TRAFFIC_SOURCES[randomInt(0, TRAFFIC_SOURCES.length - 2)]; 
+    // Logic for /boost-mp
+    if (Math.random() < 0.5) {
+        return TRAFFIC_SOURCES_GA4[5]; // (direct) / (none)
+    }
+    return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 2)]; 
 }
-// --- UTILITIES ---
+
+// --- UTILITIES (for Tool 1) ---
 const getOptimalDelay = (totalViews) => {
     const targetDurationMs = 14400000; 
     const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
@@ -89,7 +112,7 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING ---
+// --- GA4 DATA SENDING (for /boost-mp) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
@@ -119,7 +142,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function 
+// Validation function (for /boost-mp)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const testPayload = {
@@ -159,7 +182,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource();
+    const traffic = getRandomTrafficSource(false); // Use GA4 specific traffic logic
     const engagementTime = randomInt(30000, 120000); 
 
     const userProperties = {
@@ -251,7 +274,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 }
 
 
-// --- VIEW PLAN GENERATION ---
+// --- VIEW PLAN GENERATION (for /boost-mp) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -415,69 +438,9 @@ Requested Change: "${requestedChange}"`;
     }
 });
 
-// ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) 
-// ===================================================================
-// index.js (WEBSITE BOOSTER PRIME - PROXY TOOL ONLY)
-
-// --- Imports ---
-const nodeFetch = require('node-fetch'); 
-const cors = require('cors'); 
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
-const http = require('http'); // For non-authenticated proxies
-
-const app = express();
-const PORT = process.env.PORT || 10000; 
-
-// --- MIDDLEWARE & UTILITIES ---
-app.use(cors());
-app.use(express.json());
-
-// Set CORS headers for all responses (CRITICAL for frontend communication)
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
-
-// Basic check route
-app.get('/', (req, res) => {
-    res.status(200).send('Website Booster Prime API is running. Access /proxy-request.'); 
-});
-
-const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
-const geoData = [
-    { country: "India", timezone: "Asia/Kolkata" },
-    { country: "United States", timezone: "America/Los_Angeles" },
-    { country: "Canada", timezone: "America/Toronto" },
-    { country: "Germany", timezone: "Europe/Berlin" },
-    { country: "Australia", timezone: "Australia/Sydney" },
-    { country: "Japan", timezone: "Asia/Tokyo" },
-    { country: "United Kingdom", timezone: "Europe/London" },
-    { country: "Brazil", timezone: "America/Sao_Paulo" },
-    { country: "France", timezone: "Europe/Paris" }
-];
-function getRandomGeo() {
-    return geoData[randomInt(0, geoData.length - 1)];
-}
-
-// --- TRAFFIC SOURCE LOGIC (Proxy Tool specific) ---
-const trafficSources = [
-    { source: "google", medium: "organic", referrer: "https://www.google.com/" },
-    { source: "direct", medium: "none", referrer: "" },
-    { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
-    { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
-    { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
-];
-function getRandomTrafficSource() {
-    return trafficSources[randomInt(0, trafficSources.length - 1)];
-}
-
 
 // ===================================================================
-// WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) 
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - FIXED
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
@@ -491,11 +454,11 @@ app.get('/proxy-request', async (req, res) => {
 
     const isGaMpEnabled = ga_id && api_secret; 
     
-    // --- Proxy Setup (FIXED for Non-Authenticated) ---
+    // --- Proxy Setup (FIXED) ---
     let proxyAgent;
     const proxyAddress = `${ip}:${port}`;
     
-    // Check if 'auth' (username:password) is provided and not just empty/generic (i.e., not just ":")
+    // Check if 'auth' (username:password) is provided and not just empty/generic
     if (auth && auth.includes(':') && auth !== ':') {
         // Use HttpsProxyAgent for authenticated proxies
         const [username, password] = auth.split(':');
@@ -504,6 +467,7 @@ app.get('/proxy-request', async (req, res) => {
         console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
     } else {
         // Use standard http.Agent for non-authenticated proxies
+        // http import ab upar hai (line 12)
         proxyAgent = new http.Agent({ host: ip, port: port });
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
@@ -512,7 +476,7 @@ app.get('/proxy-request', async (req, res) => {
     const cid = uid; 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource(); 
+    const traffic = getRandomTrafficSource(true); // Use Proxy specific traffic logic
     const engagementTime = randomInt(30000, 120000); 
 
     const userProperties = {
@@ -533,15 +497,14 @@ app.get('/proxy-request', async (req, res) => {
         payload.timestamp_micros = String(Date.now() * 1000); 
         const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
         
-        try {
-            const response = await nodeFetch(gaEndpoint, { 
+        try { const response = await nodeFetch(gaEndpoint, { 
                 method: 'POST',
                 body: JSON.stringify(payload),
                 headers: { 
                     'Content-Type': 'application/json',
                     'User-Agent': USER_AGENT 
                 },
-                agent: proxyAgent 
+                agent: proxyAgent // Use the dynamically determined agent
             });
 
             if (response.status === 204) { 
@@ -599,8 +562,8 @@ app.get('/proxy-request', async (req, res) => {
                 }]
             };
             if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
-
-            // 3. USER ENGAGEMENT
+            
+            // 3. USER ENGAGEMENT (Added for better GA4 Realtime accuracy)
             const engagementPayload = {
                 client_id: cid,
                 user_properties: userProperties, 
@@ -645,6 +608,9 @@ app.get('/proxy-request', async (req, res) => {
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
+// Sirf ek hi baar server start hoga
 app.listen(PORT, () => {
-    console.log(`Website Booster Prime Proxy Server is running on port ${PORT}`);
+    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
+
+    
