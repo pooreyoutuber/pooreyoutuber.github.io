@@ -167,17 +167,17 @@
         </div>
     </div>
     
-    <div class="info-box">
-        <strong>Tool Usage Instructions:</strong>
+    <div class="info-box" style="border-color: var(--danger);">
+        <strong style="color: var(--danger);">⚠️ Anti-Detection Mode Activated (Use with Caution):</strong>
         <ul>
             <li>
-                **Architecture:** This tool uses a **Node.js/Express Backend** (hosted on Render) for stable proxy handling and session simulation.
+                **Goal:** This version is optimized for **maximum realism** to appear as real user traffic to Google Analytics and AdSense for short-term testing.
             </li>
             <li>
-                **Proxy Fix:** This version is configured to handle **Non-Authenticated Proxies** (without username/password).
+                **Anti-Detection Features:** The tool uses **rotating Proxies** (IPs), **random Traffic Sources (Referrers)**, and **dynamic Time-on-Site** to mimic human behavior and avoid detection algorithms.
             </li>
             <li>
-                **Proxy Rotation:** The tool now **randomly selects a new proxy** from the pool for every request, improving success rate and avoiding the 402 error.
+                **Disclaimer:** No tool can guarantee 100% undetectability against Google's algorithms. Use the tool responsibly and for the intended testing purpose.
             </li>
         </ul>
     </div>
@@ -259,7 +259,7 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-// --- NEW DATA FOR REALISTIC USER SIMULATION ---
+// --- DATA FOR REALISTIC USER SIMULATION ---
 const TRAFFIC_SOURCES = [
     { source: 'google', medium: 'organic', referrer: 'https://www.google.com/search?q=search+query' },
     { source: 'bing', medium: 'organic', referrer: 'https://www.bing.com/search?q=search+query' },
@@ -269,7 +269,7 @@ const TRAFFIC_SOURCES = [
     { source: '(direct)', medium: '(none)', referrer: '' } // Direct Traffic
 ];
 const DEVICE_TYPES = ['Desktop', 'Mobile', 'Tablet']; 
-// --- END NEW DATA ---
+// --- END DATA ---
 
 
 const MAX_SLOTS = 20; 
@@ -315,6 +315,9 @@ function getRandomDelay() {
     const minMs = finalMinSec * 1000;
     const maxMs = finalMaxSec * 1000;
     
+    // The delay should match the 'time-on-site' simulated in the backend. 
+    // The backend uses a random time between 15 and 45 seconds for engagement.
+    // Setting the next cycle between 30 and 60 seconds is highly realistic.
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
@@ -327,7 +330,7 @@ function getProxiedUrl(originalUrl, proxy, traffic, device){
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` +
           `uid=${proxy.uniqueId}&` +
-          // --- NEW SIMULATION PARAMETERS ---
+          // --- REALISTIC SIMULATION PARAMETERS ---
           `source=${encodeURIComponent(traffic.source)}&` +
           `medium=${encodeURIComponent(traffic.medium)}&` +
           `referrer=${encodeURIComponent(traffic.referrer)}&` +
@@ -406,24 +409,13 @@ function createSlot(index){
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
-    // --- CRITICAL ADSENSE SAFETY CHECK (NEW) ---
-    const lowerUrl = originalUrl.toLowerCase();
-    
-    // Check for common Adsense identifiers in the URL
-    if (lowerUrl.includes('adsense') || lowerUrl.includes('pub-') || lowerUrl.includes('admanager') || lowerUrl.includes('googleadservices')) {
-        updateStatus('❌ ADSENSE BLOCKED! HIGH RISK URL.', 'failed');
-        alert('CRITICAL WARNING: The entered URL contains high-risk keywords (Adsense, pub-, admanager). AUTOMATION HAS BEEN HALTED in Slot ' + (index+1) + ' to protect your AdSense account from Invalid Traffic violation.');
-        console.error('CRITICAL STOP: URL contains high-risk Adsense keywords. Cannot run automation.');
-        return; // HALT EXECUTION
-    }
-    // --- END SAFETY CHECK ---
-
+    // --- ADSENSE ANTI-DETECTION LOGIC ---
 
     // Step 1: CHOOSE A RANDOM PROXY and SIMULATION DETAILS
     const randomIndex = randomInt(0, premiumProxies.length - 1);
     const proxy = premiumProxies[randomIndex]; 
     
-    // NEW: Randomly select Traffic Source and Device Type
+    // NEW: Randomly select Traffic Source and Device Type for realism
     const randomTraffic = TRAFFIC_SOURCES[randomInt(0, TRAFFIC_SOURCES.length - 1)];
     const randomDevice = DEVICE_TYPES[randomInt(0, DEVICE_TYPES.length - 1)];
 
@@ -435,19 +427,19 @@ function createSlot(index){
     const isGaMpEnabled = gaIdInput.value.trim() && apiSecretInput.value.trim();
     const gaStatus = isGaMpEnabled ? ' (GA MP Active)' : '';
 
-    // Step 2: Set up the iframe
+    // Step 2: Load the site for visual check (iframe will display Ads)
     iframe.src = originalUrl;
     updateStatus(`Loading Content${gaStatus}...`, 'loading');
     
     el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
     
-    // Pass traffic and device details to the proxied URL
+    // Pass traffic and device details to the proxied URL for server-side traffic generation
     const proxiedUrl = getProxiedUrl(originalUrl, proxy, randomTraffic, randomDevice); 
 
-    updateStatus(`Sending Proxy Request to Node.js${gaStatus}...`, 'loading');
+    updateStatus(`Sending Realistic Request to Node.js${gaStatus}...`, 'loading');
 
     try {
-        // Step 3: Fetch to the Node.js backend
+        // Step 3: Fetch to the Node.js backend to send GA4/Proxy traffic
         const response = await fetch(proxiedUrl);
         const data = await response.json(); 
         
@@ -525,6 +517,7 @@ function stopAllAutomation() {
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', 'ready');
         s.element.classList.remove('scrolling'); 
+        s.element.querySelector('iframe').src = 'about:blank'; // Clear iframe for next run
     });
 }
 
@@ -543,17 +536,16 @@ globalGoBtn.addEventListener('click', ()=>{
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
     
-    stopAllAutomation();
+    // IMPORTANT: stopAllAutomation() here would stop the first run. 
+    // We let the first run finish, then set the interval.
       
     currentSlots.forEach((s) => {
         const randomDelay = getRandomDelay(); 
         const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, 'active');
+        s.setStatus(`Repeat Mode ON (${delayInSeconds}s cycle)...`, 'active');
         
-        // Run immediately, then set interval
-        s.runAutomation(url); 
-
+        // Wait for a realistic time before the next request
         const intervalId = setInterval(() => {
             s.runAutomation(url);
             s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, 'active'); 
