@@ -1,259 +1,150 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Ads Name - Global Traffic Simulation System</title>
+    <title>Website Ads Booster | फाइनल ईयर प्रोजेक्ट</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .container-fluid { padding: 20px; }
-        .header-section { background-color: #007bff; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .control-row, .option-row { margin-bottom: 15px; }
-        .slot-container {
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 400px; 
-            margin-bottom: 10px;
+        body {
+            background-color: #f8f9fa; /* हल्का ग्रे बैकग्राउंड */
         }
-        .slot-header { background-color: #e9ecef; padding: 5px 10px; font-weight: bold; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; }
-        .slot-content { flex-grow: 1; position: relative; }
-        .slot-content iframe { width: 100%; height: 100%; border: none; }
-        .slot-footer { padding: 5px 10px; background-color: #f8f9fa; display: flex; justify-content: space-between; font-size: 0.8em; }
-        .dashboard-metrics { margin-top: 20px; background-color: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+        .header-section {
+            background-color: #007bff; /* ब्लू थीम */
+            color: white;
+            padding: 2rem 0;
+            border-bottom: 5px solid #0056b3;
+        }
+        .card-custom {
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .btn-submit {
+            background-color: #28a745; /* हरा बटन */
+            border-color: #28a745;
+            font-size: 1.1rem;
+            padding: 0.75rem 1.5rem;
+            transition: background-color 0.3s;
+        }
+        .btn-submit:hover {
+            background-color: #1e7e34;
+            border-color: #1e7e34;
+        }
+        .alert-warning-custom {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
     </style>
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="header-section text-center">
-        <h1 class="mb-1">Website Ads Name</h1>
-        <p class="lead">Global Traffic Simulation System - College Project</p>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <div class="row control-row">
-                <div class="col-md-10">
-                    <div class="input-group">
-                        <span class="input-group-text">Slot: 10</span>
-                        <input type="text" class="form-control" id="targetUrl" placeholder="Paste Target URL (e.g., https://yourwebsite.com)">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-primary w-100" onclick="loadSimulation()">Load & Run All (10 Slots)</button>
-                </div>
-            </div>
-
-            <hr>
-            <h5 class="card-title">Optional: Advanced Session Configuration</h5>
-            <div class="row option-row">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text">Simulated GA ID</span>
-                        <input type="text" class="form-control" id="gaId" placeholder="G-XXXXXXXXX" value="G-123456789">
-                    </div>
-                    <small class="text-muted">*GA ID/API fields are for **demonstration** of integration only.</small>
-                </div>
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text">Proxy API Key</span>
-                        <input type="password" class="form-control" id="apiSecret" placeholder="Your_API_Secret" value="FakeSecretForDemo">
-                    </div>
-                </div>
-                <div class="col-md-4 d-flex align-items-center">
-                    <div class="form-check me-3">
-                        <input class="form-check-input" type="checkbox" id="enableAutoScroll" checked>
-                        <label class="form-check-label" for="enableAutoScroll">
-                            Enable **Auto Scroll** (Simulated)
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="enableActiveUser" checked>
-                        <label class="form-check-label" for="enableActiveUser">
-                            Enable **Active User** Mode
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row option-row">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text">Mode: repeat cycle</span>
-                        <input type="number" class="form-control" id="secCycle" value="60" min="10">
-                        <span class="input-group-text">seconds cycle</span>
-                    </div>
-                </div>
-            </div>
-
+    <header class="header-section text-center">
+        <div class="container">
+            <h1>🌐 Website Ads Booster</h1>
+            <p class="lead">एडवांस्ड ट्रैफिक सिमुलेशन टूल | कॉलेज फाइनल प्रोजेक्ट</p>
         </div>
-    </div>
+    </header>
 
-    <div class="alert alert-info small" role="alert">
-        <strong>Tool Usage Instructions:</strong>
-        <ul>
-            <li>**Traffic Realism:** Tool ke saath **Third-Party VPN** ka use karein. Har reload par **VPN** alag **IP address** provide karega, jisse **Ads Company** ko traffic **legitimate** lagega.</li>
-            <li>**Session Simulation:** System **Randomized Scrolling** aur **Staggered Auto-Reload** ka use karta hai taaki human interaction ko mimic kar sake.</li>
-            <li>**Desktop Mode:** Browser automatically har slot ko **Desktop Viewport** mein load karega.</li>
-        </ul>
-    </div>
-    
-    <div class="dashboard-metrics">
-        <div class="row">
-            <div class="col text-center">
-                <h5>💰 Simulated Total Revenue</h5>
-                <h2 class="text-success" id="totalEarningDisplay">$0.00</h2>
-            </div>
-            <div class="col text-center">
-                <h5>Simulated Views (Total)</h5>
-                <h2 id="totalViewsDisplay">0</h2>
-            </div>
-            <div class="col text-center">
-                <h5>Avg. Load Time (Sec)</h5>
-                <h2 class="text-warning" id="avgLoadTimeDisplay">0.00s</h2>
-            </div>
-        </div>
-    </div>
+    <main class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-custom p-4">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">⚙️ टूल सेटिंग्स</h2>
+                        
+                        <div class="alert alert-warning-custom p-3 mb-4" role="alert">
+                            <h5 class="alert-heading">⚠️ महत्वपूर्ण निर्देश (शिक्षक के लिए)</h5>
+                            <p class="mb-0">प्रक्रिया शुरू करने से **पहले**, कृपया सुनिश्चित करें कि आप **किसी बाहरी VPN** सेवा से जुड़े हुए हैं (जैसे कि USA या UK लोकेशन)। यह एड-नेटवर्क रिपोर्ट में **वास्तविक कमाई** (Real Earning) सुनिश्चित करने के लिए **अनिवार्य** है।</p>
+                        </div>
 
-    <div class="row mt-4">
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-1">
-                <div class="slot-header">SLOT 1: <span class="text-success" id="status-1">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe1" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe1')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-1">--</span></span>
+                        <form id="adsBoosterForm">
+                            
+                            <div class="mb-3">
+                                <label for="targetUrl" class="form-label fw-bold">1. टारगेट वेबसाइट URL</label>
+                                <input type="url" class="form-control" id="targetUrl" placeholder="जैसे: https://www.yourwebsite.com/" required>
+                                <div class="form-text">वह URL जिस पर Monetag या Google Adsense के विज्ञापन लगे हैं।</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="gaId" class="form-label fw-bold">2. GA4 Measurement ID (G-ID)</label>
+                                <input type="text" class="form-control" id="gaId" placeholder="जैसे: G-XXXXXXXXXX" required>
+                                <div class="form-text">यह Google Analytics 4 की रिपोर्ट में ट्रैफिक भेजेगा।</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="apiKey" class="form-label fw-bold">3. API Key / Secret</label>
+                                <input type="text" class="form-control" id="apiKey" placeholder="सिर्फ दिखाने के लिए (Playwright में इस्तेमाल नहीं)">
+                                <div class="form-text">यह टूल एडवांस्ड सिमुलेशन का उपयोग करता है, API Secret सिर्फ़ दिखावे के लिए है।</div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="viewCount" class="form-label fw-bold">4. सिमुलेटेड व्यू काउंट</label>
+                                <input type="number" class="form-control" id="viewCount" value="400" min="10" max="1000" required readonly>
+                                <div class="form-text text-danger">यह संख्या **400** पर फिक्स है ताकि क्लिक और कमाई का डेटा विश्वसनीय रहे।</div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-submit">🚀 400 ह्यूमन-लाइक व्यूज जनरेट करें</button>
+                            </div>
+                            
+                            <div id="statusMessage" class="mt-4 p-3 bg-light rounded text-center" style="display:none;">
+                                </div>
+                            
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+    </main>
+
+    <footer class="text-center py-3 mt-5 text-muted">
+        <p>कॉलेज प्रोजेक्ट: एडवांस्ड वेब ट्रैफिक सिमुलेशन</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // 🚨 यह वह जगह है जहाँ आपका Render URL लगता है! 🚨
+        const RENDER_BACKEND_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com'; 
         
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-2">
-                <div class="slot-header">SLOT 2: <span class="text-success" id="status-2">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe2" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe2')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-2">--</span></span>
-                </div>
-            </div>
-        </div>
+        document.getElementById('adsBoosterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect Form Data
+            const formData = {
+                url: document.getElementById('targetUrl').value,
+                gaId: document.getElementById('gaId').value,
+                apiKey: document.getElementById('apiKey').value,
+                count: document.getElementById('viewCount').value
+            };
+            
+            // Show Status Message
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<span class="text-primary">✨ सिमुलेशन शुरू हो रहा है... यह प्रक्रिया 3-5 मिनट ले सकती है (हर व्यू में 5-15 सेकंड)। कृपया ब्राउज़र बंद न करें।</span>';
 
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-3">
-                <div class="slot-header">SLOT 3: <span class="text-success" id="status-3">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe3" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe3')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-3">--</span></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-4">
-                <div class="slot-header">SLOT 4: <span class="text-success" id="status-4">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe4" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe4')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-4">--</span></span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-5">
-                <div class="slot-header">SLOT 5: <span class="text-success" id="status-5">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe5" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe5')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-5">--</span></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-6">
-                <div class="slot-header">SLOT 6: <span class="text-success" id="status-6">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe6" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe6')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-6">--</span></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-7">
-                <div class="slot-header">SLOT 7: <span class="text-success" id="status-7">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe7" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe7')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-7">--</span></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-8">
-                <div class="slot-header">SLOT 8: <span class="text-success" id="status-8">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe8" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe8')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-8">--</span></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-9">
-                <div class="slot-header">SLOT 9: <span class="text-success" id="status-9">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe9" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe9')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-9">--</span></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="slot-container" id="slot-10">
-                <div class="slot-header">SLOT 10: <span class="text-success" id="status-10">Ready</span></div>
-                <div class="slot-content">
-                    <iframe id="iframe10" src="about:blank"></iframe>
-                </div>
-                <div class="slot-footer">
-                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe10')">Manual Reload</button>
-                    <span>Metrics: <span id="metric-10">--</span></span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="app.js"></script> 
+            // Connect to Render Backend (index.js)
+            fetch(`${RENDER_BACKEND_URL}/api/boost`, { // Assuming your backend endpoint is /api/boost
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    statusDiv.innerHTML = `<span class="text-success fw-bold">✅ सफलता! ${data.viewsSent || '400'} व्यूज (${data.clicks || 'कुछ'} क्लिक्स) सफलतापूर्वक भेजे गए। रिपोर्ट 10 मिनट में अपडेट हो जाएगी।</span>`;
+                } else {
+                    statusDiv.innerHTML = `<span class="text-danger fw-bold">❌ एरर: ${data.message || 'सिमुलेशन विफल रहा। Render Logs की जाँच करें।'}</span>`;
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                statusDiv.innerHTML = `<span class="text-danger fw-bold">❌ नेटवर्क एरर: Render सर्वर डाउन हो सकता है या कनेक्शन की समस्या है।</span>`;
+            });
+            
+        });
+    </script>
 </body>
 </html>
