@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Direct GA4 Hit)</title>
+<title>Website Booster Prime (Node.js Backend)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -52,7 +52,7 @@
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
   @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
-  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
+  @media (min-width: 1500px) { .grid-template-columns: repeat(5, 1fr); } }
   .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
@@ -171,13 +171,13 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                **Architecture:** This tool now uses **Direct GA4 Measurement Protocol** calls (browser to Google). **Proxy is removed.**
+                **Architecture:** This tool uses a **Node.js/Express Backend** (hosted on Render) for stable proxy handling and session simulation.
             </li>
             <li>
-                **Proxy Fix:** External proxy dependency has been eliminated to fix connection errors.
+                **Proxy Fix:** This version is configured to handle **Non-Authenticated Proxies** (without username/password).
             </li>
             <li>
-                **Direct Hit:** Views are sent directly using your browser's network, using unique IDs for rotation.
+                **Proxy Rotation:** The tool now **randomly selects a new proxy** from the pool for every request, improving success rate and avoiding the 402 error.
             </li>
         </ul>
     </div>
@@ -189,10 +189,10 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION (PROXY CODE REMOVED/BYPASSED)
+   PROXY DATA and CONFIGURATION
    ---------------------------------------------------------------------- */
 
-// *** CRITICAL FIX: PROXY ENDPOINT REMOVED/BYPASSED ***
+// *** CRITICAL FIX: Set COMMON_AUTH to empty string for Non-Authenticated Proxies ***
 const COMMON_USER = ""; 
 const COMMON_PASS = ""; 
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; 
@@ -215,7 +215,7 @@ function getRandomNames(count) {
 
 // =========================================================================
 // !!! PROXIES FROM proxies.txt (38 Proxies) !!!
-// NOTE: These are now used ONLY for simulated IP/Country display, NOT for actual network traffic.
+// NOTE: These IPs are used for geographic/IP rotation simulation only.
 // =========================================================================
 const DUMMY_PROXIES = [
   { ip: "45.67.215.64", port: "80", country: "Dynamic" },
@@ -259,9 +259,22 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
+// --- NEW DATA FOR REALISTIC USER SIMULATION ---
+const TRAFFIC_SOURCES = [
+    { source: 'google', medium: 'organic', referrer: 'https://www.google.com/search?q=search+query' },
+    { source: 'bing', medium: 'organic', referrer: 'https://www.bing.com/search?q=search+query' },
+    { source: 'facebook', medium: 'social', referrer: 'https://www.facebook.com/post' },
+    { source: 'twitter', medium: 'social', referrer: 'https://t.co/' },
+    { source: 'linktree', medium: 'referral', referrer: 'https://linktr.ee/profile' },
+    { source: '(direct)', medium: '(none)', referrer: '' } // Direct Traffic
+];
+const DEVICE_TYPES = ['Desktop', 'Mobile', 'Tablet']; 
+// --- END NEW DATA ---
+
+
 const MAX_SLOTS = 20; 
-// !!! IMPORTANT: Proxy endpoint is no longer used for traffic generation !!!
-const PROXY_ENDPOINT = 'DIRECT_GA4_HIT_ONLY'; 
+// !!! IMPORTANT: Replace with YOUR Render service URL if this is not correct !!!
+const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request'; 
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -289,79 +302,6 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     uniqueId: generateUniqueId() 
 }));
 
-
-// --- NEW GLOBAL CONSTANT ---
-const GA4_ENDPOINT = "https://www.google-analytics.com/mp/collect";
-
-// --- NEW HELPER FUNCTION FOR CLIENT ID (Crucial for GA4) ---
-function generateClientId() {
-    // Standard format: [random number].[timestamp]
-    const timestamp = Math.floor(Date.now() / 1000);
-    const randomPart = Math.floor(Math.random() * 9000000000) + 1000000000;
-    return `${randomPart}.${timestamp}`;
-}
-
-// --- NEW FUNCTION TO SEND GA4 HIT DIRECTLY ---
-async function sendGa4HitDirectly(slotIndex, page_title, page_location, proxyDetails) {
-    const gaMeasurementId = gaIdInput.value.trim();
-    const gaApiSecret = apiSecretInput.value.trim();
-    
-    // Check if GA keys are provided
-    if (!gaMeasurementId || !gaApiSecret) {
-        return { status: 'GA_SKIPPED', message: 'GA ID/Secret Missing.' };
-    }
-
-    const client_id = generateClientId();
-    const url = `${GA4_ENDPOINT}?measurement_id=${gaMeasurementId}&api_secret=${gaApiSecret}`;
-    
-    // User-Agent: Important for GA4 to determine device/browser
-    const userAgent = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15",
-        "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
-    ][Math.floor(Math.random() * 3)];
-
-    const payload = {
-        client_id: client_id,
-        // session_id and engagement_time_msec are crucial for an 'Active User'
-        events: [{
-            name: "page_view",
-            params: {
-                session_id: Math.floor(Math.random() * 9000000000) + 1000000000,
-                engagement_time_msec: Math.floor(Math.random() * 60000) + 30000, // 30-60 seconds engagement
-                page_title: page_title,
-                page_location: page_location,
-                traffic_source: "website_booster_direct",
-                country: proxyDetails.country // Reusing the proxy's country for simulation realism
-            }
-        }]
-    };
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Sending User-Agent in the header is vital for GA4 geo/device detection
-                'User-Agent': userAgent 
-            },
-            body: JSON.stringify(payload)
-        });
-
-        // GA4 MP returns 204 (No Content) for success
-        if (response.status === 204) {
-            return { status: 'SUCCESS', message: 'View hit successful (Direct GA4)' };
-        } else {
-            const errorText = await response.text();
-            return { status: 'FAILED', message: `GA4 Failed with Status ${response.status}. Response: ${errorText.substring(0, 50)}` };
-        }
-
-    } catch (error) {
-        return { status: 'FAILED', message: `GA4 Fetch Error (Network/CORS): ${error.message}` };
-    }
-}
-// --- END NEW FUNCTIONS ---
-
 function getRandomDelay() {
     const minSec = parseInt(minTimeInput.value) || 30;
     const maxSec = parseInt(maxTimeInput.value) || 60;
@@ -378,6 +318,30 @@ function getRandomDelay() {
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
+// --- MODIFIED getProxiedUrl to pass new simulation parameters ---
+function getProxiedUrl(originalUrl, proxy, traffic, device){
+      const gaId = gaIdInput.value.trim();
+      const apiSecret = apiSecretInput.value.trim();
+      
+      let params = `target=${encodeURIComponent(originalUrl)}&` +
+          `ip=${proxy.ip}&port=${proxy.port}&` +
+          `auth=${proxy.auth}&` +
+          `uid=${proxy.uniqueId}&` +
+          // --- NEW SIMULATION PARAMETERS ---
+          `source=${encodeURIComponent(traffic.source)}&` +
+          `medium=${encodeURIComponent(traffic.medium)}&` +
+          `referrer=${encodeURIComponent(traffic.referrer)}&` +
+          `device=${encodeURIComponent(device)}`;
+      
+      if(gaId && apiSecret) {
+          params += `&ga_id=${gaId}&api_secret=${apiSecret}`;
+      }
+
+      return `${PROXY_ENDPOINT}?${params}`; 
+  }
+// --- END MODIFIED getProxiedUrl ---
+
+
 function createSlot(index){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -385,7 +349,7 @@ function createSlot(index){
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}: Ready</div>
-      <div class="slot-ip-display" id="ip-display-${index}">Simulated Location: Ready</div>
+      <div class="slot-ip-display" id="ip-display-${index}">Simulated User: Ready</div>
     </div>
     
     <div class="iframe-wrap">
@@ -394,7 +358,7 @@ function createSlot(index){
     
     <div class="slot-footer">
       <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
-      <button id="run-${index}" class="action-btn view">Start Direct View</button>
+      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
       <div class="status" id="status-wrap-${index}">
         <span class="status-dot" id="dot-${index}"></span>
         <span id="status-${index}">Ready</span>
@@ -438,55 +402,79 @@ function createSlot(index){
     }
   }
   
-  // --- MODIFIED runAutomation FUNCTION ---
+
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
-    // Step 1: CHOOSE A RANDOM 'PROXY' (Only for IP/Country display, no actual proxy usage)
+    // --- CRITICAL ADSENSE SAFETY CHECK (NEW) ---
+    const lowerUrl = originalUrl.toLowerCase();
+    
+    // Check for common Adsense identifiers in the URL
+    if (lowerUrl.includes('adsense') || lowerUrl.includes('pub-') || lowerUrl.includes('admanager') || lowerUrl.includes('googleadservices')) {
+        updateStatus('❌ ADSENSE BLOCKED! HIGH RISK URL.', 'failed');
+        alert('CRITICAL WARNING: The entered URL contains high-risk keywords (Adsense, pub-, admanager). AUTOMATION HAS BEEN HALTED in Slot ' + (index+1) + ' to protect your AdSense account from Invalid Traffic violation.');
+        console.error('CRITICAL STOP: URL contains high-risk Adsense keywords. Cannot run automation.');
+        return; // HALT EXECUTION
+    }
+    // --- END SAFETY CHECK ---
+
+
+    // Step 1: CHOOSE A RANDOM PROXY and SIMULATION DETAILS
     const randomIndex = randomInt(0, premiumProxies.length - 1);
     const proxy = premiumProxies[randomIndex]; 
     
-    // Update the Slot Display with the rotating proxy info (used for simulation realism)
-    ipDisplay.textContent = `Simulated Location: ${proxy.country}`;
+    // NEW: Randomly select Traffic Source and Device Type
+    const randomTraffic = TRAFFIC_SOURCES[randomInt(0, TRAFFIC_SOURCES.length - 1)];
+    const randomDevice = DEVICE_TYPES[randomInt(0, DEVICE_TYPES.length - 1)];
+
+    // Update the Slot Display with the rotating proxy info
+    ipDisplay.textContent = `Source: ${randomTraffic.source}/${randomTraffic.medium} | Device: ${randomDevice}`;
     titleDisplay.textContent = `SLOT ${index+1}: ${proxy.name} (${proxy.country})`;
     
     // Check if GA keys are provided
     const isGaMpEnabled = gaIdInput.value.trim() && apiSecretInput.value.trim();
     const gaStatus = isGaMpEnabled ? ' (GA MP Active)' : '';
 
-    // Step 2: Set up the iframe (Content loading remains the same)
+    // Step 2: Set up the iframe
     iframe.src = originalUrl;
     updateStatus(`Loading Content${gaStatus}...`, 'loading');
     
     el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
     
-    // --- DIRECT GA4 HIT LOGIC ---
-    updateStatus(`Sending Direct GA4 Request${gaStatus}...`, 'loading');
-    
-    const page_title = titleDisplay.textContent; 
-    const page_location = originalUrl;
-    
-    // Step 3: Call the new direct GA4 hit function
-    const gaResult = await sendGa4HitDirectly(index, page_title, page_location, proxy); 
+    // Pass traffic and device details to the proxied URL
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy, randomTraffic, randomDevice); 
 
-    let finalState = 'active';
-    let message = `Content Loaded. GA4: ${gaResult.status}`;
+    updateStatus(`Sending Proxy Request to Node.js${gaStatus}...`, 'loading');
 
-    if (gaResult.status === 'SUCCESS') {
-        message = `✅ View Sent. Location: ${proxy.country}`;
-        finalState = 'active';
-    } else if (gaResult.status === 'GA_SKIPPED') {
-        message = `Content Loaded. GA4: Disabled.`;
-        finalState = 'ready';
-    } else {
-        message = `❌ View Failed: ${gaResult.message.substring(0, 30)}...`;
-        finalState = 'failed';
-        console.error(`Slot ${index+1} GA4 Direct Error:`, gaResult.message);
+    try {
+        // Step 3: Fetch to the Node.js backend
+        const response = await fetch(proxiedUrl);
+        const data = await response.json(); 
+        
+        if (response.ok && data.status === 'OK') {
+            
+            let message = data.message;
+            let finalState = 'active';
+            
+            if (isGaMpEnabled && data.eventsSent === 0) {
+                 message = `GA4 Failed: Check Keys or Proxy IP.`;
+                 finalState = 'failed';
+                 console.error(`Slot ${index+1} GA4 Failure:`, message);
+            }
+            
+            updateStatus(message, finalState);
+            
+        } else {
+            // General Backend/Network failure
+            updateStatus(`Failed: ${data.details || data.error || 'Unknown Error'}`, 'failed');
+            console.error(`Slot ${index+1} Backend Error:`, data);
+        }
+        
+    } catch (e) {
+        updateStatus('Failed (Network/CORS Error - Server unreachable?)', 'failed');
+        console.error(`Slot ${index+1} Frontend Fetch Error:`, e);
     }
-    
-    updateStatus(message, finalState);
   }
-  // --- END MODIFIED runAutomation FUNCTION ---
   
   openBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
@@ -549,7 +537,7 @@ globalGoBtn.addEventListener('click', ()=>{
   
   globalGoBtn.disabled = true; 
   
-  currentSlots.forEach((s, index) => s.runAutomation(url));
+  currentSlots.forEach(s => s.runAutomation(url));
   
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
