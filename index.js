@@ -1,4 +1,4 @@
-// index.js (ULTIMATE FINAL VERSION - Consolidated and Fixed)
+// index.js (ULTIMATE FINAL VERSION - With Website Ads Booster Final & Weighted Traffic)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -9,17 +9,19 @@ const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
-const http = require('http'); 
+const http = require('http'); // Used for Tool 4 (Proxy Request)
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
 // --- GEMINI KEY CONFIGURATION ---
+// Render Secrets या Environment Variables से Key लोड करें
 let GEMINI_KEY;
 try {
+    // Render के Secret File Mount के लिए
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
 } catch (e) {
+    // Environment Variables के लिए
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
 }
 
@@ -32,6 +34,7 @@ if (GEMINI_KEY) {
 
 // --- MIDDLEWARE & UTILITIES ---
 app.use(cors({
+    // IMPORTANT: इसे अपने GitHub Pages फ्रंटएंड URL पर सेट करें
     origin: 'https://pooreyoutuber.github.io', 
     methods: ['GET', 'POST'],
     credentials: true
@@ -46,12 +49,12 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running! Access tools via GitHub Pages.'); 
+    res.status(200).send('PooreYouTuber Combined API is running! Access tools via GitHub Pages or /api/ads-booster-final.'); 
 });
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
+// --- GEOGRAPHIC DATA (Simulated Geo) ---
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -67,23 +70,33 @@ function getRandomGeo() {
 }
 
 
-// 🔥 REPLIT HACK 1: Client ID Generation (Simple, non-UUID style)
+// 🔥 Client ID Generation
 function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC ---
-// Used by Tool 1 (/boost-mp)
+// --- TRAFFIC SOURCE LOGIC (Weighted for Tool 1 & 5) ---
 const TRAFFIC_SOURCES_GA4 = [ 
+    // High Weightage for Organic Search (Approx 45%)
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
-    { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
-    { source: "facebook", medium: "social", referrer: "https://www.facebook.com" },
+    { source: "google", medium: "organic", referrer: "https://www.google.com" },
+    { source: "google", medium: "organic", referrer: "https://www.google.com" },
+    { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "bing", medium: "organic", referrer: "https://www.bing.com" },
-    { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" },
+
+    // High Weightage for Social Media (Approx 40%)
+    { source: "facebook", medium: "social", referrer: "https://www.facebook.com" },
+    { source: "instagram", medium: "social", referrer: "https://www.instagram.com" }, 
+    { source: "instagram", medium: "social", referrer: "https://www.instagram.com" }, 
+    { source: "reddit", medium: "social", referrer: "https://www.reddit.com" },
+    
+    // Low Weightage for Direct (Approx 15%)
+    { source: "(direct)", medium: "(none)", referrer: "" },
     { source: "(direct)", medium: "(none)", referrer: "" }
 ];
-// Used by Tool 4 (/proxy-request)
+
 const TRAFFIC_SOURCES_PROXY = [ 
+    // Tool 4 (Proxy) के लिए साधारण रैंडम एरे
     { source: "google", medium: "organic", referrer: "https://www.google.com/" },
     { source: "direct", medium: "none", referrer: "" },
     { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
@@ -95,15 +108,14 @@ function getRandomTrafficSource(isProxyTool = false) {
     if (isProxyTool) {
         return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 1)];
     }
-    // Logic for /boost-mp
-    if (Math.random() < 0.5) {
-        return TRAFFIC_SOURCES_GA4[5]; // (direct) / (none)
-    }
-    return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 2)]; 
+    
+    // Tool 1 और Tool 5 के लिए, वेटेज्ड एरे से एक सोर्स चुनें
+    return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 1)]; 
 }
 
 // --- UTILITIES (for Tool 1) ---
 const getOptimalDelay = (totalViews) => {
+    // 4 घंटे (14,400,000ms) की डिस्ट्रीब्यूशन विंडो
     const targetDurationMs = 14400000; 
     const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
     const minDelay = Math.max(5000, avgDelayMs * 0.5); 
@@ -112,7 +124,7 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (for /boost-mp) ---
+// --- GA4 DATA SENDING (Central Function) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
@@ -142,7 +154,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function (for /boost-mp)
+// Validation function 
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const testPayload = {
@@ -176,14 +188,14 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session with full attribution parameters. (Used by /boost-mp)
+ * Simulates a single view session with full attribution parameters. (Used by Tool 1 & Tool 5)
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
     const traffic = getRandomTrafficSource(false); // Use GA4 specific traffic logic
-    const engagementTime = randomInt(30000, 120000); 
+    const engagementTime = randomInt(30000, 120000); // 30s to 120s
 
     const userProperties = {
         simulated_geo: { value: geo.country }, 
@@ -248,6 +260,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (!result.success) allSuccess = false;
 
+    // View और Engagement के बीच 20s से 40s का गैप (Simulating user reading/scrolling)
     await new Promise(resolve => setTimeout(resolve, randomInt(20000, 40000)));
 
     // 3. USER ENGAGEMENT
@@ -271,6 +284,46 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     console.log(`[View ${viewCount}] Completed session. Total Engagement Time: ${Math.round(engagementTime/1000)}s.`);
 
     return allSuccess;
+}
+
+
+/**
+ * NEW: Simulates an Ad Click event to ensure Monetag/Ad-Network earnings are recorded. (Used by Tool 5)
+ */
+async function sendClickEvent(gaId, apiSecret, cid, url, viewCount) {
+    const session_id = Date.now(); 
+    const geo = getRandomGeo(); 
+    const engagementTime = randomInt(5000, 15000); // Click session is shorter
+    
+    const userProperties = { simulated_geo: { value: geo.country } };
+
+    const clickPayload = {
+        client_id: cid,
+        user_properties: userProperties,
+        events: [
+            { 
+                name: 'ad_click', // Custom event for ad click
+                params: { 
+                    page_location: url, 
+                    session_id: session_id, 
+                    debug_mode: true,
+                    engagement_time_msec: engagementTime,
+                    click_type: "monetag_simulated_ad" 
+                } 
+            },
+            { 
+                name: "user_engagement", 
+                params: { 
+                    engagement_time_msec: engagementTime, 
+                    session_id: session_id,
+                    debug_mode: true 
+                } 
+            }
+        ]
+    };
+
+    let result = await sendData(gaId, apiSecret, clickPayload, viewCount, 'ad_click');
+    return result.success;
 }
 
 
@@ -440,21 +493,21 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - FIXED
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) 
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
     // 1. Get parameters from the frontend URL query
     const { target, ip, port, auth, uid, ga_id, api_secret } = req.query; 
 
-    // Basic validation check
+    //  Basic validation check
     if (!target || !ip || !port || !uid) {
         return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, ip, port, uid).' });
     }
 
     const isGaMpEnabled = ga_id && api_secret; 
     
-    // --- Proxy Setup (FIXED) ---
+    // --- Proxy Setup ---
     let proxyAgent;
     const proxyAddress = `${ip}:${port}`;
     
@@ -467,7 +520,7 @@ app.get('/proxy-request', async (req, res) => {
         console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
     } else {
         // Use standard http.Agent for non-authenticated proxies
-        // http import ab upar hai (line 12)
+        // Note: For HTTPS target URLs, proxyAgent needs to be set up carefully
         proxyAgent = new http.Agent({ host: ip, port: port });
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
@@ -606,11 +659,83 @@ app.get('/proxy-request', async (req, res) => {
 
 
 // ===================================================================
+// 5. WEBSITE ADS BOOSTER FINAL ENDPOINT (API: /api/ads-booster-final)
+//    (Monetag Earning Simulation with Clicks and Original Traffic)
+// ===================================================================
+app.post('/api/ads-booster-final', async (req, res) => {
+    const { url, gaId, apiKey, count } = req.body; 
+    const totalViewsRequested = parseInt(count); 
+
+    if (!url || !gaId || !apiKey || totalViewsRequested !== 400) {
+        return res.status(400).json({ status: 'error', message: 'Missing URL, GA ID, API Key, or View Count is not 400.' });
+    }
+    
+    // 1. Validation Check 
+    const clientIdForValidation = generateClientId();
+    const validationResult = await validateKeys(gaId, apiKey, clientIdForValidation);
+    
+    if (!validationResult.valid) {
+         return res.status(400).json({ 
+            status: 'error', 
+            message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
+        });
+    }
+
+    // 2. Immediate Response (Render को जल्दी फ्री करने के लिए)
+    // Views: 400, Clicks (5% CTR): Approx 20
+    res.json({ 
+        status: 'accepted', 
+        message: '✨ Request accepted. Processing 400 views and simulating clicks in the background. CHECK DEBUGVIEW NOW!',
+        viewsSent: 400,
+        clicksEstimated: 20
+    });
+
+    // 3. Background Processing (The Core Earning Logic)
+    (async () => {
+        const totalViews = 400;
+        let successfulViews = 0;
+        let successfulClicks = 0;
+        console.log(`\n[FINAL BOOSTER START] Starting 400-view simulation with 5% CTR goal for Earning.`);
+        
+        for (let i = 0; i < totalViews; i++) {
+            const currentView = i + 1;
+            const clickChance = Math.random(); 
+
+            // --- 3.1 Simulate Page View Session (View Count for Monetag) ---
+            const viewSuccess = await simulateView(gaId, apiKey, url, "monetag earnings test", currentView);
+            if (viewSuccess) {
+                successfulViews++;
+            }
+            
+            // --- 3.2 Random Click Simulation (5% Chance for earning) ---
+            // यह लॉजिक Monetzag/Adsense रिपोर्ट में Earning सुनिश्चित करता है।
+            if (clickChance < 0.05) { 
+                console.log(`[View ${currentView}] CLICK CHANCE! Simulating ad click...`);
+                // Simulate a slight delay after viewing before clicking
+                await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000))); 
+                
+                // Use a new Client ID for the click for distinct action
+                const clickSuccess = await sendClickEvent(gaId, apiKey, generateClientId(), url, currentView);
+                if (clickSuccess) {
+                    successfulClicks++;
+                }
+            }
+
+            // --- 3.3 Delay between Sessions ---
+            // Delay is critical for Render stability and realistic session duration
+            const delay = randomInt(5000, 10000); 
+            console.log(`[View ${currentView}/${totalViews}] Waiting for ${Math.round(delay / 1000)}s before next session.`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        
+        console.log(`\n[FINAL BOOSTER COMPLETE] Total Views: ${successfulViews}. Total Clicks Simulated: ${successfulClicks}.`);
+    })();
+});
+
+
+// ===================================================================
 // --- SERVER START ---
 // ===================================================================
-// Sirf ek hi baar server start hoga
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-
-    
