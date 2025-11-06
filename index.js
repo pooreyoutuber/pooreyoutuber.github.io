@@ -418,28 +418,122 @@ Requested Change: "${requestedChange}"`;
 // ===================================================================
 // 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) 
 // ===================================================================
-const COMMON_AUTH_USER = "bqctypvz";
-const COMMON_AUTH_PASS = "399xb3kxqv6i";
+const express = require('express');
+const bodyParser = require('body-parser');
+const nodeFetch = require('node-fetch');
+// HttpsProxyAgent is necessary for routing traffic through authenticated proxy servers
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
+// The default 'http' agent is used for non-authenticated proxies
+const http = require('http'); 
 
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+// Middleware
+app.use(bodyParser.json());
+
+// Set CORS headers for all responses (CRITICAL for frontend communication)
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+// ===================================================================
+// --- 1. HELPER FUNCTIONS (GA4 MP Simulation) - Defined First ---
+// ===================================================================
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const geoData = [
+    { country: "India", timezone: "Asia/Kolkata" },
+    { country: "United States", timezone: "America/Los_Angeles" },
+    { country: "Canada", timezone: "America/Toronto" },
+    { country: "Germany", timezone: "Europe/Berlin" },
+    { country: "Australia", timezone: "Australia/Sydney" },
+    { country: "Japan", timezone: "Asia/Tokyo" },
+    { country: "United Kingdom", timezone: "Europe/London" },
+    { country: "Brazil", timezone: "America/Sao_Paulo" },
+    { country: "France", timezone: "Europe/Paris" }
+];
+
+const trafficSources = [
+    { source: "google", medium: "organic", referrer: "https://www.google.com/" },
+    { source: "direct", medium: "none", referrer: "" },
+    { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
+    { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
+    { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
+];
+
+
+function getRandomGeo() {
+    return geoData[randomInt(0, geoData.length - 1)];
+}
+
+function getRandomTrafficSource() {
+    return trafficSources[randomInt(0, trafficSources.length - 1)];
+}
+
+// --- END Helper Functions ---
+
+
+// ===================================================================
+// 2-4. LEGACY/UTILITY ENDPOINTS - (Unmodified/Same)
+// ===================================================================
+
+app.post('/boost-mp', async (req, res) => {
+    res.status(501).json({ status: 'ERROR', message: 'Legacy endpoint not in use. Please use /proxy-request.' });
+});
+app.post('/api/caption-generate', (req, res) => {
+    res.status(200).json({ 
+        success: true, 
+        caption: "Simulated Caption: Boost your views with this prime tool!",
+        duration: "10s"
+    });
+});
+app.post('/api/caption-edit', (req, res) => {
+    res.status(200).json({ 
+        success: true, 
+        editedCaption: req.body.caption + " - [Edited by Booster Prime]",
+        duration: "5s"
+    });
+});
+
+
+// ===================================================================
+// 5. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request)
+// ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
-    // 1. Get parameters from the frontend URL query (Includes optional ga_id and api_secret)
+    // 1. Get parameters from the frontend URL query
     const { target, ip, port, auth, uid, ga_id, api_secret } = req.query; 
 
-    // Basic validation check (Checks for essential proxy and target info)
-    if (!target || !ip || !port || !auth || !uid) {
-        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, ip, port, auth, uid).' });
+    // Basic validation check
+    if (!target || !ip || !port || !uid) {
+        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, ip, port, uid).' });
     }
 
-    // Check if GA MP parameters are provided
     const isGaMpEnabled = ga_id && api_secret; 
     
-    // --- Proxy Setup ---
-    // Note: The original code used HttpsProxyAgent with an 'http://' URL, which may be incorrect for all proxies.
-    // For standard HTTP proxy, 'node-fetch' should handle it via 'agent' property.
-    // For now, keeping the original HttpsProxyAgent setup for compatibility with the provided code snippet logic.
-    const proxyUrl = `http://${COMMON_AUTH_USER}:${COMMON_AUTH_PASS}@${ip}:${port}`;
-    const proxyAgent = new HttpsProxyAgent(proxyUrl);
+    // --- Proxy Setup (FIXED) ---
+    let proxyAgent;
+    const proxyAddress = `${ip}:${port}`;
+    
+    // Check if 'auth' (username:password) is provided and not just empty/generic
+    if (auth && auth.includes(':')) {
+        // Use HttpsProxyAgent for authenticated proxies
+        const [username, password] = auth.split(':');
+        const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
+        proxyAgent = new HttpsProxyAgent(proxyUrl);
+        console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
+    } else {
+        // Use standard http.Agent for non-authenticated proxies
+        // NOTE: node-fetch automatically handles non-authenticated proxies via http/https agent
+        proxyAgent = new http.Agent({ host: ip, port: port });
+        console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
+    }
     
     // --- GA4 MP Session Data Generation ---
     const cid = uid; 
@@ -462,7 +556,6 @@ app.get('/proxy-request', async (req, res) => {
              return false; 
         }
         
-        // CRITICAL: Use the ga_id and api_secret from the request query
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; 
         payload.timestamp_micros = String(Date.now() * 1000); 
         const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
@@ -475,7 +568,7 @@ app.get('/proxy-request', async (req, res) => {
                     'Content-Type': 'application/json',
                     'User-Agent': USER_AGENT 
                 },
-                agent: proxyAgent // Use the proxy agent for the GA4 call
+                agent: proxyAgent // Use the dynamically determined agent
             });
 
             if (response.status === 204) { 
@@ -487,12 +580,11 @@ app.get('/proxy-request', async (req, res) => {
                 return false;
             }
         } catch (error) {
-            // Logs critical error if proxy connection fails 
-            console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed: ${error.message}`);
+            console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed (Code: ${error.code || 'N/A'}). Error: ${error.message}`);
             return false;
         }
     }
-    // -- END: FUNCTION TO SEND DATA VIA PROXY ---
+    // --- END: FUNCTION TO SEND DATA VIA PROXY ---
 
     try {
         if (isGaMpEnabled) {
@@ -507,7 +599,6 @@ app.get('/proxy-request', async (req, res) => {
                         _ss: 1, 
                         debug_mode: true,
                         language: "en-US",
-                        // Note: The original code for session_default_channel_group was simplified here compared to /boost-mp
                         session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : "Direct", 
                         source: traffic.source,
                         medium: traffic.medium,
@@ -517,25 +608,23 @@ app.get('/proxy-request', async (req, res) => {
             };
             if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
             
-            // 2. PAGE VIEW EVET
-            // index.js में Page View Payload
-              const pageViewPayload = {
+            // 2. PAGE VIEW EVENT
+            const pageViewPayload = {
                 client_id: cid,
                 user_properties: userProperties,
-                 events: [{ 
-                  name: 'page_view', 
-                  params: { 
-                  page_location: target, // The actual URL sent from frontend
-                 page_title: target, // <<< CHANGED: Use the target URL as the title
-                 session_id: session_id, 
-                 debug_mode: true,
-                 language: "en-US",
-            engagement_time_msec: engagementTime,
-            page_referrer: traffic.referrer 
-        } 
-    }]
-};
-            
+                events: [{ 
+                    name: 'page_view', 
+                    params: { 
+                        page_location: target, 
+                        page_title: target, // Changed to show actual target URL/Title
+                        session_id: session_id, 
+                        debug_mode: true,
+                        language: "en-US",
+                        engagement_time_msec: engagementTime,
+                        page_referrer: traffic.referrer 
+                    } 
+                }]
+            };
             if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
         }
         
