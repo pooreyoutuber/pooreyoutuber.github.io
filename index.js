@@ -421,7 +421,6 @@ Requested Change: "${requestedChange}"`;
 // index.js (WEBSITE BOOSTER PRIME - PROXY TOOL ONLY)
 
 // --- Imports ---
-const express = require('express');
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
