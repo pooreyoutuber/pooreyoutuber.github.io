@@ -9,7 +9,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
+// NEW: Import 'http' for non-authenticated proxies, needed for Tool 4 (Technically unused now, but kept to minimize imports change)
 const http = require('http'); 
 
 const app = express();
@@ -440,37 +440,24 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - FIXED
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - MODIFIED: DIRECT GA4 HIT FROM SERVER
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
     // 1. Get parameters from the frontend URL query
+    // NOTE: ip, port, and auth are now IGNORED as proxy functionality is removed.
     const { target, ip, port, auth, uid, ga_id, api_secret } = req.query; 
 
-    // Basic validation check
-    if (!target || !ip || !port || !uid) {
-        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, ip, port, uid).' });
+    // Basic validation check (Removed checks for ip and port)
+    if (!target || !uid) {
+        return res.status(400).json({ status: 'error', error: 'Missing required query parameters (target, uid).' });
     }
 
     const isGaMpEnabled = ga_id && api_secret; 
     
-    // --- Proxy Setup (FIXED) ---
-    let proxyAgent;
-    const proxyAddress = `${ip}:${port}`;
-    
-    // Check if 'auth' (username:password) is provided and not just empty/generic
-    if (auth && auth.includes(':') && auth !== ':') {
-        // Use HttpsProxyAgent for authenticated proxies
-        const [username, password] = auth.split(':');
-        const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
-        proxyAgent = new HttpsProxyAgent(proxyUrl);
-        console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
-    } else {
-        // Use standard http.Agent for non-authenticated proxies
-        // http import ab upar hai (line 12)
-        proxyAgent = new http.Agent({ host: ip, port: port });
-        console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
-    }
+    // --- Proxy Setup (REMOVED) ---
+    // Proxy is now completely disabled. Views will be sent directly from the Node.js server.
+    const proxyAgent = undefined; // Set to undefined to ensure nodeFetch ignores it
     
     // --- GA4 MP Session Data Generation ---
     const cid = uid; 
@@ -486,10 +473,10 @@ app.get('/proxy-request', async (req, res) => {
     
     let eventCount = 0;
 
-    // --- FUNCTION TO SEND DATA VIA PROXY ---
+    // --- FUNCTION TO SEND DATA VIA PROXY (NOW DIRECTLY) ---
     async function sendDataViaProxy(payload, eventType) {
         if (!isGaMpEnabled) {
-             console.log(`[PROXY MP SKIP] Keys missing. Skipped: ${eventType}.`);
+             console.log(`[MP SKIP] Keys missing. Skipped: ${eventType}.`);
              return false; 
         }
         
@@ -497,30 +484,30 @@ app.get('/proxy-request', async (req, res) => {
         payload.timestamp_micros = String(Date.now() * 1000); 
         const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
         
-        try { const response = await nodeFetch(gaEndpoint, { 
+        try { 
+            const response = await nodeFetch(gaEndpoint, { 
                 method: 'POST',
                 body: JSON.stringify(payload),
                 headers: { 
                     'Content-Type': 'application/json',
                     'User-Agent': USER_AGENT 
                 },
-                agent: proxyAgent // Use the dynamically determined agent
+                // IMPORTANT: Removed 'agent: proxyAgent' to make it a direct hit from the server.
             });
-
             if (response.status === 204) { 
-                console.log(`[PROXY MP SUCCESS] Sent: ${eventType} via ${ip}:${port}`);
+                console.log(`[GA MP SUCCESS] Sent: ${eventType} to ${target}`);
                 return true;
             } else {
                 const errorText = await response.text(); 
-                console.error(`[PROXY MP FAILURE] Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
+                console.error(`[GA MP FAILURE] Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
                 return false;
             }
         } catch (error) {
-            console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed (Code: ${error.code || 'N/A'}). Error: ${error.message}`);
+            console.error(`[GA MP CRITICAL ERROR] Event: ${eventType}. Connection Failed (Code: ${error.code || 'N/A'}). Error: ${error.message}`);
             return false;
         }
     }
-    // --- END: FUNCTION TO SEND DATA VIA PROXY ---
+    // --- END: FUNCTION TO SEND DATA VIA PROXY (NOW DIRECTLY) ---
 
     try {
         if (isGaMpEnabled) {
@@ -583,7 +570,7 @@ app.get('/proxy-request', async (req, res) => {
         
         // 4. Send success response back to the frontend
         const message = isGaMpEnabled ? 
-                        `GA4 MP data sent successfully via proxy. Events: ${eventCount}.` : 
+                        `GA4 MP data sent successfully (Direct Hit from Server). Events: ${eventCount}.` : 
                         'Request sent (No GA MP keys provided. Check iframe for loading).';
 
         res.status(200).json({ 
@@ -612,5 +599,4 @@ app.get('/proxy-request', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-
-    
+      
