@@ -3,237 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monetization Performance Sandbox - Advanced Project</title>
+    <title>Website Ads Name - Global Traffic Simulation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Basic CSS for the layout - aap isko customize kar sakte hain */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f4f7f6;
-            color: #333;
-        }
-        .header {
-            background-color: #007bff;
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-        }
-        .control-panel {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            min-width: 250px;
-        }
-        .input-group input, .input-group button {
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .input-group button {
-            background-color: #28a745;
-            color: white;
-            cursor: pointer;
-            border: none;
-        }
-        .dashboard-container {
-            display: flex;
-            justify-content: space-around;
-            background-color: #e9ecef;
-            padding: 15px 20px;
-            margin-top: 10px;
-        }
-        .dashboard-card {
-            text-align: center;
-            padding: 10px 20px;
-            border-radius: 6px;
-            background-color: #fff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .dashboard-card h1 {
-            color: #28a745; /* Earning color */
-            margin: 5px 0 0;
-            font-size: 2em;
-        }
-        .iframe-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 columns */
-            grid-gap: 5px;
-            padding: 5px;
-            height: 80vh; /* Viewport height ka 80% */
-        }
-        .iframe-slot {
-            position: relative;
-            border: 2px solid #ccc;
+        body { background-color: #f8f9fa; }
+        .container-fluid { padding: 20px; }
+        .header-section { background-color: #007bff; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .control-row, .option-row { margin-bottom: 15px; }
+        .slot-container {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            background-color: #fff;
+            height: 400px; 
+            margin-bottom: 10px;
         }
-        .iframe-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-            font-size: 0.8em;
-        }
-        .iframe-controls button {
-            padding: 2px 5px;
-            font-size: 0.7em;
-            cursor: pointer;
-        }
-        .iframe-slot iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            /* Optional: Desktop Viewport Simulation (CSS Scaling) */
-            /* transform: scale(0.5); 
-            transform-origin: top left;
-            width: 200%; 
-            height: 200%; */
-        }
+        .slot-header { background-color: #e9ecef; padding: 5px 10px; font-weight: bold; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; }
+        .slot-content { flex-grow: 1; position: relative; }
+        .slot-content iframe { width: 100%; height: 100%; border: none; }
+        .slot-footer { padding: 5px 10px; background-color: #f8f9fa; display: flex; justify-content: space-between; font-size: 0.8em; }
+        .dashboard-metrics { margin-top: 20px; background-color: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2>Monetization Performance Sandbox</h2>
-        <p>Advanced Web Testing Tool for College Project</p>
+<div class="container-fluid">
+    <div class="header-section text-center">
+        <h1 class="mb-1">Website Ads Name</h1>
+        <p class="lead">Global Traffic Simulation System - College Project</p>
     </div>
 
-    <div class="control-panel">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row control-row">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text">Slot: 10</span>
+                        <input type="text" class="form-control" id="targetUrl" placeholder="Paste Target URL (e.g., https://yourwebsite.com)">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" onclick="loadSimulation()">Load & Run All (10 Slots)</button>
+                </div>
+            </div>
+
+            <hr>
+            <h5 class="card-title">Optional: Advanced Session Configuration</h5>
+            <div class="row option-row">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">Simulated GA ID</span>
+                        <input type="text" class="form-control" id="gaId" placeholder="G-XXXXXXXXX" value="G-123456789">
+                    </div>
+                    <small class="text-muted">*GA ID/API fields are for **demonstration** of integration only.</small>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">Proxy API Key</span>
+                        <input type="password" class="form-control" id="apiSecret" placeholder="Your_API_Secret" value="FakeSecretForDemo">
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                    <div class="form-check me-3">
+                        <input class="form-check-input" type="checkbox" id="enableAutoScroll" checked>
+                        <label class="form-check-label" for="enableAutoScroll">
+                            Enable **Auto Scroll** (Simulated)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enableActiveUser" checked>
+                        <label class="form-check-label" for="enableActiveUser">
+                            Enable **Active User** Mode
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row option-row">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">Mode: repeat cycle</span>
+                        <input type="number" class="form-control" id="secCycle" value="60" min="10">
+                        <span class="input-group-text">seconds cycle</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="alert alert-info small" role="alert">
+        <strong>Tool Usage Instructions:</strong>
+        <ul>
+            <li>**Traffic Realism:** Tool ke saath **Third-Party VPN** ka use karein. Har reload par **VPN** alag **IP address** provide karega, jisse **Ads Company** ko traffic **legitimate** lagega.</li>
+            <li>**Session Simulation:** System **Randomized Scrolling** aur **Staggered Auto-Reload** ka use karta hai taaki human interaction ko mimic kar sake.</li>
+            <li>**Desktop Mode:** Browser automatically har slot ko **Desktop Viewport** mein load karega.</li>
+        </ul>
+    </div>
+    
+    <div class="dashboard-metrics">
+        <div class="row">
+            <div class="col text-center">
+                <h5>💰 Simulated Total Revenue</h5>
+                <h2 class="text-success" id="totalEarningDisplay">$0.00</h2>
+            </div>
+            <div class="col text-center">
+                <h5>Simulated Views (Total)</h5>
+                <h2 id="totalViewsDisplay">0</h2>
+            </div>
+            <div class="col text-center">
+                <h5>Avg. Load Time (Sec)</h5>
+                <h2 class="text-warning" id="avgLoadTimeDisplay">0.00s</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-1">
+                <div class="slot-header">SLOT 1: <span class="text-success" id="status-1">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe1" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe1')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-1">--</span></span>
+                </div>
+            </div>
+        </div>
         
-        <div class="input-group">
-            <label for="urlInput">URL To Test:</label>
-            <input type="text" id="urlInput" placeholder="https://example.com/page-with-ads">
-            <button onclick="loadIframes()">Load All 10 Slots</button>
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-2">
+                <div class="slot-header">SLOT 2: <span class="text-success" id="status-2">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe2" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe2')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-2">--</span></span>
+                </div>
+            </div>
         </div>
 
-        <div class="input-group">
-            <label for="reloadTime">Auto-Reload Interval (seconds):</label>
-            <input type="number" id="reloadTime" value="30" min="5">
-            <button onclick="toggleGlobalAutoReload(this)">Start Global Auto-Reload</button>
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-3">
+                <div class="slot-header">SLOT 3: <span class="text-success" id="status-3">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe3" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe3')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-3">--</span></span>
+                </div>
+            </div>
         </div>
 
-        <div class="input-group">
-            <label>Global Controls:</label>
-            <button onclick="toggleGlobalAutoScroll(this)">Start Global Auto-Scroll</button>
-            <button onclick="saveSessionData()">Save/Log Data</button>
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-4">
+                <div class="slot-header">SLOT 4: <span class="text-success" id="status-4">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe4" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe4')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-4">--</span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-5">
+                <div class="slot-header">SLOT 5: <span class="text-success" id="status-5">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe5" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe5')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-5">--</span></span>
+                </div>
+            </div>
         </div>
 
-        <div class="dashboard-card">
-            <h4>💰 Simulated Earnings (Last Session)</h4>
-            <h1 id="totalEarningDisplay">$0.00</h1>
-            <p>Total Simulated Views: <span id="totalViewsDisplay">0</span></p>
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-6">
+                <div class="slot-header">SLOT 6: <span class="text-success" id="status-6">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe6" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe6')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-6">--</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-7">
+                <div class="slot-header">SLOT 7: <span class="text-success" id="status-7">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe7" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe7')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-7">--</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-8">
+                <div class="slot-header">SLOT 8: <span class="text-success" id="status-8">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe8" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe8')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-8">--</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-9">
+                <div class="slot-header">SLOT 9: <span class="text-success" id="status-9">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe9" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe9')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-9">--</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="slot-container" id="slot-10">
+                <div class="slot-header">SLOT 10: <span class="text-success" id="status-10">Ready</span></div>
+                <div class="slot-content">
+                    <iframe id="iframe10" src="about:blank"></iframe>
+                </div>
+                <div class="slot-footer">
+                    <button class="btn btn-sm btn-outline-dark" onclick="manualReloadSlot('iframe10')">Manual Reload</button>
+                    <span>Metrics: <span id="metric-10">--</span></span>
+                </div>
+            </div>
         </div>
 
     </div>
+</div>
 
-    <div class="iframe-grid">
-        <div class="iframe-slot" id="slot-1">
-            <div class="iframe-controls">
-                <span>Slot 1 - Status: <strong id="status-1">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe1')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe1', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe1" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-2">
-            <div class="iframe-controls">
-                <span>Slot 2 - Status: <strong id="status-2">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe2')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe2', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe2" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-3">
-            <div class="iframe-controls">
-                <span>Slot 3 - Status: <strong id="status-3">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe3')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe3', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe3" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-4">
-            <div class="iframe-controls">
-                <span>Slot 4 - Status: <strong id="status-4">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe4')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe4', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe4" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-5">
-            <div class="iframe-controls">
-                <span>Slot 5 - Status: <strong id="status-5">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe5')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe5', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe5" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-6">
-            <div class="iframe-controls">
-                <span>Slot 6 - Status: <strong id="status-6">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe6')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe6', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe6" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-7">
-            <div class="iframe-controls">
-                <span>Slot 7 - Status: <strong id="status-7">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe7')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe7', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe7" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-8">
-            <div class="iframe-controls">
-                <span>Slot 8 - Status: <strong id="status-8">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe8')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe8', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe8" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-9">
-            <div class="iframe-controls">
-                <span>Slot 9 - Status: <strong id="status-9">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe9')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe9', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe9" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-        <div class="iframe-slot" id="slot-10">
-            <div class="iframe-controls">
-                <span>Slot 10 - Status: <strong id="status-10">IDLE</strong></span>
-                <button onclick="manualReloadSlot('iframe10')">Reload</button>
-                <label><input type="checkbox" onchange="toggleAutoScrollSlot('iframe10', this.checked)"> Scroll</label>
-            </div>
-            <iframe id="iframe10" src="about:blank" frameborder="0"></iframe>
-        </div>
-
-    </div>
-
-    <script>
-        // Next step mein hum ismein JavaScript logic add karenge
-    </script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script> 
 </body>
 </html>
