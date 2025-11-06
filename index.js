@@ -418,19 +418,21 @@ Requested Change: "${requestedChange}"`;
 // ===================================================================
 // 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) 
 // ===================================================================
+// index.js (WEBSITE BOOSTER PRIME - PROXY TOOL ONLY)
+
+// --- Imports ---
 const express = require('express');
-const bodyParser = require('body-parser');
-const nodeFetch = require('node-fetch');
-// HttpsProxyAgent is necessary for routing traffic through authenticated proxy servers
+const nodeFetch = require('node-fetch'); 
+const cors = require('cors'); 
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// The default 'http' agent is used for non-authenticated proxies
-const http = require('http'); 
+const http = require('http'); // For non-authenticated proxies
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 10000; 
 
-// Middleware
-app.use(bodyParser.json());
+// --- MIDDLEWARE & UTILITIES ---
+app.use(cors());
+app.use(express.json());
 
 // Set CORS headers for all responses (CRITICAL for frontend communication)
 app.use((req, res, next) => {
@@ -439,14 +441,14 @@ app.use((req, res, next) => {
     next();
 });
 
-// ===================================================================
-// --- 1. HELPER FUNCTIONS (GA4 MP Simulation) - Defined First ---
-// ===================================================================
+// Basic check route
+app.get('/', (req, res) => {
+    res.status(200).send('Website Booster Prime API is running. Access /proxy-request.'); 
+});
 
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoData = [
     { country: "India", timezone: "Asia/Kolkata" },
     { country: "United States", timezone: "America/Los_Angeles" },
@@ -458,7 +460,11 @@ const geoData = [
     { country: "Brazil", timezone: "America/Sao_Paulo" },
     { country: "France", timezone: "Europe/Paris" }
 ];
+function getRandomGeo() {
+    return geoData[randomInt(0, geoData.length - 1)];
+}
 
+// --- TRAFFIC SOURCE LOGIC (Proxy Tool specific) ---
 const trafficSources = [
     { source: "google", medium: "organic", referrer: "https://www.google.com/" },
     { source: "direct", medium: "none", referrer: "" },
@@ -466,44 +472,13 @@ const trafficSources = [
     { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
     { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
 ];
-
-
-function getRandomGeo() {
-    return geoData[randomInt(0, geoData.length - 1)];
-}
-
 function getRandomTrafficSource() {
     return trafficSources[randomInt(0, trafficSources.length - 1)];
 }
 
-// --- END Helper Functions ---
-
 
 // ===================================================================
-// 2-4. LEGACY/UTILITY ENDPOINTS - (Unmodified/Same)
-// ===================================================================
-
-app.post('/boost-mp', async (req, res) => {
-    res.status(501).json({ status: 'ERROR', message: 'Legacy endpoint not in use. Please use /proxy-request.' });
-});
-app.post('/api/caption-generate', (req, res) => {
-    res.status(200).json({ 
-        success: true, 
-        caption: "Simulated Caption: Boost your views with this prime tool!",
-        duration: "10s"
-    });
-});
-app.post('/api/caption-edit', (req, res) => {
-    res.status(200).json({ 
-        success: true, 
-        editedCaption: req.body.caption + " - [Edited by Booster Prime]",
-        duration: "5s"
-    });
-});
-
-
-// ===================================================================
-// 5. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request)
+// WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) 
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
@@ -517,12 +492,12 @@ app.get('/proxy-request', async (req, res) => {
 
     const isGaMpEnabled = ga_id && api_secret; 
     
-    // --- Proxy Setup (FIXED) ---
+    // --- Proxy Setup (FIXED for Non-Authenticated) ---
     let proxyAgent;
     const proxyAddress = `${ip}:${port}`;
     
-    // Check if 'auth' (username:password) is provided and not just empty/generic
-    if (auth && auth.includes(':')) {
+    // Check if 'auth' (username:password) is provided and not just empty/generic (i.e., not just ":")
+    if (auth && auth.includes(':') && auth !== ':') {
         // Use HttpsProxyAgent for authenticated proxies
         const [username, password] = auth.split(':');
         const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
@@ -530,7 +505,6 @@ app.get('/proxy-request', async (req, res) => {
         console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
     } else {
         // Use standard http.Agent for non-authenticated proxies
-        // NOTE: node-fetch automatically handles non-authenticated proxies via http/https agent
         proxyAgent = new http.Agent({ host: ip, port: port });
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
@@ -568,7 +542,7 @@ app.get('/proxy-request', async (req, res) => {
                     'Content-Type': 'application/json',
                     'User-Agent': USER_AGENT 
                 },
-                agent: proxyAgent // Use the dynamically determined agent
+                agent: proxyAgent 
             });
 
             if (response.status === 204) { 
@@ -599,7 +573,7 @@ app.get('/proxy-request', async (req, res) => {
                         _ss: 1, 
                         debug_mode: true,
                         language: "en-US",
-                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : "Direct", 
+                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), 
                         source: traffic.source,
                         medium: traffic.medium,
                         page_referrer: traffic.referrer
@@ -616,7 +590,7 @@ app.get('/proxy-request', async (req, res) => {
                     name: 'page_view', 
                     params: { 
                         page_location: target, 
-                        page_title: target, // Changed to show actual target URL/Title
+                        page_title: target, 
                         session_id: session_id, 
                         debug_mode: true,
                         language: "en-US",
@@ -626,9 +600,26 @@ app.get('/proxy-request', async (req, res) => {
                 }]
             };
             if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
+
+            // 3. USER ENGAGEMENT
+            const engagementPayload = {
+                client_id: cid,
+                user_properties: userProperties, 
+                events: [
+                    { 
+                        name: "user_engagement", 
+                        params: { 
+                            engagement_time_msec: engagementTime, 
+                            session_id: session_id,
+                            debug_mode: true 
+                        } 
+                    }
+                ]
+            };
+            if (await sendDataViaProxy(engagementPayload, 'user_engagement')) eventCount++;
         }
         
-        // 3. Send success response back to the frontend
+        // 4. Send success response back to the frontend
         const message = isGaMpEnabled ? 
                         `GA4 MP data sent successfully via proxy. Events: ${eventCount}.` : 
                         'Request sent (No GA MP keys provided. Check iframe for loading).';
@@ -656,5 +647,5 @@ app.get('/proxy-request', async (req, res) => {
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
-    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
+    console.log(`Website Booster Prime Proxy Server is running on port ${PORT}`);
 });
