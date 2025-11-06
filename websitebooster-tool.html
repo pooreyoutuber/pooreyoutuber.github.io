@@ -174,10 +174,10 @@
                 **Architecture:** This tool uses a **Node.js/Express Backend** (hosted on Render) for stable proxy handling and session simulation.
             </li>
             <li>
-                **Active User Fix:** Unique Client ID is sent via the Node.js backend to trick GA4 into counting each request as a new, active user.
+                **Proxy Fix:** This version is configured to handle **Non-Authenticated Proxies** (without username/password).
             </li>
             <li>
-                **CRITICAL:** For this to work, you must replace the dummy proxies in the JavaScript code with **20 UNIQUE IP ADDRESSES**.
+                **Proxy Rotation:** The tool now **randomly selects a new proxy** from the pool for every request, improving success rate and avoiding the 402 error.
             </li>
         </ul>
     </div>
@@ -192,14 +192,20 @@
    PROXY DATA and CONFIGURATION
    ---------------------------------------------------------------------- */
 
-const COMMON_USER = "bqctypvz";
-const COMMON_PASS = "399xb3kxqv6i";
-const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
+// *** CRITICAL FIX: Set COMMON_AUTH to empty string for Non-Authenticated Proxies ***
+const COMMON_USER = ""; 
+const COMMON_PASS = ""; 
+const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; 
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
 function generateUniqueId() {
     return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
+
+// *** HELPER FUNCTION FOR ROTATION ***
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function getRandomNames(count) {
@@ -208,32 +214,47 @@ function getRandomNames(count) {
 }
 
 // =========================================================================
-// !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
+// !!! PROXIES FROM proxies.txt (38 Proxies) !!!
 // =========================================================================
 const DUMMY_PROXIES = [
-  { ip: "142.111.48.253", port: "7030", country: "US" },
-  { ip: "31.59.20.176", port: "6754", country: "DE" },
-  { ip: "38.170.176.177", port: "5572", country: "CA" },
-  { ip: "198.23.239.134", port: "6540", country: "US" },
-  { ip: "45.38.107.97", port: "6014", country: "US" },
-  { ip: "107.172.163.27", port: "6543", country: "CA" },
-  { ip: "64.137.96.74", port: "6641", country: "US" },
-  { ip: "216.10.27.159", port: "6837", country: "AU" },
-  { ip: "142.111.67.146", port: "5611", country: "US" },
-  { ip: "142.147.128.93", port: "6593", country: "CA" },
-  
-  // DUPLICATES BELOW: REPLACE THESE 10 ENTRIES WITH 10 MORE UNIQUE IPs
-  // *** NOTE: THESE ARE LIKELY THE CAUSE OF YOUR PROXY/GA4 FAILURE ***
-  { ip: "142.111.48.254", port: "7031", country: "US" }, 
-  { ip: "31.59.20.177", port: "6755", country: "DE" },  
-  { ip: "38.170.176.178", port: "5573", country: "CA" }, 
-  { ip: "198.23.239.135", port: "6541", country: "US" }, 
-  { ip: "45.38.107.98", port: "6015", country: "US" }, 
-  { ip: "107.172.163.28", port: "6544", country: "CA" }, 
-  { ip: "64.137.96.75", port: "6642", country: "US" }, 
-  { ip: "216.10.27.160", port: "6838", country: "AU" }, 
-  { ip: "142.111.67.147", port: "5612", country: "US" }, 
-  { ip: "142.147.128.94", port: "6594", country: "CA" }, 
+  { ip: "45.67.215.64", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.229", port: "80", country: "Dynamic" },
+  { ip: "69.84.182.136", port: "80", country: "Dynamic" },
+  { ip: "45.8.211.144", port: "80", country: "Dynamic" },
+  { ip: "45.67.215.29", port: "80", country: "Dynamic" },
+  { ip: "185.221.160.223", port: "80", country: "Dynamic" },
+  { ip: "69.84.182.202", port: "80", country: "Dynamic" },
+  { ip: "108.162.193.80", port: "80", country: "Dynamic" },
+  { ip: "170.114.45.176", port: "80", country: "Dynamic" },
+  { ip: "170.114.45.153", port: "80", country: "Dynamic" },
+  { ip: "108.162.195.212", port: "80", country: "Dynamic" },
+  { ip: "69.84.182.21", port: "80", country: "Dynamic" },
+  { ip: "141.101.114.164", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.140", port: "80", country: "Dynamic" },
+  { ip: "141.101.114.245", port: "80", country: "Dynamic" },
+  { ip: "45.8.211.170", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.78", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.131", port: "80", country: "Dynamic" },
+  { ip: "185.221.160.221", port: "80", country: "Dynamic" },
+  { ip: "45.8.211.182", port: "80", country: "Dynamic" },
+  { ip: "102.177.176.216", port: "80", country: "Dynamic" },
+  { ip: "8.212.168.170", port: "3389", country: "Dynamic" },
+  { ip: "170.114.45.234", port: "80", country: "Dynamic" },
+  { ip: "185.221.160.140", port: "80", country: "Dynamic" },
+  { ip: "69.84.182.123", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.130", port: "80", country: "Dynamic" },
+  { ip: "170.114.45.154", port: "80", country: "Dynamic" },
+  { ip: "170.114.45.12", port: "80", country: "Dynamic" },
+  { ip: "74.80.226.154", port: "80", country: "Dynamic" },
+  { ip: "103.116.7.58", port: "80", country: "Dynamic" },
+  { ip: "141.101.114.192", port: "80", country: "Dynamic" },
+  { ip: "185.221.160.46", port: "80", country: "Dynamic" },
+  { ip: "8.35.211.139", port: "80", country: "Dynamic" },
+  { ip: "108.162.193.9", port: "80", country: "Dynamic" },
+  { ip: "170.114.45.140", port: "80", country: "Dynamic" },
+  { ip: "185.221.160.200", port: "80", country: "Dynamic" },
+  { ip: "185.221.160.231", port: "80", country: "Dynamic" },
+  { ip: "108.162.196.222", port: "80", country: "Dynamic" }
 ];
 // =========================================================================
 
@@ -251,7 +272,6 @@ const maxTimeInput = document.getElementById('maxTime');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
-// 👇 NEW GA4 INPUTS - Ensure IDs match the HTML
 const toggleGaInputs = document.getElementById('toggleGaInputs');
 const gaInputFields = document.getElementById('gaInputFields');
 const gaIdInput = document.getElementById('gaIdInput');
@@ -263,8 +283,8 @@ let randomNamesList = getRandomNames(MAX_SLOTS);
 
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
-    auth: COMMON_AUTH,
-    name: randomNamesList[index],
+    auth: COMMON_AUTH, // This will be empty now
+    name: randomNamesList[index % randomNamesList.length], 
     uniqueId: generateUniqueId() 
 }));
 
@@ -284,14 +304,14 @@ function getRandomDelay() {
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
-function createSlot(index, proxy){
+function createSlot(index){
   const el = document.createElement('div');
   el.className = 'slot';
   
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
+      <div class="slot-title">SLOT ${index+1}: Ready</div>
+      <div class="slot-ip-display" id="ip-display-${index}">Proxy IP: Ready</div>
     </div>
     
     <div class="iframe-wrap">
@@ -315,6 +335,9 @@ function createSlot(index, proxy){
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
+  
+  const ipDisplay = el.querySelector(`#ip-display-${index}`);
+  const titleDisplay = el.querySelector('.slot-title');
 
   function updateStatus(text, state = 'ready'){
     statusSpan.textContent = text;
@@ -341,56 +364,58 @@ function createSlot(index, proxy){
     }
   }
   
-  // MODIFIED: Sending optional GA keys
   function getProxiedUrl(originalUrl, proxy){
-      // Fetch GA keys from the new optional inputs
       const gaId = gaIdInput.value.trim();
       const apiSecret = apiSecretInput.value.trim();
       
       let params = `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}&` + 
+          `auth=${proxy.auth}&` + // This will be empty: ":"
           `uid=${proxy.uniqueId}`;
       
-      // Add optional GA parameters only if provided
       if(gaId && apiSecret) {
           params += `&ga_id=${gaId}&api_secret=${apiSecret}`;
       }
 
-      // Sending data to Node.js backend
       return `${PROXY_ENDPOINT}?${params}`; 
   }
 
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
+    // Step 1: CHOOSE A RANDOM PROXY from the global pool
+    const randomIndex = randomInt(0, premiumProxies.length - 1);
+    const proxy = premiumProxies[randomIndex]; 
+    
+    // Update the Slot Display with the rotating proxy info
+    ipDisplay.textContent = `Proxy IP: ${proxy.ip}:${proxy.port} (${proxy.country})`;
+    titleDisplay.textContent = `SLOT ${index+1}: ${proxy.name} (${proxy.country})`;
+    
     // Check if GA keys are provided
     const isGaMpEnabled = gaIdInput.value.trim() && apiSecretInput.value.trim();
     const gaStatus = isGaMpEnabled ? ' (GA MP Active)' : '';
 
-    // Step 1: Set up the iframe
+    // Step 2: Set up the iframe
     iframe.src = originalUrl;
     updateStatus(`Loading Content${gaStatus}...`, 'loading');
     
     el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
     
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy); 
 
     updateStatus(`Sending Proxy Request to Node.js${gaStatus}...`, 'loading');
 
     try {
-        // Step 2: Fetch to the Node.js backend
+        // Step 3: Fetch to the Node.js backend
         const response = await fetch(proxiedUrl);
         const data = await response.json(); 
         
         if (response.ok && data.status === 'OK') {
             
-            // NEW LOGIC: Check for specific GA MP success/failure message from backend
             let message = data.message;
             let finalState = 'active';
             
             if (isGaMpEnabled && data.eventsSent === 0) {
-                 // If keys were provided but backend failed to send events (eventsSent: 0)
                  message = `GA4 Failed: Check Keys or Proxy IP.`;
                  finalState = 'failed';
                  console.error(`Slot ${index+1} GA4 Failure:`, message);
@@ -443,8 +468,8 @@ function renderSlots(count) {
     
     globalGoBtn.textContent = `Load & Run All (${finalCount} Slots)`;
 
-  for(let i=0; i < finalCount; i++){
-      const slot = createSlot(i, premiumProxies[i]);
+    for(let i=0; i < finalCount; i++){
+      const slot = createSlot(i); 
       currentSlots.push(slot);
     }
 }
@@ -477,7 +502,6 @@ globalGoBtn.addEventListener('click', ()=>{
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
     
-    // Clear any existing intervals before starting new ones
     stopAllAutomation();
       
     currentSlots.forEach((s) => {
@@ -486,6 +510,9 @@ globalGoBtn.addEventListener('click', ()=>{
 
         s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, 'active');
         
+        // Run immediately, then set interval
+        s.runAutomation(url); 
+
         const intervalId = setInterval(() => {
             s.runAutomation(url);
             s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, 'active'); 
@@ -532,7 +559,6 @@ repeatModeCheckbox.addEventListener('change', () => {
     }
 });
 
-// 👇 NEW: Optional GA Input Toggle Logic - Corrected to use ID
 toggleGaInputs.addEventListener('click', () => {
     const isVisible = gaInputFields.style.display !== 'none' && gaInputFields.style.display !== '';
     gaInputFields.style.display = isVisible ? 'none' : 'flex';
@@ -540,9 +566,9 @@ toggleGaInputs.addEventListener('click', () => {
         ? 'Optional: Enable GA4 Measurement Protocol Boost' 
         : 'GA4 MP Boost Enabled (Click to Hide)';
 });
+
+
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
 </html>
-
-  
