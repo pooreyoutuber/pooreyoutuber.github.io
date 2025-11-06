@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Website Ads Booster | High-Quality Traffic Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* --- CSS Styles (Minimalist & Professional) --- */
+  :root{
+    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
+    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
+    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
+    --primary-red: #ef4444;--danger: #dc2626;
+    --warning: #f59e0b; 
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; padding: 20px; }
+  .wrap { max-width: 900px; margin: 0px auto; padding: 20px; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); } 
+  header { margin-bottom: 25px; text-align: center; }
+  h1 { font-size: 30px; margin: 0; color: var(--primary-red); letter-spacing: -1px; } 
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
+  
+  .controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
+
+  .url-input-wrap { flex: 1; display: flex; border-radius: 10px; overflow: hidden; }
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  input[type="url"], input[type="text"] { flex: 1; padding: 12px 14px; border: 1px solid var(--border); background: white; font-size: 16px; outline: none; }
+  
+  .url-input-wrap input[type="url"] { border-radius: 0 10px 10px 0; border-left: none; }
+  .url-input-wrap, .btn { box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+  .btn { background: var(--primary-red); color: white; padding: 12px 18px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover:not(:disabled) { background: #c52f2f; }
+  .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+  .btn.stop { background: var(--danger); }
+  .btn.stop:hover { background: #b91c1c; }
+
+  .settings-box { background: #fff0f0; border: 1px solid var(--danger); padding: 15px; border-radius: 8px; margin-top: -10px; }
+  .settings-box h3 { margin-top: 0; font-size: 16px; color: var(--primary-red); }
+  .setting-group { display: flex; align-items: center; gap: 15px; font-size: 14px; color: #374151; flex-wrap: wrap; }
+  .setting-group input[type="number"], .setting-group input[type="checkbox"] { margin-right: 5px; }
+  .setting-group input[type="number"] { width: 60px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); text-align: center; }
+
+  /* Log/Status Area */
+  .log-container { background: #222; color: #00ff00; border-radius: 8px; padding: 15px; height: 350px; overflow-y: scroll; font-family: monospace; font-size: 12px; white-space: pre-wrap; margin-top: 20px; }
+  .log-line { margin-bottom: 5px; }
+  .log-time { color: #888; margin-right: 10px; }
+  .log-success { color: #059669; }
+  .log-error { color: #dc2626; font-weight: bold; }
+  .log-info { color: #0ea5e9; }
+
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Website Ads Booster</h1>
+      <div class="tagline">Server-Side, Anti-Detection Traffic Generator for AdSense Reports.</div>
+    </header>
+
+    <div class="controls">
+        <div class="input-group">
+            <div class="url-input-wrap" style="flex: 2;">
+                <input id="globalUrl" type="url" placeholder="Paste Target URL (AdSense Enabled Site)" />
+            </div>
+            
+            <button id="globalGo" class="btn" style="flex: 1; border-radius: 10px;">Start Traffic Simulation</button>
+            <button id="globalStop" class="btn stop" style="flex: 1; border-radius: 10px; display:none;">STOP ALL</button>
+        </div>
+        
+        <div class="settings-box">
+            <h3>Simulation Settings</h3>
+            <div class="setting-group">
+                <div style="flex-shrink: 0;">
+                    <label for="numSlots">
+                        Simulated **Concurrent Users (Slots):**
+                    </label>
+                    <input id="numSlots" type="number" value="10" min="1" max="20" />
+                </div>
+                
+                <input type="checkbox" id="repeatMode" checked />
+                <label for="repeatMode">
+                    Enable **Repeat Mode (Continuous Traffic)**
+                </label>
+                
+                <div style="flex-shrink: 0;">
+                    <label for="minTime">Min Cycle:</label>
+                    <input id="minTime" type="number" value="30" min="10" max="120" />
+                    <label for="maxTime">Max Cycle:</label>
+                    <input id="maxTime" type="number" value="60" min="10" max="120" />
+                    <span>seconds</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ffcccc; display: flex; flex-wrap: wrap; gap: 15px;">
+                <span id="toggleGaInputs" style="cursor:pointer; text-decoration: underline; color: var(--primary-red); font-weight: 600;">
+                    Optional: Add GA4 MP Keys (Recommended for Realtime Test)
+                </span>
+                 <div id="gaInputFields" style="display: none; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                     <label for="gaIdInput" style="color:var(--accent); font-weight:600; flex-shrink: 0;">GA ID (G-XXXX):</label>
+                     <input id="gaIdInput" type="text" placeholder="G-XXXXXXXXXX" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);" />
+                     <label for="apiSecretInput" style="color:var(--accent); font-weight:600; flex-shrink: 0;">API Secret:</label>
+                     <input id="apiSecretInput" type="text" placeholder="Your_API_Secret" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);" />
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="log-container" id="logContainer">
+        <div class="log-line"><span class="log-time">00:00:00</span> <span class="log-info">Tool Initialized. Ready to boost Adsense traffic.</span></div>
+    </div>
+
+  </div>
+
+<script>
+// --- Configuration ---
+const MAX_SLOTS = 20; 
+// !!! IMPORTANT: Replace with YOUR RENDER/SERVER URL !!!
+const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/ads-booster-request'; 
+
+// --- Dummy Data (Used to assign unique properties to each slot) ---
+const DUMMY_PROXIES = [
+  { ip: "45.67.215.64", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.229", port: "80", country: "Dynamic" },
+  { ip: "69.84.182.136", port: "80", country: "Dynamic" },
+  { ip: "45.8.211.144", port: "80", country: "Dynamic" },
+  { ip: "45.67.215.29", port: "80", country: "Dynamic" },
+  { ip: "185.221.160.223", port: "80", country: "Dynamic" },
+  { ip: "69.84.182.202", port: "80", country: "Dynamic" },
+  { ip: "108.162.193.80", port: "80", country: "Dynamic" },
+  { ip: "170.114.45.176", port: "80", country: "Dynamic" },
+  { ip: "170.114.45.153", port: "80", country: "Dynamic" },
+  { ip: "108.162.195.212", port: "80", country: "Dynamic" },
+  { ip: "69.84.182.21", port: "80", country: "Dynamic" },
+  { ip: "141.101.114.164", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.140", port: "80", country: "Dynamic" },
+  { ip: "141.101.114.245", port: "80", country: "Dynamic" },
+  { ip: "45.8.211.170", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.78", port: "80", country: "Dynamic" },
+  { ip: "216.205.52.131", port: "80", country: "Dynamic" },
+  { ip: "185.221.160.221", port: "80", country: "Dynamic" },
+  { ip: "45.8.211.182", port: "80", country: "Dynamic" }
+]; // Only using 20 for simplicity
+const TRAFFIC_SOURCES = [
+    { source: 'google', medium: 'organic', referrer: 'https://www.google.com/search?q=search+query' },
+    { source: 'facebook', medium: 'social', referrer: 'https://www.facebook.com/post' },
+    { source: '(direct)', medium: '(none)', referrer: '' } 
+];
+const DEVICE_TYPES = ['Desktop', 'Mobile', 'Tablet']; 
+const COMMON_AUTH = ""; // Assuming non-authenticated proxies
+
+// --- Elements ---
+const globalUrlInput = document.getElementById('globalUrl');
+const numSlotsInput = document.getElementById('numSlots');
+const globalGoBtn = document.getElementById('globalGo');
+const globalStopBtn = document.getElementById('globalStop');
+const repeatModeCheckbox = document.getElementById('repeatMode');
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
+const logContainer = document.getElementById('logContainer');
+
+const toggleGaInputs = document.getElementById('toggleGaInputs');
+const gaInputFields = document.getElementById('gaInputFields');
+const gaIdInput = document.getElementById('gaIdInput');
+const apiSecretInput = document.getElementById('apiSecretInput');
+
+let repeatIntervals = []; 
+
+// --- Helpers ---
+function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function generateUniqueId() { return Math.floor(Math.random() * 9000000000) + 1000000000; }
+function getRandomDelay() {
+    const minSec = parseInt(minTimeInput.value) || 30;
+    const maxSec = parseInt(maxTimeInput.value) || 60;
+    const minMs = Math.max(10, minSec) * 1000;
+    const maxMs = Math.max(minMs / 1000, maxSec) * 1000;
+    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+}
+const proxiesWithId = DUMMY_PROXIES.map((p, index) => ({
+    ...p,
+    uniqueId: generateUniqueId() + index 
+}));
+
+// --- Logging Function ---
+function logMessage(text, type = 'info') {
+    const now = new Date();
+    const timeString = now.toTimeString().split(' ')[0];
+    const newLog = document.createElement('div');
+    newLog.className = 'log-line';
+    
+    let colorClass = 'log-info';
+    if (type === 'success') colorClass = 'log-success';
+    if (type === 'error') colorClass = 'log-error';
+
+    newLog.innerHTML = `<span class="log-time">${timeString}</span> <span class="${colorClass}">[${type.toUpperCase()}] ${text}</span>`;
+    
+    logContainer.appendChild(newLog);
+    logContainer.scrollTop = logContainer.scrollHeight;
+}
+
+// --- Main Traffic Logic ---
+async function sendTraffic(slotIndex, originalUrl, proxyConfig) {
+    const randomTraffic = TRAFFIC_SOURCES[randomInt(0, TRAFFIC_SOURCES.length - 1)];
+    const randomDevice = DEVICE_TYPES[randomInt(0, DEVICE_TYPES.length - 1)];
+    
+    const gaId = gaIdInput.value.trim();
+    const apiSecret = apiSecretInput.value.trim();
+    const isGaMpEnabled = !!(gaId && apiSecret);
+    const gaStatus = isGaMpEnabled ? ' (GA Active)' : '';
+
+    let urlParams = `target=${encodeURIComponent(originalUrl)}&` +
+        `ip=${proxyConfig.ip}&port=${proxyConfig.port}&` +
+        `auth=${COMMON_AUTH}&` +
+        `uid=${proxyConfig.uniqueId}&` + // CRITICAL: Same UID for persistent user session
+        `source=${encodeURIComponent(randomTraffic.source)}&` +
+        `medium=${encodeURIComponent(randomTraffic.medium)}&` +
+        `referrer=${encodeURIComponent(randomTraffic.referrer)}&` +
+        `device=${encodeURIComponent(randomDevice)}`;
+
+    if(isGaMpEnabled) {
+        urlParams += `&ga_id=${gaId}&api_secret=${apiSecret}`;
+    }
+
+    const fullUrl = `${PROXY_ENDPOINT}?${urlParams}`;
+    
+    logMessage(`Slot ${slotIndex+1}: Sending request from ${randomTraffic.source}/${randomDevice} (IP: ${proxyConfig.ip})${gaStatus}...`, 'info');
+
+    try {
+        const response = await fetch(fullUrl);
+        const data = await response.json(); 
+        
+        if (response.ok && data.status === 'OK') {
+            logMessage(`Slot ${slotIndex+1} SUCCESS: ${data.message}`, 'success');
+        } else {
+            logMessage(`Slot ${slotIndex+1} FAILED (Server): ${data.details || data.error || 'Unknown Error'}`, 'error');
+        }
+    } catch (e) {
+        logMessage(`Slot ${slotIndex+1} FAILED (Network): Server Unreachable or CORS Error. Check Console.`, 'error');
+        console.error(`Slot ${slotIndex+1} Fetch Error:`, e);
+    }
+}
+
+// --- Controller Functions ---
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
+    globalGoBtn.disabled = false; 
+    globalStopBtn.style.display = 'none';
+    logMessage('All traffic simulation stopped.', 'warning');
+}
+
+function startTrafficSimulation() {
+    const url = globalUrlInput.value.trim();
+    const numSlots = parseInt(numSlotsInput.value) || 1;
+    const isRepeat = repeatModeCheckbox.checked;
+
+    if (!url || !url.startsWith('http')) { 
+        alert('Please paste a valid URL (starting with http/https).'); 
+        return; 
+    }
+    
+    stopAllAutomation(); // Stop any running intervals first
+
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+    
+    logMessage(`Starting simulation for ${numSlots} concurrent users...`, 'info');
+
+    for (let i = 0; i < numSlots; i++) {
+        const proxyConfig = proxiesWithId[i % proxiesWithId.length];
+        
+        const runSlot = async (slotIndex, pConfig) => {
+            await sendTraffic(slotIndex, url, pConfig);
+            
+            if (isRepeat) {
+                const delay = getRandomDelay();
+                const delayInSeconds = (delay / 1000).toFixed(1);
+                
+                logMessage(`Slot ${slotIndex+1}: Waiting for ${delayInSeconds}s before next cycle.`, 'info');
+                
+                const intervalId = setTimeout(() => {
+                     runSlot(slotIndex, pConfig); // Recursive call for continuous loop
+                }, delay); 
+                
+                repeatIntervals.push(intervalId); // Store for stopping
+            }
+        };
+
+        // Start the first run immediately
+        runSlot(i, proxyConfig);
+    }
+}
+
+
+// --- Event Listeners ---
+globalGoBtn.addEventListener('click', startTrafficSimulation);
+globalStopBtn.addEventListener('click', stopAllAutomation);
+
+// Settings validation
+[minTimeInput, maxTimeInput, numSlotsInput].forEach(input => {
+    input.addEventListener('change', () => {
+        let val = parseInt(input.value);
+        if (isNaN(val) || val < 1) input.value = 1;
+        if (input.id === 'numSlots') input.value = Math.min(val, MAX_SLOTS);
+        if (input.id === 'minTime') input.value = Math.max(10, Math.min(val, 120));
+        if (input.id === 'maxTime') input.value = Math.max(10, Math.min(val, 120));
+    });
+});
+
+toggleGaInputs.addEventListener('click', () => {
+    const isVisible = gaInputFields.style.display === 'flex';
+    gaInputFields.style.display = isVisible ? 'none' : 'flex';
+    toggleGaInputs.textContent = isVisible 
+        ? 'Optional: Add GA4 MP Keys (Recommended for Realtime Test)' 
+        : 'GA4 MP Keys Added (Click to Hide)';
+});
+</script>
+</body>
+</html>
