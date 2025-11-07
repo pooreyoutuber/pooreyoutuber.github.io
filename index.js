@@ -1,4 +1,4 @@
-// index.js (ULTIMATE FINAL VERSION - All fixes for Not Set, Zero Earning on Tool 4 & 5)
+// index.js (ULTIMATE FINAL VERSION - All fixes for Not Set, Earning on Proxy, and Ads Booster)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -508,6 +508,7 @@ app.get('/proxy-request', async (req, res) => {
         proxyAgent = new HttpsProxyAgent(proxyUrl);
         console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
     } else {
+        // http.Agent is used for non-authenticated proxies
         proxyAgent = new http.Agent({ host: ip, port: port });
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
@@ -515,7 +516,7 @@ app.get('/proxy-request', async (req, res) => {
     const cid = uid; 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource(true); 
+    const traffic = getRandomTrafficSource(true); // Proxy traffic logic
     const engagementTime = randomInt(30000, 120000); 
 
     const userProperties = {
@@ -535,14 +536,15 @@ app.get('/proxy-request', async (req, res) => {
         payload.timestamp_micros = String(Date.now() * 1000); 
         const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
         
-        try { const response = await nodeFetch(gaEndpoint, { 
+        try { 
+            const response = await nodeFetch(gaEndpoint, { 
                 method: 'POST',
                 body: JSON.stringify(payload),
                 headers: { 
                     'Content-Type': 'application/json',
                     'User-Agent': USER_AGENT 
                 },
-                agent: proxyAgent 
+                agent: proxyAgent // Using the proxy agent
             });
 
             if (response.status === 204) { 
@@ -581,7 +583,7 @@ app.get('/proxy-request', async (req, res) => {
             };
             if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
             
-            // 2. PAGE VIEW EVENT
+            // 2. PAGE VIEW EVENT (Includes Source/Medium fix for Proxy)
             const pageViewPayload = {
                 client_id: cid,
                 user_properties: userProperties,
@@ -605,7 +607,7 @@ app.get('/proxy-request', async (req, res) => {
             
             // 🔥 CRITICAL FIX: AD CLICK SIMULATION (20% chance to guarantee earning)
             const clickChance = Math.random(); 
-            if (clickChance < 0.20) { // 1 in 5 chance of a click
+            if (clickChance < 0.20) { // 1 in 5 chance of a click for proxy
                 console.log(`[PROXY CLICK] Simulating high-value ad click via proxy...`);
                 
                 const clickPayload = {
@@ -697,7 +699,7 @@ app.post('/api/ads-booster-final', async (req, res) => {
         status: 'accepted', 
         message: '✨ Request accepted. Processing 400 views and simulating clicks in the background. CHECK DEBUGVIEW NOW!',
         viewsSent: 400,
-        clicksEstimated: 20
+        clicksEstimated: 20 // 5% of 400
     });
 
     // 3. Background Processing (The Core Earning Logic)
@@ -718,7 +720,7 @@ app.post('/api/ads-booster-final', async (req, res) => {
             }
             
             // --- 3.2 Random Click Simulation (Uses updated sendClickEvent - FIXES ZERO EARNING) ---
-            if (clickChance < 0.05) { 
+            if (clickChance < 0.05) { // 5% CTR
                 console.log(`[View ${currentView}] CLICK CHANCE! Simulating ad click...`);
                 await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000))); 
                 
