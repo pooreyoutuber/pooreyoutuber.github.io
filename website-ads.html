@@ -153,26 +153,37 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    // Handle HTTP error statuses (4xx, 5xx)
-                    throw new Error(`HTTP Error Status: ${response.status}`);
+                    // अगर HTTP स्टेटस 4xx या 5xx है, तो सर्वर के JSON एरर मैसेज को पढ़ें
+                    return response.json().then(errorData => {
+                        // सर्वर का मैसेज या एक सामान्य HTTP एरर मैसेज थ्रो करें
+                        throw new Error(errorData.message || `HTTP Error Status: ${response.status}`);
+                    });
                 }
                 return response.json();
             })
             .then(data => {
                 if(data.status === 'accepted') {
                     statusDiv.className = 'mt-4 p-3 rounded text-center bg-success text-white';
-                    statusDiv.innerHTML = `<i class="bi bi-check-circle-fill"></i> **SUCCESS!** ${data.viewsSent || '400'} views and ${data.clicksEstimated || 'approx 20'} clicks are being processed. Check GA4 DebugView for real-time data and Ad-Report in 10 minutes.`;
+                    
+                    // 🔥 फिक्स: data.message और data.clicksEstimated का उपयोग करें
+                    statusDiv.innerHTML = `<i class="bi bi-check-circle-fill"></i> **SUCCESS!** ${data.message}<br>
+                        **Estimated Clicks:** ${data.clicksEstimated} (10% CTR). Check GA4 DebugView now!`;
                 } else {
-                    // Handle validation errors returned by the API (status: 'error')
+                    // सर्वर-साइड वैलिडेशन एरर (status: 'error') के लिए
                     statusDiv.className = 'mt-4 p-3 rounded text-center bg-danger text-white';
                     statusDiv.innerHTML = `<i class="bi bi-x-octagon-fill"></i> **API ERROR:** ${data.message || 'Validation failed on the server.'}`;
                 }
             })
             .catch(error => {
-                console.error('Fetch Error:', error);
+                console.error('Fetch Error:', error.message);
                 statusDiv.className = 'mt-4 p-3 rounded text-center bg-warning text-dark';
-                // This covers network failure, CORS block, or server down
-                statusDiv.innerHTML = `<i class="bi bi-wifi-off"></i> **NETWORK ERROR:** Could not connect to the Render server. Please check your VPN, URL, and the browser Console (F12) for CORS errors.`;
+                
+                // नेटवर्क एरर या थ्रो किए गए सर्वर एरर मैसेज को संभालें
+                const displayMessage = error.message.includes("Failed to fetch") || error.message.includes("HTTP Error Status")
+                    ? `Could not connect to the Render server. Please check your VPN, API Key, and the browser Console (F12) for CORS issues.`
+                    : error.message;
+
+                statusDiv.innerHTML = `<i class="bi bi-wifi-off"></i> **NETWORK/API ERROR:** ${displayMessage}`;
             });
             
         });
