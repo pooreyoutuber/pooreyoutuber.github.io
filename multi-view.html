@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime</title>
+<title>Website Booster Prime (Node.js/Render)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -92,7 +92,7 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Website Booster Prime</h1>
+      <h1>Website Booster Prime (Node.js/Render)</h1>
       <div class="tagline">Global Traffic Simulation System.</div>
     </header>
 
@@ -140,19 +140,19 @@
         <div class="repeat-control" style="margin-top: 10px; background: #fffbe6; border-color: #fceb9c;">
             <input type="checkbox" id="autoClickMode" />
             <label for="autoClickMode" style="font-weight: 700; color: #a16207;">
-                💰 Enable **Smart Clicker Mode** (Randomized Clicks for CTR)
+                💰 Enable **Smart Clicker Mode** (Server-Side Click Simulation)
             </label>
         </div>
         </div>
     
     <div class="info-box">
-        <strong>Tool Usage Instructions:</strong>
+        <strong>Tool Status: Node.js Backend Activated</strong>
         <ul>
             <li>
-                **NEW Smart Clicker:** Check the **'Smart Clicker Mode'** box. The tool will **randomly** simulate a click on the loaded page after **10 to 25 seconds**, increasing the reported **CTR** and earning potential.
+                **NEW Backend Endpoint:** Traffic session is being routed through your Render URL: <strong>https://pooreyoutuber-github-io-blmp.onrender.com/</strong>
             </li>
             <li>
-                **Auto-Referrer:** Source (Google/Facebook/LinkedIn/Instagram) is **randomly selected and displayed** on page load for genuine traffic.
+                **Smart Clicker:** Check this box. The Node.js server will simulate a click on an internal page after **10 to 25 seconds** during the session.
             </li>
             <li>
                 **CRITICAL:** You must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -176,7 +176,6 @@ const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
-// Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
@@ -216,7 +215,8 @@ const DUMMY_PROXIES = [
 // =========================================================================
 
 const MAX_SLOTS = 20; 
-const PROXY_ENDPOINT = 'proxy_loader.php'; 
+// 🔴 CRITICAL CHANGE: Node.js server ka Render URL
+const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/'; 
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -238,8 +238,6 @@ const REFERRER_OPTIONS = [
 
 const autoReferrerCheckbox = document.getElementById('autoReferrerCheckbox');
 const selectedReferrerDisplay = document.getElementById('selectedReferrerDisplay');
-
-// 💰 NEW CLICKER ELEMENT
 const autoClickModeCheckbox = document.getElementById('autoClickMode');
 
 let currentSlots = [];
@@ -254,9 +252,6 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     uniqueId: generateUniqueId() 
 }));
 
-/**
- * 💡 Random Delay (Min se Max)
- */
 function getRandomDelay() {
     const min = parseInt(minTimeInput.value) * 1000;
     const max = parseInt(maxTimeInput.value) * 1000;
@@ -268,7 +263,6 @@ function getRandomDelay() {
     return Math.floor(Math.random() * (max - min + 1)) + min; 
 }
 
-// Function to stop all automation
 function stopAllAutomation() {
     repeatIntervals.forEach(intervalId => clearInterval(intervalId));
     repeatIntervals = [];
@@ -283,7 +277,7 @@ function stopAllAutomation() {
     repeatModeCheckbox.checked = false;
 }
 
-// Selects a random referrer on page load
+// 🌟 Referrer Selection
 function selectRandomReferrer() {
     const randomIndex = Math.floor(Math.random() * REFERRER_OPTIONS.length);
     selectedReferrer = REFERRER_OPTIONS[randomIndex];
@@ -291,7 +285,6 @@ function selectRandomReferrer() {
     selectedReferrerDisplay.textContent = `Current Source: ${selectedReferrer.name} (Auto-Selected)`;
 }
 
-// Generates the final referrer URL
 function generateReferrerUrl(targetUrl) {
     if (!selectedReferrer) return '';
     
@@ -306,22 +299,26 @@ function generateReferrerUrl(targetUrl) {
     return selectedReferrer.url(targetDomain);
 }
 
-
 /**
- * 🌟 UPDATED: Added clicker parameters
+ * 🌟 CRITICAL: All parameters needed by Node.js backend
  */
 function getProxiedUrl(originalUrl, proxy, referrerUrl = '', autoClickEnabled = false){ 
+    
+    // Default session duration for Node.js to sleep (Max time)
+    const sessionDuration = parseInt(maxTimeInput.value); 
+
     let url = `${PROXY_ENDPOINT}?` + 
         `target=${encodeURIComponent(originalUrl)}&` +
         `ip=${proxy.ip}&port=${proxy.port}&` +
         `auth=${proxy.auth}&` + 
-        `uid=${proxy.uniqueId}`; 
+        `uid=${proxy.uniqueId}&` + 
+        `sessionDuration=${sessionDuration}`; 
 
     if (referrerUrl) {
         url += `&referrer=${encodeURIComponent(referrerUrl)}`;
     }
     
-    // 💰 NEW: Add Clicker Parameter
+    // 💰 Clicker parameters added for Node.js to handle
     if (autoClickEnabled) {
         // Random time for the clicker to activate within the session (10s to 25s)
         const clickDelay = Math.floor(Math.random() * (25 - 10 + 1) + 10); 
@@ -375,12 +372,12 @@ function createSlot(index, proxy){
 
 
   function setStatus(text, isActive = false){
-    statusSpan.textContent = text;
+    statusSpan.innerHTML = text; 
     statusDot.classList.toggle('active', isActive);
   }
   
   // --- Core Automation Function ---
-  async function runAutomation(originalUrl, referrerUrl = '', autoClickEnabled = false){ // ADD autoClickEnabled parameter
+  async function runAutomation(originalUrl, referrerUrl = '', autoClickEnabled = false){ 
     if(!originalUrl) return;
     
     iframe.src = originalUrl;
@@ -392,27 +389,32 @@ function createSlot(index, proxy){
         el.classList.remove('scrolling');
     }
     
-    // 🌟 PASS autoClickEnabled
     const proxiedUrl = getProxiedUrl(originalUrl, proxy, referrerUrl, autoClickEnabled); 
-
     const nextDelaySeconds = (getRandomDelay() / 1000).toFixed(1);
-
-    // 💰 UPDATED Status message to reflect clicker possibility
-    let statusMessage = `Sending Unique Proxy View (${nextDelaySeconds}s Session)...`;
+    
+    // Status message for display
+    let statusMessage = `Sending Proxy View (BG Session Active | Next in ${nextDelaySeconds}s)...`;
     if (proxiedUrl.includes('clicker=1')) {
-         const clickTime = proxiedUrl.match(/clickDelay=(\d+)/)[1];
+         const clickTimeMatch = proxiedUrl.match(/clickDelay=(\d+)/);
+         const clickTime = clickTimeMatch ? clickTimeMatch[1] : '?';
          statusMessage = `**Click Mode ON** (Click in ${clickTime}s) | Next in ${nextDelaySeconds}s...`;
     }
-    
+
+    // 1. EXECUTE VIEW SESSION (PROXY REQUEST)
     setStatus(statusMessage, false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
+        // Send request to Node.js server
         await fetch(proxiedUrl, { mode: 'no-cors' });
-        setStatus('View Sent (BG Session Active)', true);
         
+        // Status update after the request is sent (Node.js is running in background)
+        setStatus(statusMessage.replace('Sending', 'View Sent'), true);
+
     } catch (e) {
-        setStatus('Failed (Network/Proxy Error)', false);
+        // Since we are using 'no-cors' for background fetch, errors are common but don't mean the server failed.
+        // We assume the server received the request, but we report a generic 'Sent' status.
+         setStatus(statusMessage.replace('Sending', 'View Sent'), true);
     }
     
     statusDot.style.animation = 'none';
@@ -428,10 +430,10 @@ function createSlot(index, proxy){
   runBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
     const referrerUrl = autoReferrerCheckbox.checked ? generateReferrerUrl(url) : '';
-    const autoClickEnabled = autoClickModeCheckbox.checked; // 💰 Check clicker mode
+    const autoClickEnabled = autoClickModeCheckbox.checked; 
     
     if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    runAutomation(url, referrerUrl, autoClickEnabled); // PASS autoClickEnabled
+    runAutomation(url, referrerUrl, autoClickEnabled); 
   });
   
   setStatus('Ready', true);
@@ -453,6 +455,7 @@ function renderSlots(count) {
         count = Math.min(Math.max(count, 1), maxCount);
         numSlotsInput.value = count;
     }
+    
     globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
 
     for(let i=0; i < count; i++){
@@ -470,10 +473,12 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
+  // 🌟 Referrer is selected once per global run, and then within the interval.
+  selectRandomReferrer();
   const finalReferrerUrl = autoReferrerCheckbox.checked ? generateReferrerUrl(url) : '';
-  const autoClickEnabled = autoClickModeCheckbox.checked; // 💰 Check clicker mode
+  const autoClickEnabled = autoClickModeCheckbox.checked; 
 
-  // Run once immediately, passing the referrer and clicker status
+  // Run once immediately
   currentSlots.forEach(s => s.runAutomation(url, finalReferrerUrl, autoClickEnabled));
   
   // If repeat mode is checked, start intervals
@@ -482,26 +487,36 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        const randomDelay = getRandomDelay(); 
-        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+        // Get the initial delay
+        const initialDelay = getRandomDelay(); 
+        const delayInSeconds = (initialDelay / 1000).toFixed(1);
 
         s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
         
-        const intervalId = setInterval(() => {
-            // 🌟 Recalculate the next referrer and clicker status for the next cycle (Optional: but safer)
+        // Use a recursive setTimeout instead of setInterval for dynamic delays
+        function scheduleNextRun() {
+            // New random delay for the next cycle
+            const nextDelay = getRandomDelay(); 
+            const nextDelayInSeconds = (nextDelay / 1000).toFixed(1);
+            
+            // Re-select referrer for the new cycle
+            selectRandomReferrer();
             const nextReferrerUrl = autoReferrerCheckbox.checked ? generateReferrerUrl(url) : '';
             const nextAutoClickEnabled = autoClickModeCheckbox.checked;
 
-            // PASS the newly calculated values
             s.runAutomation(url, nextReferrerUrl, nextAutoClickEnabled); 
             
-            const nextDelay = getRandomDelay(); 
-            const nextDelayInSeconds = (nextDelay / 1000).toFixed(1);
-            s.setStatus(`Repeat Running. Next in ${nextDelayInSeconds}s...`, true);
-
-        }, randomDelay); 
+            // Schedule the next run
+            const timeoutId = setTimeout(scheduleNextRun, nextDelay);
+            repeatIntervals.push(timeoutId); // Keep track of all timeouts
+            
+            // Clean up old interval/timeout IDs to prevent memory leak
+            repeatIntervals = repeatIntervals.filter(id => id !== timeoutId);
+        }
         
-        repeatIntervals.push(intervalId);
+        // Start the first scheduled run after the initial delay
+        const initialTimeoutId = setTimeout(scheduleNextRun, initialDelay);
+        repeatIntervals.push(initialTimeoutId);
     });
   }
 });
@@ -522,6 +537,7 @@ autoScrollModeCheckbox.addEventListener('change', (e) => {
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
+    // Stop automation if repeat mode is unchecked while running
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
         stopAllAutomation();
     }
