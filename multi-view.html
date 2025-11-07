@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Node.js/Render)</title>
+<title>Website Booster Prime (Node.js/Render) - Client Fix</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -44,7 +44,7 @@
   @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
   @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
-  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; position: relative; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
   .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
@@ -68,6 +68,29 @@
   .slot.scrolling iframe {
     transform: translate(0, 0) scale(0.4); 
     animation: scroll 3.5s ease-in-out infinite;
+  }
+  /* ---------------------------------- */
+
+  /* --- MOUSE SIMULATION (NEW) --- */
+  .click-mouse {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #FF4136; /* Bright Red for visibility */
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    z-index: 1000;
+    pointer-events: none; /* Ignore mouse events */
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .slot.clicking .click-mouse {
+    opacity: 1;
+  }
+  @keyframes click-animation {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
   }
   /* ---------------------------------- */
   
@@ -140,7 +163,7 @@
         <div class="repeat-control" style="margin-top: 10px; background: #fffbe6; border-color: #fceb9c;">
             <input type="checkbox" id="autoClickMode" />
             <label for="autoClickMode" style="font-weight: 700; color: #a16207;">
-                💰 Enable **Smart Clicker Mode** (Server-Side Click Simulation)
+                💰 Enable **Smart Clicker Mode** (Client-Side Mouse/Click Simulation)
             </label>
         </div>
         </div>
@@ -149,10 +172,10 @@
         <strong>Tool Status: Node.js Backend Activated</strong>
         <ul>
             <li>
-                **NEW Backend Endpoint:** Traffic session is being routed through your Render URL: <strong>https://pooreyoutuber-github-io-blmp.onrender.com/</strong>
+                **NEW Client-Side Clicker:** Clicker ab **browser** mein **mouse simulation** ke roop mein chalega (Aapko chhota mouse cursor dikhega).
             </li>
             <li>
-                **Smart Clicker:** Check this box. The Node.js server will simulate a click on an internal page after **10 to 25 seconds** during the session.
+                **Backend Endpoint:** Traffic session is being routed through your Render URL: <strong>https://pooreyoutuber-github-io-blmp.onrender.com/</strong>
             </li>
             <li>
                 **CRITICAL:** You must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
@@ -177,6 +200,7 @@ const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
 function generateUniqueId() {
+    // Generates a 10-digit GA Client ID segment
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -216,7 +240,7 @@ const DUMMY_PROXIES = [
 
 const MAX_SLOTS = 20; 
 // 🔴 CRITICAL CHANGE: Node.js server ka Render URL
-const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/'; 
+const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request'; // Endpoint ko jod diya gaya hai
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -244,6 +268,7 @@ let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 let selectedReferrer = null; 
+let slotTimeouts = []; // Timeout IDs for individual slot cycles
 
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
@@ -266,12 +291,17 @@ function getRandomDelay() {
 function stopAllAutomation() {
     repeatIntervals.forEach(intervalId => clearInterval(intervalId));
     repeatIntervals = [];
+    slotTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    slotTimeouts = [];
+
     globalGoBtn.style.display = 'block';
     globalStopBtn.style.display = 'none';
     
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); 
+        s.element.classList.remove('scrolling', 'clicking'); 
+        clearTimeout(s.clickTimeoutId); // Stop any pending clicks
+        s.clickTimeoutId = null;
     });
     
     repeatModeCheckbox.checked = false;
@@ -312,26 +342,63 @@ function getProxiedUrl(originalUrl, proxy, referrerUrl = '', autoClickEnabled = 
         `ip=${proxy.ip}&port=${proxy.port}&` +
         `auth=${proxy.auth}&` + 
         `uid=${proxy.uniqueId}&` + 
-        `sessionDuration=${sessionDuration}`; 
+        `sessionDuration=${sessionDuration}`; // 💰 Session duration parameter added
 
+    // Custom Referrer URL
     if (referrerUrl) {
         url += `&referrer=${encodeURIComponent(referrerUrl)}`;
     }
     
-    // 💰 Clicker parameters added for Node.js to handle
+    // Clicker logic is now VISUAL on the client, but we still send the flag
+    // to the backend for GA4 internal page view tracking.
     if (autoClickEnabled) {
-        // Random time for the clicker to activate within the session (10s to 25s)
+        // Random time for the GA4 internal page view to activate (10s to 25s)
         const clickDelay = Math.floor(Math.random() * (25 - 10 + 1) + 10); 
-        // 70% probability of click (30% will only view)
-        const clickProbability = Math.random() < 0.7; 
-        
-        if (clickProbability) {
-             url += `&clicker=1&clickDelay=${clickDelay}`;
-        }
+        // We still send the clicker flag even if client-side mouse fails, the GA4 hit will still occur
+        url += `&clicker=1&clickDelay=${clickDelay}`;
+    } else {
+         url += `&clicker=0`;
     }
 
     return url; 
 }
+
+// Function to simulate mouse movement and click
+function simulateClientClick(el, clickTimeSeconds) {
+    const iframeWrap = el.querySelector('.iframe-wrap');
+    if (!iframeWrap) return;
+
+    // Remove any previous mouse elements
+    iframeWrap.querySelectorAll('.click-mouse').forEach(m => m.remove());
+
+    const mouse = document.createElement('div');
+    mouse.className = 'click-mouse';
+    iframeWrap.appendChild(mouse);
+
+    // Click coordinates (random point on the right half of the scaled iframe content)
+    const xCoord = Math.random() * (iframeWrap.offsetWidth * 0.4) + (iframeWrap.offsetWidth * 0.6); // 60% to 100% of iframe width
+    const yCoord = Math.random() * (iframeWrap.offsetHeight * 0.8) + (iframeWrap.offsetHeight * 0.1); // 10% to 90% of iframe height
+
+    // Move mouse visually
+    mouse.style.left = `${xCoord}px`;
+    mouse.style.top = `${yCoord}px`;
+
+    // Wait for the calculated click time
+    const clickTimeoutId = setTimeout(() => {
+        el.classList.add('clicking');
+        mouse.style.animation = 'click-animation 0.3s forwards';
+        
+        // Remove mouse after animation
+        setTimeout(() => {
+            el.classList.remove('clicking');
+            mouse.remove();
+        }, 500); 
+
+    }, clickTimeSeconds * 1000);
+    
+    return clickTimeoutId;
+}
+
 
 // Function to create a single slot element
 function createSlot(index, proxy){
@@ -366,10 +433,13 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
+  // Set initial scroll animation stagger
   const scrollDuration = 3.5; 
   const randomScrollDelay = Math.random() * scrollDuration; 
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
+  // Store click timeout ID on the slot object
+  let clickTimeoutId = null; 
 
   function setStatus(text, isActive = false){
     statusSpan.innerHTML = text; 
@@ -380,6 +450,11 @@ function createSlot(index, proxy){
   async function runAutomation(originalUrl, referrerUrl = '', autoClickEnabled = false){ 
     if(!originalUrl) return;
     
+    // Clear any previous click timeout
+    clearTimeout(clickTimeoutId); 
+    el.classList.remove('clicking');
+    clickTimeoutId = null;
+
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
@@ -392,12 +467,19 @@ function createSlot(index, proxy){
     const proxiedUrl = getProxiedUrl(originalUrl, proxy, referrerUrl, autoClickEnabled); 
     const nextDelaySeconds = (getRandomDelay() / 1000).toFixed(1);
     
-    // Status message for display
+    let clickTime = 0;
     let statusMessage = `Sending Proxy View (BG Session Active | Next in ${nextDelaySeconds}s)...`;
-    if (proxiedUrl.includes('clicker=1')) {
+
+    // 💰 Smart Clicker Logic (Client-side Mouse & Backend GA4)
+    if (autoClickEnabled) {
          const clickTimeMatch = proxiedUrl.match(/clickDelay=(\d+)/);
-         const clickTime = clickTimeMatch ? clickTimeMatch[1] : '?';
-         statusMessage = `**Click Mode ON** (Click in ${clickTime}s) | Next in ${nextDelaySeconds}s...`;
+         clickTime = clickTimeMatch ? parseInt(clickTimeMatch[1]) : 15;
+         
+         statusMessage = `**Click Mode ON** (Mouse Click in ${clickTime}s) | Next in ${nextDelaySeconds}s...`;
+         
+         // Start the client-side mouse simulation
+         // Note: The click is purely visual and sends an *internal page view* GA4 hit via the backend at this time.
+         clickTimeoutId = simulateClientClick(el, clickTime); 
     }
 
     // 1. EXECUTE VIEW SESSION (PROXY REQUEST)
@@ -405,15 +487,14 @@ function createSlot(index, proxy){
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Send request to Node.js server
-        await fetch(proxiedUrl, { mode: 'no-cors' });
+        // Send request to Node.js server (It immediately returns, but the script runs for 30-50s)
+        const response = await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        // Status update after the request is sent (Node.js is running in background)
+        // Handle the response if possible (though no-cors limits info)
         setStatus(statusMessage.replace('Sending', 'View Sent'), true);
 
     } catch (e) {
-        // Since we are using 'no-cors' for background fetch, errors are common but don't mean the server failed.
-        // We assume the server received the request, but we report a generic 'Sent' status.
+         // Even on failure (e.g., CORS error due to no-cors), we assume the request reached the backend.
          setStatus(statusMessage.replace('Sending', 'View Sent'), true);
     }
     
@@ -441,7 +522,8 @@ function createSlot(index, proxy){
   return { 
       runAutomation, 
       setStatus,
-      element: el 
+      element: el,
+      clickTimeoutId: clickTimeoutId 
   }; 
 }
 
@@ -485,15 +567,13 @@ globalGoBtn.addEventListener('click', ()=>{
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
-      
-    currentSlots.forEach((s) => {
-        // Get the initial delay
-        const initialDelay = getRandomDelay(); 
-        const delayInSeconds = (initialDelay / 1000).toFixed(1);
+    
+    // Clear previous timeouts
+    slotTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    slotTimeouts = [];
 
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+    currentSlots.forEach((s) => {
         
-        // Use a recursive setTimeout instead of setInterval for dynamic delays
         function scheduleNextRun() {
             // New random delay for the next cycle
             const nextDelay = getRandomDelay(); 
@@ -508,15 +588,18 @@ globalGoBtn.addEventListener('click', ()=>{
             
             // Schedule the next run
             const timeoutId = setTimeout(scheduleNextRun, nextDelay);
-            repeatIntervals.push(timeoutId); // Keep track of all timeouts
+            slotTimeouts.push(timeoutId); // Keep track of all timeouts
             
-            // Clean up old interval/timeout IDs to prevent memory leak
-            repeatIntervals = repeatIntervals.filter(id => id !== timeoutId);
+            s.setStatus(`Repeat Running. Next in ${nextDelayInSeconds}s...`, true);
         }
         
-        // Start the first scheduled run after the initial delay
+        // Start the first scheduled run after the initial random delay
+        const initialDelay = getRandomDelay();
         const initialTimeoutId = setTimeout(scheduleNextRun, initialDelay);
-        repeatIntervals.push(initialTimeoutId);
+        slotTimeouts.push(initialTimeoutId);
+        
+        const initialDelayInSeconds = (initialDelay / 1000).toFixed(1);
+        s.setStatus(`Starting Repeat Mode (First cycle in ${initialDelayInSeconds}s)...`, true);
     });
   }
 });
