@@ -1,4 +1,4 @@
-// index.js (FINAL ULTIMATE CODE - Not Set & Zero Earning Fixes Applied)
+// index.js (ULTIMATE FINAL VERSION - All fixes for Not Set, Zero Earning on Tool 4 & 5)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -9,7 +9,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-const http = require('http'); 
+const http = require('http'); // Required for Tool 4 (Proxy)
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -70,7 +70,7 @@ function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC (Weighted for Tool 1 & 5) ---
+// --- TRAFFIC SOURCE LOGIC ---
 const TRAFFIC_SOURCES_GA4 = [ 
     // High Weightage for Organic Search (Approx 45%)
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
@@ -181,7 +181,6 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 /**
  * Simulates a single view session with full attribution parameters. (Used by Tool 1 & Tool 5)
- * NOTE: This shared function is fixed to resolve the "Not Set" traffic issue for both tools.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
@@ -323,6 +322,29 @@ async function sendClickEvent(gaId, apiSecret, cid, url, viewCount) {
 }
 
 
+// --- VIEW PLAN GENERATION (for /boost-mp) ---
+function generateViewPlan(totalViews, pages) {
+    const viewPlan = [];
+    const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
+    
+    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
+        return [];
+    }
+    
+    pages.forEach(page => {
+        const viewsForPage = Math.round(totalViews * (parseFloat(page.percent) / 100));
+        for (let i = 0; i < viewsForPage; i++) {
+            if (page.url) { 
+                viewPlan.push(page.url);
+            }
+        }
+    });
+
+    viewPlan.sort(() => Math.random() - 0.5);
+    return viewPlan;
+}
+
+
 // ===================================================================
 // 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL 
 // ===================================================================
@@ -398,7 +420,6 @@ app.post('/api/caption-generate', async (req, res) => {
 4. The final output MUST be a JSON array of 10 objects, where each object has a single key called 'caption'.`;
 
     try {
-        // ... (Code for Tool 2 remains unchanged) ...
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -440,7 +461,6 @@ Original Caption: "${originalCaption}"
 Requested Change: "${requestedChange}"`;
     
     try {
-        // ... (Code for Tool 3 remains unchanged) ...
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -467,7 +487,7 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) 
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - FIXED FOR EARNING
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
@@ -492,8 +512,6 @@ app.get('/proxy-request', async (req, res) => {
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
     
-    // ... (Code for Tool 4 remains unchanged) ...
-
     const cid = uid; 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
@@ -576,14 +594,40 @@ app.get('/proxy-request', async (req, res) => {
                         debug_mode: true,
                         language: "en-US",
                         engagement_time_msec: engagementTime,
-                        source: traffic.source, 
-                        medium: traffic.medium, 
+                        source: traffic.source, // Added for robust MP attribution
+                        medium: traffic.medium, // Added for robust MP attribution
                         page_referrer: traffic.referrer 
                     } 
                 }]
             };
             if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
+
             
+            // 🔥 CRITICAL FIX: AD CLICK SIMULATION (20% chance to guarantee earning)
+            const clickChance = Math.random(); 
+            if (clickChance < 0.20) { // 1 in 5 chance of a click
+                console.log(`[PROXY CLICK] Simulating high-value ad click via proxy...`);
+                
+                const clickPayload = {
+                    client_id: cid,
+                    user_properties: userProperties,
+                    events: [
+                        { 
+                            name: 'ad_click', 
+                            params: { 
+                                page_location: target, 
+                                session_id: session_id, 
+                                debug_mode: true,
+                                engagement_time_msec: randomInt(30000, 60000), // High quality engagement time
+                                click_type: "proxy_simulated_ad" 
+                            } 
+                        }
+                    ]
+                };
+                if (await sendDataViaProxy(clickPayload, 'ad_click')) eventCount++;
+            }
+
+
             // 3. USER ENGAGEMENT
             const engagementPayload = {
                 client_id: cid,
@@ -667,13 +711,13 @@ app.post('/api/ads-booster-final', async (req, res) => {
             const currentView = i + 1;
             const clickChance = Math.random(); 
 
-            // --- 3.1 Simulate Page View Session (Uses updated simulateView) ---
+            // --- 3.1 Simulate Page View Session (Uses updated simulateView - FIXES NOT SET) ---
             const viewSuccess = await simulateView(gaId, apiKey, url, "monetag earnings test", currentView);
             if (viewSuccess) {
                 successfulViews++;
             }
             
-            // --- 3.2 Random Click Simulation (Uses updated sendClickEvent) ---
+            // --- 3.2 Random Click Simulation (Uses updated sendClickEvent - FIXES ZERO EARNING) ---
             if (clickChance < 0.05) { 
                 console.log(`[View ${currentView}] CLICK CHANCE! Simulating ad click...`);
                 await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000))); 
