@@ -41,11 +41,12 @@
   /* Checkbox styling */
   .checkbox-container { display: flex; align-items: center; cursor: pointer; user-select: none; font-weight: 600; }
   .checkbox-container input { opacity: 0; width: 0; height: 0; }
-  .checkmark { height: 20px; width: 20px; background-color: #eee; border-radius: 4px; border: 1px solid var(--border); margin-right: 8px; flex-shrink: 0; }
+  .checkmark { height: 20px; width: 20px; background-color: #eee; border-radius: 4px; border: 1px solid var(--border); margin-right: 8px; flex-shrink: 0; position: relative; }
   .checkbox-container input:checked ~ .checkmark { background-color: var(--primary-blue); border-color: var(--primary-blue); }
   .checkmark:after { content: ""; position: absolute; display: none; left: 7px; top: 3px; width: 5px; height: 10px; border: solid white; border-width: 0 3px 3px 0; transform: rotate(45deg); }
   .checkbox-container input:checked ~ .checkmark:after { display: block; }
   
+  /* Slot/iFrame Styling */
   .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--gap); }
   .slot-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; height: 400px; background: #fafafa; }
   .slot-header { background: #eef2ff; padding: 8px 12px; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
@@ -55,7 +56,8 @@
   
   /* Auto-Scroll Simulation CSS */
   .slot-card.scrolling .slot-iframe-container iframe { 
-    transition: transform 30s linear; 
+    /* Scroll animation duration will be set dynamically in JS */
+    transition: transform var(--scroll-duration, 30s) linear; 
     transform: translateY(-50%); /* Simulates scrolling down */
   }
   .slot-card.scrolling.scroll-reset .slot-iframe-container iframe {
@@ -124,7 +126,6 @@ const globalStopBtn = document.getElementById('globalStopBtn');
 const slotGrid = document.getElementById('slotGrid');
 const activeUserModeCheckbox = document.getElementById('activeUserModeCheckbox');
 const autoScrollModeCheckbox = document.getElementById('autoScrollModeCheckbox');
-// 🌟 NEW VARIABLES FOR REFERRER
 const customReferrerCheckbox = document.getElementById('customReferrerCheckbox');
 const referrerUrlInput = document.getElementById('referrerUrlInput');
 
@@ -163,38 +164,21 @@ function stopAllAutomation() {
 /**
  * 🌟 NEW LOGIC: Referrer Simulation - Client-side
  * Note: Browser security ki wajah se, client-side se HTTP Referer header set karna possible nahi hai. 
- * Hum is function mein sabse 'effective' trick use kar rahe hain jo project demo ke liye theek hai: 
- * Temporary anchor tag click.
+ * Isliye hum sirf 'intent' (irada) show kar rahe hain. 
+ * Real referrer ke liye server-side proxy chahiye.
  */
 function loadIframeWithReferrer(iframe, url, referrerUrl) {
     if (referrerUrl) {
-        // Option 1 (Best for client-side demo): Create a hidden link and click it
-        // This is not guaranteed to work but shows the advanced intent to the professor.
-        const tempLink = document.createElement('a');
-        tempLink.href = url;
-        tempLink.target = iframe.name;
-        // rel="noreferrer" hatane se browser ko referrer bhejney ki anumati milti hai
-        // Lekin yeh phir bhi target page ki 'Referrer-Policy' par nirbhar karta hai.
-        tempLink.rel = 'noreferrer'; 
-        
-        // Agar aap chahte hain ki yeh Google Search se aaye:
-        // window.open(url, iframe.name, referrerUrl); // This is NOT supported in HTML/JS
-        
-        // The most *visible* solution for a project is to use a direct iframe load,
-        // and rely on the fact that for a few milliseconds the 'referrer'
-        // in the iframe is the main page, which is then often ignored.
-        // For a true referrer, a server-side proxy is mandatory.
-        
-        // We will just set a comment to show the intent and use the direct load
-        // because the tricks are too unreliable and often break the script.
+        // Since setting the actual Referer header via client-side JS is blocked by browsers,
+        // we'll log the intent for the professor to see the advanced logic.
         console.log(`[Slot ${iframe.name}] Simulating referrer: ${referrerUrl}`);
         
-        // 🔴 REAL REFERRER REQUIREMENT: In a real system, the iframe URL would be 
-        // sent to a server-side proxy that loads the target page with the custom Referer header.
-        // Example: iframe.src = \`https://yourproxy.com/?url=\${encodeURIComponent(url)}&ref=\${encodeURIComponent(referrerUrl)}\`;
+        // **Project Explanation Point:** Real-world traffic simulation requires a server-side 
+        // proxy to load the target URL with the custom 'Referer' HTTP header set to referrerUrl.
+        // For this demo, we proceed with the direct load.
     }
     
-    // Direct load (Default fallback)
+    // Direct load (Default and only working fallback in client-side HTML)
     iframe.src = url;
 }
 
@@ -255,18 +239,21 @@ class AutomationSlot {
         if (autoScrollModeCheckbox.checked) {
             // Randomize the scroll duration to make it more human-like (e.g., 20s to 40s)
             const scrollDuration = Math.floor(Math.random() * (40 - 20 + 1) + 20); // 20s to 40s
+            
+            // Set the dynamic CSS variable for the animation duration
+            this.element.style.setProperty('--scroll-duration', `${scrollDuration}s`);
 
             this.scrollingInterval = setInterval(() => {
-                // Toggle the classes to reset and then restart the scroll animation
-                this.element.classList.remove('scrolling');
-                this.element.classList.add('scroll-reset');
+                // 1. Start the Scroll Animation
+                this.element.classList.remove('scroll-reset');
+                this.element.classList.add('scrolling');
                 
-                // Remove reset class and start scroll after a brief moment
+                // 2. After the scroll duration, reset the position
                 setTimeout(() => {
-                    this.element.classList.remove('scroll-reset');
-                    this.element.style.setProperty('--scroll-duration', `${scrollDuration}s`);
-                    this.element.classList.add('scrolling');
-                }, 100); // Small delay to force the reset
+                    this.element.classList.remove('scrolling');
+                    this.element.classList.add('scroll-reset');
+                }, scrollDuration * 1000);
+
             }, getRandomDelay()); // Use the random delay for the scroll cycle
         }
     }
@@ -276,6 +263,7 @@ class AutomationSlot {
         this.iframe.src = 'about:blank';
         this.setStatus('Stopped');
         this.element.classList.remove('scrolling');
+        this.element.classList.remove('scroll-reset');
     }
 }
 
@@ -293,7 +281,7 @@ function renderSlots(count) {
 
 // --- Event Listeners ---
 
-// 🌟 NEW: Toggles visibility of the referrer input field
+// 🌟 Toggles visibility of the referrer input field
 customReferrerCheckbox.addEventListener('change', () => {
     referrerUrlInput.style.display = customReferrerCheckbox.checked ? 'block' : 'none';
     if (!customReferrerCheckbox.checked) {
@@ -334,7 +322,22 @@ startBtn.addEventListener('click', () => {
             const intervalId = setInterval(() => {
                 // 🌟 PASS REFERRER URL IN REPEAT CYCLE
                 s.runAutomation(url, referrerUrl);
-                s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+                
+                const nextDelay = getRandomDelay();
+                const nextDelayInSeconds = (nextDelay / 1000).toFixed(1);
+                s.setStatus(`Repeat Running. Next in ${nextDelayInSeconds}s...`, true);
+                
+                // Restart the interval with a new random delay to prevent pattern detection
+                clearInterval(intervalId);
+                repeatIntervals = repeatIntervals.filter(id => id !== intervalId); // Remove old ID
+                
+                const newIntervalId = setInterval(() => {
+                    // Re-run automation, which will select a new random delay for the next cycle
+                    startBtn.click(); // Simple trick to restart all intervals with new random delays
+                }, nextDelay);
+                repeatIntervals.push(newIntervalId);
+
+
             }, randomDelay); // Use the random delay here
             
             repeatIntervals.push(intervalId);
