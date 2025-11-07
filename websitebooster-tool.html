@@ -1,634 +1,212 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Node.js Backend)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-<style>
-  /* --- CSS Styles (Enhanced) --- */
-  :root{
-    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
-    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
-    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
-    --primary-blue: #0ea5e9;--danger: #dc2626;
-    --warning: #f59e0b; 
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
-  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
-  header { margin-bottom: 20px; text-align: center; }
-  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
-  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
-  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-  @media (min-width: 600px) { .input-group { flex-direction: row; } }
-  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
-  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
-  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  input[type="url"], input[type="text"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
-  
-  /* Reset the URL input border radius for standalone use */
-  .url-input-wrap input[type="url"] { border-radius: 0 10px 10px 0; border-left: 1px solid var(--border); }
-
-  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
-  .btn:hover:not(:disabled) { background: #0c8cd8; }
-  .btn:disabled { background: #94a3b8; cursor: not-allowed; }
-  .btn.stop { background: var(--danger); }
-  .btn.stop:hover { background: #b91c1c; }
-
-  .repeat-control { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
-  .repeat-control-group { display: flex; align-items: center; gap: 5px; }
-  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
-  .repeat-control label { flex-shrink: 0; }
-  .repeat-control span { color: var(--accent); font-weight: 600; }
-  .repeat-control input[type="number"] { font-size: 14px; text-align: center; width: 50px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); } 
-
-  .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-  .info-box strong { font-weight: 700; color: var(--accent); }
-  .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
-  .info-box ul li { margin-bottom: 6px; }
-  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
-  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
-  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
-  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
-  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
-  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
-  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-  iframe { 
-    width: 100%; height: 100%; border: 0; display: block; background: white; 
-    transform: scale(0.4); 
-    transform-origin: 0 0;
-    width: calc(100% / 0.4);
-    height: calc(100% / 0.4);
-    opacity: 1;
-  }
-  
-  /* --- CSS for Auto-Scrolling --- */
-  @keyframes scroll {
-    0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, -200%) scale(0.4); } 
-    100% { transform: translate(0, 0) scale(0.4); } 
-  }
-
-  .slot.scrolling iframe {
-    transform: translate(0, 0) scale(0.4); 
-    animation: scroll 3s ease-in-out infinite;
-  }
-  
-  .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
-  .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
-  .action-btn.view { background: var(--success); color: white; }
-  .action-btn.view:hover { background: #047857; }
-  .action-btn.new-tab { 
-      background: #f90;
-      color: white; 
-      flex-grow: 1;
-      font-size: 12px;
-      padding: 8px 10px;
-  }
-  .action-btn.new-tab:hover { background: #e80; }
-  .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
-  .status-dot { 
-    display: inline-block; width: 7px; height: 7px; border-radius: 50%; 
-    background: var(--muted); transition: background 0.3s ease; 
-  }
-  .status-dot.active { 
-    background: var(--success); 
-    animation: pulse-ping 1.6s infinite; 
-  }
-  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Booster Prime | Live Earning API Engine</title> 
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Styles (Optimized for Professional Look) --- */
+        :root {
+            --bg: #e9ecef;
+            --card: #ffffff;
+            --accent: #0f4f7f; /* Dark Blue from Prime Tool */
+            --primary-blue: #0ea5e9; /* Light Blue/Cyan from Prime Tool */
+            --danger: #dc3545;
+            --success: #28a745;
+            --warning: #ffc107;
+        }
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .header-section {
+            background-color: var(--accent);
+            color: white;
+            padding: 3rem 0;
+            border-bottom: 8px solid #0a3353;
+        }
+        .header-section h1 {
+            font-weight: 700;
+        }
+        .card-custom {
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .btn-submit {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            font-size: 1.2rem;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-submit:hover {
+            background-color: #0c8cd8;
+            border-color: #0c8cd8;
+            transform: translateY(-2px);
+        }
+        .alert-warning-custom {
+            background-color: #fef3c7; 
+            color: #854d0e;
+            border-left: 6px solid var(--warning);
+            font-weight: 500;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #343a40;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25);
+            border-color: var(--primary-blue);
+        }
+        /* Real-time Earning Status Style */
+        .status-earning {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Website Booster Prime</h1>
-      <div class="tagline">Global Traffic Simulation System.</div>
+
+    <header class="header-section text-center">
+        <div class="container">
+            <h1><i class="bi bi-currency-dollar"></i> Website Booster Prime: Live Earning API Engine</h1>
+            <p class="lead">Uses Direct MP API for 400 High-Value Sessions + Guaranteed 5% Click Rate.</p>
+        </div>
     </header>
 
-    <div class="controls">
-        <div class="input-group">
-            
-            <div class="slot-selector">
-                Slots:
-                <input id="numSlots" type="number" value="10" min="1" max="20" />
-            </div>
+    <main class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-custom p-5">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-5" style="color: var(--accent);"><i class="bi bi-fire"></i> Initiate High-Value Traffic</h2>
+                        
+                        <div class="alert alert-warning-custom p-4 mb-5" role="alert">
+                            <h5 class="alert-heading"><i class="bi bi-shield-fill-exclamation"></i> CRITICAL INSTRUCTION</h5>
+                            <p class="mb-0">This tool uses the most powerful **Adsense/Monetag earning API** (`/api/ads-booster-final`). You **MUST** use an External VPN before clicking START to simulate global traffic.</p>
+                        </div>
 
-            <div class="url-input-wrap">
-                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
-            </div>
-            <button id="globalGo" class="btn">Load & Run All</button>
-        </div>
-        
-        <div id="gaControls" class="repeat-control" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-            <div style="font-weight: 700; color: var(--danger);">
-                <span id="toggleGaInputs" style="cursor:pointer; text-decoration: underline;">
-                    Optional: Enable GA4 Measurement Protocol Boost
-                </span>
-            </div>
-            <div id="gaInputFields" style="display: none; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                 <label for="gaIdInput" style="color:var(--accent); font-weight:600; flex-shrink: 0;">GA ID (G-XXXX):</label>
-                 <input id="gaIdInput" type="text" placeholder="G-XXXXXXXXXX" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);" />
-                 <label for="apiSecretInput" style="color:var(--accent); font-weight:600; flex-shrink: 0;">API Secret:</label>
-                 <input id="apiSecretInput" type="text" placeholder="Your_API_Secret" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);" />
-            </div>
-            <div style="font-size: 11px; color: var(--muted); margin-top: -5px;">
-                *Required only if you want to see **Active Users** in Google Analytics Realtime report.
-            </div>
-        </div>
-        
-        <div class="repeat-control">
-            <div class="repeat-control-group">
-                <input type="checkbox" id="repeatMode" />
-                <label for="repeatMode">
-                    Enable **Active User** Mode: Repeat cycle 
-                </label>
-            </div>
-            
-            <div class="repeat-control-group">
-                <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="30" min="10" max="120" />
-                <label for="maxTime">Max:</label>
-                <input id="maxTime" type="number" value="60" min="10" max="120" />
-                <span>seconds cycle</span>
-            </div>
-            
-            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div class="repeat-control-group">
-                    <input type="checkbox" id="autoScrollMode" />
-                    <label for="autoScrollMode">
-                        Enable **Auto Scroll** (Simulated)
-                    </label>
+                        <form id="adsBoosterForm">
+                            
+                            <div class="mb-4">
+                                <label for="targetUrl" class="form-label">1. Target Website URL (The Page with Ads)</label>
+                                <input type="url" class="form-control" id="targetUrl" placeholder="e.g., https://www.yourwebsitedomain.com/page-with-ads" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="gaId" class="form-label">2. GA4 Measurement ID (G-ID)</label>
+                                <input type="text" class="form-control" id="gaId" placeholder="e.g., G-XXXXXXXXXX" required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="apiKey" class="form-label">3. API Secret (GA4 Measurement Protocol)</label>
+                                <input type="text" class="form-control" id="apiKey" placeholder="Your GA4 API Secret Key" required>
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="viewCount" class="form-label">4. Total Sessions</label>
+                                <input type="number" class="form-control bg-light" id="viewCount" value="400" min="400" max="400" required readonly>
+                                <div class="form-text text-danger fw-bold">Fixed at 400 views to guarantee high earning potential (20 clicks).</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-submit" id="submitBtn"><i class="bi bi-lightning-charge-fill"></i> START LIVE EARNING SESSION</button>
+                            </div>
+                            
+                            <div id="statusMessage" class="mt-4 p-3 rounded text-center" style="display:none; border: 1px solid #ced4da;">
+                            </div>
+                            
+                        </form>
+                    </div>
                 </div>
-
-                <div class="repeat-control-group">
-                    <input type="checkbox" id="activeClickMode" />
-                    <label for="activeClickMode">
-                        Enable **Active Click** (Mouse Simulation)
-                    </label>
-                </div>
-                </div>
-            
-            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
+            </div>
         </div>
-    </div>
-    
-    <div class="info-box">
-        <strong>Tool Usage Instructions:</strong>
-        <ul>
-            <li>
-                **Architecture:** This tool uses a **Node.js/Express Backend** (hosted on Render) for stable proxy handling and session simulation.
-            </li>
-            <li>
-                **Proxy Fix:** This version is configured to handle **Non-Authenticated Proxies** (without username/password).
-            </li>
-            <li>
-                **Proxy Rotation:** The tool now **randomly selects a new proxy** from the pool for every request, improving success rate and avoiding the 402 error.
-            </li>
-            <li>
-                **Client-Side Fix (NEW):** If you enable **Active Click**, the browser simulates mouse movements and a click before calling the proxy, making the traffic appear **100% human** to Ad-Networks.
-            </li>
-        </ul>
-    </div>
+    </main>
 
-    <div class="grid-container" id="gridContainer">
-        </div>
-    
-  </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-/* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION
-   ---------------------------------------------------------------------- */
+    <script>
+        // 🚨 YOUR RENDER BACKEND URL 🚨
+        const RENDER_BACKEND_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com'; 
+        // 🚨 UNIFIED API ENDPOINT (The highest earning one) 🚨
+        const API_ENDPOINT = '/api/ads-booster-final'; 
 
-// *** CRITICAL FIX: Set COMMON_AUTH to empty string for Non-Authenticated Proxies ***
-const COMMON_USER = ""; 
-const COMMON_PASS = ""; 
-const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`; 
-
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
-
-function generateUniqueId() {
-    return Math.floor(Math.random() * 9000000000) + 1000000000;
-}
-
-// *** HELPER FUNCTION FOR ROTATION ***
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function getRandomNames(count) {
-    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-}
-
-// =========================================================================
-// !!! PROXIES FROM proxies.txt (38 Proxies) !!!
-// =========================================================================
-const DUMMY_PROXIES = [
-  { ip: "45.67.215.64", port: "80", country: "Dynamic" },
-  { ip: "216.205.52.229", port: "80", country: "Dynamic" },
-  { ip: "69.84.182.136", port: "80", country: "Dynamic" },
-  { ip: "45.8.211.144", port: "80", country: "Dynamic" },
-  { ip: "45.67.215.29", port: "80", country: "Dynamic" },
-  { ip: "185.221.160.223", port: "80", country: "Dynamic" },
-  { ip: "69.84.182.202", port: "80", country: "Dynamic" },
-  { ip: "108.162.193.80", port: "80", country: "Dynamic" },
-  { ip: "170.114.45.176", port: "80", country: "Dynamic" },
-  { ip: "170.114.45.153", port: "80", country: "Dynamic" },
-  { ip: "108.162.195.212", port: "80", country: "Dynamic" },
-  { ip: "69.84.182.21", port: "80", country: "Dynamic" },
-  { ip: "141.101.114.164", port: "80", country: "Dynamic" },
-  { ip: "216.205.52.140", port: "80", country: "Dynamic" },
-  { ip: "141.101.114.245", port: "80", country: "Dynamic" },
-  { ip: "45.8.211.170", port: "80", country: "Dynamic" },
-  { ip: "216.205.52.78", port: "80", country: "Dynamic" },
-  { ip: "216.205.52.131", port: "80", country: "Dynamic" },
-  { ip: "185.221.160.221", port: "80", country: "Dynamic" },
-  { ip: "45.8.211.182", port: "80", country: "Dynamic" },
-  { ip: "102.177.176.216", port: "80", country: "Dynamic" },
-  { ip: "8.212.168.170", port: "3389", country: "Dynamic" },
-  { ip: "170.114.45.234", port: "80", country: "Dynamic" },
-  { ip: "185.221.160.140", port: "80", country: "Dynamic" },
-  { ip: "69.84.182.123", port: "80", country: "Dynamic" },
-  { ip: "216.205.52.130", port: "80", country: "Dynamic" },
-  { ip: "170.114.45.154", port: "80", country: "Dynamic" },
-  { ip: "170.114.45.12", port: "80", country: "Dynamic" },
-  { ip: "74.80.226.154", port: "80", country: "Dynamic" },
-  { ip: "103.116.7.58", port: "80", country: "Dynamic" },
-  { ip: "141.101.114.192", port: "80", country: "Dynamic" },
-  { ip: "185.221.160.46", port: "80", country: "Dynamic" },
-  { ip: "8.35.211.139", port: "80", country: "Dynamic" },
-  { ip: "108.162.193.9", port: "80", country: "Dynamic" },
-  { ip: "170.114.45.140", port: "80", country: "Dynamic" },
-  { ip: "185.221.160.200", port: "80", country: "Dynamic" },
-  { ip: "185.221.160.231", port: "80", country: "Dynamic" },
-  { ip: "108.162.196.222", port: "80", country: "Dynamic" }
-];
-// =========================================================================
-
-const MAX_SLOTS = 20; 
-// !!! IMPORTANT: Replace with YOUR Render service URL if this is not correct !!!
-const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request'; 
-
-const gridContainer = document.getElementById('gridContainer');
-const globalUrlInput = document.getElementById('globalUrl');
-const numSlotsInput = document.getElementById('numSlots');
-const globalGoBtn = document.getElementById('globalGo');
-const repeatModeCheckbox = document.getElementById('repeatMode');
-const minTimeInput = document.getElementById('minTime'); 
-const maxTimeInput = document.getElementById('maxTime'); 
-const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
-const activeClickModeCheckbox = document.getElementById('activeClickMode'); // 🔥 NEW CHECKBOX VARIABLE
-const globalStopBtn = document.getElementById('globalStop');
-
-const toggleGaInputs = document.getElementById('toggleGaInputs');
-const gaInputFields = document.getElementById('gaInputFields');
-const gaIdInput = document.getElementById('gaIdInput');
-const apiSecretInput = document.getElementById('apiSecretInput');
-
-let currentSlots = [];
-let repeatIntervals = []; 
-let randomNamesList = getRandomNames(MAX_SLOTS); 
-
-const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
-    ...p,
-    auth: COMMON_AUTH, // This will be empty now
-    name: randomNamesList[index % randomNamesList.length], 
-    uniqueId: generateUniqueId() 
-}));
-
-function getRandomDelay() {
-    const minSec = parseInt(minTimeInput.value) || 30;
-    const maxSec = parseInt(maxTimeInput.value) || 60;
-    
-    const finalMinSec = Math.max(10, Math.min(minSec, maxSec));
-    const finalMaxSec = Math.max(finalMinSec, maxSec); 
-    
-    minTimeInput.value = finalMinSec;
-    maxTimeInput.value = finalMaxSec;
-
-    const minMs = finalMinSec * 1000;
-    const maxMs = finalMaxSec * 1000;
-    
-    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
-}
-
-// 🔥 NEW FUNCTION: Mouse Movement and Click Simulation
-async function simulateMouseActivityAndClick() {
-    const body = document.body;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const movements = 5;
-    const durationMs = 3000; // Total duration of simulation
-
-    // Step 1: 5 Random Mouse Movements over 3 seconds
-    for (let i = 0; i < movements; i++) {
-        setTimeout(() => {
-            const x = randomInt(width * 0.1, width * 0.9);
-            const y = randomInt(height * 0.1, height * 0.9);
+        document.getElementById('adsBoosterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            // Dispatch a mousemove event on the window to prove client-side activity
-            body.dispatchEvent(new MouseEvent('mousemove', {
-                clientX: x,
-                clientY: y,
-                bubbles: true
-            }));
-        }, i * (durationMs / movements)); 
-    }
-    
-    // Wait for movements to finish
-    await new Promise(resolve => setTimeout(resolve, durationMs + 500));
-    
-    // Step 2: Simulate a single click at a random location
-    const clickX = randomInt(width * 0.3, width * 0.7);
-    const clickY = randomInt(height * 0.3, height * 0.7);
-    
-    body.dispatchEvent(new MouseEvent('click', {
-        clientX: clickX,
-        clientY: clickY,
-        bubbles: true,
-        button: 0 // Left click
-    }));
-    
-    console.log("Mouse Click Simulated.");
-}
-
-
-function createSlot(index){
-  const el = document.createElement('div');
-  el.className = 'slot';
-  
-  el.innerHTML = `
-    <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}: Ready</div>
-      <div class="slot-ip-display" id="ip-display-${index}">Proxy IP: Ready</div>
-    </div>
-    
-    <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-    </div>
-    
-    <div class="slot-footer">
-      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
-      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
-      <div class="status" id="status-wrap-${index}">
-        <span class="status-dot" id="dot-${index}"></span>
-        <span id="status-${index}">Ready</span>
-      </div>
-    </div>
-  `;
-  
-  gridContainer.appendChild(el);
-
-  const iframe = el.querySelector(`#iframe-${index}`);
-  const openBtn = el.querySelector(`#open-${index}`);
-  const runBtn = el.querySelector(`#run-${index}`);
-  const statusSpan = el.querySelector(`#status-${index}`);
-  const statusDot = el.querySelector(`#dot-${index}`);
-  
-  const ipDisplay = el.querySelector(`#ip-display-${index}`);
-  const titleDisplay = el.querySelector('.slot-title');
-
-  function updateStatus(text, state = 'ready'){
-    statusSpan.textContent = text;
-    statusDot.classList.remove('active');
-    statusDot.style.animation = 'none';
-    statusDot.style.backgroundColor = 'var(--muted)';
-
-    switch(state) {
-        case 'active':
-            statusDot.classList.add('active');
-            statusDot.style.backgroundColor = 'var(--success)';
-            break;
-        case 'loading':
-            statusDot.style.backgroundColor = 'var(--warning)'; 
-            statusDot.style.animation = 'pulse-ping 0.8s infinite';
-            break;
-        case 'failed':
-            statusDot.style.backgroundColor = 'var(--danger)';
-            break;
-        case 'ready':
-        default:
-            statusDot.style.backgroundColor = 'var(--muted)'; 
-            break;
-    }
-  }
-  function getProxiedUrl(originalUrl, proxy){
-      const gaId = gaIdInput.value.trim();
-      const apiSecret = apiSecretInput.value.trim();
-      
-      let params = `target=${encodeURIComponent(originalUrl)}&` +
-          `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}&` + // This will be empty: ":"
-          `uid=${proxy.uniqueId}`;
-      
-      if(gaId && apiSecret) {
-          params += `&ga_id=${gaId}&api_secret=${apiSecret}`;
-      }
-
-      return `${PROXY_ENDPOINT}?${params}`; 
-  }
-
-  async function runAutomation(originalUrl){
-    if(!originalUrl) return;
-    
-    // 🔥 STEP 0: Run Client-Side Simulation if enabled
-    if (activeClickModeCheckbox.checked) {
-        updateStatus('Simulating Mouse Activity & Click...', 'loading');
-        await simulateMouseActivityAndClick();
-    }
-    
-    // Step 1: CHOOSE A RANDOM PROXY from the global pool
-    const randomIndex = randomInt(0, premiumProxies.length - 1);
-    const proxy = premiumProxies[randomIndex]; 
-    
-    // Update the Slot Display with the rotating proxy info
-    ipDisplay.textContent = `Proxy IP: ${proxy.ip}:${proxy.port} (${proxy.country})`;
-    titleDisplay.textContent = `SLOT ${index+1}: ${proxy.name} (${proxy.country})`;
-    
-    // Check if GA keys are provided
-    const isGaMpEnabled = gaIdInput.value.trim() && apiSecretInput.value.trim();
-    const gaStatus = isGaMpEnabled ? ' (GA MP Active)' : '';
-
-    // Step 2: Set up the iframe
-    iframe.src = originalUrl;
-    updateStatus(`Loading Content${gaStatus}...`, 'loading');
-    
-    el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
-    
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy); 
-
-    updateStatus(`Sending Proxy Request to Node.js${gaStatus}...`, 'loading');
-
-    try {
-        // Step 3: Fetch to the Node.js backend (This is where the AD_CLICK event is sent)
-        const response = await fetch(proxiedUrl);
-        const data = await response.json(); 
-        
-        if (response.ok && data.status === 'OK') {
+            const submitBtn = document.getElementById('submitBtn');
+            const statusDiv = document.getElementById('statusMessage');
             
-            let message = data.message;
-            let finalState = 'active';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Validating Keys...';
+
+            const formData = {
+                url: document.getElementById('targetUrl').value,
+                gaId: document.getElementById('gaId').value,
+                apiKey: document.getElementById('apiKey').value,
+                count: document.getElementById('viewCount').value
+            };
             
-            if (isGaMpEnabled && data.eventsSent === 0) {
-                 message = `GA4 Failed: Check Keys or Proxy IP.`;
-                 finalState = 'failed';
-                 console.error(`Slot ${index+1} GA4 Failure:`, message);
-            }
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'mt-4 p-3 rounded text-center status-earning bg-info text-white';
+            statusDiv.innerHTML = '<i class="bi bi-key-fill"></i> Validating Keys with Google...';
+
+            // Connect to Render Backend
+            fetch(`${RENDER_BACKEND_URL}${API_ENDPOINT}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || `HTTP Error Status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data.status === 'accepted') {
+                    statusDiv.className = 'mt-4 p-3 rounded text-center status-earning bg-success text-white';
+                    
+                    // Live Earning Status Message
+                    statusDiv.innerHTML = `<i class="bi bi-check-circle-fill"></i> **SUCCESS!** Live Earning Process Started.<br>
+                        Sending **400 High-Value Views** and **${data.clicksEstimated} Clicks!**<br>
+                        Check GA4 DebugView immediately.`;
+
+                    // Keep button disabled after successful start (as it runs in background)
+                    submitBtn.innerHTML = '<i class="bi bi-clock-history"></i> Process Running...';
+                } else {
+                    // Handle server-side validation errors
+                    statusDiv.className = 'mt-4 p-3 rounded text-center status-earning bg-danger text-white';
+                    statusDiv.innerHTML = `<i class="bi bi-x-octagon-fill"></i> **API ERROR:** ${data.message || 'Validation failed on the server.'}`;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> START LIVE EARNING SESSION';
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error.message);
+                statusDiv.className = 'mt-4 p-3 rounded text-center status-earning bg-danger text-white';
+                
+                const displayMessage = error.message.includes("Failed to fetch") || error.message.includes("HTTP Error Status")
+                    ? `Could not connect to the Render server. **Did you use a VPN?**`
+                    : error.message;
+
+                statusDiv.innerHTML = `<i class="bi bi-wifi-off"></i> **NETWORK/API ERROR:** ${displayMessage}`;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> START LIVE EARNING SESSION';
+            });
             
-            updateStatus(message, finalState);
-            
-        } else {
-            // General Backend/Network failure
-            updateStatus(`Failed: ${data.details || data.error || 'Unknown Error'}`, 'failed');
-            console.error(`Slot ${index+1} Backend Error:`, data);
-        }
-        
-    } catch (e) {
-        updateStatus('Failed (Network/CORS Error - Server unreachable?)', 'failed');
-        console.error(`Slot ${index+1} Frontend Fetch Error:`, e);
-    }
-  }
-  
-  openBtn.addEventListener('click', ()=> {
-    const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    window.open(url, '_blank'); 
-  });
-
-  runBtn.addEventListener('click', ()=> {
-    const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    runAutomation(url); 
-  });
-  
-  updateStatus('Ready', 'ready');
-
-  return { 
-      runAutomation, 
-      setStatus: updateStatus, 
-      element: el 
-  }; 
-}
-
-function renderSlots(count) {
-    stopAllAutomation();
-    gridContainer.innerHTML = ''; 
-    currentSlots = [];
-
-    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
-    let finalCount = parseInt(count) || 1;
-    finalCount = Math.min(Math.max(finalCount, 1), maxCount);
-    numSlotsInput.value = finalCount;
-    
-    globalGoBtn.textContent = `Load & Run All (${finalCount} Slots)`;
-
-    for(let i=0; i < finalCount; i++){
-      const slot = createSlot(i); 
-      currentSlots.push(slot);
-    }
-}
-
-function stopAllAutomation() {
-    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
-    repeatIntervals = [];
-    globalGoBtn.style.display = 'block';
-    globalGoBtn.disabled = false; 
-    globalStopBtn.style.display = 'none';
-    
-    currentSlots.forEach(s => {
-        s.setStatus('Ready (Stopped)', 'ready');
-        s.element.classList.remove('scrolling'); 
-    });
-}
-
-globalGoBtn.addEventListener('click', ()=>{
-  const url = globalUrlInput.value.trim();
-  if(!url){ 
-      alert('Please paste a valid URL into the global input field.'); 
-      return; 
-  }
-  
-  globalGoBtn.disabled = true; 
-  
-  currentSlots.forEach(s => s.runAutomation(url));
-  
-  if (repeatModeCheckbox.checked) {
-    globalGoBtn.style.display = 'none';
-    globalStopBtn.style.display = 'block';
-    
-    stopAllAutomation();
-      
-    currentSlots.forEach((s) => {
-        const randomDelay = getRandomDelay(); 
-        const delayInSeconds = (randomDelay / 1000).toFixed(1);
-
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, 'active');
-        
-        // Run immediately, then set interval
-        s.runAutomation(url); 
-
-        const intervalId = setInterval(() => {
-            s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, 'active'); 
-        }, randomDelay); 
-        
-        repeatIntervals.push(intervalId);
-    });
-  } else {
-    setTimeout(() => {
-        globalGoBtn.disabled = false;
-    }, 500); 
-  }
-});
-
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
-    renderSlots(count);
-});
-
-autoScrollModeCheckbox.addEventListener('change', (e) => {
-    const isScrolling = e.target.checked;
-    currentSlots.forEach(s => {
-        s.element.classList.toggle('scrolling', isScrolling);
-    });
-});
-
-minTimeInput.addEventListener('change', () => {
-    let min = parseInt(minTimeInput.value) || 10;
-    minTimeInput.value = Math.max(10, Math.min(min, 120));
-});
-
-maxTimeInput.addEventListener('change', () => {
-    let max = parseInt(maxTimeInput.value) || 60;
-    maxTimeInput.value = Math.max(10, Math.min(max, 120));
-});
-
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
-
-repeatModeCheckbox.addEventListener('change', () => {
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
-toggleGaInputs.addEventListener('click', () => {
-    const isVisible = gaInputFields.style.display !== 'none' && gaInputFields.style.display !== '';
-    gaInputFields.style.display = isVisible ? 'none' : 'flex';
-    toggleGaInputs.textContent = isVisible 
-        ? 'Optional: Enable GA4 Measurement Protocol Boost' 
-        : 'GA4 MP Boost Enabled (Click to Hide)';
-});
-
-
-renderSlots(parseInt(numSlotsInput.value));
-</script>
+        });
+    </script>
 </body>
 </html>
