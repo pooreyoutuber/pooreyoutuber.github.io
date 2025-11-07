@@ -35,7 +35,7 @@
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
-  .repeat-control input[type="number"], #referrerUrlInput { font-size: 14px; text-align: center; } 
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } 
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
@@ -67,9 +67,7 @@
 
   .slot.scrolling iframe {
     transform: translate(0, 0) scale(0.4); 
-    /* 3.5s duration for approx 8.5 cycles in 30s */
     animation: scroll 3.5s ease-in-out infinite;
-    /* animation-delay is set via JavaScript for staggering */
   }
   /* ---------------------------------- */
   
@@ -131,11 +129,19 @@
         </div>
         
         <div class="repeat-control" style="margin-top: 10px;">
-            <input type="checkbox" id="customReferrerCheckbox" />
-            <label for="customReferrerCheckbox">
-                **Advanced Traffic Source/Referrer**
+            <input type="checkbox" id="autoReferrerCheckbox" />
+            <label for="autoReferrerCheckbox" style="font-weight: 700; color: var(--accent);">
+                **Advanced Auto-Traffic Source (Randomized Referrer)**
             </label>
-            <input id="referrerUrlInput" type="url" placeholder="e.g., https://www.google.com/search?q=my-keyword" style="flex: 1; min-width: 200px; padding: 5px; border-radius: 4px; display: none; text-align: left;" />
+        </div>
+        <div style="font-size: 14px; color: var(--success); margin-top: -5px; text-align: center; padding-bottom: 10px; font-weight: 600;">
+            <span id="selectedReferrerDisplay"></span>
+        </div>
+        <div class="repeat-control" style="margin-top: 10px; background: #fffbe6; border-color: #fceb9c;">
+            <input type="checkbox" id="autoClickMode" />
+            <label for="autoClickMode" style="font-weight: 700; color: #a16207;">
+                💰 Enable **Smart Clicker Mode** (Randomized Clicks for CTR)
+            </label>
         </div>
         </div>
     
@@ -143,16 +149,13 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Advanced Referrer Added:</strong> Now you can set a **Custom Traffic Source** (like a Google search URL) to make traffic appear high-quality in your GA4 reports.
+                **NEW Smart Clicker:** Check the **'Smart Clicker Mode'** box. The tool will **randomly** simulate a click on the loaded page after **10 to 25 seconds**, increasing the reported **CTR** and earning potential.
             </li>
             <li>
-                <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
+                **Auto-Referrer:** Source (Google/Facebook/LinkedIn/Instagram) is **randomly selected and displayed** on page load for genuine traffic.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every **30-50 seconds (Randomized)**.
-            </li>
-            <li>
-                **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
+                **CRITICAL:** You must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
             </li>
         </ul>
     </div>
@@ -175,7 +178,6 @@ const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael"
 
 // Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
-    // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -213,7 +215,7 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const MAX_SLOTS = 20; // Maximum slots set to 20
+const MAX_SLOTS = 20; 
 const PROXY_ENDPOINT = 'proxy_loader.php'; 
 
 const gridContainer = document.getElementById('gridContainer');
@@ -226,36 +228,43 @@ const maxTimeInput = document.getElementById('maxTime');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
-// 🌟 NEW VARIABLES FOR REFERRER
-const customReferrerCheckbox = document.getElementById('customReferrerCheckbox');
-const referrerUrlInput = document.getElementById('referrerUrlInput');
+// 🌟 REFERRER CONFIGURATION
+const REFERRER_OPTIONS = [
+    { name: "Google Search", url: (domain) => `https://www.google.com/search?q=best+${domain}&ie=UTF-8` },
+    { name: "Facebook Post", url: () => `https://www.facebook.com/l.php?u=http://dummy.com` },
+    { name: "Instagram Link", url: () => `https://www.instagram.com/p/${Math.random().toString(36).substring(2, 9)}/` },
+    { name: "LinkedIn Post", url: () => `https://www.linkedin.com/pulse/view/` + Math.random().toString(36).substring(2, 10) },
+];
+
+const autoReferrerCheckbox = document.getElementById('autoReferrerCheckbox');
+const selectedReferrerDisplay = document.getElementById('selectedReferrerDisplay');
+
+// 💰 NEW CLICKER ELEMENT
+const autoClickModeCheckbox = document.getElementById('autoClickMode');
 
 let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
+let selectedReferrer = null; 
 
-// Map proxies with fixed unique IDs
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
+    uniqueId: generateUniqueId() 
 }));
 
 /**
- * 💡 IMPROVEMENT: Fixed 30s ki jagah Random Delay (Min se Max)
- * Yeh GA4 ke engaged session ko natural rakhta hai.
+ * 💡 Random Delay (Min se Max)
  */
 function getRandomDelay() {
     const min = parseInt(minTimeInput.value) * 1000;
     const max = parseInt(maxTimeInput.value) * 1000;
     
-    // Safety check: if min > max or invalid, use the min value
     if (isNaN(min) || isNaN(max) || min > max) {
-        return min || 30000; // Default to 30 seconds if values are missing
+        return min || 30000; 
     }
     
-    // Returns a random delay between min and max
     return Math.floor(Math.random() * (max - min + 1)) + min; 
 }
 
@@ -268,35 +277,66 @@ function stopAllAutomation() {
     
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
+        s.element.classList.remove('scrolling'); 
     });
     
-    // Uncheck repeat mode if stopping
     repeatModeCheckbox.checked = false;
 }
 
+// Selects a random referrer on page load
+function selectRandomReferrer() {
+    const randomIndex = Math.floor(Math.random() * REFERRER_OPTIONS.length);
+    selectedReferrer = REFERRER_OPTIONS[randomIndex];
+    
+    selectedReferrerDisplay.textContent = `Current Source: ${selectedReferrer.name} (Auto-Selected)`;
+}
+
+// Generates the final referrer URL
+function generateReferrerUrl(targetUrl) {
+    if (!selectedReferrer) return '';
+    
+    let targetDomain = 'website';
+    if (targetUrl && targetUrl.startsWith('http')) {
+        try {
+            targetDomain = new URL(targetUrl).hostname.replace('www.', '');
+        } catch(e) {
+            targetDomain = 'website'; 
+        }
+    }
+    return selectedReferrer.url(targetDomain);
+}
+
+
 /**
- * 🌟 UPDATED: Referrer URL ko proxy script mein bhejne ke liye update kiya
+ * 🌟 UPDATED: Added clicker parameters
  */
-function getProxiedUrl(originalUrl, proxy, referrerUrl = ''){
+function getProxiedUrl(originalUrl, proxy, referrerUrl = '', autoClickEnabled = false){ 
     let url = `${PROXY_ENDPOINT}?` + 
         `target=${encodeURIComponent(originalUrl)}&` +
         `ip=${proxy.ip}&port=${proxy.port}&` +
         `auth=${proxy.auth}&` + 
-        `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+        `uid=${proxy.uniqueId}`; 
 
-    // 🌟 NEW: Add referrer parameter if available
     if (referrerUrl) {
         url += `&referrer=${encodeURIComponent(referrerUrl)}`;
-        console.log(`[Slot ${proxy.name}] Using Referrer: ${referrerUrl}`);
-    } else {
-        console.log(`[Slot ${proxy.name}] Using Direct Traffic.`);
+    }
+    
+    // 💰 NEW: Add Clicker Parameter
+    if (autoClickEnabled) {
+        // Random time for the clicker to activate within the session (10s to 25s)
+        const clickDelay = Math.floor(Math.random() * (25 - 10 + 1) + 10); 
+        // 70% probability of click (30% will only view)
+        const clickProbability = Math.random() < 0.7; 
+        
+        if (clickProbability) {
+             url += `&clicker=1&clickDelay=${clickDelay}`;
+        }
     }
 
     return url; 
 }
 
-// Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
+// Function to create a single slot element
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -329,10 +369,8 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
-  // NEW: Apply a random, negative animation delay for staggered start
-  const scrollDuration = 3.5; // Matches the CSS animation duration
+  const scrollDuration = 3.5; 
   const randomScrollDelay = Math.random() * scrollDuration; 
-  // Set negative delay to start the animation at a random point in its cycle.
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
 
@@ -342,35 +380,35 @@ function createSlot(index, proxy){
   }
   
   // --- Core Automation Function ---
-  // 🌟 UPDATED: Added referrerUrl parameter
-  async function runAutomation(originalUrl, referrerUrl = ''){
+  async function runAutomation(originalUrl, referrerUrl = '', autoClickEnabled = false){ // ADD autoClickEnabled parameter
     if(!originalUrl) return;
     
-    // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
     
-    // Apply/Remove scrolling class
     if (autoScrollModeCheckbox.checked) {
         el.classList.add('scrolling');
     } else {
         el.classList.remove('scrolling');
     }
     
-    // 🌟 UPDATED: Passing referrerUrl to getProxiedUrl
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy, referrerUrl);
+    // 🌟 PASS autoClickEnabled
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy, referrerUrl, autoClickEnabled); 
 
-    // Get the next randomized delay for status update
     const nextDelaySeconds = (getRandomDelay() / 1000).toFixed(1);
 
-    setStatus(`Sending Unique Proxy View (${nextDelaySeconds}s Session)...`, false);
+    // 💰 UPDATED Status message to reflect clicker possibility
+    let statusMessage = `Sending Unique Proxy View (${nextDelaySeconds}s Session)...`;
+    if (proxiedUrl.includes('clicker=1')) {
+         const clickTime = proxiedUrl.match(/clickDelay=(\d+)/)[1];
+         statusMessage = `**Click Mode ON** (Click in ${clickTime}s) | Next in ${nextDelaySeconds}s...`;
+    }
+    
+    setStatus(statusMessage, false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for 30s.
         await fetch(proxiedUrl, { mode: 'no-cors' });
-        
-        // Response is quick due to Connection: close header in PHP
         setStatus('View Sent (BG Session Active)', true);
         
     } catch (e) {
@@ -389,14 +427,15 @@ function createSlot(index, proxy){
 
   runBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
-    const referrerUrl = customReferrerCheckbox.checked ? referrerUrlInput.value.trim() : '';
+    const referrerUrl = autoReferrerCheckbox.checked ? generateReferrerUrl(url) : '';
+    const autoClickEnabled = autoClickModeCheckbox.checked; // 💰 Check clicker mode
+    
     if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    runAutomation(url, referrerUrl); 
+    runAutomation(url, referrerUrl, autoClickEnabled); // PASS autoClickEnabled
   });
   
   setStatus('Ready', true);
 
-  // Expose the slot element to allow toggling scrolling globally on existing slots
   return { 
       runAutomation, 
       setStatus,
@@ -414,7 +453,6 @@ function renderSlots(count) {
         count = Math.min(Math.max(count, 1), maxCount);
         numSlotsInput.value = count;
     }
-    
     globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
 
     for(let i=0; i < count; i++){
@@ -424,7 +462,7 @@ function renderSlots(count) {
     stopAllAutomation();
 }
 
-// Global Start/Run Logic - UPDATED FOR REFERRER AND RANDOM RELOAD TIME
+// Global Start/Run Logic 
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -432,11 +470,11 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
-  // 🌟 NEW: Get Referrer URL from the input field
-  const referrerUrl = customReferrerCheckbox.checked ? referrerUrlInput.value.trim() : '';
+  const finalReferrerUrl = autoReferrerCheckbox.checked ? generateReferrerUrl(url) : '';
+  const autoClickEnabled = autoClickModeCheckbox.checked; // 💰 Check clicker mode
 
-  // Run once immediately, passing the referrer
-  currentSlots.forEach(s => s.runAutomation(url, referrerUrl));
+  // Run once immediately, passing the referrer and clicker status
+  currentSlots.forEach(s => s.runAutomation(url, finalReferrerUrl, autoClickEnabled));
   
   // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
@@ -444,22 +482,24 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // CRITICAL CHANGE: Use getRandomDelay() for a random, stable cycle time
         const randomDelay = getRandomDelay(); 
         const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
         s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
         
         const intervalId = setInterval(() => {
-            // 🌟 UPDATED: Passing referrerUrl
-            s.runAutomation(url, referrerUrl);
+            // 🌟 Recalculate the next referrer and clicker status for the next cycle (Optional: but safer)
+            const nextReferrerUrl = autoReferrerCheckbox.checked ? generateReferrerUrl(url) : '';
+            const nextAutoClickEnabled = autoClickModeCheckbox.checked;
+
+            // PASS the newly calculated values
+            s.runAutomation(url, nextReferrerUrl, nextAutoClickEnabled); 
             
-            // Get the NEXT random delay for the status message
             const nextDelay = getRandomDelay(); 
             const nextDelayInSeconds = (nextDelay / 1000).toFixed(1);
             s.setStatus(`Repeat Running. Next in ${nextDelayInSeconds}s...`, true);
 
-        }, randomDelay); // Use the random delay here
+        }, randomDelay); 
         
         repeatIntervals.push(intervalId);
     });
@@ -473,35 +513,23 @@ numSlotsInput.addEventListener('change', (e) => {
     renderSlots(count);
 });
 
-// Event listener for auto-scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
 
-// 🌟 NEW: Event listener for Custom Referrer Checkbox
-customReferrerCheckbox.addEventListener('change', () => {
-    referrerUrlInput.style.display = customReferrerCheckbox.checked ? 'block' : 'none';
-    if (!customReferrerCheckbox.checked) {
-        referrerUrlInput.value = ''; // Clear value when unchecked
-    }
-});
-
-
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
-    // Stop automation if repeat mode is unchecked while running
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
         stopAllAutomation();
     }
 });
 
 
-// Initial render when the page loads
+// Initial selection and render when the page loads
+selectRandomReferrer();
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
