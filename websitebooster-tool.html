@@ -1,402 +1,259 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tango: Zero-Cost Traffic Simulator (No IFRAME)</title>
+    <title>💰 Ad Impression Booster - Earning Tool</title>
     <style>
+        /* --- General Styling --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f9;
             color: #333;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #1a73e8;
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #555;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-        .control-panel, .actions {
-            background-color: #e9f0f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border: 1px solid #c9dff0;
-        }
-        .input-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        input[type="text"] {
-            flex-grow: 1;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        .btn-run {
-            padding: 12px 25px;
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .btn-run:hover {
-            background-color: #0b57d0;
-        }
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            font-size: 15px;
-            font-weight: 500;
-        }
-        .checkbox-group input[type="checkbox"], .checkbox-group input[type="number"] {
-            margin-right: 5px;
-        }
-        /* Slot Container will now show a LOG */
-        .slot-container {
-            margin-top: 30px;
-            background: #222;
-            color: #0f0;
-            padding: 15px;
-            border-radius: 8px;
-            height: 350px;
-            overflow-y: scroll;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
-        }
-        .log-entry {
-            border-bottom: 1px dashed #444;
-            padding: 4px 0;
-        }
-        .critical-action {
-            background-color: #fce8e6;
-            padding: 15px;
-            border: 1px solid #d93025;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .critical-action p {
             margin: 0;
-            color: #d93025;
-            font-weight: bold;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
-        .btn-reset {
-            padding: 10px 20px;
-            background-color: #d93025;
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 5px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #555;
+            text-align: center;
+            margin-top: 0;
+            font-weight: 400;
+        }
+
+        /* --- Form Styling --- */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+            outline: none;
+        }
+
+        /* --- Button Styling --- */
+        #boost-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745; /* Green for Start */
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
             cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
         }
-        .btn-reset:hover {
-            background-color: #a50e05;
+
+        #boost-button:hover {
+            background-color: #218838;
+        }
+        
+        #boost-button:disabled {
+            background-color: #95d3a5;
+            cursor: not-allowed;
+        }
+
+        /* --- Status & Log Area --- */
+        #status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            opacity: 1;
+        }
+
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            opacity: 1;
+        }
+        
+        .log-box {
+            margin-top: 20px;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: scroll;
+            font-family: monospace;
+            font-size: 0.85em;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>💰 Ad Impression Booster</h1>
+        <h3>Proxy-based Earning Session Starter</h3>
+        
+        <div id="status-message"></div>
 
-<div class="container">
-    <h1>Tango: Human Behavior Simulator</h1>
-    <p class="subtitle">शिक्षण प्रोजेक्ट: बॉट डिटेक्टशन से बचने के लिए उन्नत व्यवहार सिमुलेशन</p>
+        <div class="form-group">
+            <label for="targetUrl">🔗 Target URL (iFrame/Slot Page)</label>
+            <input type="text" id="targetUrl" placeholder="https://yourwebsite.com/slot-page.html" required>
+        </div>
 
-    <div class="control-panel">
-        <div class="input-group">
-            <span style="font-weight: bold;">Slots: 10</span>
-            <input type="text" id="targetUrl" placeholder="Target URL डालें (e.g., https://yourwebsite.com)">
-            <button class="btn-run" id="loadAndRunBtn">LOAD & RUN ALL (10 Sessions)</button>
+        <div class="form-group">
+            <label for="proxyIp">🌍 Proxy IP (e.g., 192.168.1.1)</label>
+            <input type="text" id="proxyIp" placeholder="Enter Proxy IP" required>
+        </div>
+
+        <div class="form-group">
+            <label for="proxyPort">🔌 Proxy Port (e.g., 8080)</label>
+            <input type="number" id="proxyPort" placeholder="Enter Proxy Port" required>
         </div>
         
-        <div class="checkbox-group">
-            <label>
-                <input type="checkbox" id="activeUserMode">
-                Enable **Timed Cycle** Mode (VPN चेंज के बीच में)
-            </label>
-            <label>
-                Cycle Time: <input type="number" id="cycleSeconds" value="45" min="30" max="120" style="width: 60px;"> seconds
-            </label>
-            <span style="color: #4CAF50;">✅ सीरियल लोडिंग (5s Delay) और ह्यूमन सिमुलेशन सक्रिय है।</span>
+        <div class="form-group">
+            <label for="proxyAuth">🔑 Proxy Auth (Username:Password - Optional)</label>
+            <input type="text" id="proxyAuth" placeholder="user:pass (Optional)">
         </div>
+        
+        <div class="form-group">
+            <label for="sessionDuration">⏱️ Session Duration (Seconds)</label>
+            <input type="number" id="sessionDuration" value="45" min="15" max="300" required>
+        </div>
+
+        <button id="boost-button">🚀 Start Earning Session</button>
+        
+        <div class="log-box" id="log-box">
+            --- Session Log ---
+        </div>
+
     </div>
 
-    <div class="critical-action">
-        <p>
-            🚨 **अत्यंत महत्वपूर्ण (VPN चेंज पर):** हर 5-6 मिनट में VPN बदलने के बाद, एक नए यूज़र के रूप में दिखने के लिए यह बटन दबाएँ।
-        </p>
-        <button class="btn-reset" id="cleanAndResetBtn">CLEAN & RESET (VPN Change)</button>
-    </div>
-
-    <h2>Live Session Log: 10 Active Sessions</h2>
-    <div class="slot-container" id="logContainer">
-        <div class="log-entry" style="color: #fff;">>> Waiting for input. Enter URL and click LOAD & RUN.</div>
-    </div>
-
-</div>
-
-<script>
-    const SLOT_COUNT = 10;
-    const SERIAL_DELAY_MS = 5000; // 5 seconds delay between sessions
-    let cycleInterval = null;
-    const logContainer = document.getElementById('logContainer');
-
-    document.getElementById('loadAndRunBtn').addEventListener('click', startSimulation);
-    document.getElementById('cleanAndResetBtn').addEventListener('click', cleanAndReset);
-
-    /**
-     * Log messages to the console and the UI log container.
-     */
-    function log(message, type = 'info') {
-        const logEntry = document.createElement('div');
-        logEntry.className = 'log-entry';
+    <script>
+        const API_BASE_URL = 'http://localhost:10000'; // <-- CHANGE THIS!
+        // IMPORTANT: When deploying on Render, change this to your Render Service URL (e.g., https://your-render-service.onrender.com)
         
-        let color = '#0f0'; // Green for success/info
-        if (type === 'error') color = '#f00';
-        if (type === 'warn') color = '#ff0';
-        
-        logEntry.style.color = color;
-        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        
-        logContainer.prepend(logEntry); // Add to top
-        if (logContainer.children.length > 50) {
-            logContainer.removeChild(logContainer.lastChild); // Keep log tidy
-        }
-        console.log(message);
-    }
+        const boostButton = document.getElementById('boost-button');
+        const statusMessage = document.getElementById('status-message');
+        const logBox = document.getElementById('log-box');
 
-    /**
-     * The core simulation function.
-     */
-    function startSimulation() {
-        const url = document.getElementById('targetUrl').value.trim();
-        const activeMode = document.getElementById('activeUserMode').checked;
-        const cycleSeconds = parseInt(document.getElementById('cycleSeconds').value);
-
-        if (!url || !url.startsWith('http')) {
-            alert("कृपया एक वैध URL (http/https के साथ) दर्ज करें।");
-            return;
+        function appendLog(message) {
+            const now = new Date().toLocaleTimeString();
+            logBox.innerHTML += `\n[${now}] ${message}`;
+            logBox.scrollTop = logBox.scrollHeight; // Auto-scroll to bottom
         }
 
-        // 1. Log update
-        log(`--- NEW SESSION STARTED (URL: ${url}) ---`, 'warn');
-        document.getElementById('loadAndRunBtn').disabled = true;
-        
-        // 2. Start serial loading of 10 "virtual" sessions
-        startSerialLoading(url);
-        
-        // 3. Start auto-reload timer if active mode is checked
-        if (activeMode) {
-            startCycle(url, cycleSeconds);
+        function setStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-${type}`;
+            statusMessage.style.opacity = '1';
         }
-    }
 
-    /**
-     * Starts 10 "virtual" sessions with a 5-second delay between each.
-     */
-    function startSerialLoading(url) {
-        const fakeLocales = [
-            "Zoe (US)", "David (DE)", "Mia (CA)", "Charlotte (UK)", "Liam (FR)",
-            "Noah (AU)", "Emma (IN)", "Oliver (BR)", "Ava (JP)", "Elijah (ZA)"
-        ];
-
-        for (let i = 0; i < SLOT_COUNT; i++) {
-            setTimeout(() => {
-                log(`[SLOT ${i + 1} / 10] Session started for ${fakeLocales[i]}. Fetching...`);
-                // Call the advanced function that performs the real work
-                simulateVirtualVisit(i, url, fakeLocales[i]);
-            }, i * SERIAL_DELAY_MS);
-        }
-        
-        // Re-enable button after all serial loads are initiated
-        setTimeout(() => {
-            document.getElementById('loadAndRunBtn').disabled = false;
-            log("सभी 10 वर्चुअल सत्र शुरू हो चुके हैं।", 'info');
-        }, SLOT_COUNT * SERIAL_DELAY_MS);
-    }
-
-    /**
-     * @brief This function uses a hidden/advanced technique (Fetch/Beacon) to load the page.
-     * **NOTE:** Since we cannot use a server (Render Static), this will rely on the
-     * client-side to make 10 distinct requests to the target URL.
-     *
-     * To make the ads company count it, we must ensure the browser's
-     * headers (like Referrer) are manipulated, which is only possible with a server.
-     * **For this front-end only project, we rely on the teacher's understanding of:**
-     * 1. Unique Caching/Storage per Slot (Simulated)
-     * 2. Serial Loading
-     * 3. Human Behavior (Mouse movements on the current page)
-     *
-     * For Monetag, a simple fetch might be enough to count an impression,
-     * but the human behavior is key for validity.
-     */
-    function simulateVirtualVisit(index, url, locale) {
-        // --- ADVANCED BOT-EVASION SIMULATION (FOR TEACHER) ---
-        
-        // 1. Random User-Agent/Referrer Simulation (Teacher needs to understand this is server-side code, but we simulate the effect)
-        const userAgents = ["Chrome/110", "Firefox/98", "Safari/16", "Android/12"];
-        const referrers = ["https://www.google.com/", "https://www.facebook.com/", "Direct"];
-        
-        const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
-        const referrer = referrers[Math.floor(Math.random() * referrers.length)];
-
-        // 2. Fetch the URL (This is the "Impression" trigger)
-        fetch(url, {
-            mode: 'no-cors', // To avoid CORS errors when fetching external sites
-            cache: 'no-cache',
-            // Headers cannot be fully manipulated from client JS for security, 
-            // but we LOG what would happen on a server
-            // headers: { 
-            //     'User-Agent': userAgent,
-            //     'Referer': referrer 
-            // }
-        })
-        .then(() => {
-            log(`[SLOT ${index + 1}] 🌐 Page Loaded via Fetch (Impression Recorded).`, 'info');
+        boostButton.addEventListener('click', async () => {
+            const target_url = document.getElementById('targetUrl').value.trim();
+            const ip = document.getElementById('proxyIp').value.trim();
+            const port = document.getElementById('proxyPort').value.trim();
+            const auth = document.getElementById('proxyAuth').value.trim();
+            const sessionDuration = document.getElementById('sessionDuration').value.trim();
             
-            // 3. Human Behavior Time
-            const duration = Math.floor(Math.random() * (90 - 60 + 1)) + 60; // 60 to 90 seconds
-            log(`[SLOT ${index + 1}] ⏳ Simulating Human Interaction for ${duration}s... (UA: ${userAgent}, Ref: ${referrer})`, 'warn');
-            
-            // Start mouse simulation on THIS page
-            startMouseSimulation(duration * 1000);
-            
-            setTimeout(() => {
-                log(`[SLOT ${index + 1}] ✅ Human Simulation Complete. Session Ended.`, 'info');
-            }, duration * 1000);
-        })
-        .catch(e => {
-            log(`[SLOT ${index + 1}] ❌ Error fetching URL: ${e.message}`, 'error');
-        });
-    }
-
-    /**
-     * @brief Manually clear all browser identification data (Cookies, Storage).
-     */
-    function cleanAndReset() {
-        if (!confirm("क्या आप सुनिश्चित हैं कि आपने VPN IP बदल दिया है? यह सभी ब्राउज़र पहचान (कुकीज़, लोकल स्टोरेज) को हटा देगा।")) {
-            return;
-        }
-
-        // 1. सभी कुकीज़ हटाएं
-        document.cookie.split(";").forEach((c) => {
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-
-        // 2. लोकल और सेशन स्टोरेज साफ़ करें (GA4/Monetag ट्रैकिंग से बचने के लिए)
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // 3. ऑटो-रीलोड बंद करें
-        stopCycle();
-        
-        // 4. लॉग साफ़ करें
-        logContainer.innerHTML = `<div class="log-entry" style="color: #fff;">>> LOG CLEARED. VPN IP has been changed.</div>`;
-
-        alert("✅ सफाई पूरी हुई। VPN IP अब एक नए, साफ ब्राउज़र के रूप में दिखाई देगा। अब आप 'Load & Run All' पर क्लिक कर सकते हैं।");
-    }
-    
-    /**
-     * @brief Starts the auto-reload cycle.
-     */
-    function startCycle(url, seconds) {
-        stopCycle(); 
-        const delayMs = seconds * 1000;
-        
-        cycleInterval = setInterval(() => {
-            log(`--- AUTO CYCLE: ${seconds}s के बाद नया सेशन शुरू हो रहा है... ---`, 'warn');
-            // Clear identity before new cycle for maximum effect
-            cleanAndReset(false); // Clean without prompt
-            startSimulation();
-        }, delayMs);
-        
-        log(`ऑटो-रीलोड सक्रिय: हर ${seconds} सेकंड में.`, 'info');
-    }
-
-    /**
-     * @brief Stops the auto-reload cycle.
-     */
-    function stopCycle() {
-        if (cycleInterval) {
-            clearInterval(cycleInterval);
-            cycleInterval = null;
-            log("ऑटो-रीलोड निष्क्रिय।", 'info');
-        }
-    }
-
-    /**
-     * @brief Simulates mouse movement and scrolling on the current page to avoid idle detection.
-     */
-    function startMouseSimulation(duration) {
-        let startTime = Date.now();
-        
-        const scrollSim = setInterval(() => {
-            if (Date.now() - startTime >= duration) {
-                clearInterval(scrollSim);
+            // Basic Frontend Validation
+            if (!target_url || !ip || !port) {
+                setStatus('❌ कृपया Target URL, IP और Port भरें।', 'error');
                 return;
             }
-            // Simulate random scroll up/down
-            const scrollAmount = Math.random() > 0.5 ? 5 : -5;
-            window.scrollBy(0, scrollAmount); 
-        }, 1000); // Scroll every 1 second
 
-        const mouseMoveSim = setInterval(() => {
-            if (Date.now() - startTime >= duration) {
-                clearInterval(mouseMoveSim);
-                return;
+            // Construct the API URL for Tool 4
+            const apiUrl = new URL(`${API_BASE_URL}/ad-impression-booster`);
+            apiUrl.searchParams.append('target_url', target_url);
+            apiUrl.searchParams.append('ip', ip);
+            apiUrl.searchParams.append('port', port);
+            apiUrl.searchParams.append('sessionDuration', sessionDuration);
+            
+            if (auth) {
+                apiUrl.searchParams.append('auth', auth);
             }
-            // Simulate random mouse movement (by moving a hidden element)
-            const x = Math.floor(Math.random() * window.innerWidth);
-            const y = Math.floor(Math.random() * window.innerHeight);
-            // We can't actually move the cursor, but triggering mouse events might help.
-            document.body.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y }));
-        }, 500); // Mouse move every 0.5 second
+            
+            // UI Update before fetch
+            boostButton.disabled = true;
+            boostButton.textContent = '⏱️ Processing... Check Server Console!';
+            statusMessage.style.opacity = '0';
+            logBox.innerHTML = '--- Session Log ---'; // Clear log
+            appendLog(`Starting session for URL: ${target_url}`);
 
-        // Stop all after duration
-        setTimeout(() => {
-            clearInterval(scrollSim);
-            clearInterval(mouseMoveSim);
-        }, duration);
-    }
-    
-    // Ensure URL starts with HTTPS
-    document.getElementById('targetUrl').addEventListener('input', function() {
-        let url = this.value;
-        if (url && !url.startsWith('http')) {
-            this.value = 'https://' + url;
-        }
-    });
+            try {
+                const response = await fetch(apiUrl.toString());
+                const result = await response.json();
 
-</script>
+                if (response.ok && result.status === 'ACCEPTED') {
+                    setStatus(`✅ SUCCESS: Request accepted by server. Message: ${result.message}`, 'success');
+                    appendLog(`Server Response: ${result.message}`);
+                    appendLog(`*** CHECK RENDER SERVER CONSOLE FOR LIVE PROGRESS ***`);
+                } else {
+                    // Handle API error response
+                    const errorMessage = result.error || 'Unknown server error.';
+                    setStatus(`❌ FAILED: ${errorMessage}`, 'error');
+                    appendLog(`ERROR: ${errorMessage}`);
+                }
+            } catch (error) {
+                // Handle network/connection error
+                setStatus(`❌ CRITICAL ERROR: Could not connect to API server. (${API_BASE_URL})`, 'error');
+                appendLog(`NETWORK ERROR: ${error.message}`);
+            } finally {
+                // Re-enable button after a short delay
+                setTimeout(() => {
+                    boostButton.disabled = false;
+                    boostButton.textContent = '🚀 Start Earning Session';
+                }, 5000); // 5 second cool-down
+            }
+        });
+    </script>
 </body>
 </html>
