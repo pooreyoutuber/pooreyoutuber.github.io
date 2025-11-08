@@ -1,4 +1,4 @@
-// index.js (ULTIMATE FINAL VERSION - Consolidated and Fixed)
+// index.js (FINAL VERSION - 5 Tools, No Conflicts)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -9,7 +9,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
+// Import 'http' for non-authenticated proxies
 const http = require('http'); 
 
 const app = express();
@@ -18,8 +18,10 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
+    // Attempt to read key from Render Secrets (Best Practice)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
 } catch (e) {
+    // Fallback to environment variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
 }
 
@@ -27,6 +29,7 @@ let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
+    // Dummy AI object if key is missing to avoid crashing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -82,7 +85,7 @@ const TRAFFIC_SOURCES_GA4 = [
     { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" },
     { source: "(direct)", medium: "(none)", referrer: "" }
 ];
-// Used by Tool 4 (/proxy-request)
+// Used by Tool 4 & 5
 const TRAFFIC_SOURCES_PROXY = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com/" },
     { source: "direct", medium: "none", referrer: "" },
@@ -112,8 +115,8 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (for /boost-mp) ---
-async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
+// --- GA4 DATA SENDING (for /boost-mp and /proxy-request) ---
+async function sendData(gaId, apiSecret, payload, currentViewId, eventType, proxyAgent = null) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
     const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
@@ -125,7 +128,8 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
             headers: { 
                 'Content-Type': 'application/json',
                 'User-Agent': USER_AGENT 
-            }
+            },
+            agent: proxyAgent // Use proxyAgent if provided
         });
 
         if (response.status === 204) { 
@@ -311,16 +315,16 @@ app.post('/boost-mp', async (req, res) => {
     
     const viewPlan = generateViewPlan(totalViewsRequested, pages.filter(p => p.percent > 0)); 
     if (viewPlan.length === 0) {
-         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
+           return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
     
     if (!validationResult.valid) {
-         return res.status(400).json({ 
-            status: 'error', 
-            message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
-        });
+          return res.status(400).json({ 
+              status: 'error', 
+              message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
+          });
     }
 
     res.json({ 
@@ -440,12 +444,11 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - WEBSITE BOOSTER ADS TRAFFIC (NEW)
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - ORIGINAL TOOL 4 (Unchanged)
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
     // 1. Get parameters from the frontend URL query
-    // NEW PARAMS: sessionDuration, referrer, clicker, clickDelay
     const { target, ip, port, auth, uid, ga_id, api_secret, sessionDuration, referrer, clicker, clickDelay } = req.query; 
 
     // Basic validation check
@@ -459,7 +462,6 @@ app.get('/proxy-request', async (req, res) => {
     const clickDelayMs = parseInt(clickDelay || 15) * 1000;
 
     // --- 2. IMMEDIATE RESPONSE (to avoid frontend timeout) ---
-    // Frontend ko turant OK response dega
     const message = isGaMpEnabled ? 
                         `GA4 MP data will be sent in background via proxy. Session Duration: ${sessionDuration}s.` : 
                         'Request accepted (No GA MP keys provided).';
@@ -470,7 +472,6 @@ app.get('/proxy-request', async (req, res) => {
     });
     
     // --- 3. START HEAVY LIFTING IN BACKGROUND (IIFE) ---
-    // Session ko background mein shuru karega
     (async () => {
         
         // --- Proxy Setup (FIXED) ---
@@ -484,7 +485,14 @@ app.get('/proxy-request', async (req, res) => {
             proxyAgent = new HttpsProxyAgent(proxyUrl);
             console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
         } else {
-            proxyAgent = new http.Agent({ host: ip, port: port });
+             // For non-authenticated proxy
+             try {
+                // Try HttpsProxyAgent first
+                proxyAgent = new HttpsProxyAgent(`http://${proxyAddress}`);
+             } catch (e) {
+                // Fallback for simple HTTP agents
+                proxyAgent = new http.Agent({ host: ip, port: port });
+             }
             console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
         }
         
@@ -493,10 +501,8 @@ app.get('/proxy-request', async (req, res) => {
         const session_id = Date.now(); 
         const geo = getRandomGeo(); 
         const traffic = getRandomTrafficSource(true); 
-        // 🚀 CHANGE 2: Increased initial engagement time (for ad viewability)
-        const initialEngagementTime = randomInt(15000, 30000); // 15s to 30s
+        const initialEngagementTime = randomInt(15000, 30000); 
         
-
         const userProperties = {
             simulated_geo: { value: geo.country }, 
             user_timezone: { value: geo.timezone }
@@ -605,7 +611,6 @@ app.get('/proxy-request', async (req, res) => {
                 }]
             };
             if (await sendDataViaProxy(scrollPayload, 'scroll (User Interaction)')) eventCount++;
-            // --- END NEW SCROLL EVENT ---
             
             
             // --- PHASE 2: SMART CLICKER SIMULATION (Optional) ---
@@ -615,7 +620,6 @@ app.get('/proxy-request', async (req, res) => {
                 totalTimeWaited += clickDelayMs;
                 
                 // 3. SECOND PAGE VIEW (Simulated Internal Click)
-                // New random internal URL for the click
                 const internalUrl = `${target}/internal-page-click-${Math.random().toString(36).substring(2, 6)}`;
                 const internalPageViewPayload = {
                     client_id: cid,
@@ -672,6 +676,139 @@ app.get('/proxy-request', async (req, res) => {
             console.error(`[PROXY ${ip}] Session Aborted due to critical error:`, error.message);
         }
     })();
+});
+
+
+// ===================================================================
+// 5. WEBSITE EARNING BOOSTER (API: /website-earning-booster) - NEW TOOL 5 for Monetag/Ad Networks
+// ===================================================================
+app.get('/website-earning-booster', async (req, res) => {
+    
+    // 1. Get parameters from the frontend URL query
+    const { target, ip, port, auth, sessionDuration, clicker, clickDelay } = req.query; 
+
+    // Basic validation check
+    if (!target || !ip || !port) {
+        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, ip, port).' });
+    }
+
+    const sessionDurationMs = parseInt(sessionDuration || 30) * 1000;
+    const clickerEnabled = clicker === '1';
+    const clickDelayMs = parseInt(clickDelay || 15) * 1000;
+
+    // --- 2. IMMEDIATE RESPONSE (to avoid frontend timeout) ---
+    const message = `💸 Website Earning Booster accepted. Traffic boosting started in background via proxy ${ip}. Session Duration: ${sessionDuration}s.`;
+
+    res.status(200).json({ 
+        status: 'ACCEPTED', 
+        message: message
+    });
+    
+    // --- 3. START HEAVY LIFTING IN BACKGROUND (IIFE) ---
+    (async () => {
+        
+        // --- Proxy Setup ---
+        let proxyAgent;
+        const proxyAddress = `${ip}:${port}`;
+        
+        // Authenticated vs Non-Authenticated Proxy Agent
+        if (auth && auth.includes(':') && auth !== ':') {
+            const [username, password] = auth.split(':');
+            const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
+            proxyAgent = new HttpsProxyAgent(proxyUrl);
+        } else {
+             try {
+                proxyAgent = new HttpsProxyAgent(`http://${proxyAddress}`);
+             } catch (e) {
+                proxyAgent = new http.Agent({ host: ip, port: port });
+             }
+        }
+        
+        /**
+         * The core function: Hits the target URL using the proxy and dynamic, human-like headers.
+         */
+        async function hitTargetViaProxy(proxyAgent, targetUrl, customReferrer) {
+            const USER_AGENTS = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", 
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1.15", 
+                "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            ];
+            const randomUserAgent = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
+            const trafficSource = getRandomTrafficSource(true);
+
+            const headers = {
+                'User-Agent': randomUserAgent, 
+                'Referer': customReferrer || trafficSource.referrer, // Use provided or random referrer
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9,hi;q=0.8', 
+                'Cache-Control': 'no-cache', 
+                'Connection': 'keep-alive'
+            };
+
+            try {
+                const response = await nodeFetch(targetUrl, {
+                    method: 'GET',
+                    agent: proxyAgent,
+                    headers: headers,
+                    timeout: 20000 // 20 seconds timeout for a slow proxy/server
+                });
+
+                if (response.ok) {
+                    console.log(`[EARNING BOOSTER ${ip}] SUCCESS ✅ | Target Hit! Status: ${response.status}. Referrer: ${headers['Referer'].substring(0, 20)}...`);
+                    return true;
+                } else {
+                    console.error(`[EARNING BOOSTER ${ip}] FAILURE ❌ | Status: ${response.status}. Target URL failed to load.`);
+                    return false;
+                }
+            } catch (error) {
+                console.error(`[EARNING BOOSTER ${ip}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
+                return false;
+            }
+        }
+        
+        
+        // --- PHASE 1: INITIAL HIT & DURATION SIMULATION ---
+        console.log(`\n--- [EARNING BOOSTER ${ip}] Session Start (Target: ${target}, Duration: ${sessionDuration}s) ---`);
+        
+        // 1. Initial hit to the target URL (The main impression trigger for Ad Networks)
+        let initialSuccess = await hitTargetViaProxy(proxyAgent, target, req.query.referrer);
+        
+        if (!initialSuccess) {
+            console.log(`[EARNING BOOSTER ${ip}] Initial hit failed. Aborting session.`);
+            return; // Stop execution if the initial hit fails
+        }
+        
+        let totalTimeSpent = 0;
+        
+        // --- PHASE 2: SMART CLICKER (Internal URL Hit) ---
+        if (clickerEnabled) {
+            console.log(`[EARNING BOOSTER ${ip}] Smart Clicker: Waiting for ${Math.round(clickDelayMs/1000)}s for internal click...`);
+            await new Promise(resolve => setTimeout(resolve, clickDelayMs));
+            totalTimeSpent += clickDelayMs;
+            
+            // 2. Second hit to a simulated internal URL (Enhances session quality)
+            const internalUrl = `${target}/internal-page-click-${Math.random().toString(36).substring(2, 6)}`;
+            await hitTargetViaProxy(proxyAgent, internalUrl, target); // Referrer is the main page
+            
+            console.log(`[EARNING BOOSTER ${ip}] Smart Clicker: Internal Click Registered.`);
+        }
+        
+        // --- PHASE 3: SESSION ENGAGEMENT & SLEEP ---
+        // Sleep for the remaining duration to complete the session time
+        const engagementTime = randomInt(15000, 30000); // 15 to 30s interaction before sleep
+        await new Promise(resolve => setTimeout(resolve, engagementTime));
+        totalTimeSpent += engagementTime;
+        
+        const remainingTimeMs = Math.max(1000, sessionDurationMs - totalTimeSpent); 
+        console.log(`[EARNING BOOSTER ${ip}] Sleeping for ${Math.round(remainingTimeMs/1000)}s to complete ${sessionDuration}s session.`);
+        await new Promise(resolve => setTimeout(resolve, remainingTimeMs));
+        
+        
+        console.log(`[EARNING BOOSTER ${ip}] Session Complete. Total Simulated Duration: ${Math.round((totalTimeSpent + remainingTimeMs)/1000)}s.`);
+        
+    })().catch(err => {
+        console.error(`[EARNING BOOSTER CRITICAL] Main IIFE failed: ${err.message}`);
+    });
 });
 
 
