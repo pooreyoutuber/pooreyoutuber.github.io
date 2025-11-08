@@ -493,7 +493,9 @@ app.get('/proxy-request', async (req, res) => {
         const session_id = Date.now(); 
         const geo = getRandomGeo(); 
         const traffic = getRandomTrafficSource(true); 
-        const initialEngagementTime = randomInt(5000, 15000); // First page view duration
+        // 🚀 CHANGE 2: Increased initial engagement time (for ad viewability)
+        const initialEngagementTime = randomInt(15000, 30000); // 15s to 30s
+        
 
         const userProperties = {
             simulated_geo: { value: geo.country }, 
@@ -584,6 +586,27 @@ app.get('/proxy-request', async (req, res) => {
             if (await sendDataViaProxy(pageViewPayload, 'page_view (Initial)')) eventCount++;
             totalTimeWaited += initialEngagementTime;
 
+            // 🚀 CHANGE 1: Add SCROLL Event Simulation (High Quality Interaction)
+            const scrollDelay = randomInt(5000, 10000); // 5s to 10s wait before scrolling
+            console.log(`[PROXY ${ip}] Simulating scroll interaction after ${Math.round(scrollDelay/1000)}s...`);
+            await new Promise(resolve => setTimeout(resolve, scrollDelay));
+            totalTimeWaited += scrollDelay;
+            
+            const scrollPayload = {
+                client_id: cid,
+                user_properties: userProperties,
+                events: [{
+                    name: 'scroll', // GA4 Enhanced Measurement Event
+                    params: {
+                        session_id: session_id,
+                        debug_mode: true,
+                        language: "en-US"
+                    }
+                }]
+            };
+            if (await sendDataViaProxy(scrollPayload, 'scroll (User Interaction)')) eventCount++;
+            // --- END NEW SCROLL EVENT ---
+            
             
             // --- PHASE 2: SMART CLICKER SIMULATION (Optional) ---
             if (clickerEnabled) {
@@ -605,7 +628,8 @@ app.get('/proxy-request', async (req, res) => {
                             session_id: session_id, 
                             debug_mode: true,
                             language: "en-US",
-                            engagement_time_msec: randomInt(5000, 15000), 
+                            // 🚀 CHANGE 3: Longer engagement time for internal page
+                            engagement_time_msec: randomInt(10000, 20000), // 10s to 20s
                             page_referrer: target // Referrer is the main page
                         } 
                     }]
