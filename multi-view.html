@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime (Node.js/Render) - Client Fix</title>
+<title>Website Booster Prime</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles --- */
+  /* --- CSS Styles (Same as previous responsive version) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -18,375 +18,412 @@
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
   .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
   header { margin-bottom: 20px; text-align: center; }
-  h1 { font-size: 2.2rem; color: var(--accent); margin-bottom: 5px; }
-  h4 { margin: 0 0 8px 0; font-size: 1.1rem; }
-  p { margin: 0; font-size: 0.9rem; color: var(--muted); }
-  
-  .controls, .slots-grid { 
-    background: var(--card); border: 1px solid var(--border); 
-    border-radius: var(--radius); padding: var(--gap); margin-bottom: var(--gap); 
-    box-shadow: var(--shadow);
+  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
+  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover { background: #0c8cd8; }
+  .btn.stop { background: var(--danger); }
+  .btn.stop:hover { background: #b91c1c; }
+  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
+  .repeat-control label { flex-shrink: 0; }
+  .repeat-control span { color: var(--accent); font-weight: 600; }
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } 
+  .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .info-box strong { font-weight: 700; color: var(--accent); }
+  .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
+  .info-box ul li { margin-bottom: 6px; }
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
+  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
+  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
+  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
+  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+  iframe { 
+    width: 100%; height: 100%; border: 0; display: block; background: white; 
+    transform: scale(0.4); 
+    transform-origin: 0 0;
+    width: calc(100% / 0.4);
+    height: calc(100% / 0.4);
+    opacity: 1;
   }
   
-  /* Input Styling */
-  input[type="text"], input[type="number"], select {
-    width: 100%; padding: 10px 12px; border: 1px solid var(--border); 
-    border-radius: 8px; font-size: 1rem; margin-bottom: 10px; 
-    transition: border-color 0.2s;
-  }
-  input[type="text"]:focus, input[type="number"]:focus, select:focus {
-    border-color: var(--primary-blue); outline: none;
-  }
+  /* --- CSS for Auto-Scrolling (MODIFIED FOR UNIFORM SCROLLING) --- */
   
-  /* Buttons */
-  button {
-    padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; 
-    cursor: pointer; transition: background-color 0.2s; font-size: 0.95rem;
+  /* Single Scroll (Up-Down motion) */
+  @keyframes scroll {
+    0% { transform: translate(0, 0) scale(0.4); } 
+    100% { transform: translate(0, -200%) scale(0.4); } /* Scroll down to 200% */
   }
-  .run-all-btn { background: var(--primary-blue); color: white; }
-  .run-all-btn:hover { background: #0c88c0; }
-  .stop-btn { background: var(--danger); color: white; display: none; }
-  .stop-btn:hover { background: #b01b1b; }
-  .run-btn { background: var(--success); color: white; margin-top: 8px; width: 100%; }
-  .run-btn:hover { background: #047857; }
-  
-  /* Layouts */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
-  .field-row { display: flex; gap: 8px; margin-bottom: 10px; }
-  .field-row > input, .field-row > select { margin-bottom: 0; }
-  .checkbox-row { display: flex; align-items: center; margin-bottom: 10px; gap: 15px; }
-  .checkbox-row input[type="checkbox"] { width: auto; margin-right: 5px; }
-  .checkbox-row label { color: #333; font-size: 0.9rem; cursor: pointer; }
 
-  /* Slots Grid */
-  .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--gap); }
-  .slot { border: 1px solid var(--border); padding: 12px; border-radius: 8px; background: #fff; }
-  .slot.running { border-color: var(--primary-blue); background: #e0f2fe; }
-  .slot.running .status-text { color: var(--primary-blue); font-weight: 600; }
-  .status-text { min-height: 20px; }
-  
-  /* Media Queries */
-  @media (max-width: 768px) {
-    .grid-2 { grid-template-columns: 1fr; }
-    .slots-grid { grid-template-columns: 1fr; }
-    .wrap { margin: 10px auto; padding: 10px; }
+  .slot.scrolling iframe {
+    /* Use 'alternate' to scroll up and down smoothly, 'infinite' for loop */
+    animation: scroll var(--scroll-duration, 30s) ease-in-out alternate infinite;
+    /* Removed animation-delay for uniform start */
   }
+  /* --------------------------------------------------------------- */
+  
+  .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
+  .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
+  .action-btn.view { background: var(--success); color: white; }
+  .action-btn.view:hover { background: #047857; }
+  .action-btn.new-tab { 
+      background: #f90;
+      color: white; 
+      flex-grow: 1;
+      font-size: 12px;
+      padding: 8px 10px;
+  }
+  .action-btn.new-tab:hover { background: #e80; }
+  .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
+  .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
+  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
 </style>
-
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>🚀 Website Booster PRIME</h1>
-    <p>Ad Earning Stabilization & High-Quality Traffic Tool</p>
-  </header>
+  <div class="wrap">
+    <header>
+      <h1>Website Booster Prime</h1>
+      <div class="tagline">Global Traffic Simulation System.</div>
+    </header>
 
-  <div class="controls">
-    <h3>🌐 Global Settings (Tool 4: Website Booster Prime)</h3>
-    
-    <div class="grid-2">
-      <input type="text" placeholder="Target URL (e.g., https://my-site.github.io/)" id="globalUrl" value="https://example.com" required>
-      <div class="field-row">
-        <input type="number" placeholder="Sessions (Slots)" id="numSlots" value="5" min="1" max="50">
-        <input type="number" placeholder="Session Duration (seconds)" id="sessionDuration" value="60" min="30" max="120">
-      </div>
-    </div>
-    
-    <div class="grid-2" style="margin-bottom: 0;">
-        <input type="text" placeholder="GA ID (G-XXXXXXXXXX)" id="gaIdInput" value="">
-        <input type="text" placeholder="GA API Secret" id="apiSecretInput" value="">
-    </div>
+    <div class="controls">
+        <div class="input-group">
+            
+            <div class="slot-selector">
+                Slots:
+                <input id="numSlots" type="number" value="10" min="1" max="20" />
+            </div>
 
-    <p style="margin: 5px 0 15px 0; font-size: 0.85rem;">GA keys are optional. Use them to verify traffic in GA4 DebugView.</p>
-
-    <div class="checkbox-row">
-        <input type="checkbox" id="smartClicker">
-        <label for="smartClicker">Enable Smart Clicker Mode (Internal Click)</label>
+            <div class="url-input-wrap">
+                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+            </div>
+            <button id="globalGo" class="btn">Load & Run All</button>
+        </div>
         
-        <input type="checkbox" id="activeUserMode" checked>
-        <label for="activeUserMode" style="color: var(--success); font-weight: bold;">Enable Active User Mode (Scroll/Engage Fix)</label>
+        <div class="repeat-control">
+            <input type="checkbox" id="repeatMode" />
+            <label for="repeatMode">
+                Enable **Active User** Mode: Repeat all 
+                <label for="minTime">Min:</label>
+                <input id="minTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <label for="maxTime">Max:</label>
+                <input id="maxTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <span>seconds cycle</span> for better GA tracking.
+            </label>
+            
+            <input type="checkbox" id="autoScrollMode" />
+            <label for="autoScrollMode">
+                Enable **Auto Scroll** (Simulated & Uniform)
+            </label>
+            <label for="autoScrollReps">
+                Scroll Reps:
+                <input id="autoScrollReps" type="number" value="1" min="1" max="10" style="width: 50px; padding: 5px; border-radius: 4px;" />
+            </label>
+            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
+        </div>
     </div>
     
-    <div class="field-row" style="align-items: center;">
-        <label for="referrerSelect" style="white-space: nowrap; margin-right: 5px;">Referrer Source:</label>
-        <select id="referrerSelect" style="flex-grow: 1;">
-            </select>
-        <button onclick="selectRandomReferrer()">Randomize</button>
+    <div class="info-box">
+        <strong>Tool Usage Instructions:</strong>
+        <ul>
+            <li>
+                <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
+            </li>
+            <li>
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every **30 seconds**.
+            </li>
+            <li>
+                **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
+            </li>
+        </ul>
     </div>
-    
-    <div class="field-row" style="margin-bottom: 0;">
-        <button id="runAllBtn" class="run-all-btn" style="flex-grow: 1;">Load & Run All Slots</button>
-        <button id="globalStopBtn" class="stop-btn" style="flex-grow: 1;">STOP ALL</button>
-        <input type="checkbox" id="repeatModeCheckbox" style="width: auto;">
-        <label for="repeatModeCheckbox" style="white-space: nowrap; color: var(--accent);">Repeat Mode (5 Mins)</label>
-    </div>
+
+    <div class="grid-container" id="gridContainer">
+        </div>
     
   </div>
 
-  <div id="slotsContainer" class="slots-grid">
-    </div>
-
-</div>
-
 <script>
-// --- GLOBAL VARIABLES ---
-let currentSlots = [];
-const slotTimeouts = []; // Array to store all timeouts for cleanup
-const numSlotsInput = document.getElementById('numSlots');
-const globalStopBtn = document.getElementById('globalStopBtn');
-const repeatModeCheckbox = document.getElementById('repeatModeCheckbox');
-const globalUrlInput = document.getElementById('globalUrl');
-const globalDurationInput = document.getElementById('sessionDuration');
-const smartClickerCheckbox = document.getElementById('smartClicker');
-// NEW: Active User Mode Checkbox (for Scroll Simulation)
-const activeUserModeCheckbox = document.getElementById('activeUserMode'); 
+/* ----------------------------------------------------------------------
+   PROXY DATA and CONFIGURATION
+   ---------------------------------------------------------------------- */
 
-// IMPORTANT: Replace this with your actual Render/Server URL
-const API_BASE_URL = 'https://pooreyoutuber-api.onrender.com'; 
+const COMMON_USER = "bqctypvz";
+const COMMON_PASS = "399xb3kxqv6i";
+const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-// --- UTILITIES ---
-const getRandomDelay = () => Math.floor(Math.random() * 5000) + 1000; // 1 to 6 seconds random delay
-const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
-// Array of traffic sources to simulate realistic referral traffic
-const randomReferrers = [
-    "https://www.google.com/search?q=college+project+tool",
-    "https://www.facebook.com/posts/12345",
-    "https://www.youtube.com/watch?v=tool-demo",
-    "https://www.bing.com/search?q=best+github+tool",
-    "https://www.reddit.com/r/webdev/comments/tool",
-    "https://t.co/random-tweet-link", // X/Twitter
-    "" // Direct Traffic (use sparingly)
+// Function to generate a simple unique ID (used for GA4 cookie)
+function generateUniqueId() {
+    // Generates a random 10-digit number string
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
+
+function getRandomNames(count) {
+    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
+// =========================================================================
+// !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
+// =========================================================================
+const DUMMY_PROXIES = [
+  { ip: "142.111.48.253", port: "7030", country: "US" },
+  { ip: "31.59.20.176", port: "6754", country: "DE" },
+  { ip: "38.170.176.177", port: "5572", country: "CA" },
+  { ip: "198.23.239.134", port: "6540", country: "US" },
+  { ip: "45.38.107.97", port: "6014", country: "US" },
+  { ip: "107.172.163.27", port: "6543", country: "CA" },
+  { ip: "64.137.96.74", port: "6641", country: "US" },
+  { ip: "216.10.27.159", port: "6837", country: "AU" },
+  { ip: "142.111.67.146", port: "5611", country: "US" },
+  { ip: "142.147.128.93", port: "6593", country: "CA" },
+  
+  // DUPLICATES BELOW: REPLACE THESE 10 ENTRIES WITH 10 MORE UNIQUE IPs
+  { ip: "142.111.48.254", port: "7031", country: "US" }, 
+  { ip: "31.59.20.177", port: "6755", country: "DE" },  
+  { ip: "38.170.176.178", port: "5573", country: "CA" }, 
+  { ip: "198.23.239.135", port: "6541", country: "US" }, 
+  { ip: "45.38.107.98", port: "6015", country: "US" }, 
+  { ip: "107.172.163.28", port: "6544", country: "CA" }, 
+  { ip: "64.137.96.75", port: "6642", country: "US" }, 
+  { ip: "216.10.27.160", port: "6838", country: "AU" }, 
+  { ip: "142.111.67.147", port: "5612", country: "US" }, 
+  { ip: "142.147.128.94", port: "6594", country: "CA" }, 
 ];
+// =========================================================================
 
-// --- SLOT CLASS ---
-class Slot {
-    constructor(index) {
-        this.index = index;
-        this.element = document.createElement('div');
-        this.element.className = 'slot';
-        this.render();
-    }
+const MAX_SLOTS = 20; // Maximum slots set to 20
+const PROXY_ENDPOINT = 'proxy_loader.php'; 
+const FIXED_CYCLE_TIME_MS = 30000; // 30 seconds fixed cycle time
 
-    render() {
-        // [Existing HTML Structure]
-        this.element.innerHTML = `
-            <h4>Slot #${this.index + 1}</h4>
-            <div class="field-row">
-                <input type="text" placeholder="Proxy IP:Port" id="ipPort${this.index}" value="">
-                <input type="text" placeholder="Auth (user:pass)" id="auth${this.index}" value="">
-            </div>
-            <div class="field-row">
-                <select id="country${this.index}">
-                    <option value="">Random Country</option>
-                    <option value="US">USA</option>
-                    <option value="IN">India</option>
-                    <option value="JP">Japan</option>
-                    <option value="DE">Germany</option>
-                </select>
-                <input type="text" placeholder="Custom Client ID (optional)" id="cid${this.index}" value="">
-            </div>
-            <p id="status${this.index}" class="status-text">Ready. (0 events sent)</p>
-            <div class="slot-controls">
-                <button class="run-btn" data-index="${this.index}">Run Slot</button>
-            </div>
-        `;
-    }
+const gridContainer = document.getElementById('gridContainer');
+const globalUrlInput = document.getElementById('globalUrl');
+const numSlotsInput = document.getElementById('numSlots');
+const globalGoBtn = document.getElementById('globalGo');
+const repeatModeCheckbox = document.getElementById('repeatMode');
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
+const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
+const autoScrollRepsInput = document.getElementById('autoScrollReps'); // NEW
+const globalStopBtn = document.getElementById('globalStop');
 
-    setStatus(message, isRunning = false) {
-        const statusElement = document.getElementById(`status${this.index}`);
-        statusElement.textContent = message;
-        this.element.classList.toggle('running', isRunning);
-    }
+let currentSlots = [];
+let repeatIntervals = []; 
+let randomNamesList = getRandomNames(MAX_SLOTS); 
 
-    getProxyDetails() {
-        const [ip, port] = document.getElementById(`ipPort${this.index}`).value.split(':');
-        const auth = document.getElementById(`auth${this.index}`).value;
-        const cid = document.getElementById(`cid${this.index}`).value || this.generateDefaultCid();
-        return { ip, port, auth, cid };
-    }
-    
-    // New function to generate a unique Client ID if none is provided
-    generateDefaultCid() {
-        return 'cid-' + Math.random().toString(36).substring(2, 10);
-    }
+// Map proxies with fixed unique IDs
+const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
+    ...p,
+    auth: COMMON_AUTH,
+    name: randomNamesList[index],
+    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
+}));
+
+// Function to return fixed 30s delay for repeat mode
+function getRandomDelay() {
+    // Fixed cycle time: 30 seconds (30000 milliseconds)
+    return FIXED_CYCLE_TIME_MS;
 }
 
-// --- CORE FUNCTIONALITY ---
-function renderSlots(count) {
-    const container = document.getElementById('slotsContainer');
-    container.innerHTML = '';
-    currentSlots = [];
-    for (let i = 0; i < count; i++) {
-        const slot = new Slot(i);
-        currentSlots.push(slot);
-        container.appendChild(slot.element);
-    }
-}
+// Function to create a single slot element (MODIFIED FOR UNIFORM SCROLLING)
+function createSlot(index, proxy){
+  const el = document.createElement('div');
+  el.className = 'slot';
+  
+  el.innerHTML = `
+    <div class="slot-top">
+      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
+      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
+    </div>
+    
+    <div class="iframe-wrap">
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    </div>
+    
+    <div class="slot-footer">
+      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
+      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
+      <div class="status" id="status-wrap-${index}">
+        <span class="status-dot" id="dot-${index}"></span>
+        <span id="status-${index}">Ready</span>
+      </div>
+    </div>
+  `;
+  
+  gridContainer.appendChild(el);
 
-async function runSlot(slotIndex) {
-    const s = currentSlots[slotIndex];
-    const { ip, port, auth, cid } = s.getProxyDetails();
+  const iframe = el.querySelector(`#iframe-${index}`);
+  const openBtn = el.querySelector(`#open-${index}`);
+  const runBtn = el.querySelector(`#run-${index}`);
+  const statusSpan = el.querySelector(`#status-${index}`);
+  const statusDot = el.querySelector(`#dot-${index}`);
+  
+  // REMOVED: Applying a random, negative animation delay for staggered start
+  // iframe.style.animationDelay = `...`; 
 
-    const targetUrl = globalUrlInput.value;
-    const duration = globalDurationInput.value;
-    const smartClicker = smartClickerCheckbox.checked ? 1 : 0;
+
+  function setStatus(text, isActive = false){
+    statusSpan.textContent = text;
+    statusDot.classList.toggle('active', isActive);
+  }
+  
+  function getProxiedUrl(originalUrl, proxy){
+      // Sending the Unique ID (uid) to the PHP script
+      return `${PROXY_ENDPOINT}?` + 
+          `target=${encodeURIComponent(originalUrl)}&` +
+          `ip=${proxy.ip}&port=${proxy.port}&` +
+          `auth=${proxy.auth}&` + 
+          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+  }
+
+  // --- Core Automation Function ---
+  async function runAutomation(originalUrl){
+    if(!originalUrl) return;
     
-    // 🚀 NEW LOGIC: Active User Mode (Sends the High-Quality flag)
-    const activeUser = activeUserModeCheckbox.checked ? 1 : 0; 
+    // 1. iFrame Load (Visible preview)
+    iframe.src = originalUrl;
+    setStatus('Loading Content...', false);
     
-    // Traffic Source Logic
-    const referrer = document.getElementById('referrerSelect').value;
-    
-    if (!ip || !port || !targetUrl) {
-        s.setStatus('Error: IP:Port and Target URL are required.');
-        return;
+    // Apply/Remove scrolling class and update duration
+    const scrollReps = parseInt(autoScrollRepsInput.value) || 1;
+    if (autoScrollModeCheckbox.checked) {
+        // Calculate animation duration based on desired repetitions in 30s
+        // 30s is the session duration. Each scroll (up-down) is one cycle of the animation.
+        // Duration is 30s / Reps. Use 30s if Reps is 1.
+        const scrollDuration = FIXED_CYCLE_TIME_MS / scrollReps / 1000; 
+        
+        // Set CSS variable for the animation duration
+        el.style.setProperty('--scroll-duration', `${scrollDuration}s`);
+        el.classList.add('scrolling');
+    } else {
+        el.classList.remove('scrolling');
     }
+    
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+
+    // Changed status message to reflect fixed 30s
+    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        const gaId = document.getElementById('gaIdInput').value;
-        const apiSecret = document.getElementById('apiSecretInput').value;
+        // Fetch request is sent. PHP script runs in background for 30s.
+        await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        // Show status before the request is made
-        s.setStatus('Sending Request...', true);
-
-        // Build the query parameters for the API call
-        const params = new URLSearchParams({
-            target: targetUrl,
-            ip: ip,
-            port: port,
-            auth: auth,
-            uid: cid,
-            ga_id: gaId,
-            api_secret: apiSecret,
-            sessionDuration: duration,
-            referrer: referrer,
-            clicker: smartClicker,
-            // 🚀 NEW PARAMETER: activeUser for scroll/engagement simulation
-            activeUser: activeUser 
-        });
-
-        // The API call to your fixed backend endpoint
-        const response = await fetch(`${API_BASE_URL}/proxy-request?${params.toString()}`);
-        const data = await response.json();
-
-        if (response.ok && data.status === 'ACCEPTED') {
-            // Success response means the background job started
-            s.setStatus(`Accepted ✅. Session Duration: ${duration}s. (Check console for progress)`, true);
-        } else {
-            // Handle server-side errors
-            s.setStatus(`FAILED ❌: ${data.error || 'Server rejected the request.'}`, false);
-        }
-
-    } catch (error) {
-        console.error(`Slot ${s.index + 1} CRITICAL Error:`, error);
-        s.setStatus(`CRITICAL FAIL 🛑: Connection Error to API Server.`, false);
+        // Response is quick due to Connection: close header in PHP
+        setStatus('View Sent (BG Session Active)', true);
+        
+    } catch (e) {
+        setStatus('Failed (Network/Proxy Error)', false);
     }
+    
+    statusDot.style.animation = 'none';
+  }
+  
+  // Event Handlers
+  openBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    window.open(url, '_blank'); 
+  });
+
+  runBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    runAutomation(url); 
+  });
+  
+  setStatus('Ready', true);
+
+  // Expose the slot element to allow toggling scrolling globally on existing slots
+  return { 
+      runAutomation, 
+      setStatus,
+      element: el 
+  }; 
 }
 
+// Function to redraw slots based on the selected number
+function renderSlots(count) {
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+
+    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    if (count < 1 || count > maxCount) {
+        count = Math.min(Math.max(count, 1), maxCount);
+        numSlotsInput.value = count;
+    }
+    
+    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+
+    for(let i=0; i < count; i++){
+      const slot = createSlot(i, premiumProxies[i]);
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+// Global Stop Function
 function stopAllAutomation() {
-    // Clear all scheduled timeouts
-    slotTimeouts.forEach(clearTimeout);
-    slotTimeouts.length = 0; // Clear the array
-    
-    // Update UI state
-    currentSlots.forEach(s => {
-        s.setStatus('Stopped manually.');
-    });
-    
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
     globalStopBtn.style.display = 'none';
-    document.getElementById('runAllBtn').style.display = 'inline-block';
     
-    // Reset repeat mode UI
-    repeatModeCheckbox.checked = false;
-    repeatModeCheckbox.disabled = false;
-}
-
-function selectRandomReferrer() {
-    const referrerSelect = document.getElementById('referrerSelect');
-    referrerSelect.value = randomReferrers[randomInt(0, randomReferrers.length - 1)];
-}
-
-// Fills the referrer dropdown options
-function populateReferrers() {
-    const referrerSelect = document.getElementById('referrerSelect');
-    referrerSelect.innerHTML = '';
-    randomReferrers.forEach(ref => {
-        const option = document.createElement('option');
-        option.value = ref;
-        option.textContent = ref || "Direct / None";
-        referrerSelect.appendChild(option);
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
     });
+    
+    // Uncheck repeat mode if stopping
+    repeatModeCheckbox.checked = false;
 }
 
+// Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  if(!url){ 
+      alert('Please paste a valid URL into the global input field.'); 
+      return; 
+  }
+  
+  // Run once immediately
+  currentSlots.forEach(s => s.runAutomation(url));
+  
+  // If repeat mode is checked, start intervals
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+      
+    currentSlots.forEach((s) => {
+        // CRITICAL CHANGE: Get a fixed 30s delay
+        const fixedDelay = getRandomDelay(); 
+        const delayInSeconds = (fixedDelay / 1000);
 
-// --- EVENT LISTENERS (Delegation for Run Buttons) ---
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('run-btn')) {
-        const slotIndex = parseInt(e.target.dataset.index);
-        runSlot(slotIndex);
-    }
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, fixedDelay); // Use the fixed delay here
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
 });
-
-// Run All Button Logic
-document.getElementById('runAllBtn').addEventListener('click', () => {
-    if (repeatModeCheckbox.checked) {
-        // --- REPEAT MODE LOGIC ---
-        
-        // Check if all slots have IP:Port for repeat mode
-        const allSlotsHaveProxy = currentSlots.every(s => {
-            const { ip, port } = s.getProxyDetails();
-            return ip && port;
-        });
-
-        if (!allSlotsHaveProxy) {
-            alert("Error: All slots must have a valid IP:Port for Repeat Mode.");
-            return;
-        }
-        
-        // UI State change for Repeat Mode
-        document.getElementById('runAllBtn').style.display = 'none';
-        globalStopBtn.style.display = 'inline-block';
-        repeatModeCheckbox.disabled = true;
-
-        const scheduleNextRun = () => {
-            if (repeatModeCheckbox.checked) {
-                // 1. Run all slots
-                currentSlots.forEach((s, index) => runSlot(index));
-                
-                // 2. Schedule the next run (5 minutes + random jitter, matching your VPN change)
-                const nextDelay = 300000 + randomInt(10000, 30000); // 5 minutes 10 seconds to 5 minutes 30 seconds
-                const nextDelayInSeconds = (nextDelay / 1000).toFixed(1);
-                
-                // Set the timeout and track it
-                const timeoutId = setTimeout(scheduleNextRun, nextDelay);
-                // Clear previous timeout and store new one (Only one active scheduled timeout for next cycle)
-                slotTimeouts.forEach(clearTimeout);
-                slotTimeouts.length = 0; 
-                slotTimeouts.push(timeoutId); 
-                
-                currentSlots.forEach(s => s.setStatus(`Repeat Running. Next cycle in ${nextDelayInSeconds}s...`, true));
-                
-                // **VPN CHANGE ALERT**
-                alert(`ATTENTION: VPN/Proxy बदलने का समय हो गया है! (Next run in ${nextDelayInSeconds}s)`);
-
-            }
-        };
-        
-        // Start the first scheduled run after a brief delay
-        const initialDelay = getRandomDelay();
-        const initialTimeoutId = setTimeout(scheduleNextRun, initialDelay);
-        slotTimeouts.push(initialTimeoutId);
-        
-        const initialDelayInSeconds = (initialDelay / 1000).toFixed(1);
-        currentSlots.forEach(s => s.setStatus(`Starting Repeat Mode (First cycle in ${initialDelayInSeconds}s)...`, true));
-        
-    } else {
-        // Simple Run All (Non-Repeat Mode)
-        currentSlots.forEach((s, index) => runSlot(index));
-    }
-});
-
 
 // Event listeners
 numSlotsInput.addEventListener('change', (e) => {
@@ -395,10 +432,30 @@ numSlotsInput.addEventListener('change', (e) => {
     renderSlots(count);
 });
 
-// **REMOVED** autoScrollModeCheckbox LISTENER (functionality now managed by activeUserModeCheckbox + Backend)
+// Event listener for auto-scroll checkbox and reps input
+function updateScrollSettings() {
+    const isScrolling = autoScrollModeCheckbox.checked;
+    const scrollReps = parseInt(autoScrollRepsInput.value) || 1;
+    
+    // The total time for one session is 30 seconds (FIXED_CYCLE_TIME_MS)
+    const scrollDuration = FIXED_CYCLE_TIME_MS / scrollReps / 1000; 
+
+    currentSlots.forEach(s => {
+        if (isScrolling) {
+            // Apply the new duration via CSS variable
+            s.element.style.setProperty('--scroll-duration', `${scrollDuration}s`);
+            s.element.classList.add('scrolling');
+        } else {
+            // Remove scrolling
+            s.element.classList.remove('scrolling');
+        }
+    });
+}
+
+autoScrollModeCheckbox.addEventListener('change', updateScrollSettings);
+autoScrollRepsInput.addEventListener('change', updateScrollSettings);
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
-
 repeatModeCheckbox.addEventListener('change', () => {
     // Stop automation if repeat mode is unchecked while running
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
@@ -407,9 +464,7 @@ repeatModeCheckbox.addEventListener('change', () => {
 });
 
 
-// Initial setup when the page loads
-populateReferrers();
-selectRandomReferrer();
+// Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
