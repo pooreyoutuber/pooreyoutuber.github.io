@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as original website-ads.html) --- */
+  /* --- CSS Styles (No changes unless noted below) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -57,7 +57,7 @@
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Desktop Scale Fix */
+    /* Desktop Scale Fix: Simulates Mobile View (40% scale) */
     transform: scale(0.4); 
     transform-origin: 0 0;
     width: calc(100% / 0.4);
@@ -65,17 +65,20 @@
     opacity: 1;
   }
   
-  /* --- CSS for Auto-Scrolling (Modified) --- */
-  @keyframes scroll {
+  /* --- FIXED CSS for Auto-Scrolling --- */
+  @keyframes scroll { 
     0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, -200%) scale(0.4); } 
-    100% { transform: translate(0, 0) scale(0.4); } 
+    /* Moves the scaled content up by 150% of the container height (1/0.4 = 250% total height, so 150% is max scroll) */
+    100% { transform: translate(0, -150%) scale(0.4); } 
   }
 
   .slot.scrolling iframe {
     transform: translate(0, 0) scale(0.4); 
-    /* 3.5s duration for approx 8.5 cycles in 30s */
-    animation: scroll 3.5s ease-in-out infinite;
+    animation-name: scroll;
+    animation-duration: 8s; /* Slowed down for realism (8 seconds down, 8 seconds up) */
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate; /* CRITICAL FIX: Scrolls down, then scrolls back up smoothly */
     /* animation-delay is set via JavaScript for staggering */
   }
   /* ---------------------------------- */
@@ -208,7 +211,7 @@ const DUMMY_PROXIES = [
 // =========================================================================
 
 const MAX_SLOTS = 10; // Limited to 10 unique proxies available
-const PROXY_ENDPOINT = '/proxy-request'; // Targetting Tool 4 (GA4 Booster)
+const PROXY_ENDPOINT = 'http://your-server-ip:10000/proxy-request'; // CRITICAL: Update this to your deployed server URL
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -220,7 +223,7 @@ const maxTimeInput = document.getElementById('maxTime');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
-// NEW: Get the Auto Clicker Checkbox element
+// Get the Auto Clicker Checkbox element
 const autoClickerModeCheckbox = document.getElementById('autoClickerMode'); 
 
 let currentSlots = [];
@@ -274,8 +277,8 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
-  // NEW: Apply a random, negative animation delay for staggered start
-  const scrollDuration = 3.5; // Matches the CSS animation duration
+  // FIX APPLIED: Use the new animation duration (8s) for staggering
+  const scrollDuration = 8; 
   const randomScrollDelay = Math.random() * scrollDuration; 
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
@@ -285,20 +288,18 @@ function createSlot(index, proxy){
     statusDot.classList.toggle('active', isActive);
   }
   
-  // *** MODIFIED FUNCTION TO PASS AUTO CLICKER STATUS ***
+  // Function to build the proxied URL for the backend
   function getProxiedUrl(originalUrl, proxy){
-      // Check the status of the new optional checkbox
       const autoClickerEnabled = autoClickerModeCheckbox.checked ? '1' : '0';
       
-      // Note: proxy.ip and proxy.port might be empty if running in VPN mode
       const ipParam = proxy.ip ? `ip=${proxy.ip}&port=${proxy.port}&` : '';
       const authParam = proxy.auth ? `auth=${proxy.auth}&` : '';
 
+      // CRITICAL: Proxy endpoint is used here
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` + 
           ipParam + 
           authParam +
-          `sessionDuration=30&` + 
           `clicker=${autoClickerEnabled}&` + // Pass the optional parameter
           `uid=${proxy.uniqueId}`; 
   }
@@ -320,16 +321,13 @@ function createSlot(index, proxy){
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    // Changed status message to reflect fixed 30s
     setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. The backend script will run in the background.
-        // We use mode: 'no-cors' just for a quick request, assuming the response is quick.
+        // Fetch request is sent. 
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        // Response is quick due to the backend design
         setStatus('View Sent (BG Session Active)', true);
         
     } catch (e) {
@@ -354,7 +352,6 @@ function createSlot(index, proxy){
   
   setStatus('Ready', true);
 
-  // Expose the slot element to allow toggling scrolling globally on existing slots
   return { 
       runAutomation, 
       setStatus,
@@ -398,7 +395,7 @@ function stopAllAutomation() {
     repeatModeCheckbox.checked = false;
 }
 
-// Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
+// Global Start/Run Logic 
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -415,7 +412,6 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // CRITICAL CHANGE: Get a fixed 30s delay
         const fixedDelay = getRandomDelay(); 
         const delayInSeconds = (fixedDelay / 1000);
 
@@ -424,7 +420,7 @@ globalGoBtn.addEventListener('click', ()=>{
         const intervalId = setInterval(() => {
             s.runAutomation(url);
             s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
-        }, fixedDelay); // Use the fixed delay here
+        }, fixedDelay); 
         
         repeatIntervals.push(intervalId);
     });
@@ -440,17 +436,14 @@ numSlotsInput.addEventListener('change', (e) => {
 
 // Event listener for auto-scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
-    // Stop automation if repeat mode is unchecked while running
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
         stopAllAutomation();
     }
@@ -461,5 +454,4 @@ repeatModeCheckbox.addEventListener('change', () => {
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
-  </html>
-  
+</html>
