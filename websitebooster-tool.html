@@ -3,257 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💰 Ad Impression Booster - Earning Tool</title>
+    <title>Tool 4: 10 स्लॉट प्रॉक्सी Iframe लोडर</title>
     <style>
-        /* --- General Styling --- */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f9;
-            color: #333;
-            margin: 0;
-            padding: 20px;
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; }
+        #input-area { padding: 25px; background-color: #2c3e50; border-bottom: 5px solid #3498db; text-align: center; color: white; }
+        h1 { margin-top: 0; font-size: 2em; }
+        #urlInput { 
+            width: 50%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border: none; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 1em;
+        }
+        #loadButton { 
+            padding: 12px 30px; 
+            background-color: #2ecc71; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #loadButton:hover { background-color: #27ae60; }
+
+        /* नया: ऑप्शन्स एरिया */
+        #options-area {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #34495e;
+            border-radius: 6px;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+            gap: 20px;
         }
-
-        .container {
-            background-color: #ffffff;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1 {
-            color: #007bff;
-            text-align: center;
-            margin-bottom: 5px;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 10px;
-        }
-        
-        h3 {
-            color: #555;
-            text-align: center;
-            margin-top: 0;
-            font-weight: 400;
-        }
-
-        /* --- Form Styling --- */
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #555;
-        }
-
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
-            outline: none;
-        }
-
-        /* --- Button Styling --- */
-        #boost-button {
-            width: 100%;
-            padding: 15px;
-            background-color: #28a745; /* Green for Start */
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 700;
+        #options-area label {
+            font-size: 0.95em;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            user-select: none;
+        }
+        #options-area input[type="checkbox"] {
+            margin-right: 5px;
+            accent-color: #3498db;
         }
 
-        #boost-button:hover {
-            background-color: #218838;
+        /* Iframe ग्रिड */
+        .iframe-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 15px; 
+            padding: 20px;
         }
-        
-        #boost-button:disabled {
-            background-color: #95d3a5;
-            cursor: not-allowed;
-        }
-
-        /* --- Status & Log Area --- */
-        #status-message {
-            margin-top: 20px;
-            padding: 15px;
+        .iframe-slot {
+            width: 100%;
+            height: 350px; 
+            border: 4px solid #3498db; 
             border-radius: 8px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .note {
             text-align: center;
-            font-weight: 600;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .status-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            opacity: 1;
-        }
-
-        .status-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            opacity: 1;
-        }
-        
-        .log-box {
-            margin-top: 20px;
-            background-color: #eee;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: scroll;
-            font-family: monospace;
-            font-size: 0.85em;
-            white-space: pre-wrap;
+            padding: 15px;
+            color: #e74c3c;
+            font-weight: bold;
+            background-color: #fbecec;
+            margin: 0;
+            border-bottom: 1px solid #e74c3c;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>💰 Ad Impression Booster</h1>
-        <h3>Proxy-based Earning Session Starter</h3>
+
+    <div id="input-area">
+        <h1>🌐 Tool 4: 10 स्लॉट प्रॉक्सी रोटेटर</h1>
+        <input type="text" id="urlInput" placeholder="टारगेट URL पेस्ट करें (e.g., https://bing.com)" value="">
+        <button id="loadButton">💥 10 प्रॉक्सी Iframe लोड करें</button>
         
-        <div id="status-message"></div>
-
-        <div class="form-group">
-            <label for="targetUrl">🔗 Target URL (iFrame/Slot Page)</label>
-            <input type="text" id="targetUrl" placeholder="https://yourwebsite.com/slot-page.html" required>
+        <div id="options-area">
+            <label><input type="checkbox" id="autoReloadCheck"> 1. Auto Reload (30s)</label>
+            <label><input type="checkbox" id="autoScrollCheck"> 2. Auto Scrolling (Limited)</label>
+            <label><input type="checkbox" id="autoClickCheck"> 3. Auto Clicker (Limited)</label>
         </div>
-
-        <div class="form-group">
-            <label for="proxyIp">🌍 Proxy IP (e.g., 192.168.1.1)</label>
-            <input type="text" id="proxyIp" placeholder="Enter Proxy IP" required>
-        </div>
-
-        <div class="form-group">
-            <label for="proxyPort">🔌 Proxy Port (e.g., 8080)</label>
-            <input type="number" id="proxyPort" placeholder="Enter Proxy Port" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="proxyAuth">🔑 Proxy Auth (Username:Password - Optional)</label>
-            <input type="text" id="proxyAuth" placeholder="user:pass (Optional)">
-        </div>
-        
-        <div class="form-group">
-            <label for="sessionDuration">⏱️ Session Duration (Seconds)</label>
-            <input type="number" id="sessionDuration" value="45" min="15" max="300" required>
-        </div>
-
-        <button id="boost-button">🚀 Start Earning Session</button>
-        
-        <div class="log-box" id="log-box">
-            --- Session Log ---
-        </div>
-
     </div>
+    
+    <p class="note">
+        ✅ हर Iframe एक **नई प्रॉक्सी** का उपयोग करेगा। ⚠️ Auto Scrolling/Clicking अधिकांश साइटों पर **काम नहीं करेगा** (Same-Origin Policy)।
+    </p>
+
+    <div class="iframe-container" id="iframe-container">
+        </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:10000'; // <-- CHANGE THIS!
-        // IMPORTANT: When deploying on Render, change this to your Render Service URL (e.g., https://your-render-service.onrender.com)
+        const container = document.getElementById('iframe-container');
+        const urlInput = document.getElementById('urlInput');
+        const loadButton = document.getElementById('loadButton');
+        const autoReloadCheck = document.getElementById('autoReloadCheck');
+        const autoScrollCheck = document.getElementById('autoScrollCheck');
+        const autoClickCheck = document.getElementById('autoClickCheck');
         
-        const boostButton = document.getElementById('boost-button');
-        const statusMessage = document.getElementById('status-message');
-        const logBox = document.getElementById('log-box');
-
-        function appendLog(message) {
-            const now = new Date().toLocaleTimeString();
-            logBox.innerHTML += `\n[${now}] ${message}`;
-            logBox.scrollTop = logBox.scrollHeight; // Auto-scroll to bottom
+        const IFRAME_COUNT = 10;
+        const proxyEndpoint = '/load?url=';
+        let reloadInterval = null; 
+        
+        // 10 खाली iframes बनाएं
+        function createIframes() {
+            container.innerHTML = ''; 
+            for (let i = 0; i < IFRAME_COUNT; i++) {
+                const iframe = document.createElement('iframe');
+                iframe.id = `iframe-${i + 1}`;
+                iframe.className = 'iframe-slot';
+                iframe.setAttribute('frameborder', '0');
+                iframe.setAttribute('src', 'about:blank'); 
+                // हर iframe को एक इवेंट लिसनर दें ताकि लोड होने पर गतिविधि शुरू हो सके
+                iframe.onload = () => {
+                    const scrollEnabled = autoScrollCheck.checked;
+                    const clickEnabled = autoClickCheck.checked;
+                    if (scrollEnabled || clickEnabled) {
+                        simulateActivity(iframe, scrollEnabled, clickEnabled);
+                    }
+                };
+                container.appendChild(iframe);
+            }
         }
 
-        function setStatus(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = `status-${type}`;
-            statusMessage.style.opacity = '1';
+        /**
+         * Same-Origin Policy के कारण, यह फ़ंक्शन ज्यादातर विफल हो जाएगा, 
+         * लेकिन यह लॉजिक को तैयार रखता है अगर कोई समान डोमेन लोड हो।
+         */
+        function simulateActivity(iframe, doScroll, doClick) {
+            try {
+                const iframeWindow = iframe.contentWindow;
+                const iframeDocument = iframeWindow.document;
+
+                if (!iframeDocument || !iframeDocument.body) {
+                    console.warn(`[Iframe ${iframe.id}] Document not accessible (Same-Origin Policy likely)`);
+                    return;
+                }
+                
+                if (doScroll) {
+                    // 1. Auto Scrolling
+                    const scrollDuration = 5000; // 5 seconds of scrolling
+                    const scrollInterval = 500;
+                    let scrollHeight = iframeDocument.body.scrollHeight;
+                    let scrollPos = 0;
+                    let scrollDirection = 1; // 1: down, -1: up
+
+                    const scrollLoop = setInterval(() => {
+                        if (scrollDirection === 1) {
+                            scrollPos += 100;
+                            if (scrollPos >= scrollHeight) {
+                                scrollDirection = -1; // Change to up
+                            }
+                        } else {
+                            scrollPos -= 100;
+                            if (scrollPos <= 0) {
+                                scrollDirection = 1; // Change to down
+                            }
+                        }
+
+                        // स्क्रॉल लागू करें
+                        iframeWindow.scrollTo(0, scrollPos);
+
+                        // 5 सेकंड के बाद स्क्रॉलिंग बंद करें
+                        if (Date.now() - startTime >= scrollDuration) {
+                            clearInterval(scrollLoop);
+                        }
+                    }, scrollInterval);
+
+                    const startTime = Date.now();
+                }
+
+                if (doClick) {
+                    // 2. Auto Clicker (पहला लिंक या बटन ढूंढें)
+                    const clickableElements = iframeDocument.querySelectorAll('a, button');
+                    if (clickableElements.length > 0) {
+                        // एक रैंडम एलिमेंट पर क्लिक करें
+                        const randomIndex = Math.floor(Math.random() * clickableElements.length);
+                        const targetElement = clickableElements[randomIndex];
+                        console.log(`[Iframe ${iframe.id}] Simulating click on: ${targetElement.tagName}`);
+                        targetElement.click(); 
+                    }
+                }
+
+            } catch (e) {
+                // यह एरर तब आती है जब Same-Origin Policy इसे ब्लॉक करता है
+                console.error(`[Iframe ${iframe.id}] Activity Blocked: ${e.message}`);
+            }
         }
 
-        boostButton.addEventListener('click', async () => {
-            const target_url = document.getElementById('targetUrl').value.trim();
-            const ip = document.getElementById('proxyIp').value.trim();
-            const port = document.getElementById('proxyPort').value.trim();
-            const auth = document.getElementById('proxyAuth').value.trim();
-            const sessionDuration = document.getElementById('sessionDuration').value.trim();
-            
-            // Basic Frontend Validation
-            if (!target_url || !ip || !port) {
-                setStatus('❌ कृपया Target URL, IP और Port भरें।', 'error');
+        // iframes को लोड करने और ऑटोमेशन शुरू करने के लिए मुख्य फ़ंक्शन
+        function loadAndAutomate() {
+            const targetUrl = urlInput.value.trim();
+
+            if (!targetUrl) {
+                alert("कृपया लोड करने के लिए एक URL दर्ज करें।");
                 return;
             }
-
-            // Construct the API URL for Tool 4
-            const apiUrl = new URL(`${API_BASE_URL}/ad-impression-booster`);
-            apiUrl.searchParams.append('target_url', target_url);
-            apiUrl.searchParams.append('ip', ip);
-            apiUrl.searchParams.append('port', port);
-            apiUrl.searchParams.append('sessionDuration', sessionDuration);
             
-            if (auth) {
-                apiUrl.searchParams.append('auth', auth);
+            // पुराने इंटरवल को रोकें
+            if (reloadInterval) {
+                clearInterval(reloadInterval);
+                reloadInterval = null;
             }
-            
-            // UI Update before fetch
-            boostButton.disabled = true;
-            boostButton.textContent = '⏱️ Processing... Check Server Console!';
-            statusMessage.style.opacity = '0';
-            logBox.innerHTML = '--- Session Log ---'; // Clear log
-            appendLog(`Starting session for URL: ${target_url}`);
 
-            try {
-                const response = await fetch(apiUrl.toString());
-                const result = await response.json();
+            // सुनिश्चित करें कि URL में 'http' या 'https' है
+            let fullTargetUrl = targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`;
 
-                if (response.ok && result.status === 'ACCEPTED') {
-                    setStatus(`✅ SUCCESS: Request accepted by server. Message: ${result.message}`, 'success');
-                    appendLog(`Server Response: ${result.message}`);
-                    appendLog(`*** CHECK RENDER SERVER CONSOLE FOR LIVE PROGRESS ***`);
-                } else {
-                    // Handle API error response
-                    const errorMessage = result.error || 'Unknown server error.';
-                    setStatus(`❌ FAILED: ${errorMessage}`, 'error');
-                    appendLog(`ERROR: ${errorMessage}`);
-                }
-            } catch (error) {
-                // Handle network/connection error
-                setStatus(`❌ CRITICAL ERROR: Could not connect to API server. (${API_BASE_URL})`, 'error');
-                appendLog(`NETWORK ERROR: ${error.message}`);
-            } finally {
-                // Re-enable button after a short delay
-                setTimeout(() => {
-                    boostButton.disabled = false;
-                    boostButton.textContent = '🚀 Start Earning Session';
-                }, 5000); // 5 second cool-down
+            const iframes = container.querySelectorAll('.iframe-slot');
+
+            iframes.forEach((iframe, index) => {
+                // हर iframe को सर्वर के प्रॉक्सी एंडपॉइंट पर भेजें।
+                iframe.src = `${proxyEndpoint}${encodeURIComponent(fullTargetUrl)}&slot=${index}`;
+            });
+
+            // यदि Auto Reload चुना गया है, तो एक नया इंटरवल सेट करें
+            if (autoReloadCheck.checked) {
+                const reloadTimeMs = 30000; // 30 seconds
+                reloadInterval = setInterval(loadAndAutomate, reloadTimeMs);
+                alert(`Iframes loaded and Auto Reloading every ${reloadTimeMs/1000} seconds.`);
+            } else {
+                alert(`Iframes loaded once. Reloading disabled.`);
             }
-        });
+        }
+
+
+        // बटन क्लिक पर loadAndAutomate शुरू करें
+        loadButton.addEventListener('click', loadAndAutomate);
+
+        // पेज लोड होने पर iframes बनाएं
+        window.onload = createIframes;
+
     </script>
+
 </body>
 </html>
