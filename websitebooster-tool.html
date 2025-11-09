@@ -31,7 +31,13 @@
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  /* Updated for better layout of multiple options */
+  .repeat-control { 
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--muted); 
+    background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .control-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
@@ -114,20 +120,30 @@
         </div>
         
         <div class="repeat-control">
-            <input type="checkbox" id="repeatMode" />
-            <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all 
-                <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
-                <label for="maxTime">Max:</label>
-                <input id="maxTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
-                <span>seconds cycle</span> for better GA tracking.
-            </label>
+            <div class="control-row">
+                <input type="checkbox" id="repeatMode" />
+                <label for="repeatMode">
+                    Enable **Active User** Mode: Repeat all 
+                    <label for="minTime">Min:</label>
+                    <input id="minTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
+                    <label for="maxTime">Max:</label>
+                    <input id="maxTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
+                    <span>seconds cycle</span> for better GA tracking.
+                </label>
+            </div>
             
-            <input type="checkbox" id="autoScrollMode" />
-            <label for="autoScrollMode">
-                Enable **Auto Scroll** (Simulated & Staggered)
-            </label>
+            <div class="control-row">
+                <input type="checkbox" id="autoScrollMode" />
+                <label for="autoScrollMode">
+                    Enable **Auto Scroll** (Simulated & Staggered)
+                </label>
+                
+                <input type="checkbox" id="autoClickerMode" checked />
+                <label for="autoClickerMode">
+                    Enable **Auto Clicker** (Earning Booster)
+                </label>
+            </div>
+            
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
@@ -136,13 +152,13 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Active User Fix:</strong> यह टूल हर रिक्वेस्ट के साथ एक **Unique Client ID** भेजता है, जो GA4 में एक नया **Active User** सेशन रजिस्टर करता है।
+                <strong>Earning Booster:</strong> **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai, jisse MonetaG jaise ad network par earning badhti hai.
             </li>
             <li>
-                <strong>Action:</strong> **'Enable Active User Mode'** चेक करें और 'Load & Run All' पर क्लिक करें। यह हर **30 सेकंड** में प्रॉक्सी के माध्यम से रिक्वेस्ट दोहराएगा।
+                <strong>VPN Mode:</strong> Proxy fields empty chhodne par, yeh tool aapke **VPN** IP se request bhejega. Agar Proxy use karna hai, toh `ip` aur `port` bharein.
             </li>
             <li>
-                **CRITICAL:** आप अभी **10 प्रॉक्सी** का उपयोग कर रहे हैं। स्लॉट्स को 10 पर सेट रखें। बेहतर ट्रैफिक गुणवत्ता के लिए, `index.html` में अधिक यूनिक IP जोड़ें।
+                <strong>Action:</strong> **'Enable Active User Mode'** aur **'Auto Clicker'** (default checked) check rakhein. **'Load & Run All'** se test shuru karein.
             </li>
         </ul>
     </div>
@@ -161,7 +177,7 @@ const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
 
 // Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
@@ -204,6 +220,9 @@ const maxTimeInput = document.getElementById('maxTime');
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
+// NEW: Get the Auto Clicker Checkbox element
+const autoClickerModeCheckbox = document.getElementById('autoClickerMode'); 
+
 let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
@@ -226,10 +245,6 @@ function getRandomDelay() {
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
-  
-  // NOTE: You must also pass ga_id and api_secret via the URL for Tool 4 /proxy-request to fully work.
-  // The UI doesn't have an input for it, so you'll need to add them manually to the globalUrl for testing
-  // e.g. https://yourwebsite.com?ga_id=G-XXXXX&api_secret=YYY
   
   el.innerHTML = `
     <div class="slot-top">
@@ -262,7 +277,6 @@ function createSlot(index, proxy){
   // NEW: Apply a random, negative animation delay for staggered start
   const scrollDuration = 3.5; // Matches the CSS animation duration
   const randomScrollDelay = Math.random() * scrollDuration; 
-  // Set negative delay to start the animation at a random point in its cycle.
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
 
@@ -271,21 +285,22 @@ function createSlot(index, proxy){
     statusDot.classList.toggle('active', isActive);
   }
   
+  // *** MODIFIED FUNCTION TO PASS AUTO CLICKER STATUS ***
   function getProxiedUrl(originalUrl, proxy){
-      // NOTE: /proxy-request needs GA4 keys to be passed. Since the UI doesn't have fields for them,
-      // it assumes you will pass the main target URL with GA4 keys in the URL query string,
-      // which is how the original Tool 4 frontend worked.
+      // Check the status of the new optional checkbox
+      const autoClickerEnabled = autoClickerModeCheckbox.checked ? '1' : '0';
       
-      // GA4 keys (if provided in the URL) will be extracted by the backend.
-      // Target URL is extracted by the backend.
-      
+      // Note: proxy.ip and proxy.port might be empty if running in VPN mode
+      const ipParam = proxy.ip ? `ip=${proxy.ip}&port=${proxy.port}&` : '';
+      const authParam = proxy.auth ? `auth=${proxy.auth}&` : '';
+
       return `${PROXY_ENDPOINT}?` + 
-          `target=${encodeURIComponent(originalUrl)}&` + // The actual page to visit
-          `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}&` + 
-          `sessionDuration=30&` + // Fixed 30s session duration
-          `clicker=1&` + // Defaulting to smart clicker enabled
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+          `target=${encodeURIComponent(originalUrl)}&` + 
+          ipParam + 
+          authParam +
+          `sessionDuration=30&` + 
+          `clicker=${autoClickerEnabled}&` + // Pass the optional parameter
+          `uid=${proxy.uniqueId}`; 
   }
 
   // --- Core Automation Function ---
@@ -310,7 +325,7 @@ function createSlot(index, proxy){
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. The backend script will run for 30s in the background.
+        // Fetch request is sent. The backend script will run in the background.
         // We use mode: 'no-cors' just for a quick request, assuming the response is quick.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
@@ -446,4 +461,5 @@ repeatModeCheckbox.addEventListener('change', () => {
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
-</html>
+  </html>
+  
