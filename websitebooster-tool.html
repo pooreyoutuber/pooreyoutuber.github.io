@@ -184,7 +184,8 @@ let currentSlots = [];
 let repeatIntervals = [];
 
 // --- Utilities ---
-const getRandomDelay = () => 30000; // Fixed 30 seconds for earning cycle
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const getRandomDelay = () => randomInt(30000, 40000); // Random delay between 30s-40s for ultra-realism
 
 const generateUniqueId = () => Math.random().toString(36).substring(2, 12) + Date.now().toString(36).substring(2, 5);
 
@@ -225,7 +226,7 @@ class Slot {
                 </div>
             </div>
             <div class="slot-body">
-                <input type="text" class="slot-url-input" placeholder="Target URL (e.g., https://example.com/page-1)">
+                <input type="text" class="slot-url-input" placeholder="Target URL (e.g., https://example.com)">
                 <input type="text" class="slot-proxy-input" placeholder="Proxy IP:Port (Optional)">
                 <input type="text" class="slot-auth-input" placeholder="Proxy Auth (user:pass, Optional)">
                 <input type="text" class="slot-gaid-input" placeholder="GA4 ID (G-XXXXX, Optional)">
@@ -264,16 +265,12 @@ class Slot {
             const newY = randomInt(50, height - 50);
             const duration = randomInt(500, 2000); 
 
-            // Update CSS for smooth transition
             this.mouseCursor.style.transitionDuration = `${duration}ms`;
             this.mouseCursor.style.transform = `translate(${newX}px, ${newY}px)`;
             
             // Random Click Simulation (Very Low Probability)
-            if (Math.random() < 0.05) { // 5% chance to click every move cycle
-                 this.setStatus('Random Click Simulated!', true);
-                 // We don't need to do anything here because the main server logic (Tool 4) 
-                 // is already handling the "Conversion/Click" when 'clicker=1' is sent.
-                 // This just adds a visual/client-side layer of realism.
+            if (Math.random() < 0.03) { // 3% chance to simulate a click visually
+                 this.setStatus('Visual Click Simulated!', true);
             }
         };
 
@@ -308,7 +305,7 @@ class Slot {
         const apiSecret = this.apiSecretInput.value.trim();
         const uniqueUid = generateUniqueId();
         
-        // AdSense Safe Logic: clicker=1 (Max Earning) only if the checkbox is checked
+        // CRITICAL: This sends '1' for Max Earning and '0' for Safe Mode
         const clickerStatus = mouseClickModeCheckbox.checked ? '1' : '0'; 
 
         const params = new URLSearchParams({
@@ -319,13 +316,13 @@ class Slot {
             auth: proxyAuth || '',
             ga_id: gaId || '',
             api_secret: apiSecret || '',
-            clicker: clickerStatus // CRITICAL: This controls Max Earning Mode in index.js
+            clicker: clickerStatus 
         });
 
         const fullApiUrl = `${apiUrl}?${params.toString()}`;
 
-        this.setStatus('Sending request to Backend API...', true);
-        this.iframe.src = 'about:blank'; // Clear iframe before next request
+        this.setStatus('Sending request to Backend API (Max CPC Logic)...', true);
+        this.iframe.src = 'about:blank'; 
         
         // 2. Start Mouse Movement for Realism
         this.startMouseMovement();
@@ -335,14 +332,12 @@ class Slot {
             const data = await response.json();
 
             if (data.status === 'OK') {
-                this.setStatus(`Success! Status: ${data.message.substring(0, 50)}...`, true);
+                this.setStatus(`Success! Mode: ${clickerStatus === '1' ? 'MAX EARNING' : 'ADSENSE SAFE'}.`, true);
             } else {
                 this.setStatus(`Error: ${data.error} | ${data.details.substring(0, 50)}...`, false, true);
             }
             
             // 3. Update Iframe Source (for visual proof)
-            // We set the iframe source AFTER the proxy request to ensure the 
-            // traffic is counted by the server before the browser loads it.
             this.iframe.src = url;
 
         } catch (error) {
@@ -350,7 +345,7 @@ class Slot {
             this.stopAutomation(); 
         }
 
-        // 4. Update the scrolling state after running
+        // 4. Update the scrolling state
         this.iframe.parentElement.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
     }
 
@@ -365,7 +360,7 @@ class Slot {
 
         if (repeatModeCheckbox.checked) {
             const fixedDelay = getRandomDelay(); 
-            this.setStatus(`Starting Repeat Mode (${fixedDelay / 1000}s cycle)...`, true);
+            this.setStatus(`Starting Repeat Mode (${Math.round(fixedDelay / 1000)}s cycle)...`, true);
             this.intervalId = setInterval(runOnce, fixedDelay);
         } else {
             this.setStatus('Running once...', true);
@@ -386,8 +381,8 @@ class Slot {
             this.intervalId = null;
         }
         
-        this.stopMouseMovement(); // Stop the mouse movement
-        this.iframe.parentElement.classList.remove('scrolling'); // Stop scrolling
+        this.stopMouseMovement(); 
+        this.iframe.parentElement.classList.remove('scrolling'); 
         this.setStatus('Stopped', false);
     }
 
@@ -419,16 +414,10 @@ function stopAllAutomation() {
 
 // --- Global Event Listeners ---
 globalStartBtn.addEventListener('click', () => {
-    stopAllAutomation(); // Ensure all are stopped before starting
+    stopAllAutomation(); 
     
-    // Check if repeat mode is enabled and use that logic
-    if (repeatModeCheckbox.checked) {
-        // Start all slots immediately without a global interval
-        currentSlots.forEach(s => s.startAutomation(true));
-    } else {
-        // Run once mode
-        currentSlots.forEach(s => s.runAutomation());
-    }
+    // Start all slots immediately
+    currentSlots.forEach(s => s.startAutomation(true));
 
     globalStartBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
@@ -436,6 +425,14 @@ globalStartBtn.addEventListener('click', () => {
 
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
+
+
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
 
 // Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
