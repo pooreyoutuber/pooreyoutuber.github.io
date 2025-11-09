@@ -68,11 +68,12 @@
   /* --- FIXED CSS for Auto-Scrolling --- */
   @keyframes scroll { 
     0% { transform: translate(0, 0) scale(0.4); } 
-    /* Moves the scaled content up by 150% of the container height (1/0.4 = 250% total height, so 150% is max scroll) */
+    /* Changed from -200% to -150% to cover the full scaled content height (250%) without showing white space */
     100% { transform: translate(0, -150%) scale(0.4); } 
   }
 
   .slot.scrolling iframe {
+    /* Starting point */
     transform: translate(0, 0) scale(0.4); 
     animation-name: scroll;
     animation-duration: 8s; /* Slowed down for realism (8 seconds down, 8 seconds up) */
@@ -211,7 +212,7 @@ const DUMMY_PROXIES = [
 // =========================================================================
 
 const MAX_SLOTS = 10; // Limited to 10 unique proxies available
-const PROXY_ENDPOINT = 'http://your-server-ip:10000/proxy-request'; // CRITICAL: Update this to your deployed server URL
+const PROXY_ENDPOINT = '/proxy-request'; // Targetting Tool 4 (GA4 Booster)
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -278,8 +279,9 @@ function createSlot(index, proxy){
   const statusDot = el.querySelector(`#dot-${index}`);
   
   // FIX APPLIED: Use the new animation duration (8s) for staggering
-  const scrollDuration = 8; 
+  const scrollDuration = 8; // Matches the fixed CSS animation duration
   const randomScrollDelay = Math.random() * scrollDuration; 
+  // Stagger the start time by setting a random negative delay
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
 
@@ -295,11 +297,11 @@ function createSlot(index, proxy){
       const ipParam = proxy.ip ? `ip=${proxy.ip}&port=${proxy.port}&` : '';
       const authParam = proxy.auth ? `auth=${proxy.auth}&` : '';
 
-      // CRITICAL: Proxy endpoint is used here
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` + 
           ipParam + 
           authParam +
+          `sessionDuration=30&` + // Always 30 seconds for the session
           `clicker=${autoClickerEnabled}&` + // Pass the optional parameter
           `uid=${proxy.uniqueId}`; 
   }
