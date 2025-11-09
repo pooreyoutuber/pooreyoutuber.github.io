@@ -1,4 +1,4 @@
-// index.js (FINAL VERSION - 5 Tools, No Conflicts)
+// index.js (FINAL VERSION - 4 Tools: Booster, Caption Gen, Caption Edit, Iframe Proxy)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -8,9 +8,7 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
-const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// Import 'http' for non-authenticated proxies
-const http = require('http'); 
+const path = require('path'); // index.html सर्व करने के लिए
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -18,10 +16,8 @@ const PORT = process.env.PORT || 10000;
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
-    // Attempt to read key from Render Secrets (Best Practice)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
 } catch (e) {
-    // Fallback to environment variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
 }
 
@@ -29,7 +25,6 @@ let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
-    // Dummy AI object if key is missing to avoid crashing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
@@ -48,13 +43,9 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', (req, res) => {
-    res.status(200).send('PooreYouTuber Combined API is running! Access tools via GitHub Pages.'); 
-});
-
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
+// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension in Tool 1) ---
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -70,13 +61,12 @@ function getRandomGeo() {
 }
 
 
-// 🔥 REPLIT HACK 1: Client ID Generation (Simple, non-UUID style)
+// 🔥 Client ID Generation (Simple, non-UUID style)
 function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC ---
-// Used by Tool 1 (/boost-mp)
+// --- TRAFFIC SOURCE LOGIC (Used for Tool 1) ---
 const TRAFFIC_SOURCES_GA4 = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
@@ -85,20 +75,8 @@ const TRAFFIC_SOURCES_GA4 = [
     { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" },
     { source: "(direct)", medium: "(none)", referrer: "" }
 ];
-// Used by Tool 4 & 5
-const TRAFFIC_SOURCES_PROXY = [ 
-    { source: "google", medium: "organic", referrer: "https://www.google.com/" },
-    { source: "direct", medium: "none", referrer: "" },
-    { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
-    { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
-    { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
-];
 
 function getRandomTrafficSource(isProxyTool = false) {
-    if (isProxyTool) {
-        return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 1)];
-    }
-    // Logic for /boost-mp
     if (Math.random() < 0.5) {
         return TRAFFIC_SOURCES_GA4[5]; // (direct) / (none)
     }
@@ -115,7 +93,7 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (for /boost-mp and /proxy-request) ---
+// --- GA4 DATA SENDING (for Tool 1) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType, proxyAgent = null) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
@@ -129,7 +107,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType, prox
                 'Content-Type': 'application/json',
                 'User-Agent': USER_AGENT 
             },
-            agent: proxyAgent // Use proxyAgent if provided
+            agent: proxyAgent 
         });
 
         if (response.status === 204) { 
@@ -146,7 +124,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType, prox
     }
 }
 
-// Validation function (for /boost-mp)
+// Validation function (for Tool 1)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const testPayload = {
@@ -180,13 +158,13 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session with full attribution parameters. (Used by /boost-mp)
+ * Simulates a single view session with full attribution parameters. (Used by Tool 1)
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource(false); // Use GA4 specific traffic logic
+    const traffic = getRandomTrafficSource(false); 
     const engagementTime = randomInt(30000, 120000); 
 
     const userProperties = {
@@ -278,7 +256,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 }
 
 
-// --- VIEW PLAN GENERATION (for /boost-mp) ---
+// --- VIEW PLAN GENERATION (for Tool 1) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -302,7 +280,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL 
+// TOOL 1: WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL 
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -356,7 +334,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
+// TOOL 2: AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -400,7 +378,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
+// TOOL 3: AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -444,378 +422,122 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - ORIGINAL TOOL 4 (Unchanged)
+// TOOL 4: Iframe Proxy Loader (API: /load) - NEW TOOL
 // ===================================================================
-app.get('/proxy-request', async (req, res) => {
-    
-    // 1. Get parameters from the frontend URL query
-    const { target, ip, port, auth, uid, ga_id, api_secret, sessionDuration, referrer, clicker, clickDelay } = req.query; 
 
-    // Basic validation check
-    if (!target || !ip || !port || !uid) {
-        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, ip, port, uid).' });
+// --- प्रॉक्सी डेटा और रोटेशन लॉजिक (Tool 4 Specific) ---
+// आपकी प्रीमियम प्रॉक्सी सूची (IP:PORT:USERNAME:PASSWORD)
+const proxyList = [
+    "142.111.48.253:7030:bqctypvz:399xb3kxqv6i",
+    "31.59.20.176:6754:bqctypvz:399xb3kxqv6i",
+    "23.95.150.145:6114:bqctypvz:399xb3kxqv6i",
+    "198.23.239.134:6540:bqctypvz:399xb3kxqv6i",
+    "45.38.107.97:6014:bqctypvz:399xb3kxqv6i",
+    "107.172.163.27:6543:bqctypvz:399xb3kxqv6i",
+    "198.105.121.200:6462:bqctypvz:399xb3kxqv6i",
+    "64.137.96.74:6641:bqctypvz:399xb3kxqv6i",
+    "216.10.27.159:6837:bqctypvz:399xb3kxqv6i",
+    "142.111.67.146:5611:bqctypvz:399xb3kxqv6i"
+];
+
+let currentProxyIndex = 0;
+
+function getNextProxy() {
+    if (proxyList.length === 0) {
+        return null;
     }
+    // प्रॉक्सी को रोटेट करें (बारी-बारी से अगली प्रॉक्सी चुनें)
+    const proxy = proxyList[currentProxyIndex];
+    currentProxyIndex = (currentProxyIndex + 1) % proxyList.length;
+    return proxy;
+}
+// --------------------------------------------------------------------
 
-    const isGaMpEnabled = ga_id && api_secret; 
-    const sessionDurationMs = parseInt(sessionDuration || 30) * 1000;
-    const clickerEnabled = clicker === '1';
-    const clickDelayMs = parseInt(clickDelay || 15) * 1000;
 
-    // --- 2. IMMEDIATE RESPONSE (to avoid frontend timeout) ---
-    const message = isGaMpEnabled ? 
-                        `GA4 MP data will be sent in background via proxy. Session Duration: ${sessionDuration}s.` : 
-                        'Request accepted (No GA MP keys provided).';
-
-    res.status(200).json({ 
-        status: 'ACCEPTED', 
-        message: message
-    });
-    
-    // --- 3. START HEAVY LIFTING IN BACKGROUND (IIFE) ---
-    (async () => {
-        
-        // --- Proxy Setup (FIXED) ---
-        let proxyAgent;
-        const proxyAddress = `${ip}:${port}`;
-        
-        // Authenticated vs Non-Authenticated Proxy Agent
-        if (auth && auth.includes(':') && auth !== ':') {
-            const [username, password] = auth.split(':');
-            const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
-            proxyAgent = new HttpsProxyAgent(proxyUrl);
-            console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
-        } else {
-             // For non-authenticated proxy
-             try {
-                // Try HttpsProxyAgent first
-                proxyAgent = new HttpsProxyAgent(`http://${proxyAddress}`);
-             } catch (e) {
-                // Fallback for simple HTTP agents
-                proxyAgent = new http.Agent({ host: ip, port: port });
-             }
-            console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
-        }
-        
-        // --- GA4 MP Session Data Generation ---
-        const cid = uid; 
-        const session_id = Date.now(); 
-        const geo = getRandomGeo(); 
-        const traffic = getRandomTrafficSource(true); 
-        const initialEngagementTime = randomInt(15000, 30000); 
-        
-        const userProperties = {
-            simulated_geo: { value: geo.country }, 
-            user_timezone: { value: geo.timezone }
-        };
-        
-        let eventCount = 0;
-        let totalTimeWaited = 0;
-        
-        // --- FUNCTION TO SEND DATA VIA PROXY ---
-        async function sendDataViaProxy(payload, eventType) {
-            if (!isGaMpEnabled) {
-                 return false; 
-            }
-            
-            const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; 
-            payload.timestamp_micros = String(Date.now() * 1000); 
-            const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
-            
-            try { 
-                const response = await nodeFetch(gaEndpoint, { 
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'User-Agent': USER_AGENT 
-                    },
-                    agent: proxyAgent 
-                });
-
-                if (response.status === 204) { 
-                    console.log(`[PROXY ${ip}] SUCCESS ✅ | Sent: ${eventType}`);
-                    return true;
-                } else {
-                    const errorText = await response.text(); 
-                    console.error(`[PROXY ${ip}] FAILURE ❌ | Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
-                    return false;
-                }
-            } catch (error) {
-                console.error(`[PROXY ${ip}] CRITICAL ERROR ⚠️ | Event: ${eventType}. Connection Failed: ${error.message}`);
-                return false;
-            }
-        }
-        // --- END: FUNCTION TO SEND DATA VIA PROXY ---
-        
-        try {
-            console.log(`\n--- [PROXY ${ip}] Session Start (Duration: ${sessionDuration}s, Clicker: ${clickerEnabled}) ---`);
-            
-            // --- PHASE 1: SESSION START & INITIAL PAGE VIEW ---
-            
-            // 1. SESSION START EVENT
-            const sessionStartPayload = {
-                client_id: cid,
-                user_properties: userProperties,
-                events: [{ 
-                    name: "session_start", 
-                    params: { 
-                        session_id: session_id, 
-                        _ss: 1, 
-                        debug_mode: true,
-                        language: "en-US",
-                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), 
-                        source: traffic.source,
-                        medium: traffic.medium,
-                        page_referrer: referrer || traffic.referrer // Use provided referrer if available
-                    } 
-                }]
-            };
-            if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
-            
-            // 2. INITIAL PAGE VIEW EVENT
-            const pageViewPayload = {
-                client_id: cid,
-                user_properties: userProperties,
-                events: [{ 
-                    name: 'page_view', 
-                    params: { 
-                        page_location: target, 
-                        page_title: target, 
-                        session_id: session_id, 
-                        debug_mode: true,
-                        language: "en-US",
-                        engagement_time_msec: initialEngagementTime,
-                        page_referrer: referrer || traffic.referrer 
-                    } 
-                }]
-            };
-            if (await sendDataViaProxy(pageViewPayload, 'page_view (Initial)')) eventCount++;
-            totalTimeWaited += initialEngagementTime;
-
-            // 🚀 CHANGE 1: Add SCROLL Event Simulation (High Quality Interaction)
-            const scrollDelay = randomInt(5000, 10000); // 5s to 10s wait before scrolling
-            console.log(`[PROXY ${ip}] Simulating scroll interaction after ${Math.round(scrollDelay/1000)}s...`);
-            await new Promise(resolve => setTimeout(resolve, scrollDelay));
-            totalTimeWaited += scrollDelay;
-            
-            const scrollPayload = {
-                client_id: cid,
-                user_properties: userProperties,
-                events: [{
-                    name: 'scroll', // GA4 Enhanced Measurement Event
-                    params: {
-                        session_id: session_id,
-                        debug_mode: true,
-                        language: "en-US"
-                    }
-                }]
-            };
-            if (await sendDataViaProxy(scrollPayload, 'scroll (User Interaction)')) eventCount++;
-            
-            
-            // --- PHASE 2: SMART CLICKER SIMULATION (Optional) ---
-            if (clickerEnabled) {
-                console.log(`[PROXY ${ip}] Smart Clicker: Waiting for ${Math.round(clickDelayMs/1000)}s for internal click...`);
-                await new Promise(resolve => setTimeout(resolve, clickDelayMs));
-                totalTimeWaited += clickDelayMs;
-                
-                // 3. SECOND PAGE VIEW (Simulated Internal Click)
-                const internalUrl = `${target}/internal-page-click-${Math.random().toString(36).substring(2, 6)}`;
-                const internalPageViewPayload = {
-                    client_id: cid,
-                    user_properties: userProperties,
-                    events: [{ 
-                        name: 'page_view', 
-                        params: { 
-                            page_location: internalUrl, 
-                            page_title: 'Internal Page Click', 
-                            session_id: session_id, 
-                            debug_mode: true,
-                            language: "en-US",
-                            // 🚀 CHANGE 3: Longer engagement time for internal page
-                            engagement_time_msec: randomInt(10000, 20000), // 10s to 20s
-                            page_referrer: target // Referrer is the main page
-                        } 
-                    }]
-                };
-                if (await sendDataViaProxy(internalPageViewPayload, 'page_view (Internal Click)')) eventCount++;
-                console.log(`[PROXY ${ip}] Smart Clicker: Internal Click Registered.`);
-            }
-            
-            // --- PHASE 3: SESSION ENGAGEMENT & SLEEP ---
-            
-            // Calculate remaining sleep time: Full duration - total time waited so far - safety margin (1s)
-            const remainingTimeMs = Math.max(1000, sessionDurationMs - totalTimeWaited - 1000); 
-            console.log(`[PROXY ${ip}] Sleeping for ${Math.round(remainingTimeMs/1000)}s to complete ${sessionDuration}s session.`);
-            await new Promise(resolve => setTimeout(resolve, remainingTimeMs));
-            
-            // --- PHASE 4: END SESSION / USER ENGAGEMENT ---
-            
-            // The total time of the session
-            const totalEngagementTime = sessionDurationMs + randomInt(0, 1000); 
-
-            const engagementPayload = {
-                client_id: cid,
-                user_properties: userProperties, 
-                events: [
-                    { 
-                        name: "user_engagement", 
-                        params: { 
-                            engagement_time_msec: totalEngagementTime, 
-                            session_id: session_id,
-                            debug_mode: true 
-                        } 
-                    }
-                ]
-            };
-            if (await sendDataViaProxy(engagementPayload, 'user_engagement')) eventCount++;
-
-            console.log(`[PROXY ${ip}] Session Complete. Total Events: ${eventCount}.`);
-            
-        } catch (error) {
-            console.error(`[PROXY ${ip}] Session Aborted due to critical error:`, error.message);
-        }
-    })();
+// 1. फ्रंटेंड सर्व करना (Serving the Frontend)
+// जब यूजर मुख्य URL पर जाए, तो index.html भेजें
+app.get('/', (req, res) => {
+    // index.html फ़ाइल को भेजें
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// 2. प्रॉक्सी एंडपॉइंट (The Proxy Endpoint)
+// Iframes इस एंडपॉइंट को कॉल करेंगे: /load?url=...
+app.get('/load', async (req, res) => {
+    const targetUrl = req.query.url;
+    const slotIndex = req.query.slot || 'N/A'; 
 
-// ===================================================================
-// 5. WEBSITE EARNING BOOSTER (API: /website-earning-booster) - NEW TOOL 5 for Monetag/Ad Networks
-// ===================================================================
-app.get('/website-earning-booster', async (req, res) => {
+    if (!targetUrl) {
+        return res.status(400).send("URL query parameter is missing.");
+    }
     
-    // 1. Get parameters from the frontend URL query
-    const { target, ip, port, auth, sessionDuration, clicker, clickDelay } = req.query; 
-
-    // Basic validation check
-    if (!target || !ip || !port) {
-        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, ip, port).' });
+    // Tool 4 के अंदर डिफाइन किए गए फ़ंक्शन का उपयोग करें
+    const proxyString = getNextProxy(); 
+    if (!proxyString) {
+        return res.status(503).send("No proxies available.");
     }
 
-    const sessionDurationMs = parseInt(sessionDuration || 30) * 1000;
-    const clickerEnabled = clicker === '1';
-    const clickDelayMs = parseInt(clickDelay || 15) * 1000;
+    const [host, port, authUsername, authPassword] = proxyString.split(':');
 
-    // --- 2. IMMEDIATE RESPONSE (to avoid frontend timeout) ---
-    const message = `💸 Website Earning Booster accepted. Traffic boosting started in background via proxy ${ip}. Session Duration: ${sessionDuration}s.`;
+    console.log(`Slot ${slotIndex}: Loading ${targetUrl} using proxy ${host}:${port}`);
 
-    res.status(200).json({ 
-        status: 'ACCEPTED', 
-        message: message
-    });
-    
-    // --- 3. START HEAVY LIFTING IN BACKGROUND (IIFE) ---
-    (async () => {
-        
-        // --- Proxy Setup ---
-        let proxyAgent;
-        const proxyAddress = `${ip}:${port}`;
-        
-        // Authenticated vs Non-Authenticated Proxy Agent
-        if (auth && auth.includes(':') && auth !== ':') {
-            const [username, password] = auth.split(':');
-            const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
-            proxyAgent = new HttpsProxyAgent(proxyUrl);
-        } else {
-             try {
-                proxyAgent = new HttpsProxyAgent(`http://${proxyAddress}`);
-             } catch (e) {
-                proxyAgent = new http.Agent({ host: ip, port: port });
-             }
-        }
-        
-        /**
-         * The core function: Hits the target URL using the proxy and dynamic, human-like headers.
-         */
-        async function hitTargetViaProxy(proxyAgent, targetUrl, customReferrer) {
-            const USER_AGENTS = [
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", 
-                "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/605.1.15", 
-                "Mozilla/5.0 (Linux; Android 13; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
-            ];
-            const randomUserAgent = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
-            const trafficSource = getRandomTrafficSource(true);
-
-            const headers = {
-                'User-Agent': randomUserAgent, 
-                'Referer': customReferrer || trafficSource.referrer, // Use provided or random referrer
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9,hi;q=0.8', 
-                'Cache-Control': 'no-cache', 
-                'Connection': 'keep-alive'
-            };
-
-            try {
-                const response = await nodeFetch(targetUrl, {
-                    method: 'GET',
-                    agent: proxyAgent,
-                    headers: headers,
-                    timeout: 20000 // 20 seconds timeout for a slow proxy/server
-                });
-
-                if (response.ok) {
-                    console.log(`[EARNING BOOSTER ${ip}] SUCCESS ✅ | Target Hit! Status: ${response.status}. Referrer: ${headers['Referer'].substring(0, 20)}...`);
-                    return true;
-                } else {
-                    console.error(`[EARNING BOOSTER ${ip}] FAILURE ❌ | Status: ${response.status}. Target URL failed to load.`);
-                    return false;
+    try {
+        const response = await axios({
+            method: 'get',
+            url: targetUrl,
+            // प्रॉक्सी सेटिंग्स
+            proxy: {
+                host: host,
+                port: parseInt(port),
+                auth: {
+                    username: authUsername,
+                    password: authPassword
                 }
-            } catch (error) {
-                console.error(`[EARNING BOOSTER ${ip}] CRITICAL ERROR ⚠️ | Connection Failed: ${error.message}`);
-                return false;
+            },
+            // Iframe में दिखाने के लिए responseType 'arraybuffer' रखें
+            responseType: 'arraybuffer',
+            headers: {
+                'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (compatible; ProxyBot/1.0)',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Encoding': 'identity', 
+                'Connection': 'keep-alive',
             }
-        }
+        });
+
+        // X-Frame-Options और Content-Security-Policy जैसे हेडर को हटा दें ताकि Iframe में लोड हो सके
+        const headers = response.headers;
+        delete headers['x-frame-options'];
+        delete headers['content-security-policy'];
         
-        
-        // --- PHASE 1: INITIAL HIT & DURATION SIMULATION ---
-        console.log(`\n--- [EARNING BOOSTER ${ip}] Session Start (Target: ${target}, Duration: ${sessionDuration}s) ---`);
-        
-        // 1. Initial hit to the target URL (The main impression trigger for Ad Networks)
-        let initialSuccess = await hitTargetViaProxy(proxyAgent, target, req.query.referrer);
-        
-        if (!initialSuccess) {
-            console.log(`[EARNING BOOSTER ${ip}] Initial hit failed. Aborting session.`);
-            return; // Stop execution if the initial hit fails
-        }
-        
-        let totalTimeSpent = 0;
-        
-        // --- PHASE 2: SMART CLICKER (Internal URL Hit) ---
-        if (clickerEnabled) {
-            console.log(`[EARNING BOOSTER ${ip}] Smart Clicker: Waiting for ${Math.round(clickDelayMs/1000)}s for internal click...`);
-            await new Promise(resolve => setTimeout(resolve, clickDelayMs));
-            totalTimeSpent += clickDelayMs;
-            
-            // 2. Second hit to a simulated internal URL (Enhances session quality)
-            const internalUrl = `${target}/internal-page-click-${Math.random().toString(36).substring(2, 6)}`;
-            await hitTargetViaProxy(proxyAgent, internalUrl, target); // Referrer is the main page
-            
-            console.log(`[EARNING BOOSTER ${ip}] Smart Clicker: Internal Click Registered.`);
-        }
-        
-        // --- PHASE 3: SESSION ENGAGEMENT & SLEEP ---
-        // Sleep for the remaining duration to complete the session time
-        const engagementTime = randomInt(15000, 30000); // 15 to 30s interaction before sleep
-        await new Promise(resolve => setTimeout(resolve, engagementTime));
-        totalTimeSpent += engagementTime;
-        
-        const remainingTimeMs = Math.max(1000, sessionDurationMs - totalTimeSpent); 
-        console.log(`[EARNING BOOSTER ${ip}] Sleeping for ${Math.round(remainingTimeMs/1000)}s to complete ${sessionDuration}s session.`);
-        await new Promise(resolve => setTimeout(resolve, remainingTimeMs));
-        
-        
-        console.log(`[EARNING BOOSTER ${ip}] Session Complete. Total Simulated Duration: ${Math.round((totalTimeSpent + remainingTimeMs)/1000)}s.`);
-        
-    })().catch(err => {
-        console.error(`[EARNING BOOSTER CRITICAL] Main IIFE failed: ${err.message}`);
-    });
+         // प्राप्त हेडर और डेटा वापस भेजें
+        res.set(headers);
+        res.set('Content-Type', response.headers['content-type'] || 'text/html');
+        res.set('X-Frame-Options', 'ALLOWALL'); 
+        res.status(response.status).send(response.data);
+
+    } catch (error) {
+        console.error(`Slot ${slotIndex}: Proxy Error for ${targetUrl}:`, error.message);
+        // Iframe में दिखाने के लिए HTML एरर मैसेज
+        const errorHtml = `
+            <html>
+                <body style="text-align: center; color: red;">
+                    <h3 style="margin-top: 50px;">प्रॉक्सी/लोडिंग एरर</h3>
+                    <p>URL: ${targetUrl}</p>
+                    <p>प्रॉक्सी: ${host}:${port}</p>
+                    <p>यह URL लोड होने से मना कर रहा है या प्रॉक्सी विफल है।</p>
+                    <p style="font-size: small;">एरर: ${error.message}</p>
+                </body>
+            </html>
+        `;
+        // Iframe को 200 ओके भेजें ताकि वह एरर मैसेज दिखा सके
+        res.status(200).send(errorHtml);
+    }
 });
 
 
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
-// Sirf ek hi baar server start hoga
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
