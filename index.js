@@ -1,4 +1,4 @@
-// index.js (FINAL VERSION - 4 Tools: Booster, Caption Gen, Caption Edit, Iframe Proxy)
+// index.js (FINAL VERSION - VPN/Budget Friendly & Earning Booster)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -8,7 +8,8 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
-const path = require('path'); // index.html सर्व करने के लिए
+const { HttpsProxyAgent } = require('https-proxy-agent'); 
+const http = require('http'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -36,16 +37,19 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '5mb' }));
 
-// General CORS headers
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
 
+app.get('/', (req, res) => {
+    res.status(200).send('PooreYouTuber Combined API is running! Access tools via GitHub Pages.'); 
+});
+
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension in Tool 1) ---
+// --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -61,12 +65,11 @@ function getRandomGeo() {
 }
 
 
-// 🔥 Client ID Generation (Simple, non-UUID style)
 function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC (Used for Tool 1) ---
+// --- TRAFFIC SOURCE LOGIC ---
 const TRAFFIC_SOURCES_GA4 = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
@@ -75,10 +78,20 @@ const TRAFFIC_SOURCES_GA4 = [
     { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" },
     { source: "(direct)", medium: "(none)", referrer: "" }
 ];
+const TRAFFIC_SOURCES_PROXY = [ 
+    { source: "google", medium: "organic", referrer: "https://www.google.com/" },
+    { source: "direct", medium: "none", referrer: "" },
+    { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
+    { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
+    { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
+];
 
 function getRandomTrafficSource(isProxyTool = false) {
+    if (isProxyTool) {
+        return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 1)];
+    }
     if (Math.random() < 0.5) {
-        return TRAFFIC_SOURCES_GA4[5]; // (direct) / (none)
+        return TRAFFIC_SOURCES_GA4[5]; 
     }
     return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 2)]; 
 }
@@ -93,11 +106,29 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (for Tool 1) ---
-async function sendData(gaId, apiSecret, payload, currentViewId, eventType, proxyAgent = null) {
+// --- ADVANCED EARNING IDEA: USER AGENT DIVERSITY ---
+const USER_AGENTS = [
+    // Windows Chrome
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    // MacOS Safari
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    // Android Chrome
+    "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36",
+    // iPhone Safari
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    // Linux Firefox
+    "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0"
+];
+
+function getRandomUserAgent() {
+    return USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
+}
+
+// --- GA4 DATA SENDING (for /boost-mp) --- (Used by Tool 1)
+async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
-    const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
+    const USER_AGENT = getRandomUserAgent(); 
     
     try {
         const response = await nodeFetch(gaEndpoint, { 
@@ -106,8 +137,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType, prox
             headers: { 
                 'Content-Type': 'application/json',
                 'User-Agent': USER_AGENT 
-            },
-            agent: proxyAgent 
+            }
         });
 
         if (response.status === 204) { 
@@ -123,8 +153,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType, prox
         return { success: false, error: error.message };
     }
 }
-
-// Validation function (for Tool 1)
+// Validation function (for /boost-mp)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const testPayload = {
@@ -158,7 +187,7 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 
 /**
- * Simulates a single view session with full attribution parameters. (Used by Tool 1)
+ * Simulates a single view session with full attribution parameters. (Used by /boost-mp)
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
@@ -256,7 +285,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
 }
 
 
-// --- VIEW PLAN GENERATION (for Tool 1) ---
+// --- VIEW PLAN GENERATION (for /boost-mp) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
     const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
@@ -280,7 +309,7 @@ function generateViewPlan(totalViews, pages) {
 
 
 // ===================================================================
-// TOOL 1: WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL 
+// 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL 
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -293,16 +322,16 @@ app.post('/boost-mp', async (req, res) => {
     
     const viewPlan = generateViewPlan(totalViewsRequested, pages.filter(p => p.percent > 0)); 
     if (viewPlan.length === 0) {
-           return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
+         return res.status(400).json({ status: 'error', message: 'View distribution failed. Ensure Total % is 100 and URLs are provided.' });
     }
 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
     
     if (!validationResult.valid) {
-          return res.status(400).json({ 
-              status: 'error', 
-              message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
-          });
+         return res.status(400).json({ 
+            status: 'error', 
+            message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
+        });
     }
 
     res.json({ 
@@ -334,7 +363,7 @@ app.post('/boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// TOOL 2: AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
+// 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -378,7 +407,7 @@ app.post('/api/caption-generate', async (req, res) => {
 });
 
 // ===================================================================
-// TOOL 3: AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
+// 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -422,115 +451,176 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
-// TOOL 4: Iframe Proxy Loader (API: /load) - NEW TOOL
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - VPN/EARNING FIX
 // ===================================================================
+app.get('/proxy-request', async (req, res) => {
+    
+    // 1. Get parameters from the frontend URL query
+    const { target, ip, port, auth, uid, ga_id, api_secret } = req.query; 
 
-// --- प्रॉक्सी डेटा और रोटेशन लॉजिक (Tool 4 Specific) ---
-// आपकी प्रीमियम प्रॉक्सी सूची (IP:PORT:USERNAME:PASSWORD)
-const proxyList = [
-    "142.111.48.253:7030:bqctypvz:399xb3kxqv6i",
-    "31.59.20.176:6754:bqctypvz:399xb3kxqv6i",
-    "23.95.150.145:6114:bqctypvz:399xb3kxqv6i",
-    "198.23.239.134:6540:bqctypvz:399xb3kxqv6i",
-    "45.38.107.97:6014:bqctypvz:399xb3kxqv6i",
-    "107.172.163.27:6543:bqctypvz:399xb3kxqv6i",
-    "198.105.121.200:6462:bqctypvz:399xb3kxqv6i",
-    "64.137.96.74:6641:bqctypvz:399xb3kxqv6i",
-    "216.10.27.159:6837:bqctypvz:399xb3kxqv6i",
-    "142.111.67.146:5611:bqctypvz:399xb3kxqv6i"
-];
-
-let currentProxyIndex = 0;
-
-function getNextProxy() {
-    if (proxyList.length === 0) {
-        return null;
+    // Basic validation check (IP/Port optional for VPN mode)
+    if (!target || !uid) { 
+        return res.status(400).json({ status: 'FAILED', error: 'Missing required query parameters (target, uid).' });
     }
-    // प्रॉक्सी को रोटेट करें (बारी-बारी से अगली प्रॉक्सी चुनें)
-    const proxy = proxyList[currentProxyIndex];
-    currentProxyIndex = (currentProxyIndex + 1) % proxyList.length;
-    return proxy;
-}
-// --------------------------------------------------------------------
 
+    const isGaMpEnabled = ga_id && api_secret; 
+    const USER_AGENT = getRandomUserAgent(); // FIX: Random User Agent
+    
+    // --- Proxy/VPN Setup (VPN-Friendly Logic) ---
+    let proxyAgent = undefined; // Default: undefined (will use local machine's network, i.e., VPN if connected)
 
-// 1. फ्रंटेंड सर्व करना (Serving the Frontend)
-// जब यूजर मुख्य URL पर जाए, तो index.html भेजें
-app.get('/', (req, res) => {
-    // index.html फ़ाइल को भेजें
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// 2. प्रॉक्सी एंडपॉइंट (The Proxy Endpoint)
-// Iframes इस एंडपॉइंट को कॉल करेंगे: /load?url=...
-app.get('/load', async (req, res) => {
-    const targetUrl = req.query.url;
-    const slotIndex = req.query.slot || 'N/A'; 
-
-    if (!targetUrl) {
-        return res.status(400).send("URL query parameter is missing.");
+    if (ip && port) { // Agar user ne Proxy details diye hain
+        const proxyAddress = `${ip}:${port}`;
+        // Proxy Agent banayein
+        if (auth && auth.includes(':') && auth !== ':') {
+            const [username, password] = auth.split(':');
+            const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
+            proxyAgent = new HttpsProxyAgent(proxyUrl);
+            console.log(`[AGENT MODE] Using provided Authenticated Proxy: ${ip}`);
+        } else {
+            const proxyUrl = `http://${ip}:${port}`;
+            proxyAgent = new HttpsProxyAgent(proxyUrl);
+            console.log(`[AGENT MODE] Using provided Non-Authenticated Proxy: ${ip}`);
+        }
+    } else {
+         console.log(`[AGENT MODE] Using local machine's IP (via VPN, if connected).`);
     }
     
-    // Tool 4 के अंदर डिफाइन किए गए फ़ंक्शन का उपयोग करें
-    const proxyString = getNextProxy(); 
-    if (!proxyString) {
-        return res.status(503).send("No proxies available.");
+    // --- GA4 MP Session Data Generation ---
+    const cid = uid; 
+    const session_id = Date.now(); 
+    const geo = getRandomGeo(); 
+    const traffic = getRandomTrafficSource(true); 
+    // FIX: Engagement time ko zyada, 50s se 2min tak for better quality
+    const engagementTime = randomInt(50000, 120000); 
+
+    const userProperties = {
+        simulated_geo: { value: geo.country }, 
+        user_timezone: { value: geo.timezone }
+    };
+    
+    let eventCount = 0;
+
+    // --- FUNCTION TO SEND DATA VIA PROXY ---
+    async function sendDataViaProxy(payload, eventType) {
+        if (!isGaMpEnabled) {
+             console.log(`[PROXY MP SKIP] Keys missing. Skipped: ${eventType}.`);
+             return false; 
+        }
+        
+        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; 
+        payload.timestamp_micros = String(Date.now() * 1000); 
+        
+        try { 
+            const response = await nodeFetch(gaEndpoint, { 
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'User-Agent': USER_AGENT 
+                },
+                agent: proxyAgent // proxyAgent ya toh HttpsProxyAgent hoga ya undefined (VPN)
+            });
+
+            if (response.status === 204) { 
+                console.log(`[PROXY MP SUCCESS] Sent: ${eventType}.`);
+                return true;
+            } else {
+                const errorText = await response.text(); 
+                console.error(`[PROXY MP FAILURE] Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
+                return false;
+            }
+        } catch (error) {
+            console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed (Code: ${error.code || 'N/A'}). Error: ${error.message}`);
+            return false;
+        }
     }
 
-    const [host, port, authUsername, authPassword] = proxyString.split(':');
+    // --- FUNCTION TO SIMULATE AD CLICK (ADVANCED IDEA 2: EARNING BOOSTER) ---
+    async function simulateAdClick(targetUrl, proxyAgent) {
+        // Yeh Monetag jaisi ad company ko signal bhejta hai ki "click" hua hai.
+        const adClickTarget = targetUrl; // Mukhya URL ko hi hit karna kaafi hai
+        
+        try {
+            console.log(`[CLICK SIMULATION] Hitting target URL again to simulate Ad Click.`);
+            await nodeFetch(adClickTarget, {
+                method: 'GET',
+                headers: { 'User-Agent': getRandomUserAgent() },
+                agent: proxyAgent, 
+                timeout: 5000 
+            });
+            console.log(`[CLICK SUCCESS] Ad-click action simulated successfully.`);
+            return true;
+        } catch (error) {
+            console.log(`[CLICK FAIL] Simulated click connection failed: ${error.message}`);
+            return false;
+        }
+    }
 
-    console.log(`Slot ${slotIndex}: Loading ${targetUrl} using proxy ${host}:${port}`);
 
     try {
-        const response = await axios({
-            method: 'get',
-            url: targetUrl,
-            // प्रॉक्सी सेटिंग्स
-            proxy: {
-                host: host,
-                port: parseInt(port),
-                auth: {
-                    username: authUsername,
-                    password: authPassword
-                }
-            },
-            // Iframe में दिखाने के लिए responseType 'arraybuffer' रखें
-            responseType: 'arraybuffer',
-            headers: {
-                'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (compatible; ProxyBot/1.0)',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'Accept-Encoding': 'identity', 
-                'Connection': 'keep-alive',
-            }
+        
+        // 🔥 STEP 1: TARGET URL VISIT (Simulates the user landing on the page)
+        console.log(`[TARGET VISIT] Hitting target ${target}.`);
+        
+        const targetResponse = await nodeFetch(target, {
+            method: 'GET', 
+            headers: { 'User-Agent': USER_AGENT }, 
+            agent: proxyAgent // Use the configured agent (VPN friendly)
         });
 
-        // X-Frame-Options और Content-Security-Policy जैसे हेडर को हटा दें ताकि Iframe में लोड हो सके
-        const headers = response.headers;
-        delete headers['x-frame-options'];
-        delete headers['content-security-policy'];
-        
-         // प्राप्त हेडर और डेटा वापस भेजें
-        res.set(headers);
-        res.set('Content-Type', response.headers['content-type'] || 'text/html');
-        res.set('X-Frame-Options', 'ALLOWALL'); 
-        res.status(response.status).send(response.data);
+        if (targetResponse.status < 200 || targetResponse.status >= 300) {
+             throw new Error(`Target visit failed with status ${targetResponse.status}`);
+        }
+        console.log(`[TARGET VISIT SUCCESS] Target visited.`);
 
+        // 💡 ADVANCED IDEA 1: USER STAYS ON PAGE FOR REALISTIC TIME (Earning Booster)
+        // Ad networks ke liye 20-40 seconds 'high quality' time hota hai.
+        const waitTime = randomInt(20000, 40000); 
+        console.log(`[WAIT] Simulating human behavior: Waiting for ${Math.round(waitTime/1000)} seconds.`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+
+        // 🔥 STEP 2: SIMULATE AD CLICK (Earning Booster)
+        await simulateAdClick(target, proxyAgent);
+
+        // 3. Send GA4 MP data (Optional, for tracking only)
+        if (isGaMpEnabled) {
+            
+            // SESSION START EVENT
+             const sessionStartPayload = { client_id: cid, user_properties: userProperties, events: [{ name: "session_start", params: { session_id: session_id, _ss: 1, debug_mode: true, language: "en-US", session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), source: traffic.source, medium: traffic.medium, page_referrer: traffic.referrer } }] };
+             if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
+            
+            await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
+
+            // PAGE VIEW EVENT
+             const pageViewPayload = { client_id: cid, user_properties: userProperties, events: [{ name: 'page_view', params: { page_location: target, page_title: target, session_id: session_id, debug_mode: true, language: "en-US", engagement_time_msec: engagementTime, page_referrer: traffic.referrer } }] };
+             if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
+            
+            await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
+
+            // USER ENGAGEMENT EVENT
+             const engagementPayload = { client_id: cid, user_properties: userProperties, events: [ { name: "user_engagement", params: { engagement_time_msec: engagementTime, session_id: session_id, debug_mode: true } } ] };
+             if (await sendDataViaProxy(engagementPayload, 'user_engagement')) eventCount++;
+        }
+        
+        // 4. Send success response back to the frontend
+        const message = `✅ Success! Earning booster action simulated. Traffic IP: ${ip && port ? ip : 'VPN (Local)'}.`;
+
+        res.status(200).json({ 
+            status: 'OK', 
+            message: message,
+            eventsSent: eventCount
+        });
+        
     } catch (error) {
-        console.error(`Slot ${slotIndex}: Proxy Error for ${targetUrl}:`, error.message);
-        // Iframe में दिखाने के लिए HTML एरर मैसेज
-        const errorHtml = `
-            <html>
-                <body style="text-align: center; color: red;">
-                    <h3 style="margin-top: 50px;">प्रॉक्सी/लोडिंग एरर</h3>
-                    <p>URL: ${targetUrl}</p>
-                    <p>प्रॉक्सी: ${host}:${port}</p>
-                    <p>यह URL लोड होने से मना कर रहा है या प्रॉक्सी विफल है।</p>
-                    <p style="font-size: small;">एरर: ${error.message}</p>
-                </body>
-            </html>
-        `;
-        // Iframe को 200 ओके भेजें ताकि वह एरर मैसेज दिखा सके
-        res.status(200).send(errorHtml);
+        const errorCode = error.code || error.message;
+        console.error(`[PROXY REQUEST HANDLER FAILED] Error:`, errorCode);
+        
+        res.status(502).json({ 
+            status: 'FAILED', 
+            error: 'Connection ya Target URL se connect nahi ho paya. VPN/Proxy check karein.', 
+            details: errorCode
+        });
     }
 });
 
@@ -538,6 +628,7 @@ app.get('/load', async (req, res) => {
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
+// Sirf ek hi baar server start hoga
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
