@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (No changes) --- */
+  /* --- CSS Styles (Same as original website-ads.html) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -18,414 +18,174 @@
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
   .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
   header { margin-bottom: 20px; text-align: center; }
-  h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--accent); }
-  h2 { font-size: 1.2rem; margin-top: 0; color: var(--muted); font-weight: 400; }
-
-  .controls {
-    background: var(--card); padding: var(--gap); border-radius: var(--radius);
-    box-shadow: var(--shadow); margin-bottom: 20px; display: flex;
-    gap: var(--gap); align-items: flex-end; flex-wrap: wrap;
+  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
+  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover { background: #0c8cd8; }
+  .btn.stop { background: var(--danger); }
+  .btn.stop:hover { background: #b91c1c; }
+  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  /* Updated for better layout of multiple options */
+  .repeat-control { 
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--muted); 
+    background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
-  .control-group { display: flex; flex-direction: column; min-width: 150px; }
-  .control-group label { font-size: 0.9rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
-  .controls input[type="text"], .controls input[type="number"], .controls select {
-    padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
-    width: 100%;
-  }
-
-  .options {
-    background: #fffbe6; border: 1px solid #fde68a; padding: 10px; border-radius: 8px;
-    margin-top: 10px; font-size: 0.9rem; color: #a16207;
-    display: flex; gap: 15px; flex-wrap: wrap;
-  }
-  .option-item { display: flex; align-items: center; gap: 5px; }
-
-  .slots-container {
-    display: grid; gap: var(--gap);
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-  .slot {
-    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-    padding: var(--gap); border: 1px solid var(--border);
-    position: relative; /* For the mouse cursor */
-  }
-
-  .slot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .slot-header h3 { margin: 0; font-size: 1.1rem; }
-  .slot-header button {
-    padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer;
-    font-weight: 600;
-  }
-  .start-btn { background: var(--primary-blue); color: white; }
-  .stop-btn { background: var(--danger); color: white; }
-
-  .slot-body { display: flex; flex-direction: column; gap: 8px; }
-  .slot-body input[type="text"] {
-    padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
-    width: 100%;
-  }
-
-  .slot-iframe-container {
-    border: 1px solid var(--border); height: 300px; overflow: hidden;
-    position: relative; margin-top: 10px; background: var(--bg);
-  }
-  .slot-iframe-container iframe { width: 100%; height: 100%; border: none; }
-
-  .status-bar {
-    margin-top: 10px; padding: 8px; border-radius: 6px;
-    font-size: 0.85rem; font-weight: 600;
-    background: #f0fdf4; color: var(--success);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .status-bar.running { background: #eff6ff; color: var(--primary-blue); }
-  .status-bar.error { background: #fef2f2; color: var(--danger); }
-
-  .global-actions { margin-top: 20px; display: flex; gap: var(--gap); }
-  .global-actions button {
-    padding: 10px 20px; font-size: 1rem; font-weight: 700; border-radius: 8px;
-    cursor: pointer; border: none;
-  }
-
-  .global-start-btn { background: var(--success); color: white; flex-grow: 1; }
-  .global-stop-btn { background: var(--danger); color: white; flex-grow: 1; }
-
-  /* New CSS for Mouse Cursor */
-  .mouse-cursor {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%23000000" d="M3.24 3.76L17.24 17.76M3.76 17.76L17.76 3.76M10 0a10 10 0 1 0 0 20a10 10 0 1 0 0-20z"/></svg>') no-repeat center center;
-    background-size: contain;
-    pointer-events: none;
-    z-index: 1000;
-    transition: transform 0.2s ease-out; 
-    opacity: 0.8;
-  }
-
-  /* CSS for Auto Scroll */
-  .slot-iframe-container.scrolling {
-    animation: scrollAnimation 30s linear infinite alternate; 
-  }
-
-  @keyframes scrollAnimation {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(calc(-100% + 300px)); } 
-  }
-
-</style>
-</head>
-<body>
-
-<div class="wrap">
-  <header>
-    <h1>🌐 Website Earning Booster</h1>
-    <h2>Final Project Tool: AdSense Safe & Max Earning Mode</h2>
-  </header>
-
-  <div class="controls">
-    <div class="control-group">
-        <label for="num-slots">Total Slots (Parallel Users)</label>
-        <input type="number" id="num-slots" value="10" min="1" max="20">
-    </div>
-    
-    <div class="control-group" style="flex-grow: 2;">
-        <label for="api-url">Backend API URL (Your Server)</label>
-        <input type="text" id="api-url" value="http://your-server-ip:10000/proxy-request" placeholder="http://your-server-ip:10000/proxy-request">
-    </div>
-
-    <div class="control-group" style="flex-grow: 2;">
-        <label for="global-proxy-input">Global Proxy IP:Port</label>
-        <input type="text" id="global-proxy-input" placeholder="Proxy IP:Port (e.g., 101.50.20.1:8888)">
-    </div>
-    <div class="control-group" style="flex-grow: 2;">
-        <label for="global-auth-input">Global Proxy Auth (user:pass)</label>
-        <input type="text" id="global-auth-input" placeholder="user:pass (Optional)">
-    </div>
-    <div class="control-group" style="flex-grow: 1;">
-        <label for="global-gaid-input">Global GA4 ID (G-XXXXX)</label>
-        <input type="text" id="global-gaid-input" placeholder="G-XXXXX (Optional)">
-    </div>
-    <div class="control-group" style="flex-grow: 1;">
-        <label for="global-api-secret-input">Global GA4 API Secret</label>
-        <input type="text" id="global-api-secret-input" placeholder="API Secret (Optional)">
-    </div>
-
-    <div class="options" style="width: 100%; justify-content: space-around;">
-        <div class="option-item">
-            <input type="checkbox" id="repeat-mode" checked>
-            <label for="repeat-mode">Cycle Every 30s (Earning Logic)</label>
+  .control-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
+  .repeat-control label { flex-shrink: 0; }
+  .repeat-control span { color: var(--accent); font-weight: 600; }
+@@ -114,20 +120,30 @@
         </div>
-        <div class="option-item">
-            <input type="checkbox" id="auto-scroll-mode" checked>
-            <label for="auto-scroll-mode">Auto Scroll (High Viewability)</label>
-        </div>
-        <div class="option-item">
-            <input type="checkbox" id="mouse-click-mode" checked>
-            <label for="mouse-click-mode">Simulate Mouse & Click (Max Earning Mode)</label>
+
+        <div class="repeat-control">
+            <input type="checkbox" id="repeatMode" />
+            <label for="repeatMode">
+                Enable **Active User** Mode: Repeat all 
+                <label for="minTime">Min:</label>
+                <input id="minTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
+                <label for="maxTime">Max:</label>
+                <input id="maxTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
+                <span>seconds cycle</span> for better GA tracking.
+            </label>
+            <div class="control-row">
+                <input type="checkbox" id="repeatMode" />
+                <label for="repeatMode">
+                    Enable **Active User** Mode: Repeat all 
+                    <label for="minTime">Min:</label>
+                    <input id="minTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
+                    <label for="maxTime">Max:</label>
+                    <input id="maxTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
+                    <span>seconds cycle</span> for better GA tracking.
+                </label>
+            </div>
+            
+            <div class="control-row">
+                <input type="checkbox" id="autoScrollMode" />
+                <label for="autoScrollMode">
+                    Enable **Auto Scroll** (Simulated & Staggered)
+                </label>
+                
+                <input type="checkbox" id="autoClickerMode" checked />
+                <label for="autoClickerMode">
+                    Enable **Auto Clicker** (Earning Booster)
+                </label>
+            </div>
+
+            <input type="checkbox" id="autoScrollMode" />
+            <label for="autoScrollMode">
+                Enable **Auto Scroll** (Simulated & Staggered)
+            </label>
+            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
-  </div>
-
-  <div class="global-actions">
-    <button id="global-start-btn" class="global-start-btn">🚀 Start All Slots</button>
-    <button id="global-stop-btn" class="global-stop-btn" style="display: none;">🛑 Stop All Slots</button>
-  </div>
-
-  <div class="slots-container" id="slots-container">
+@@ -136,13 +152,13 @@
+        <strong>Tool Usage Instructions:</strong>
+        <ul>
+            <li>
+                <strong>Active User Fix:</strong> यह टूल हर रिक्वेस्ट के साथ एक **Unique Client ID** भेजता है, जो GA4 में एक नया **Active User** सेशन रजिस्टर करता है।
+                <strong>Earning Booster:</strong> **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai, jisse MonetaG jaise ad network par earning badhti hai.
+            </li>
+            <li>
+                <strong>Action:</strong> **'Enable Active User Mode'** चेक करें और 'Load & Run All' पर क्लिक करें। यह हर **30 सेकंड** में प्रॉक्सी के माध्यम से रिक्वेस्ट दोहराएगा।
+                <strong>VPN Mode:</strong> Proxy fields empty chhodne par, yeh tool aapke **VPN** IP se request bhejega. Agar Proxy use karna hai, toh `ip` aur `port` bharein.
+            </li>
+            <li>
+                **CRITICAL:** आप अभी **10 प्रॉक्सी** का उपयोग कर रहे हैं। स्लॉट्स को 10 पर सेट रखें। बेहतर ट्रैफिक गुणवत्ता के लिए, `index.html` में अधिक यूनिक IP जोड़ें।
+                <strong>Action:</strong> **'Enable Active User Mode'** aur **'Auto Clicker'** (default checked) check rakhein. **'Load & Run All'** se test shuru karein.
+            </li>
+        </ul>
     </div>
+@@ -161,7 +177,7 @@
+const COMMON_PASS = "399xb3kxqv6i";
+const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-</div>
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
 
-<script>
-// --- Configuration ---
-const API_URL_BASE = document.getElementById('api-url');
-const repeatModeCheckbox = document.getElementById('repeat-mode');
-const autoScrollModeCheckbox = document.getElementById('auto-scroll-mode');
-const mouseClickModeCheckbox = document.getElementById('mouse-click-mode');
+// Function to generate a simple unique ID (used for GA4 cookie)
+function generateUniqueId() {
+@@ -204,6 +220,9 @@
+const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
+const globalStopBtn = document.getElementById('globalStop');
 
-const globalProxyInput = document.getElementById('global-proxy-input');
-const globalAuthInput = document.getElementById('global-auth-input');
-const globalGaIdInput = document.getElementById('global-gaid-input');
-const globalApiSecretInput = document.getElementById('global-api-secret-input');
-
-const numSlotsInput = document.getElementById('num-slots');
-const slotsContainer = document.getElementById('slots-container');
-const globalStartBtn = document.getElementById('global-start-btn');
-const globalStopBtn = document.getElementById('global-stop-btn');
-
+// NEW: Get the Auto Clicker Checkbox element
+const autoClickerModeCheckbox = document.getElementById('autoClickerMode'); 
 let currentSlots = [];
-let repeatIntervals = [];
+let repeatIntervals = []; 
+let randomNamesList = getRandomNames(MAX_SLOTS); 
+@@ -227,10 +246,6 @@
+  const el = document.createElement('div');
+  el.className = 'slot';
 
-// --- Utilities ---
-const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-const getRandomDelay = () => randomInt(30000, 40000); 
-const generateUniqueId = () => Math.random().toString(36).substring(2, 12) + Date.now().toString(36).substring(2, 5);
-
-// --- Slot Class Definition ---
-class Slot {
-    constructor(id) {
-        this.id = id;
-        this.element = this.createSlotElement();
-        this.iframe = this.element.querySelector('iframe');
-        this.urlInput = this.element.querySelector('.slot-url-input');
-        
-        this.statusElement = this.element.querySelector('.status-bar-text');
-        this.startBtn = this.element.querySelector('.start-btn');
-        this.stopBtn = this.element.querySelector('.stop-btn');
-        this.intervalId = null;
-        this.isAutomationRunning = false;
-        
-        this.mouseCursor = this.element.querySelector('.mouse-cursor'); 
-        this.mouseIntervalId = null;
-        
-        this.setupEventListeners();
-        this.setStatus('Ready to run', false);
-    }
-
-    createSlotElement() {
-        const slotDiv = document.createElement('div');
-        slotDiv.className = 'slot';
-        slotDiv.innerHTML = `
-            <div class="slot-header">
-                <h3>Slot ${this.id}</h3>
-                <div>
-                    <button class="stop-btn" style="display: none;">Stop</button>
-                    <button class="start-btn">Run</button>
-                </div>
-            </div>
-            <div class="slot-body">
-                <input type="text" class="slot-url-input" placeholder="Target URL (REQUIRED)">
-            </div>
-            <div class="status-bar"><span class="status-bar-text"></span></div>
-            <div class="slot-iframe-container">
-                <iframe sandbox="allow-scripts allow-same-origin allow-popups" referrerpolicy="no-referrer"></iframe>
-                <div class="mouse-cursor" style="display: none;"></div> 
-            </div>
-        `;
-        return slotDiv;
-    }
-
-    setStatus(message, isRunning = false, isError = false) {
-        this.statusElement.textContent = message;
-        const statusBar = this.statusElement.parentElement;
-        statusBar.className = 'status-bar';
-        if (isRunning) statusBar.classList.add('running');
-        if (isError) statusBar.classList.add('error');
-    }
-
-    startMouseMovement() {
-        if (!mouseClickModeCheckbox.checked) return;
-        this.mouseCursor.style.display = 'block';
-        const container = this.iframe.parentElement;
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-
-        const moveMouse = () => {
-            const newX = randomInt(50, width - 50);
-            const newY = randomInt(50, height - 50);
-            const duration = randomInt(500, 2000); 
-
-            this.mouseCursor.style.transitionDuration = `${duration}ms`;
-            this.mouseCursor.style.transform = `translate(${newX}px, ${newY}px)`;
-            
-            if (Math.random() < 0.03) { 
-                 this.setStatus('Visual Click Simulated!', true);
-            }
-        };
-
-        this.mouseIntervalId = setInterval(moveMouse, randomInt(1000, 3000));
-        moveMouse(); 
-    }
-
-    stopMouseMovement() {
-        if (this.mouseIntervalId) {
-            clearInterval(this.mouseIntervalId);
-            this.mouseIntervalId = null;
-        }
-        this.mouseCursor.style.display = 'none';
-        this.mouseCursor.style.transitionDuration = '0s';
-        this.mouseCursor.style.transform = 'translate(0px, 0px)';
-    }
+  // NOTE: You must also pass ga_id and api_secret via the URL for Tool 4 /proxy-request to fully work.
+  // The UI doesn't have an input for it, so you'll need to add them manually to the globalUrl for testing
+  // e.g. https://yourwebsite.com?ga_id=G-XXXXX&api_secret=YYY
+  
+  el.innerHTML = `
+    <div class="slot-top">
+      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
+@@ -262,7 +277,6 @@
+  // NEW: Apply a random, negative animation delay for staggered start
+  const scrollDuration = 3.5; // Matches the CSS animation duration
+  const randomScrollDelay = Math.random() * scrollDuration; 
+  // Set negative delay to start the animation at a random point in its cycle.
+  iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
 
-    async runAutomation(targetUrl) {
-        const url = targetUrl || this.urlInput.value.trim();
-        const apiUrl = API_URL_BASE.value;
+@@ -271,21 +285,22 @@
+    statusDot.classList.toggle('active', isActive);
+  }
 
-        if (!url) {
-            this.setStatus('Error: Target URL is missing', false, true);
-            return;
-        }
-        
-        // 1. Get GLOBAL Inputs
-        const [ip, port] = globalProxyInput.value.split(':');
-        const proxyAuth = globalAuthInput.value.trim();
-        const gaId = globalGaIdInput.value.trim();
-        const apiSecret = globalApiSecretInput.value.trim();
-        const uniqueUid = generateUniqueId();
-        
-        const clickerStatus = mouseClickModeCheckbox.checked ? '1' : '0'; 
+  // *** MODIFIED FUNCTION TO PASS AUTO CLICKER STATUS ***
+  function getProxiedUrl(originalUrl, proxy){
+      // NOTE: /proxy-request needs GA4 keys to be passed. Since the UI doesn't have fields for them,
+      // it assumes you will pass the main target URL with GA4 keys in the URL query string,
+      // which is how the original Tool 4 frontend worked.
+      
+      // GA4 keys (if provided in the URL) will be extracted by the backend.
+      // Target URL is extracted by the backend.
+      // Check the status of the new optional checkbox
+      const autoClickerEnabled = autoClickerModeCheckbox.checked ? '1' : '0';
 
-        const params = new URLSearchParams({
-            target: url,
-            uid: uniqueUid,
-            ip: ip || '',
-            port: port || '',
-            auth: proxyAuth || '',
-            ga_id: gaId || '',
-            api_secret: apiSecret || '',
-            clicker: clickerStatus 
-        });
+      // Note: proxy.ip and proxy.port might be empty if running in VPN mode
+      const ipParam = proxy.ip ? `ip=${proxy.ip}&port=${proxy.port}&` : '';
+      const authParam = proxy.auth ? `auth=${proxy.auth}&` : '';
+      return `${PROXY_ENDPOINT}?` + 
+          `target=${encodeURIComponent(originalUrl)}&` + // The actual page to visit
+          `ip=${proxy.ip}&port=${proxy.port}&` +
+          `auth=${proxy.auth}&` + 
+          `sessionDuration=30&` + // Fixed 30s session duration
+          `clicker=1&` + // Defaulting to smart clicker enabled
+          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+          `target=${encodeURIComponent(originalUrl)}&` + 
+          ipParam + 
+          authParam +
+          `sessionDuration=30&` + 
+          `clicker=${autoClickerEnabled}&` + // Pass the optional parameter
+          `uid=${proxy.uniqueId}`; 
+  }
 
-        const fullApiUrl = `${apiUrl}?${params.toString()}`;
+  // --- Core Automation Function ---
+@@ -310,7 +325,7 @@
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
-        this.setStatus(`Sending request (Slot ${this.id})...`, true);
-        this.iframe.src = 'about:blank'; 
-        
-        // 2. Start Mouse Movement
-        this.startMouseMovement();
+    try {
+        // Fetch request is sent. The backend script will run for 30s in the background.
+        // Fetch request is sent. The backend script will run in the background.
+        // We use mode: 'no-cors' just for a quick request, assuming the response is quick.
+        await fetch(proxiedUrl, { mode: 'no-cors' });
 
-        try {
-            const response = await fetch(fullApiUrl, { method: 'GET' });
-            const data = await response.json();
-
-            if (data.status === 'OK') {
-                this.setStatus(`Success! Mode: ${clickerStatus === '1' ? 'MAX EARNING' : 'ADSENSE SAFE'}.`, true);
-            } else {
-                this.setStatus(`Error: ${data.error} | ${data.details.substring(0, 50)}...`, false, true);
-            }
-            
-            this.iframe.src = url;
-
-        } catch (error) {
-            this.setStatus(`Critical Frontend Error: ${error.message}`, false, true);
-            this.stopAutomation(); 
-        }
-
-        this.iframe.parentElement.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
-    }
-
-    startAutomation(isGlobal = false) {
-        if (this.isAutomationRunning) return;
-
-        this.isAutomationRunning = true;
-        this.startBtn.style.display = 'none';
-        this.stopBtn.style.display = 'inline-block';
-        
-        const runOnce = () => this.runAutomation();
-
-        if (repeatModeCheckbox.checked) {
-            const fixedDelay = getRandomDelay(); 
-            this.setStatus(`Starting Repeat Mode (${Math.round(fixedDelay / 1000)}s cycle)...`, true);
-            this.intervalId = setInterval(runOnce, fixedDelay);
-        } else {
-            this.setStatus('Running once...', true);
-        }
-
-        runOnce(); 
-    }
-
-    stopAutomation() {
-        if (!this.isAutomationRunning) return;
-
-        this.isAutomationRunning = false;
-        this.startBtn.style.display = 'inline-block';
-        this.stopBtn.style.display = 'none';
-        
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-        }
-        
-        this.stopMouseMovement(); 
-        this.iframe.parentElement.classList.remove('scrolling'); 
-        this.setStatus('Stopped', false);
-    }
-
-    setupEventListeners() {
-        this.startBtn.addEventListener('click', () => this.startAutomation(false));
-        this.stopBtn.addEventListener('click', () => this.stopAutomation());
-    }
-}
-
-// --- Global Functions ---
-function renderSlots(count) {
-    slotsContainer.innerHTML = '';
-    currentSlots = [];
-    for (let i = 1; i <= count; i++) {
-        const slot = new Slot(i);
-        slotsContainer.appendChild(slot.element);
-        currentSlots.push(slot);
-    }
-}
-
-function stopAllAutomation() {
-    currentSlots.forEach(s => s.stopAutomation());
-    repeatIntervals.forEach(clearInterval);
-    repeatIntervals = [];
-
-    globalStartBtn.style.display = 'block';
-    globalStopBtn.style.display = 'none';
-}
-
-// --- Global Event Listeners ---
-globalStartBtn.addEventListener('click', () => {
-    stopAllAutomation(); 
-    currentSlots.forEach(s => s.startAutomation(true));
-
-    globalStartBtn.style.display = 'none';
-    globalStopBtn.style.display = 'block';
-});
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
-
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count) || count < 1) count = 1; 
-    renderSlots(count);
-});
-
+@@ -446,4 +461,5 @@
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
 </html>
+  </html>
