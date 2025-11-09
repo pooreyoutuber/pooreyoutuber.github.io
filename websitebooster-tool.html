@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as original website-ads.html) --- */
+  /* --- CSS Styles (No changes) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -96,20 +96,20 @@
     height: 20px;
     background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%23000000" d="M3.24 3.76L17.24 17.76M3.76 17.76L17.76 3.76M10 0a10 10 0 1 0 0 20a10 10 0 1 0 0-20z"/></svg>') no-repeat center center;
     background-size: contain;
-    pointer-events: none; /* Mouse can click through it */
+    pointer-events: none;
     z-index: 1000;
-    transition: transform 0.2s ease-out; /* Smooth movement */
+    transition: transform 0.2s ease-out; 
     opacity: 0.8;
   }
 
   /* CSS for Auto Scroll */
   .slot-iframe-container.scrolling {
-    animation: scrollAnimation 30s linear infinite alternate; /* 30s to scroll up/down */
+    animation: scrollAnimation 30s linear infinite alternate; 
   }
 
   @keyframes scrollAnimation {
     0% { transform: translateY(0); }
-    100% { transform: translateY(calc(-100% + 300px)); } /* Scroll to the bottom of the 300px window */
+    100% { transform: translateY(calc(-100% + 300px)); } 
   }
 
 </style>
@@ -127,33 +127,41 @@
         <label for="num-slots">Total Slots (Parallel Users)</label>
         <input type="number" id="num-slots" value="10" min="1" max="20">
     </div>
-
+    
     <div class="control-group" style="flex-grow: 2;">
         <label for="api-url">Backend API URL (Your Server)</label>
         <input type="text" id="api-url" value="http://your-server-ip:10000/proxy-request" placeholder="http://your-server-ip:10000/proxy-request">
     </div>
 
-    <div class="control-group">
-        <label for="repeat-mode">Repeat Mode</label>
+    <div class="control-group" style="flex-grow: 2;">
+        <label for="global-proxy-input">Global Proxy IP:Port</label>
+        <input type="text" id="global-proxy-input" placeholder="Proxy IP:Port (e.g., 101.50.20.1:8888)">
+    </div>
+    <div class="control-group" style="flex-grow: 2;">
+        <label for="global-auth-input">Global Proxy Auth (user:pass)</label>
+        <input type="text" id="global-auth-input" placeholder="user:pass (Optional)">
+    </div>
+    <div class="control-group" style="flex-grow: 1;">
+        <label for="global-gaid-input">Global GA4 ID (G-XXXXX)</label>
+        <input type="text" id="global-gaid-input" placeholder="G-XXXXX (Optional)">
+    </div>
+    <div class="control-group" style="flex-grow: 1;">
+        <label for="global-api-secret-input">Global GA4 API Secret</label>
+        <input type="text" id="global-api-secret-input" placeholder="API Secret (Optional)">
+    </div>
+
+    <div class="options" style="width: 100%; justify-content: space-around;">
         <div class="option-item">
             <input type="checkbox" id="repeat-mode" checked>
             <label for="repeat-mode">Cycle Every 30s (Earning Logic)</label>
         </div>
-    </div>
-    
-    <div class="control-group">
-        <label for="auto-scroll-mode">High Engagement Mode</label>
         <div class="option-item">
             <input type="checkbox" id="auto-scroll-mode" checked>
             <label for="auto-scroll-mode">Auto Scroll (High Viewability)</label>
         </div>
-    </div>
-    
-    <div class="control-group">
-        <label for="mouse-click-mode">Max Earning / Clicker</label>
         <div class="option-item">
             <input type="checkbox" id="mouse-click-mode" checked>
-            <label for="mouse-click-mode">Simulate Mouse & Random Click (Max Earning Mode)</label>
+            <label for="mouse-click-mode">Simulate Mouse & Click (Max Earning Mode)</label>
         </div>
     </div>
   </div>
@@ -173,7 +181,12 @@
 const API_URL_BASE = document.getElementById('api-url');
 const repeatModeCheckbox = document.getElementById('repeat-mode');
 const autoScrollModeCheckbox = document.getElementById('auto-scroll-mode');
-const mouseClickModeCheckbox = document.getElementById('mouse-click-mode'); // New
+const mouseClickModeCheckbox = document.getElementById('mouse-click-mode');
+
+const globalProxyInput = document.getElementById('global-proxy-input');
+const globalAuthInput = document.getElementById('global-auth-input');
+const globalGaIdInput = document.getElementById('global-gaid-input');
+const globalApiSecretInput = document.getElementById('global-api-secret-input');
 
 const numSlotsInput = document.getElementById('num-slots');
 const slotsContainer = document.getElementById('slots-container');
@@ -185,8 +198,7 @@ let repeatIntervals = [];
 
 // --- Utilities ---
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-const getRandomDelay = () => randomInt(30000, 40000); // Random delay between 30s-40s for ultra-realism
-
+const getRandomDelay = () => randomInt(30000, 40000); 
 const generateUniqueId = () => Math.random().toString(36).substring(2, 12) + Date.now().toString(36).substring(2, 5);
 
 // --- Slot Class Definition ---
@@ -196,17 +208,13 @@ class Slot {
         this.element = this.createSlotElement();
         this.iframe = this.element.querySelector('iframe');
         this.urlInput = this.element.querySelector('.slot-url-input');
-        this.proxyInput = this.element.querySelector('.slot-proxy-input');
-        this.authInput = this.element.querySelector('.slot-auth-input');
-        this.gaIdInput = this.element.querySelector('.slot-gaid-input');
-        this.apiSecretInput = this.element.querySelector('.slot-api-secret-input');
+        
         this.statusElement = this.element.querySelector('.status-bar-text');
         this.startBtn = this.element.querySelector('.start-btn');
         this.stopBtn = this.element.querySelector('.stop-btn');
         this.intervalId = null;
         this.isAutomationRunning = false;
         
-        // New: Mouse Cursor Element
         this.mouseCursor = this.element.querySelector('.mouse-cursor'); 
         this.mouseIntervalId = null;
         
@@ -226,11 +234,7 @@ class Slot {
                 </div>
             </div>
             <div class="slot-body">
-                <input type="text" class="slot-url-input" placeholder="Target URL (e.g., https://example.com)">
-                <input type="text" class="slot-proxy-input" placeholder="Proxy IP:Port (Optional)">
-                <input type="text" class="slot-auth-input" placeholder="Proxy Auth (user:pass, Optional)">
-                <input type="text" class="slot-gaid-input" placeholder="GA4 ID (G-XXXXX, Optional)">
-                <input type="text" class="slot-api-secret-input" placeholder="GA4 API Secret (Optional)">
+                <input type="text" class="slot-url-input" placeholder="Target URL (REQUIRED)">
             </div>
             <div class="status-bar"><span class="status-bar-text"></span></div>
             <div class="slot-iframe-container">
@@ -249,16 +253,12 @@ class Slot {
         if (isError) statusBar.classList.add('error');
     }
 
-    // New: Mouse Movement Logic
     startMouseMovement() {
         if (!mouseClickModeCheckbox.checked) return;
         this.mouseCursor.style.display = 'block';
         const container = this.iframe.parentElement;
         const width = container.clientWidth;
         const height = container.clientHeight;
-
-        let x = width / 2;
-        let y = height / 2;
 
         const moveMouse = () => {
             const newX = randomInt(50, width - 50);
@@ -268,14 +268,13 @@ class Slot {
             this.mouseCursor.style.transitionDuration = `${duration}ms`;
             this.mouseCursor.style.transform = `translate(${newX}px, ${newY}px)`;
             
-            // Random Click Simulation (Very Low Probability)
-            if (Math.random() < 0.03) { // 3% chance to simulate a click visually
+            if (Math.random() < 0.03) { 
                  this.setStatus('Visual Click Simulated!', true);
             }
         };
 
         this.mouseIntervalId = setInterval(moveMouse, randomInt(1000, 3000));
-        moveMouse(); // Initial move
+        moveMouse(); 
     }
 
     stopMouseMovement() {
@@ -294,18 +293,17 @@ class Slot {
         const apiUrl = API_URL_BASE.value;
 
         if (!url) {
-            this.setStatus('Error: URL is missing', false, true);
+            this.setStatus('Error: Target URL is missing', false, true);
             return;
         }
         
-        // 1. Construct API URL
-        const [ip, port] = this.proxyInput.value.split(':');
-        const proxyAuth = this.authInput.value.trim();
-        const gaId = this.gaIdInput.value.trim();
-        const apiSecret = this.apiSecretInput.value.trim();
+        // 1. Get GLOBAL Inputs
+        const [ip, port] = globalProxyInput.value.split(':');
+        const proxyAuth = globalAuthInput.value.trim();
+        const gaId = globalGaIdInput.value.trim();
+        const apiSecret = globalApiSecretInput.value.trim();
         const uniqueUid = generateUniqueId();
         
-        // CRITICAL: This sends '1' for Max Earning and '0' for Safe Mode
         const clickerStatus = mouseClickModeCheckbox.checked ? '1' : '0'; 
 
         const params = new URLSearchParams({
@@ -321,10 +319,10 @@ class Slot {
 
         const fullApiUrl = `${apiUrl}?${params.toString()}`;
 
-        this.setStatus('Sending request to Backend API (Max CPC Logic)...', true);
+        this.setStatus(`Sending request (Slot ${this.id})...`, true);
         this.iframe.src = 'about:blank'; 
         
-        // 2. Start Mouse Movement for Realism
+        // 2. Start Mouse Movement
         this.startMouseMovement();
 
         try {
@@ -337,7 +335,6 @@ class Slot {
                 this.setStatus(`Error: ${data.error} | ${data.details.substring(0, 50)}...`, false, true);
             }
             
-            // 3. Update Iframe Source (for visual proof)
             this.iframe.src = url;
 
         } catch (error) {
@@ -345,7 +342,6 @@ class Slot {
             this.stopAutomation(); 
         }
 
-        // 4. Update the scrolling state
         this.iframe.parentElement.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
     }
 
@@ -366,7 +362,7 @@ class Slot {
             this.setStatus('Running once...', true);
         }
 
-        runOnce(); // Run immediately on start
+        runOnce(); 
     }
 
     stopAutomation() {
@@ -415,26 +411,20 @@ function stopAllAutomation() {
 // --- Global Event Listeners ---
 globalStartBtn.addEventListener('click', () => {
     stopAllAutomation(); 
-    
-    // Start all slots immediately
     currentSlots.forEach(s => s.startAutomation(true));
 
     globalStartBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
 });
 
-
 globalStopBtn.addEventListener('click', stopAllAutomation);
-
 
 numSlotsInput.addEventListener('change', (e) => {
     let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
+    if (isNaN(count) || count < 1) count = 1; 
     renderSlots(count);
 });
 
-
-// Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
