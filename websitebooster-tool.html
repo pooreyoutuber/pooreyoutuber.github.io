@@ -68,15 +68,16 @@
   /* --- CRITICAL FIX: CSS for Auto-Scrolling (Final) --- */
   @keyframes scroll { 
     0% { transform: translate(0, 0) scale(0.4); } 
-    /* FIX APPLIED: Changed -200% to -100% to prevent excess scrolling and white space */
-    100% { transform: translate(0, -100%) scale(0.4); } 
+    /* FIX APPLIED: Increased translate value to -220% to cover longer pages without white space */
+    100% { transform: translate(0, -220%) scale(0.4); } 
   }
 
   .slot.scrolling iframe {
     /* Starting point */
     transform: translate(0, 0) scale(0.4); 
     animation-name: scroll;
-    animation-duration: 10s; /* Adjusted for realistic, slower scroll over the new distance */
+    /* FIX APPLIED: Increased duration to 20s for smoother, more realistic scroll */
+    animation-duration: 20s; 
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
     animation-direction: alternate; /* Scrolls down, then scrolls back up smoothly */
@@ -278,8 +279,8 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
-  // FIX APPLIED: Use the new animation duration (10s) for staggering
-  const scrollDuration = 10; // Matches the fixed CSS animation duration
+  // FIX APPLIED: Use the new animation duration (20s) for staggering
+  const scrollDuration = 20; // Matches the fixed CSS animation duration (20s)
   const randomScrollDelay = Math.random() * scrollDuration; 
   // Stagger the start time by setting a random negative delay
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
