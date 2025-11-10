@@ -65,24 +65,24 @@
     opacity: 1;
   }
   
-  /* --- FIXED CSS for Auto-Scrolling --- */
+  /* --- CRITICAL FIX: CSS for Auto-Scrolling (Final) --- */
   @keyframes scroll { 
     0% { transform: translate(0, 0) scale(0.4); } 
-    /* Changed from -200% to -150% to cover the full scaled content height (250%) without showing white space */
-    100% { transform: translate(0, -150%) scale(0.4); } 
+    /* Set to -200% for smooth, complete scroll on most pages without showing white space */
+    100% { transform: translate(0, -200%) scale(0.4); } 
   }
 
   .slot.scrolling iframe {
     /* Starting point */
     transform: translate(0, 0) scale(0.4); 
     animation-name: scroll;
-    animation-duration: 8s; /* Slowed down for realism (8 seconds down, 8 seconds up) */
+    animation-duration: 10s; /* Adjusted for realistic, slower scroll over the new distance */
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
-    animation-direction: alternate; /* CRITICAL FIX: Scrolls down, then scrolls back up smoothly */
+    animation-direction: alternate; /* Scrolls down, then scrolls back up smoothly */
     /* animation-delay is set via JavaScript for staggering */
   }
-  /* ---------------------------------- */
+  /* ---------------------------------------------------- */
   
   .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
   .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
@@ -156,13 +156,13 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Earning Booster:</strong> **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai, jisse MonetaG jaise ad network par earning badhti hai.
+                **Earning Booster:** **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai, jisse MonetaG jaise ad network par earning badhti hai.
             </li>
             <li>
-                <strong>VPN Mode:</strong> Proxy fields empty chhodne par, yeh tool aapke **VPN** IP se request bhejega. Agar Proxy use karna hai, toh `ip` aur `port` bharein.
+                **VPN Mode:** Proxy fields empty chhodne par, yeh tool aapke **VPN** IP se request bhejega. Agar Proxy use karna hai, toh `ip` aur `port` bharein.
             </li>
             <li>
-                <strong>Action:</strong> **'Enable Active User Mode'** aur **'Auto Clicker'** (default checked) check rakhein. **'Load & Run All'** se test shuru karein.
+                **Action:** **'Enable Active User Mode'** aur **'Auto Clicker'** (default checked) check rakhein. **'Load & Run All'** se test shuru karein.
             </li>
         </ul>
     </div>
@@ -278,8 +278,8 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
   
-  // FIX APPLIED: Use the new animation duration (8s) for staggering
-  const scrollDuration = 8; // Matches the fixed CSS animation duration
+  // FIX APPLIED: Use the new animation duration (10s) for staggering
+  const scrollDuration = 10; // Matches the fixed CSS animation duration
   const randomScrollDelay = Math.random() * scrollDuration; 
   // Stagger the start time by setting a random negative delay
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
