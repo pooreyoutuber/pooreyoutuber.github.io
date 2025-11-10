@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as original website-ads.html) --- */
+  /* --- CSS Styles --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -57,25 +57,28 @@
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Desktop Scale Fix */
-    transform: scale(0.4); 
+    /* Zoom Level: 60% */
+    transform: scale(0.6); 
     transform-origin: 0 0;
-    width: calc(100% / 0.4);
-    height: calc(100% / 0.4);
+    width: calc(100% / 0.6); 
+    height: calc(100% / 0.6); 
     opacity: 1;
   }
   
-  /* --- CSS for Auto-Scrolling (Modified) --- */
+  /* --- FIX 2: CSS for Auto-Scrolling (Final Fixed Distance and Speed) --- */
   @keyframes scroll {
-    0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, -200%) scale(0.4); } 
-    100% { transform: translate(0, 0) scale(0.4); } 
+    /* Updated start scale to 0.6 */
+    0% { transform: translate(0, 0) scale(0.6); } 
+    /* Increased distance to -250% for 60% zoom for full page coverage */
+    50% { transform: translate(0, -250%) scale(0.6); } 
+    /* Updated end scale to 0.6 */
+    100% { transform: translate(0, 0) scale(0.6); } 
   }
 
   .slot.scrolling iframe {
-    transform: translate(0, 0) scale(0.4); 
-    /* 3.5s duration for approx 8.5 cycles in 30s */
-    animation: scroll 3.5s ease-in-out infinite;
+    transform: translate(0, 0) scale(0.6); 
+    /* Set duration to 16s for very slow, realistic scroll over the new, longer distance */
+    animation: scroll 16s ease-in-out infinite;
     /* animation-delay is set via JavaScript for staggering */
   }
   /* ---------------------------------- */
@@ -275,7 +278,7 @@ function createSlot(index, proxy){
   const statusDot = el.querySelector(`#dot-${index}`);
   
   // NEW: Apply a random, negative animation delay for staggered start
-  const scrollDuration = 3.5; // Matches the CSS animation duration
+  const scrollDuration = 16; // Matches the fixed CSS animation duration (16s)
   const randomScrollDelay = Math.random() * scrollDuration; 
   iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
@@ -461,5 +464,4 @@ repeatModeCheckbox.addEventListener('change', () => {
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
-  </html>
-  
+</html>
