@@ -3,90 +3,124 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Captcha Booster - Auto Earning Tool</title>
+<title>Captcha Booster - Auto Earning Tool (Tool 5)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* Base CSS */
+  /* Base CSS for Good UI */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
-    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
+    --shadow: 0 8px 25px rgba(0,0,0,0.1);--radius: 15px;--gap: 16px; 
     --primary-blue: #0ea5e9;--danger: #dc2626;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
-  .wrap { max-width: 800px; margin: 24px auto; padding: 12px; } 
-  header { margin-bottom: 20px; text-align: center; }
-  h1 { font-size: 30px; margin: 0; color: var(--danger); letter-spacing: -1px; } 
-  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
-  .tool-container { background: var(--card); padding: 30px; border-radius: 15px; box-shadow: var(--shadow); }
-  .input-group { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-  label { font-weight: 600; color: var(--accent); }
-  input[type="text"], input[type="number"] { 
-      padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 16px; width: 100%;
+  .wrap { max-width: 800px; margin: 30px auto; padding: 15px; } 
+  header { margin-bottom: 25px; text-align: center; }
+  h1 { font-size: 32px; margin: 0; color: var(--danger); letter-spacing: -1px; font-weight: 800; } 
+  .tagline { color: var(--muted); font-size: 16px; margin-top: 8px; }
+  
+  /* Tool Card Styling */
+  .tool-container { 
+      background: var(--card); padding: 35px; border-radius: var(--radius); 
+      box-shadow: var(--shadow); 
+      border-top: 5px solid var(--danger);
   }
+  .input-group { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+  label { font-weight: 700; color: #111827; font-size: 15px; }
+  
+  /* Input Styling */
+  input[type="text"], input[type="number"] { 
+      padding: 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 16px; 
+      width: 100%; transition: border-color 0.3s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--danger);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+  }
+
+  /* Controls and Buttons */
   .controls-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
   .btn { 
-      background: var(--danger); color: white; padding: 12px 18px; border-radius: 10px; border: 0; 
-      cursor: pointer; font-weight: 700; transition: background-color 0.2s; flex-grow: 1;
+      background: var(--danger); color: white; padding: 14px 25px; border-radius: 10px; border: 0; 
+      cursor: pointer; font-weight: 700; transition: all 0.2s; flex-grow: 1;
+      font-size: 16px; text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4);
   }
-  .btn:hover { background: #b91c1c; }
-  .btn.stop { background: #ccc; color: #333; }
-  .btn.stop:hover { background: #a0a0a0; }
+  .btn:hover { background: #b91c1c; transform: translateY(-2px); }
+  .btn.stop { background: #333; color: white; box-shadow: none; }
+  .btn.stop:hover { background: #111; transform: translateY(-2px); }
+  
+  /* Status Box */
   .status-box { 
-      padding: 15px; border-radius: 8px; font-size: 14px; margin-top: 10px; 
-      color: #333; background: #f0f4f8; min-height: 40px; display: flex; align-items: center;
-      border: 1px solid var(--border);
+      padding: 15px; border-radius: 10px; font-size: 15px; margin-top: 15px; 
+      color: #333; background: #f0f4f8; min-height: 45px; display: flex; align-items: center;
+      border: 2px solid var(--border); font-weight: 600;
   }
+
+  /* Console Styling */
   .console { 
-      margin-top: 20px; padding: 15px; border: 1px dashed var(--danger); border-radius: 8px; 
-      background: #fff; min-height: 200px; max-height: 400px; overflow-y: scroll;
-      font-size: 13px; font-family: monospace; 
+      margin-top: 30px; padding: 20px; border: 1px solid var(--border); border-radius: 10px; 
+      background: #fcfcfc; min-height: 250px; max-height: 400px; overflow-y: scroll;
+      font-size: 14px; font-family: 'Consolas', monospace; 
   }
-  .console p { margin: 5px 0; border-bottom: 1px dotted #eee; padding-bottom: 5px; }
+  .console p { margin: 5px 0; padding: 5px 0; border-bottom: 1px dotted #eee; }
+  .console p:last-child { border-bottom: none; }
   .console .success { color: var(--success); }
-  .console .fail { color: var(--danger); }
+  .console .fail { color: var(--danger); font-weight: 600; }
+
+  /* Checkbox styling */
+  .checkbox-group { display: flex; align-items: center; gap: 8px; }
+  .checkbox-group input[type="checkbox"] { transform: scale(1.4); }
+  .checkbox-group label { color: var(--success); font-size: 15px; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>🤖 Captcha Booster</h1>
-      <div class="tagline">Autonomous Earning System for 2Captcha API.</div>
+      <div class="tagline">Autonomous Earning System for 2Captcha API. (Tool 5)</div>
     </header>
 
     <div class="tool-container">
       <div class="input-group">
-        <label for="captchaApiKey">2Captcha API Key:</label>
+        <label for="captchaApiKey">🔑 2Captcha API Key:</label>
         <input id="captchaApiKey" type="text" placeholder="Paste your 2Captcha API Key (Mandatory)" />
         
         <div class="controls-row">
-            <label for="maxRuns" style="width: auto;">Max Captcha Runs (1-500):</label>
-            <input id="maxRuns" type="number" value="500" min="1" max="500" style="width: 80px;" />
+            <div style="display: flex; align-items: center; gap: 10px;">
+                 <label for="maxRuns" style="width: auto;">Max Captcha Runs:</label>
+                 <input id="maxRuns" type="number" value="500" min="1" max="5000" style="width: 100px; text-align: center;" />
+            </div>
 
-            <div style="display: flex; align-items: center; gap: 5px;">
-                 <input type="checkbox" id="autoRunCaptcha" style="transform: scale(1.3);" checked />
-                 <label for="autoRunCaptcha" style="font-weight: 600; color: var(--success); width: auto;">Enable Auto Loop (3-4 min VPN Wait)</label>
+            <div class="checkbox-group">
+                 <input type="checkbox" id="autoRunCaptcha" checked />
+                 <label for="autoRunCaptcha">Enable Auto Loop (3-4 min VPN/IP change wait)</label>
             </div>
         </div>
       </div>
       
       <div class="controls-row" style="margin-bottom: 20px;">
-          <button id="startCaptchaTool" class="btn">START AUTO SOLVER</button>
-          <button id="stopCaptchaTool" class="btn stop" style="display: none;">STOP SOLVER</button>
+          <button id="startCaptchaTool" class="btn">🚀 START AUTO SOLVER</button>
+          <button id="stopCaptchaTool" class="btn stop" style="display: none;">🛑 STOP SOLVER</button>
       </div>
       
       <div class="status-box" id="captchaStatus">Status: Ready to begin.</div>
       
       <div class="console" id="captchaConsole">
-        <p style="color: #6b7280;">Captcha Earning Process Console:</p>
+        <p style="color: var(--muted); border-bottom: none;">[CONSOLE] Captcha Earning Process Log:</p>
       </div>
     </div>
   </div>
 
 <script>
-const CAPTCHA_ENDPOINT = '/auto-solve-captcha'; // Your Node.js backend endpoint
+// 🔥 CRITICAL: YAHAN APNA RENDER URL DAALEIN!
+// Replace 'YOUR_RENDER_URL_HERE' with the actual base URL of your Render app (e.g., https://my-backend.onrender.com)
+const RENDER_BASE_URL = 'YOUR_RENDER_URL_HERE'; 
+const CAPTCHA_ENDPOINT = RENDER_BASE_URL + '/auto-solve-captcha';
+
 
 const captchaApiKeyInput = document.getElementById('captchaApiKey');
 const maxRunsInput = document.getElementById('maxRuns');
@@ -101,9 +135,10 @@ let currentRun = 0;
 let totalSolved = 0;
 
 function updateCaptchaStatus(text, isError = false) {
-    captchaStatusDiv.textContent = text;
+    captchaStatusDiv.innerHTML = `**Status:** ${text}`;
     captchaStatusDiv.style.borderColor = isError ? 'var(--danger)' : 'var(--success)';
     captchaStatusDiv.style.color = isError ? 'var(--danger)' : '#111827';
+    captchaStatusDiv.style.background = isError ? '#fee2e2' : '#d1fae5';
 }
 
 function updateCaptchaConsole(text, type = 'info') {
@@ -116,7 +151,13 @@ function updateCaptchaConsole(text, type = 'info') {
         newEntry.classList.add('fail');
     }
     
-    captchaConsoleDiv.prepend(newEntry);
+    // Console mein naye entries hamesha upar honge (second position after the title).
+    captchaConsoleDiv.insertBefore(newEntry, captchaConsoleDiv.children[1]);
+    
+    // Remove oldest entries to keep the list clean (Max 50 entries + 1 title)
+    if (captchaConsoleDiv.children.length > 51) {
+        captchaConsoleDiv.removeChild(captchaConsoleDiv.lastChild);
+    }
 }
 
 async function startCaptchaSolvingLoop() {
@@ -124,62 +165,65 @@ async function startCaptchaSolvingLoop() {
     const maxRuns = parseInt(maxRunsInput.value);
     const autoRun = autoRunCaptchaCheckbox.checked;
 
-    if (apiKey.length < 32 || apiKey.includes(' ')) {
-        updateCaptchaStatus('❌ Error: Please enter a valid 2Captcha API Key.', true);
+    if (RENDER_BASE_URL === 'YOUR_RENDER_URL_HERE') {
+        updateCaptchaStatus('❌ CRITICAL ERROR: Please replace "YOUR_RENDER_URL_HERE" in the code with your actual Render API URL.', true);
         return;
     }
-    if (maxRuns < 1 || maxRuns > 500 || isNaN(maxRuns)) {
-        updateCaptchaStatus('❌ Error: Max Runs must be between 1 and 500.', true);
+    if (apiKey.length < 32 || apiKey.includes(' ')) {
+        updateCaptchaStatus('❌ Error: Please enter a valid 2Captcha API Key (Must be 32 characters long).', true);
+        return;
+    }
+    if (maxRuns < 1 || isNaN(maxRuns)) {
+        updateCaptchaStatus('❌ Error: Max Runs must be a valid number greater than 0.', true);
         return;
     }
 
+    // UI State Change
     startCaptchaToolBtn.style.display = 'none';
     stopCaptchaToolBtn.style.display = 'block';
     isCaptchaRunning = true;
     currentRun = 0;
     totalSolved = 0;
-    updateCaptchaStatus(`✅ Started! Auto Run: ${autoRun ? 'ON' : 'OFF'}. Max Runs: ${maxRuns}.`, false);
+    updateCaptchaStatus(`✅ Solver Started! Auto Run: **${autoRun ? 'ON' : 'OFF'}**. Max Runs: **${maxRuns}** runs.`, false);
     updateCaptchaConsole('--- Captcha Solver Initiated ---');
 
     while (isCaptchaRunning && currentRun < maxRuns) {
         currentRun++;
 
         // 1. Frontend Status Update
-        updateCaptchaStatus(`Attempt ${currentRun}/${maxRuns}. Solving... Solved: ${totalSolved}`, false);
+        updateCaptchaStatus(`Attempt ${currentRun}/${maxRuns}. Solving... Solved: **${totalSolved}**`, false);
         updateCaptchaConsole(`Attempt ${currentRun}/${maxRuns}: Requesting solve via Node.js backend...`);
 
         // 2. Call the Backend API for a single solve attempt
-        // currentRun parameter is used by index.js to rotate the internal proxy list.
-        const BACKEND_URL = `${CAPTCHA_ENDPOINT}?apiKey=${apiKey}&currentRun=${currentRun}`;
+        const FINAL_URL = `${CAPTCHA_ENDPOINT}?apiKey=${apiKey}&currentRun=${currentRun}`;
 
         try {
-            const response = await fetch(BACKEND_URL);
+            const response = await fetch(FINAL_URL);
             const data = await response.json();
             
             if (data.status === 'SOLVED') {
                 totalSolved++;
-                updateCaptchaConsole(`SUCCESS! Token received (Proxy Cycle ${currentRun}). Total Solved: ${totalSolved}.`, 'success');
+                updateCaptchaConsole(`✅ SUCCESS! Token received (Proxy Cycle ${currentRun}). Total Solved: ${totalSolved}.`, 'success');
             } else if (data.status === 'FAILED') {
-                updateCaptchaConsole(`FAILED! Reason: ${data.error}`, 'fail');
+                updateCaptchaConsole(`❌ FAILED! Reason: ${data.error.substring(0, 70)}...`, 'fail');
             } else {
-                updateCaptchaConsole(`UNKNOWN RESPONSE from backend: ${JSON.stringify(data)}`, 'fail');
+                updateCaptchaConsole(`⚠️ UNKNOWN RESPONSE: ${JSON.stringify(data).substring(0, 50)}...`, 'fail');
             }
 
         } catch (error) {
-            updateCaptchaConsole(`CRITICAL ERROR: Could not connect to Node.js server (${error.message}). Stopping.`, 'fail');
+            updateCaptchaConsole(`❌ CRITICAL ERROR: Could not connect to Render server (${error.message}). Stopping. Check RENDER_BASE_URL.`, 'fail');
             break; 
         }
 
         // 3. Auto Run/Looping Logic with 3-4 minute delay for VPN rotation
-        if (autoRun && currentRun < maxRuns) {
+        if (autoRun && currentRun < maxRuns && isCaptchaRunning) {
             // Wait for 3 to 4 minutes (180,000 to 240,000 ms)
             const waitTime = Math.floor(Math.random() * (240 - 180 + 1) + 180) * 1000;
             const waitMinutes = (waitTime / 60000).toFixed(2);
             
-            updateCaptchaStatus(`Attempt ${currentRun}/${maxRuns}. Solved: ${totalSolved}. ⏳ WAITING ${waitMinutes} mins for VPN/Proxy change...`, false);
-            updateCaptchaConsole(`\n--- Waiting ${waitMinutes} mins for VPN/Proxy rotation before next run... ---`, 'info');
+            updateCaptchaStatus(`Attempt ${currentRun}/${maxRuns}. Solved: **${totalSolved}**. ⏳ WAITING **${waitMinutes} mins** for VPN/IP change...`, false);
+            updateCaptchaConsole(`\n--- Waiting ${waitMinutes} mins for VPN/IP rotation before next run... ---`, 'info');
             
-            // This is the CRITICAL delay for your VPN change
             await new Promise(resolve => setTimeout(resolve, waitTime)); 
         } else if (currentRun >= maxRuns) {
              // Max runs reached, stop the loop
@@ -188,21 +232,31 @@ async function startCaptchaSolvingLoop() {
     }
 
     // Final Stop procedure
-    stopCaptchaSolvingLoop();
-    updateCaptchaStatus(`⭐ FINISHED! Total Runs: ${currentRun}. Total Solved: ${totalSolved}.`, false);
-    updateCaptchaConsole('--- Captcha Solver Finished ---');
+    stopCaptchaSolvingLoop(true);
 }
 
-function stopCaptchaSolvingLoop() {
-    isCaptchaRunning = false;
-    startCaptchaToolBtn.style.display = 'block';
-    stopCaptchaToolBtn.style.display = 'none';
-    updateCaptchaStatus('Stopped by user. Ready to restart.', false);
+function stopCaptchaSolvingLoop(finished = false) {
+    if (isCaptchaRunning) {
+        isCaptchaRunning = false;
+        startCaptchaToolBtn.style.display = 'block';
+        stopCaptchaToolBtn.style.display = 'none';
+        
+        if (finished) {
+            updateCaptchaStatus(`⭐ FINISHED! Total Runs: **${currentRun}**. Total Solved: **${totalSolved}**.`, false);
+            updateCaptchaConsole('--- Captcha Solver Finished ---');
+        } else {
+            updateCaptchaStatus('🛑 Stopped by user. Ready to restart.', false);
+            updateCaptchaConsole('--- Captcha Solver Stopped by User ---');
+        }
+    }
 }
 
 
 startCaptchaToolBtn.addEventListener('click', startCaptchaSolvingLoop);
-stopCaptchaToolBtn.addEventListener('click', stopCaptchaSolvingLoop);
+stopCaptchaToolBtn.addEventListener('click', () => stopCaptchaSolvingLoop(false));
+
+// Initial UI setup
+updateCaptchaStatus('Ready to begin. Enter your 2Captcha API Key and start.', false);
 </script>
 </body>
 </html>
