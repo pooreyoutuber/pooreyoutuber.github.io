@@ -7,7 +7,7 @@ const nodeFetch = require('node-fetch');
 const cors = require('cors'); 
 const fs = require('fs'); 
 const crypto = require('crypto');
-const axios = require('axios');
+const axios = require('axios'); // Captcha Booster (Tool 5) ke liye zaroori
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
 const http = require('http'); 
 const { URL } = require('url'); 
@@ -96,6 +96,79 @@ async function sendDataViaProxy(payload, eventType) {
     console.log(`[GA4 MP] Sending simulated GA4 data: ${eventType}`);
     return true; 
 }
+
+
+// ===================================================================
+// 🔥 NEW: 2CAPTCHA CONFIGURATION AND SOLVER UTILITY (Tool 5 Helper)
+// --- Tool 5 Code Utilities Yahan se Shuru ---
+// ===================================================================
+
+// --- 2CAPTCHA CONFIGURATION ---
+const TWOCAPTCHA_BASE_URL = 'http://2captcha.com/in.php';
+const TWOCAPTCHA_RES_URL = 'http://2captcha.com/res.php';
+
+// Proxy Rotation ke liye yeh list use hogi (Webshare's dummy list)
+const DUMMY_PROXIES = [ 
+    { ip: "142.111.48.253", port: "7030", country: "US" }, 
+    { ip: "31.59.20.176", port: "6754", country: "DE" }, 
+    { ip: "23.95.150.145", port: "6114", country: "CA" }, 
+    { ip: "198.23.239.134", port: "6540", country: "US" }, 
+    { ip: "45.38.107.97", port: "6014", country: "US" }, 
+    { ip: "107.172.163.27", port: "6543", country: "CA" }, 
+    { ip: "198.105.121.200", port: "6462", country: "US" }, 
+    { ip: "64.137.96.74", port: "6641", country: "US" }, 
+    { ip: "216.10.27.159", port: "6837", country: "AU" }, 
+    { ip: "142.111.67.146", port: "5611", country: "US" }, 
+];
+const COMMON_AUTH = "bqctypvz:399xb3kxqv6i"; // Aapka Webshare Auth
+
+/**
+ * Solves a reCAPTCHA v2 using 2Captcha API and a provided proxy.
+ */
+async function solveRecaptcha(targetUrl, siteKey, proxyIp, proxyPort, proxyAuth, apiKey) {
+    const TWOCAPTCHA_API_KEY = apiKey; 
+    const [proxyUser, proxyPass] = proxyAuth ? proxyAuth.split(':') : ['', ''];
+    const proxyType = 'http';
+
+    try {
+        // 1. Submit the Captcha
+        const submitUrl = `${TWOCAPTCHA_BASE_URL}?key=${TWOCAPTCHA_API_KEY}&method=userrecaptcha&googlekey=${siteKey}&pageurl=${encodeURIComponent(targetUrl)}&json=1&proxy=${proxyUser}:${proxyPass}@${proxyIp}:${proxyPort}&proxytype=${proxyType}`;
+        
+        let response = await axios.get(submitUrl);
+        
+        if (response.data.status !== 1) {
+            throw new Error(`2Captcha Submission Failed: ${response.data.request}`);
+        }
+        const taskId = response.data.request;
+        console.log(`Submitted Captcha. Task ID: ${taskId}.`);
+
+        // 2. Poll for the result (Max 75 seconds)
+        let result = null;
+        for (let i = 0; i < 15; i++) { 
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            const checkUrl = `${TWOCAPTCHA_RES_URL}?key=${TWOCAPTCHA_API_KEY}&action=get&id=${taskId}&json=1`;
+            response = await axios.get(checkUrl);
+
+            if (response.data.status === 1) {
+                result = response.data.request;
+                return { status: 'SOLVED', token: result };
+            }
+            if (response.data.request !== 'CAPCHA_NOT_READY') {
+                throw new Error(`2Captcha Polling Error: ${response.data.request}`);
+            }
+        }
+        
+        throw new Error("2Captcha solution timed out.");
+
+    } catch (error) {
+        return { status: 'FAILED', error: error.message };
+    }
+}
+// ===================================================================
+// END: 2CAPTCHA CONFIGURATION AND SOLVER UTILITY
+// ===================================================================
+
 
 // ===================================================================
 // 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL (Placeholder)
@@ -370,6 +443,64 @@ app.get('/proxy-request', async (req, res) => {
         });
     }
 });
+
+
+// ===================================================================
+// 5. CAPTCHA BOOSTER ENDPOINT (API: /auto-solve-captcha) - NEW TOOL (LAST ENDPOINT)
+// ===================================================================
+app.get('/auto-solve-captcha', async (req, res) => {
+    
+    // Frontend se key aur current run number lete hain
+    const { apiKey, currentRun } = req.query; 
+
+    if (!apiKey) {
+        return res.status(400).json({ status: 'FAILED', error: 'Missing 2Captcha API Key.' });
+    }
+    
+    // --- VPN/Proxy Rotation Logic ---
+    const runNumber = parseInt(currentRun) || 1;
+    const proxyIndex = (runNumber - 1) % DUMMY_PROXIES.length;
+    const proxy = DUMMY_PROXIES[proxyIndex];
+    
+    const proxyDetails = {
+        ip: proxy.ip, 
+        port: proxy.port, 
+        auth: COMMON_AUTH // Webshare Auth
+    };
+
+    // --- Captcha Target (Example - reCAPTCHA v2 Demo Site) ---
+    const CAPTCHA_URL = "https://www.google.com/recaptcha/api2/demo"; 
+    const CAPTCHA_SITEKEY = "6Le-wvkSAAAAAPBOPR_T_e4_30Tn_h-eQZz_vL"; 
+
+    console.log(`[Captcha Run ${runNumber}] Attempting solve via Proxy: ${proxy.ip}`);
+
+    // Call the solver utility
+    const solverResult = await solveRecaptcha(
+        CAPTCHA_URL, 
+        CAPTCHA_SITEKEY, 
+        proxyDetails.ip, 
+        proxyDetails.port, 
+        proxyDetails.auth,
+        apiKey // Dynamic API key
+    );
+
+    if (solverResult.status === 'SOLVED') {
+        console.log(`[Captcha Run ${runNumber}] ✅ SUCCESS! Token received.`);
+        res.status(200).json({
+            status: 'SOLVED',
+            message: 'reCAPTCHA token successfully retrieved.',
+            token: solverResult.token
+        });
+    } else {
+        console.log(`[Captcha Run ${runNumber}] ❌ FAILED! Error: ${solverResult.error}`);
+        res.status(200).json({ 
+            status: 'FAILED',
+            message: 'reCAPTCHA solving failed or timed out.',
+            error: solverResult.error
+        });
+    }
+});
+// ===================================================================
 
 
 // ===================================================================
