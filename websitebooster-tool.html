@@ -128,9 +128,9 @@
                 <label for="repeatMode">
                     Enable **Active User** Mode: Repeat all 
                     <label for="minTime">Min:</label>
-                    <input id="minTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
+                    <input id="minTime" type="number" value="45" min="45" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
                     <label for="maxTime">Max:</label>
-                    <input id="maxTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
+                    <input id="maxTime" type="number" value="120" min="45" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
                     <span>seconds cycle</span> for better GA tracking.
                 </label>
             </div>
@@ -155,10 +155,10 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Earning Booster:</strong> **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai, jisse MonetaG jaise ad network par earning badhti hai.
+                <strong>Earning Booster:</strong> **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai. Lekin ab yeh click sirf **15% sessions** mein **randomly** hoga taaki bot detection se bacha ja sake.
             </li>
             <li>
-                <strong>VPN Mode:</strong> Proxy fields empty chhodne par, yeh tool aapke **VPN** IP se request bhejega. Agar Proxy use karna hai, toh `ip` aur `port` bharein.
+                <strong>Human Mode:</strong> Session ab **45 se 120 seconds** ke beech randomly repeat honge, jo GA4 aur ad network ko zyada natural lagega.
             </li>
             <li>
                 <strong>Action:</strong> **'Enable Active User Mode'** aur **'Auto Clicker'** (default checked) check rakhein. **'Load & Run All'** se test shuru karein.
@@ -211,12 +211,8 @@ const DUMMY_PROXIES = [
 // =========================================================================
 
 const MAX_SLOTS = 10; // Limited to 10 unique proxies available
-
-// ***************************************************************
-// *** RENDER CLOUD URL / PROXY ENDPOINT FIX ***
-// ***************************************************************
+// NOTE: PROXY_ENDPOINT is set in the previous conversation to: Https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request
 const PROXY_ENDPOINT = 'Https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request'; 
-// ***************************************************************
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -243,11 +239,17 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
 }));
 
-// Function to return fixed 30s delay for repeat mode
+// --- MODIFIED: Function to return random delay for repeat mode (45s to 120s) ---
 function getRandomDelay() {
-    // Fixed cycle time: 30 seconds (30000 milliseconds)
-    return 30000;
+    const minMs = parseInt(minTimeInput.value) * 1000;
+    const maxMs = parseInt(maxTimeInput.value) * 1000;
+    // Add a check to ensure max > min
+    if (minMs >= maxMs) return maxMs; 
+    
+    // Generate random delay between min and max (inclusive)
+    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
+// ----------------------------------------------------------------------------
 
 // Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
 function createSlot(index, proxy){
@@ -406,7 +408,7 @@ function stopAllAutomation() {
     repeatModeCheckbox.checked = false;
 }
 
-// Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
+// Global Start/Run Logic - UPDATED FOR RANDOMIZED RELOAD TIME
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -423,16 +425,16 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // CRITICAL CHANGE: Get a fixed 30s delay
-        const fixedDelay = getRandomDelay(); 
-        const delayInSeconds = (fixedDelay / 1000);
+        // CRITICAL CHANGE: Get a RANDOM delay (45s to 120s)
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000);
 
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds.toFixed(2)}s cycle)...`, true);
         
         const intervalId = setInterval(() => {
             s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
-        }, fixedDelay); // Use the fixed delay here
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds.toFixed(2)}s...`, true);
+        }, randomDelay); // Use the randomized delay here
         
         repeatIntervals.push(intervalId);
     });
