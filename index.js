@@ -9,9 +9,9 @@ const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
+// NEW: Import 'http' is now unnecessary but kept for potential other use in the future, HttpsProxyAgent handles all
 const http = require('http'); 
-const { URL } = require('url'); // Added URL import
+const { URL } = require('url'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -457,11 +457,21 @@ Requested Change: "${requestedChange}"`;
 
 
 // ===================================================================
-// --- AI FUNCTION FOR KEYWORD GENERATION (RESTORED for Tool 4) ---
+// --- AI FUNCTION FOR KEYWORD GENERATION (UPDATED FOR CACHING) ---
 // ===================================================================
+const keywordCache = {}; // Cache to store generated keywords (Gemini API billing saver)
+
 async function generateSearchKeyword(targetUrl, isHighValue = false) {
     if (!ai || !GEMINI_KEY) { return null; }
     
+    const cacheKey = `${targetUrl}-${isHighValue}`;
+    if (keywordCache[cacheKey]) {
+        console.log(`[GEMINI CACHE HIT] Reusing keyword for ${targetUrl}`);
+        // Return a random keyword from the cached list
+        const keywords = keywordCache[cacheKey];
+        return keywords[randomInt(0, keywords.length - 1)]; 
+    }
+
     let urlPath;
     try {
         urlPath = new URL(targetUrl).pathname;
@@ -475,7 +485,7 @@ async function generateSearchKeyword(targetUrl, isHighValue = false) {
         prompt = `Generate exactly 5 highly expensive, transactional search queries (keywords) for high-CPC niches like Finance, Insurance, Software, or Legal, which are still related to the topic/URL path: ${urlPath}. The goal is to maximize ad revenue. Queries can be a mix of Hindi and English. Format the output as a JSON array of strings.`;
     } else {
         // Safe and Realistic Prompt (Default Mode)
-        prompt = `Generate exactly 5 realistic and highly relevant search queries (keywords) that an actual person might use to find a webpage with the topic/URL path: ${urlPath}. Queries can be a mix of Hindi and English. Format the output as a JSON array of strings.`;
+    prompt = `Generate exactly 5 realistic and highly relevant search queries (keywords) that an actual person might use to find a webpage with the topic/URL path: ${urlPath}. Queries can be a mix of Hindi and English. Format the output as a JSON array of strings.`;
     }
     
     try {
@@ -493,6 +503,7 @@ async function generateSearchKeyword(targetUrl, isHighValue = false) {
         });
         const keywords = JSON.parse(response.text.trim());
         if (Array.isArray(keywords) && keywords.length > 0) {
+            keywordCache[cacheKey] = keywords; // Store the array in cache
             return keywords[randomInt(0, keywords.length - 1)]; 
         }
     } catch (error) {
@@ -503,7 +514,7 @@ async function generateSearchKeyword(targetUrl, isHighValue = false) {
 
 
 // ===================================================================
-// --- FUNCTION TO SIMULATE HIGH-VALUE CONVERSION (RESTORED for Tool 4) ---
+// --- FUNCTION TO SIMULATE HIGH-VALUE CONVERSION (UPDATED FOR RELIABILITY) ---
 // ===================================================================
 async function simulateConversion(targetUrl, proxyAgent, originalReferrer, userAgent) {
     const parsedUrl = new URL(targetUrl);
@@ -512,22 +523,33 @@ async function simulateConversion(targetUrl, proxyAgent, originalReferrer, userA
     // 1. Simulate Mouse Movement (AdSense Safety)
     console.log(`[ACTION 1] Simulating 2s mouse movement and pause (Human Interaction).`);
     await new Promise(resolve => setTimeout(resolve, randomInt(1500, 2500)));
+    
+    // **FIX 3: SCROLL/READING SIMULATION ADDED**
+    console.log(`[ACTION 2] Simulating random scroll/read time before click.`);
+    await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
 
     // 2. Simulate Click & Second Page Load (High Earning Strategy)
-    const conversionTarget = domain + '/random-page-' + randomInt(100, 999) + '.html'; 
+    // Use a generic second page to simulate a click (e.g., on an internal link or an ad that goes to another internal page)
+    const conversionTarget = domain + '/conversion-landing-page-' + randomInt(100, 999) + '.html'; 
     
     try {
-        console.log(`[ACTION 2] Simulating Conversion: Loading second page (${conversionTarget}).`);
+        console.log(`[ACTION 3] Simulating Conversion: Loading second page (${conversionTarget}).`);
         
         await nodeFetch(conversionTarget, {
             method: 'GET',
             headers: { 
                 'User-Agent': userAgent,
+                // **FIX 3: CRITICAL REFERER FIX** Referer is the page where the click happened (targetUrl)
                 'Referer': targetUrl 
             }, 
             agent: proxyAgent, // Use the proxy agent for the second request too
-            timeout: 5000 
+            timeout: 7000 // Increased timeout
         });
+        
+        // **FIX 3: FINAL CONVERSION DELAY ADDED**
+        console.log(`[ACTION 4] Final wait after conversion for better engagement signal.`);
+        await new Promise(resolve => setTimeout(resolve, randomInt(1000, 2000))); 
+        
         console.log(`[CONVERSION SUCCESS] Second page loaded successfully (Simulated high-value action).`);
         return true;
     } catch (error) {
@@ -538,7 +560,7 @@ async function simulateConversion(targetUrl, proxyAgent, originalReferrer, userA
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - FIXED
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - CRITICALLY FIXED
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
@@ -553,19 +575,21 @@ app.get('/proxy-request', async (req, res) => {
     const isGaMpEnabled = ga_id && api_secret; 
     const USER_AGENT = getRandomUserAgent(); // Defined in utilities
     
-    // --- Proxy Setup (FIXED) ---
+    // --- Proxy Setup (FIX 1: UNIVERSAL HttpsProxyAgent) ---
     let proxyAgent;
     const proxyAddress = `${ip}:${port}`;
     
     // Check if 'auth' (username:password) is provided and not just empty/generic
     if (auth && auth.includes(':') && auth !== ':') {
         const [username, password] = auth.split(':');
-        const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
+        const proxyUrl = `http://${username}:${password}@${proxyAddress}`; // Protocol must be http for proxy URL
         proxyAgent = new HttpsProxyAgent(proxyUrl);
-        console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
+        console.log(`[PROXY AGENT] Using Authenticated HttpsProxyAgent: ${ip}`);
     } else {
-        proxyAgent = new http.Agent({ host: ip, port: port });
-        console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
+        // FIX: Use HttpsProxyAgent even for non-authenticated proxies for HTTPS traffic (GA4 MP)
+        const proxyUrl = `http://${proxyAddress}`; // Protocol must be http for proxy URL
+        proxyAgent = new HttpsProxyAgent(proxyUrl);
+        console.log(`[PROXY AGENT] Using Non-Authenticated HttpsProxyAgent: ${ip}`);
     }
     
     // --- GA4 MP Session Data Generation ---
@@ -573,7 +597,8 @@ app.get('/proxy-request', async (req, res) => {
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
     const traffic = getRandomTrafficSource(true); 
-    const engagementTime = randomInt(30000, 120000); 
+    // FIX 4: Adjust engagementTime range to be closer to the actual wait time (20-40s) for consistency.
+    const engagementTime = randomInt(30000, 50000); 
 
     const userProperties = {
         simulated_geo: { value: geo.country }, 
@@ -582,8 +607,9 @@ app.get('/proxy-request', async (req, res) => {
     
     let eventCount = 0;
 
-    // --- FUNCTION TO SEND DATA VIA PROXY (Kept the inner function from the uploaded index.js) ---
-    async function sendDataViaProxy(payload, eventType) {
+    // --- FUNCTION TO SEND DATA VIA PROXY (UPDATED FOR DYNAMIC USER AGENT) ---
+    // Pass the session's USER_AGENT as an argument
+    async function sendDataViaProxy(payload, eventType, sessionUserAgent) {
         if (!isGaMpEnabled) {
              console.log(`[PROXY MP SKIP] Keys missing. Skipped: ${eventType}.`);
              return false; 
@@ -591,7 +617,6 @@ app.get('/proxy-request', async (req, res) => {
         
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; 
         payload.timestamp_micros = String(Date.now() * 1000); 
-        const USER_AGENT_GA4 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
         
         try { 
             const response = await nodeFetch(gaEndpoint, { 
@@ -599,9 +624,10 @@ app.get('/proxy-request', async (req, res) => {
                 body: JSON.stringify(payload),
                 headers: { 
                     'Content-Type': 'application/json',
-                    'User-Agent': USER_AGENT_GA4 
+                    // FIX 2: Use the dynamic, random session user agent
+                    'User-Agent': sessionUserAgent 
                 },
-                agent: proxyAgent // Use the dynamically determined agent
+                agent: proxyAgent 
             });
 
             if (response.status === 204) { 
@@ -613,23 +639,25 @@ app.get('/proxy-request', async (req, res) => {
                 return false;
             }
         } catch (error) {
-            console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed (Code: ${error.code || 'N/A'}). Error: ${error.message}`);
+            const errorCode = error.code || error.message;
+            console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed (Code: ${errorCode}).`);
             return false;
         }
     }
     // --- END: FUNCTION TO SEND DATA VIA PROXY ---
 
-    // --- START: CORE LOGIC (Restored from index (1).js) ---
+    // --- START: CORE LOGIC ---
     try {
         
-        // 🚀 STEP 0 - GEMINI AI Keyword Generation
+        // 🚀 STEP 0 - GEMINI AI Keyword Generation (MAX CPC mode)
         let searchKeyword = null;
         if (traffic.source === 'google' && GEMINI_KEY) { 
              const useHighValue = clicker === '1'; 
              searchKeyword = await generateSearchKeyword(target, useHighValue);
              
              if (searchKeyword) {
-                 traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
+                 // Ensure the referrer includes the generated search query for high-value organic traffic
+                 traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}&ie=UTF-8`;
                  console.log(`[GEMINI BOOST: ${useHighValue ? 'MAX CPC' : 'REALISTIC'}] Generated Keyword: "${searchKeyword}"`);
              }
         }
@@ -640,10 +668,11 @@ app.get('/proxy-request', async (req, res) => {
         const targetResponse = await nodeFetch(target, {
             method: 'GET', 
             headers: { 
-                'User-Agent': USER_AGENT,
+                'User-Agent': USER_AGENT, // Random Agent used here
                 'Referer': traffic.referrer 
             }, 
-            agent: proxyAgent 
+            agent: proxyAgent,
+            timeout: 10000 // Added a sensible timeout
         });
 
         if (targetResponse.status < 200 || targetResponse.status >= 300) {
@@ -659,7 +688,7 @@ app.get('/proxy-request', async (req, res) => {
 
         // 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION (ADSENSE SAFE MODE)
         if (clicker === '1') {
-            console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON.`);
+            console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON (Max Earning Intent).`);
             await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
         } else {
              console.log(`[ADSENSE SAFE MODE] Conversion Mode is OFF. Skipping high-value action.`);
@@ -686,7 +715,8 @@ app.get('/proxy-request', async (req, res) => {
                     } 
                 }]
             };
-            if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
+            // Pass USER_AGENT to the sending function
+            if (await sendDataViaProxy(sessionStartPayload, 'session_start', USER_AGENT)) eventCount++;
             
             // 2. PAGE VIEW EVENT
             const pageViewPayload = {
@@ -696,7 +726,7 @@ app.get('/proxy-request', async (req, res) => {
                     name: 'page_view', 
                     params: { 
                         page_location: target, 
-                        page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : target, // Modified for Keyword
+                        page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : target, 
                         session_id: session_id, 
                         debug_mode: true,
                         language: "en-US",
@@ -706,7 +736,7 @@ app.get('/proxy-request', async (req, res) => {
                 }]
             };
             
-            if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
+            if (await sendDataViaProxy(pageViewPayload, 'page_view', USER_AGENT)) eventCount++;
             
             // 3. USER ENGAGEMENT
             const engagementPayload = {
@@ -723,7 +753,7 @@ app.get('/proxy-request', async (req, res) => {
                     }
                 ]
             };
-            if (await sendDataViaProxy(engagementPayload, 'user_engagement')) eventCount++;
+            if (await sendDataViaProxy(engagementPayload, 'user_engagement', USER_AGENT)) eventCount++;
         }
 
         
@@ -756,4 +786,3 @@ app.get('/proxy-request', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-            
