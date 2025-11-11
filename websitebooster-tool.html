@@ -31,7 +31,29 @@
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
-  /* Updated for better layout of multiple options */
+
+  /* --- CONTROL PANEL STYLES (NEW/FIXED) --- */
+  .control-panel { 
+    background: var(--card); border: 1px solid var(--border); 
+    border-radius: var(--radius); padding: 20px; margin-bottom: var(--gap);
+    box-shadow: var(--shadow);
+    display: grid; gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Adjusted width for clarity */
+  }
+  .control-group { display: flex; flex-direction: column; }
+  label { font-size: 14px; font-weight: 600; margin-bottom: 5px; color: #1f2937; }
+  input[type="text"], input[type="password"] {
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; width: 100%; transition: border-color 0.2s;
+  }
+  input:focus { outline: none; border-color: var(--primary-blue); }
+  .checkbox-group { display: flex; align-items: center; justify-content: space-between; height: 100%; padding-top: 5px; }
+  .checkbox-group label { margin: 0; }
+  .checkbox-group input[type="checkbox"] { margin-left: 8px; transform: scale(1.3); }
+  .btn-group { display: flex; gap: 10px; margin-top: 25px; grid-column: span 2; } /* Full width for buttons */
+  /* --- END CONTROL PANEL STYLES --- */
+
+
   .repeat-control { 
     display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--muted); 
     background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); 
@@ -54,15 +76,26 @@
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
   .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
-  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-  iframe { 
-    width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Zoom Level: 60% */
+  .iframe-wrap { 
+    flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; 
+    /* NEW: Desktop view container fix (Allows scrolling inside the wrap if needed) */
+    overflow-x: auto; 
+    overflow-y: hidden;
+    background-color: #f6f8fb;
+  }
+  
+  /* --- DESKTOP VIEW FIX --- */
+  .iframe-wrap iframe { 
+    width: 1280px; /* Fixed Desktop Width */
+    height: 100%; 
+    border: 0; display: block; background: white; 
     transform: scale(0.6); 
     transform-origin: 0 0;
-    width: calc(100% / 0.6); 
+    /* Scale fix for 1280px desktop width */
+    width: calc(1280px / 0.6); 
     height: calc(100% / 0.6); 
     opacity: 1;
+    transition: transform 0.5s ease;
   }
   
   /* --- FIX 2: CSS for Auto-Scrolling (Final Fixed Distance and Speed) --- */
@@ -76,7 +109,6 @@
   }
 
   .slot.scrolling iframe {
-    transform: translate(0, 0) scale(0.6); 
     /* Set duration to 16s for very slow, realistic scroll over the new, longer distance */
     animation: scroll 16s ease-in-out infinite;
     /* animation-delay is set via JavaScript for staggering */
@@ -104,50 +136,65 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>💰 Website Earning Booster</h1>
-      <div class="tagline">GA4 Active User Traffic Simulation System (As per your design).</div>
+      <h1>💰 Website Earning Booster Prime</h1>
+      <div class="tagline">GA4 Active User Traffic Simulation System (Render Cloud Enabled)</div>
     </header>
 
     <div class="controls">
         <div class="input-group">
-            
             <div class="slot-selector">
                 Slots:
-                <input id="numSlots" type="number" value="10" min="1" max="10" />
+                <input id="numSlots" type="number" value="4" min="1" max="10" />
             </div>
 
             <div class="url-input-wrap">
-                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com/high-cpc-page)" />
             </div>
+            
             <button id="globalGo" class="btn">Load & Run All</button>
         </div>
+    </div>
+
+    <div class="control-panel">
+        <div class="control-group">
+            <label for="ga-id">GA4 Measurement ID (G-XXXXXXX)</label>
+            <input type="text" id="ga-id" placeholder="G-XXXXXXXXX" value="">
+        </div>
+        <div class="control-group">
+            <label for="ga-secret">GA4 API Secret</label>
+            <input type="password" id="ga-secret" placeholder="Your API Secret" value="">
+        </div>
         
-        <div class="repeat-control">
-            <div class="control-row">
-                <input type="checkbox" id="repeatMode" />
-                <label for="repeatMode">
-                    Enable **Active User** Mode: Repeat all 
-                    <label for="minTime">Min:</label>
-                    <input id="minTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
-                    <label for="maxTime">Max:</label>
-                    <input id="maxTime" type="number" value="30" min="30" max="30" style="width: 50px; padding: 5px; border-radius: 4px;" disabled />
-                    <span>seconds cycle</span> for better GA tracking.
-                </label>
-            </div>
-            
-            <div class="control-row">
-                <input type="checkbox" id="autoScrollMode" />
-                <label for="autoScrollMode">
-                    Enable **Auto Scroll** (Simulated & Staggered)
-                </label>
-                
-                <input type="checkbox" id="autoClickerMode" checked />
-                <label for="autoClickerMode">
-                    Enable **Auto Clicker** (Earning Booster)
-                </label>
-            </div>
-            
-            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
+        <div class="control-group">
+            <label for="proxy-ip">Proxy IP:Port (Optional: VPN IP use karein)</label>
+            <input type="text" id="proxy-ip" placeholder="103.111.89.200:8080" value="">
+        </div>
+        <div class="control-group">
+            <label for="proxy-auth">Proxy Auth (user:pass) - Optional</label>
+            <input type="password" id="proxy-auth" placeholder="user:password" value="">
+        </div>
+
+        <div class="control-group checkbox-group">
+            <label for="repeatMode">
+                Enable **Active User** Repeat Mode
+            </label>
+            <input type="checkbox" id="repeatMode" checked />
+        </div>
+        <div class="control-group checkbox-group">
+            <label for="autoScrollMode">
+                Enable **Auto Scroll** (Simulated & Staggered)
+            </label>
+            <input type="checkbox" id="autoScrollMode" checked />
+        </div>
+        <div class="control-group checkbox-group">
+            <label for="autoClickerMode">
+                Enable **Auto Clicker** (MAX Earning Booster)
+            </label>
+            <input type="checkbox" id="autoClickerMode" checked />
+        </div>
+        
+        <div class="btn-group">
+            <button id="globalStop" class="btn stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
@@ -155,13 +202,16 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Earning Booster:</strong> **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai, jisse MonetaG jaise ad network par earning badhti hai.
+                <strong>API Endpoint:</strong> यह टूल अब आपके **Render Cloud URL** (`https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request`) का उपयोग कर रहा है।
             </li>
             <li>
-                <strong>VPN Mode:</strong> Proxy fields empty chhodne par, yeh tool aapke **VPN** IP se request bhejega. Agar Proxy use karna hai, toh `ip` aur `port` bharein.
+                **Earning Mode:** **'Auto Clicker'** (`index.js` में **clicker='1'** भेजता है) **High-Value Conversion** को ट्रिगर करता है, जिससे Ad Network पर Earning/CPC बढ़ती है।
             </li>
             <li>
-                <strong>Action:</strong> **'Enable Active User Mode'** aur **'Auto Clicker'** (default checked) check rakhein. **'Load & Run All'** se test shuru karein.
+                **Proxy/VPN:** Proxy IP/Port और Auth भरें। **यदि खाली छोड़ते हैं, तो यह टूल आपके Browser/VPN IP** से रिक्वेस्ट भेजेगा।
+            </li>
+            <li>
+                **Action:** Target URL, GA4 Keys और Proxy (या VPN) भरकर **'Load & Run All'** पर क्लिक करें।
             </li>
         </ul>
     </div>
@@ -176,15 +226,19 @@
    PROXY DATA and CONFIGURATION
    ---------------------------------------------------------------------- */
 
+// --- CRITICAL CONFIGURATION: Render Cloud URL ---
+const RENDER_BASE_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com';
+const PROXY_ENDPOINT = `${RENDER_BASE_URL}/proxy-request`; // Targetting Tool 4 (GA4 Booster)
+// -----------------------------------------------
+
 const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
 
-// Function to generate a simple unique ID (used for GA4 cookie)
+// Function to generate a simple unique ID (used for GA4 client_id fix)
 function generateUniqueId() {
-    // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -210,21 +264,24 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const MAX_SLOTS = 10; // Limited to 10 unique proxies available
-const PROXY_ENDPOINT = '/proxy-request'; // Targetting Tool 4 (GA4 Booster)
+const MAX_SLOTS = 10; 
 
+// --- ELEMENTS ---
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
-const minTimeInput = document.getElementById('minTime'); 
-const maxTimeInput = document.getElementById('maxTime'); 
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
-
-// NEW: Get the Auto Clicker Checkbox element
 const autoClickerModeCheckbox = document.getElementById('autoClickerMode'); 
+
+// NEW GA4 & Proxy Inputs
+const gaIdInput = document.getElementById('ga-id');
+const gaSecretInput = document.getElementById('ga-secret');
+const proxyIpInput = document.getElementById('proxy-ip');
+const proxyAuthInput = document.getElementById('proxy-auth');
+
 
 let currentSlots = [];
 let repeatIntervals = []; 
@@ -233,7 +290,7 @@ let randomNamesList = getRandomNames(MAX_SLOTS);
 // Map proxies with fixed unique IDs
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
-    auth: COMMON_AUTH,
+    // Note: I am intentionally *not* adding a fixed 'auth' here, so we use the user-defined one
     name: randomNamesList[index],
     uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
 }));
@@ -252,7 +309,7 @@ function createSlot(index, proxy){
   el.innerHTML = `
     <div class="slot-top">
       <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
+      <div class="slot-ip-display">Proxy IP: ${proxy.ip || '---'}:${proxy.port || '---'}</div>
     </div>
     
     <div class="iframe-wrap">
@@ -288,28 +345,38 @@ function createSlot(index, proxy){
     statusDot.classList.toggle('active', isActive);
   }
   
-  // *** MODIFIED FUNCTION TO PASS AUTO CLICKER STATUS ***
+  // *** MODIFIED FUNCTION TO PASS ALL PARAMETERS INCLUDING GA4 & PROXY ***
   function getProxiedUrl(originalUrl, proxy){
-      // Check the status of the new optional checkbox
-      const autoClickerEnabled = autoClickerModeCheckbox.checked ? '1' : '0';
+      const ipPort = proxyIpInput.value.trim();
+      const ip = ipPort.split(':')[0] || proxy.ip;
+      const port = ipPort.split(':')[1] || proxy.port;
+      const auth = proxyAuthInput.value.trim();
       
-      // Note: proxy.ip and proxy.port might be empty if running in VPN mode
-      const ipParam = proxy.ip ? `ip=${proxy.ip}&port=${proxy.port}&` : '';
-      const authParam = proxy.auth ? `auth=${proxy.auth}&` : '';
-
+      const ga_id = gaIdInput.value.trim();
+      const api_secret = gaSecretInput.value.trim();
+      const clickerEnabled = autoClickerModeCheckbox.checked ? '1' : '0';
+      
+      // Target Render Endpoint with ALL parameters
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` + 
-          ipParam + 
-          authParam +
-          `sessionDuration=30&` + 
-          `clicker=${autoClickerEnabled}&` + // Pass the optional parameter
-          `uid=${proxy.uniqueId}`; 
+          `ip=${ip}&port=${port}&` + // Use user-defined or default proxy from list
+          `auth=${encodeURIComponent(auth)}&` + // Use user-defined auth
+          `ga_id=${ga_id}&api_secret=${api_secret}&` + // GA4 Keys
+          `clicker=${clickerEnabled}&` + // Clicker Mode
+          `uid=${proxy.uniqueId}`; // Unique Client ID for GA4
   }
 
   // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
+    // Check for critical missing values
+    if(!gaIdInput.value.trim() || !gaSecretInput.value.trim()){
+        setStatus('Error: Missing GA4 Keys', false);
+        alert('कृपया GA4 Measurement ID और API Secret भरें।');
+        return;
+    }
+
     // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
     setStatus('Loading Content...', false);
@@ -323,20 +390,31 @@ function createSlot(index, proxy){
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    // Changed status message to reflect fixed 30s
     setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
         // Fetch request is sent. The backend script will run in the background.
         // We use mode: 'no-cors' just for a quick request, assuming the response is quick.
-        await fetch(proxiedUrl, { mode: 'no-cors' });
+        const response = await fetch(proxiedUrl, { 
+            method: 'GET'
+            // mode: 'cors' is better for getting the actual response status
+        }); 
         
-        // Response is quick due to the backend design
-        setStatus('View Sent (BG Session Active)', true);
+        // Since backend sends a JSON response, we check status and message
+        const data = await response.json();
+        
+        if (response.ok && data.status === 'OK') {
+             setStatus(`Success: ${data.message.substring(0, 50)}...`, true);
+        } else {
+             // Handle backend error messages
+             setStatus(`Error: ${data.error.substring(0, 50)}...`, false);
+        }
         
     } catch (e) {
-        setStatus('Failed (Network/Proxy Error)', false);
+        // Handle network/CORS/connection errors
+        setStatus('Failed (Network/CORS Error)', false);
+        console.error("Frontend Fetch Error:", e);
     }
     
     statusDot.style.animation = 'none';
@@ -357,15 +435,14 @@ function createSlot(index, proxy){
   
   setStatus('Ready', true);
 
-  // Expose the slot element to allow toggling scrolling globally on existing slots
+  // Expose the slot element and functions
   return { 
       runAutomation, 
       setStatus,
       element: el 
   }; 
 }
-
-// Function to redraw slots based on the selected number
+  // Function to redraw slots based on the selected number
 function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
@@ -398,7 +475,7 @@ function stopAllAutomation() {
     });
     
     // Uncheck repeat mode if stopping
-    repeatModeCheckbox.checked = false;
+    // repeatModeCheckbox.checked = false; // Don't uncheck, let user control
 }
 
 // Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
@@ -407,6 +484,12 @@ globalGoBtn.addEventListener('click', ()=>{
   if(!url){ 
       alert('Please paste a valid URL into the global input field.'); 
       return; 
+  }
+  
+  // Validation for GA4 keys
+  if(!gaIdInput.value.trim() || !gaSecretInput.value.trim()){
+      alert('कृपया GA4 Measurement ID और API Secret भरें। यह GA4 ट्रैकिंग के लिए अनिवार्य है।');
+      return;
   }
   
   // Run once immediately
@@ -443,25 +526,19 @@ numSlotsInput.addEventListener('change', (e) => {
 
 // Event listener for auto-scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
 
 globalStopBtn.addEventListener('click', stopAllAutomation);
-repeatModeCheckbox.addEventListener('change', () => {
-    // Stop automation if repeat mode is unchecked while running
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
 
 // Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
 </html>
+
+
+// Functio
