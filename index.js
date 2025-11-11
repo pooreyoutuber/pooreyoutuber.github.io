@@ -52,6 +52,9 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+// --- NEW CONSTANT FOR EARNING LOGIC (Gemini/Clicker Cost Control) ---
+const HIGH_VALUE_ACTION_CHANCE = 0.15; // 15% chance to run high-value conversion even if frontend asks for it.
+
 // --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
@@ -538,7 +541,7 @@ async function simulateConversion(targetUrl, proxyAgent, originalReferrer, userA
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - FIXED
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - MODIFIED FOR HUMAN BEHAVIOR & EARNINGS
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
@@ -566,6 +569,21 @@ app.get('/proxy-request', async (req, res) => {
     } else {
         proxyAgent = new http.Agent({ host: ip, port: port });
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
+    }
+    
+    // --- NEW: EARNING CONTROL LOGIC ---
+    let shouldRunConversion = false;
+    let earningMode = 'ADSENSE SAFE (High Impression Mode)';
+    let useHighCpcKeywords = false;
+    
+    // If the frontend is running the "Auto Clicker" mode:
+    if (clicker === '1') {
+        // Only run the conversion/click in a small percentage of sessions (e.g., 15%)
+        if (Math.random() < HIGH_VALUE_ACTION_CHANCE) {
+            shouldRunConversion = true;
+            useHighCpcKeywords = true; // Use high-value keywords only when conversion runs
+            earningMode = 'MAX EARNING (High-CPC & Conversion Mode)';
+        }
     }
     
     // --- GA4 MP Session Data Generation ---
@@ -619,22 +637,30 @@ app.get('/proxy-request', async (req, res) => {
     }
     // --- END: FUNCTION TO SEND DATA VIA PROXY ---
 
-    // --- START: CORE LOGIC (Restored from index (1).js) ---
+    // --- START: CORE LOGIC ---
     try {
         
-        // 🚀 STEP 0 - GEMINI AI Keyword Generation
+        // 🚀 STEP 0 - GEMINI AI Keyword Generation (MODIFIED FOR BILLING CONTROL AND EARNINGS)
         let searchKeyword = null;
-        if (traffic.source === 'google' && GEMINI_KEY) { 
-             const useHighValue = clicker === '1'; 
-             searchKeyword = await generateSearchKeyword(target, useHighValue);
+        if (traffic.source === 'google' && GEMINI_KEY && useHighCpcKeywords) { 
+             // 1. Call Gemini ONLY for High CPC keywords when the clicker randomization passes
+             searchKeyword = await generateSearchKeyword(target, true); // true = HighValue
              
              if (searchKeyword) {
                  traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-                 console.log(`[GEMINI BOOST: ${useHighValue ? 'MAX CPC' : 'REALISTIC'}] Generated Keyword: "${searchKeyword}"`);
+                 console.log(`[GEMINI BOOST: MAX CPC] Generated Keyword: "${searchKeyword}"`);
+             }
+        }
+        else if (traffic.source === 'google' && GEMINI_KEY && !useHighCpcKeywords && Math.random() < 0.3) {
+             // 2. Call Gemini for SAFE Realistic keywords only ~30% of the time for organic traffic
+             searchKeyword = await generateSearchKeyword(target, false); // false = not HighValue
+             if (searchKeyword) {
+                 traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
+                 console.log(`[GEMINI BOOST: REALISTIC] Generated Keyword: "${searchKeyword}"`);
              }
         }
 
-        // 🔥 STEP 1: TARGET URL VISIT (First Page Load)
+        // 🔥 STEP 1: TARGET URL VISIT
         console.log(`[TARGET VISIT] Hitting target ${target}.`);
         
         const targetResponse = await nodeFetch(target, {
@@ -658,11 +684,11 @@ app.get('/proxy-request', async (req, res) => {
 
 
         // 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION (ADSENSE SAFE MODE)
-        if (clicker === '1') {
-            console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON.`);
+        if (shouldRunConversion) { // Check the randomized flag
+            console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON (Randomized Check Passed).`);
             await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
         } else {
-             console.log(`[ADSENSE SAFE MODE] Conversion Mode is OFF. Skipping high-value action.`);
+             console.log(`[ADSENSE SAFE MODE] Conversion Mode is OFF (Randomized Check Failed or Disabled). Skipping high-value action.`);
         }
         
         // 🔥 STEP 3: Send GA4 MP data (Now correctly integrated)
@@ -728,7 +754,7 @@ app.get('/proxy-request', async (req, res) => {
 
         
         // 4. Send success response back to the frontend
-        const message = `✅ Success! Action simulated. Earning Status: ${clicker === '1' ? 'MAX EARNING (High-CPC Mode)' : 'ADSENSE SAFE (High Impression Mode)'}. GA4 Events Sent: ${eventCount}.`;
+        const message = `✅ Success! Action simulated. Earning Status: ${earningMode}. GA4 Events Sent: ${eventCount}. CTR Check: ${shouldRunConversion ? 'HIT' : 'MISS'}.`;
 
         res.status(200).json({ 
             status: 'OK', 
@@ -756,4 +782,3 @@ app.get('/proxy-request', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-            
