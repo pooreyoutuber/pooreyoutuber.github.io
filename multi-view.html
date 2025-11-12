@@ -1,590 +1,480 @@
-<!DOCTYPE html>
-<html lang="hi">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Booster Prime - Global Traffic Simulation System</title>
-    <style>
-        /* CSS: Styling aur Layout - Screenshot se inspired */
-        :root {
-            --primary-color: #007bff; /* Main Blue */
-            --secondary-color: #f8f9fa; /* Light Background */
-            --slot-bg: #ffffff; /* Slot Background */
-            --button-primary: #ffc107; /* Orange/Yellow for Load */
-            --button-secondary: #28a745; /* Green for Start Proxy/View */
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Website Earning Booster - Active User Traffic</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--secondary-color);
-            overflow-x: hidden;
-            padding-bottom: 20px;
-        }
+<style>
+  /* --- CSS Styles --- */
+  :root{
+    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
+    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
+    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
+    --primary-blue: #0ea5e9;--danger: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
+  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
+  header { margin-bottom: 20px; text-align: center; }
+  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
+  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover { background: #0c8cd8; }
+  .btn.stop { background: var(--danger); }
+  .btn.stop:hover { background: #b91c1c; }
+  
+  /* --- ADJUSTED FOR SCREENSHOT MATCH --- */
+  .repeat-control { 
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--muted); 
+    /* Removed card styling to match screenshot's minimal look */
+    background: transparent; 
+    padding: 0; 
+    border: none; 
+    box-shadow: none; 
+    /* Reduced margin */
+    margin-top: 5px; 
+    margin-bottom: 5px;
+  }
+  .control-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
+  .repeat-control label { flex-shrink: 0; }
+  .repeat-control span { color: var(--accent); font-weight: 600; }
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; width: 50px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); } 
+  .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .info-box strong { font-weight: 700; color: var(--accent); }
+  .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
+  .info-box ul li { margin-bottom: 6px; }
+  /* --- 2 COLUMN GRID --- */
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
+  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } } /* Screenshot match */
+  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } } 
+  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(4, 1fr); } } 
 
-        .header {
-            background-color: #343a40; /* Dark Header */
-            color: white;
-            padding: 10px 20px;
-            font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        .header small {
-            display: block;
-            font-size: 12px;
-            opacity: 0.8;
-        }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
+  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
+  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
+  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+  iframe { 
+    width: 100%; height: 100%; border: 0; display: block; background: white; 
+    /* Desktop Mode Zoom: 60% */
+    transform: scale(0.6); 
+    transform-origin: 0 0;
+    width: calc(100% / 0.6); 
+    height: calc(100% / 0.6); 
+    opacity: 1;
+  }
+  
+  /* --- FIX 2: CSS for Auto-Scrolling (Final Fixed Distance and Speed) --- */
+  @keyframes scroll {
+    /* Updated start scale to 0.6 */
+    0% { transform: translate(0, 0) scale(0.6); } 
+    /* Increased distance to -250% for 60% zoom for full page coverage */
+    50% { transform: translate(0, -250%) scale(0.6); } 
+    /* Updated end scale to 0.6 */
+    100% { transform: translate(0, 0) scale(0.6); } 
+  }
 
-        /* Top Control Panel */
-        .controls-panel {
-            padding: 20px 20px 10px 20px;
-            background-color: var(--slot-bg);
-            border-bottom: 1px solid #dee2e6;
-            margin-bottom: 15px;
-        }
-
-        /* URL Section - Single Line Layout */
-        .url-section {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center; /* Vertically align items */
-        }
-
-        #urlInput {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        #loadButton {
-            padding: 10px 20px;
-            background-color: var(--button-primary);
-            color: #343a40;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            white-space: nowrap; /* Button content should not wrap */
-        }
-
-        /* Auto Controls / Checkboxes - Two Separate Lines */
-        .auto-controls-line-1,
-        .auto-controls-line-2 {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px; /* Spacing between elements */
-            margin-bottom: 10px;
-        }
-
-        .auto-controls-line-1 input[type="number"],
-        .auto-controls-line-2 input[type="number"] {
-             width: 50px; 
-             padding: 5px; 
-             border-radius: 4px; 
-             border: 1px solid #ccc;
-             font-size: 13px;
-        }
-
-        .auto-controls-line-1 label,
-        .auto-controls-line-2 label {
-            font-size: 13px;
-            color: #495057;
-            display: flex;
-            align-items: center;
-        }
-        
-        /* Tool Instructions */
-        .instructions {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 15px; /* Added gap from controls */
-        }
-        .instructions strong {
-            color: #dc3545; 
-            display: block;
-            margin-top: 5px;
-        }
-
-        /* Slots Grid Layout - 2 Columns */
-        .slots-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* 2 columns like screenshot */
-            gap: 20px;
-            padding: 0 20px;
-        }
-
-        .iframe-container {
-            background-color: var(--slot-bg);
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            overflow: hidden; 
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-            /* Desktop Mode Hint: Fixed height/aspect ratio for desktop view */
-            height: 350px; 
-            position: relative;
-        }
-
-        .slot-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
-        }
-        .slot-header strong { color: var(--primary-color); }
-        .slot-header small { color: #6c757d; }
-
-        .browser-iframe {
-            width: 100%;
-            height: calc(100% - 70px); 
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        
-        .slot-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 5px;
-        }
-        .slot-buttons button {
-            flex-grow: 1;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: bold;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-        }
-        .slot-buttons .view-button {
-            background-color: var(--button-primary);
-            color: #343a40;
-        }
-        .slot-buttons .proxy-button {
-            background-color: var(--button-secondary);
-            color: white;
-        }
-        .slot-buttons .status {
-            background-color: #f5f5f5;
-            color: #6c757d;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        /* Activity Indicator - sirf click hone par dikhega, hamesha nahi (jaisa apne chaha) */
-        .activity-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 40px; 
-            color: #dc3545; /* Click ke time red/critical color */
-            opacity: 0; 
-            z-index: 10;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-
-        .activity-indicator.click-active {
-            opacity: 1; 
-            transform: translate(-50%, -50%) scale(1.2);
-            animation: spin 0.5s infinite linear;
-        }
-        @keyframes spin {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 992px) {
-            .slots-grid {
-                grid-template-columns: 1fr; /* Single column on smaller screens */
-            }
-            .iframe-container {
-                height: 300px;
-            }
-            /* Control lines ko stack karna */
-            .auto-controls-line-1, .auto-controls-line-2 {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-    </style>
+  .slot.scrolling iframe {
+    transform: translate(0, 0) scale(0.6); 
+    /* Set duration to 16s for very slow, realistic scroll over the new, longer distance */
+    animation: scroll 16s ease-in-out infinite;
+    /* animation-delay is set via JavaScript for staggering */
+  }
+  /* ---------------------------------- */
+  
+  .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
+  .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
+  .action-btn.view { background: var(--success); color: white; }
+  .action-btn.view:hover { background: #047857; }
+  .action-btn.new-tab { 
+      background: #f90;
+      color: white; 
+      flex-grow: 1;
+      font-size: 12px;
+      padding: 8px 10px;
+  }
+  .action-btn.new-tab:hover { background: #e80; }
+  .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
+  .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
+  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
+</style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <h1>💰 Website Earning Booster</h1>
+      <div class="tagline">GA4 Active User Traffic Simulation System (As per your design).</div>
+    </header>
+
+    <div class="controls">
+        <div class="input-group">
+            
+            <div class="slot-selector">
+                Slots:
+                <input id="numSlots" type="number" value="10" min="1" max="10" />
+            </div>
+
+            <div class="url-input-wrap">
+                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
+            </div>
+            <button id="globalGo" class="btn">Load & Run All</button>
+        </div>
+        
+        <div class="repeat-control">
+            <div class="control-row">
+                <input type="checkbox" id="repeatMode" />
+                <label for="repeatMode">
+                    Enable **Active User** Mode: Repeat all 
+                    <label for="minTime">Min:</label>
+                    <input id="minTime" type="number" value="45" min="45" max="120" />
+                    <label for="maxTime">Max:</label>
+                    <input id="maxTime" type="number" value="120" min="45" max="120" />
+                    <span>seconds cycle</span> for better GA tracking.
+                </label>
+            </div>
+            
+            <div class="control-row">
+                <input type="checkbox" id="autoScrollMode" />
+                <label for="autoScrollMode">
+                    Enable **Auto Scroll** (Simulated & Staggered)
+                </label>
+                
+                <input type="checkbox" id="autoClickerMode" checked />
+                <label for="autoClickerMode">
+                    Enable **Auto Clicker** (Earning Booster)
+                </label>
+            </div>
+            
+            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
+        </div>
+    </div>
     
-    <div class="header">
-        Website Booster Prime <small>Global Traffic Simulation System</small>
+    <div class="info-box">
+        <strong>Tool Usage Instructions:</strong>
+        <ul>
+            <li>
+                <strong>Earning Booster:</strong> **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai. Lekin ab yeh click sirf **15% sessions** mein **randomly** hoga taaki bot detection se bacha ja sake.
+            </li>
+            <li>
+                <strong>Human Mode:</strong> Session ab **45 se 120 seconds** ke beech randomly repeat honge, jo GA4 aur ad network ko zyada natural lagega.
+            </li>
+            <li>
+                <strong>Action:</strong> **'Enable Active User Mode'** aur **'Auto Clicker'** (default checked) check rakhein. **'Load & Run All'** se test shuru karein.
+            </li>
+        </ul>
     </div>
 
-    <div class="controls-panel">
-        <div class="url-section">
-            <label for="urlInput" style="white-space: nowrap; font-size: 14px;">Paste Target URL (e.g., https://yourwebsite.com)</label>
-            <input type="text" id="urlInput" placeholder="https://yourwebsite.com">
-            <button id="loadButton">Load & Run All (10 Slots)</button>
+    <div class="grid-container" id="gridContainer">
         </div>
+    
+  </div>
 
-        <div class="auto-controls-line-1">
-            <label>
-                <input type="checkbox" id="activeUserCheck" checked>
-                Enable **Active User** Mode: Repeat at Min:
-            </label>
-            <input type="number" id="minTimeInput" value="30" min="10">
-            <label>Max:</label>
-            <input type="number" id="maxTimeInput" value="60" min="30">
-            <label>seconds cycle for better GA tracking.</label>
-        </div>
+<script>
+/* ----------------------------------------------------------------------
+   PROXY DATA and CONFIGURATION
+   ---------------------------------------------------------------------- */
 
-        <div class="auto-controls-line-2">
-            <label>
-                <input type="checkbox" id="autoScrollCheck" checked>
-                Enable **Auto Scroll** (Simulated & Staggered)
-            </label>
-            <label>
-                <input type="checkbox" id="autoClicksCheck">
-                Enable **Click Simulation**
-            </label>
-            <label>
-                <input type="checkbox" id="randomDelayCheck" checked>
-                Enable **Random Page Delay** (10-30s)
-            </label>
-        </div>
+const COMMON_USER = "bqctypvz";
+const COMMON_PASS = "399xb3kxqv6i";
+const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
-        <div class="instructions">
-            **Tool Usage Instructions:**
-            * **Action:** Check the ***Enable Active User Mode*** and click 'Load & Run All'. This automatically repeats the request every **30-60 seconds** (random).
-            * **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
-        </div>
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
+
+// Function to generate a simple unique ID (used for GA4 cookie)
+function generateUniqueId() {
+    // Generates a random 10-digit number string
+    return Math.floor(Math.random() * 9000000000) + 1000000000;
+}
+
+function getRandomNames(count) {
+    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
+// =========================================================================
+// !!! 10 UNIQUE PROXIES FROM YOUR UPLOADED FILE (Webshare 10 proxies.txt) !!!
+// =========================================================================
+const DUMMY_PROXIES = [
+  { ip: "142.111.48.253", port: "7030", country: "US" }, 
+  { ip: "31.59.20.176", port: "6754", country: "DE" }, 
+  { ip: "23.95.150.145", port: "6114", country: "CA" }, 
+  { ip: "198.23.239.134", port: "6540", country: "US" }, 
+  { ip: "45.38.107.97", port: "6014", country: "US" }, 
+  { ip: "107.172.163.27", port: "6543", country: "CA" }, 
+  { ip: "198.105.121.200", port: "6462", country: "US" }, 
+  { ip: "64.137.96.74", port: "6641", country: "US" }, 
+  { ip: "216.10.27.159", port: "6837", country: "AU" }, 
+  { ip: "142.111.67.146", port: "5611", country: "US" }, 
+];
+// =========================================================================
+
+const MAX_SLOTS = 10; // Limited to 10 unique proxies available
+const PROXY_ENDPOINT = 'Https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request'; 
+
+const gridContainer = document.getElementById('gridContainer');
+const globalUrlInput = document.getElementById('globalUrl');
+const numSlotsInput = document.getElementById('numSlots');
+const globalGoBtn = document.getElementById('globalGo');
+const repeatModeCheckbox = document.getElementById('repeatMode');
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
+const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
+const globalStopBtn = document.getElementById('globalStop');
+
+const autoClickerModeCheckbox = document.getElementById('autoClickerMode'); 
+
+let currentSlots = [];
+let repeatIntervals = []; 
+let randomNamesList = getRandomNames(MAX_SLOTS); 
+
+// Map proxies with fixed unique IDs
+const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
+    ...p,
+    auth: COMMON_AUTH,
+    name: randomNamesList[index],
+    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
+}));
+
+// --- MODIFIED: Function to return random delay for repeat mode (45s to 120s) ---
+function getRandomDelay() {
+    const minMs = parseInt(minTimeInput.value) * 1000;
+    const maxMs = parseInt(maxTimeInput.value) * 1000;
+    // Add a check to ensure max > min
+    if (minMs >= maxMs) return maxMs; 
+    
+    // Generate random delay between min and max (inclusive)
+    return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+}
+// ----------------------------------------------------------------------------
+
+// Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
+function createSlot(index, proxy){
+  const el = document.createElement('div');
+  el.className = 'slot';
+  
+  el.innerHTML = `
+    <div class="slot-top">
+      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
+      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
     </div>
+    
+    <div class="iframe-wrap">
+      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    </div>
+    
+    <div class="slot-footer">
+      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
+      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
+      <div class="status" id="status-wrap-${index}">
+        <span class="status-dot" id="dot-${index}"></span>
+        <span id="status-${index}">Ready</span>
+      </div>
+    </div>
+  `;
+  
+  gridContainer.appendChild(el);
 
-    <div class="slots-grid" id="slotsGrid">
-        <div class="iframe-container" data-slot-id="0">
-            <div class="slot-header"><strong>SLOT 1: Alex (US)</strong><small>Proxy IP: 143.111.46.253:7030</small></div>
-            <iframe class="browser-iframe" id="iframe0" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe0').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="0">♾️</div>
-        </div>
+  const iframe = el.querySelector(`#iframe-${index}`);
+  const openBtn = el.querySelector(`#open-${index}`);
+  const runBtn = el.querySelector(`#run-${index}`);
+  const statusSpan = el.querySelector(`#status-${index}`);
+  const statusDot = el.querySelector(`#dot-${index}`);
+  
+  // Apply a random, negative animation delay for staggered start
+  const scrollDuration = 16; // Matches the fixed CSS animation duration (16s)
+  const randomScrollDelay = Math.random() * scrollDuration; 
+  iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
 
-        <div class="iframe-container" data-slot-id="1">
-            <div class="slot-header"><strong>SLOT 2: Olivia (DE)</strong><small>Proxy IP: 31.58.30.178:6754</small></div>
-            <iframe class="browser-iframe" id="iframe1" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe1').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="1">♾️</div>
-        </div>
+
+  function setStatus(text, isActive = false){
+    statusSpan.textContent = text;
+    statusDot.classList.toggle('active', isActive);
+  }
+  
+  // *** MODIFIED FUNCTION TO PASS AUTO CLICKER STATUS ***
+  function getProxiedUrl(originalUrl, proxy){
+      // Check the status of the new optional checkbox
+      const autoClickerEnabled = autoClickerModeCheckbox.checked ? '1' : '0';
+      
+      // Note: proxy.ip and proxy.port might be empty if running in VPN mode
+      const ipParam = proxy.ip ? `ip=${proxy.ip}&port=${proxy.port}&` : '';
+      const authParam = proxy.auth ? `auth=${proxy.auth}&` : '';
+
+      return `${PROXY_ENDPOINT}?` + 
+          `target=${encodeURIComponent(originalUrl)}&` + 
+          ipParam + 
+          authParam +
+          `sessionDuration=30&` + 
+          `clicker=${autoClickerEnabled}&` + // Pass the optional parameter for earning
+          `uid=${proxy.uniqueId}`; 
+  }
+
+  // --- Core Automation Function ---
+  async function runAutomation(originalUrl){
+    if(!originalUrl) return;
+    
+    // 1. iFrame Load (Visible preview)
+    iframe.src = originalUrl;
+    setStatus('Loading Content...', false);
+    
+    // Apply/Remove scrolling class
+    if (autoScrollModeCheckbox.checked) {
+        el.classList.add('scrolling');
+    } else {
+        el.classList.remove('scrolling');
+    }
+    
+    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+
+    // Changed status message to reflect fixed 30s
+    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+
+    try {
+        // Fetch request is sent. The backend script will run in the background.
+        await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        <div class="iframe-container" data-slot-id="2">
-            <div class="slot-header"><strong>SLOT 3: Andrew (CA)</strong><small>Proxy IP: 38.170.177.17:5373</small></div>
-            <iframe class="browser-iframe" id="iframe2" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe2').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="2">♾️</div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="3">
-            <div class="slot-header"><strong>SLOT 4: Charlotte (US)</strong><small>Proxy IP: 168.25.230.198:4540</small></div>
-            <iframe class="browser-iframe" id="iframe3" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe3').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="3">♾️</div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="4">
-            <div class="slot-header"><strong>SLOT 5: Ella (US)</strong><small>Proxy IP: 95.38.101.87:5034</small></div>
-            <iframe class="browser-iframe" id="iframe4" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe4').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="4">♾️</div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="5">
-            <div class="slot-header"><strong>SLOT 6: Sophia (CA)</strong><small>Proxy IP: 107.97.90.227:8543</small></div>
-            <iframe class="browser-iframe" id="iframe5" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe5').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="5">♾️</div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="6">
-            <div class="slot-header"><strong>SLOT 7: John (US)</strong><small>Proxy IP: 64.127.96.74:6641</small></div>
-            <iframe class="browser-iframe" id="iframe6" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe6').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="6">♾️</div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="7">
-            <div class="slot-header"><strong>SLOT 8: Joseph (AU)</strong><small>Proxy IP: 210.19.27.130:8837</small></div>
-            <iframe class="browser-iframe" id="iframe7" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe7').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="7">♾️</div>
-        </div>
+        // Response is quick due to the backend design
+        setStatus('View Sent (BG Session Active)', true);
         
-        <div class="iframe-container" data-slot-id="8">
-            <div class="slot-header"><strong>SLOT 9: Mia (FR)</strong><small>Proxy IP: 109.171.192.17:4141</small></div>
-            <iframe class="browser-iframe" id="iframe8" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe8').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="8">♾️</div>
-        </div>
+    } catch (e) {
+        setStatus('Failed (Network/Proxy Error)', false);
+    }
+    
+    statusDot.style.animation = 'none';
+  }
+  
+  // Event Handlers
+  openBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    window.open(url, '_blank'); 
+  });
 
-        <div class="iframe-container" data-slot-id="9">
-            <div class="slot-header"><strong>SLOT 10: Liam (IN)</strong><small>Proxy IP: 49.37.12.18:9090</small></div>
-            <iframe class="browser-iframe" id="iframe9" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe9').src, '_blank')">Full View (New Tab)</button>
-                <button class="proxy-button">Start Proxy View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="9">♾️</div>
-        </div>
+  runBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    runAutomation(url); 
+  });
+  
+  setStatus('Ready', true);
 
-    </div> <script>
-        // JavaScript: Logic aur Controls
-        const urlInput = document.getElementById('urlInput');
-        const loadButton = document.getElementById('loadButton');
+  // Expose the slot element to allow toggling scrolling globally on existing slots
+  return { 
+      runAutomation, 
+      setStatus,
+      element: el 
+  }; 
+}
+
+// Function to redraw slots based on the selected number
+function renderSlots(count) {
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+
+    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    if (count < 1 || count > maxCount) {
+        count = Math.min(Math.max(count, 1), maxCount);
+        numSlotsInput.value = count;
+    }
+    
+    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+
+    for(let i=0; i < count; i++){
+      const slot = createSlot(i, premiumProxies[i]);
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+// Global Stop Function
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+    
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
+    });
+    
+    // Uncheck repeat mode if stopping
+    repeatModeCheckbox.checked = false;
+}
+
+// Global Start/Run Logic - UPDATED FOR RANDOMIZED RELOAD TIME
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  if(!url){ 
+      alert('Please paste a valid URL into the global input field.'); 
+      return; 
+  }
+  
+  // Run once immediately
+  currentSlots.forEach(s => s.runAutomation(url));
+  
+  // If repeat mode is checked, start intervals
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+      
+    currentSlots.forEach((s) => {
+        // CRITICAL CHANGE: Get a RANDOM delay (45s to 120s)
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds.toFixed(2)}s cycle)...`, true);
         
-        // Controls
-        const activeUserCheck = document.getElementById('activeUserCheck'); 
-        const autoScrollCheck = document.getElementById('autoScrollCheck');
-        const autoClicksCheck = document.getElementById('autoClicksCheck');
-        const minTimeInput = document.getElementById('minTimeInput');
-        const maxTimeInput = document.getElementById('maxTimeInput');
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds.toFixed(2)}s...`, true);
+        }, randomDelay); // Use the randomized delay here
         
-        const numIframes = 10;
-        const iframeContainers = document.querySelectorAll('.iframe-container');
-        const iframes = Array.from({ length: numIframes }, (_, i) => document.getElementById(`iframe${i}`));
-        const statusSpans = Array.from({ length: numIframes }, (_, i) => iframeContainers[i].querySelector('.status'));
-        const indicators = Array.from({ length: numIframes }, (_, i) => iframeContainers[i].querySelector('.activity-indicator'));
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
 
-        
-        let reloadIntervalId = null;
-        let scrollIntervalId = null;
-        let clickIntervalId = null;
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
 
-        loadButton.addEventListener('click', startMultiBrowser);
-        
-        // Control listeners
-        activeUserCheck.addEventListener('change', () => toggleIntervals(activeUserCheck.checked, 'reload'));
-        autoScrollCheck.addEventListener('change', () => toggleIntervals(autoScrollCheck.checked, 'scroll'));
-        autoClicksCheck.addEventListener('change', () => toggleIntervals(autoClicksCheck.checked, 'click'));
+// Event listener for auto-scroll checkbox
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    // Toggles the scrolling class on all current slots when the checkbox changes
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        // Ensure that scrolling is only applied if it's checked
+        s.element.classList.toggle('scrolling', isScrolling);
+    });
+});
 
-        // Helper function for URL normalization
-        function normalizeUrl(url) {
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                return 'https://' + url;
-            }
-            return url;
-        }
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    // Stop automation if repeat mode is unchecked while running
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
 
-        // --- Load & Run Logic ---
-        function loadIframes(url) {
-            // Random Page Delay feature ko `randomDelayCheck` checkbox ki zaroorat nahi hai, yeh automatically 'Active User Mode' ke saath chalta hai
-            const minTime = 10000; 
-            const maxTime = 30000; 
-            
-            iframes.forEach((iframe, index) => {
-                const delay = Math.floor(Math.random() * (maxTime - minTime + 1) + minTime); 
-                
-                iframe.src = 'about:blank'; 
 
-                setTimeout(() => {
-                    iframe.src = url;
-                    statusSpans[index].textContent = 'Running';
-                    statusSpans[index].style.backgroundColor = '#d4edda'; // Light Green
-                    statusSpans[index].style.color = '#155724'; // Dark Green
-                }, delay * index); 
-            });
-        }
-
-        function startMultiBrowser() {
-            let url = urlInput.value.trim();
-            if (!url) {
-                alert('Kripya Target URL daalein.');
-                return;
-            }
-            url = normalizeUrl(url);
-
-            loadIframes(url);
-
-            clearIntervals();
-            
-            // Start features based on checkbox status
-            if (activeUserCheck.checked) toggleIntervals(true, 'reload');
-            if (autoScrollCheck.checked) toggleIntervals(true, 'scroll');
-            if (autoClicksCheck.checked) toggleIntervals(true, 'click');
-        }
-        
-        // --- Timer Controls ---
-        function clearIntervals() {
-            clearInterval(reloadIntervalId);
-            clearInterval(scrollIntervalId);
-            clearInterval(clickIntervalId);
-            reloadIntervalId = null;
-            scrollIntervalId = null;
-            clickIntervalId = null;
-        }
-
-        function toggleIntervals(shouldStart, type) {
-            if (type === 'reload') {
-                const minSec = parseInt(minTimeInput.value) || 30;
-                const maxSec = parseInt(maxTimeInput.value) || 60;
-                
-                if (shouldStart) {
-                    if (reloadIntervalId) return;
-                    const randomReloadTime = Math.floor(Math.random() * (maxSec - minSec + 1) + minSec) * 1000;
-                    reloadIntervalId = setInterval(reloadFrames, randomReloadTime);
-                } else {
-                    clearInterval(reloadIntervalId);
-                    reloadIntervalId = null;
-                }
-            } else if (type === 'scroll') {
-                if (shouldStart) {
-                    if (scrollIntervalId) return;
-                    scrollIntervalId = setInterval(scrollFrames, 100); 
-                } else {
-                    clearInterval(scrollIntervalId);
-                    scrollIntervalId = null;
-                }
-            } else if (type === 'click') {
-                if (shouldStart) {
-                    if (clickIntervalId) return;
-                    const randomTime = Math.floor(Math.random() * (15000) + 15000); 
-                    clickIntervalId = setInterval(realisticClickSimulation, randomTime);
-                } else {
-                    clearInterval(clickIntervalId);
-                    clickIntervalId = null;
-                }
-            }
-        }
-
-        function reloadFrames() {
-            iframes.forEach((iframe) => {
-                if (iframe.src && iframe.src !== 'about:blank') {
-                    iframe.contentWindow.location.reload(true);
-                }
-            });
-            toggleIntervals(false, 'reload');
-            toggleIntervals(true, 'reload');
-        }
-
-        function scrollFrames() {
-            iframes.forEach((iframe) => {
-                
-                if (iframe.scrollDirection === undefined) iframe.scrollDirection = 1; 
-
-                try {
-                    const doc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (doc && doc.body) {
-                        const currentScroll = iframe.contentWindow.scrollY;
-                        const maxScroll = doc.body.scrollHeight - iframe.clientHeight;
-                        const scrollStep = 10 * iframe.scrollDirection; 
-
-                        iframe.contentWindow.scrollBy(0, scrollStep);
-                        
-                        if (currentScroll >= maxScroll && iframe.scrollDirection === 1) {
-                            iframe.scrollDirection = 0; 
-                            setTimeout(() => {
-                                iframe.scrollDirection = -1; 
-                            }, Math.random() * 1000 + 1000); 
-                        } 
-                        else if (currentScroll <= 0 && iframe.scrollDirection === -1) {
-                            iframe.scrollDirection = 0; 
-                            setTimeout(() => {
-                                iframe.scrollDirection = 1; 
-                            }, Math.random() * 1000 + 1000); 
-                        }
-                    }
-                } catch (e) {
-                    // Cross-Origin error ignore karein
-                }
-            });
-        }
-        
-        function realisticClickSimulation() {
-            const randomIndex = Math.floor(Math.random() * numIframes);
-            const iframe = iframes[randomIndex];
-            const indicator = indicators[randomIndex];
-
-            try {
-                const doc = iframe.contentDocument || iframe.contentWindow.document;
-                if (doc) {
-                    const elements = doc.querySelectorAll('a:not([target="_blank"]), button');
-                    
-                    if (elements.length > 0) {
-                        const randomElementIndex = Math.floor(Math.random() * elements.length);
-                        const clickableElement = elements[randomElementIndex];
-
-                        if (clickableElement) {
-                            if (indicator) {
-                                indicator.classList.add('click-active');
-                            }
-                            
-                            setTimeout(() => {
-                                clickableElement.click();
-                                
-                                if (indicator) {
-                                    indicator.classList.remove('click-active');
-                                }
-
-                                toggleIntervals(false, 'click');
-                                toggleIntervals(true, 'click');
-
-                            }, 2000); 
-                        }
-                    }
-                }
-            } catch (e) {
-                // Cross-Origin error ignore karein
-            }
-        }
-        
-    </script>
-
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
 </body>
 </html>
