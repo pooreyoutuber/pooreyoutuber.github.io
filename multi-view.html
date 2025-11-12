@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi Browser - Web Behavior Simulation Tool</title>
+    <title>Multi Browser - Advanced Traffic & Behavior Simulation Tool</title>
     <style>
         /* CSS: Styling aur Layout */
         body {
@@ -11,7 +11,7 @@
             margin: 0;
             padding: 10px;
             background-color: #f4f4f4;
-            overflow: hidden; /* Main page scroll na ho */
+            overflow: hidden; 
         }
 
         .controls-panel {
@@ -33,7 +33,7 @@
         .auto-options { display: flex; gap: 20px; padding-top: 10px; border-top: 1px solid #eee; }
         .auto-options label { display: flex; align-items: center; font-weight: 500; cursor: pointer; }
 
-        /* Iframe Grid Layout - Desktop View Hint ke liye Bada Size */
+        /* Iframe Grid Layout - Desktop View Hint */
         .iframe-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr); 
@@ -46,7 +46,7 @@
             border-radius: 6px;
             overflow: hidden; 
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            position: relative; /* Visual indicator ke liye zaroori */
+            position: relative; 
         }
 
         .browser-iframe {
@@ -55,28 +55,45 @@
             border: none;
         }
         
-        /* Visual Click Indicator (Infinity symbol) */
-        .click-indicator {
+        /* Visual Activity Indicator (Ghumta hua Infinity) */
+        .activity-indicator {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 40px;
+            font-size: 30px; 
             color: #ff5722;
             text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-            animation: spin 1s infinite linear;
+            animation: pulse 1.5s infinite ease-in-out, spin 3s infinite linear; 
             z-index: 10;
-            display: none; /* By default hidden */
+            opacity: 0.5; 
+            display: none; /* Scrolling chalu hone par dikhega */
         }
-        .click-indicator.active {
-            display: block;
+
+        /* Jab scrolling chalu ho tab indicator dikhega */
+        .iframe-container.scrolling-active .activity-indicator {
+            display: block; 
         }
+
+        /* Click ke waqt indicator ko highlight karein */
+        .activity-indicator.click-active {
+            font-size: 45px;
+            color: #007bff;
+            opacity: 1;
+        }
+
         @keyframes spin {
             from { transform: translate(-50%, -50%) rotate(0deg); }
             to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        /* Responsive Adjustments */
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); } 
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Responsive Adjustments (Previous code se) */
         @media (max-width: 1200px) { .iframe-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 800px) { 
             .iframe-grid { grid-template-columns: repeat(2, 1fr); } 
@@ -93,32 +110,36 @@
         </div>
 
         <div class="auto-options">
-            <label title="Auto-Reload: Har 30 second mein sabhi tabs ko refresh karega.">
+            <label title="Auto-Reload: Har 30 se 60 second ke beech random time par sabhi tabs ko refresh karega.">
                 <input type="checkbox" id="autoReloadCheck">
-                Auto Reload (30 sec)
+                Random Auto Reload (30-60 sec)
             </label>
-            <label title="Bi-directional Scroll: Sabhi tabs ko upar-neeche scroll karega, jaise koi user padh raha ho.">
+            <label title="Bi-directional Scroll: Sabhi tabs ko upar-neeche scroll karega.">
                 <input type="checkbox" id="autoScrollCheck" checked>
                 Bi-directional Scrolling
             </label>
-            <label title="Realistic Click: Random interval par kisi 1 tab mein sirf 1 link par click karega aur activity dikhayega.">
+            <label title="Realistic Click: Random interval par kisi 1 tab mein 1 element par click karega aur activity dikhayega.">
                 <input type="checkbox" id="autoClicksCheck">
                 Realistic Click Simulation
+            </label>
+            <label title="Random Time on Page: Har tab ko load hone ke baad 10 se 30 second tak rukne ka samay dega.">
+                <input type="checkbox" id="randomDelayCheck" checked>
+                Random Page Delay (10-30 sec)
             </label>
         </div>
     </div>
 
     <div class="iframe-grid" id="iframeContainer">
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe0"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe1"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe2"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe3"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe4"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe5"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe6"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe7"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe8"></iframe><div class="click-indicator">∞</div></div>
-        <div class="iframe-container"><iframe class="browser-iframe" id="iframe9"></iframe><div class="click-indicator">∞</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe0"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe1"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe2"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe3"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe4"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe5"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe6"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe7"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe8"></iframe><div class="activity-indicator">♾️</div></div>
+        <div class="iframe-container"><iframe class="browser-iframe" id="iframe9"></iframe><div class="activity-indicator">♾️</div></div>
     </div>
 
     <script>
@@ -128,6 +149,7 @@
         const autoReloadCheck = document.getElementById('autoReloadCheck');
         const autoScrollCheck = document.getElementById('autoScrollCheck');
         const autoClicksCheck = document.getElementById('autoClicksCheck');
+        const randomDelayCheck = document.getElementById('randomDelayCheck'); // Naya control
         const numIframes = 10;
         const iframeContainers = document.querySelectorAll('.iframe-container');
         const iframes = Array.from({ length: numIframes }, (_, i) => document.getElementById(`iframe${i}`));
@@ -142,6 +164,7 @@
         autoReloadCheck.addEventListener('change', () => toggleIntervals(autoReloadCheck.checked, 'reload'));
         autoScrollCheck.addEventListener('change', () => toggleIntervals(autoScrollCheck.checked, 'scroll'));
         autoClicksCheck.addEventListener('change', () => toggleIntervals(autoClicksCheck.checked, 'click'));
+        // Random Delay Checkbox ka asar loadIframes par hoga (toggleIntervals mein nahi)
 
         function normalizeUrl(url) {
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -150,9 +173,20 @@
             return url;
         }
 
+        // --- IMPROVEMENT: Delay ke saath load karna ---
         function loadIframes(url) {
-            iframes.forEach((iframe) => {
-                iframe.src = url; 
+            const delayEnabled = randomDelayCheck.checked;
+            
+            iframes.forEach((iframe, index) => {
+                const delay = delayEnabled ? Math.floor(Math.random() * (20000 - 10000 + 1) + 10000) : 0; // 10 to 20 seconds delay
+                
+                // Puraani load ko rokna
+                iframe.src = 'about:blank'; 
+
+                setTimeout(() => {
+                    iframe.src = url; 
+                    console.log(`Iframe ${index} loaded after delay of ${delay / 1000}s.`);
+                }, delay * index); // Har iframe ko thode alag samay par load karein
             });
         }
 
@@ -188,7 +222,9 @@
             if (type === 'reload') {
                 if (shouldStart) {
                     if (reloadIntervalId) return;
-                    reloadIntervalId = setInterval(reloadFrames, 30000); // 30 seconds
+                    // IMPROVEMENT: Random Reload Time (30 se 60 sec)
+                    const randomReloadTime = Math.floor(Math.random() * (60000 - 30000 + 1) + 30000);
+                    reloadIntervalId = setInterval(reloadFrames, randomReloadTime);
                 } else {
                     clearInterval(reloadIntervalId);
                     reloadIntervalId = null;
@@ -197,15 +233,19 @@
                 if (shouldStart) {
                     if (scrollIntervalId) return;
                     scrollIntervalId = setInterval(scrollFrames, 100); // 100ms
+                    // IMPROVEMENT: Scrolling chalu hone par indicator ON
+                    iframeContainers.forEach(c => c.classList.add('scrolling-active'));
                 } else {
                     clearInterval(scrollIntervalId);
                     scrollIntervalId = null;
+                    // Scrolling band hone par indicator OFF
+                    iframeContainers.forEach(c => c.classList.remove('scrolling-active'));
                 }
             } else if (type === 'click') {
                 if (shouldStart) {
                     if (clickIntervalId) return;
                     // Random interval 15 se 30 seconds ke beech
-                    const randomTime = Math.random() * (15000) + 15000; 
+                    const randomTime = Math.floor(Math.random() * (15000) + 15000); 
                     clickIntervalId = setInterval(realisticClickSimulation, randomTime);
                 } else {
                     clearInterval(clickIntervalId);
@@ -220,14 +260,16 @@
                     iframe.contentWindow.location.reload(true);
                 }
             });
-            console.log('Auto Reload triggered.');
+            console.log('Random Auto Reload triggered.');
+            // Reload ke baad, agla reload timer random hona chahiye
+            toggleIntervals(false, 'reload');
+            toggleIntervals(true, 'reload');
         }
 
-        // --- Bi-directional Scrolling Logic ---
+        // --- Bi-directional Scrolling Logic (Niche se Upar) ---
         function scrollFrames() {
             iframes.forEach((iframe) => {
                 
-                // Har iframe ke liye direction track karein
                 if (iframe.scrollDirection === undefined) iframe.scrollDirection = 1; // 1 = down, -1 = up
 
                 try {
@@ -235,28 +277,35 @@
                     if (doc && doc.body) {
                         const currentScroll = iframe.contentWindow.scrollY;
                         const maxScroll = doc.body.scrollHeight - iframe.clientHeight;
-                        const scrollStep = 10 * iframe.scrollDirection; // Direction ke anusaar step
+                        const scrollStep = 10 * iframe.scrollDirection; 
 
                         iframe.contentWindow.scrollBy(0, scrollStep);
                         
-                        // Neeche pahunche: Direction ulta (Reverse direction)
+                        // Neeche pahunche
                         if (currentScroll >= maxScroll && iframe.scrollDirection === 1) {
-                            iframe.scrollDirection = -1;
+                            // IMPROVEMENT: Neeche 1-2 second rukna
+                            iframe.scrollDirection = 0; // Rok do
+                            setTimeout(() => {
+                                iframe.scrollDirection = -1; // Fir upar jao
+                            }, Math.random() * 1000 + 1000); // 1 se 2 sec ruko
                         } 
-                        // Upar pahunche: Direction ulta (Reverse direction)
+                        // Upar pahunche
                         else if (currentScroll <= 0 && iframe.scrollDirection === -1) {
-                            iframe.scrollDirection = 1;
+                            // IMPROVEMENT: Upar 1-2 second rukna
+                            iframe.scrollDirection = 0; // Rok do
+                            setTimeout(() => {
+                                iframe.scrollDirection = 1; // Fir neeche aao
+                            }, Math.random() * 1000 + 1000); // 1 se 2 sec ruko
                         }
                     }
                 } catch (e) {
-                    // Security ya cross-origin error ko ignore karein
+                    // Security errors ignore karein
                 }
             });
         }
         
         // --- Realistic Click Simulation with Visual Feedback ---
         function realisticClickSimulation() {
-            // 1. Ek random iframe chunein
             const randomIndex = Math.floor(Math.random() * numIframes);
             const iframe = iframes[randomIndex];
             const container = iframeContainers[randomIndex];
@@ -264,32 +313,31 @@
             try {
                 const doc = iframe.contentDocument || iframe.contentWindow.document;
                 if (doc) {
-                    // 2. Clickable elements (links) ko target karein
-                    const links = doc.querySelectorAll('a:not([target="_blank"])');
+                    // Link ya Button ko target karein
+                    const elements = doc.querySelectorAll('a:not([target="_blank"]), button');
                     
-                    if (links.length > 0) {
-                        // 3. Un links mein se bhi ek random link chunein
-                        const randomLinkIndex = Math.floor(Math.random() * links.length);
-                        const clickableElement = links[randomLinkIndex];
+                    if (elements.length > 0) {
+                        const randomElementIndex = Math.floor(Math.random() * elements.length);
+                        const clickableElement = elements[randomElementIndex];
 
                         if (clickableElement) {
-                            // 4. Visual Indicator ON karein (Infinity symbol)
-                            const indicator = container.querySelector('.click-indicator');
+                            // Visual Indicator ko highlight karein
+                            const indicator = container.querySelector('.activity-indicator');
                             if (indicator) {
-                                indicator.classList.add('active');
+                                indicator.classList.add('click-active');
                             }
                             
-                            // 5. 2 seconds baad click aur indicator OFF karein
+                            // 2 seconds baad click aur indicator ko normal karein
                             setTimeout(() => {
                                 clickableElement.click();
-                                console.log(`Realistic Click: Iframe ${randomIndex} mein link par click kiya.`);
+                                console.log(`Realistic Click: Iframe ${randomIndex} mein element par click kiya.`);
                                 
                                 // Indicator band kar dein
                                 if (indicator) {
-                                    indicator.classList.remove('active');
+                                    indicator.classList.remove('click-active');
                                 }
 
-                                // Click ke baad, click interval ko reset kar dein (taki agla click random time par ho)
+                                // Click interval ko reset kar dein
                                 toggleIntervals(false, 'click');
                                 toggleIntervals(true, 'click');
 
@@ -298,7 +346,7 @@
                     }
                 }
             } catch (e) {
-                console.warn(`Click Simulation Error on Iframe ${randomIndex}:`, e.message);
+                // Cross-Origin error ignore karein
             }
         }
         
