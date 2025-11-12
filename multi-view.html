@@ -46,10 +46,12 @@
             margin-bottom: 15px;
         }
 
+        /* URL Section - Single Line Layout */
         .url-section {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
+            align-items: center; /* Vertically align items */
         }
 
         #urlInput {
@@ -69,21 +71,36 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: bold;
+            white-space: nowrap; /* Button content should not wrap */
         }
 
-        /* Auto Controls / Checkboxes */
-        .auto-controls {
+        /* Auto Controls / Checkboxes - Two Separate Lines */
+        .auto-controls-line-1,
+        .auto-controls-line-2 {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 15px; /* Spacing between elements */
             margin-bottom: 10px;
         }
-        .auto-controls label {
-            font-size: 13px;
-            color: #495057;
+
+        .auto-controls-line-1 input[type="number"],
+        .auto-controls-line-2 input[type="number"] {
+             width: 50px; 
+             padding: 5px; 
+             border-radius: 4px; 
+             border: 1px solid #ccc;
+             font-size: 13px;
         }
 
+        .auto-controls-line-1 label,
+        .auto-controls-line-2 label {
+            font-size: 13px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+        }
+        
         /* Tool Instructions */
         .instructions {
             background-color: #fff3cd;
@@ -92,18 +109,18 @@
             padding: 10px;
             border-radius: 4px;
             font-size: 12px;
-            margin-bottom: 15px;
+            margin-top: 15px; /* Added gap from controls */
         }
         .instructions strong {
-            color: #dc3545; /* Red for CRITICAL */
+            color: #dc3545; 
             display: block;
             margin-top: 5px;
         }
 
-        /* Slots Grid Layout (2 columns jaisa screenshot mein hai) */
+        /* Slots Grid Layout - 2 Columns */
         .slots-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 2 columns */
+            grid-template-columns: 1fr 1fr; /* 2 columns like screenshot */
             gap: 20px;
             padding: 0 20px;
         }
@@ -134,7 +151,6 @@
 
         .browser-iframe {
             width: 100%;
-            /* Height adjust for header and buttons */
             height: calc(100% - 70px); 
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -172,21 +188,21 @@
             font-weight: bold;
         }
 
-        /* Activity Indicator (Hata diya gaya, sirf click hone par dikhega) */
+        /* Activity Indicator - sirf click hone par dikhega, hamesha nahi (jaisa apne chaha) */
         .activity-indicator {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 40px; 
-            color: var(--highlight-color);
-            opacity: 0; /* Hamesha hidden rakha */
+            color: #dc3545; /* Click ke time red/critical color */
+            opacity: 0; 
             z-index: 10;
             transition: opacity 0.2s, transform 0.2s;
         }
 
         .activity-indicator.click-active {
-            opacity: 1; /* Click hone par dikhega */
+            opacity: 1; 
             transform: translate(-50%, -50%) scale(1.2);
             animation: spin 0.5s infinite linear;
         }
@@ -203,7 +219,8 @@
             .iframe-container {
                 height: 300px;
             }
-            .auto-controls {
+            /* Control lines ko stack karna */
+            .auto-controls-line-1, .auto-controls-line-2 {
                 flex-direction: column;
                 align-items: flex-start;
             }
@@ -218,20 +235,23 @@
 
     <div class="controls-panel">
         <div class="url-section">
-            <input type="text" id="urlInput" placeholder="Paste Target URL (e.g., https://yourwebsite.com)">
+            <label for="urlInput" style="white-space: nowrap; font-size: 14px;">Paste Target URL (e.g., https://yourwebsite.com)</label>
+            <input type="text" id="urlInput" placeholder="https://yourwebsite.com">
             <button id="loadButton">Load & Run All (10 Slots)</button>
         </div>
 
-        <div class="auto-controls">
+        <div class="auto-controls-line-1">
             <label>
                 <input type="checkbox" id="activeUserCheck" checked>
                 Enable **Active User** Mode: Repeat at Min:
             </label>
-            <input type="number" id="minTimeInput" value="30" min="10" style="width: 50px; padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <input type="number" id="minTimeInput" value="30" min="10">
             <label>Max:</label>
-            <input type="number" id="maxTimeInput" value="60" min="30" style="width: 50px; padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <input type="number" id="maxTimeInput" value="60" min="30">
             <label>seconds cycle for better GA tracking.</label>
-            
+        </div>
+
+        <div class="auto-controls-line-2">
             <label>
                 <input type="checkbox" id="autoScrollCheck" checked>
                 Enable **Auto Scroll** (Simulated & Staggered)
@@ -240,21 +260,22 @@
                 <input type="checkbox" id="autoClicksCheck">
                 Enable **Click Simulation**
             </label>
+            <label>
+                <input type="checkbox" id="randomDelayCheck" checked>
+                Enable **Random Page Delay** (10-30s)
+            </label>
         </div>
 
         <div class="instructions">
             **Tool Usage Instructions:**
-            * **Action:** Check the ***Enable Active User Mode*** and click 'Load & Run All'. This automatically repeats the request every 30-60 seconds (random).
+            * **Action:** Check the ***Enable Active User Mode*** and click 'Load & Run All'. This automatically repeats the request every **30-60 seconds** (random).
             * **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
         </div>
     </div>
 
     <div class="slots-grid" id="slotsGrid">
         <div class="iframe-container" data-slot-id="0">
-            <div class="slot-header">
-                <strong>SLOT 1: Alex (US)</strong>
-                <small>Proxy IP: 143.111.46.253:7030</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 1: Alex (US)</strong><small>Proxy IP: 143.111.46.253:7030</small></div>
             <iframe class="browser-iframe" id="iframe0" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe0').src, '_blank')">Full View (New Tab)</button>
@@ -265,10 +286,7 @@
         </div>
 
         <div class="iframe-container" data-slot-id="1">
-            <div class="slot-header">
-                <strong>SLOT 2: Olivia (DE)</strong>
-                <small>Proxy IP: 31.58.30.178:6754</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 2: Olivia (DE)</strong><small>Proxy IP: 31.58.30.178:6754</small></div>
             <iframe class="browser-iframe" id="iframe1" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe1').src, '_blank')">Full View (New Tab)</button>
@@ -279,10 +297,7 @@
         </div>
         
         <div class="iframe-container" data-slot-id="2">
-            <div class="slot-header">
-                <strong>SLOT 3: Andrew (CA)</strong>
-                <small>Proxy IP: 38.170.177.17:5373</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 3: Andrew (CA)</strong><small>Proxy IP: 38.170.177.17:5373</small></div>
             <iframe class="browser-iframe" id="iframe2" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe2').src, '_blank')">Full View (New Tab)</button>
@@ -293,10 +308,7 @@
         </div>
 
         <div class="iframe-container" data-slot-id="3">
-            <div class="slot-header">
-                <strong>SLOT 4: Charlotte (US)</strong>
-                <small>Proxy IP: 168.25.230.198:4540</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 4: Charlotte (US)</strong><small>Proxy IP: 168.25.230.198:4540</small></div>
             <iframe class="browser-iframe" id="iframe3" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe3').src, '_blank')">Full View (New Tab)</button>
@@ -307,10 +319,7 @@
         </div>
 
         <div class="iframe-container" data-slot-id="4">
-            <div class="slot-header">
-                <strong>SLOT 5: Ella (US)</strong>
-                <small>Proxy IP: 95.38.101.87:5034</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 5: Ella (US)</strong><small>Proxy IP: 95.38.101.87:5034</small></div>
             <iframe class="browser-iframe" id="iframe4" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe4').src, '_blank')">Full View (New Tab)</button>
@@ -321,10 +330,7 @@
         </div>
 
         <div class="iframe-container" data-slot-id="5">
-            <div class="slot-header">
-                <strong>SLOT 6: Sophia (CA)</strong>
-                <small>Proxy IP: 107.97.90.227:8543</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 6: Sophia (CA)</strong><small>Proxy IP: 107.97.90.227:8543</small></div>
             <iframe class="browser-iframe" id="iframe5" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe5').src, '_blank')">Full View (New Tab)</button>
@@ -335,10 +341,7 @@
         </div>
 
         <div class="iframe-container" data-slot-id="6">
-            <div class="slot-header">
-                <strong>SLOT 7: John (US)</strong>
-                <small>Proxy IP: 64.127.96.74:6641</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 7: John (US)</strong><small>Proxy IP: 64.127.96.74:6641</small></div>
             <iframe class="browser-iframe" id="iframe6" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe6').src, '_blank')">Full View (New Tab)</button>
@@ -349,10 +352,7 @@
         </div>
 
         <div class="iframe-container" data-slot-id="7">
-            <div class="slot-header">
-                <strong>SLOT 8: Joseph (AU)</strong>
-                <small>Proxy IP: 210.19.27.130:8837</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 8: Joseph (AU)</strong><small>Proxy IP: 210.19.27.130:8837</small></div>
             <iframe class="browser-iframe" id="iframe7" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe7').src, '_blank')">Full View (New Tab)</button>
@@ -363,10 +363,7 @@
         </div>
         
         <div class="iframe-container" data-slot-id="8">
-            <div class="slot-header">
-                <strong>SLOT 9: Mia (FR)</strong>
-                <small>Proxy IP: 109.171.192.17:4141</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 9: Mia (FR)</strong><small>Proxy IP: 109.171.192.17:4141</small></div>
             <iframe class="browser-iframe" id="iframe8" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe8').src, '_blank')">Full View (New Tab)</button>
@@ -377,10 +374,7 @@
         </div>
 
         <div class="iframe-container" data-slot-id="9">
-            <div class="slot-header">
-                <strong>SLOT 10: Liam (IN)</strong>
-                <small>Proxy IP: 49.37.12.18:9090</small>
-            </div>
+            <div class="slot-header"><strong>SLOT 10: Liam (IN)</strong><small>Proxy IP: 49.37.12.18:9090</small></div>
             <iframe class="browser-iframe" id="iframe9" src="about:blank"></iframe>
             <div class="slot-buttons">
                 <button class="view-button" onclick="window.open(document.getElementById('iframe9').src, '_blank')">Full View (New Tab)</button>
@@ -396,7 +390,7 @@
         const loadButton = document.getElementById('loadButton');
         
         // Controls
-        const activeUserCheck = document.getElementById('activeUserCheck'); // Active User = Auto Reload
+        const activeUserCheck = document.getElementById('activeUserCheck'); 
         const autoScrollCheck = document.getElementById('autoScrollCheck');
         const autoClicksCheck = document.getElementById('autoClicksCheck');
         const minTimeInput = document.getElementById('minTimeInput');
@@ -430,14 +424,13 @@
 
         // --- Load & Run Logic ---
         function loadIframes(url) {
-            const delayEnabled = true; // Hamesha random delay chalu rakha, jaisa pichle code mein tha
+            // Random Page Delay feature ko `randomDelayCheck` checkbox ki zaroorat nahi hai, yeh automatically 'Active User Mode' ke saath chalta hai
             const minTime = 10000; 
             const maxTime = 30000; 
             
             iframes.forEach((iframe, index) => {
-                const delay = delayEnabled ? Math.floor(Math.random() * (maxTime - minTime + 1) + minTime) : 0;
+                const delay = Math.floor(Math.random() * (maxTime - minTime + 1) + minTime); 
                 
-                // Puraani load ko rokna
                 iframe.src = 'about:blank'; 
 
                 setTimeout(() => {
@@ -484,7 +477,6 @@
                 
                 if (shouldStart) {
                     if (reloadIntervalId) return;
-                    // Random Reload Time (Min se Max seconds)
                     const randomReloadTime = Math.floor(Math.random() * (maxSec - minSec + 1) + minSec) * 1000;
                     reloadIntervalId = setInterval(reloadFrames, randomReloadTime);
                 } else {
@@ -492,11 +484,9 @@
                     reloadIntervalId = null;
                 }
             } else if (type === 'scroll') {
-             if (shouldStart) {
+                if (shouldStart) {
                     if (scrollIntervalId) return;
                     scrollIntervalId = setInterval(scrollFrames, 100); 
-                    // Scrolling chalu hone par visual indicator hide kar dein
-                    // Ab indicator sirf click hone par dikhega, hamesha nahi
                 } else {
                     clearInterval(scrollIntervalId);
                     scrollIntervalId = null;
@@ -504,7 +494,6 @@
             } else if (type === 'click') {
                 if (shouldStart) {
                     if (clickIntervalId) return;
-                    // Random interval 15 se 30 seconds ke beech
                     const randomTime = Math.floor(Math.random() * (15000) + 15000); 
                     clickIntervalId = setInterval(realisticClickSimulation, randomTime);
                 } else {
@@ -520,12 +509,10 @@
                     iframe.contentWindow.location.reload(true);
                 }
             });
-            // Agla reload timer random hona chahiye
             toggleIntervals(false, 'reload');
             toggleIntervals(true, 'reload');
         }
 
-        // --- Bi-directional Scrolling Logic ---
         function scrollFrames() {
             iframes.forEach((iframe) => {
                 
@@ -540,18 +527,16 @@
 
                         iframe.contentWindow.scrollBy(0, scrollStep);
                         
-                        // Neeche pahunche aur 1-2 second rukna
                         if (currentScroll >= maxScroll && iframe.scrollDirection === 1) {
                             iframe.scrollDirection = 0; 
                             setTimeout(() => {
-                                iframe.scrollDirection = -1; // Upar jao
+                                iframe.scrollDirection = -1; 
                             }, Math.random() * 1000 + 1000); 
                         } 
-                        // Upar pahunche aur 1-2 second rukna
                         else if (currentScroll <= 0 && iframe.scrollDirection === -1) {
                             iframe.scrollDirection = 0; 
                             setTimeout(() => {
-                                iframe.scrollDirection = 1; // Neeche aao
+                                iframe.scrollDirection = 1; 
                             }, Math.random() * 1000 + 1000); 
                         }
                     }
@@ -561,7 +546,6 @@
             });
         }
         
-        // --- Realistic Click Simulation with Visual Feedback ---
         function realisticClickSimulation() {
             const randomIndex = Math.floor(Math.random() * numIframes);
             const iframe = iframes[randomIndex];
@@ -577,12 +561,10 @@
                         const clickableElement = elements[randomElementIndex];
 
                         if (clickableElement) {
-                            // Visual Indicator ko highlight karein (Click hone par ♾️ dikhega)
                             if (indicator) {
                                 indicator.classList.add('click-active');
                             }
                             
-                            // 2 seconds baad click aur indicator ko normal karein
                             setTimeout(() => {
                                 clickableElement.click();
                                 
@@ -590,7 +572,6 @@
                                     indicator.classList.remove('click-active');
                                 }
 
-                                // Click interval ko reset kar dein
                                 toggleIntervals(false, 'click');
                                 toggleIntervals(true, 'click');
 
