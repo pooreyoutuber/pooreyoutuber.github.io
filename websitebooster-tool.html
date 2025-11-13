@@ -1,13 +1,28 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <title>Python Geo-Location Spoofing Proxy Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 50px; background-color: #f4f4f9; }
+        .container { width: 90%; max-width: 900px; }
+        h1 { color: #007bff; }
+        form { display: flex; margin-bottom: 20px; }
+        input[type="text"] { flex-grow: 1; padding: 12px; border: 2px solid #007bff; border-radius: 5px 0 0 5px; font-size: 16px; }
+        button { padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 0 5px 5px 0; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
+        button:hover { background-color: #0056b3; }
+        .iframe-container { margin-top: 20px; border: 1px solid #ccc; background-color: white; border-radius: 8px; overflow: hidden; }
+        .error { color: red; font-weight: bold; padding: 10px; background-color: #ffe0e0; border: 1px solid red; border-radius: 5px; margin-bottom: 15px;}
+        h2 { background-color: #e9ecef; padding: 10px; margin: 0; border-bottom: 1px solid #ccc; font-size: 1.2em; }
+        iframe { width: 100%; height: 600px; border: none; display: block; }
+        .success-message { padding: 10px; background-color: #d4edda; color: #155724; margin: 0;}
+    </style>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Earning Booster - Active User Traffic</title>
+<title>Website Booster Prime - Rotating Proxy Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
 <style>
-  /* --- CSS Styles --- */
+  /* --- CSS Styles (Same as previous responsive version) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
@@ -31,13 +46,7 @@
   .btn:hover { background: #0c8cd8; }
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
-  /* Updated for better layout of multiple options */
-  .repeat-control { 
-    display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--muted); 
-    background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  .control-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
@@ -57,29 +66,22 @@
   .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
   iframe { 
     width: 100%; height: 100%; border: 0; display: block; background: white; 
-    /* Zoom Level: 60% */
-    transform: scale(0.6); 
+    transform: scale(0.4); 
     transform-origin: 0 0;
-    width: calc(100% / 0.6); 
-    height: calc(100% / 0.6); 
+    width: calc(100% / 0.4);
+    height: calc(100% / 0.4);
     opacity: 1;
   }
   
-  /* --- FIX 2: CSS for Auto-Scrolling (Final Fixed Distance and Speed) --- */
+  /* --- CSS for Auto-Scrolling --- */
   @keyframes scroll {
-    /* Updated start scale to 0.6 */
-    0% { transform: translate(0, 0) scale(0.6); } 
-    /* Increased distance to -250% for 60% zoom for full page coverage */
-    50% { transform: translate(0, -250%) scale(0.6); } 
-    /* Updated end scale to 0.6 */
-    100% { transform: translate(0, 0) scale(0.6); } 
+    0% { transform: translate(0, 0) scale(0.4); } 
+    50% { transform: translate(0, -200%) scale(0.4); } 
+    100% { transform: translate(0, 0) scale(0.4); } 
   }
-
   .slot.scrolling iframe {
-    transform: translate(0, 0) scale(0.6); 
-    /* Set duration to 16s for very slow, realistic scroll over the new, longer distance */
-    animation: scroll 16s ease-in-out infinite;
-    /* animation-delay is set via JavaScript for staggering */
+    transform: translate(0, 0) scale(0.4); 
+    animation: scroll 3s ease-in-out infinite;
   }
   /* ---------------------------------- */
   
@@ -102,20 +104,39 @@
 </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🐍 कॉलेज प्रॉजेक्ट: Python Geo-Location प्रॉक्सी</h1>
+        <p>URL डालें, और उसे Webshare प्रॉक्सी के माध्यम से लोड करें।</p>
+        
+        <form action="/" method="GET">
+            <input type="text" name="url" placeholder="वह URL डालें जिसे आप प्रॉक्सी के माध्यम से खोलना चाहते हैं (e.g., https://example.com)" 
+                   value="{{ target_url if target_url }}" required>
+            <button type="submit">🚀 प्रॉक्सी से खोलो</button>
+        </form>
+        {% if target_url %}
+            {% if error %}
+                <div class="error">❌ प्रॉक्सी कनेक्शन त्रुटि: {{ error }}</div>
+            {% else %}
+                <div class="iframe-container">
+                    <h2>🌐 फेच किया गया कंटेंट: {{ target_url }}</h2>
+                    <iframe sandbox="allow-scripts allow-forms allow-same-origin" srcdoc="{{ content_to_render | safe }}"></iframe>
+                    <p class="success-message">✅ Geo-location Spoofing सफल। Google Analytics अब प्रॉक्सी का स्थान रिकॉर्ड करेगा।</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
   <div class="wrap">
     <header>
-      <h1>💰 Website Earning Booster</h1>
-      <div class="tagline">GA4 Active User Traffic Simulation System (As per your design).</div>
+      <h1>Website Booster Prime</h1>
+      <div class="tagline">Global Traffic Simulation System - Using Rotating Proxies.</div>
     </header>
-
     <div class="controls">
         <div class="input-group">
             
             <div class="slot-selector">
                 Slots:
-                <input id="numSlots" type="number" value="10" min="1" max="10" />
+                <input id="numSlots" type="number" value="10" min="1" max="20" />
             </div>
-
             <div class="url-input-wrap">
                 <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
             </div>
@@ -123,97 +144,63 @@
         </div>
         
         <div class="repeat-control">
-            <div class="control-row">
-                <input type="checkbox" id="repeatMode" />
-                <label for="repeatMode">
-                    Enable **Active User** Mode: Repeat all 
-                    <label for="minTime">Min:</label>
-                    <input id="minTime" type="number" value="45" min="45" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
-                    <label for="maxTime">Max:</label>
-                    <input id="maxTime" type="number" value="120" min="45" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
-                    <span>seconds cycle</span> for better GA tracking.
-                </label>
-            </div>
+            <input type="checkbox" id="repeatMode" />
+            <label for="repeatMode">
+                Enable **Active User** Mode: Repeat all 
+                <label for="minTime">Min:</label>
+                <input id="minTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <label for="maxTime">Max:</label>
+                <input id="maxTime" type="number" value="60" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
+                <span>seconds cycle</span> for better GA tracking.
+            </label>
             
-            <div class="control-row">
-                <input type="checkbox" id="autoScrollMode" />
-                <label for="autoScrollMode">
-                    Enable **Auto Scroll** (Simulated & Staggered)
-                </label>
-                
-                <input type="checkbox" id="autoClickerMode" checked />
-                <label for="autoClickerMode">
-                    Enable **Auto Clicker** (Earning Booster)
-                </label>
-            </div>
-            
+            <input type="checkbox" id="autoScrollMode" />
+            <label for="autoScrollMode">
+                Enable **Auto Scroll** (Simulated)
+            </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
     
     <div class="info-box">
-        <strong>Tool Usage Instructions:</strong>
+        <strong>Tool Usage Instructions (Rotating Proxy Fix):</strong>
         <ul>
             <li>
-                <strong>Earning Booster:</strong> **'Auto Clicker'** (recommended) aapke backend (`index.js`) ko **Ad Click Simulation** chalane ka signal bhejta hai. Lekin ab yeh click sirf **15% sessions** mein **randomly** hoga taaki bot detection se bacha ja sake.
+                <strong>New Logic:</strong> The tool now uses a **Rotating Proxy Endpoint** (`p.webshare.io`). Every request from any slot will receive a new IP, ensuring a unique Active User for GA4.
             </li>
             <li>
-                <strong>Human Mode:</strong> Session ab **45 se 120 seconds** ke beech randomly repeat honge, jo GA4 aur ad network ko zyada natural lagega.
+                <strong>Active User Fix:</strong> Each request sends a **unique Client ID (Cookie)** combined with a **new IP** from the rotating proxy.
             </li>
             <li>
-                <strong>Action:</strong> **'Enable Active User Mode'** aur **'Auto Clicker'** (default checked) check rakhein. **'Load & Run All'** se test shuru karein.
+                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request between the Min/Max seconds (**staggered**).
             </li>
         </ul>
     </div>
-
     <div class="grid-container" id="gridContainer">
         </div>
     
   </div>
-
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION
+   PROXY DATA and CONFIGURATION (UPDATED FOR ROTATING PROXY)
    ---------------------------------------------------------------------- */
-
-const COMMON_USER = "bqctypvz";
-const COMMON_PASS = "399xb3kxqv6i";
-const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
-
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Mason", "Victoria", "Lucas", "Zoe"];
-
+// ⚠️ CHANGE THESE VALUES to your actual credentials if they differ
+const PROXY_DOMAIN = "p.webshare.io";
+const PROXY_PORT = "80";
+const PROXY_USER = "bqctypvz-rotate"; 
+const PROXY_PASS = "399xb3kxqv6i";
+const PROXY_AUTH = `${PROXY_USER}:${PROXY_PASS}`;
+const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 // Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
-    // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
-
 function getRandomNames(count) {
     const shuffled = [...allNames].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
 }
-
-// =========================================================================
-// !!! 10 UNIQUE PROXIES FROM YOUR UPLOADED FILE (Webshare 10 proxies.txt) !!!
-// =========================================================================
-const DUMMY_PROXIES = [
-  { ip: "142.111.48.253", port: "7030", country: "US" }, 
-  { ip: "31.59.20.176", port: "6754", country: "DE" }, 
-  { ip: "23.95.150.145", port: "6114", country: "CA" }, 
-  { ip: "198.23.239.134", port: "6540", country: "US" }, 
-  { ip: "45.38.107.97", port: "6014", country: "US" }, 
-  { ip: "107.172.163.27", port: "6543", country: "CA" }, 
-  { ip: "198.105.121.200", port: "6462", country: "US" }, 
-  { ip: "64.137.96.74", port: "6641", country: "US" }, 
-  { ip: "216.10.27.159", port: "6837", country: "AU" }, 
-  { ip: "142.111.67.146", port: "5611", country: "US" }, 
-];
-// =========================================================================
-
-const MAX_SLOTS = 10; // Limited to 10 unique proxies available
-// NOTE: PROXY_ENDPOINT is set in the previous conversation to: Https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request
-const PROXY_ENDPOINT = 'Https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request'; 
-
+const MAX_SLOTS = 20; 
+const PROXY_ENDPOINT = 'proxy_loader.php'; 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
@@ -223,43 +210,36 @@ const minTimeInput = document.getElementById('minTime');
 const maxTimeInput = document.getElementById('maxTime'); 
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
-
-// NEW: Get the Auto Clicker Checkbox element
-const autoClickerModeCheckbox = document.getElementById('autoClickerMode'); 
-
 let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
-
-// Map proxies with fixed unique IDs
-const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
-    ...p,
-    auth: COMMON_AUTH,
-    name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
-}));
-
-// --- MODIFIED: Function to return random delay for repeat mode (45s to 120s) ---
+// Map slot data with fixed unique IDs
+const slotConfigs = [];
+for (let i = 0; i < MAX_SLOTS; i++) {
+    slotConfigs.push({
+        name: randomNamesList[i],
+        uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
+    });
+}
+// Function to get a random delay from the user-defined min/max time
 function getRandomDelay() {
-    const minMs = parseInt(minTimeInput.value) * 1000;
-    const maxMs = parseInt(maxTimeInput.value) * 1000;
-    // Add a check to ensure max > min
-    if (minMs >= maxMs) return maxMs; 
+    const minSec = parseInt(minTimeInput.value);
+    const maxSec = parseInt(maxTimeInput.value);
     
-    // Generate random delay between min and max (inclusive)
+    const minMs = Math.min(minSec, maxSec) * 1000;
+    const maxMs = Math.max(minSec, maxSec) * 1000;
+    
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
-// ----------------------------------------------------------------------------
-
-// Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
-function createSlot(index, proxy){
+// Function to create a single slot element
+function createSlot(index, config){
   const el = document.createElement('div');
   el.className = 'slot';
   
   el.innerHTML = `
     <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
+      <div class="slot-title">SLOT ${index+1}: ${config.name}</div>
+      <div class="slot-ip-display">Proxy Endpoint: ${PROXY_DOMAIN}:${PROXY_PORT}</div>
     </div>
     
     <div class="iframe-wrap">
@@ -277,42 +257,25 @@ function createSlot(index, proxy){
   `;
   
   gridContainer.appendChild(el);
-
   const iframe = el.querySelector(`#iframe-${index}`);
   const openBtn = el.querySelector(`#open-${index}`);
   const runBtn = el.querySelector(`#run-${index}`);
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
-  
-  // NEW: Apply a random, negative animation delay for staggered start
-  const scrollDuration = 16; // Matches the fixed CSS animation duration (16s)
-  const randomScrollDelay = Math.random() * scrollDuration; 
-  iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
-
-
   function setStatus(text, isActive = false){
     statusSpan.textContent = text;
     statusDot.classList.toggle('active', isActive);
   }
   
-  // *** MODIFIED FUNCTION TO PASS AUTO CLICKER STATUS ***
-  function getProxiedUrl(originalUrl, proxy){
-      // Check the status of the new optional checkbox
-      const autoClickerEnabled = autoClickerModeCheckbox.checked ? '1' : '0';
-      
-      // Note: proxy.ip and proxy.port might be empty if running in VPN mode
-      const ipParam = proxy.ip ? `ip=${proxy.ip}&port=${proxy.port}&` : '';
-      const authParam = proxy.auth ? `auth=${proxy.auth}&` : '';
-
+  function getProxiedUrl(originalUrl, uniqueId){
+      // Sending all proxy details and Unique ID to the PHP script
       return `${PROXY_ENDPOINT}?` + 
-          `target=${encodeURIComponent(originalUrl)}&` + 
-          ipParam + 
-          authParam +
-          `sessionDuration=30&` + 
-          `clicker=${autoClickerEnabled}&` + // Pass the optional parameter
-          `uid=${proxy.uniqueId}`; 
+          `target=${encodeURIComponent(originalUrl)}&` +
+          `ip=${PROXY_DOMAIN}&port=${PROXY_PORT}&` +
+          `auth=${PROXY_AUTH}&` + 
+          `uid=${uniqueId}&` + // Unique ID for GA4 Cookie Fix
+            `protocol=SOCKS5`; // Inform PHP script about SOCKS5 protocol
   }
-
   // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
@@ -328,18 +291,14 @@ function createSlot(index, proxy){
         el.classList.remove('scrolling');
     }
     
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
-
-    // Changed status message to reflect fixed 30s
+    const proxiedUrl = getProxiedUrl(originalUrl, config.uniqueId);
     setStatus('Sending Unique Proxy View (30s Session)...', false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
-
     try {
-        // Fetch request is sent. The backend script will run in the background.
-        // We use mode: 'no-cors' just for a quick request, assuming the response is quick.
+        // Fetch request is sent. PHP script runs in background for 30s.
         await fetch(proxiedUrl, { mode: 'no-cors' });
         
-        // Response is quick due to the backend design
+        // Response is quick due to Connection: close header in PHP
         setStatus('View Sent (BG Session Active)', true);
         
     } catch (e) {
@@ -355,7 +314,6 @@ function createSlot(index, proxy){
     if(!url){ alert('Please paste a URL into the global input field first.'); return; }
     window.open(url, '_blank'); 
   });
-
   runBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
     if(!url){ alert('Please paste a URL into the global input field first.'); return; }
@@ -363,35 +321,29 @@ function createSlot(index, proxy){
   });
   
   setStatus('Ready', true);
-
-  // Expose the slot element to allow toggling scrolling globally on existing slots
   return { 
       runAutomation, 
       setStatus,
       element: el 
   }; 
 }
-
 // Function to redraw slots based on the selected number
 function renderSlots(count) {
     gridContainer.innerHTML = ''; 
     currentSlots = [];
-
-    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    const maxCount = MAX_SLOTS;
     if (count < 1 || count > maxCount) {
         count = Math.min(Math.max(count, 1), maxCount);
         numSlotsInput.value = count;
     }
     
     globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
-
     for(let i=0; i < count; i++){
-      const slot = createSlot(i, premiumProxies[i]);
+      const slot = createSlot(i, slotConfigs[i]); // Use the simplified slotConfigs
       currentSlots.push(slot);
     }
     stopAllAutomation();
 }
-
 // Global Stop Function
 function stopAllAutomation() {
     repeatIntervals.forEach(intervalId => clearInterval(intervalId));
@@ -401,14 +353,12 @@ function stopAllAutomation() {
     
     currentSlots.forEach(s => {
         s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
+        s.element.classList.remove('scrolling'); 
     });
     
-    // Uncheck repeat mode if stopping
     repeatModeCheckbox.checked = false;
 }
-
-// Global Start/Run Logic - UPDATED FOR RANDOMIZED RELOAD TIME
+// Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -425,50 +375,33 @@ globalGoBtn.addEventListener('click', ()=>{
     globalStopBtn.style.display = 'block';
       
     currentSlots.forEach((s) => {
-        // CRITICAL CHANGE: Get a RANDOM delay (45s to 120s)
         const randomDelay = getRandomDelay(); 
-        const delayInSeconds = (randomDelay / 1000);
-
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds.toFixed(2)}s cycle)...`, true);
+        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
         
         const intervalId = setInterval(() => {
             s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${delayInSeconds.toFixed(2)}s...`, true);
-        }, randomDelay); // Use the randomized delay here
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, randomDelay); 
         
         repeatIntervals.push(intervalId);
     });
   }
 });
-
 // Event listeners
 numSlotsInput.addEventListener('change', (e) => {
     let count = parseInt(e.target.value);
     if (isNaN(count)) count = 1; 
     renderSlots(count);
 });
-
 // Event listener for auto-scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
-
 globalStopBtn.addEventListener('click', stopAllAutomation);
 repeatModeCheckbox.addEventListener('change', () => {
-    // Stop automation if repeat mode is unchecked while running
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
-
-// Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
-</script>
-</body>
-</html>
+        stopAll
