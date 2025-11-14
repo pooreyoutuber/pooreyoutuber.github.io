@@ -127,6 +127,11 @@
             <label for="autoScrollMode">
                 Enable **Auto Scroll** (Simulated & Staggered)
             </label>
+
+            <input type="checkbox" id="maxEarningMode" style="margin-left: 15px;" />
+            <label for="maxEarningMode" style="font-weight: bold; color: var(--danger);">
+                HIGH-RISK **Max Earning Mode** (Fake Clicks)
+            </label>
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
@@ -135,13 +140,13 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
+                <strong>Monetag/AdSense:</strong> **Max Earning Mode** चालू करने पर यह टूल नकली क्लिक्स (fake clicks) और हाई-CPC कीवर्ड्स का इस्तेमाल करेगा। AdSense के लिए यह **बहुत ख़तरनाक** है, लेकिन Monetag पर कमाई दिखाने में मदद कर सकता है।
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request every **30 seconds**.
+                <strong>Action:</strong> Check the **'Active User Mode'** and **'Max Earning Mode'** and click 'Load & Run All' for the best earning chance.
             </li>
             <li>
-                **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
+                **CRITICAL:** The script now uses your **10 authenticated proxies**. Make sure the URL you enter has ads from Monetag या AdSense.
             </li>
         </ul>
     </div>
@@ -153,9 +158,10 @@
 
 <script>
 /* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION
+   PROXY DATA and CONFIGURATION (UPDATED WITH USER'S PROXIES)
    ---------------------------------------------------------------------- */
 
+// USER'S CREDENTIALS
 const COMMON_USER = "bqctypvz";
 const COMMON_PASS = "399xb3kxqv6i";
 const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
@@ -174,36 +180,37 @@ function getRandomNames(count) {
 }
 
 // =========================================================================
-// !!! CRITICAL STEP: REPLACE THIS WITH 20 UNIQUE PROXIES !!!
+// !!! CRITICAL STEP: 10 UNIQUE PROXIES + 10 PLACEHOLDERS ADDED !!!
 // =========================================================================
 const DUMMY_PROXIES = [
+  // --- USER'S 10 UNIQUE PROXIES ---
   { ip: "142.111.48.253", port: "7030", country: "US" },
   { ip: "31.59.20.176", port: "6754", country: "DE" },
-  { ip: "38.170.176.177", port: "5572", country: "CA" },
+  { ip: "23.95.150.145", port: "6114", country: "CA" },
   { ip: "198.23.239.134", port: "6540", country: "US" },
   { ip: "45.38.107.97", port: "6014", country: "US" },
   { ip: "107.172.163.27", port: "6543", country: "CA" },
+  { ip: "198.105.121.200", port: "6462", country: "US" }, // Added from file
   { ip: "64.137.96.74", port: "6641", country: "US" },
   { ip: "216.10.27.159", port: "6837", country: "AU" },
   { ip: "142.111.67.146", port: "5611", country: "US" },
-  { ip: "142.147.128.93", port: "6593", country: "CA" },
-  
-  // DUPLICATES BELOW: REPLACE THESE 10 ENTRIES WITH 10 MORE UNIQUE IPs
-  { ip: "142.111.48.254", port: "7031", country: "US" }, 
-  { ip: "31.59.20.177", port: "6755", country: "DE" },  
-  { ip: "38.170.176.178", port: "5573", country: "CA" }, 
-  { ip: "198.23.239.135", port: "6541", country: "US" }, 
-  { ip: "45.38.107.98", port: "6015", country: "US" }, 
-  { ip: "107.172.163.28", port: "6544", country: "CA" }, 
-  { ip: "64.137.96.75", port: "6642", country: "US" }, 
-  { ip: "216.10.27.160", port: "6838", country: "AU" }, 
-  { ip: "142.111.67.147", port: "5612", country: "US" }, 
-  { ip: "142.147.128.94", port: "6594", country: "CA" }, 
+
+  // --- 10 MORE UNIQUE PLACEHOLDERS (REPLACE THESE) ---
+  { ip: "142.147.128.90", port: "4050", country: "PLACEHOLDER" }, 
+  { ip: "142.147.128.91", port: "4051", country: "PLACEHOLDER" },
+  { ip: "142.147.128.92", port: "4052", country: "PLACEHOLDER" },
+  { ip: "142.147.128.93", port: "4053", country: "PLACEHOLDER" },
+  { ip: "142.147.128.94", port: "4054", country: "PLACEHOLDER" },
+  { ip: "142.147.128.95", port: "4055", country: "PLACEHOLDER" },
+  { ip: "142.147.128.96", port: "4056", country: "PLACEHOLDER" },
+  { ip: "142.147.128.97", port: "4057", country: "PLACEHOLDER" },
+  { ip: "142.147.128.98", port: "4058", country: "PLACEHOLDER" },
+  { ip: "142.147.128.99", port: "4059", country: "PLACEHOLDER" },
 ];
 // =========================================================================
 
 const MAX_SLOTS = 20; // Maximum slots set to 20
-const PROXY_ENDPOINT = 'proxy_loader.php'; 
+const PROXY_ENDPOINT = '/proxy-request'; // Fixed endpoint for Node.js API
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
@@ -214,6 +221,9 @@ const minTimeInput = document.getElementById('minTime');
 const maxTimeInput = document.getElementById('maxTime'); 
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
+
+// NEW ELEMENT
+const maxEarningModeCheckbox = document.getElementById('maxEarningMode');
 
 let currentSlots = [];
 let repeatIntervals = []; 
@@ -230,7 +240,10 @@ const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
 // Function to return fixed 30s delay for repeat mode
 function getRandomDelay() {
     // Fixed cycle time: 30 seconds (30000 milliseconds)
-    return 30000;
+    // We use a small randomness to avoid perfect timing.
+    const min = 29000;
+    const max = 31000;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 // Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
@@ -279,12 +292,15 @@ function createSlot(index, proxy){
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      // Sending the Unique ID (uid) to the PHP script
+      const isMaxEarningEnabled = maxEarningModeCheckbox.checked ? '1' : '0';
+
+      // Sending the Unique ID (uid) and the clicker flag to the API
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+          `uid=${proxy.uniqueId}&` +
+          `clicker=${isMaxEarningEnabled}`; // 0 or 1 based on checkbox
   }
 
   // --- Core Automation Function ---
@@ -293,7 +309,6 @@ function createSlot(index, proxy){
     
     // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
-    setStatus('Loading Content...', false);
     
     // Apply/Remove scrolling class
     if (autoScrollModeCheckbox.checked) {
@@ -303,17 +318,20 @@ function createSlot(index, proxy){
     }
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
+    const earningModeText = maxEarningModeCheckbox.checked ? 'MAX EARNINGS' : 'SAFE IMPRESSION';
 
-    // Changed status message to reflect fixed 30s
-    setStatus('Sending Unique Proxy View (30s Session)...', false);
+    setStatus(`Sending ${earningModeText} View...`, false);
     statusDot.style.animation = 'pulse-ping 0.5s infinite';
 
     try {
-        // Fetch request is sent. PHP script runs in background for 30s.
-        await fetch(proxiedUrl, { mode: 'no-cors' });
+        const response = await fetch(proxiedUrl);
+        const data = await response.json();
         
-        // Response is quick due to Connection: close header in PHP
-        setStatus('View Sent (BG Session Active)', true);
+        if (response.ok && data.status === 'OK') {
+            setStatus(`View Sent. Status: ${maxEarningModeCheckbox.checked ? 'CLICK ATTEMPTED' : 'IMPRESSION'}`, true);
+        } else {
+            setStatus(`Failed: ${data.error || response.statusText}`, false);
+        }
         
     } catch (e) {
         setStatus('Failed (Network/Proxy Error)', false);
@@ -400,7 +418,7 @@ globalGoBtn.addEventListener('click', ()=>{
     currentSlots.forEach((s) => {
         // CRITICAL CHANGE: Get a fixed 30s delay
         const fixedDelay = getRandomDelay(); 
-        const delayInSeconds = (fixedDelay / 1000);
+        const delayInSeconds = (fixedDelay / 1000).toFixed(1);
 
         s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
         
