@@ -1,465 +1,640 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="hi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-<style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
-  :root{
-    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
-    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
-    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
-    --primary-blue: #0ea5e9;--danger: #dc2626;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
-  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
-  header { margin-bottom: 20px; text-align: center; }
-  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
-  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
-  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-  @media (min-width: 600px) { .input-group { flex-direction: row; } }
-  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
-  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
-  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
-  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
-  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
-  .btn:hover { background: #0c8cd8; }
-  .btn.stop { background: var(--danger); }
-  .btn.stop:hover { background: #b91c1c; }
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
-  .repeat-control input[type="checkbox"] { transform: scale(1.2); }
-  .repeat-control label { flex-shrink: 0; }
-  .repeat-control span { color: var(--accent); font-weight: 600; }
-  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } 
-  .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-  .info-box strong { font-weight: 700; color: var(--accent); }
-  .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
-  .info-box ul li { margin-bottom: 6px; }
-  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
-  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
-  @media (min-width: 1500px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
-  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 380px; }
-  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
-  .slot-ip-display { font-size: 11px; color: var(--muted); font-weight: 500; } 
-  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-  iframe { 
-    width: 100%; height: 100%; border: 0; display: block; background: white; 
-    transform: scale(0.4); 
-    transform-origin: 0 0;
-    width: calc(100% / 0.4);
-    height: calc(100% / 0.4);
-    opacity: 1;
-  }
-  
-  /* --- CSS for Auto-Scrolling (Modified) --- */
-  @keyframes scroll {
-    0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, -200%) scale(0.4); } 
-    100% { transform: translate(0, 0) scale(0.4); } 
-  }
-
-  .slot.scrolling iframe {
-    transform: translate(0, 0) scale(0.4); 
-    /* 3.5s duration for approx 8.5 cycles in 30s */
-    animation: scroll 3.5s ease-in-out infinite;
-    /* animation-delay is set via JavaScript for staggering */
-  }
-  /* ---------------------------------- */
-  
-  .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
-  .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
-  .action-btn.view { background: var(--success); color: white; }
-  .action-btn.view:hover { background: #047857; }
-  .action-btn.new-tab { 
-      background: #f90;
-      color: white; 
-      flex-grow: 1;
-      font-size: 12px;
-      padding: 8px 10px;
-  }
-  .action-btn.new-tab:hover { background: #e80; }
-  .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
-  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
-  .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
-  @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
-</style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <h1>Website Booster Prime</h1>
-      <div class="tagline">Global Traffic Simulation System.</div>
-    </header>
-
-    <div class="controls">
-        <div class="input-group">
-            
-            <div class="slot-selector">
-                Slots:
-                <input id="numSlots" type="number" value="10" min="1" max="20" />
-            </div>
-
-            <div class="url-input-wrap">
-                <input id="globalUrl" type="url" placeholder="Paste Target URL (e.g., https://yourwebsite.com)" />
-            </div>
-            <button id="globalGo" class="btn">Load & Run All</button>
-        </div>
-        
-        <div class="repeat-control">
-            <input type="checkbox" id="repeatMode" />
-            <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all 
-                <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
-                <label for="maxTime">Max:</label>
-                <input id="maxTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
-                <span>seconds cycle</span> for better GA tracking.
-            </label>
-            
-            <input type="checkbox" id="autoScrollMode" />
-            <label for="autoScrollMode">
-                Enable **Auto Scroll** (Simulated & Staggered)
-            </label>
-
-            <input type="checkbox" id="maxEarningMode" style="margin-left: 15px;" />
-            <label for="maxEarningMode" style="font-weight: bold; color: var(--danger);">
-                HIGH-RISK **Max Earning Mode** (Fake Clicks)
-            </label>
-            <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
-        </div>
-    </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Traffic Simulator Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <div class="info-box">
-        <strong>Tool Usage Instructions:</strong>
-        <ul>
-            <li>
-                <strong>Monetag/AdSense:</strong> **Max Earning Mode** चालू करने पर यह टूल नकली क्लिक्स (fake clicks) और हाई-CPC कीवर्ड्स का इस्तेमाल करेगा। AdSense के लिए यह **बहुत ख़तरनाक** है, लेकिन Monetag पर कमाई दिखाने में मदद कर सकता है।
-            </li>
-            <li>
-                <strong>Action:</strong> Check the **'Active User Mode'** and **'Max Earning Mode'** and click 'Load & Run All' for the best earning chance.
-            </li>
-            <li>
-                **CRITICAL:** The script now uses your **10 authenticated proxies**. Make sure the URL you enter has ads from Monetag या AdSense.
-            </li>
-        </ul>
-    </div>
-
-    <div class="grid-container" id="gridContainer">
-        </div>
-    
-  </div>
-
-<script>
-/* ----------------------------------------------------------------------
-   PROXY DATA and CONFIGURATION (UPDATED WITH USER'S PROXIES)
-   ---------------------------------------------------------------------- */
-
-// USER'S CREDENTIALS
-const COMMON_USER = "bqctypvz";
-const COMMON_PASS = "399xb3kxqv6i";
-const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
-
-const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
-
-// Function to generate a simple unique ID (used for GA4 cookie)
-function generateUniqueId() {
-    // Generates a random 10-digit number string
-    return Math.floor(Math.random() * 9000000000) + 1000000000;
-}
-
-function getRandomNames(count) {
-    const shuffled = [...allNames].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-}
-
-// =========================================================================
-// !!! CRITICAL STEP: 10 UNIQUE PROXIES + 10 PLACEHOLDERS ADDED !!!
-// =========================================================================
-const DUMMY_PROXIES = [
-  // --- USER'S 10 UNIQUE PROXIES ---
-  { ip: "142.111.48.253", port: "7030", country: "US" },
-  { ip: "31.59.20.176", port: "6754", country: "DE" },
-  { ip: "23.95.150.145", port: "6114", country: "CA" },
-  { ip: "198.23.239.134", port: "6540", country: "US" },
-  { ip: "45.38.107.97", port: "6014", country: "US" },
-  { ip: "107.172.163.27", port: "6543", country: "CA" },
-  { ip: "198.105.121.200", port: "6462", country: "US" }, // Added from file
-  { ip: "64.137.96.74", port: "6641", country: "US" },
-  { ip: "216.10.27.159", port: "6837", country: "AU" },
-  { ip: "142.111.67.146", port: "5611", country: "US" },
-
-  // --- 10 MORE UNIQUE PLACEHOLDERS (REPLACE THESE) ---
-  { ip: "142.147.128.90", port: "4050", country: "PLACEHOLDER" }, 
-  { ip: "142.147.128.91", port: "4051", country: "PLACEHOLDER" },
-  { ip: "142.147.128.92", port: "4052", country: "PLACEHOLDER" },
-  { ip: "142.147.128.93", port: "4053", country: "PLACEHOLDER" },
-  { ip: "142.147.128.94", port: "4054", country: "PLACEHOLDER" },
-  { ip: "142.147.128.95", port: "4055", country: "PLACEHOLDER" },
-  { ip: "142.147.128.96", port: "4056", country: "PLACEHOLDER" },
-  { ip: "142.147.128.97", port: "4057", country: "PLACEHOLDER" },
-  { ip: "142.147.128.98", port: "4058", country: "PLACEHOLDER" },
-  { ip: "142.147.128.99", port: "4059", country: "PLACEHOLDER" },
-];
-// =========================================================================
-
-const MAX_SLOTS = 20; // Maximum slots set to 20
-const PROXY_ENDPOINT = '/proxy-request'; // Fixed endpoint for Node.js API
-
-const gridContainer = document.getElementById('gridContainer');
-const globalUrlInput = document.getElementById('globalUrl');
-const numSlotsInput = document.getElementById('numSlots');
-const globalGoBtn = document.getElementById('globalGo');
-const repeatModeCheckbox = document.getElementById('repeatMode');
-const minTimeInput = document.getElementById('minTime'); 
-const maxTimeInput = document.getElementById('maxTime'); 
-const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
-const globalStopBtn = document.getElementById('globalStop');
-
-// NEW ELEMENT
-const maxEarningModeCheckbox = document.getElementById('maxEarningMode');
-
-let currentSlots = [];
-let repeatIntervals = []; 
-let randomNamesList = getRandomNames(MAX_SLOTS); 
-
-// Map proxies with fixed unique IDs
-const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
-    ...p,
-    auth: COMMON_AUTH,
-    name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie Fix
-}));
-
-// Function to return fixed 30s delay for repeat mode
-function getRandomDelay() {
-    // Fixed cycle time: 30 seconds (30000 milliseconds)
-    // We use a small randomness to avoid perfect timing.
-    const min = 29000;
-    const max = 31000;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-// Function to create a single slot element (MODIFIED FOR STAGGERED SCROLLING)
-function createSlot(index, proxy){
-  const el = document.createElement('div');
-  el.className = 'slot';
-  
-  el.innerHTML = `
-    <div class="slot-top">
-      <div class="slot-title">SLOT ${index+1}: ${proxy.name} (${proxy.country})</div>
-      <div class="slot-ip-display">Proxy IP: ${proxy.ip}:${proxy.port}</div>
-    </div>
-    
-    <div class="iframe-wrap">
-      <iframe id="iframe-${index}" src="about:blank" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-    </div>
-    
-    <div class="slot-footer">
-      <button id="open-${index}" class="action-btn new-tab">Full View (New Tab)</button>
-      <button id="run-${index}" class="action-btn view">Start Proxy View</button>
-      <div class="status" id="status-wrap-${index}">
-        <span class="status-dot" id="dot-${index}"></span>
-        <span id="status-${index}">Ready</span>
-      </div>
-    </div>
-  `;
-  
-  gridContainer.appendChild(el);
-
-  const iframe = el.querySelector(`#iframe-${index}`);
-  const openBtn = el.querySelector(`#open-${index}`);
-  const runBtn = el.querySelector(`#run-${index}`);
-  const statusSpan = el.querySelector(`#status-${index}`);
-  const statusDot = el.querySelector(`#dot-${index}`);
-  
-  // NEW: Apply a random, negative animation delay for staggered start
-  const scrollDuration = 3.5; // Matches the CSS animation duration
-  const randomScrollDelay = Math.random() * scrollDuration; 
-  // Set negative delay to start the animation at a random point in its cycle.
-  iframe.style.animationDelay = `-${randomScrollDelay.toFixed(2)}s`; 
-
-
-  function setStatus(text, isActive = false){
-    statusSpan.textContent = text;
-    statusDot.classList.toggle('active', isActive);
-  }
-  
-  function getProxiedUrl(originalUrl, proxy){
-      const isMaxEarningEnabled = maxEarningModeCheckbox.checked ? '1' : '0';
-
-      // Sending the Unique ID (uid) and the clicker flag to the API
-      return `${PROXY_ENDPOINT}?` + 
-          `target=${encodeURIComponent(originalUrl)}&` +
-          `ip=${proxy.ip}&port=${proxy.port}&` +
-          `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}&` +
-          `clicker=${isMaxEarningEnabled}`; // 0 or 1 based on checkbox
-  }
-
-  // --- Core Automation Function ---
-  async function runAutomation(originalUrl){
-    if(!originalUrl) return;
-    
-    // 1. iFrame Load (Visible preview)
-    iframe.src = originalUrl;
-    
-    // Apply/Remove scrolling class
-    if (autoScrollModeCheckbox.checked) {
-        el.classList.add('scrolling');
-    } else {
-        el.classList.remove('scrolling');
-    }
-    
-    const proxiedUrl = getProxiedUrl(originalUrl, proxy);
-    const earningModeText = maxEarningModeCheckbox.checked ? 'MAX EARNINGS' : 'SAFE IMPRESSION';
-
-    setStatus(`Sending ${earningModeText} View...`, false);
-    statusDot.style.animation = 'pulse-ping 0.5s infinite';
-
-    try {
-        const response = await fetch(proxiedUrl);
-        const data = await response.json();
-        
-        if (response.ok && data.status === 'OK') {
-            setStatus(`View Sent. Status: ${maxEarningModeCheckbox.checked ? 'CLICK ATTEMPTED' : 'IMPRESSION'}`, true);
-        } else {
-            setStatus(`Failed: ${data.error || response.statusText}`, false);
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         
-    } catch (e) {
-        setStatus('Failed (Network/Proxy Error)', false);
-    }
-    
-    statusDot.style.animation = 'none';
-  }
-  
-  // Event Handlers
-  openBtn.addEventListener('click', ()=> {
-    const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    window.open(url, '_blank'); 
-  });
-
-  runBtn.addEventListener('click', ()=> {
-    const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
-    runAutomation(url); 
-  });
-  
-  setStatus('Ready', true);
-
-  // Expose the slot element to allow toggling scrolling globally on existing slots
-  return { 
-      runAutomation, 
-      setStatus,
-      element: el 
-  }; 
-}
-
-// Function to redraw slots based on the selected number
-function renderSlots(count) {
-    gridContainer.innerHTML = ''; 
-    currentSlots = [];
-
-    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
-    if (count < 1 || count > maxCount) {
-        count = Math.min(Math.max(count, 1), maxCount);
-        numSlotsInput.value = count;
-    }
-    
-    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
-
-    for(let i=0; i < count; i++){
-      const slot = createSlot(i, premiumProxies[i]);
-      currentSlots.push(slot);
-    }
-    stopAllAutomation();
-}
-
-// Global Stop Function
-function stopAllAutomation() {
-    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
-    repeatIntervals = [];
-    globalGoBtn.style.display = 'block';
-    globalStopBtn.style.display = 'none';
-    
-    currentSlots.forEach(s => {
-        s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
-    });
-    
-    // Uncheck repeat mode if stopping
-    repeatModeCheckbox.checked = false;
-}
-
-// Global Start/Run Logic - UPDATED FOR FIXED RELOAD TIME
-globalGoBtn.addEventListener('click', ()=>{
-  const url = globalUrlInput.value.trim();
-  if(!url){ 
-      alert('Please paste a valid URL into the global input field.'); 
-      return; 
-  }
-  
-  // Run once immediately
-  currentSlots.forEach(s => s.runAutomation(url));
-  
-  // If repeat mode is checked, start intervals
-  if (repeatModeCheckbox.checked) {
-    globalGoBtn.style.display = 'none';
-    globalStopBtn.style.display = 'block';
-      
-    currentSlots.forEach((s) => {
-        // CRITICAL CHANGE: Get a fixed 30s delay
-        const fixedDelay = getRandomDelay(); 
-        const delayInSeconds = (fixedDelay / 1000).toFixed(1);
-
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        const intervalId = setInterval(() => {
-            s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
-        }, fixedDelay); // Use the fixed delay here
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
         
-        repeatIntervals.push(intervalId);
-    });
-  }
-});
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        
+        .control-panel {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        input[type="url"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            min-width: 300px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .behavior-controls {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .control-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label {
+            font-weight: 500;
+            color: var(--text);
+        }
+        
+        input[type="range"] {
+            width: 100%;
+        }
+        
+        .range-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        .stats-panel {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .slots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .slot-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .slot-title {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .slot-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .slot-iframe {
+            width: 100%;
+            height: 200px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #f1f5f9;
+        }
+        
+        .slot-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+        
+        .status-dot.active {
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .slot-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .log-panel {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-top: 25px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        
+        .log-time {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        
+        .vpn-notice {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Smart Traffic Simulator Pro</h1>
+            <p class="subtitle">Advanced Human-like Traffic Simulation for Better Ad Revenue</p>
+        </header>
+        
+        <div class="vpn-notice">
+            <strong>⚠️ VPN Connected:</strong> Make sure your VPN is active for different IP addresses
+        </div>
+        
+        <div class="control-panel">
+            <div class="input-group">
+                <input type="url" id="targetUrl" placeholder="https://your-website.com" />
+                <button class="btn btn-primary" id="startAll">Start All Sessions</button>
+                <button class="btn btn-danger" id="stopAll" style="display: none;">Stop All</button>
+            </div>
+            
+            <div class="behavior-controls">
+                <h3>🎯 Smart Behavior Settings</h3>
+                
+                <div class="control-row">
+                    <div class="control-item">
+                        <label>Number of Sessions: <span id="sessionCount">5</span></label>
+                        <input type="range" id="sessionSlider" min="1" max="10" value="5">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>Visit Duration: <span id="durationValue">60-180</span> seconds</label>
+                        <input type="range" id="durationSlider" min="30" max="300" value="120">
+                        <div class="range-values">
+                            <span>30s</span>
+                            <span>300s</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                    <div class="control-item">
+                        <input type="checkbox" id="randomClicks" checked>
+                        <label for="randomClicks">Simulate Random Clicks</label>
+                    </div>
+                    
+                    <div class="control-item">
+                        <input type="checkbox" id="mouseMovement" checked>
+                        <label for="mouseMovement">Simulate Mouse Movements</label>
+                    </div>
+                    
+                    <div class="control-item">
+                        <input type="checkbox" id="scrollBehavior" checked>
+                        <label for="scrollBehavior">Natural Scrolling</label>
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                    <div class="control-item">
+                        <input type="checkbox" id="multiplePages" checked>
+                        <label for="multiplePages">Visit Multiple Pages</label>
+                    </div>
+                    
+                    <div class="control-item">
+                        <input type="checkbox" id="randomTimes" checked>
+                        <label for="randomTimes">Random Visit Times</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="activeSessions">0</div>
+                    <div class="stat-label">Active Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalVisits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgDuration">0s</div>
+                    <div class="stat-label">Avg. Duration</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="successRate">100%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slots-container" id="slotsContainer">
+            <!-- Slots will be generated here -->
+        </div>
+        
+        <div class="log-panel">
+            <h3>📋 Activity Log</h3>
+            <div id="activityLog">
+                <div class="log-entry">
+                    <span class="log-time">[12:00:00]</span> System ready. Configure settings and start sessions.
+                </div>
+            </div>
+        </div>
+    </div>
 
-// Event listeners
-numSlotsInput.addEventListener('change', (e) => {
-    let count = parseInt(e.target.value);
-    if (isNaN(count)) count = 1; 
-    renderSlots(count);
-});
-
-// Event listener for auto-scroll checkbox
-autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
-    const isScrolling = e.target.checked;
-    currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
-        s.element.classList.toggle('scrolling', isScrolling);
-    });
-});
-
-globalStopBtn.addEventListener('click', stopAllAutomation);
-repeatModeCheckbox.addEventListener('change', () => {
-    // Stop automation if repeat mode is unchecked while running
-    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
-        stopAllAutomation();
-    }
-});
-
-
-// Initial render when the page loads
-renderSlots(parseInt(numSlotsInput.value));
-</script>
+    <script>
+        class SmartTrafficSimulator {
+            constructor() {
+                this.sessions = [];
+                this.isRunning = false;
+                this.totalVisits = 0;
+                this.config = {
+                    sessionCount: 5,
+                    minDuration: 60,
+                    maxDuration: 180,
+                    randomClicks: true,
+                    mouseMovement: true,
+                    scrollBehavior: true,
+                    multiplePages: true,
+                    randomTimes: true
+                };
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.generateSlots();
+            }
+            
+            initializeElements() {
+                this.targetUrl = document.getElementById('targetUrl');
+                this.startAllBtn = document.getElementById('startAll');
+                this.stopAllBtn = document.getElementById('stopAll');
+                this.slotsContainer = document.getElementById('slotsContainer');
+                this.sessionSlider = document.getElementById('sessionSlider');
+                this.sessionCount = document.getElementById('sessionCount');
+                this.durationSlider = document.getElementById('durationSlider');
+                this.durationValue = document.getElementById('durationValue');
+                this.activeSessions = document.getElementById('activeSessions');
+                this.totalVisitsElem = document.getElementById('totalVisits');
+                this.avgDuration = document.getElementById('avgDuration');
+                this.successRate = document.getElementById('successRate');
+                this.activityLog = document.getElementById('activityLog');
+            }
+            
+            bindEvents() {
+                this.startAllBtn.addEventListener('click', () => this.startAllSessions());
+                this.stopAllBtn.addEventListener('click', () => this.stopAllSessions());
+                
+                this.sessionSlider.addEventListener('input', (e) => {
+                    this.config.sessionCount = parseInt(e.target.value);
+                    this.sessionCount.textContent = this.config.sessionCount;
+                    this.generateSlots();
+                });
+                
+                this.durationSlider.addEventListener('input', (e) => {
+                    const baseDuration = parseInt(e.target.value);
+                    this.config.minDuration = Math.max(30, baseDuration - 60);
+                    this.config.maxDuration = baseDuration + 60;
+                    this.durationValue.textContent = `${this.config.minDuration}-${this.config.maxDuration}`;
+                });
+                
+                // Bind behavior checkboxes
+                ['randomClicks', 'mouseMovement', 'scrollBehavior', 'multiplePages', 'randomTimes'].forEach(setting => {
+                    document.getElementById(setting).addEventListener('change', (e) => {
+                        this.config[setting] = e.target.checked;
+                    });
+                });
+            }
+            
+            generateSlots() {
+                this.slotsContainer.innerHTML = '';
+                this.sessions = [];
+                
+                for (let i = 0; i < this.config.sessionCount; i++) {
+                    const slot = this.createSlot(i);
+                    this.slotsContainer.appendChild(slot.element);
+                    this.sessions.push(slot);
+                }
+            }
+            
+            createSlot(index) {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'slot-card';
+                
+                const userAgent = this.getRandomUserAgent();
+                const location = this.getRandomLocation();
+                
+                slotElement.innerHTML = `
+                    <div class="slot-header">
+                        <div class="slot-title">Session ${index + 1}</div>
+                        <div class="slot-info">${location}</div>
+                    </div>
+                    
+                    <div class="slot-iframe" id="iframe-${index}">
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
+                            Waiting to start...
+                        </div>
+                    </div>
+                    
+                    <div class="slot-status">
+                        <div class="status-dot" id="status-dot-${index}"></div>
+                        <span id="status-text-${index}">Ready</span>
+                    </div>
+                    
+                    <div class="slot-actions">
+                        <button class="btn btn-primary btn-small" id="start-${index}">Start</button>
+                        <button class="btn btn-danger btn-small" id="stop-${index}" style="display: none;">Stop</button>
+                        <button class="btn btn-small" style="background: var(--warning); color: white;" id="view-${index}">View</button>
+                    </div>
+                `;
+                
+                const slot = {
+                    element: slotElement,
+                    index: index,
+                    isActive: false,
+                    intervalId: null,
+                    visitCount: 0,
+                    totalDuration: 0,
+                    userAgent: userAgent,
+                    location: location
+                };
+                
+                // Bind slot events
+                document.getElementById(`start-${index}`).addEventListener('click', () => this.startSession(slot));
+                document.getElementById(`stop-${index}`).addEventListener('click', () => this.stopSession(slot));
+                document.getElementById(`view-${index}`).addEventListener('click', () => this.openInNewTab(slot));
+                
+                return slot;
+            }
+            
+            getRandomUserAgent() {
+                const userAgents = [
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
+                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15'
+                ];
+                return userAgents[Math.floor(Math.random() * userAgents.length)];
+            }
+            
+            getRandomLocation() {
+                const locations = [
+                    'US - New York', 'US - California', 'UK - London', 'Canada - Toronto',
+                    'Germany - Berlin', 'France - Paris', 'Australia - Sydney', 'Japan - Tokyo',
+                    'India - Mumbai', 'Brazil - Sao Paulo'
+                ];
+                return locations[Math.floor(Math.random() * locations.length)];
+            }
+            
+            getRandomDuration() {
+                return Math.floor(Math.random() * (this.config.maxDuration - this.config.minDuration + 1)) + this.config.minDuration;
+            }
+            
+            logActivity(message) {
+                const now = new Date();
+                const timeString = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `<span class="log-time">${timeString}</span> ${message}`;
+                
+                this.activityLog.appendChild(logEntry);
+                this.activityLog.scrollTop = this.activityLog.scrollHeight;
+            }
+            
+            startSession(slot) {
+                if (!this.targetUrl.value) {
+                    alert('Please enter a target URL first');
+                    return;
+                }
+                
+                slot.isActive = true;
+                slot.visitCount++;
+                this.totalVisits++;
+                
+                this.updateSlotUI(slot, 'active', 'Loading content...');
+                this.logActivity(`Session ${slot.index + 1} stopped`);
+                
+                const iframeContainer = document.getElementById(`iframe-${slot.index}`);
+                iframeContainer.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
+                    Session stopped
+                </div>`;
+                
+                this.updateStats();
+            }
+            
+            updateSlotUI(slot, status, text) {
+                const statusDot = document.getElementById(`status-dot-${slot.index}`);
+                const statusText = document.getElementById(`status-text-${slot.index}`);
+                const startBtn = document.getElementById(`start-${slot.index}`);
+                const stopBtn = document.getElementById(`stop-${slot.index}`);
+                
+                statusDot.className = 'status-dot';
+                if (status === 'active') {
+                    statusDot.classList.add('active');
+                }
+                
+                statusText.textContent = text;
+                startBtn.style.display = status === 'active' ? 'none' : 'block';
+                stopBtn.style.display = status === 'active' ? 'block' : 'none';
+            }
+            
+            openInNewTab(slot) {
+                if (this.targetUrl.value) {
+                    window.open(this.targetUrl.value, '_blank');
+                }
+            }
+            
+            startAllSessions() {
+                if (!this.targetUrl.value) {
+                    alert('Please enter a target URL first');
+                    return;
+                }
+                
+                this.isRunning = true;
+                this.startAllBtn.style.display = 'none';
+                this.stopAllBtn.style.display = 'block';
+                
+                this.logActivity('Starting all sessions...');
+                
+                // Stagger session starts for more natural behavior
+                this.sessions.forEach((slot, index) => {
+                    setTimeout(() => {
+                        this.startSession(slot);
+                    }, index * 5000); // 5 seconds between each session start
+                });
+            }
+            
+            stopAllSessions() {
+                this.isRunning = false;
+                this.startAllBtn.style.display = 'block';
+                this.stopAllBtn.style.display = 'none';
+                
+                this.logActivity('Stopping all sessions...');
+                
+                this.sessions.forEach(slot => {
+                    this.stopSession(slot);
+                });
+            }
+            
+            updateStats() {
+                const activeCount = this.sessions.filter(s => s.isActive).length;
+                const avgDuration = this.sessions.reduce((sum, slot) => sum + slot.totalDuration, 0) / 
+                                  Math.max(this.sessions.reduce((sum, slot) => sum + slot.visitCount, 0), 1);
+                
+                this.activeSessions.textContent = activeCount;
+                this.totalVisitsElem.textContent = this.totalVisits;
+                this.avgDuration.textContent = `${Math.round(avgDuration)}s`;
+                this.successRate.textContent = '100%';
+            }
+        }
+        
+        // Initialize the simulator when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SmartTrafficSimulator();
+        });
+    </script>
 </body>
 </html>
