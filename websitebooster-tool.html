@@ -409,4 +409,142 @@ function createSlot(index, proxy){
 // Function to redraw slots based on the selected number
 function renderSlots(count) {
     gridContainer.innerHTML = ''; 
+    currentSlots = [];
+
+    const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
+    if (count < 1 || count > maxCount) {
+        count = Math.min(Math.max(count, 1), maxCount);
+        numSlotsInput.value = count;
+    }
+
+    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+
+    for(let i=0; i < count; i++){
+      const slot = createSlot(i, premiumProxies[i]);
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+// Global Stop Function
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); 
+        // Reset iframe src to blank and stop animation completely
+        s.element.querySelector('iframe').src = 'about:blank';
+        s.element.querySelector('iframe').style.animation = 'none'; 
+        // Stop scrolling on all slots
+        s.element.classList.remove('scroll-up', 'scroll-down'); 
+    });
+    
+    // repeatModeCheckbox.checked = false; // Keep checked state if user wants to stop/restart
+}
+
+// Global Start/Run Logic
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  if(!url){ 
+      alert('Please paste a valid URL into the global input field.'); 
+      return; 
+  }
+
+  // Run once immediately
+  currentSlots.forEach(s => s.runAutomation(url));
+
+  // If repeat mode is checked, start intervals
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+
+    currentSlots.forEach((s) => {
+        // Function to set up the next interval with a random delay
+        const setupNextInterval = (slot, initialDelay) => {
+            const delayInSeconds = (initialDelay / 1000).toFixed(1);
+            slot.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+
+            const intervalId = setInterval(() => {
+                slot.runAutomation(url);
+                // After running, stop the current interval and set up the next one immediately
+                clearInterval(intervalId);
+                const nextRandomDelay = getRandomDelay();
+                setupNextInterval(slot, nextRandomDelay); // Recursively set up the next one
+            }, initialDelay); 
+            
+            // Keep track of the current active interval ID for stopping
+            const indexToReplace = repeatIntervals.findIndex(id => id === slot.currentIntervalId);
+            if (indexToReplace > -1) {
+                repeatIntervals[indexToReplace] = intervalId;
+            } else {
+                repeatIntervals.push(intervalId);
+            }
+            slot.currentIntervalId = intervalId; // Store the current ID in the slot object
+        };
+
+        s.currentIntervalId = null; // Initialize current interval tracker
+        setupNextInterval(s, getRandomDelay());
+        s.setStatus(`Starting Repeat Mode...`, true);
+        // CRITICAL CHANGE: Get a random delay from the user-defined min/max time
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, randomDelay); // Use the random delay here
+        
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
+
+// Event listeners
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+// Event listener for auto-scroll checkbox (UPDATED LOGIC)
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        const iframe = s.element.querySelector('iframe');
+        // Clear both classes first
+        s.element.classList.remove('scroll-up', 'scroll-down');
+        
+        if (isScrolling) {
+            s.element.classList.add('scrolling');
+            s.element.style.setProperty('--scroll-distance', s.scrollProps.distance);
+            iframe.style.animationDuration = s.scrollProps.duration;
+            iframe.style.animationDelay = s.scrollProps.delay;
+    
+            // Apply the pre-determined direction for the slot
+            s.element.classList.add(s.proxy.scrollDirection); 
+        }
+    });
+});
+
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    // If repeat mode is unchecked while running, stop all.
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
+</body>
+</html>
     
