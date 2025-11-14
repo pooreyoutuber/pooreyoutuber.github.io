@@ -389,4 +389,148 @@ function createSlot(index, config, proxy){
 
   openBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
-    if(!url){ alert('Please paste
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    window.open(url, '_blank'); 
+  });
+
+  runBtn.addEventListener('click', ()=> {
+    const url = globalUrlInput.value.trim();
+    if(!url){ alert('Please paste a URL into the global input field first.'); return; }
+    runAutomation(url); 
+  });
+
+  setStatus('Ready', true);
+
+  return { 
+      runAutomation, 
+      setStatus,
+      element: el 
+  }; 
+}
+
+function renderSlots(count) {
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+    const listString = proxyListTextarea.value;
+    parsedProxies = parseProxyList(listString);
+
+    const maxCount = MAX_SLOTS;
+    if (count < 1 || count > maxCount) {
+        count = Math.min(Math.max(count, 1), maxCount);
+        numSlotsInput.value = count;
+    }
+    
+    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+    if (parsedProxies.length === 0) {
+        gridContainer.innerHTML = '<div class="info-box" style="margin-top:20px; text-align:center;"><strong>Error:</strong> Please enter a valid proxy list (IP:Port:User:Pass format).</div>';
+        currentSlots = [];
+        return;
+    }
+
+    for(let i=0; i < count; i++){
+      const slot = createSlot(i, slotConfigs[i]); 
+    // Limit slots to the number of available proxies
+    const actualCount = Math.min(count, parsedProxies.length);
+    numSlotsInput.value = actualCount; 
+    
+    gridContainer.innerHTML = ''; 
+    currentSlots = [];
+    globalGoBtn.textContent = `Load & Run All (${actualCount} Slots)`;
+    
+    for(let i=0; i < actualCount; i++){
+        // Assign a unique proxy to each slot
+      const slot = createSlot(i, slotConfigs[i], parsedProxies[i]); 
+      currentSlots.push(slot);
+    }
+    stopAllAutomation();
+}
+
+function stopAllAutomation() {
+    repeatIntervals.forEach(intervalId => clearInterval(intervalId));
+    repeatIntervals = [];
+    globalGoBtn.style.display = 'block';
+    globalStopBtn.style.display = 'none';
+
+    currentSlots.forEach(s => {
+        s.setStatus('Ready (Stopped)', true);
+        s.element.classList.remove('scrolling'); 
+    });
+
+    repeatModeCheckbox.checked = false;
+}
+
+globalGoBtn.addEventListener('click', ()=>{
+  const url = globalUrlInput.value.trim();
+  const proxyDetails = proxyDetailsInput.value.trim();
+
+  if(!url){ 
+      alert('Please paste a valid Target URL.'); 
+      return; 
+  }
+  if(!parseProxyDetails(proxyDetails)){
+      alert('Please enter Proxy Details in the correct format (user:pass@ip:port).');
+      return;
+  }
+  
+  if(currentSlots.length === 0){
+    renderSlots(parseInt(numSlotsInput.value));
+    if (currentSlots.length === 0) {
+        alert('Please enter a valid proxy list and select slots.');
+        return;
+    }
+  }
+
+  currentSlots.forEach(s => s.runAutomation(url));
+
+  if (repeatModeCheckbox.checked) {
+    globalGoBtn.style.display = 'none';
+    globalStopBtn.style.display = 'block';
+
+    currentSlots.forEach((s) => {
+        const randomDelay = getRandomDelay(); 
+        const delayInSeconds = (randomDelay / 1000).toFixed(1);
+
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+
+        const intervalId = setInterval(() => {
+            s.runAutomation(url);
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
+        }, randomDelay); 
+
+        repeatIntervals.push(intervalId);
+    });
+  }
+});
+
+// Re-render slots whenever slot count or proxy list changes
+numSlotsInput.addEventListener('change', (e) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count)) count = 1; 
+    renderSlots(count);
+});
+
+proxyListTextarea.addEventListener('change', () => {
+    renderSlots(parseInt(numSlotsInput.value));
+});
+
+
+autoScrollModeCheckbox.addEventListener('change', (e) => {
+    const isScrolling = e.target.checked;
+    currentSlots.forEach(s => {
+        s.element.classList.toggle('scrolling', isScrolling);
+    });
+});
+
+globalStopBtn.addEventListener('click', stopAllAutomation);
+repeatModeCheckbox.addEventListener('change', () => {
+    if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
+        stopAllAutomation();
+    }
+});
+
+
+// Initial render when the page loads
+renderSlots(parseInt(numSlotsInput.value));
+</script>
+</body>
+</html>
