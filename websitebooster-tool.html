@@ -58,16 +58,27 @@
     opacity: 1;
   }
   
-  /* --- CSS for Auto-Scrolling (UPDATED) --- */
+  /* --- CSS for Auto-Scrolling (UPDATED FOR BETTER SIMULATION) --- */
   @keyframes scroll {
-    0% { transform: translate(0, 0) scale(0.4); } 
-    50% { transform: translate(0, -60%) scale(0.4); } /* -200% से -60% में बदला गया */
-    100% { transform: translate(0, 0) scale(0.4); } 
+    /* 0% (Start): Website top is visible */
+    0% { 
+        transform: translate(0, 0) scale(0.4); 
+    } 
+    
+    /* 50% (Midpoint): Shift iFrame up to reveal the bottom content */
+    50% { 
+        transform: translate(0, -40%) scale(0.4); /* Reduced from -200% to -40% for smoother scrolling */
+    } 
+    
+    /* 100% (End): Back to the top */
+    100% { 
+        transform: translate(0, 0) scale(0.4); 
+    } 
   }
 
   .slot.scrolling iframe {
-    /* ease-in-out को बदलकर linear किया गया और अवधि 15s की गई */
-    animation: scroll 15s linear infinite; 
+    /* Animation speed increased to 20s for better visibility */
+    animation: scroll 20s linear infinite; 
   }
   /* ---------------------------------- */
   
@@ -190,7 +201,7 @@ const DUMMY_PROXIES = [
   { ip: "142.111.48.254", port: "7031", country: "US" }, 
   { ip: "31.59.20.177", port: "6755", country: "DE" },  
   { ip: "38.170.176.178", port: "5573", country: "CA" }, 
-  { ip: "198.23.239.135", port: "6541", country: "US" }, 
+  { ip: "198.239.135", port: "6541", country: "US" }, 
   { ip: "45.38.107.98", port: "6015", country: "US" }, 
   { ip: "107.172.163.28", port: "6544", country: "CA" }, 
   { ip: "64.137.96.75", port: "6642", country: "US" }, 
