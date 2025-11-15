@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Ad Validity Tester with Random Delay</title>
+    <title>Ad Validity Simulation Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* Global Styles */
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Roboto', sans-serif; 
             margin: 0; 
             padding: 20px; 
-            background-color: #f0f2f5; 
+            background-color: #e9ebee; /* Light background */
             color: #333;
         }
 
         /* Control Panel Styles */
         .controls { 
             background-color: #ffffff; 
-            padding: 25px; 
+            padding: 30px; 
             border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); 
             margin-bottom: 25px; 
             max-width: 1320px;
             margin-left: auto;
@@ -27,34 +28,40 @@
         }
         
         h2 { 
-            color: #1877f2; 
-            border-bottom: 2px solid #e0e0e0; 
-            padding-bottom: 10px; 
+            color: #007bff; /* Primary color */
+            border-bottom: 3px solid #e0e0e0; 
+            padding-bottom: 12px; 
             margin-top: 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
         }
+        h2 span { margin-right: 10px; font-size: 24px; }
 
         /* Input & Buttons */
         label { 
             display: block; 
             margin-top: 15px; 
-            font-weight: 600; 
+            font-weight: 500; 
             font-size: 14px;
+            color: #555;
         }
         input[type="text"], input[type="number"] { 
             padding: 12px; 
             margin-top: 8px; 
             border-radius: 6px; 
-            border: 1px solid #ccd0d5; 
+            border: 1px solid #ccc; 
             width: calc(100% - 24px); 
             box-sizing: border-box;
             transition: border-color 0.3s;
         }
         input:focus {
-            border-color: #1877f2;
+            border-color: #007bff;
             outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
         }
         
-        /* New: Two-column layout for min/max time */
+        /* Two-column layout for min/max time */
         .time-inputs {
             display: flex;
             gap: 20px;
@@ -62,11 +69,24 @@
         .time-inputs > div {
             flex-grow: 1;
         }
+        .checkbox-group {
+            margin-top: 15px;
+        }
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 8px;
+            width: auto;
+        }
 
         .button-group {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 15px;
+            margin-top: 25px;
         }
 
         button { 
@@ -74,9 +94,12 @@
             border-radius: 6px; 
             border: none; 
             cursor: pointer; 
-            font-weight: 600;
+            font-weight: 700;
             flex-grow: 1;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:active {
+            transform: translateY(1px);
         }
 
         #startButton { 
@@ -93,13 +116,19 @@
 
         /* Status Message */
         .status { 
-            margin-top: 20px; 
+            margin-top: 25px; 
             padding: 15px; 
             border-radius: 6px; 
-            background-color: #e7f3ff; 
-            border: 1px solid #b3d9ff; 
+            background-color: #f8d7da; /* Alert/Info color */
+            border: 1px solid #f5c6cb; 
             font-size: 14px;
-            color: #004085;
+            color: #721c24;
+            font-weight: 500;
+        }
+        .status.running {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
         }
         
         /* Iframe Container (Simulating Desktop) */
@@ -107,82 +136,103 @@
             max-width: 1280px; 
             height: 800px; 
             margin: 0px auto; 
-            border: 1px solid #ccc;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            border: 5px solid #343a40; /* Darker bezel */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
             background-color: #fff;
             overflow: hidden;
             position: relative;
+            border-radius: 8px;
         }
         iframe { 
             width: 100%; 
             height: 100%; 
             border: none; 
         }
-        
-        .disclaimer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #6c757d;
-        }
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h2>🌐 Ad Validity Test Controller</h2>
+        <h2><span>🚀</span> Ad Validity Simulation Controller</h2>
 
-        <label for="urlInput">Enter Website URL to Test:</label>
+        <label for="urlInput">Website URL for Testing (Ensure VPN is Active):</label>
         <input type="text" id="urlInput" placeholder="e.g., https://yourcollegetestingdomain.com" value="">
 
         <div class="time-inputs">
             <div>
                 <label for="minTime">Minimum Reload Time (Seconds):</label>
-                <input type="number" id="minTime" value="25" min="20" placeholder="Min 20">
+                <input type="number" id="minTime" value="30" min="20" placeholder="Recommended: 30">
             </div>
             <div>
                 <label for="maxTime">Maximum Reload Time (Seconds):</label>
-                <input type="number" id="maxTime" value="40" min="25" placeholder="Max 40">
+                <input type="number" id="maxTime" value="50" min="35" placeholder="Recommended: 50">
             </div>
         </div>
         
-        <label>
-            <input type="checkbox" id="autoScrollCheck" checked>
-            Enable **Auto-Scrolling** (Simulates human browsing behavior)
-        </label>
-
-        <div class="button-group">
-            <button id="startButton" onclick="startTesting()">Start Testing</button>
-            <button id="stopButton" onclick="stopTesting()">Stop Testing</button>
+        <div class="checkbox-group">
+            <label>
+                <input type="checkbox" id="autoScrollCheck" checked>
+                Enable Auto-Scrolling (Simulates reading)
+            </label>
+            <label>
+                <input type="checkbox" id="mouseMovementCheck" checked>
+                Enable Mouse Movement (Simulates focus)
+            </label>
         </div>
 
-        <div class="status" id="statusMessage">Status: Enter a URL and click 'Start Testing' to begin the validity simulation.</div>
+        <div class="button-group">
+            <button id="startButton" onclick="startTesting()">Start Validity Simulation</button>
+            <button id="stopButton" onclick="stopTesting()">Stop Simulation</button>
+        </div>
+
+        <div class="status" id="statusMessage">Status: Enter URL, ensure VPN is running, and click 'Start'. Use separate VPN locations for each session.</div>
     </div>
 
     <div class="iframe-wrapper">
         <iframe id="testFrame" src="" title="Website Test Area"></iframe>
     </div>
     
-    <div class="disclaimer">
-        *Disclaimer: This tool simulates human traffic patterns (single session, random time delays, scrolling) to comply with Ad Network policies.
-    </div>
-
     <script>
-        let reloadInterval;
+        let reloadTimeout;
         let scrollInterval;
+        let mouseInterval;
         const testFrame = document.getElementById('testFrame');
         const statusMessage = document.getElementById('statusMessage');
+        const iframeWrapper = document.querySelector('.iframe-wrapper');
         let currentScroll = 0;
         let scrollDirection = 1;
 
-        // --- Helper: Get Random Number ---
         function getRandomInt(min, max) {
             min = Math.ceil(min);
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // --- 1. Auto-Scrolling Function ---
+        // --- 1. Mouse Movement Simulation ---
+        function startMouseMovement() {
+            if (mouseInterval) clearInterval(mouseInterval);
+
+            // Moves the simulated mouse every 1 second
+            mouseInterval = setInterval(() => {
+                const wrapperRect = iframeWrapper.getBoundingClientRect();
+                
+                // Randomly move the mouse position over the iframe area
+                const randomX = getRandomInt(0, wrapperRect.width);
+                const randomY = getRandomInt(0, wrapperRect.height);
+
+                // Create and dispatch a fake mouse event on the iframe wrapper
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: wrapperRect.left + randomX,
+                    clientY: wrapperRect.top + randomY,
+                    bubbles: true,
+                    cancelable: true
+                });
+                iframeWrapper.dispatchEvent(mouseEvent);
+                
+            }, 1000); // Trigger a movement every 1 second
+        }
+
+        // --- 2. Auto-Scrolling Function (Unchanged) ---
         function startAutoScroll() {
             if (scrollInterval) clearInterval(scrollInterval);
             
@@ -191,32 +241,24 @@
                 try {
                     const iframeWindow = testFrame.contentWindow;
                     const iframeDocument = iframeWindow.document;
-
                     if (iframeDocument.body) {
                         const maxScroll = iframeDocument.body.scrollHeight - iframeWindow.innerHeight;
-                        
                         if (maxScroll <= 0) return; 
 
                         if (scrollDirection === 1) {
                             currentScroll += scrollStep;
-                            if (currentScroll >= maxScroll) {
-                                scrollDirection = -1; 
-                            }
+                            if (currentScroll >= maxScroll) scrollDirection = -1; 
                         } else {
                             currentScroll -= scrollStep;
-                            if (currentScroll <= 0) {
-                                scrollDirection = 1; 
-                            }
+                            if (currentScroll <= 0) scrollDirection = 1; 
                         }
                         iframeWindow.scrollTo({ top: currentScroll, behavior: 'auto' });
                     }
-                } catch (e) {
-                    // Cross-origin error expected.
-                }
+                } catch (e) { /* Cross-origin error expected. */ }
             }, 100);
         }
 
-        // --- 2. Start Testing ---
+        // --- 3. Start Testing ---
         function startTesting() {
             stopTesting(); 
 
@@ -224,6 +266,7 @@
             const minTime = parseInt(document.getElementById('minTime').value, 10);
             const maxTime = parseInt(document.getElementById('maxTime').value, 10);
             const autoScrollEnabled = document.getElementById('autoScrollCheck').checked;
+            const mouseMovementEnabled = document.getElementById('mouseMovementCheck').checked;
 
             if (!url) {
                 alert("Please enter a valid URL.");
@@ -239,42 +282,49 @@
             }
 
             testFrame.src = url;
-            statusMessage.innerHTML = `Status: **Testing started.** URL loaded at ${new Date().toLocaleTimeString()}. Auto-refresh interval: **${minTime} to ${maxTime} seconds**.`;
+            statusMessage.classList.remove('status');
+            statusMessage.classList.add('running');
+            statusMessage.innerHTML = `Status: **TESTING ACTIVE.** URL loaded at ${new Date().toLocaleTimeString()}. Random interval: **${minTime}-${maxTime} seconds**.`;
 
             if (autoScrollEnabled) {
                 startAutoScroll();
             }
+            if (mouseMovementEnabled) {
+                startMouseMovement();
+            }
 
-            // Start the main refresh loop
             scheduleNextReload(url, minTime, maxTime);
         }
 
-        // --- 3. Recursive Reload Scheduler ---
+        // --- 4. Recursive Reload Scheduler ---
         function scheduleNextReload(url, minTime, maxTime) {
-            // Get a random time between min and max (in milliseconds)
             const randomDelaySeconds = getRandomInt(minTime, maxTime);
             const randomDelayMs = randomDelaySeconds * 1000;
 
-            // Set the interval/timeout
-            reloadInterval = setTimeout(() => {
+            reloadTimeout = setTimeout(() => {
                 testFrame.src = url; 
                 currentScroll = 0; 
                 
-                statusMessage.innerHTML = `Status: **URL Re-loaded** at ${new Date().toLocaleTimeString()}. Next refresh in ${randomDelaySeconds} seconds (Random Delay).`;
+                statusMessage.innerHTML = `Status: **TESTING ACTIVE.** URL Re-loaded at ${new Date().toLocaleTimeString()}. Next refresh in ${randomDelaySeconds} seconds (Random Delay).`;
                 
-                // Recursively call the function to schedule the next reload
+                // Restart mouse and scroll (in case they stopped)
+                if (document.getElementById('autoScrollCheck').checked) startAutoScroll();
+                if (document.getElementById('mouseMovementCheck').checked) startMouseMovement();
+
+                // Schedule the next reload
                 scheduleNextReload(url, minTime, maxTime);
 
             }, randomDelayMs);
         }
 
-
-        // --- 4. Stop Testing ---
+        // --- 5. Stop Testing ---
         function stopTesting() {
-            // Use clearTimeout since we are now using setTimeout recursively
-            clearTimeout(reloadInterval); 
+            clearTimeout(reloadTimeout); 
             clearInterval(scrollInterval);
-            statusMessage.innerHTML = "Status: **Testing stopped.**";
+            clearInterval(mouseInterval); // Stop mouse movement
+            statusMessage.classList.remove('running');
+            statusMessage.classList.add('status');
+            statusMessage.innerHTML = "Status: **Simulation STOPPED.** Please change VPN location before starting a new session.";
             testFrame.src = ""; 
         }
     </script>
