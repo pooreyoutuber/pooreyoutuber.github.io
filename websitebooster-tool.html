@@ -3,330 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ad Validity Simulation Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Multi-Slot Ad Earning Projector (College Project)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Global Styles */
         body { 
             font-family: 'Roboto', sans-serif; 
             margin: 0; 
             padding: 20px; 
-            background-color: #e9ebee; /* Light background */
+            background-color: #f4f7f9;
             color: #333;
         }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-        /* Control Panel Styles */
+        /* Header */
+        h1 {
+            color: #007bff;
+            border-bottom: 3px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        /* Control Panel */
         .controls { 
             background-color: #ffffff; 
             padding: 30px; 
             border-radius: 12px; 
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); 
-            margin-bottom: 25px; 
-            max-width: 1320px;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); 
+            margin-bottom: 30px;
         }
-        
         h2 { 
-            color: #007bff; /* Primary color */
-            border-bottom: 3px solid #e0e0e0; 
-            padding-bottom: 12px; 
+            color: #28a745;
             margin-top: 0;
             font-weight: 700;
-            display: flex;
-            align-items: center;
+            margin-bottom: 20px;
         }
-        h2 span { margin-right: 10px; font-size: 24px; }
-
-        /* Input & Buttons */
+        
+        /* Input Grid */
+        .url-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .slot {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .slot h3 {
+            margin-top: 0;
+            color: #555;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
         label { 
             display: block; 
-            margin-top: 15px; 
+            margin-top: 10px; 
             font-weight: 500; 
             font-size: 14px;
             color: #555;
         }
-        input[type="text"], input[type="number"] { 
-            padding: 12px; 
-            margin-top: 8px; 
+        input[type="text"], input[type="number"], select { 
+            padding: 10px; 
+            margin-top: 5px; 
             border-radius: 6px; 
             border: 1px solid #ccc; 
-            width: calc(100% - 24px); 
+            width: calc(100% - 20px); 
             box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-        input:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
         }
         
-        /* Two-column layout for min/max time */
-        .time-inputs {
-            display: flex;
-            gap: 20px;
+        /* Button */
+        #calculateButton {
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        .time-inputs > div {
-            flex-grow: 1;
+        #calculateButton:hover {
+            background-color: #0056b3;
         }
-        .checkbox-group {
+
+        /* Results Panel */
+        .results {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        .results h2 {
+            color: #dc3545;
+        }
+        
+        /* Results Table */
+        #resultsTable {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 15px;
         }
-        .checkbox-group label {
-            display: inline-flex;
-            align-items: center;
-            margin-right: 20px;
-            cursor: pointer;
+        #resultsTable th, #resultsTable td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
         }
-        .checkbox-group input[type="checkbox"] {
-            margin-right: 8px;
-            width: auto;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        button { 
-            padding: 12px 20px; 
-            border-radius: 6px; 
-            border: none; 
-            cursor: pointer; 
+        #resultsTable th {
+            background-color: #007bff;
+            color: white;
             font-weight: 700;
-            flex-grow: 1;
-            transition: background-color 0.3s, transform 0.1s;
         }
-        button:active {
-            transform: translateY(1px);
+        #resultsTable tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
-
-        #startButton { 
-            background-color: #28a745; 
-            color: white; 
-        }
-        #startButton:hover { background-color: #218838; }
-
-        #stopButton { 
-            background-color: #dc3545; 
-            color: white; 
-        }
-        #stopButton:hover { background-color: #c82333; }
-
-        /* Status Message */
-        .status { 
-            margin-top: 25px; 
-            padding: 15px; 
-            border-radius: 6px; 
-            background-color: #f8d7da; /* Alert/Info color */
-            border: 1px solid #f5c6cb; 
-            font-size: 14px;
-            color: #721c24;
-            font-weight: 500;
-        }
-        .status.running {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        /* Iframe Container (Simulating Desktop) */
-        .iframe-wrapper {
-            max-width: 1280px; 
-            height: 800px; 
-            margin: 0px auto; 
-            border: 5px solid #343a40; /* Darker bezel */
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            background-color: #fff;
-            overflow: hidden;
-            position: relative;
-            border-radius: 8px;
-        }
-        iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
+        .growth { color: #28a745; font-weight: 700; }
+        .decline { color: #dc3545; font-weight: 700; }
+        .total-row td {
+            font-weight: 700;
+            background-color: #e9ecef;
         }
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <h2><span>🚀</span> Ad Validity Simulation Controller</h2>
-
-        <label for="urlInput">Website URL for Testing (Ensure VPN is Active):</label>
-        <input type="text" id="urlInput" placeholder="e.g., https://yourcollegetestingdomain.com" value="">
-
-        <div class="time-inputs">
-            <div>
-                <label for="minTime">Minimum Reload Time (Seconds):</label>
-                <input type="number" id="minTime" value="30" min="20" placeholder="Recommended: 30">
-            </div>
-            <div>
-                <label for="maxTime">Maximum Reload Time (Seconds):</label>
-                <input type="number" id="maxTime" value="50" min="35" placeholder="Recommended: 50">
-            </div>
-        </div>
-        
-        <div class="checkbox-group">
-            <label>
-                <input type="checkbox" id="autoScrollCheck" checked>
-                Enable Auto-Scrolling (Simulates reading)
-            </label>
-            <label>
-                <input type="checkbox" id="mouseMovementCheck" checked>
-                Enable Mouse Movement (Simulates focus)
-            </label>
-        </div>
-
-        <div class="button-group">
-            <button id="startButton" onclick="startTesting()">Start Validity Simulation</button>
-            <button id="stopButton" onclick="stopTesting()">Stop Simulation</button>
-        </div>
-
-        <div class="status" id="statusMessage">Status: Enter URL, ensure VPN is running, and click 'Start'. Use separate VPN locations for each session.</div>
-    </div>
-
-    <div class="iframe-wrapper">
-        <iframe id="testFrame" src="" title="Website Test Area"></iframe>
-    </div>
+<div class="container">
+    <h1>📈 Multi-Slot Earning Projection Tool (Simulated Analytics)</h1>
     
-    <script>
-        let reloadTimeout;
-        let scrollInterval;
-        let mouseInterval;
-        const testFrame = document.getElementById('testFrame');
-        const statusMessage = document.getElementById('statusMessage');
-        const iframeWrapper = document.querySelector('.iframe-wrapper');
-        let currentScroll = 0;
-        let scrollDirection = 1;
+    <div class="controls">
+        <h2>इनपुट सेटिंग्स (5 दिन के अनुमान के लिए)</h2>
+        
+        <p style="font-style: italic; color: #555;">
+            यह टूल सिमुलेशन पर आधारित है। कृपया प्रत्येक स्लॉट के लिए दैनिक अनुमानित ट्रैफिक और RPM (प्रति 1000 व्यू पर कमाई) दर्ज करें।
+        </p>
 
-        function getRandomInt(min, max) {
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+        <div class="url-grid" id="slotInputs">
+            </div>
+
+        <button id="calculateButton" onclick="calculateProjections()">
+            5-दिन की कमाई का अनुमान लगाएँ
+        </button>
+    </div>
+
+    <div class="results">
+        <h2>📊 अनुमानित परिणाम (5-Day Projection Report)</h2>
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Slot #</th>
+                    <th>वेबसाइट URL</th>
+                    <th>दैनिक ट्रैफिक (Simulated)</th>
+                    <th>RPM (Simulated)</th>
+                    <th>कुल 5-दिन की कमाई (USD)</th>
+                    <th>परफॉरमेंस की तुलना</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+            <tfoot id="resultsTableFoot">
+                </tfoot>
+        </table>
+    </div>
+</div>
+
+<script>
+    const NUM_SLOTS = 5; // आप इसे 10 कर सकते हैं
+    const DAYS_PROJECTION = 5;
+
+    // --- 1. RPM वैल्यू मैपिंग (Simulated Geolocation Impact) ---
+    const RPM_MAP = {
+        'US': 8.00,  // High Value Traffic
+        'EU': 5.50,
+        'IN': 1.80,  // Lower Value Traffic
+        'GLOBAL': 4.00 
+    };
+
+    // --- 2. Input Generation Logic ---
+    function generateInputs() {
+        const slotInputsDiv = document.getElementById('slotInputs');
+        let html = '';
+        for (let i = 1; i <= NUM_SLOTS; i++) {
+            html += `
+                <div class="slot">
+                    <h3>Slot ${i}</h3>
+                    <label for="url${i}">Website URL:</label>
+                    <input type="text" id="url${i}" placeholder="https://example.com/ad-test-${i}">
+                    
+                    <label for="traffic${i}">दैनिक ट्रैफिक (Views):</label>
+                    <input type="number" id="traffic${i}" value="${(i * 1000) + 500}" min="100" placeholder="e.g., 5000">
+
+                    <label for="geo${i}">सिमुलेटेड जियोलोकेशन:</label>
+                    <select id="geo${i}">
+                        <option value="US">USA (High RPM)</option>
+                        <option value="EU">Europe</option>
+                        <option value="IN">India (Low RPM)</option>
+                        <option value="GLOBAL" selected>Global Average</option>
+                    </select>
+                </div>
+            `;
         }
+        slotInputsDiv.innerHTML = html;
+    }
 
-        // --- 1. Mouse Movement Simulation ---
-        function startMouseMovement() {
-            if (mouseInterval) clearInterval(mouseInterval);
+    // --- 3. Calculation Logic ---
+    function calculateProjections() {
+        const resultsBody = document.getElementById('resultsTable').querySelector('tbody');
+        const resultsFoot = document.getElementById('resultsTableFoot');
+        resultsBody.innerHTML = '';
+        resultsFoot.innerHTML = '';
+        
+        let totalEarning = 0;
+        
+        for (let i = 1; i <= NUM_SLOTS; i++) {
+            const url = document.getElementById(`url${i}`).value || `Slot ${i} (No URL)`;
+            const traffic = parseInt(document.getElementById(`traffic${i}`).value) || 0;
+            const geo = document.getElementById(`geo${i}`).value;
 
-            // Moves the simulated mouse every 1 second
-            mouseInterval = setInterval(() => {
-                const wrapperRect = iframeWrapper.getBoundingClientRect();
-                
-                // Randomly move the mouse position over the iframe area
-                const randomX = getRandomInt(0, wrapperRect.width);
-                const randomY = getRandomInt(0, wrapperRect.height);
+            // Get the base RPM based on selected Geo
+            const baseRpm = RPM_MAP[geo];
 
-                // Create and dispatch a fake mouse event on the iframe wrapper
-                const mouseEvent = new MouseEvent('mousemove', {
-                    clientX: wrapperRect.left + randomX,
-                    clientY: wrapperRect.top + randomY,
-                    bubbles: true,
-                    cancelable: true
-                });
-                iframeWrapper.dispatchEvent(mouseEvent);
-                
-            }, 1000); // Trigger a movement every 1 second
-        }
-
-        // --- 2. Auto-Scrolling Function (Unchanged) ---
-        function startAutoScroll() {
-            if (scrollInterval) clearInterval(scrollInterval);
+            // 5% variance for simulation realism (to show daily change)
+            const simulatedRpm = baseRpm * (1 + (Math.random() * 0.1 - 0.05)); 
             
-            scrollInterval = setInterval(() => {
-                const scrollStep = 10; 
-                try {
-                    const iframeWindow = testFrame.contentWindow;
-                    const iframeDocument = iframeWindow.document;
-                    if (iframeDocument.body) {
-                        const maxScroll = iframeDocument.body.scrollHeight - iframeWindow.innerHeight;
-                        if (maxScroll <= 0) return; 
+            // Calculation: (Total Views / 1000) * RPM
+            const dailyEarning = (traffic / 1000) * simulatedRpm;
+            const totalProjection = dailyEarning * DAYS_PROJECTION;
+            
+            totalEarning += totalProjection;
 
-                        if (scrollDirection === 1) {
-                            currentScroll += scrollStep;
-                            if (currentScroll >= maxScroll) scrollDirection = -1; 
-                        } else {
-                            currentScroll -= scrollStep;
-                            if (currentScroll <= 0) scrollDirection = 1; 
-                        }
-                        iframeWindow.scrollTo({ top: currentScroll, behavior: 'auto' });
-                    }
-                } catch (e) { /* Cross-origin error expected. */ }
-            }, 100);
+            // --- Performance Comparison Logic (For Project Display) ---
+            // Simulating a random increase/decrease compared to a theoretical baseline
+            const growthRate = (Math.random() * 0.5 - 0.25); // -25% to +25%
+            const growthText = growthRate > 0 ? 
+                `<span class="growth">🚀 ${((growthRate * 100).toFixed(1))}% Increase</span>` :
+                `<span class="decline">📉 ${((growthRate * 100).toFixed(1))}% Decline</span>`;
+            
+            // Add row to table
+            resultsBody.innerHTML += `
+                <tr>
+                    <td>${i}</td>
+                    <td>${url}</td>
+                    <td>${traffic.toLocaleString()}</td>
+                    <td>$${simulatedRpm.toFixed(2)}</td>
+                    <td>$${totalProjection.toFixed(2)}</td>
+                    <td>${growthText}</td>
+                </tr>
+            `;
         }
 
-        // --- 3. Start Testing ---
-        function startTesting() {
-            stopTesting(); 
+        // --- Total Footer Row ---
+        resultsFoot.innerHTML = `
+            <tr class="total-row">
+                <td colspan="4" style="text-align: right;">कुल 5-दिन की कमाई (सभी स्लॉट्स):</td>
+                <td>$${totalEarning.toFixed(2)}</td>
+                <td></td>
+            </tr>
+        `;
+    }
 
-            let url = document.getElementById('urlInput').value.trim();
-            const minTime = parseInt(document.getElementById('minTime').value, 10);
-            const maxTime = parseInt(document.getElementById('maxTime').value, 10);
-            const autoScrollEnabled = document.getElementById('autoScrollCheck').checked;
-            const mouseMovementEnabled = document.getElementById('mouseMovementCheck').checked;
+    // Initialize inputs when the page loads
+    window.onload = generateInputs;
+</script>
 
-            if (!url) {
-                alert("Please enter a valid URL.");
-                return;
-            }
-            if (minTime < 20 || maxTime < minTime) {
-                 alert("Minimum time must be 20 seconds or more, and Maximum time must be greater than Minimum time.");
-                return;
-            }
-
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                url = 'http://' + url;
-            }
-
-            testFrame.src = url;
-            statusMessage.classList.remove('status');
-            statusMessage.classList.add('running');
-            statusMessage.innerHTML = `Status: **TESTING ACTIVE.** URL loaded at ${new Date().toLocaleTimeString()}. Random interval: **${minTime}-${maxTime} seconds**.`;
-
-            if (autoScrollEnabled) {
-                startAutoScroll();
-            }
-            if (mouseMovementEnabled) {
-                startMouseMovement();
-            }
-
-            scheduleNextReload(url, minTime, maxTime);
-        }
-
-        // --- 4. Recursive Reload Scheduler ---
-        function scheduleNextReload(url, minTime, maxTime) {
-            const randomDelaySeconds = getRandomInt(minTime, maxTime);
-            const randomDelayMs = randomDelaySeconds * 1000;
-
-            reloadTimeout = setTimeout(() => {
-                testFrame.src = url; 
-                currentScroll = 0; 
-                
-                statusMessage.innerHTML = `Status: **TESTING ACTIVE.** URL Re-loaded at ${new Date().toLocaleTimeString()}. Next refresh in ${randomDelaySeconds} seconds (Random Delay).`;
-                
-                // Restart mouse and scroll (in case they stopped)
-                if (document.getElementById('autoScrollCheck').checked) startAutoScroll();
-                if (document.getElementById('mouseMovementCheck').checked) startMouseMovement();
-
-                // Schedule the next reload
-                scheduleNextReload(url, minTime, maxTime);
-
-            }, randomDelayMs);
-        }
-
-        // --- 5. Stop Testing ---
-        function stopTesting() {
-            clearTimeout(reloadTimeout); 
-            clearInterval(scrollInterval);
-            clearInterval(mouseInterval); // Stop mouse movement
-            statusMessage.classList.remove('running');
-            statusMessage.classList.add('status');
-            statusMessage.innerHTML = "Status: **Simulation STOPPED.** Please change VPN location before starting a new session.";
-            testFrame.src = ""; 
-        }
-    </script>
 </body>
 </html>
