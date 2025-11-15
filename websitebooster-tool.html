@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Ad Validity Tester</title>
+    <title>Professional Ad Validity Tester with Random Delay</title>
     <style>
         /* Global Styles */
         body { 
@@ -21,7 +21,7 @@
             border-radius: 12px; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
             margin-bottom: 25px; 
-            max-width: 1320px; /* To align with iframe container */
+            max-width: 1320px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -52,6 +52,15 @@
         input:focus {
             border-color: #1877f2;
             outline: none;
+        }
+        
+        /* New: Two-column layout for min/max time */
+        .time-inputs {
+            display: flex;
+            gap: 20px;
+        }
+        .time-inputs > div {
+            flex-grow: 1;
         }
 
         .button-group {
@@ -95,9 +104,9 @@
         
         /* Iframe Container (Simulating Desktop) */
         .iframe-wrapper {
-            max-width: 1280px; /* Standard Desktop Width */
-            height: 800px; /* Increased height for better view */
-            margin: 0px auto; /* Centered */
+            max-width: 1280px; 
+            height: 800px; 
+            margin: 0px auto; 
             border: 1px solid #ccc;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
             background-color: #fff;
@@ -108,7 +117,6 @@
             width: 100%; 
             height: 100%; 
             border: none; 
-            /* Optional: You can try setting iframe width/height based on target screen size */
         }
         
         .disclaimer {
@@ -127,8 +135,16 @@
         <label for="urlInput">Enter Website URL to Test:</label>
         <input type="text" id="urlInput" placeholder="e.g., https://yourcollegetestingdomain.com" value="">
 
-        <label for="autoReloadTime">Auto-Reload Interval (Seconds):</label>
-        <input type="number" id="autoReloadTime" value="30" min="20" placeholder="Minimum 20 seconds for validity">
+        <div class="time-inputs">
+            <div>
+                <label for="minTime">Minimum Reload Time (Seconds):</label>
+                <input type="number" id="minTime" value="25" min="20" placeholder="Min 20">
+            </div>
+            <div>
+                <label for="maxTime">Maximum Reload Time (Seconds):</label>
+                <input type="number" id="maxTime" value="40" min="25" placeholder="Max 40">
+            </div>
+        </div>
         
         <label>
             <input type="checkbox" id="autoScrollCheck" checked>
@@ -148,7 +164,7 @@
     </div>
     
     <div class="disclaimer">
-        *Disclaimer: This tool simulates human traffic patterns (single session, time delays, scrolling) to comply with Ad Network policies. Invalid traffic attempts (e.g., mass-loading) are strictly avoided.
+        *Disclaimer: This tool simulates human traffic patterns (single session, random time delays, scrolling) to comply with Ad Network policies.
     </div>
 
     <script>
@@ -157,26 +173,29 @@
         const testFrame = document.getElementById('testFrame');
         const statusMessage = document.getElementById('statusMessage');
         let currentScroll = 0;
-        let scrollDirection = 1; // 1 for down, -1 for up
+        let scrollDirection = 1;
+
+        // --- Helper: Get Random Number ---
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
 
         // --- 1. Auto-Scrolling Function ---
         function startAutoScroll() {
             if (scrollInterval) clearInterval(scrollInterval);
             
-            // Scroll every 100ms
             scrollInterval = setInterval(() => {
                 const scrollStep = 10; 
-
-                // Attempt to scroll inside the iframe (Note: may be blocked by cross-origin policy for external sites)
                 try {
                     const iframeWindow = testFrame.contentWindow;
                     const iframeDocument = iframeWindow.document;
 
-                    // If the document is loaded and accessible
                     if (iframeDocument.body) {
                         const maxScroll = iframeDocument.body.scrollHeight - iframeWindow.innerHeight;
                         
-                        if (maxScroll <= 0) return; // Nothing to scroll
+                        if (maxScroll <= 0) return; 
 
                         if (scrollDirection === 1) {
                             currentScroll += scrollStep;
@@ -189,13 +208,10 @@
                                 scrollDirection = 1; 
                             }
                         }
-
                         iframeWindow.scrollTo({ top: currentScroll, behavior: 'auto' });
                     }
                 } catch (e) {
-                    // This error is expected for external domains due to browser security (same-origin policy).
-                    // We keep the function running as an indicator of "attempted human activity."
-                    // console.error("Scrolling failed (likely cross-origin):", e);
+                    // Cross-origin error expected.
                 }
             }, 100);
         }
@@ -205,42 +221,58 @@
             stopTesting(); 
 
             let url = document.getElementById('urlInput').value.trim();
-            const time = parseInt(document.getElementById('autoReloadTime').value, 10);
+            const minTime = parseInt(document.getElementById('minTime').value, 10);
+            const maxTime = parseInt(document.getElementById('maxTime').value, 10);
             const autoScrollEnabled = document.getElementById('autoScrollCheck').checked;
 
             if (!url) {
                 alert("Please enter a valid URL.");
                 return;
             }
-            if (time < 20) {
-                 alert("The auto-reload time must be 20 seconds or more to ensure ad validity.");
+            if (minTime < 20 || maxTime < minTime) {
+                 alert("Minimum time must be 20 seconds or more, and Maximum time must be greater than Minimum time.");
                 return;
             }
 
-            // Ensure URL has a protocol for iframe to load correctly
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
                 url = 'http://' + url;
             }
 
             testFrame.src = url;
-            statusMessage.innerHTML = `Status: **Testing started.** URL loaded at ${new Date().toLocaleTimeString()}. Auto-refresh set for every **${time} seconds**.`;
+            statusMessage.innerHTML = `Status: **Testing started.** URL loaded at ${new Date().toLocaleTimeString()}. Auto-refresh interval: **${minTime} to ${maxTime} seconds**.`;
 
-            // Start Auto-Scrolling
             if (autoScrollEnabled) {
                 startAutoScroll();
             }
 
-            // Start Auto-Refresh Timer
-            reloadInterval = setInterval(() => {
-                testFrame.src = url; 
-                currentScroll = 0; 
-                statusMessage.innerHTML = `Status: **URL Re-loaded** at ${new Date().toLocaleTimeString()}. Next refresh in ${time} seconds.`;
-            }, time * 1000);
+            // Start the main refresh loop
+            scheduleNextReload(url, minTime, maxTime);
         }
 
-        // --- 3. Stop Testing ---
+        // --- 3. Recursive Reload Scheduler ---
+        function scheduleNextReload(url, minTime, maxTime) {
+            // Get a random time between min and max (in milliseconds)
+            const randomDelaySeconds = getRandomInt(minTime, maxTime);
+            const randomDelayMs = randomDelaySeconds * 1000;
+
+            // Set the interval/timeout
+            reloadInterval = setTimeout(() => {
+                testFrame.src = url; 
+                currentScroll = 0; 
+                
+                statusMessage.innerHTML = `Status: **URL Re-loaded** at ${new Date().toLocaleTimeString()}. Next refresh in ${randomDelaySeconds} seconds (Random Delay).`;
+                
+                // Recursively call the function to schedule the next reload
+                scheduleNextReload(url, minTime, maxTime);
+
+            }, randomDelayMs);
+        }
+
+
+        // --- 4. Stop Testing ---
         function stopTesting() {
-            clearInterval(reloadInterval);
+            // Use clearTimeout since we are now using setTimeout recursively
+            clearTimeout(reloadInterval); 
             clearInterval(scrollInterval);
             statusMessage.innerHTML = "Status: **Testing stopped.**";
             testFrame.src = ""; 
