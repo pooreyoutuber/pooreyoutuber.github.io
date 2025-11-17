@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Website Booster Prime</title>
+<title>Website Booster Prime (Node.js Backend)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* --- CSS Styles (Same as previous responsive version) --- */
+  /* --- CSS Styles (Enhanced) --- */
   :root{
     --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
     --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
     --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
     --primary-blue: #0ea5e9;--danger: #dc2626;
+    --warning: #f59e0b; 
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
@@ -28,14 +29,18 @@
   .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
   input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
   .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
-  .btn:hover { background: #0c8cd8; }
+  .btn:hover:not(:disabled) { background: #0c8cd8; }
+  .btn:disabled { background: #94a3b8; cursor: not-allowed; }
   .btn.stop { background: var(--danger); }
   .btn.stop:hover { background: #b91c1c; }
-  .repeat-control { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+
+  .repeat-control { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  .repeat-control-group { display: flex; align-items: center; gap: 5px; }
   .repeat-control input[type="checkbox"] { transform: scale(1.2); }
   .repeat-control label { flex-shrink: 0; }
   .repeat-control span { color: var(--accent); font-weight: 600; }
-  .repeat-control input[type="number"] { font-size: 14px; text-align: center; } /* Added style for new inputs */
+  .repeat-control input[type="number"] { font-size: 14px; text-align: center; width: 50px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); } 
+
   .info-box { background: var(--card); color: #111827; padding: 16px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .info-box strong { font-weight: 700; color: var(--accent); }
   .info-box ul { list-style: disc; margin: 8px 0 0 20px; padding: 0; }
@@ -69,7 +74,6 @@
     transform: translate(0, 0) scale(0.4); 
     animation: scroll 3s ease-in-out infinite;
   }
-  /* ---------------------------------- */
   
   .slot-footer { display: flex; gap: 6px; align-items: center; margin-top: 8px; justify-content: space-between; flex-wrap: wrap; }
   .action-btn { padding: 8px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; font-size: 11px; white-space: nowrap; transition: background-color 0.2s; }
@@ -84,8 +88,14 @@
   }
   .action-btn.new-tab:hover { background: #e80; }
   .status { font-size: 11px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; }
-  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s ease; }
-  .status-dot.active { background: var(--success); animation: pulse-ping 1.6s infinite; }
+  .status-dot { 
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%; 
+    background: var(--muted); transition: background 0.3s ease; 
+  }
+  .status-dot.active { 
+    background: var(--success); 
+    animation: pulse-ping 1.6s infinite; 
+  }
   @keyframes pulse-ping { 0%{ transform:scale(.85); opacity:1 } 70%{ transform:scale(1.5); opacity:0 } 100%{ transform:scale(.85); opacity:0 } }
 </style>
 </head>
@@ -111,20 +121,28 @@
         </div>
         
         <div class="repeat-control">
-            <input type="checkbox" id="repeatMode" />
-            <label for="repeatMode">
-                Enable **Active User** Mode: Repeat all 
-                <label for="minTime">Min:</label>
-                <input id="minTime" type="number" value="30" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
-                <label for="maxTime">Max:</label>
-                <input id="maxTime" type="number" value="60" min="10" max="120" style="width: 50px; padding: 5px; border-radius: 4px;" />
-                <span>seconds cycle</span> for better GA tracking.
-            </label>
+            <div class="repeat-control-group">
+                <input type="checkbox" id="repeatMode" />
+                <label for="repeatMode">
+                    Enable **Active User** Mode: Repeat cycle 
+                </label>
+            </div>
             
-            <input type="checkbox" id="autoScrollMode" />
-            <label for="autoScrollMode">
-                Enable **Auto Scroll** (Simulated)
-            </label>
+            <div class="repeat-control-group">
+                <label for="minTime">Min:</label>
+                <input id="minTime" type="number" value="30" min="10" max="120" />
+                <label for="maxTime">Max:</label>
+                <input id="maxTime" type="number" value="60" min="10" max="120" />
+                <span>seconds cycle</span>
+            </div>
+
+            <div class="repeat-control-group">
+                <input type="checkbox" id="autoScrollMode" />
+                <label for="autoScrollMode">
+                    Enable **Auto Scroll** (Simulated)
+                </label>
+            </div>
+            
             <button id="globalStop" class="action-btn new-tab stop" style="display:none;">STOP ALL</button>
         </div>
     </div>
@@ -133,13 +151,13 @@
         <strong>Tool Usage Instructions:</strong>
         <ul>
             <li>
-                <strong>Active User Fix:</strong> This tool now sends a **unique Client ID (Cookie)** with every request to trick GA4 into counting it as a new user.
+                **Architecture:** This tool uses a **Node.js/Express Backend** (hosted on Render) for stable proxy handling and session simulation.
             </li>
             <li>
-                <strong>Action:</strong> Check the **'Enable Active User Mode'** and click 'Load & Run All'. This automatically repeats the request between the Min/Max seconds (**staggered**) for the required session time.
+                **Active User Fix:** Unique Client ID is sent via the Node.js backend to trick GA4 into counting each request as a new, active user.
             </li>
             <li>
-                **CRITICAL:** For this to work, you must replace the dummy proxies in the script with **20 UNIQUE IP ADDRESSES**. Duplicate IPs will not count as unique Active Users.
+                **CRITICAL:** For this to work, you must replace the dummy proxies in the JavaScript code with **20 UNIQUE IP ADDRESSES**.
             </li>
         </ul>
     </div>
@@ -160,9 +178,7 @@ const COMMON_AUTH = `${COMMON_USER}:${COMMON_PASS}`;
 
 const allNames = ["Alex", "Sophia", "John", "Maria", "David", "Emily", "Michael", "Olivia", "James", "Ava", "Robert", "Isabella", "William", "Mia", "Joseph", "Charlotte", "Daniel", "Amelia", "Andrew", "Harper", "Logan", "Grace", "Ethan", "Chloe", "Noah", "Ella", "Mason", "Victoria", "Lucas", "Zoe"];
 
-// Function to generate a simple unique ID (used for GA4 cookie)
 function generateUniqueId() {
-    // Generates a random 10-digit number string
     return Math.floor(Math.random() * 9000000000) + 1000000000;
 }
 
@@ -200,16 +216,17 @@ const DUMMY_PROXIES = [
 ];
 // =========================================================================
 
-const MAX_SLOTS = 20; // Maximum slots set to 20
-const PROXY_ENDPOINT = 'proxy_loader.php'; 
+const MAX_SLOTS = 20; 
+// 👇 UPDATED RENDER URL for the Node.js backend
+const PROXY_ENDPOINT = 'https://pooreyoutuber-github-io-blmp.onrender.com/proxy-request'; 
 
 const gridContainer = document.getElementById('gridContainer');
 const globalUrlInput = document.getElementById('globalUrl');
 const numSlotsInput = document.getElementById('numSlots');
 const globalGoBtn = document.getElementById('globalGo');
 const repeatModeCheckbox = document.getElementById('repeatMode');
-const minTimeInput = document.getElementById('minTime'); // New
-const maxTimeInput = document.getElementById('maxTime'); // New
+const minTimeInput = document.getElementById('minTime'); 
+const maxTimeInput = document.getElementById('maxTime'); 
 const autoScrollModeCheckbox = document.getElementById('autoScrollMode'); 
 const globalStopBtn = document.getElementById('globalStop');
 
@@ -217,32 +234,29 @@ let currentSlots = [];
 let repeatIntervals = []; 
 let randomNamesList = getRandomNames(MAX_SLOTS); 
 
-// Map proxies with fixed unique IDs
 const premiumProxies = DUMMY_PROXIES.map((p, index) => ({
     ...p,
     auth: COMMON_AUTH,
     name: randomNamesList[index],
-    uniqueId: generateUniqueId() // Unique ID for GA4 Cookie
+    uniqueId: generateUniqueId() 
 }));
 
-const REPEAT_INTERVAL_MS = 30000; // 30 seconds - (Baseline)
-
-// 👇 नया फ़ंक्शन: अब मिन और मैक्स टाइम इनपुट फील्ड्स से वैल्यू लेता है
 function getRandomDelay() {
-    // Get values from new input fields (convert seconds to milliseconds)
-    const minSec = parseInt(minTimeInput.value);
-    const maxSec = parseInt(maxTimeInput.value);
+    const minSec = parseInt(minTimeInput.value) || 30;
+    const maxSec = parseInt(maxTimeInput.value) || 60;
     
-    // Ensure valid range
-    const minMs = Math.min(minSec, maxSec) * 1000;
-    const maxMs = Math.max(minSec, maxSec) * 1000;
+    const finalMinSec = Math.max(10, Math.min(minSec, maxSec));
+    const finalMaxSec = Math.max(finalMinSec, maxSec); 
     
-    // Generate random delay
+    minTimeInput.value = finalMinSec;
+    maxTimeInput.value = finalMaxSec;
+
+    const minMs = finalMinSec * 1000;
+    const maxMs = finalMaxSec * 1000;
+    
     return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
-// 👆 नया फ़ंक्शन
 
-// Function to create a single slot element
 function createSlot(index, proxy){
   const el = document.createElement('div');
   el.className = 'slot';
@@ -275,55 +289,70 @@ function createSlot(index, proxy){
   const statusSpan = el.querySelector(`#status-${index}`);
   const statusDot = el.querySelector(`#dot-${index}`);
 
-  function setStatus(text, isActive = false){
+  function updateStatus(text, state = 'ready'){
     statusSpan.textContent = text;
-    statusDot.classList.toggle('active', isActive);
+    statusDot.classList.remove('active');
+    statusDot.style.animation = 'none';
+    statusDot.style.backgroundColor = 'var(--muted)';
+
+    switch(state) {
+        case 'active':
+            statusDot.classList.add('active');
+            statusDot.style.backgroundColor = 'var(--success)';
+            break;
+        case 'loading':
+            statusDot.style.backgroundColor = 'var(--warning)'; 
+            statusDot.style.animation = 'pulse-ping 0.8s infinite';
+            break;
+        case 'failed':
+            statusDot.style.backgroundColor = 'var(--danger)';
+            break;
+        case 'ready':
+        default:
+            statusDot.style.backgroundColor = 'var(--muted)'; 
+            break;
+    }
   }
   
   function getProxiedUrl(originalUrl, proxy){
-      // Sending the Unique ID (uid) to the PHP script
+      // Sending data to Node.js backend
       return `${PROXY_ENDPOINT}?` + 
           `target=${encodeURIComponent(originalUrl)}&` +
           `ip=${proxy.ip}&port=${proxy.port}&` +
           `auth=${proxy.auth}&` + 
-          `uid=${proxy.uniqueId}`; // Unique ID for GA4 Cookie Fix
+          `uid=${proxy.uniqueId}`; 
   }
 
-  // --- Core Automation Function ---
   async function runAutomation(originalUrl){
     if(!originalUrl) return;
     
-    // 1. iFrame Load (Visible preview)
     iframe.src = originalUrl;
-    setStatus('Loading Content...', false);
+    updateStatus('Loading Content...', 'loading');
     
-    // Apply/Remove scrolling class
-    if (autoScrollModeCheckbox.checked) {
-        el.classList.add('scrolling');
-    } else {
-        el.classList.remove('scrolling');
-    }
+    el.classList.toggle('scrolling', autoScrollModeCheckbox.checked);
     
     const proxiedUrl = getProxiedUrl(originalUrl, proxy);
 
-    setStatus('Sending Unique Proxy View (30s Session)...', false);
-    statusDot.style.animation = 'pulse-ping 0.5s infinite';
+    updateStatus('Sending Proxy Request to Node.js...', 'loading');
 
     try {
-        // Fetch request is sent. PHP script runs in background for 30s.
-        await fetch(proxiedUrl, { mode: 'no-cors' });
+        // Fetch to the Node.js backend
+        const response = await fetch(proxiedUrl);
+        const data = await response.json(); 
         
-        // Response is quick due to Connection: close header in PHP
-        setStatus('View Sent (BG Session Active)', true);
+        if (response.ok && data.status === 'OK') {
+            updateStatus('View Sent (BG Session Active)', 'active');
+        } else {
+            updateStatus(`Failed: ${data.details || 'Unknown Error'}`, 'failed');
+            console.error(`Slot ${index+1} Backend Error:`, data);
+        }
         
     } catch (e) {
-        setStatus('Failed (Network/Proxy Error)', false);
+        updateStatus('Failed (Network/CORS Error)', 'failed');
+        console.error(`Slot ${index+1} Frontend Fetch Error:`, e);
     }
-    
-    statusDot.style.animation = 'none';
   }
   
-  // Event Handlers
   openBtn.addEventListener('click', ()=> {
     const url = globalUrlInput.value.trim();
     if(!url){ alert('Please paste a URL into the global input field first.'); return; }
@@ -336,52 +365,46 @@ function createSlot(index, proxy){
     runAutomation(url); 
   });
   
-  setStatus('Ready', true);
+  updateStatus('Ready', 'ready');
 
-  // Expose the slot element to allow toggling scrolling globally on existing slots
   return { 
       runAutomation, 
-      setStatus,
+      setStatus: updateStatus, 
       element: el 
   }; 
 }
 
-// Function to redraw slots based on the selected number
 function renderSlots(count) {
+    stopAllAutomation();
     gridContainer.innerHTML = ''; 
     currentSlots = [];
 
     const maxCount = Math.min(MAX_SLOTS, premiumProxies.length);
-    if (count < 1 || count > maxCount) {
-        count = Math.min(Math.max(count, 1), maxCount);
-        numSlotsInput.value = count;
-    }
+    let finalCount = parseInt(count) || 1;
+    finalCount = Math.min(Math.max(finalCount, 1), maxCount);
+    numSlotsInput.value = finalCount;
     
-    globalGoBtn.textContent = `Load & Run All (${count} Slots)`;
+    globalGoBtn.textContent = `Load & Run All (${finalCount} Slots)`;
 
-    for(let i=0; i < count; i++){
+    for(let i=0; i < finalCount; i++){
       const slot = createSlot(i, premiumProxies[i]);
       currentSlots.push(slot);
     }
-    stopAllAutomation();
 }
 
-// Global Stop Function
 function stopAllAutomation() {
     repeatIntervals.forEach(intervalId => clearInterval(intervalId));
     repeatIntervals = [];
     globalGoBtn.style.display = 'block';
+    globalGoBtn.disabled = false; 
     globalStopBtn.style.display = 'none';
     
     currentSlots.forEach(s => {
-        s.setStatus('Ready (Stopped)', true);
-        s.element.classList.remove('scrolling'); // Stop scrolling on all slots
+        s.setStatus('Ready (Stopped)', 'ready');
+        s.element.classList.remove('scrolling'); 
     });
-    
-    repeatModeCheckbox.checked = false;
 }
 
-// Global Start/Run Logic - UPDATED FOR STAGGERED RELOAD
 globalGoBtn.addEventListener('click', ()=>{
   const url = globalUrlInput.value.trim();
   if(!url){ 
@@ -389,49 +412,62 @@ globalGoBtn.addEventListener('click', ()=>{
       return; 
   }
   
-  // Run once immediately
+  globalGoBtn.disabled = true; 
+  
   currentSlots.forEach(s => s.runAutomation(url));
   
-  // If repeat mode is checked, start intervals
   if (repeatModeCheckbox.checked) {
     globalGoBtn.style.display = 'none';
     globalStopBtn.style.display = 'block';
+    
+    stopAllAutomation();
       
     currentSlots.forEach((s) => {
-        // 👇 CRITICAL CHANGE: Get a random delay from the user-defined min/max time
         const randomDelay = getRandomDelay(); 
         const delayInSeconds = (randomDelay / 1000).toFixed(1);
 
-        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, true);
+        s.setStatus(`Starting Repeat Mode (${delayInSeconds}s cycle)...`, 'active');
         
         const intervalId = setInterval(() => {
             s.runAutomation(url);
-            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, true);
-        }, randomDelay); // Use the random delay here
+            s.setStatus(`Repeat Running. Next in ${delayInSeconds}s...`, 'active'); 
+        }, randomDelay); 
         
         repeatIntervals.push(intervalId);
     });
+  } else {
+    setTimeout(() => {
+        globalGoBtn.disabled = false;
+    }, 500); 
   }
 });
 
-// Event listeners
 numSlotsInput.addEventListener('change', (e) => {
     let count = parseInt(e.target.value);
     if (isNaN(count)) count = 1; 
     renderSlots(count);
 });
 
-// Event listener for auto-scroll checkbox
 autoScrollModeCheckbox.addEventListener('change', (e) => {
-    // Toggles the scrolling class on all current slots when the checkbox changes
     const isScrolling = e.target.checked;
     currentSlots.forEach(s => {
-        // Ensure that scrolling is only applied if it's checked
         s.element.classList.toggle('scrolling', isScrolling);
     });
 });
 
+minTimeInput.addEventListener('change', () => {
+    let min = parseInt(minTimeInput.value) || 10;
+    minTimeInput.value = Math.max(10, Math.min(min, 120));
+});
+
+maxTimeInput.addEventListener('change', () => {
+    let max = parseInt(maxTimeInput.value) || 60;
+    maxTimeInput.value = Math.max(10, Math.min(max, 120));
+});
+
+
 globalStopBtn.addEventListener('click', stopAllAutomation);
+
 repeatModeCheckbox.addEventListener('change', () => {
     if (!repeatModeCheckbox.checked && globalStopBtn.style.display === 'block') {
         stopAllAutomation();
@@ -439,7 +475,6 @@ repeatModeCheckbox.addEventListener('change', () => {
 });
 
 
-// Initial render when the page loads
 renderSlots(parseInt(numSlotsInput.value));
 </script>
 </body>
