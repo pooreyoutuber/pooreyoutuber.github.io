@@ -473,7 +473,7 @@ Requested Change: "${requestedChange}"`;
                 responseMimeType: "application/json",
                 responseSchema: {
                     type: "object",
-                    { editedCaption: { type: "string" } },
+                    properties: { editedCaption: { type: "string" } },
                     required: ["editedCaption"]
                 },
                 temperature: 0.7,
