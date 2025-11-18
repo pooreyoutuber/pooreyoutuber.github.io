@@ -1,4 +1,4 @@
-// index.js (ULTIMATE FINAL VERSION - Consolidated and Fixed)
+// index.js (ULTIMATE FINAL VERSION - Consolidated and Fixed with Enhanced Attribution for Tool 1)
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -9,9 +9,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
 const http = require('http'); 
-const { URL } = require('url'); // Added URL import
+const { URL } = require('url'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -56,6 +55,7 @@ const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + mi
 const HIGH_VALUE_ACTION_CHANCE = 0.15; // 15% chance to run high-value conversion even if frontend asks for it.
 
 // --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
+// 🔥 FIXED: Added more countries for better diversity
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
     { country: "India", region: "Maharashtra", timezone: "Asia/Kolkata" },
@@ -64,7 +64,12 @@ const geoLocations = [
     { country: "Germany", region: "Bavaria", timezone: "Europe/Berlin" },
     { country: "France", region: "Ile-de-France", timezone: "Europe/Paris" },
     { country: "United Kingdom", region: "England", timezone: "Europe/London" },
-    { country: "Canada", region: "Ontario", timezone: "America/Toronto" }
+    { country: "Canada", region: "Ontario", timezone: "America/Toronto" },
+    { country: "Brazil", region: "São Paulo", timezone: "America/Sao_Paulo" },
+    { country: "Mexico", region: "Mexico City", timezone: "America/Mexico_City" },
+    { country: "Nigeria", region: "Lagos", timezone: "Africa/Lagos" },
+    { country: "Indonesia", region: "Jakarta", timezone: "Asia/Jakarta" },
+    { country: "Egypt", region: "Cairo", timezone: "Africa/Cairo" } 
 ];
 function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
@@ -76,15 +81,19 @@ function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC ---
+// --- TRAFFIC SOURCE LOGIC (UPDATE 1: DIVERSIFY SOURCES) ---
 // Used by Tool 1 (/boost-mp)
 const TRAFFIC_SOURCES_GA4 = [ 
-    { source: "google", medium: "organic", referrer: "https://www.google.com" },
-    { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
-    { source: "facebook", medium: "social", referrer: "https://www.facebook.com" },
-    { source: "bing", medium: "organic", referrer: "https://www.bing.com" },
-    { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" },
-    { source: "(direct)", medium: "(none)", referrer: "" }
+    { source: "google", medium: "organic", referrer: "https://www.google.com" }, // 1. Google Search
+    { source: "youtube", medium: "social", referrer: "https://www.youtube.com" }, // 2. YouTube Social
+    { source: "facebook", medium: "social", referrer: "https://www.facebook.com" }, // 3. Facebook
+    { source: "bing", medium: "organic", referrer: "https://www.bing.com" }, // 4. Bing Search
+    { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" }, // 5. Reddit Referral
+    { source: "instagram", medium: "social", referrer: "https://www.instagram.com" }, // 6. Instagram
+    { source: "twitter", medium: "social", referrer: "https://t.co" }, // 7. Twitter/X
+    { source: "pinterest", medium: "social", referrer: "https://www.pinterest.com" }, // 8. Pinterest
+    { source: "duckduckgo", medium: "organic", referrer: "https://duckduckgo.com" }, // 9. DuckDuckGo
+    { source: "(direct)", medium: "(none)", referrer: "" } // 10. Direct
 ];
 // Used by Tool 4 (/proxy-request)
 const TRAFFIC_SOURCES_PROXY = [ 
@@ -95,15 +104,25 @@ const TRAFFIC_SOURCES_PROXY = [
     { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
 ];
 
+// 🔥 FIXED: TRAFFIC DISTRIBUTION LOGIC for /boost-mp
 function getRandomTrafficSource(isProxyTool = false) {
     if (isProxyTool) {
         return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 1)];
     }
-    // Logic for /boost-mp
-    if (Math.random() < 0.5) {
-        return TRAFFIC_SOURCES_GA4[5]; // (direct) / (none)
+    
+    // Logic for /boost-mp: Realistic Distribution
+    const rand = Math.random();
+    
+    if (rand < 0.35) { // 35% Direct
+        return TRAFFIC_SOURCES_GA4[9]; // (direct) / (none)
+    } else if (rand < 0.65) { // 30% Search (Google/Bing/DuckDuckGo)
+        // Ensure index 0 (Google) is more common than 3 (Bing) and 8 (DuckDuckGo)
+        const searchSources = [0, 0, 0, 3, 8]; 
+        return TRAFFIC_SOURCES_GA4[searchSources[randomInt(0, searchSources.length - 1)]]; 
+    } else { // 35% Social / Referral
+        const socialSources = [1, 2, 4, 5, 6, 7]; // YouTube, Facebook, Reddit, Instagram, Twitter, Pinterest
+        return TRAFFIC_SOURCES_GA4[socialSources[randomInt(0, socialSources.length - 1)]];
     }
-    return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 2)]; 
 }
 
 // --- USER AGENT DIVERSITY (Added from old code to support Tool 4) ---
@@ -194,12 +213,13 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 /**
  * Simulates a single view session with full attribution parameters. (Used by /boost-mp)
+ * 🔥 FIXED: session_start attribution logic improved to fix "not set" issue.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource(false); // Use GA4 specific traffic logic
+    const traffic = getRandomTrafficSource(false); 
     const engagementTime = randomInt(30000, 120000); 
 
     const userProperties = {
@@ -212,6 +232,20 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     console.log(`\n--- [View ${viewCount}] Session (Geo: ${geo.country}, Source/Medium: ${traffic.source}/${traffic.medium}) ---`);
 
     // 1. SESSION START EVENT
+    // FIX: session_default_channel_group logic improved to match GA4 groupings
+    let defaultChannelGroup;
+    if (traffic.medium === "organic") {
+        defaultChannelGroup = "Organic Search";
+    } else if (traffic.medium === "social") {
+        defaultChannelGroup = "Social";
+    } else if (traffic.source === "(direct)" && traffic.medium === "(none)") {
+        defaultChannelGroup = "Direct";
+    } else if (traffic.medium === "referral") {
+        defaultChannelGroup = "Referral";
+    } else {
+        defaultChannelGroup = "Unassigned"; 
+    }
+
     let sessionStartEvents = [
         { 
             name: "session_start", 
@@ -220,7 +254,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
                 _ss: 1, 
                 debug_mode: true,
                 language: "en-US",
-                session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ? traffic.medium : "Direct",
+                session_default_channel_group: defaultChannelGroup, 
                 source: traffic.source,
                 medium: traffic.medium,
                 page_referrer: traffic.referrer
@@ -246,7 +280,8 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
             name: 'page_view', 
             params: { 
                 page_location: url, 
-                page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : "Simulated Content View",
+                // FIX: page_title simplified to avoid attribution conflicts
+                page_title: "Simulated Content View", 
                 session_id: session_id, 
                 debug_mode: true,
                 language: "en-US",
@@ -316,7 +351,6 @@ function generateViewPlan(totalViews, pages) {
 
 // ===================================================================
 // 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL 
-// [NO CHANGES - Working Correctly]
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -371,7 +405,6 @@ app.post('/boost-mp', async (req, res) => {
 
 // ===================================================================
 // 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
-// [NO CHANGES - Working Correctly]
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -416,7 +449,6 @@ app.post('/api/caption-generate', async (req, res) => {
 
 // ===================================================================
 // 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
-// [NO CHANGES - Working Correctly]
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -441,7 +473,7 @@ Requested Change: "${requestedChange}"`;
                 responseMimeType: "application/json",
                 responseSchema: {
                     type: "object",
-                    properties: { editedCaption: { type: "string" } },
+                    { editedCaption: { type: "string" } },
                     required: ["editedCaption"]
                 },
                 temperature: 0.7,
