@@ -334,7 +334,10 @@
 
 <script>
     // **Your YouTube Data API Key**
-    const API_KEY = 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo'; // Note: This key seems to be a public example/placeholder. Ensure you use your valid key.
+    // 🛑 IMPORTANT FIX: The key below is a placeholder and WILL NOT WORK. 
+    // You MUST replace 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo' with YOUR valid YouTube Data API v3 key 
+    // obtained from Google Cloud Console for the tool to function correctly.
+    const API_KEY = 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo'; 
 
     function extractVideoId(url) {
         // Regex to extract Video ID from various YouTube URL formats
@@ -365,24 +368,33 @@
         resultDiv.innerHTML = '<p>🚀 Analyzing video data... Please wait.</p>';
 
         fetch(apiUrl)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    // Check for HTTP errors like 403, 400
+                    return response.json().then(data => { throw new Error(data.error.message || `HTTP error! status: ${response.status}`); });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.items && data.items.length > 0) {
                     displayData(data.items[0]);
-                } else if (data.error) {
-                    let errorMessage = data.error.message;
-                    if (data.error.code === 403) {
-                         errorMessage = "Quota Exceeded or API Key Invalid. Please check your Google Cloud Console settings.";
-                    }
-                    resultDiv.innerHTML = `<p class="error">❌ API Error: ${errorMessage}</p>`;
-                } 
-                else {
-                    resultDiv.innerHTML = '<p class="error">Video not found or is private. Ensure the video is **Public**.</p>';
+                } else {
+                    // This often happens if the video ID is invalid, or the video is private/deleted.
+                    resultDiv.innerHTML = '<p class="error">Video not found, is private, or has been deleted. Ensure the video is **Public**.</p>';
                 }
             })
             .catch(error => {
                 console.error('Fetch Error:', error);
-                resultDiv.innerHTML = `<p class="error">🌐 Network Error: Could not connect to the YouTube API. ${error.message}</p>`;
+                let errorMessage = error.message;
+
+                // Provide a clearer message if the error points to API key/quota issues
+                if (errorMessage.includes("API Key") || errorMessage.includes("Quota") || errorMessage.includes("403")) {
+                    errorMessage = "Quota Exceeded, API Key Invalid, or Permissions Denied. **Please check your Google Cloud Console and replace the placeholder API Key.**";
+                } else if (errorMessage.includes("Network")) {
+                    errorMessage = "Could not connect to the YouTube API. Check your internet connection.";
+                }
+
+                resultDiv.innerHTML = `<p class="error">❌ API Error: ${errorMessage}</p>`;
             });
     }
 
@@ -412,10 +424,11 @@
             html += '<span style="color: #999;">No tags specified. (High recommendation to add relevant keywords)</span>';
         }
         html += `</p>`;
+        html += `<p><strong>Channel:</strong> ${snippet.channelTitle || 'N/A'}</p>`;
         html += `<p><strong>Published Date:</strong> ${new Date(snippet.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>`;
         html += `</div>`;
 
-        // Statistics Section
+        // Statistics Se
         html += `<div class="data-card">`;
         html += `<h2 style="color: #28a745; border-bottom-color: #28a745;">Engagement Statistics</h2>`;
         html += `<div class="stats-grid">`;
@@ -423,10 +436,10 @@
         // Views
         html += `<div class="stat-item"><strong>Total Views</strong><span>${stats.viewCount ? new Intl.NumberFormat('en-US').format(stats.viewCount) : 'N/A'}</span></div>`;
         
-        // Likes
+        // Likes - stats.likeCount might be missing if likes are disabled
         html += `<div class="stat-item"><strong>Likes Count</strong><span>${stats.likeCount ? new Intl.NumberFormat('en-US').format(stats.likeCount) : 'N/A'}</span></div>`;
         
-        // Comments
+        // Comments - stats.commentCount might be missing if comments are disabled
         html += `<div class="stat-item"><strong>Comments Count</strong><span>${stats.commentCount ? new Intl.NumberFormat('en-US').format(stats.commentCount) : 'N/A'}</span></div>`;
 
         html += `</div>`;
@@ -434,4 +447,41 @@
 
         resultDiv.innerHTML = html;
         
-        // Ensure AdSense push is called for dynamically loaded content as well (option
+        // Ensure AdSense push is called for dynamically loaded content as well (optional, but good practice)
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    }
+
+    // --- COMPLETION: DARK MODE PERSISTENCE AND TOGGLE LOGIC ---
+    const DARK_MODE_KEY = 'darkModeEnabled';
+
+    // 1. Load preference on page load
+    function loadDarkModePreference() {
+        // Check for local storage preference, or default to system preference if available
+        const storedPreference = localStorage.getItem(DARK_MODE_KEY);
+        let isDarkMode = false;
+
+        if (storedPreference !== null) {
+            isDarkMode = storedPreference === 'true';
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // Check system preference if no local storage setting is found
+            isDarkMode = true;
+        }
+
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        }
+    }
+
+    // 2. Function to toggle (The user can call this from a new button if they add one)
+    function toggleDarkMode() {
+        const isDarkMode = document.body.classList.toggle('dark-mode');
+        localStorage.setItem(DARK_MODE_KEY, isDarkMode);
+    }
+
+    // Load preference when script loads
+    loadDarkModePreference();
+    window.toggleDarkMode = toggleDarkMode; // Expose globally for easy testing/use
+    // --- END DARK MODE LOGIC ---
+</script>
+</body>
+</html>
