@@ -483,5 +483,279 @@
 
             <p><strong>4. Technical and Third-Party Data Disclaimer (Future API Use):</strong></p>
             <p>This Website may contain links or references to external websites, platforms, or resources. By using our Services, you agree that your access and reliance on any information or tool output is **entirely at your own risk.** PooreYoutuber Tools, its operators, affiliates, and employees shall not be held liable for any damages, losses, or costs arising from the use of, or inability to use, our Services. If our tools are updated in the future to utilize live Application Programming Interfaces (APIs) for data collection, the **user remains solely responsible** for adhering to the terms and conditions of that third-party API and for ensuring the secure and compliant management of any API keys or credentials.</p>
+        </div>
+    </div>
+
+<script>
+    // Global variables to hold chart instances
+    let engagementChart, seoHealthChart, keywordDensityChart;
+    
+    // Helper function for number formatting (e.g., 1200000 -> 1.2M)
+    function formatNumber(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num;
+    }
+
+    // --- SIMULATED DATA GENERATION (As per Disclaimer) ---
+    function simulateAuditData(channelName) {
+        // Static data to make the report feel stable and professional
+        const defaultData = {
+            name: channelName || "PooreYouTuber Demo Channel",
+            id: "UC_" + Math.random().toString(36).substring(2, 11).toUpperCase(),
+            avatar: "https://i.ibb.co/L5QyXQj/pooreyoutuber-demo-avatar.png", // Replace with a generic placeholder image URL
+            subscribers: 1240000,
+            views: 150000000,
+            videos: 450,
+            overallScore: 85,
             
-           
+            // Engagement Graph (Doughnut Chart)
+            engagement: {
+                labels: ['Engagement Score', 'Potential Gap'],
+                data: [82, 18], // 82% score
+                color: '#007bff'
+            },
+            
+            // SEO Health Radar (Radar Chart)
+            seoHealth: {
+                labels: ['Niche Focus', 'Title SEO', 'Tags Strategy', 'Description Depth', 'Thumbnail/Branding', 'CTA Implementation'],
+                data: [90, 85, 95, 80, 70, 75], // Scores out of 100
+            },
+            
+            // Keyword Density (Doughnut Chart)
+            keywordDensity: {
+                labels: ['Relevant Keywords', 'Branding Tags', 'Long-Tail Keywords', 'Unrelated Tags'],
+                data: [45, 25, 20, 10], // Percentage breakdown
+            },
+            
+            // Top/Low Performing Videos
+            topVideos: [
+                { title: "Viral: Ultimate Guide to Video Editing 2024", views: 520000 },
+                { title: "My First 1000 Subscribers Journey", views: 410000 },
+                { title: "5 Mistakes I Made in My First Year", views: 350000 },
+                { title: "Best Mic Under $100 Review", views: 310000 },
+                { title: "How I Quadrupled My Watch Time", views: 280000 },
+                { title: "SEO Secrets: Rank #1 on YouTube", views: 250000 },
+                { title: "Editing Workflow for Faster Uploads", views: 230000 },
+                { title: "Budget Camera Setup for Beginners", views: 210000 },
+                { title: "Creating Killer Thumbnails in Photoshop", views: 195000 },
+                { title: "Must-Have Tools for Every YouTuber", views: 180000 }
+            ],
+            
+            lowVideos: [
+                { title: "Vlog 4: Unedited Day in the Life", views: 1500 },
+                { title: "Quick Livestream Test (Private Link)", views: 2100 },
+                { title: "My Old Setup (No one asked)", views: 3500 },
+                { title: "Testing New YouTube Feature Beta", views: 4200 },
+                { title: "Unlisted Short: Behind the Scenes", views: 5000 },
+                { title: "Channel Update (Old Niche)", views: 6500 },
+                { title: "Random Gaming Clip (Unrelated)", views: 7100 },
+                { title: "Outdated Tutorial (2018)", views: 8000 },
+                { title: "Bad Audio Test", views: 9500 },
+                { title: "Video with Clickbait Title (Low Retention)", views: 11000 }
+            ]
+        };
+        
+        return new Promise(resolve => {
+            // Simulate network delay
+            setTimeout(() => {
+                resolve(defaultData);
+            }, 1500); // 1.5 seconds delay
+        });
+    }
+
+    // --- CHART INITIALIZATION AND RENDERING ---
+    function initializeCharts(data) {
+        // Destroy old charts if they exist
+        if (engagementChart) engagementChart.destroy();
+        if (seoHealthChart) seoHealthChart.destroy();
+        if (keywordDensityChart) keywordDensityChart.destroy();
+        
+        const primaryColor = getComputedStyle(document.body).getPropertyValue('--primary-color').trim();
+        const accentColor = getComputedStyle(document.body).getPropertyValue('--accent-color').trim();
+        const dangerColor = getComputedStyle(document.body).getPropertyValue('--danger-color').trim();
+        const text_color = getComputedStyle(document.body).getPropertyValue('--text-color').trim();
+
+        // 1. Engagement Score Graph (Doughnut)
+        const engagementCtx = document.getElementById('engagement-score-graph').getContext('2d');
+        engagementChart = new Chart(engagementCtx, {
+            type: 'doughnut',
+            data: {
+                labels: data.engagement.labels,
+                datasets: [{
+                    data: data.engagement.data,
+                    backgroundColor: [
+                        primaryColor, 
+                        '#e9ecef' // Light background for the gap
+                    ],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false },
+                    doughnutlabel: {
+                        labels: [{
+                            text: data.engagement.data[0] + '%',
+                            font: { size: 30, weight: 'bold' },
+                            color: primaryColor
+                        }, {
+                            text: 'Engagement',
+                            font: { size: 14 },
+                            color: text_color
+                        }]
+                    }
+                }
+            }
+        });
+
+        // 2. SEO Health Radar (Radar)
+        const seoHealthCtx = document.getElementById('seo-health-graph').getContext('2d');
+        seoHealthChart = new Chart(seoHealthCtx, {
+            type: 'radar',
+            data: {
+                labels: data.seoHealth.labels,
+                datasets: [{
+                    label: 'Score (Max 100)',
+                    data: data.seoHealth.data,
+                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                    borderColor: accentColor,
+                    pointBackgroundColor: accentColor,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: accentColor
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                elements: { line: { borderWidth: 3 } },
+                scales: {
+                    r: {
+                        angleLines: { color: getComputedStyle(document.body).getPropertyValue('--border-light').trim() },
+                        grid: { color: getComputedStyle(document.body).getPropertyValue('--border-light').trim() },
+                        pointLabels: { font: { size: 10 }, color: text_color },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: { display: false }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 3. Keyword Density Graph (Pie/Doughnut)
+        const densityCtx = document.getElementById('keyword-density-graph').getContext('2d');
+        keywordDensityChart = new Chart(densityCtx, {
+            type: 'pie',
+            data: {
+                labels: data.keywordDensity.labels,
+                datasets: [{
+                    data: data.keywordDensity.data,
+                    backgroundColor: [primaryColor, accentColor, dangerColor, '#6c757d'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { color: text_color } },
+                }
+            }
+        });
+    }
+
+    // --- DISPLAY REPORT LOGIC ---
+    function displayReport(data) {
+        document.getElementById('channel-avatar').src = data.avatar;
+        document.getElementById('channel-name').textContent = data.name;
+        document.getElementById('channel-id').textContent = data.id;
+        
+        document.getElementById('sub-count').textContent = formatNumber(data.subscribers);
+        document.getElementById('view-count').textContent = formatNumber(data.views);
+        document.getElementById('video-count').textContent = data.videos;
+        
+        document.getElementById('overall-score-display').textContent = data.overallScore + '%';
+        
+        // Populate Top Videos List
+        const topList = document.getElementById('top-videos-list');
+        topList.innerHTML = data.topVideos.map(v => 
+            `<li><strong>${formatNumber(v.views)} Views:</strong> ${v.title}</li>`
+        ).join('');
+        
+        // Populate Low Videos List
+        const lowList = document.getElementById('low-videos-list');
+        lowList.innerHTML = data.lowVideos.map(v => 
+            `<li><strong>${formatNumber(v.views)} Views:</strong> ${v.title}</li>`
+        ).join('');
+        
+        // Render Charts
+        initializeCharts(data);
+        
+        // Show results and hide loading
+        document.getElementById('loading-indicator').classList.add('hidden');
+        document.getElementById('audit-results').classList.remove('hidden');
+        document.getElementById('audit-button').disabled = false;
+    }
+
+    // --- MAIN AUDIT FUNCTION (Called by Button) ---
+    async function startAudit() {
+        const input = document.getElementById('channel-input');
+        const channelName = input.value.trim();
+        const resultsDiv = document.getElementById('audit-results');
+        const loadingDiv = document.getElementById('loading-indicator');
+        const auditButton = document.getElementById('audit-button');
+
+        if (!channelName) {
+            alert("Please enter a Channel URL or Name.");
+            input.focus();
+            return;
+        }
+
+        // Show Loading State
+        auditButton.disabled = true;
+        resultsDiv.classList.add('hidden');
+        loadingDiv.classList.remove('hidden');
+
+        try {
+            const data = await simulateAuditData(channelName);
+            displayReport(data);
+            
+            // Scroll to the results for better UX
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (error) {
+            console.error("Audit failed:", error);
+            loadingDiv.innerHTML = `<p style="color: ${getComputedStyle(document.body).getPropertyValue('--danger-color').trim()}">❌ Error generating report. Please try again. (Check console for details)</p>`;
+            auditButton.disabled = false;
+        }
+    }
+    
+    // --- DARK MODE LOGIC (for Persistence and initialization) ---
+    function applyDarkMode() {
+        const isDarkMode = localStorage.getItem('darkModeEnabled') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        }
+    }
+    applyDarkMode();
+    
+    // Function to handle the dark mode toggle (If user adds a toggle button later)
+    window.toggleDarkMode = function() {
+        const isDarkMode = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkModeEnabled', isDarkMode);
+        // Reinitialize charts to update colors dynamically
+        if (document.getElementById('audit-results').classList.contains('hidden') === false) {
+             startAudit(); // Just re-run the audit to refresh charts with new colors
+        }
+    };
+    
+</script>
+</body>
+</html>
+
