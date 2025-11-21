@@ -194,6 +194,8 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 /**
  * Simulates a single view session with full attribution parameters. (Used by /boost-mp)
+ * * 🔥 FIX APPLIED: Corrected GA4 MP parameters for Source/Medium attribution 
+ * and ensured User Properties (simulated_geo) are sent with all events.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
@@ -202,6 +204,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const traffic = getRandomTrafficSource(false); // Use GA4 specific traffic logic
     const engagementTime = randomInt(30000, 120000); 
 
+    // User Properties are crucial for custom dimensions like geo
     const userProperties = {
         simulated_geo: { value: geo.country }, 
         user_timezone: { value: geo.timezone }
@@ -211,26 +214,29 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     
     console.log(`\n--- [View ${viewCount}] Session (Geo: ${geo.country}, Source/Medium: ${traffic.source}/${traffic.medium}) ---`);
 
-    // 1. SESSION START EVENT
+    // 1. SESSION START EVENT (The primary event for traffic attribution)
     let sessionStartEvents = [
         { 
             name: "session_start", 
             params: { 
                 session_id: session_id, 
+                // ✅ FIX: Use campaign_source and campaign_medium for reliable session attribution
+                campaign_source: traffic.source, 
+                campaign_medium: traffic.medium,
+                session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ? traffic.medium : "Direct",
+                page_referrer: traffic.referrer, // The referrer URL
+                
                 _ss: 1, 
                 debug_mode: true,
-                language: "en-US",
-                session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ? traffic.medium : "Direct",
-                source: traffic.source,
-                medium: traffic.medium,
-                page_referrer: traffic.referrer
+                language: "en-US"
             } 
         }
     ];
 
+    // Ensure user_properties are sent with session_start
     const sessionStartPayload = {
         client_id: cid,
-        user_properties: userProperties,
+        user_properties: userProperties, // Sending custom geo/timezone here
         events: sessionStartEvents
     };
 
@@ -256,9 +262,10 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         }
     ];
 
+    // ✅ FIX: Ensure user_properties and client_id are sent with page_view
     const pageViewPayload = {
         client_id: cid,
-        user_properties: userProperties,
+        user_properties: userProperties, // Sending custom geo/timezone here
         events: pageViewEvents
     };
 
@@ -270,7 +277,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     // 3. USER ENGAGEMENT
     const engagementPayload = {
         client_id: cid,
-        user_properties: userProperties, 
+        user_properties: userProperties, // ✅ FIX: Ensure user properties are included here too
         events: [
             { 
                 name: "user_engagement", 
@@ -361,6 +368,7 @@ app.post('/boost-mp', async (req, res) => {
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
 
+            // Note: The fix is inside the simulateView function definition above.
             await simulateView(ga_id, api_key, url, search_keyword, currentView);
         }
         
