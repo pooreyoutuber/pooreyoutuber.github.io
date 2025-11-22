@@ -28,12 +28,14 @@ let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
+    // Fallback in case AI key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
 // --- MIDDLEWARE & UTILITIES ---
+// Updated CORS to allow all for simplicity in deployment
 app.use(cors({
-    origin: 'https://pooreyoutuber.github.io', 
+    origin: '*', 
     methods: ['GET', 'POST'],
     credentials: true
 }));
@@ -52,8 +54,8 @@ app.get('/', (req, res) => {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// --- NEW CONSTANT FOR EARNING LOGIC (Gemini/Clicker Cost Control) ---
-const HIGH_VALUE_ACTION_CHANCE = 0.15; // 15% chance to run high-value conversion even if frontend asks for it.
+// 🔥 NEW CONSTANT FOR EARNING LOGIC (Gemini/Clicker Cost Control)
+const HIGH_VALUE_ACTION_CHANCE = 0.15; // 15% chance to run high-value conversion/click
 
 // --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoLocations = [
@@ -86,18 +88,22 @@ const TRAFFIC_SOURCES_GA4 = [
     { source: "reddit", medium: "referral", referrer: "https://www.reddit.com" },
     { source: "(direct)", medium: "(none)", referrer: "" }
 ];
-// Used by Tool 4 (/proxy-request)
+// Used by Tool 4 (/proxy-request) - Preferring higher value organic/referral traffic
 const TRAFFIC_SOURCES_PROXY = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com/" },
-    { source: "direct", medium: "none", referrer: "" },
     { source: "facebook.com", medium: "social", referrer: "https://www.facebook.com/" },
     { source: "linkedin.com", medium: "social", referrer: "https://www.linkedin.com/" },
     { source: "bing", medium: "organic", referrer: "https://www.bing.com/" },
+    { source: "(direct)", medium: "(none)", referrer: "" }
 ];
 
 function getRandomTrafficSource(isProxyTool = false) {
     if (isProxyTool) {
-        return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 1)];
+        // Reduced direct traffic chance for Proxy Tool to simulate better sources
+        if (Math.random() < 0.2) {
+             return TRAFFIC_SOURCES_PROXY[4]; // (direct) / (none)
+        }
+        return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 2)];
     }
     // Logic for /boost-mp
     if (Math.random() < 0.5) {
@@ -106,7 +112,7 @@ function getRandomTrafficSource(isProxyTool = false) {
     return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 2)]; 
 }
 
-// --- USER AGENT DIVERSITY (Added from old code to support Tool 4) ---
+// --- USER AGENT DIVERSITY ---
 const USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
@@ -194,8 +200,6 @@ async function validateKeys(gaId, apiSecret, cid) {
 
 /**
  * Simulates a single view session with full attribution parameters. (Used by /boost-mp)
- * * 🔥 FIX APPLIED: Corrected GA4 MP parameters for Source/Medium attribution 
- * and ensured User Properties (simulated_geo) are sent with all events.
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId(); 
@@ -220,7 +224,6 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
             name: "session_start", 
             params: { 
                 session_id: session_id, 
-                // ✅ FIX: Use campaign_source and campaign_medium for reliable session attribution
                 campaign_source: traffic.source, 
                 campaign_medium: traffic.medium,
                 session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ? traffic.medium : "Direct",
@@ -233,10 +236,9 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         }
     ];
 
-    // Ensure user_properties are sent with session_start
     const sessionStartPayload = {
         client_id: cid,
-        user_properties: userProperties, // Sending custom geo/timezone here
+        user_properties: userProperties, 
         events: sessionStartEvents
     };
 
@@ -262,10 +264,9 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
         }
     ];
 
-    // ✅ FIX: Ensure user_properties and client_id are sent with page_view
     const pageViewPayload = {
         client_id: cid,
-        user_properties: userProperties, // Sending custom geo/timezone here
+        user_properties: userProperties, 
         events: pageViewEvents
     };
 
@@ -277,7 +278,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     // 3. USER ENGAGEMENT
     const engagementPayload = {
         client_id: cid,
-        user_properties: userProperties, // ✅ FIX: Ensure user properties are included here too
+        user_properties: userProperties, 
         events: [
             { 
                 name: "user_engagement", 
@@ -323,7 +324,6 @@ function generateViewPlan(totalViews, pages) {
 
 // ===================================================================
 // 1. WEBSITE BOOSTER ENDPOINT (API: /boost-mp) - GA4 TOOL 
-// [NO CHANGES - Working Correctly]
 // ===================================================================
 app.post('/boost-mp', async (req, res) => {
     const { ga_id, api_key, views, pages, search_keyword } = req.body; 
@@ -368,7 +368,6 @@ app.post('/boost-mp', async (req, res) => {
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
 
-            // Note: The fix is inside the simulateView function definition above.
             await simulateView(ga_id, api_key, url, search_keyword, currentView);
         }
         
@@ -379,7 +378,6 @@ app.post('/boost-mp', async (req, res) => {
 
 // ===================================================================
 // 2. AI INSTA CAPTION GENERATOR ENDPOINT - GEMINI TOOL 
-// [NO CHANGES - Working Correctly]
 // ===================================================================
 app.post('/api/caption-generate', async (req, res) => { 
     if (!GEMINI_KEY) {
@@ -424,7 +422,6 @@ app.post('/api/caption-generate', async (req, res) => {
 
 // ===================================================================
 // 3. AI INSTA CAPTION EDITOR ENDPOINT - GEMINI TOOL 
-// [NO CHANGES - Working Correctly]
 // ===================================================================
 app.post('/api/caption-edit', async (req, res) => {
     if (!GEMINI_KEY) {
@@ -575,21 +572,20 @@ app.get('/proxy-request', async (req, res) => {
         proxyAgent = new HttpsProxyAgent(proxyUrl);
         console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
     } else {
+        // Use http.Agent for non-authenticated proxies (crucial for cheap/free proxies)
         proxyAgent = new http.Agent({ host: ip, port: port });
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
     
-    // --- NEW: EARNING CONTROL LOGIC ---
+    // --- NEW: EARNING CONTROL LOGIC (15% chance for high-value action) ---
     let shouldRunConversion = false;
     let earningMode = 'ADSENSE SAFE (High Impression Mode)';
     let useHighCpcKeywords = false;
     
-    // If the frontend is running the "Auto Clicker" mode:
     if (clicker === '1') {
-        // Only run the conversion/click in a small percentage of sessions (e.g., 15%)
         if (Math.random() < HIGH_VALUE_ACTION_CHANCE) {
             shouldRunConversion = true;
-            useHighCpcKeywords = true; // Use high-value keywords only when conversion runs
+            useHighCpcKeywords = true; 
             earningMode = 'MAX EARNING (High-CPC & Conversion Mode)';
         }
     }
@@ -608,7 +604,7 @@ app.get('/proxy-request', async (req, res) => {
     
     let eventCount = 0;
 
-    // --- FUNCTION TO SEND DATA VIA PROXY (Kept the inner function from the uploaded index.js) ---
+    // --- FUNCTION TO SEND DATA VIA PROXY ---
     async function sendDataViaProxy(payload, eventType) {
         if (!isGaMpEnabled) {
              console.log(`[PROXY MP SKIP] Keys missing. Skipped: ${eventType}.`);
@@ -648,23 +644,23 @@ app.get('/proxy-request', async (req, res) => {
     // --- START: CORE LOGIC ---
     try {
         
-        // 🚀 STEP 0 - GEMINI AI Keyword Generation (MODIFIED FOR BILLING CONTROL AND EARNINGS)
+        // 🚀 STEP 0 - GEMINI AI Keyword Generation (High-CPC keywords used conditionally)
         let searchKeyword = null;
-        if (traffic.source === 'google' && GEMINI_KEY && useHighCpcKeywords) { 
-             // 1. Call Gemini ONLY for High CPC keywords when the clicker randomization passes
-             searchKeyword = await generateSearchKeyword(target, true); // true = HighValue
-             
-             if (searchKeyword) {
-                 traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-                 console.log(`[GEMINI BOOST: MAX CPC] Generated Keyword: "${searchKeyword}"`);
-             }
-        }
-        else if (traffic.source === 'google' && GEMINI_KEY && !useHighCpcKeywords && Math.random() < 0.3) {
-             // 2. Call Gemini for SAFE Realistic keywords only ~30% of the time for organic traffic
-             searchKeyword = await generateSearchKeyword(target, false); // false = not HighValue
-             if (searchKeyword) {
-                 traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-                 console.log(`[GEMINI BOOST: REALISTIC] Generated Keyword: "${searchKeyword}"`);
+        if (traffic.source === 'google' && GEMINI_KEY) { 
+            // High-CPC keywords are ONLY called when conversion is enabled (shouldRunConversion = true)
+             if (useHighCpcKeywords) {
+                searchKeyword = await generateSearchKeyword(target, true); // true = HighValue (Max Earning)
+                if (searchKeyword) {
+                    traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
+                    console.log(`[GEMINI BOOST: MAX CPC] Generated Keyword: "${searchKeyword}"`);
+                }
+             } else if (Math.random() < 0.3) {
+                 // Safe Realistic keywords ~30% of the time for organic traffic
+                 searchKeyword = await generateSearchKeyword(target, false); 
+                 if (searchKeyword) {
+                    traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
+                    console.log(`[GEMINI BOOST: REALISTIC] Generated Keyword: "${searchKeyword}"`);
+                 }
              }
         }
 
@@ -685,21 +681,22 @@ app.get('/proxy-request', async (req, res) => {
         }
         console.log(`[TARGET VISIT SUCCESS] Target visited.`);
 
-        // 💡 ADVANCED IDEA: REALISTIC WAIT TIME
+        // 💡 ADVANCED IDEA: REALISTIC WAIT TIME (Increased for better Earning/Engagement)
+        // Increased to 20-40 seconds to mimic real user session time.
         const waitTime = randomInt(20000, 40000); 
         console.log(`[WAIT] Simulating human behavior: Waiting for ${Math.round(waitTime/1000)} seconds.`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
 
 
         // 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION (ADSENSE SAFE MODE)
-        if (shouldRunConversion) { // Check the randomized flag
+        if (shouldRunConversion) { // Check the randomized flag (15% chance)
             console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON (Randomized Check Passed).`);
             await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
         } else {
              console.log(`[ADSENSE SAFE MODE] Conversion Mode is OFF (Randomized Check Failed or Disabled). Skipping high-value action.`);
         }
         
-        // 🔥 STEP 3: Send GA4 MP data (Now correctly integrated)
+        // 🔥 STEP 3: Send GA4 MP data (Crucial for proving the value of the session)
         if (isGaMpEnabled) {
             
             // 1. SESSION START EVENT
@@ -713,9 +710,9 @@ app.get('/proxy-request', async (req, res) => {
                         _ss: 1, 
                         debug_mode: true,
                         language: "en-US",
-                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), 
                         source: traffic.source,
                         medium: traffic.medium,
+                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), 
                         page_referrer: traffic.referrer
                     } 
                 }]
@@ -730,7 +727,7 @@ app.get('/proxy-request', async (req, res) => {
                     name: 'page_view', 
                     params: { 
                         page_location: target, 
-                        page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : target, // Modified for Keyword
+                        page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : target, 
                         session_id: session_id, 
                         debug_mode: true,
                         language: "en-US",
