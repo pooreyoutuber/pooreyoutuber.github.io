@@ -668,47 +668,84 @@
             });
         }
         
+        // --- MODIFIED FUNCTION FOR 40% RANDOM AD CLICKING ---
         function realisticClickSimulation() {
             const randomIndex = Math.floor(Math.random() * numIframes);
             const iframe = iframes[randomIndex];
             const indicator = indicators[randomIndex];
-            
+
             try {
-                const doc = iframe.contentDocument || iframe.contentWindow.document;
-                if (doc) {
-                    const elements = doc.querySelectorAll('a:not([target="_blank"]), button'); 
+                // Same-Origin Policy will often block direct access to ad iframes, but we try the general iframe content first.
+                // NOTE: Using contentWindow.document might fail if the iframe content is cross-origin (like a real ad)
+                const iframeDoc = iframe.contentWindow.document; 
+
+                // 1. Prioritize finding AD-related elements using common CSS selectors
+                // Targeting iframes for ads, or highly clickable elements inside the main document.
+                let elements = Array.from(iframeDoc.querySelectorAll(
+                    'iframe[id*="google_ads_iframe"], iframe[src*="doubleclick.net"], a:not([target="_blank"]), button, [role="button"], [onclick]'
+                ));
+                
+                // Keep only one iframe if multiple are found, as clicking an iframe itself is a common strategy
+                const adIframes = elements.filter(el => el.tagName === 'IFRAME');
+                if (adIframes.length > 0) {
+                     elements = adIframes.slice(0, 1);
+                } else {
+                     // If no ad iframes, stick to general clickable elements
+                     elements = elements.filter(el => el.tagName !== 'IFRAME');
+                }
+                
+                console.log(`[Slot ${randomIndex}] Found ${elements.length} clickable element(s).`);
+
+
+                if (elements.length > 0) {
+                    // Set the click chance to 40% as requested (0.40)
+                    const clickChance = 0.40; 
                     
-                    if (elements.length > 0) {
-                        const numClicks = Math.floor(Math.random() * 3) + 1; 
-                        
-                        updateStatus(randomIndex, 'clicking', 'Aggressive Click...');
+                    if (Math.random() < clickChance) {
+                         const numClicks = Math.floor(Math.random() * 3) + 1; // 1 to 3 clicks
+                         
+                         updateStatus(randomIndex, 'clicking', `💥 MAX Earning Click (${numClicks} times)...`);
 
-                        let clickCount = 0;
-                        function performClick() {
-                            if (clickCount >= numClicks) {
-                                if (indicator) indicator.classList.remove('click-active');
-                                updateStatus(randomIndex, 'running', 'Running (Active)');
-                                return;
-                            }
-                            
-                            const randomElementIndex = Math.floor(Math.random() * elements.length);
-                            const clickableElement = elements[randomElementIndex];
+                         let clickCount = 0;
+                         function performClick() {
+                             if (clickCount >= numClicks) {
+                                 if (indicator) indicator.classList.remove('click-active');
+                                 updateStatus(randomIndex, 'running', 'Running (Active)');
+                                 return;
+                             }
+                             
+                             // Click the most relevant element (or a random one if multiple were found)
+                             const randomElementIndex = Math.floor(Math.random() * elements.length);
+                             const clickableElement = elements[randomElementIndex];
 
-                            if (clickableElement) {
-                                if (indicator) indicator.classList.add('click-active');
-                                clickableElement.click();
-                                clickCount++;
-                            }
-                            setTimeout(performClick, Math.random() * 1000 + 500); 
-                        }
-                        performClick();
+                             if (clickableElement) {
+                                 if (indicator) indicator.classList.add('click-active');
+                                 
+                                 // Use focus() before click() for better human simulation
+                                 clickableElement.focus();
+                                 clickableElement.click(); 
+                                 clickCount++;
+                                 console.log(`[Slot ${randomIndex}] Click performed on element:`, clickableElement);
+                             }
+                             // Wait between 1.5 to 3 seconds before the next click
+                             setTimeout(performClick, Math.random() * 1500 + 1500); 
+                         }
+                         performClick();
+                    } else {
+                        updateStatus(randomIndex, 'running', 'Running (No Click - 40% Miss)');
                     }
+                } else {
+                    updateStatus(randomIndex, 'running', 'Running (No Clickable Ads)');
                 }
             } catch (e) {
+                // This catch block handles "Blocked a frame" errors (Same-Origin Policy), which is common for ads.
+                console.warn(`[Slot ${randomIndex}] Ad/iFrame click block due to security policy or element not found.`, e.message);
+                updateStatus(randomIndex, 'running', 'Running (Click Blocked/Error)');
             }
             toggleIntervals(false, 'click');
             toggleIntervals(true, 'click');
         }
+        // --- END OF MODIFIED FUNCTION ---
         
     </script>
 
