@@ -55,7 +55,8 @@ app.get('/', (req, res) => {
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 // 🔥 NEW CONSTANT FOR EARNING LOGIC (Gemini/Clicker Cost Control)
-const HIGH_VALUE_ACTION_CHANCE = 0.15; // 15% chance to run high-value conversion/click
+// --- MODIFIED: 15% से 40% किया गया ---
+const HIGH_VALUE_ACTION_CHANCE = 0.40; // 40% chance to run high-value conversion/click (MODIFIED FOR HIGHER EARNING TEST)
 
 // --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoLocations = [
@@ -577,7 +578,7 @@ app.get('/proxy-request', async (req, res) => {
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
     
-    // --- NEW: EARNING CONTROL LOGIC (15% chance for high-value action) ---
+    // --- NEW: EARNING CONTROL LOGIC (40% chance for high-value action) ---
     let shouldRunConversion = false;
     let earningMode = 'ADSENSE SAFE (High Impression Mode)';
     let useHighCpcKeywords = false;
@@ -689,7 +690,7 @@ app.get('/proxy-request', async (req, res) => {
 
 
         // 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION (ADSENSE SAFE MODE)
-        if (shouldRunConversion) { // Check the randomized flag (15% chance)
+        if (shouldRunConversion) { // Check the randomized flag (40% chance)
             console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON (Randomized Check Passed).`);
             await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
         } else {
