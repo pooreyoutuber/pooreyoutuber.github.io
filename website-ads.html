@@ -5,23 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate YouTube Booster Prime</title>
     <style>
-        /* CSS: Professional Design */
+        /* CSS: Professional Design (Similar to your preferred clean style) */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f0f3f6; }
         .container { max-width: 750px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); overflow: hidden; }
         .tool-header { text-align: center; padding: 30px 0; background-color: #cc0000; color: white; } /* YouTube Red */
         .tool-header h2 { margin: 0; font-size: 32px; font-weight: 700; }
         .tool-header p { margin: 8px 0 0; font-size: 18px; opacity: 0.9; }
         .form-section { padding: 30px; }
-        .form-group { margin-bottom: 25px; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 10px; color: #cc0000; font-size: 18px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
-        .action-button { width: 100%; padding: 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 22px; font-weight: bold; cursor: pointer; }
-        .risk-toggle-group { display: flex; align-items: center; justify-content: space-between; border: 2px solid #ff0000; padding: 15px; margin-top: 15px; border-radius: 8px; background-color: #ffe6e6; }
-        .risk-toggle-group label { margin: 0; font-size: 18px; color: #ff0000; }
-        .proxy-details { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ff0000; }
-        .proxy-details input { margin-top: 10px; }
-        .risk-label-safe { color: green; font-weight: bold; }
-        .risk-label-high { color: red; font-weight: bold; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; font-size: 16px; }
+        .form-group input[type="text"], .form-group input[type="number"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        
+        .action-button-container { padding: 0 30px 30px; }
+        .action-button { width: 100%; padding: 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 22px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; }
+        .action-button:hover { background-color: #0056b3; }
+        
+        /* High Risk Toggle Styling */
+        .risk-toggle-group { border: 2px solid #e0e0e0; padding: 15px; border-radius: 8px; background-color: #fff; margin-top: 30px; }
+        .risk-toggle-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .risk-toggle-header label { font-size: 18px; color: #cc0000; font-weight: bold; }
+        .risk-status-label { font-weight: bold; }
+        .risk-label-safe { color: green; }
+        .risk-label-high { color: red; }
+        
+        .proxy-details { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc; }
+        .proxy-details label { color: #ff0000; font-size: 14px; font-weight: bold; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -30,42 +38,55 @@
 
     <div class="tool-header">
         <h2>🚀 YouTube Booster Prime: Ultimate Growth</h2>
-        <p>Your solution for Monetizable Watch Time and Earning Simulation</p>
+        <p>Monetizable Watch Time, Subs, Likes & Optional Earning Sim</p>
     </div>
 
     <div class="form-section">
         
         <div class="form-group">
-            <label>1. Target YouTube Video URL & Channel URL</label>
-            <input type="text" id="videoUrl" placeholder="Video URL (e.g., https://www.youtube.com/watch?v=XXXXXX)" required>
-            <input type="text" id="channelUrl" placeholder="Channel URL (For Subscriptions)" style="margin-top: 10px;" required>
+            <label>1. Target YouTube Video URL:</label>
+            <input type="text" id="videoUrl" placeholder="e.g., https://www.youtube.com/watch?v=XXXXXX" required>
         </div>
 
         <div class="form-group">
-            <label for="totalViews">2. Total Views to Distribute (Max 500):</label>
+            <label>2. Target Channel URL (For Subscriptions):</label>
+            <input type="text" id="channelUrl" placeholder="e.g., https://www.youtube.com/@YourChannel" required>
+        </div>
+
+        <div class="form-group">
+            <label for="totalViews">3. Total Views to Distribute (Max 500):</label>
             <input type="number" id="totalViews" value="50" min="1" max="500" required>
         </div>
 
         <div class="form-group">
-            <label>3. Google Analytics Keys (Crucial for Watch Time/Subs)</label>
-            <input type="text" id="gaId" placeholder="GA4 Measurement ID (G-XXXXX)" required>
-            <input type="text" id="apiSecret" placeholder="API Secret (Measurement Protocol Key)" style="margin-top: 10px;" required>
+            <label>4. Google Analytics Measurement ID (GA4):</label>
+            <input type="text" id="gaId" placeholder="e.g., G-XXXXX" required>
+        </div>
+
+        <div class="form-group">
+            <label>5. API Secret (Measurement Protocol Key):</label>
+            <input type="text" id="apiSecret" placeholder="e.g., Abc-123-Xyz" required>
         </div>
         
         <div class="risk-toggle-group">
-            <label for="highRiskToggle">4. High Risk Mode (Earning Simulation)</label>
-            <div>
-                <span id="riskStatus" class="risk-label-safe">NO RISK</span>
-                <input type="checkbox" id="highRiskToggle" onchange="toggleRiskMode()"> 
+            <div class="risk-toggle-header">
+                <label for="highRiskToggle">6. High Risk Mode (Earning Simulation)</label>
+                <div>
+                    <span id="riskStatus" class="risk-status-label risk-label-safe">NO RISK</span>
+                    <input type="checkbox" id="highRiskToggle" onchange="toggleRiskMode()"> 
+                </div>
             </div>
-        </div>
 
-        <div id="proxyFields" style="display: none;">
-             <div class="form-group proxy-details">
-                <label style="color: #ff0000;">⚠️ PROXY DETAILS (Required for High Risk Mode)</label>
-                <input type="text" id="proxyIp" placeholder="Proxy IP (e.g., 185.23.23.1)">
-                <input type="text" id="proxyPort" placeholder="Proxy Port (e.g., 8080)">
-                <input type="text" id="proxyAuth" placeholder="Proxy Auth (username:password - Optional)">
+            <div id="proxyFields" style="display: none;">
+                <p style="font-size: 12px; margin-bottom: 10px; color: #333;">⚠️ WARNING: This mode simulates Ad Impressions via Proxy. Use carefully.</p>
+                <div class="proxy-details">
+                    <label>Proxy IP (Required for Earning Sim):</label>
+                    <input type="text" id="proxyIp" placeholder="e.g., 185.23.23.1">
+                    <label style="margin-top: 10px;">Proxy Port:</label>
+                    <input type="text" id="proxyPort" placeholder="e.g., 8080">
+                    <label style="margin-top: 10px;">Proxy Auth (Optional):</label>
+                    <input type="text" id="proxyAuth" placeholder="username:password">
+                </div>
             </div>
         </div>
         
@@ -79,7 +100,7 @@
 </div>
 
 <script>
-    // ⚠️ Unified API Endpoint for combined logic
+    // ⚠️ Unified API Endpoint
     const API_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com/ultimate-booster'; 
     
     function toggleRiskMode() {
@@ -90,11 +111,15 @@
         if (toggle.checked) {
             proxyFields.style.display = 'block';
             riskStatus.innerText = 'HIGH RISK';
-            riskStatus.className = 'risk-label-high';
+            riskStatus.className = 'risk-status-label risk-label-high';
         } else {
             proxyFields.style.display = 'none';
             riskStatus.innerText = 'NO RISK';
-            riskStatus.className = 'risk-label-safe';
+            riskStatus.className = 'risk-status-label risk-label-safe';
+            // Clear proxy fields when turning off risk mode
+            document.getElementById('proxyIp').value = '';
+            document.getElementById('proxyPort').value = '';
+            document.getElementById('proxyAuth').value = '';
         }
     }
 
@@ -106,21 +131,21 @@
         const apiSecret = document.getElementById('apiSecret').value.trim();
         const highRiskToggle = document.getElementById('highRiskToggle').checked;
         
-        const proxyIp = document.getElementById('proxyIp').value.trim();
-        const proxyPort = document.getElementById('proxyPort').value.trim();
-        const proxyAuth = document.getElementById('proxyAuth').value.trim();
         const statusMessage = document.getElementById('statusMessage');
 
         // Validation 
         if (!videoUrl || !channelUrl || !gaId || !apiSecret || totalViews < 1 || totalViews > 500) {
             statusMessage.style.color = 'red';
-            statusMessage.innerText = '⚠️ Please fill in all required fields (URLs, GA Keys, Views 1-500).';
+            statusMessage.innerText = '⚠️ Please fill in all required fields (1-5).';
             return;
         }
 
-        // High Risk Mode Validation
         let proxyPayload = null;
         if (highRiskToggle) {
+            const proxyIp = document.getElementById('proxyIp').value.trim();
+            const proxyPort = document.getElementById('proxyPort').value.trim();
+            const proxyAuth = document.getElementById('proxyAuth').value.trim();
+
             if (!proxyIp || !proxyPort) {
                  statusMessage.style.color = 'red';
                  statusMessage.innerText = '⚠️ High Risk Mode enabled: Proxy IP and Port are mandatory.';
@@ -142,7 +167,7 @@
             views: totalViews,
             video_url: videoUrl,
             channel_url: channelUrl,
-            // Only include proxy object if High Risk is ON and data is present
+            // Only include proxy object if High Risk is ON
             proxy: proxyPayload 
         };
 
