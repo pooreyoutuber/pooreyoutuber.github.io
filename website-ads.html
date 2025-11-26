@@ -200,16 +200,17 @@
         <h3>💡 How This Tool Works:</h3>
         <ul>
             <li>**Multi-Target Distribution:** The total views requested are automatically **distributed evenly** across all valid URLs provided (up to 4 videos).</li>
-            <li>**High Retention:** Each simulated session sends a **5-10 minute** engagement time and a high chance of a **`video_complete`** event.</li>
-            <li>**Engagement Boost:** Randomly injects **`like_video`** and **`subscribe_channel`** events to simulate genuine user interaction.</li>
-            <li>**Server-Side:** Uses the GA4 Measurement Protocol to run sessions in the background, ensuring views continue **after closing the browser**.</li>
+            <li>**Realistic Retention:** Sessions simulate **human-like** viewing behavior (variable watch time, likes, and subscriptions).</li>
+            <li>**Engagement Boost:** Injects **`like_video`** and **`subscribe_channel`** events for a 35% engagement rate.</li>
+            <li>**Server-Side:** Uses GA4 Measurement Protocol to run sessions in the background, ensuring views continue **after closing the browser**.</li>
         </ul>
     </div>
 
 </div>
 
 <script>
-    const API_URL = window.location.origin + '/youtube-boost-mp'; 
+    // ⚠️ HARDCODED URL: This URL is set to ensure connection to your Render server.
+    const API_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com/youtube-boost-mp'; 
 
     function startYoutubeBoost() {
         const gaId = document.getElementById('gaId').value.trim();
@@ -250,19 +251,12 @@
         statusMessage.style.color = '#ff8c00'; // Orange
         statusMessage.innerText = '⏳ Initiating boost... (Validating Keys and Starting Server Process)';
 
-        // Data payload sent to the backend endpoint /youtube-boost-mp
-        // NOTE: The backend code will need to be slightly modified to handle the array of URLs.
-        // For now, we only send the first URL to match the current backend implementation,
-        // but we'll prepare the payload to signal multiple targets.
-        // --- NOTE: Since the backend only accepts one URL currently, we must adapt.
-        // Since the user requested multi-target, the simplest approach is to send all,
-        // and modify the backend slightly to handle this array. 
-        
+        // Data payload matching the new /youtube-boost-mp endpoint
         const payload = {
             ga_id: gaId,
             api_key: apiSecret,
             views: totalViews,
-            video_urls: videoUrls, // Send the array of URLs
+            video_urls: videoUrls, // Array of URLs is now accepted by backend (index 3.js)
             channel_url: channelUrl
         };
 
@@ -286,7 +280,7 @@
         .catch(error => {
             console.error('Fetch Error:', error);
             statusMessage.style.color = 'red';
-            statusMessage.innerText = `❌ CRITICAL ERROR: Could not connect to the server (${API_URL}).`;
+            statusMessage.innerText = `❌ CRITICAL ERROR: Could not connect to the server. Check if your Render server is running.`;
         });
     }
 </script>
