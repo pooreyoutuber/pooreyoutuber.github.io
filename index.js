@@ -58,6 +58,12 @@ const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + mi
 // --- MODIFIED: 15% से 40% किया गया ---
 const HIGH_VALUE_ACTION_CHANCE = 0.40; // 40% chance to run high-value conversion/click (MODIFIED FOR HIGHER EARNING TEST)
 
+// --- NEW YOUTUBE CONSTANTS (For Realistic Human Simulation) ---
+const YOUTUBE_ENGAGEMENT_CHANCE = 0.35; // 35% chance to Like/Subscribe (30-40% range)
+const YOUTUBE_FULL_RETENTION_PERCENT = 0.25; // 25% chance for 100% completion (20-25% range)
+const YOUTUBE_MID_RETENTION_PERCENT = 0.65; // 65% chance for 70-90% completion
+// Remaining 10% will be low retention/bounce.
+
 // --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoLocations = [
     { country: "United States", region: "California", timezone: "America/Los_Angeles" },
@@ -136,7 +142,7 @@ const getOptimalDelay = (totalViews) => {
     return randomInt(minDelay, finalMaxDelay);
 };
 
-// --- GA4 DATA SENDING (for /boost-mp) ---
+// --- GA4 DATA SENDING (for /boost-mp and /youtube-boost-mp) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
@@ -166,7 +172,7 @@ async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     }
 }
 
-// Validation function (for /boost-mp)
+// Validation function (for all GA4 tools)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     const testPayload = {
@@ -778,6 +784,301 @@ app.get('/proxy-request', async (req, res) => {
             details: errorCode
         });
     }
+});
+
+
+// ===================================================================
+// 5. YOUTUBE ENGAGEMENT BOOSTER ENDPOINT (API: /youtube-boost-mp) - NEW TOOL
+// ===================================================================
+
+/**
+ * Simulates a single highly-realistic YouTube session with variable retention and engagement.
+ */
+async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCount) {
+    const cid = generateClientId(); 
+    const session_id = Date.now(); 
+    const geo = getRandomGeo(); 
+    const traffic = getRandomTrafficSource(false); // Use GA4 specific traffic logic
+
+    // --- WATCH TIME & RETENTION LOGIC (Simulated video duration is 8 to 12 minutes) ---
+    const simulatedSessionDuration = randomInt(480000, 720000); // 8 minutes to 12 minutes (480s to 720s)
+    const retentionRoll = Math.random(); 
+    let engagementTime; 
+    let didCompleteVideo = false;
+
+    if (retentionRoll < YOUTUBE_FULL_RETENTION_PERCENT) { // 25% chance (High Retention: 100% completion)
+        engagementTime = simulatedSessionDuration;
+        didCompleteVideo = true;
+    } else if (retentionRoll < (YOUTUBE_FULL_RETENTION_PERCENT + YOUTUBE_MID_RETENTION_PERCENT)) { // 65% chance (Mid Retention: 70-90% of duration)
+        engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.70), Math.floor(simulatedSessionDuration * 0.90));
+        didCompleteVideo = false;
+    } else { // 10% chance (Low Retention/Bounce: 10-20% of duration)
+        engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.10), Math.floor(simulatedSessionDuration * 0.20));
+        didCompleteVideo = false;
+    }
+    
+    // Ensure minimum watch time for a "good" view
+    engagementTime = Math.max(30000, engagementTime); // Must be at least 30 seconds
+
+    const userProperties = {
+        simulated_geo: { value: geo.country }, 
+        user_timezone: { value: geo.timezone }
+    };
+    
+    let allSuccess = true;
+    let eventsSent = 0;
+    
+    console.log(`\n--- [YT View ${viewCount}] Session (Geo: ${geo.country}, Duration: ${Math.round(engagementTime/1000)}s) ---`);
+    
+    // 1. SESSION START EVENT
+    const sessionStartPayload = {
+        client_id: cid,
+        user_properties: userProperties, 
+        events: [{ 
+            name: "session_start", 
+            params: { 
+                session_id: session_id, 
+                campaign_source: traffic.source, 
+                campaign_medium: traffic.medium,
+                session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"),
+                page_referrer: traffic.referrer, 
+                page_location: videoUrl, 
+                _ss: 1, 
+                debug_mode: true,
+                language: "en-US"
+            } 
+        }]
+    };
+
+    let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'yt_session_start');
+    if (result.success) eventsSent++; else allSuccess = false;
+
+    await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
+
+    // 2. PAGE VIEW EVENT (Video Page Load)
+    const pageViewPayload = {
+        client_id: cid,
+        user_properties: userProperties, 
+        events: [{ 
+            name: 'page_view', 
+            params: { 
+                page_location: videoUrl, 
+                page_title: "Simulated YouTube Video Page",
+                session_id: session_id, 
+                debug_mode: true,
+                language: "en-US",
+                page_referrer: traffic.referrer,
+                engagement_time_msec: randomInt(300, 800) // Initial short engagement for page load
+            } 
+        }]
+    };
+
+    result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
+    if (result.success) eventsSent++; else allSuccess = false;
+
+    await new Promise(resolve => setTimeout(resolve, randomInt(500, 1500)));
+    
+    // 3. VIDEO START EVENT
+    const videoStartPayload = {
+        client_id: cid,
+        user_properties: userProperties, 
+        events: [{ 
+            name: 'video_start', 
+            params: { 
+                video_url: videoUrl, 
+                session_id: session_id,
+                debug_mode: true,
+                video_provider: 'youtube'
+            } 
+        }]
+    };
+    result = await sendData(gaId, apiSecret, videoStartPayload, viewCount, 'video_start');
+    if (result.success) eventsSent++; else allSuccess = false;
+
+    // --- Wait for the actual simulated watch time (Not a real wait, just for log separation) ---
+    await new Promise(resolve => setTimeout(resolve, randomInt(500, 1000)));
+
+    // 4. VIDEO COMPLETE/PROGRESS EVENT
+    if (didCompleteVideo) {
+         const videoCompletePayload = {
+            client_id: cid,
+            user_properties: userProperties, 
+            events: [{ 
+                name: 'video_complete', 
+                params: { 
+                    video_url: videoUrl, 
+                    session_id: session_id,
+                    debug_mode: true,
+                    video_provider: 'youtube'
+                } 
+            }]
+        };
+        result = await sendData(gaId, apiSecret, videoCompletePayload, viewCount, 'video_complete');
+        if (result.success) eventsSent++; else allSuccess = false;
+    } else if (engagementTime > simulatedSessionDuration * 0.5) {
+        // VIDEO PROGRESS (For mid-retention, signal 50% progress)
+        const videoProgressPayload = {
+            client_id: cid,
+            user_properties: userProperties, 
+            events: [{ 
+                name: 'video_progress', 
+                params: { 
+                    video_url: videoUrl, 
+                    session_id: session_id,
+                    debug_mode: true,
+                    video_provider: 'youtube',
+                    video_percent: 50 // Signal 50% watched
+                } 
+            }]
+        };
+        result = await sendData(gaId, apiSecret, videoProgressPayload, viewCount, 'video_progress (50%)');
+        if (result.success) eventsSent++; else allSuccess = false;
+    }
+    
+    // 5. LIKE & SUBSCRIBE ACTION (35% Chance)
+    if (Math.random() < YOUTUBE_ENGAGEMENT_CHANCE) { 
+        
+        // 5a. LIKE VIDEO EVENT (50% chance of a like, within the 35% engagement block)
+        if (Math.random() < 0.5) { 
+             const likeVideoPayload = {
+                client_id: cid,
+                user_properties: userProperties, 
+                events: [{ 
+                    name: 'like_video', 
+                    params: { 
+                        video_url: videoUrl, 
+                        session_id: session_id,
+                        debug_mode: true
+                    } 
+                }]
+            };
+            result = await sendData(gaId, apiSecret, likeVideoPayload, viewCount, 'like_video');
+            if (result.success) eventsSent++; else allSuccess = false;
+        }
+
+        // 5b. SUBSCRIBE CHANNEL EVENT
+        const subscribeChannelPayload = {
+            client_id: cid,
+            user_properties: userProperties, 
+            events: [{ 
+                name: 'subscribe_channel', 
+                params: { 
+                    channel_url: channelUrl, // Use the separate channel URL
+                    session_id: session_id,
+                    debug_mode: true
+                } 
+            }]
+        };
+        result = await sendData(gaId, apiSecret, subscribeChannelPayload, viewCount, 'subscribe_channel');
+        if (result.success) eventsSent++; else allSuccess = false;
+    }
+
+
+    // 6. USER ENGAGEMENT (The final watch time/duration metric)
+    const engagementPayload = {
+        client_id: cid,
+        user_properties: userProperties, 
+        events: [{ 
+            name: "user_engagement", 
+            params: { 
+                engagement_time_msec: engagementTime, // The main metric for Watch Time
+                session_id: session_id,
+                debug_mode: true 
+            } 
+        }]
+    };
+    result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
+    if (result.success) eventsSent++; else allSuccess = false;
+
+    console.log(`[YT View ${viewCount}] Session Complete. Total Events Sent: ${eventsSent}.`);
+
+    return allSuccess;
+}
+
+
+app.post('/youtube-boost-mp', async (req, res) => {
+    // Expected body: { ga_id, api_key, views, channel_url, video_urls: ["url1", "url2", ...] }
+    const { ga_id, api_key, views, channel_url, video_urls } = req.body; 
+    const totalViewsRequested = parseInt(views);
+    const clientIdForValidation = generateClientId();
+
+    // 1. Basic Validation
+    if (!ga_id || !api_key || !totalViewsRequested || totalViewsRequested < 1 || totalViewsRequested > 500 || !channel_url || !Array.isArray(video_urls) || video_urls.length === 0) {
+        return res.status(400).json({ 
+            status: 'error', 
+            message: 'Missing GA keys, Views (1-500), Channel URL, or Video URLs (min 1).' 
+        });
+    }
+
+    // Filter and ensure URLs are valid YouTube links
+    const validVideoUrls = video_urls.filter(url => 
+        url && (url.includes('youtube.com/watch') || url.includes('youtu.be/'))
+    );
+
+    if (validVideoUrls.length === 0) {
+        return res.status(400).json({ 
+            status: 'error', 
+            message: 'At least one valid YouTube Video URL is required.' 
+        });
+    }
+
+    // 2. Key Validation
+    const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
+    
+    if (!validationResult.valid) {
+         return res.status(400).json({ 
+            status: 'error', 
+            message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
+        });
+    }
+
+    // 3. View Distribution Logic: Distribute totalViewsRequested evenly across validVideoUrls
+    const viewPlan = [];
+    const numTargets = validVideoUrls.length;
+    const baseViewsPerTarget = Math.floor(totalViewsRequested / numTargets);
+    let remainder = totalViewsRequested % numTargets;
+
+    validVideoUrls.forEach(url => {
+        let viewsForUrl = baseViewsPerTarget;
+        if (remainder > 0) {
+            viewsForUrl++; // Distribute the remainder views one by one
+            remainder--;
+        }
+        for (let i = 0; i < viewsForUrl; i++) {
+            viewPlan.push(url);
+        }
+    });
+    
+    // Final shuffle for realistic distribution over time
+    viewPlan.sort(() => Math.random() - 0.5); 
+    const finalTotalViews = viewPlan.length;
+
+
+    res.json({ 
+        status: 'accepted', 
+        message: `✨ Request accepted. Keys validated. Processing ${finalTotalViews} views across ${numTargets} video(s) started in the background.`
+    });
+
+    // 4. Start the heavy, time-consuming simulation in the background
+    (async () => {
+        console.log(`\n[YOUTUBE BOOSTER START] Starting real simulation for ${finalTotalViews} views across ${numTargets} URLs.`);
+        
+        for (let i = 0; i < finalTotalViews; i++) {
+            const url = viewPlan[i];
+            const currentView = i + 1;
+
+            if (i > 0) {
+                // Use a realistic, slow delay for YouTube traffic (3 to 5 minutes)
+                const delay = randomInt(180000, 300000); // 3 minutes to 5 minutes
+                console.log(`[YT View ${currentView}/${finalTotalViews}] Waiting for ${Math.round(delay / 60000)} minutes...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+
+            await simulateYoutubeView(ga_id, api_key, url, channel_url, currentView);
+        }
+        
+        console.log(`\n[YOUTUBE BOOSTER COMPLETE] Successfully finished ${finalTotalViews} view simulations.`);
+    })();
 });
 
 
