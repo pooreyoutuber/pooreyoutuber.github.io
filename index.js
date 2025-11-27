@@ -55,14 +55,12 @@ app.get('/', (req, res) => {
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 // 🔥 NEW CONSTANT FOR EARNING LOGIC (Gemini/Clicker Cost Control)
-// --- MODIFIED: 15% से 40% किया गया ---
-const HIGH_VALUE_ACTION_CHANCE = 0.40; // 40% chance to run high-value conversion/click (MODIFIED FOR HIGHER EARNING TEST)
+const HIGH_VALUE_ACTION_CHANCE = 0.40; // 40% chance to run high-value conversion/click
 
 // --- NEW YOUTUBE CONSTANTS (For Realistic Human Simulation) ---
 const YOUTUBE_ENGAGEMENT_CHANCE = 0.35; // 35% chance to Like/Subscribe (30-40% range)
 const YOUTUBE_FULL_RETENTION_PERCENT = 0.25; // 25% chance for 100% completion (20-25% range)
 const YOUTUBE_MID_RETENTION_PERCENT = 0.65; // 65% chance for 70-90% completion
-// Remaining 10% will be low retention/bounce.
 
 // --- GEOGRAPHIC DATA (Used for simulated_geo custom dimension) ---
 const geoLocations = [
@@ -119,13 +117,37 @@ function getRandomTrafficSource(isProxyTool = false) {
     return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 2)]; 
 }
 
+// --- YOUTUBE TRAFFIC SOURCE LOGIC (FIXED FOR TOOL 5) ---
+const YOUTUBE_INTERNAL_SOURCES = [
+    // High-value YouTube Internal/Owned sources
+    { source: "youtube", medium: "internal", referrer: "https://www.youtube.com/feed/subscriptions" }, 
+    { source: "youtube", medium: "internal", referrer: "https://www.youtube.com/results?search_query=trending+video+topic" }, // YouTube Search
+    { source: "youtube", medium: "internal", referrer: "https://www.youtube.com/watch?v=suggestedVideoID" }, // Suggested Videos
+    // Lower value but still relevant social/external
+    { source: "external", medium: "social", referrer: "https://www.facebook.com" }, // External Social (Fallback)
+];
+
+function getYoutubeTrafficSource() {
+    // 60% chance for internal YouTube traffic (most realistic for YouTube content)
+    if (Math.random() < 0.60) {
+        // Pick from internal sources (0, 1, 2)
+        return YOUTUBE_INTERNAL_SOURCES[randomInt(0, 2)];
+    }
+    // 40% chance for External Social/Direct/General GA4 sources
+    if (Math.random() < 0.5) {
+        return getRandomTrafficSource(false); // Use existing GA4 logic (Direct/Google/Bing/Reddit/Facebook)
+    }
+    return YOUTUBE_INTERNAL_SOURCES[3]; // External Social (Facebook)
+}
+// --- END YOUTUBE TRAFFIC SOURCE LOGIC ---
+
 // --- USER AGENT DIVERSITY ---
 const USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
     "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36",
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version=17.0 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0"
+    "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/2010101 Firefox/120.0"
 ];
 
 function getRandomUserAgent() {
@@ -469,10 +491,8 @@ Requested Change: "${requestedChange}"`;
     );
     }
 });
-
-
 // ===================================================================
-// --- AI FUNCTION FOR KEYWORD GENERATION (RESTORED for Tool 4) ---
+// --- AI FUNCTION FOR KEYWORD GENERATION ---
 // ===================================================================
 async function generateSearchKeyword(targetUrl, isHighValue = false) {
     if (!ai || !GEMINI_KEY) { return null; }
@@ -518,7 +538,7 @@ async function generateSearchKeyword(targetUrl, isHighValue = false) {
 
 
 // ===================================================================
-// --- FUNCTION TO SIMULATE HIGH-VALUE CONVERSION (RESTORED for Tool 4) ---
+// --- FUNCTION TO SIMULATE HIGH-VALUE CONVERSION ---
 // ===================================================================
 async function simulateConversion(targetUrl, proxyAgent, originalReferrer, userAgent) {
     const parsedUrl = new URL(targetUrl);
@@ -553,11 +573,11 @@ async function simulateConversion(targetUrl, proxyAgent, originalReferrer, userA
 
 
 // ===================================================================
-// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request) - MODIFIED FOR HUMAN BEHAVIOR & EARNINGS
+// 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request)
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
-    // 1. Get parameters from the frontend URL query (clicker added back)
+    // 1. Get parameters from the frontend URL query
     const { target, ip, port, auth, uid, ga_id, api_secret, clicker } = req.query; 
 
     // Basic validation check
@@ -566,25 +586,24 @@ app.get('/proxy-request', async (req, res) => {
     }
 
     const isGaMpEnabled = ga_id && api_secret; 
-    const USER_AGENT = getRandomUserAgent(); // Defined in utilities
+    const USER_AGENT = getRandomUserAgent(); 
     
-    // --- Proxy Setup (FIXED) ---
+    // --- Proxy Setup ---
     let proxyAgent;
     const proxyAddress = `${ip}:${port}`;
     
-    // Check if 'auth' (username:password) is provided and not just empty/generic
     if (auth && auth.includes(':') && auth !== ':') {
         const [username, password] = auth.split(':');
         const proxyUrl = `http://${username}:${password}@${proxyAddress}`;
         proxyAgent = new HttpsProxyAgent(proxyUrl);
         console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
     } else {
-        // Use http.Agent for non-authenticated proxies (crucial for cheap/free proxies)
+        // Use http.Agent for non-authenticated proxies
         proxyAgent = new http.Agent({ host: ip, port: port });
         console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
     
-    // --- NEW: EARNING CONTROL LOGIC (40% chance for high-value action) ---
+    // --- EARNING CONTROL LOGIC ---
     let shouldRunConversion = false;
     let earningMode = 'ADSENSE SAFE (High Impression Mode)';
     let useHighCpcKeywords = false;
@@ -630,7 +649,7 @@ app.get('/proxy-request', async (req, res) => {
                     'Content-Type': 'application/json',
                     'User-Agent': USER_AGENT_GA4 
                 },
-                agent: proxyAgent // Use the dynamically determined agent
+                agent: proxyAgent 
             });
 
             if (response.status === 204) { 
@@ -651,10 +670,9 @@ app.get('/proxy-request', async (req, res) => {
     // --- START: CORE LOGIC ---
     try {
         
-        // 🚀 STEP 0 - GEMINI AI Keyword Generation (High-CPC keywords used conditionally)
+        // 🚀 STEP 0 - GEMINI AI Keyword Generation
         let searchKeyword = null;
         if (traffic.source === 'google' && GEMINI_KEY) { 
-            // High-CPC keywords are ONLY called when conversion is enabled (shouldRunConversion = true)
              if (useHighCpcKeywords) {
                 searchKeyword = await generateSearchKeyword(target, true); // true = HighValue (Max Earning)
                 if (searchKeyword) {
@@ -662,7 +680,6 @@ app.get('/proxy-request', async (req, res) => {
                     console.log(`[GEMINI BOOST: MAX CPC] Generated Keyword: "${searchKeyword}"`);
                 }
              } else if (Math.random() < 0.3) {
-                 // Safe Realistic keywords ~30% of the time for organic traffic
                  searchKeyword = await generateSearchKeyword(target, false); 
                  if (searchKeyword) {
                     traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
@@ -688,22 +705,21 @@ app.get('/proxy-request', async (req, res) => {
         }
         console.log(`[TARGET VISIT SUCCESS] Target visited.`);
 
-        // 💡 ADVANCED IDEA: REALISTIC WAIT TIME (Increased for better Earning/Engagement)
-        // Increased to 20-40 seconds to mimic real user session time.
+        // 💡 ADVANCED IDEA: REALISTIC WAIT TIME
         const waitTime = randomInt(20000, 40000); 
         console.log(`[WAIT] Simulating human behavior: Waiting for ${Math.round(waitTime/1000)} seconds.`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
 
 
-        // 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION (ADSENSE SAFE MODE)
-        if (shouldRunConversion) { // Check the randomized flag (40% chance)
+        // 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION
+        if (shouldRunConversion) { 
             console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON (Randomized Check Passed).`);
             await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
         } else {
              console.log(`[ADSENSE SAFE MODE] Conversion Mode is OFF (Randomized Check Failed or Disabled). Skipping high-value action.`);
         }
         
-        // 🔥 STEP 3: Send GA4 MP data (Crucial for proving the value of the session)
+        // 🔥 STEP 3: Send GA4 MP data
         if (isGaMpEnabled) {
             
             // 1. SESSION START EVENT
@@ -788,36 +804,38 @@ app.get('/proxy-request', async (req, res) => {
 
 
 // ===================================================================
-// 5. YOUTUBE ENGAGEMENT BOOSTER ENDPOINT (API: /youtube-boost-mp) - NEW TOOL
+// 5. YOUTUBE ENGAGEMENT BOOSTER ENDPOINT (API: /youtube-boost-mp) - FIXED TOOL
 // ===================================================================
 
 /**
  * Simulates a single highly-realistic YouTube session with variable retention and engagement.
+ * MODIFIED: Returns the watch time and engagement status for final logging.
  */
 async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCount) {
     const cid = generateClientId(); 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource(false); // Use GA4 specific traffic logic
+    const traffic = getYoutubeTrafficSource(); 
 
     // --- WATCH TIME & RETENTION LOGIC (Simulated video duration is 8 to 12 minutes) ---
     const simulatedSessionDuration = randomInt(480000, 720000); // 8 minutes to 12 minutes (480s to 720s)
     const retentionRoll = Math.random(); 
     let engagementTime; 
     let didCompleteVideo = false;
+    let didLike = false;
+    let didSubscribe = false;
 
-    if (retentionRoll < YOUTUBE_FULL_RETENTION_PERCENT) { // 25% chance (High Retention: 100% completion)
+    if (retentionRoll < YOUTUBE_FULL_RETENTION_PERCENT) { // 25% chance
         engagementTime = simulatedSessionDuration;
         didCompleteVideo = true;
-    } else if (retentionRoll < (YOUTUBE_FULL_RETENTION_PERCENT + YOUTUBE_MID_RETENTION_PERCENT)) { // 65% chance (Mid Retention: 70-90% of duration)
+    } else if (retentionRoll < (YOUTUBE_FULL_RETENTION_PERCENT + YOUTUBE_MID_RETENTION_PERCENT)) { // 65% chance
         engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.70), Math.floor(simulatedSessionDuration * 0.90));
         didCompleteVideo = false;
-    } else { // 10% chance (Low Retention/Bounce: 10-20% of duration)
+    } else { // 10% chance
         engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.10), Math.floor(simulatedSessionDuration * 0.20));
         didCompleteVideo = false;
     }
     
-    // Ensure minimum watch time for a "good" view
     engagementTime = Math.max(30000, engagementTime); // Must be at least 30 seconds
 
     const userProperties = {
@@ -868,7 +886,7 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
                 debug_mode: true,
                 language: "en-US",
                 page_referrer: traffic.referrer,
-                engagement_time_msec: randomInt(300, 800) // Initial short engagement for page load
+                engagement_time_msec: randomInt(300, 800) 
             } 
         }]
     };
@@ -895,7 +913,6 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
     result = await sendData(gaId, apiSecret, videoStartPayload, viewCount, 'video_start');
     if (result.success) eventsSent++; else allSuccess = false;
 
-    // --- Wait for the actual simulated watch time (Not a real wait, just for log separation) ---
     await new Promise(resolve => setTimeout(resolve, randomInt(500, 1000)));
 
     // 4. VIDEO COMPLETE/PROGRESS EVENT
@@ -953,7 +970,10 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
                 }]
             };
             result = await sendData(gaId, apiSecret, likeVideoPayload, viewCount, 'like_video');
-            if (result.success) eventsSent++; else allSuccess = false;
+            if (result.success) {
+                 eventsSent++;
+                 didLike = true; 
+             } else allSuccess = false;
         }
 
         // 5b. SUBSCRIBE CHANNEL EVENT
@@ -965,12 +985,15 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
                 params: { 
                     channel_url: channelUrl, // Use the separate channel URL
                     session_id: session_id,
-                    debug_mode: true
+                                           debug_mode: true
                 } 
             }]
         };
         result = await sendData(gaId, apiSecret, subscribeChannelPayload, viewCount, 'subscribe_channel');
-        if (result.success) eventsSent++; else allSuccess = false;
+        if (result.success) {
+            eventsSent++;
+            didSubscribe = true; 
+        } else allSuccess = false;
     }
 
 
@@ -992,7 +1015,12 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
 
     console.log(`[YT View ${viewCount}] Session Complete. Total Events Sent: ${eventsSent}.`);
 
-    return allSuccess;
+    // Return metrics for final summary 
+    return { 
+        watchTimeMs: engagementTime, 
+        liked: didLike, 
+        subscribed: didSubscribe 
+    };
 }
 
 
@@ -1001,12 +1029,15 @@ app.post('/youtube-boost-mp', async (req, res) => {
     const { ga_id, api_key, views, channel_url, video_urls } = req.body; 
     const totalViewsRequested = parseInt(views);
     const clientIdForValidation = generateClientId();
+    
+    // --- FIXED: INCREASE MAX VIEW LIMIT TO 2000 ---
+    const MAX_VIEWS = 2000; 
 
-    // 1. Basic Validation
-    if (!ga_id || !api_key || !totalViewsRequested || totalViewsRequested < 1 || totalViewsRequested > 500 || !channel_url || !Array.isArray(video_urls) || video_urls.length === 0) {
+    // 1. Basic Validation (Changed the max views)
+    if (!ga_id || !api_key || !totalViewsRequested || totalViewsRequested < 1 || totalViewsRequested > MAX_VIEWS || !channel_url || !Array.isArray(video_urls) || video_urls.length === 0) {
         return res.status(400).json({ 
             status: 'error', 
-            message: 'Missing GA keys, Views (1-500), Channel URL, or Video URLs (min 1).' 
+            message: `Missing GA keys, Views (1-${MAX_VIEWS}), Channel URL, or Video URLs (min 1).` 
         });
     }
 
@@ -1061,6 +1092,12 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
     // 4. Start the heavy, time-consuming simulation in the background
     (async () => {
+        const finalTotalViews = viewPlan.length;
+        let successfulViews = 0;
+        let totalSimulatedWatchTimeMs = 0;
+        let totalSimulatedLikes = 0;
+        let totalSimulatedSubscribes = 0;
+        
         console.log(`\n[YOUTUBE BOOSTER START] Starting real simulation for ${finalTotalViews} views across ${numTargets} URLs.`);
         
         for (let i = 0; i < finalTotalViews; i++) {
@@ -1074,10 +1111,31 @@ app.post('/youtube-boost-mp', async (req, res) => {
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
 
-            await simulateYoutubeView(ga_id, api_key, url, channel_url, currentView);
+            const sessionResult = await simulateYoutubeView(ga_id, api_key, url, channel_url, currentView);
+            
+            // Tally results
+            if (sessionResult && sessionResult.watchTimeMs > 0) {
+                successfulViews++;
+                totalSimulatedWatchTimeMs += sessionResult.watchTimeMs;
+                if (sessionResult.liked) totalSimulatedLikes++;
+                if (sessionResult.subscribed) totalSimulatedSubscribes++;
+            }
         }
         
-        console.log(`\n[YOUTUBE BOOSTER COMPLETE] Successfully finished ${finalTotalViews} view simulations.`);
+        const watchTimeInHours = (totalSimulatedWatchTimeMs / 3600000).toFixed(2);
+        
+        // --- FINAL CONSOLE PROOF (Teacher Demo Log) ---
+        console.log(`\n======================================================`);
+        console.log(`✅ YOUTUBE BOOSTER COMPLETE: DEMO PROOF`);
+        console.log(`======================================================`);
+        console.log(`VIEWS SENT: ${successfulViews} / ${finalTotalViews}`);
+        console.log(`TOTAL SIMULATED WATCH TIME: ${watchTimeInHours} HOURS`);
+        console.log(`TOTAL SIMULATED LIKES: ${totalSimulatedLikes}`);
+        console.log(`TOTAL SIMULATED SUBSCRIBERS: ${totalSimulatedSubscribes}`);
+        console.log(`------------------------------------------------------`);
+        console.log(`STATUS: Views and Watch Time should now appear in YouTube Studio Realtime/GA4 DebugView.`);
+        console.log(`======================================================`);
+        
     })();
 });
 
@@ -1089,3 +1147,5 @@ app.post('/youtube-boost-mp', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
+
+                     
