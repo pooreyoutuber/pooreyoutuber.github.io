@@ -58,7 +58,8 @@ const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + mi
 const HIGH_VALUE_ACTION_CHANCE = 0.40; // 40% chance to run high-value conversion/click
 
 // --- NEW YOUTUBE CONSTANTS (For Realistic Human Simulation) ---
-const YOUTUBE_ENGAGEMENT_CHANCE = 0.35; // 35% chance to Like/Subscribe (30-40% range)
+// 🔥 FIXED: Engagement rate lowered from 0.35 to 0.08
+const YOUTUBE_ENGAGEMENT_CHANCE = 0.08; // 8% chance to Like/Subscribe (More realistic)
 const YOUTUBE_FULL_RETENTION_PERCENT = 0.25; // 25% chance for 100% completion (20-25% range)
 const YOUTUBE_MID_RETENTION_PERCENT = 0.65; // 65% chance for 70-90% completion
 
@@ -168,7 +169,9 @@ const getOptimalDelay = (totalViews) => {
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
     payload.timestamp_micros = String(Date.now() * 1000); 
-    const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
+    // 🔥 FIXED: Use a random User-Agent for every request (Crucial for YouTube)
+    // OLD: const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
+    const USER_AGENT = getRandomUserAgent(); 
     
     try {
         const response = await nodeFetch(gaEndpoint, { 
@@ -639,6 +642,7 @@ app.get('/proxy-request', async (req, res) => {
         
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; 
         payload.timestamp_micros = String(Date.now() * 1000); 
+        // Note: For Proxy Tool, we use the old static agent for GA MP calls as the proxy handles IP/location spoofing.
         const USER_AGENT_GA4 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
         
         try { 
@@ -831,8 +835,10 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
     } else if (retentionRoll < (YOUTUBE_FULL_RETENTION_PERCENT + YOUTUBE_MID_RETENTION_PERCENT)) { // 65% chance
         engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.70), Math.floor(simulatedSessionDuration * 0.90));
         didCompleteVideo = false;
-    } else { // 10% chance
-        engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.10), Math.floor(simulatedSessionDuration * 0.20));
+    } else { 
+        // 🔥 FIXED: Low Retention (10% chance) must be stronger (30%-50% completion)
+        // OLD: engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.10), Math.floor(simulatedSessionDuration * 0.20));
+        engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.30), Math.floor(simulatedSessionDuration * 0.50));
         didCompleteVideo = false;
     }
     
@@ -952,10 +958,10 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
         if (result.success) eventsSent++; else allSuccess = false;
     }
     
-    // 5. LIKE & SUBSCRIBE ACTION (35% Chance)
+    // 5. LIKE & SUBSCRIBE ACTION (FIXED: 8% Chance)
     if (Math.random() < YOUTUBE_ENGAGEMENT_CHANCE) { 
         
-        // 5a. LIKE VIDEO EVENT (50% chance of a like, within the 35% engagement block)
+        // 5a. LIKE VIDEO EVENT (50% chance of a like, within the 8% engagement block)
         if (Math.random() < 0.5) { 
              const likeVideoPayload = {
                 client_id: cid,
@@ -1105,8 +1111,8 @@ app.post('/youtube-boost-mp', async (req, res) => {
             const currentView = i + 1;
 
             if (i > 0) {
-                // Use a realistic, slow delay for YouTube traffic (3 to 5 minutes)
-                const delay = randomInt(180000, 300000); // 3 minutes to 5 minutes
+                // 🔥 FIXED: Delay increased from 3-5 minutes to 10-20 minutes
+                const delay = randomInt(600000, 1200000); // 10 minutes (600000) to 20 minutes (1200000)
                 console.log(`[YT View ${currentView}/${finalTotalViews}] Waiting for ${Math.round(delay / 60000)} minutes...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
@@ -1147,5 +1153,3 @@ app.post('/youtube-boost-mp', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-
-                     
