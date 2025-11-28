@@ -96,35 +96,27 @@
             color: #007bff;
             border: 1px solid #cce5ff;
         }
-        
-        /* GA Keys Section - HIDDEN NOW */
-        .ga-keys-section {
-            background-color: #f7f7f7;
-            padding: 20px;
-            border-top: 1px solid #eee;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="tool-header">
-        <h2>🚀 YouTube Views & Engagement Booster</h2>
-        <p>Your views and watch time will be processed in the background on the server.</p>
+        <h2>🚀 YouTube Views & Engagement Booster (DEMO MODE)</h2>
+        <p>Processing is now ultra-fast for testing. Results will show INSTANTLY in Realtime Analytics.</p>
     </div>
 
     <div class="form-section">
         <label for="videoUrls">Videos URLs (One per line, max 5)</label>
         <textarea id="videoUrls" placeholder="Example:&#10;https://www.youtube.com/watch?v=ABCDE12345&#10;https://youtu.be/ZYXWV9876" required></textarea>
 
-        <label for="channelUrl">Your Channel URL (For Subscriber Action)</label>
-        <input type="text" id="channelUrl" placeholder="Example: https://www.youtube.com/@YourChannelName" required>
+        <label for="channelUrl">Your Channel URL (Subscriber Action के लिए - वैकल्पिक)</label>
+        <input type="text" id="channelUrl" placeholder="Example: https://www.youtube.com/@YourChannelName (वैकल्पिक)">
 
         <label for="totalViews">Total Views to Send (Max 2000)</label>
         <input type="number" id="totalViews" placeholder="e.g., 500" min="1" max="2000" required>
         
-        <button class="submit-btn" onclick="getYoutubeBoost()">Start Background Boost</button>
+        <button class="submit-btn" onclick="getYoutubeBoost()">Start Background Boost (SUPER FAST)</button>
 
         <div id="statusMessage">
             Status: Ready to send views to your Render Server.
@@ -138,19 +130,16 @@
     const API_URL = `${API_BASE_URL}/youtube-boost-mp`;
 
     function getYoutubeBoost() {
-        // Removed: const gaId = document.getElementById('gaId').value.trim();
-        // Removed: const apiSecret = document.getElementById('apiSecret').value.trim();
-        
         const videoUrlsInput = document.getElementById('videoUrls').value.trim();
         const videoUrls = videoUrlsInput.split('\n').map(url => url.trim()).filter(url => url.length > 0);
-        const channelUrl = document.getElementById('channelUrl').value.trim();
+        const channelUrl = document.getElementById('channelUrl').value.trim(); // Optional now
         const totalViews = document.getElementById('totalViews').value.trim();
         const statusMessage = document.getElementById('statusMessage');
 
         // Validation 
-        if (!videoUrlsInput || videoUrls.length === 0 || !channelUrl || !totalViews) {
+        if (!videoUrlsInput || videoUrls.length === 0 || !totalViews) {
             statusMessage.style.color = 'red';
-            statusMessage.innerText = '❌ ERROR: Please fill out all required fields (URLs, Channel, and Views).';
+            statusMessage.innerText = '❌ ERROR: Please fill out required fields (URLs and Views).';
             return;
         }
 
@@ -173,7 +162,7 @@
         statusMessage.style.color = '#ff8c00'; // Orange
         statusMessage.innerText = '⏳ Initiating boost... (Starting Server Background Process)';
 
-        // Data payload matching the new /youtube-boost-mp endpoint (GA Keys are now removed)
+        // Data payload: GA Keys are EXCLUDED as they are hardcoded on the server
         const payload = {
             views: totalViews,
             video_urls: videoUrls, 
@@ -191,8 +180,8 @@
         .then(data => {
             if (data.status === 'accepted') {
                 statusMessage.style.color = 'green';
-                // Success message emphasizes background processing
-                statusMessage.innerText = `✅ SUCCESS! Request for ${data.finalViews || viewCount} views accepted. Processing started in the background on Render Server. You can now safely close your browser.`;
+                // Message emphasizes fast background processing
+                statusMessage.innerText = `✅ SUCCESS! Request for ${data.finalViews || viewCount} views accepted. Processing started in the background (SUPER FAST MODE). Now check YouTube Realtime Analytics!`;
             } else {
                 statusMessage.style.color = 'red';
                 statusMessage.innerText = `❌ ERROR: ${data.message || 'Unknown error occurred.'}. Check your Render server logs.`;
