@@ -130,7 +130,10 @@
         </div>
         
         <label for="videoUrls">Videos URLs (One per line, max 5)</label>
-        <textarea id="videoUrls" placeholder="Example:&#10;https://www.youtube.com/watch?v=ABCDE12345&#10;https://youtu.be/ZYXWV9876" required></textarea>
+        <textarea id="videoUrls" placeholder="Example:
+https://www.youtube.com/watch?v=ABCDE12345
+https://youtu.be/ZYXWV9876
+https://www.youtube.com/shorts/XYZ12345" required></textarea>
 
         <label for="channelUrl">Your Channel URL (Subscriber Action के लिए - वैकल्पिक)</label>
         <input type="text" id="channelUrl" placeholder="Example: https://www.youtube.com/@YourChannelName (वैकल्पिक)">
@@ -153,11 +156,12 @@
     const API_URL = `${API_BASE_URL}/youtube-boost-mp`;
 
     function getYoutubeBoost() {
-        // 🔥 Keys are taken from the frontend inputs
+        // Keys are taken from the frontend inputs
         const gaId = document.getElementById('gaId').value.trim();
         const apiSecret = document.getElementById('apiSecret').value.trim();
         
         const videoUrlsInput = document.getElementById('videoUrls').value.trim();
+        // Filtering out empty lines
         const videoUrls = videoUrlsInput.split('\n').map(url => url.trim()).filter(url => url.length > 0);
         const channelUrl = document.getElementById('channelUrl').value.trim(); 
         const totalViews = document.getElementById('totalViews').value.trim();
@@ -177,22 +181,25 @@
             return;
         }
 
-        const validYoutubeUrlRegex = /^(https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}(?:&.*)?)$/;
+        // 🔥🔥🔥 FIXED REGEX: Made the validation more robust to include /shorts/ and be less strict
+        // This regex checks for: youtube.com/watch?v= or youtu.be/ or youtube.com/shorts/ followed by an 11-char ID. Protocol and www are optional.
+        const validYoutubeUrlRegex = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&].*)?$/;
+        
         const allValid = videoUrls.every(url => url.match(validYoutubeUrlRegex));
 
         if (!allValid) {
             statusMessage.style.color = 'red';
-            statusMessage.innerText = '❌ ERROR: One or more provided URLs are not valid YouTube links.';
+            statusMessage.innerText = '❌ ERROR: One or more provided URLs are not valid YouTube links (e.g., missing 11-character ID, or incorrect format).';
             return;
         }
 
         statusMessage.style.color = '#ff8c00'; // Orange
-        statusMessage.innerText = '⏳ Initiating boost... (Starting Server Background Process)';
+        statusMessage.innerText = '⏳ Initiating boost... (Validating Keys and Starting Server Process)';
 
         // Data payload includes GA Keys
         const payload = {
-            ga_id: gaId, // Key added
-            api_key: apiSecret, // Key added
+            ga_id: gaId, 
+            api_key: apiSecret, 
             views: totalViews,
             video_urls: videoUrls, 
             channel_url: channelUrl
