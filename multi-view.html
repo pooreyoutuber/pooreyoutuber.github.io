@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Browser Earning: Professional Fingerprinting System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-ZPMC525FGT');
-</script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT'); 
+    </script>
+    
     <style>
-        /* CSS: Ultra-Modern Browser UI Look */
+        /* CSS: Ultra-Modern Browser UI Look (Original CSS Structure) */
         :root {
             --primary-color: #007bff;
             --secondary-color: #f8f9fa;
@@ -22,6 +24,9 @@
             --control-bg: #e9ecef;
             --button-success: #28a745; 
             --button-danger: #dc3545; 
+            --running-color: #17a2b8;
+            --clicking-color: #ffc107;
+            --error-color: #dc3545;
         }
 
         body {
@@ -30,489 +35,210 @@
             padding: 0;
             background-color: var(--secondary-color);
             overflow-x: hidden;
-            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .header {
-            background-color: var(--header-bg); 
+            background-color: var(--header-bg);
             color: white;
             padding: 15px 20px;
-            font-size: 22px;
-            font-weight: 700;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             text-align: center;
-        }
-        .header small {
-            display: block;
-            font-size: 14px;
-            opacity: 0.9;
-            color: #ffc107; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .controls-panel {
+        .controls {
             padding: 20px;
             background-color: var(--control-bg);
-            border-bottom: 3px solid var(--button-danger); 
-            margin-bottom: 25px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .url-section {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            align-items: center; 
-        }
-
-        #urlInput {
-            flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        #loadButton {
-            padding: 12px 25px;
-            background-color: var(--button-success); 
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: bold;
-            white-space: nowrap; 
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px; 
-            margin-bottom: 10px;
-        }
-
-        .control-group input[type="number"] {
-             width: 60px; 
-             padding: 8px; 
-             border-radius: 4px; 
-             border: 1px solid #ccc;
-             font-size: 13px;
-             text-align: center;
-        }
-
-        .control-group label {
-            font-size: 14px;
-            color: #495057;
-            display: flex;
-            align-items: center;
-            font-weight: 500;
-        }
-        
-        .instructions {
-            background-color: #fff3cd; 
-            color: #856404;
-            border: 1px solid #ffeeba;
-            padding: 15px;
-            border-radius: 6px;
-            font-size: 13px;
-            margin-top: 20px; 
-        }
-        .instructions strong {
-            color: #dc3545; 
-            display: block;
-            margin-top: 5px;
-        }
-
-        .slots-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; 
-            gap: 25px;
-            padding: 0 20px;
-        }
-
-        /* --- Browser Container Styles --- */
-        .iframe-container {
-            background-color: var(--slot-bg);
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            overflow: hidden; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            height: 400px; 
-            position: relative;
-        }
-
-        .browser-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 10px;
-            background-color: #f1f3f4; /* Browser Tab Color */
             border-bottom: 1px solid #ccc;
-            font-size: 12px;
-            color: #6c757d;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
         }
-        .browser-controls span {
-            margin-left: 8px;
-            cursor: pointer;
-        }
-        .browser-controls .fa-times { color: var(--button-danger); }
-        .browser-controls .fa-minus { color: #ffc107; }
 
-        .slot-info {
+        .controls input[type="text"], .controls input[type="number"] {
+            padding: 8px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            width: 250px;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: var(--button-success);
+            color: white;
+            transition: background-color 0.2s;
+        }
+        
+        .controls button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .browser-slot {
+            background-color: var(--slot-bg);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .slot-buttons {
+            padding: 10px;
+            background-color: #f1f1f1;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 10px;
-            font-size: 13px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #dee2e6;
         }
-        .slot-info strong { color: var(--primary-color); font-size: 14px; }
-        .slot-info small { color: #6c757d; }
 
-        .browser-iframe {
-            width: 100%;
-            height: calc(100% - 90px); /* Adjusted height for new headers */
-            border: none;
-            background-color: white;
-        }
-        
-        .slot-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #eee;
-        }
-        .slot-buttons button {
-            flex-grow: 1;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: bold;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-        }
-        .slot-buttons .view-button {
-            background-color: #007bff;
-            color: white;
-        }
-        .slot-buttons .status {
-            background-color: #f5f5f5;
-            color: #6c757d;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
+        .slot-buttons span {
+            font-size: 0.9em;
             font-weight: bold;
         }
         
         /* Status Colors */
-        .status.running { background-color: #d4edda; color: #155724; } 
-        .status.loading { background-color: #cfe2ff; color: #052c65; } 
-        .status.clicking { background-color: #f8d7da; color: #721c24; } 
+        .status { color: #6c757d; }
+        .running { color: var(--running-color); }
+        .clicking { color: var(--clicking-color); }
+        .error { color: var(--error-color); }
+        .loading { color: var(--primary-color); }
 
-
-        .activity-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 40px; 
-            color: #dc3545; 
-            opacity: 0; 
-            z-index: 10;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-
-        .activity-indicator.click-active {
-            opacity: 1; 
-            transform: translate(-50%, -50%) scale(1.2);
-            animation: spin 0.5s infinite linear;
-        }
-        @keyframes spin {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        @media (max-width: 992px) {
-            .slots-grid {
-                grid-template-columns: 1fr; 
-            }
-            .iframe-container {
-                height: 350px;
-            }
+        .browser-iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
         }
     </style>
 </head>
 <body>
-    
+
     <div class="header">
-        Professional Browser Fingerprinting System
-        <small>Simulating 10 Unique Global Users with High-Value Traffic</small>
+        <h1>College Earning Tool 4.0: High-Value Traffic</h1>
+        <p>Target URL par Adsense Earning ke liye Server-Side Simulation (Tool 4: /proxy-request)</p>
     </div>
 
-    <div class="controls-panel">
-        <div class="url-section">
-            <label for="urlInput" style="white-space: nowrap; font-size: 14px;">Target URL:</label>
-            <input type="text" id="urlInput" placeholder="https://yourwebsite.com">
-            <button id="loadButton"><i class="fas fa-play"></i> START SIMULATION</button>
-        </div>
+    <div class="controls">
+        <input type="text" id="urlInput" placeholder="Enter Target URL (e.g., yourwebsite.com)">
+        
+        <label for="minTimeInput">Min Session Time (sec):</label>
+        <input type="number" id="minTimeInput" value="120" min="10" max="600">
+        
+        <label for="maxTimeInput">Max Session Time (sec):</label>
+        <input type="number" id="maxTimeInput" value="300" min="10" max="600">
+        
+        <label>
+            <input type="checkbox" id="activeUserCheck" checked>
+            Active User (Adsense Click / Conversion)
+        </label>
+        
+        <label>
+            <input type="checkbox" id="randomDelayCheck" checked>
+            Random Start Delay
+        </label>
 
-        <div class="control-group">
-            <label>
-                <input type="checkbox" id="activeUserCheck" checked>
-                **ULTRA-HIGH VALUE** Mode: Cycle Min:
-            </label>
-            <input type="number" id="minTimeInput" value="120" min="60">
-            <label>Max:</label>
-            <input type="number" id="maxTimeInput" value="240" min="120">
-            <label>seconds (Maximizes GA Session Value).</label>
-        </div>
+        <button id="loadButton">START SIMULATION</button>
+    </div>
 
-        <div class="control-group">
-            <label><input type="checkbox" id="autoScrollCheck" checked> Auto Scroll (Human-like)</label>
-            <label><input type="checkbox" id="autoClicksCheck" checked> Aggressive Click (5-15s Interval)</label>
-            <label><input type="checkbox" id="randomDelayCheck" checked> Staggered Initial Load</label>
+    <div class="grid-container">
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 1 (US)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
         </div>
-
-        <div class="instructions">
-            **सिस्टम अपडेट (Render Cloud URL शामिल):** Render URL कोड में डाल दिया गया है। सभी ट्रैफिक गतिविधि (Reload/Click/Scroll) क्लाइंट-साइड (IFrame के अंदर) से हो रही है।
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 2 (DE)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 3 (CA)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 4 (JP)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 5 (IN)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 6 (UK)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 7 (US)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 8 (AU)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 9 (FR)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
+        </div>
+        <div class="browser-slot">
+            <div class="slot-buttons"><span>Slot 10 (BR)</span><span class="status">Ready</span></div>
+            <iframe class="browser-iframe" src="about:blank"></iframe>
         </div>
     </div>
 
-    <div class="slots-grid" id="slotsGrid">
-        <div class="iframe-container" data-slot-id="0">
-            <div class="browser-header">
-                <i class="fab fa-chrome"></i> **Chrome 120** on Windows 10
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 1 (US)</strong> <small>Proxy: 143.111.46.253 | Resolution: 1920x1080</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe0" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe0').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="0"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="1">
-            <div class="browser-header">
-                <i class="fab fa-firefox-browser"></i> **Firefox 118** on macOS Ventura
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 2 (DE)</strong> <small>Proxy: 31.58.30.178 | Resolution: 1440x900</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe1" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe1').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="1"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-        
-        <div class="iframe-container" data-slot-id="2">
-            <div class="browser-header">
-                <i class="fab fa-edge"></i> **Edge 119** on Windows 11
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 3 (CA)</strong> <small>Proxy: 38.170.177.17 | Resolution: 1366x768</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe2" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe2').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="2"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="3">
-            <div class="browser-header">
-                <i class="fab fa-chrome"></i> **Chrome 121** on Linux Ubuntu
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 4 (US)</strong> <small>Proxy: 168.25.230.198 | Resolution: 1600x900</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe3" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe3').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="3"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="4">
-            <div class="browser-header">
-                <i class="fab fa-firefox-browser"></i> **Firefox 117** on Windows 10
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 5 (US)</strong> <small>Proxy: 95.38.101.87 | Resolution: 1280x800</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe4" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe4').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="4"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="5">
-            <div class="browser-header">
-                <i class="fab fa-safari"></i> **Safari 17** on macOS Sonoma
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 6 (CA)</strong> <small>Proxy: 107.97.90.227 | Resolution: 2560x1440</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe5" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe5').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="5"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="6">
-            <div class="browser-header">
-                <i class="fab fa-chrome"></i> **Chrome 119** on Windows 10
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 7 (US)</strong> <small>Proxy: 64.127.96.74 | Resolution: 1920x1200</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe6" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe6').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="6"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="7">
-            <div class="browser-header">
-                <i class="fab fa-firefox-browser"></i> **Firefox 116** on Linux Fedora
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 8 (AU)</strong> <small>Proxy: 210.19.27.130 | Resolution: 1024x768</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe7" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe7').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="7"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-        
-        <div class="iframe-container" data-slot-id="8">
-            <div class="browser-header">
-                <i class="fab fa-edge"></i> **Edge 120** on Windows 10
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 9 (FR)</strong> <small>Proxy: 109.171.192.17 | Resolution: 1920x1080</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe8" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe8').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="8"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-
-        <div class="iframe-container" data-slot-id="9">
-            <div class="browser-header">
-                <i class="fab fa-android"></i> **Chrome 122** on Android 13
-                <div class="browser-controls">
-                    <i class="fas fa-minus"></i>
-                    <i class="fas fa-square"></i>
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            <div class="slot-info">
-                <strong>SLOT 10 (IN)</strong> <small>Proxy: 49.37.12.18 | Resolution: 375x667 (Mobile)</small>
-            </div>
-            <iframe class="browser-iframe" id="iframe9" src="about:blank"></iframe>
-            <div class="slot-buttons">
-                <button class="view-button" onclick="window.open(document.getElementById('iframe9').src, '_blank')"><i class="fas fa-external-link-alt"></i> Full View</button>
-                <span class="status">Ready (Stopped)</span>
-            </div>
-             <div class="activity-indicator" data-indicator-for="9"><i class="fas fa-mouse-pointer"></i></div>
-        </div>
-
-    </div> 
-    
     <script>
-        // 💡 Render Backend URL: जैसा कि आपने निर्देश दिया है, Render URL को यहाँ जोड़ा गया है।
-        const API_BASE_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com';
+        // --- Naya aur Adsense Earning-Ready JavaScript Code ---
+
+        // =======================================================
+        // ⚠️ CONFIGURATION - YEH 3 CHEEZEIN TEACHER KE SAMNE ZARUR BHAREIN
+        // =======================================================
+        // 💡 1. SERVER BASE URL: Aapke live server ka URL (Jahan index.js chal raha hai).
+        const SERVER_BASE_URL = 'YOUR_LIVE_SERVER_URL'; 
         
-        // JavaScript: ULTRA-HIGH EARNING Optimization Logic (with long session time)
+        // 💡 2. GA4 ID: Aapki website ki Google Analytics ID (Adsense click/conversion ke liye zaruri).
+        const YOUR_GA_ID = 'G-XXXXXXXXXX'; // Example: G-ZPMC525FGT
+        
+        // 💡 3. API SECRET: Aapki GA4 Measurement Protocol Secret Key.
+        const YOUR_API_SECRET = 'YOUR_API_SECRET_KEY'; // Example: A1B2C3D4E5F6G7H8I9J0
+        // =======================================================
+
+        // HTML Slots se li gayi Proxy aur Geo Data (Total 10 Slots)
+        const PROXY_DATA = [
+            { ip: '143.111.46.253', port: '8080', geo: 'US', auth: '' }, 
+            { ip: '31.58.30.178', port: '8080', geo: 'DE', auth: '' }, 
+            { ip: '38.170.177.17', port: '8080', geo: 'CA', auth: '' },
+            { ip: '58.12.18.232', port: '8080', geo: 'JP', auth: '' },
+            { ip: '103.117.151.200', port: '8080', geo: 'IN', auth: '' },
+            { ip: '202.43.187.12', port: '8080', geo: 'UK', auth: '' },
+            { ip: '64.127.96.74', port: '8080', geo: 'US', auth: '' },
+            { ip: '210.19.27.130', port: '8080', geo: 'AU', auth: '' },
+            { ip: '109.171.192.17', port: '8080', geo: 'FR', auth: '' },
+            { ip: '170.82.179.11', port: '8080', geo: 'BR', auth: '' }
+        ];
+
+        // DOM Elements ko select karna
+        const iframes = document.querySelectorAll('.browser-iframe');
+        const statusSpans = document.querySelectorAll('.slot-buttons .status');
         const urlInput = document.getElementById('urlInput');
         const loadButton = document.getElementById('loadButton');
-        
-        const activeUserCheck = document.getElementById('activeUserCheck'); 
-        const autoScrollCheck = document.getElementById('autoScrollCheck');
-        const autoClicksCheck = document.getElementById('autoClicksCheck');
-        const minTimeInput = document.getElementById('minTimeInput'); 
+        const activeUserCheck = document.getElementById('activeUserCheck');
+        const minTimeInput = document.getElementById('minTimeInput');
         const maxTimeInput = document.getElementById('maxTimeInput');
-        
-        const numIframes = 10;
-        const iframeContainers = document.querySelectorAll('.iframe-container');
-        const iframes = Array.from({ length: numIframes }, (_, i) => document.getElementById(`iframe${i}`));
-        const statusSpans = Array.from({ length: numIframes }, (_, i) => iframeContainers[i].querySelector('.status'));
-        const indicators = Array.from({ length: numIframes }, (_, i) => iframeContainers[i].querySelector('.activity-indicator'));
-        
-        let reloadIntervalId = null;
-        let scrollIntervalId = null;
-        let clickIntervalId = null; 
+        const randomDelayCheck = document.getElementById('randomDelayCheck');
 
-        loadButton.addEventListener('click', startMultiBrowser);
-        
-        activeUserCheck.addEventListener('change', () => toggleIntervals(activeUserCheck.checked, 'reload'));
-        autoScrollCheck.addEventListener('change', () => toggleIntervals(autoScrollCheck.checked, 'scroll'));
-        autoClicksCheck.addEventListener('change', () => toggleIntervals(autoClicksCheck.checked, 'click'));
 
         function normalizeUrl(url) {
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -523,43 +249,71 @@
 
         function updateStatus(index, state, message = '') {
             const statusSpan = statusSpans[index];
-            statusSpan.className = 'status'; 
-            statusSpan.textContent = message || (state.charAt(0).toUpperCase() + state.slice(1) + (state === 'running' ? ' (Active)' : ''));
+            statusSpan.className = 'status';
+            statusSpan.textContent = message || (state.charAt(0).toUpperCase() + state.slice(1));
             if (state !== 'stopped' && state !== 'ready') {
                 statusSpan.classList.add(state);
             }
         }
-        
-        function clearStorage(iframe) {
+
+        function generateSimpleId(index) {
+            // Har session ke liye ek unique Client ID (uid) generate karta hai
+            return `client-${index}-${Date.now().toString(36)}${Math.random().toString(36).substr(2)}`;
+        }
+
+        /**
+         * Adsense Earning ke liye High-Value Server-Side Simulation karta hai.
+         */
+        async function simulateApiCall(index, targetUrl, proxyData) {
+            const uid = generateSimpleId(index);
+            // '1' ka matlab hai ki server Adsense click/conversion event bhejega (Yahi main earning logic hai)
+            const clickerValue = activeUserCheck.checked ? '1' : '0'; 
+            
+            // Final API URL (index.js ke Tool 4 /proxy-request ko call karta hai)
+            const apiUrl = new URL(`${SERVER_BASE_URL}/proxy-request`);
+            apiUrl.searchParams.append('target', targetUrl);
+            apiUrl.searchParams.append('ip', proxyData.ip);
+            apiUrl.searchParams.append('port', proxyData.port);
+            apiUrl.searchParams.append('auth', proxyData.auth);
+            apiUrl.searchParams.append('uid', uid); 
+            apiUrl.searchParams.append('ga_id', YOUR_GA_ID); 
+            apiUrl.searchParams.append('api_secret', YOUR_API_SECRET); 
+            apiUrl.searchParams.append('clicker', clickerValue); 
+
+            // Iframe ko Loading status par update karna
+            iframes[index].src = 'about:blank';
+            updateStatus(index, 'loading', `API Call: ${proxyData.geo} (Loading...)`);
+
             try {
-                iframe.contentWindow.localStorage.clear();
-                iframe.contentWindow.sessionStorage.clear();
-            } catch (e) {
-                // Ignore Cross-Origin error
+                const response = await fetch(apiUrl.toString());
+                const data = await response.json();
+
+                if (data.status === 'OK') {
+                    // SUCCESS: Iframe ko target URL se load karein (sirf display ke liye)
+                    iframes[index].src = targetUrl;
+                    
+                    // Teacher ke liye zaruri message: "Adsense Click" aur "Search Keyword"
+                    const msg = clickerValue === '1' 
+                        ? `✅ Earning Click Sent from: ${data.simulatedSearchKeyword || 'Gemini Search'}` 
+                        : '✅ Session OK';
+                        
+                    updateStatus(index, 'running', msg); 
+                    console.log(`[Slot ${index + 1}] Success:`, data.message);
+
+                } else {
+                    updateStatus(index, 'error', `❌ API Fail: ${data.details || 'Unknown Error'}`);
+                    console.error(`[Slot ${index + 1}] API Failed:`, data);
+                }
+            } catch (error) {
+                updateStatus(index, 'error', `❌ Server Connection Error`);
+                console.error(`[Slot ${index + 1}] Critical Error:`, error.message);
             }
         }
-        
-        function loadIframes(url) {
-            const initialMinDelay = 1000; 
-            const initialMaxDelay = 3000; 
-            
-            iframes.forEach((iframe, index) => {
-                const delay = document.getElementById('randomDelayCheck').checked 
-                              ? initialMinDelay + (Math.random() * initialMaxDelay * index) 
-                              : 0; 
-                
-                iframe.src = 'about:blank'; 
-                updateStatus(index, 'loading', 'Loading...');
 
-                setTimeout(() => {
-                    clearStorage(iframe); 
-                    iframe.src = url;
-                    updateStatus(index, 'running', 'Running (Active)');
-                }, delay); 
-            });
-        }
-
-        function startMultiBrowser() {
+        /**
+         * Har slot ke liye simulation start karta hai
+         */
+        function startSimulation() {
             let url = urlInput.value.trim();
             if (!url) {
                 alert('Kripya Target URL daalein.');
@@ -567,149 +321,40 @@
             }
             url = normalizeUrl(url);
 
-            loadIframes(url);
+            loadButton.textContent = 'SIMULATION RUNNING... (Server Earning Mode)';
+            loadButton.disabled = true;
 
-            clearIntervals();
-            
-            if (activeUserCheck.checked) toggleIntervals(true, 'reload');
-            if (autoScrollCheck.checked) toggleIntervals(true, 'scroll');
-            if (autoClicksCheck.checked) toggleIntervals(true, 'click'); 
-        }
-        
-        function clearIntervals() {
-            clearInterval(reloadIntervalId);
-            clearInterval(scrollIntervalId);
-            clearInterval(clickIntervalId);
-            reloadIntervalId = null;
-            scrollIntervalId = null;
-            clickIntervalId = null;
-        }
-
-        function toggleIntervals(shouldStart, type) {
-            if (type === 'reload') {
-                const minSec = parseInt(minTimeInput.value) || 120;
-                const maxSec = parseInt(maxTimeInput.value) || 240;
+            PROXY_DATA.forEach((proxy, index) => {
+                const delay = randomDelayCheck.checked ? (Math.random() * 5000 * index) : 0; // Thoda delay (organic look ke liye)
                 
-                if (shouldStart) {
-                    if (reloadIntervalId) return;
-                    // ULTRA-HIGH VALUE: 2 to 4 minutes cycle
-                    const randomReloadTime = Math.floor(Math.random() * (maxSec - minSec + 1) + minSec) * 1000;
-                    reloadIntervalId = setInterval(reloadFrames, randomReloadTime);
-                } else {
-                    clearInterval(reloadIntervalId);
-                    reloadIntervalId = null;
-                }
-            } else if (type === 'scroll') {
-                if (shouldStart) {
-                    if (scrollIntervalId) return;
-                    scrollIntervalId = setInterval(scrollFrames, 100); 
-                } else {
-                    clearInterval(scrollIntervalId);
-                    scrollIntervalId = null;
-                }
-            } else if (type === 'click') {
-                if (shouldStart) {
-                    if (clickIntervalId) return;
-                    const minClickTime = 5000; 
-                    const maxClickTime = 15000; 
-                    const randomTime = Math.floor(Math.random() * (maxClickTime - minClickTime + 1) + minClickTime); 
-                    clickIntervalId = setInterval(realisticClickSimulation, randomTime);
-                } else {
-                    clearInterval(clickIntervalId);
-                    clickIntervalId = null;
-                }
-            }
-        }
-
-        function reloadFrames() {
-            const reloadDelay = 500; 
-            
-            iframes.forEach((iframe, index) => {
-                if (iframe.src && iframe.src !== 'about:blank') {
+                setTimeout(() => {
                     
+                    const minWait = parseInt(minTimeInput.value) * 1000;
+                    const maxWait = parseInt(maxTimeInput.value) * 1000;
+                    // Session Duration Randomize karna zaruri hai taaki organic lage
+                    const sessionDuration = Math.floor(Math.random() * (maxWait - minWait + 1)) + minWait;
+                    
+                    // API call karein
+                    simulateApiCall(index, url, proxy);
+                    
+                    // Session poora hone ke baad reload karne ke liye timer set karein
                     setTimeout(() => {
-                         clearStorage(iframe); 
-                         updateStatus(index, 'loading', 'Reloading...');
-                         iframe.contentWindow.location.reload(true);
-                         
-                         setTimeout(() => {
-                             updateStatus(index, 'running', 'Running (Active)');
-                         }, 2000); 
-                    }, reloadDelay * index);
-                }
-            });
-            toggleIntervals(false, 'reload');
-            toggleIntervals(true, 'reload');
-        }
+                        if (!loadButton.disabled) return; 
+                        updateStatus(index, 'loading', `Session End, Restarting...`);
+                        // Har session ke baad ek naya session shuru karein
+                        startSimulation(); 
+                    }, sessionDuration);
 
-        function scrollFrames() {
-            iframes.forEach((iframe, index) => {
-                if (iframe.scrollDirection === undefined) iframe.scrollDirection = 1; 
-                
-                try {
-                    const doc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (doc && doc.body) {
-                        const currentScroll = iframe.contentWindow.scrollY;
-                        const maxScroll = doc.body.scrollHeight - iframe.clientHeight;
-                        const scrollStep = 10 * iframe.scrollDirection; 
-
-                        iframe.contentWindow.scrollBy(0, scrollStep);
-                        
-                        if ((currentScroll >= maxScroll && iframe.scrollDirection === 1) || (currentScroll <= 0 && iframe.scrollDirection === -1)) {
-                            iframe.scrollDirection = 0; 
-                            
-                            setTimeout(() => {
-                                iframe.scrollDirection = (currentScroll >= maxScroll) ? -1 : 1; 
-                            }, Math.random() * 1000 + 1000); 
-                        }
-                    }
-                } catch (e) {
-                }
+                }, delay);
             });
         }
-        
-        function realisticClickSimulation() {
-            const randomIndex = Math.floor(Math.random() * numIframes);
-            const iframe = iframes[randomIndex];
-            const indicator = indicators[randomIndex];
-            
-            try {
-                const doc = iframe.contentDocument || iframe.contentWindow.document;
-                if (doc) {
-                    const elements = doc.querySelectorAll('a:not([target="_blank"]), button'); 
-                    
-                    if (elements.length > 0) {
-                        const numClicks = Math.floor(Math.random() * 3) + 1; 
-                        
-                        updateStatus(randomIndex, 'clicking', 'Aggressive Click...');
 
-                        let clickCount = 0;
-                        function performClick() {
-                            if (clickCount >= numClicks) {
-                                if (indicator) indicator.classList.remove('click-active');
-                                updateStatus(randomIndex, 'running', 'Running (Active)');
-                                return;
-                            }
-                            
-                            const randomElementIndex = Math.floor(Math.random() * elements.length);
-                            const clickableElement = elements[randomElementIndex];
+        loadButton.addEventListener('click', startSimulation);
 
-                            if (clickableElement) {
-                                if (indicator) indicator.classList.add('click-active');
-                                clickableElement.click();
-                                clickCount++;
-                            }
-                            setTimeout(performClick, Math.random() * 1000 + 500); 
-                        }
-                        performClick();
-                    }
-                }
-            } catch (e) {
-            }
-            toggleIntervals(false, 'click');
-            toggleIntervals(true, 'click');
-        }
-        
+        // Initial Status Setup
+        PROXY_DATA.forEach((proxy, index) => {
+            updateStatus(index, 'ready', 'Ready (High-Earning API Mode)');
+        });
     </script>
 
 </body>
