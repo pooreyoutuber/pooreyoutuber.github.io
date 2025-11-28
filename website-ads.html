@@ -67,6 +67,19 @@
             min-height: 80px;
         }
 
+        /* Keys Section */
+        .keys-section {
+            background-color: #fff3cd; /* Light warning yellow */
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .keys-section input {
+            background-color: #fffdf5;
+        }
+
+
         /* Submit Button */
         .submit-btn {
             display: block;
@@ -102,11 +115,20 @@
 
 <div class="container">
     <div class="tool-header">
-        <h2>🚀 YouTube Views & Engagement Booster (DEMO MODE)</h2>
-        <p>Processing is now ultra-fast for testing. Results will show INSTANTLY in Realtime Analytics.</p>
+        <h2>🚀 YouTube Views & Engagement Booster (Demo Mode)</h2>
+        <p>Keys are required here for quick testing without server redeployment.</p>
     </div>
 
     <div class="form-section">
+        
+        <div class="keys-section">
+            <label for="gaId">YouTube GA ID (Measurement ID, e.g., G-XXXXXXXXXX)</label>
+            <input type="text" id="gaId" placeholder="Your YouTube GA ID" required>
+            
+            <label for="apiSecret">API Secret Key (From GA4 Stream)</label>
+            <input type="text" id="apiSecret" placeholder="Your API Secret" required>
+        </div>
+        
         <label for="videoUrls">Videos URLs (One per line, max 5)</label>
         <textarea id="videoUrls" placeholder="Example:&#10;https://www.youtube.com/watch?v=ABCDE12345&#10;https://youtu.be/ZYXWV9876" required></textarea>
 
@@ -115,6 +137,7 @@
 
         <label for="totalViews">Total Views to Send (Max 2000)</label>
         <input type="number" id="totalViews" placeholder="e.g., 500" min="1" max="2000" required>
+        
         
         <button class="submit-btn" onclick="getYoutubeBoost()">Start Background Boost (SUPER FAST)</button>
 
@@ -130,16 +153,20 @@
     const API_URL = `${API_BASE_URL}/youtube-boost-mp`;
 
     function getYoutubeBoost() {
+        // 🔥 Keys are taken from the frontend inputs
+        const gaId = document.getElementById('gaId').value.trim();
+        const apiSecret = document.getElementById('apiSecret').value.trim();
+        
         const videoUrlsInput = document.getElementById('videoUrls').value.trim();
         const videoUrls = videoUrlsInput.split('\n').map(url => url.trim()).filter(url => url.length > 0);
-        const channelUrl = document.getElementById('channelUrl').value.trim(); // Optional now
+        const channelUrl = document.getElementById('channelUrl').value.trim(); 
         const totalViews = document.getElementById('totalViews').value.trim();
         const statusMessage = document.getElementById('statusMessage');
 
         // Validation 
-        if (!videoUrlsInput || videoUrls.length === 0 || !totalViews) {
+        if (!gaId || !apiSecret || !videoUrlsInput || videoUrls.length === 0 || !totalViews) {
             statusMessage.style.color = 'red';
-            statusMessage.innerText = '❌ ERROR: Please fill out required fields (URLs and Views).';
+            statusMessage.innerText = '❌ ERROR: Please fill out all required fields (GA ID, API Secret, URLs, and Views).';
             return;
         }
 
@@ -162,8 +189,10 @@
         statusMessage.style.color = '#ff8c00'; // Orange
         statusMessage.innerText = '⏳ Initiating boost... (Starting Server Background Process)';
 
-        // Data payload: GA Keys are EXCLUDED as they are hardcoded on the server
+        // Data payload includes GA Keys
         const payload = {
+            ga_id: gaId, // Key added
+            api_key: apiSecret, // Key added
             views: totalViews,
             video_urls: videoUrls, 
             channel_url: channelUrl
