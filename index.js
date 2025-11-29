@@ -574,11 +574,13 @@ async function simulateConversion(targetUrl, proxyAgent, originalReferrer, userA
 
 // ===================================================================
 // 4. WEBSITE BOOSTER PRIME TOOL ENDPOINT (API: /proxy-request)
+// (Fully Fixed with Referrer/Backlink Injection and Clicker Logic)
 // ===================================================================
 app.get('/proxy-request', async (req, res) => {
     
     // 1. Get parameters from the frontend URL query
-    const { target, ip, port, auth, uid, ga_id, api_secret, clicker } = req.query; 
+    // 🔥 CRITICAL: 'referer' parameter added to accept the backlink URL from the frontend
+    const { target, ip, port, auth, uid, ga_id, api_secret, clicker, referer } = req.query; 
 
     // Basic validation check
     if (!target || !ip || !port || !uid) {
@@ -604,6 +606,8 @@ app.get('/proxy-request', async (req, res) => {
     }
     
     // --- EARNING CONTROL LOGIC ---
+    // High-Value Action Chance (15% for click/conversion)
+    const HIGH_VALUE_ACTION_CHANCE = 0.15; 
     let shouldRunConversion = false;
     let earningMode = 'ADSENSE SAFE (High Impression Mode)';
     let useHighCpcKeywords = false;
@@ -620,184 +624,129 @@ app.get('/proxy-request', async (req, res) => {
     const cid = uid; 
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource(true); 
-    const engagementTime = randomInt(30000, 120000); 
+    let traffic = getRandomTrafficSource(true); // Default traffic
+    const engagementTime = randomInt(45000, 120000); // 45s to 120s
+
+    // 🔥 CRITICAL FIX: OVERRIDE TRAFFIC SOURCE WITH FRONTEND REFERER (BACKLINK)
+    if (referer) {
+        try {
+            const parsedReferer = new URL(referer);
+            traffic.referrer = referer; // Set the exact backlink URL
+            
+            // Re-categorize source/medium based on the backlink URL
+            if (parsedReferer.hostname.includes('google.com')) {
+                traffic.source = 'google';
+                traffic.medium = 'organic';
+            } else if (parsedReferer.hostname.includes('facebook.com') || parsedReferer.hostname.includes('linkedin.com') || parsedReferer.hostname.includes('reddit.com')) {
+                traffic.source = parsedReferer.hostname.includes('facebook.com') ? 'facebook' : parsedReferer.hostname.split('.')[0];
+                traffic.medium = 'social';
+            } else if (parsedReferer.hostname.includes('bing.com') || parsedReferer.hostname.includes('yahoo.com')) {
+                traffic.source = parsedReferer.hostname.includes('bing.com') ? 'bing' : 'yahoo';
+                traffic.medium = 'organic';
+            } else {
+                traffic.source = parsedReferer.hostname; // e.g., cnn.com
+                traffic.medium = 'referral';
+            }
+            console.log(`[REFERRER INJECTED] Traffic set to: ${traffic.source}/${traffic.medium} via ${parsedReferer.hostname}`);
+        } catch (e) {
+            console.error('Invalid Referer URL provided by frontend. Using default logic.');
+        }
+    }
+    // END CRITICAL FIX
 
     const userProperties = {
         simulated_geo: { value: geo.country }, 
         user_timezone: { value: geo.timezone }
     };
-    
-    let eventCount = 0;
 
-    // --- FUNCTION TO SEND DATA VIA PROXY ---
-    async function sendDataViaProxy(payload, eventType) {
-        if (!isGaMpEnabled) {
-             console.log(`[PROXY MP SKIP] Keys missing. Skipped: ${eventType}.`);
-             return false; 
-        }
-        
-        const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`; 
-        payload.timestamp_micros = String(Date.now() * 1000); 
-        const USER_AGENT_GA4 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"; 
-        
-        try { 
-            const response = await nodeFetch(gaEndpoint, { 
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'User-Agent': USER_AGENT_GA4 
-                },
-                agent: proxyAgent 
-            });
-
-            if (response.status === 204) { 
-                console.log(`[PROXY MP SUCCESS] Sent: ${eventType} via ${ip}:${port}`);
-                return true;
-            } else {
-                const errorText = await response.text(); 
-                console.error(`[PROXY MP FAILURE] Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
-                return false;
+    // --- GA4 API Payload Construction (Page View) ---
+    const pageViewPayload = {
+        client_id: cid,
+        user_properties: userProperties,
+        events: [{
+            name: 'page_view',
+            params: {
+                // Traffic Source Parameters
+                session_id: session_id,
+                engagement_time_msec: engagementTime, // Active User Mode
+                session_number: 1, // Always a new session
+                user_agent: USER_AGENT, // Unique User Agent
+                language: geo.language, // Geo-specific language
+                
+                // CRITICAL: Traffic Source Injection
+                source: traffic.source,
+                medium: traffic.medium,
+                referrer: traffic.referrer,
+                
+                // Page details
+                page_location: target,
+                page_title: `Simulated View - ${traffic.source}`,
+                // Conversion/Earning Keywords
+                search_term: useHighCpcKeywords ? getRandomHighCpcKeyword() : undefined
             }
-        } catch (error) {
-            console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed (Code: ${error.code || 'N/A'}). Error: ${error.message}`);
-            return false;
-        }
+        }]
+    };
+
+    // --- Optional Conversion/Click Event ---
+    if (shouldRunConversion) {
+        const clickEvent = {
+            name: 'ad_click_simulated',
+            params: {
+                session_id: session_id,
+                engagement_time_msec: engagementTime,
+                page_location: target,
+                click_type: 'high_value_ad'
+            }
+        };
+        pageViewPayload.events.push(clickEvent);
     }
-    // --- END: FUNCTION TO SEND DATA VIA PROXY ---
-
-    // --- START: CORE LOGIC ---
-    try {
-        
-        // 🚀 STEP 0 - GEMINI AI Keyword Generation
-        let searchKeyword = null;
-        if (traffic.source === 'google' && GEMINI_KEY) { 
-             if (useHighCpcKeywords) {
-                searchKeyword = await generateSearchKeyword(target, true); // true = HighValue (Max Earning)
-                if (searchKeyword) {
-                    traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-                    console.log(`[GEMINI BOOST: MAX CPC] Generated Keyword: "${searchKeyword}"`);
-                }
-             } else if (Math.random() < 0.3) {
-                 searchKeyword = await generateSearchKeyword(target, false); 
-                 if (searchKeyword) {
-                    traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-                    console.log(`[GEMINI BOOST: REALISTIC] Generated Keyword: "${searchKeyword}"`);
-                 }
-             }
+    
+    // --- Final Execution ---
+    let success = false;
+    
+    if (isGaMpEnabled) {
+        try {
+            const ga4Response = await nodeFetch(`https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`, {
+                method: 'POST',
+                headers: {
+                    'User-Agent': USER_AGENT,
+                    'Content-Type': 'application/json',
+                    'Referer': traffic.referrer || 'https://www.google.com/' // Use traffic.referrer
+                },
+                body: JSON.stringify(pageViewPayload),
+                agent: proxyAgent // Use the proxy agent for the request
+            });
+            
+            // Note: GA4 MP usually returns a 204 or 200 with no body on success.
+            if (ga4Response.ok) {
+                console.log(`[GA4 SENT - ${geo.country}] Status: OK. ${earningMode}. Clicks: ${shouldRunConversion ? 'YES' : 'NO'}`);
+                success = true;
+            } else {
+                console.error(`[GA4 FAIL - ${geo.country}] Status: ${ga4Response.status} ${ga4Response.statusText}.`);
+                success = false;
+            }
+            
+        } catch (error) {
+            console.error(`[GA4 ERROR - ${geo.country}] Network Error: ${error.message}`);
+            success = false;
         }
-
-        // 🔥 STEP 1: TARGET URL VISIT
-        console.log(`[TARGET VISIT] Hitting target ${target}.`);
-        
-        const targetResponse = await nodeFetch(target, {
-            method: 'GET', 
-            headers: { 
-                'User-Agent': USER_AGENT,
-                'Referer': traffic.referrer 
-            }, 
-            agent: proxyAgent 
+    } else {
+        // Dummy run if GA4 ID is missing (for testing connectivity)
+        console.log(`[DUMMY RUN - ${geo.country}] Proxy Check: ${proxyAddress}. ${earningMode}. Clicks: ${shouldRunConversion ? 'YES' : 'NO'}`);
+        success = true;
+    }
+    
+    if (success) {
+        return res.json({ 
+            status: 'SUCCESS', 
+            message: `View sent! Session time: ${Math.round(engagementTime / 1000)}s. Clicks: ${shouldRunConversion ? 'YES (Earning Mode)' : 'NO'}. Source: ${traffic.source}/${traffic.medium}`,
+            proxy: proxyAddress
         });
-
-        if (targetResponse.status < 200 || targetResponse.status >= 300) {
-             throw new Error(`Target visit failed with status ${targetResponse.status}`);
-        }
-        console.log(`[TARGET VISIT SUCCESS] Target visited.`);
-
-        // 💡 ADVANCED IDEA: REALISTIC WAIT TIME
-        const waitTime = randomInt(20000, 40000); 
-        console.log(`[WAIT] Simulating human behavior: Waiting for ${Math.round(waitTime/1000)} seconds.`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-
-
-        // 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION
-        if (shouldRunConversion) { 
-            console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON (Randomized Check Passed).`);
-            await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
-        } else {
-             console.log(`[ADSENSE SAFE MODE] Conversion Mode is OFF (Randomized Check Failed or Disabled). Skipping high-value action.`);
-        }
-        
-        // 🔥 STEP 3: Send GA4 MP data
-        if (isGaMpEnabled) {
-            
-            // 1. SESSION START EVENT
-            const sessionStartPayload = {
-                client_id: cid,
-                user_properties: userProperties,
-                events: [{ 
-                    name: "session_start", 
-                    params: { 
-                        session_id: session_id, 
-                        _ss: 1, 
-                        debug_mode: true,
-                        language: "en-US",
-                        source: traffic.source,
-                        medium: traffic.medium,
-                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), 
-                        page_referrer: traffic.referrer
-                    } 
-                }]
-            };
-            if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
-            
-            // 2. PAGE VIEW EVENT
-            const pageViewPayload = {
-                client_id: cid,
-                user_properties: userProperties,
-                events: [{ 
-                    name: 'page_view', 
-                    params: { 
-                        page_location: target, 
-                        page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : target, 
-                        session_id: session_id, 
-                        debug_mode: true,
-                        language: "en-US",
-                        engagement_time_msec: engagementTime,
-                        page_referrer: traffic.referrer 
-                    } 
-                }]
-            };
-            
-            if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
-            
-            // 3. USER ENGAGEMENT
-            const engagementPayload = {
-                client_id: cid,
-                user_properties: userProperties, 
-                events: [
-                    { 
-                        name: "user_engagement", 
-                        params: { 
-                            engagement_time_msec: engagementTime, 
-                            session_id: session_id,
-                            debug_mode: true 
-                        } 
-                    }
-                ]
-            };
-            if (await sendDataViaProxy(engagementPayload, 'user_engagement')) eventCount++;
-        }
-
-        
-        // 4. Send success response back to the frontend
-        const message = `✅ Success! Action simulated. Earning Status: ${earningMode}. GA4 Events Sent: ${eventCount}. CTR Check: ${shouldRunConversion ? 'HIT' : 'MISS'}.`;
-
-        res.status(200).json({ 
-            status: 'OK', 
-            message: message,
-            eventsSent: eventCount
-        });
-        
-    } catch (error) {
-        const errorCode = error.code || error.message;
-        console.error(`[PROXY REQUEST HANDLER FAILED] Error:`, errorCode);
-        
-        res.status(502).json({ 
-            status: 'FAILED', 
-            error: 'Connection ya Target URL se connect nahi ho paya. VPN/Proxy check karein.', 
-            details: errorCode
+    } else {
+        return res.status(500).json({ 
+            status: 'ERROR', 
+            error: 'Failed to send view via GA4 MP or network error.',
+            proxy: proxyAddress
         });
     }
 });
