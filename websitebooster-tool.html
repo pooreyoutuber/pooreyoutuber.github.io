@@ -3,38 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini-Browser Multi-Viewer</title>
+    <title>🌐 10x Multi-Viewer Browser</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* General Setup & Global Controls */
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #e9ebee;
-            color: #333;
+            background-color: #f0f2f5; 
+            color: #1d2129;
+            overflow-x: hidden;
         }
         h1 {
-            color: #1c2e4a;
+            color: #1877f2; 
             text-align: center;
-            padding: 15px 0;
+            padding: 20px 0;
             background-color: #ffffff;
-            margin: 0 0 20px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 0 0 25px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-weight: 700;
+            letter-spacing: 1px;
         }
         .global-controls {
-            max-width: 90%;
-            margin: 0 auto 20px auto;
+            max-width: 95%;
+            margin: 0 auto 30px auto;
             background-color: #ffffff;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid #1877f2;
         }
+
+        /* Global URL Input Section */
+        .url-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .url-input-group input[type="url"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .url-input-group input[type="url"]:focus {
+            border-color: #1877f2;
+            outline: none;
+        }
+        .url-input-group button {
+            padding: 10px 25px;
+            background-color: #42b72a; 
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .url-input-group button:hover {
+            background-color: #36a420;
+            transform: translateY(-1px);
+        }
+
+        /* Global Options */
         .options-group {
             display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
+            justify-content: flex-start;
+            gap: 30px;
+            padding-top: 15px;
             border-top: 1px solid #eee;
-            margin-top: 10px;
         }
         .option-item {
             display: flex;
@@ -45,120 +86,126 @@
         .option-item input[type="checkbox"] {
             margin-right: 10px;
             appearance: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid #007bff;
-            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #1877f2;
+            border-radius: 4px;
             position: relative;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
         .option-item input[type="checkbox"]:checked {
-            background-color: #007bff;
+            background-color: #1877f2;
         }
         .option-item input[type="checkbox"]:checked::after {
             content: '✓';
             position: absolute;
-            top: -2px;
-            left: 2px;
+            top: 0px;
+            left: 3px;
             color: white;
             font-size: 14px;
+            font-weight: bold;
         }
 
-        /* Iframe Grid Styling */
+        /* Iframe Grid Styling - 3 COLUMNS PER ROW */
         .iframe-grid {
+            /* Sets 3 equal columns */
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 15px;
-            max-width: 90%;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px;
+            max-width: 95%;
             margin: 0 auto;
-            height: 85vh; 
+            min-height: 80vh; 
+            padding-bottom: 20px;
         }
+        
+        /* The last (10th) slot spans across all 3 columns (3-3-3-1 layout) */
+        #slot-10 {
+            grid-column: 1 / span 3; 
+            height: 400px; 
+        }
+        
+        /* Iframe Slot and Header Styling */
         .iframe-slot {
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border: 1px solid #c0ccda;
+            border-radius: 10px;
             background-color: #fff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
             overflow: hidden; 
+            transition: transform 0.3s;
+            height: 350px; 
+        }
+        .iframe-slot:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
 
-        /* Slot Header (Mini-Search Bar) */
         .slot-header {
             display: flex;
-            padding: 5px;
-            background-color: #f7f7f7;
-            border-bottom: 1px solid #eee;
-            flex-shrink: 0; /* Prevents header from shrinking */
-        }
-        .slot-header input {
-            flex-grow: 1;
-            padding: 5px 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        .slot-header button {
-            padding: 5px 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            margin-left: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background-color 0.3s;
-        }
-        .slot-header button:hover {
-            background-color: #1e7e34;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            background-color: #e5f0ff; 
+            color: #1877f2;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+            border-bottom: 1px solid #c0ccda;
         }
         
         /* Iframe Container & Scaling */
         .iframe-container {
-            flex-grow: 1; /* Allows iframe container to take remaining space */
+            flex-grow: 1;
             position: relative;
-            overflow: hidden; /* This hides the scrolled parts of the inner content */
+            overflow: hidden;
         }
         .iframe-container iframe {
             position: absolute;
             top: 0;
             left: 0;
-            /* DESKTOP MODE SIMULATION */
+            /* Simulates Desktop view and scales it down */
             width: 1280px; 
             height: 100%; 
+            min-height: 1000px; 
             border: none;
             
-            /* Scaling and Origin for Desktop View */
             transform: scale(0.35); 
             transform-origin: 0 0; 
-            min-height: 1000px; 
         }
     </style>
 </head>
 <body>
 
-    <h1>🌐 Mini-Browser Multi-Viewer</h1>
+    <h1>🌎 10x Multi-Viewer Browser (3x3 + 1 Layout)</h1>
 
     <div class="global-controls">
-        <p style="font-weight: bold; margin-bottom: 5px; color: #1c2e4a;">Global Options:</p>
+        <p style="font-weight: bold; margin-bottom: 10px; color: #1877f2; font-size: 18px;">🔗 Global URL Load (Loads the URL into all 10 slots):</p>
+        <div class="url-input-group">
+            <input type="url" id="globalUrlInput" placeholder="https://example.com or example.com" value="google.com">
+            <button id="loadAllButton" onclick="loadAllUrls()">🚀 Go & Load All</button>
+        </div>
+        
+        <p style="font-weight: bold; margin-bottom: 5px; color: #1d2129; border-top: 1px solid #eee; padding-top: 15px;">⚙️ Global Options:</p>
         <div class="options-group">
             <label class="option-item" for="autoReloadCheckbox">
                 <input type="checkbox" id="autoReloadCheckbox">
-                Auto Reload All (Every 30s)
+                🔄 Auto Reload (Every 30s)
             </label>
             <label class="option-item" for="autoScrollCheckbox">
                 <input type="checkbox" id="autoScrollCheckbox">
-                Auto Scrolling All (30s Cycle, 10 Steps)
+                ⬇️ Auto Scrolling (30s Cycle)
             </label>
         </div>
     </div>
 
     <div class="iframe-grid" id="iframeContainer">
-        </div>
+    </div>
 
     <script>
         const container = document.getElementById('iframeContainer');
+        const globalUrlInput = document.getElementById('globalUrlInput');
         const autoReloadCheckbox = document.getElementById('autoReloadCheckbox');
         const autoScrollCheckbox = document.getElementById('autoScrollCheckbox');
         
@@ -166,7 +213,6 @@
         let reloadInterval = null;
         let scrollInterval = null;
         
-        // Array to store the current URL for each slot
         const slotUrls = Array(NUM_SLOTS).fill('about:blank');
 
         // 1. Initial Setup: Create 10 Mini-Browser Slots
@@ -174,26 +220,13 @@
             for (let i = 0; i < NUM_SLOTS; i++) {
                 const slotDiv = document.createElement('div');
                 slotDiv.className = 'iframe-slot';
-                slotDiv.id = `slot-${i + 1}`; // Unique ID for each slot
+                slotDiv.id = `slot-${i + 1}`; 
 
-                // Create Header (Mini-Search Bar)
                 const header = document.createElement('div');
                 header.className = 'slot-header';
-                
-                const urlInput = document.createElement('input');
-                urlInput.type = 'url';
-                urlInput.id = `urlInput-${i + 1}`;
-                urlInput.placeholder = `URL for Slot ${i + 1}`;
-                
-                const loadButton = document.createElement('button');
-                loadButton.textContent = 'Go';
-                loadButton.onclick = () => loadSingleUrl(i + 1);
-
-                header.appendChild(urlInput);
-                header.appendChild(loadButton);
+                header.textContent = `Slot ${i + 1}`;
                 slotDiv.appendChild(header);
 
-                // Create Iframe Container
                 const iframeContainer = document.createElement('div');
                 iframeContainer.className = 'iframe-container';
                 iframeContainer.id = `iframeContainer-${i + 1}`;
@@ -206,39 +239,41 @@
                 slotDiv.appendChild(iframeContainer);
 
                 container.appendChild(slotDiv);
-                
-                // Add Enter key listener for the input field
-                urlInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        loadSingleUrl(i + 1);
-                    }
-                });
             }
         }
 
-        // 2. Load URL in a single slot
-        function loadSingleUrl(slotIndex) {
-            const urlInput = document.getElementById(`urlInput-${slotIndex}`);
-            const iframe = document.getElementById(`iframe-${slotIndex}`);
-            const url = urlInput.value.trim();
+        // 2. Load URL in all slots
+        function loadAllUrls() {
+            const url = globalUrlInput.value.trim();
 
             if (!url) {
-                alert(`Please enter a valid URL for Slot ${slotIndex}!`);
-                urlInput.focus();
+                alert(`Please enter a valid URL!`);
+                globalUrlInput.focus();
                 return;
             }
 
-            // Ensure protocol is present and update stored URL
+            // Ensure protocol is present
             const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-            slotUrls[slotIndex - 1] = fullUrl;
-            
-            // Load the URL
-            if (iframe) {
-                iframe.src = fullUrl;
-            }
-        }
+            slotUrls.fill(fullUrl); 
 
-        // 3. Auto Reload Management (Every 30 seconds)
+            // Load the URL in all 10 iframes
+            for (let i = 1; i <= NUM_SLOTS; i++) {
+                const iframe = document.getElementById(`iframe-${i}`);
+                if (iframe) {
+                    iframe.src = fullUrl;
+                }
+            }
+            console.log(`Loaded URL: ${fullUrl} into all ${NUM_SLOTS} slots.`);
+        }
+        
+        // Add Enter key listener for the global input field
+        globalUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadAllUrls();
+            }
+        });
+
+        // 3. Auto Reload Management
         function manageAutoReload() {
             if (reloadInterval) {
                 clearInterval(reloadInterval);
@@ -252,16 +287,16 @@
                         if (url && url !== 'about:blank') {
                             const iframe = document.getElementById(`iframe-${i}`);
                             if (iframe) {
-                                iframe.src = url; // Reload by setting the same source
+                                iframe.src = url; 
                             }
                         }
                     }
                     console.log(`Auto Reloaded ${NUM_SLOTS} slots.`);
-                }, 30000); // 30 seconds
+                }, 30000); 
             }
         }
 
-        // 4. Auto Scrolling Management (10 steps over 30 seconds)
+        // 4. Auto Scrolling Management
         function manageAutoScroll() {
             if (scrollInterval) {
                 clearInterval(scrollInterval);
@@ -271,11 +306,10 @@
             if (autoScrollCheckbox.checked) {
                 let scrollStep = 0;
                 const NUM_STEPS = 10;
-                const INTERVAL_MS = 3000; // 3 seconds per step
-                const MAX_SCROLL_HEIGHT_ESTIMATE = 1000; // Estimated large scroll area
+                const INTERVAL_MS = 3000; 
 
                 scrollInterval = setInterval(() => {
-                    scrollStep = (scrollStep % NUM_STEPS) + 1; // Cycle steps 1 to 10
+                    scrollStep = (scrollStep % NUM_STEPS) + 1; 
 
                     for (let i = 1; i <= NUM_SLOTS; i++) {
                         const iframeContainer = document.getElementById(`iframeContainer-${i}`);
@@ -283,17 +317,14 @@
                         if (iframeContainer) {
                             const slotHeight = iframeContainer.clientHeight;
                             
-                            // Calculate the target scroll position based on the visible height and steps
-                            // The scroll distance is based on the visible height to ensure a full pass.
                             const SCROLL_AMOUNT_PER_STEP = (slotHeight * 2) / NUM_STEPS;
                             
                             let targetScrollTop = SCROLL_AMOUNT_PER_STEP * (scrollStep - 1);
                             
                             if (scrollStep === 1) {
-                                targetScrollTop = 0; // Ensure reset to top on the first step
+                                targetScrollTop = 0; 
                             }
                             
-                            // Apply the scroll to the IFRAME CONTAINER DIV
                             iframeContainer.scrollTo({
                                 top: targetScrollTop,
                                 behavior: 'smooth'
@@ -302,7 +333,7 @@
                     }
                     console.log(`Scrolling Step: ${scrollStep}`);
 
-                }, INTERVAL_MS); // 3-second interval
+                }, INTERVAL_MS); 
             }
         }
 
@@ -315,5 +346,4 @@
     </script>
 
 </body>
-    </html>
-    
+</html>
