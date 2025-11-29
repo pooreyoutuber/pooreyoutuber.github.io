@@ -6,7 +6,7 @@
     <title>🌐 10x Multi-Viewer Browser</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* General Setup & Global Controls */
+        /* General Setup & Global Controls (Unchanged) */
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -35,7 +35,7 @@
             border-left: 5px solid #1877f2;
         }
 
-        /* Global URL Input Section */
+        /* Global URL Input Section (Unchanged) */
         .url-input-group {
             display: flex;
             gap: 10px;
@@ -69,7 +69,7 @@
             transform: translateY(-1px);
         }
 
-        /* Global Options */
+        /* Global Options (Unchanged) */
         .options-group {
             display: flex;
             justify-content: flex-start;
@@ -107,9 +107,8 @@
             font-weight: bold;
         }
 
-        /* Iframe Grid Styling - 3 COLUMNS PER ROW */
+        /* Iframe Grid Styling (Unchanged) */
         .iframe-grid {
-            /* Sets 3 equal columns */
             display: grid;
             grid-template-columns: repeat(3, 1fr); 
             gap: 20px;
@@ -119,13 +118,11 @@
             padding-bottom: 20px;
         }
         
-        /* The last (10th) slot spans across all 3 columns (3-3-3-1 layout) */
         #slot-10 {
             grid-column: 1 / span 3; 
             height: 400px; 
         }
         
-        /* Iframe Slot and Header Styling */
         .iframe-slot {
             border: 1px solid #c0ccda;
             border-radius: 10px;
@@ -155,22 +152,24 @@
             border-bottom: 1px solid #c0ccda;
         }
         
-        /* Iframe Container & Scaling */
+        /* Iframe Container & Scaling - IMPROVED FOR SCROLLING */
         .iframe-container {
             flex-grow: 1;
             position: relative;
-            overflow: hidden;
+            /* Enable scrolling on the container to move the viewable area */
+            overflow-y: scroll; 
         }
         .iframe-container iframe {
             position: absolute;
             top: 0;
             left: 0;
-            /* Simulates Desktop view and scales it down */
             width: 1280px; 
-            height: 100%; 
-            min-height: 1000px; 
+            /* Set a fixed height that is larger than the container's visible area */
+            height: 1500px; 
+            min-height: 1500px; /* Ensures a long virtual page */
             border: none;
             
+            /* The scale value must ensure the height fits within the container's scroll area */
             transform: scale(0.35); 
             transform-origin: 0 0; 
         }
@@ -260,7 +259,12 @@
             for (let i = 1; i <= NUM_SLOTS; i++) {
                 const iframe = document.getElementById(`iframe-${i}`);
                 if (iframe) {
-                    iframe.src = fullUrl;
+                    // Check if the source is the same, if so, force reload to reset scrolling
+                    if (iframe.src === fullUrl) {
+                         iframe.contentWindow.location.reload(true);
+                    } else {
+                        iframe.src = fullUrl;
+                    }
                 }
             }
             console.log(`Loaded URL: ${fullUrl} into all ${NUM_SLOTS} slots.`);
@@ -286,8 +290,9 @@
                         const url = slotUrls[i - 1];
                         if (url && url !== 'about:blank') {
                             const iframe = document.getElementById(`iframe-${i}`);
-                            if (iframe) {
-                                iframe.src = url; 
+                            if (iframe && iframe.contentWindow) {
+                                // Reload using contentWindow to force a fresh page load
+                                iframe.contentWindow.location.reload(true);
                             }
                         }
                     }
@@ -296,7 +301,7 @@
             }
         }
 
-        // 4. Auto Scrolling Management
+        // 4. Auto Scrolling Management - FIX APPLIED HERE
         function manageAutoScroll() {
             if (scrollInterval) {
                 clearInterval(scrollInterval);
@@ -306,25 +311,31 @@
             if (autoScrollCheckbox.checked) {
                 let scrollStep = 0;
                 const NUM_STEPS = 10;
-                const INTERVAL_MS = 3000; 
+                const CYCLE_TIME_SECONDS = 30;
+                // Calculate interval duration to complete the steps in CYCLE_TIME_SECONDS
+                const INTERVAL_MS = (CYCLE_TIME_SECONDS * 1000) / NUM_STEPS; 
 
                 scrollInterval = setInterval(() => {
+                    // Cycle steps from 1 to 10
                     scrollStep = (scrollStep % NUM_STEPS) + 1; 
 
                     for (let i = 1; i <= NUM_SLOTS; i++) {
                         const iframeContainer = document.getElementById(`iframeContainer-${i}`);
                         
                         if (iframeContainer) {
-                            const slotHeight = iframeContainer.clientHeight;
+                            // Calculate the total scrollable height
+                            const maxScroll = iframeContainer.scrollHeight - iframeContainer.clientHeight;
                             
-                            const SCROLL_AMOUNT_PER_STEP = (slotHeight * 2) / NUM_STEPS;
+                            // Determine the scroll amount per step
+                            const SCROLL_AMOUNT_PER_STEP = maxScroll / (NUM_STEPS - 1); 
                             
                             let targetScrollTop = SCROLL_AMOUNT_PER_STEP * (scrollStep - 1);
                             
                             if (scrollStep === 1) {
-                                targetScrollTop = 0; 
+                                targetScrollTop = 0; // Ensure reset to top on the first step
                             }
                             
+                            // Apply the smooth scroll to the IFRAME CONTAINER DIV
                             iframeContainer.scrollTo({
                                 top: targetScrollTop,
                                 behavior: 'smooth'
