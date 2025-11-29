@@ -177,7 +177,7 @@
 </head>
 <body>
 
-    <h1>🌎 10x Multi-Viewer Browser (3x3 + 1 Layout)</h1>
+    <h1>🌎 10x Multi-Viewer Browser </h1>
 
     <div class="global-controls">
         <p style="font-weight: bold; margin-bottom: 10px; color: #1877f2; font-size: 18px;">🔗 Global URL Load (Loads the URL into all 10 slots):</p>
@@ -297,7 +297,7 @@
             }
         }
 
-        // 4. Auto Scrolling Management - THE CORRECTED LOGIC
+        // 4. Auto Scrolling Management - THE CORRECTED LOGIC (8 steps in 30s)
         function manageAutoScroll() {
             if (scrollInterval) {
                 clearInterval(scrollInterval);
@@ -306,13 +306,15 @@
 
             if (autoScrollCheckbox.checked) {
                 let scrollStep = 0;
-                const NUM_STEPS = 10;
+                // NEW: Total number of steps is 8
+                const NUM_STEPS = 8; 
                 const CYCLE_TIME_SECONDS = 30;
-                // Interval duration to complete 10 steps in 30 seconds (3 seconds per step)
+                
+                // Interval duration: 30000ms / 8 steps = 3750ms per step
                 const INTERVAL_MS = (CYCLE_TIME_SECONDS * 1000) / NUM_STEPS; 
 
                 scrollInterval = setInterval(() => {
-                    // Cycle steps from 1 to 10
+                    // Cycle steps from 1 to 8
                     scrollStep = (scrollStep % NUM_STEPS) + 1; 
 
                     for (let i = 1; i <= NUM_SLOTS; i++) {
@@ -322,7 +324,7 @@
                             // The maximum scrollable distance within the container
                             const maxScroll = iframeContainer.scrollHeight - iframeContainer.clientHeight;
                             
-                            // Calculate the scroll amount per step
+                            // Calculate the scroll amount per step (Divide by NUM_STEPS - 1 to include step 1 and step 8)
                             const SCROLL_AMOUNT_PER_STEP = maxScroll / (NUM_STEPS - 1); 
                             
                             let targetScrollTop = SCROLL_AMOUNT_PER_STEP * (scrollStep - 1);
