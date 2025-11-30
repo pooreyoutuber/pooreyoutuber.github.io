@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Browser Earning: Professional Fingerprinting System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT');
+    </script>
     <style>
         /* CSS: Ultra-Modern Browser UI Look */
         :root {
@@ -326,21 +333,9 @@
     </div>
 
     <script>
-        // NOTE: Humne API URL ko yahan se hata diya hai. Ab yeh code sirf URL load karega.
-        // Server-side (index.js) par hum ek alag API banayenge jo proxy aur URL type ko handle karega.
-
-        // --- NEW UTILITY: Multi-Platform URL Detection ---
-        function getUrlType(url) {
-            if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
-            if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
-            if (url.includes('instagram.com') || url.includes('instagr.am')) return 'instagram';
-            return 'website'; // Default for AdSense/Monetag
-        }
-        
-        // JavaScript: ULTRA-HIGH EARNING Optimization Logic (with long session time)
+        // --- CONSTANTS ---
         const urlInput = document.getElementById('urlInput');
         const loadButton = document.getElementById('loadButton');
-        
         const activeUserCheck = document.getElementById('activeUserCheck'); 
         const autoScrollCheck = document.getElementById('autoScrollCheck');
         const autoClicksCheck = document.getElementById('autoClicksCheck');
@@ -363,11 +358,35 @@
         autoScrollCheck.addEventListener('change', () => toggleIntervals(autoScrollCheck.checked, 'scroll'));
         autoClicksCheck.addEventListener('change', () => toggleIntervals(autoClicksCheck.checked, 'click'));
 
-        function normalizeUrl(url) {
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                return 'https://' + url;
+        // --- NEW UTILITY: URL Adaptation for Iframe Loading (FIXED YOUTUBE) ---
+        function getUrlType(url) {
+            if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+            if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
+            if (url.includes('instagram.com') || url.includes('instagr.am')) return 'instagram';
+            return 'website'; // Default
+        }
+
+        /**
+         * URL को सामान्य बनाता है और Iframe में लोड होने के लिए ज़रूरी बदलाव करता है (जैसे YouTube Embed)।
+         */
+        function normalizeAndAdaptUrl(url) {
+            let normalizedUrl = url;
+            if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+                normalizedUrl = 'https://' + normalizedUrl;
             }
-            return url;
+
+            const urlType = getUrlType(normalizedUrl);
+
+            // FIX: YouTube Links को Embed Format में बदलना ताकि वे Iframe में लोड हो सकें
+            if (urlType === 'youtube') {
+                const videoIdMatch = normalizedUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|v\/|e\/|embed\/|watch\?v=|[^#]*\&v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                if (videoIdMatch && videoIdMatch[1]) {
+                    // YouTube Embed URL with AutoPlay and Mute for better stealth
+                    return `https://www.youtube.com/embed/${videoIdMatch[1]}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1`;
+                }
+            }
+            
+            return normalizedUrl;
         }
 
         function updateStatus(index, state, message = '') {
@@ -385,32 +404,31 @@
                 iframe.contentWindow.localStorage.clear();
                 iframe.contentWindow.sessionStorage.clear();
             } catch (e) {
-                // Ignore Cross-Origin error
             }
         }
         
         function loadIframes(url) {
-            const initialMinDelay = 1000; // 1 second
-            const initialMaxDelay = 3000; // 3 seconds
-            const urlType = getUrlType(url); // NEW: Get URL Type
+            const initialMinDelay = 1000; 
+            const initialMaxDelay = 3000; 
+            
+            const finalAdaptedUrl = normalizeAndAdaptUrl(url); 
+            const urlType = getUrlType(finalAdaptedUrl);
             
             iframes.forEach((iframe, index) => {
-                // Random start delay for each iframe
                 const delay = document.getElementById('randomDelayCheck').checked 
                               ? initialMinDelay + (Math.random() * initialMaxDelay * index) 
                               : 0; 
                 
                 iframe.src = 'about:blank'; 
-                updateStatus(index, 'loading', `Loading (${urlType.toUpperCase()})...`); // Updated Status
+                updateStatus(index, 'loading', `Loading (${urlType.toUpperCase()})...`); 
                 
                 setTimeout(() => {
                     clearStorage(iframe); 
                     
-                    // NEW: Save URL Type to Iframe (Used for Scroll/Click logic)
                     iframe.setAttribute('data-url-type', urlType); 
                     
-                    // Direct URL load (Backend will handle the proxy/stealth)
-                    iframe.src = url; 
+                    // Final adapted URL yahan load hogi
+                    iframe.src = finalAdaptedUrl; 
                     
                     updateStatus(index, 'running', `Running (${urlType.toUpperCase()})`);
                 }, delay); 
@@ -423,7 +441,6 @@
                 alert('Kripya Target URL daalein.');
                 return;
             }
-            url = normalizeUrl(url);
 
             loadIframes(url);
 
@@ -445,14 +462,12 @@
 
         function toggleIntervals(shouldStart, type) {
             if (type === 'reload') {
-                const minSec = parseInt(minTimeInput.value) || 120; // Default 2 minutes
-                const maxSec = parseInt(maxTimeInput.value) || 240; // Default 4 minutes
+                const minSec = parseInt(minTimeInput.value) || 120; 
+                const maxSec = parseInt(maxTimeInput.value) || 240; 
                 
                 if (shouldStart) {
                     if (reloadIntervalId) return;
-                    // ULTRA-HIGH VALUE: 2 to 4 minutes cycle for Long Session
                     const randomReloadTime = Math.floor(Math.random() * (maxSec - minSec + 1) + minSec) * 1000;
-                    console.log(`Setting reload interval to: ${randomReloadTime / 1000} seconds`);
                     reloadIntervalId = setInterval(reloadFrames, randomReloadTime);
                 } else {
                     clearInterval(reloadIntervalId);
@@ -461,8 +476,7 @@
             } else if (type === 'scroll') {
                 if (shouldStart) {
                     if (scrollIntervalId) return;
-                    // Scroll speed slow karein
-                    scrollIntervalId = setInterval(scrollFrames, 50); // Fast interval for smooth scroll
+                    scrollIntervalId = setInterval(scrollFrames, 50); 
                 } else {
                     clearInterval(scrollIntervalId);
                     scrollIntervalId = null;
@@ -482,7 +496,7 @@
         }
 
         function reloadFrames() {
-            const reloadDelay = 500; // Delay between reloads
+            const reloadDelay = 500; 
             
             iframes.forEach((iframe, index) => {
                 if (iframe.src && iframe.src !== 'about:blank') {
@@ -498,7 +512,6 @@
                     }, reloadDelay * index);
                 }
             });
-            // Interval ko reset karein
             toggleIntervals(false, 'reload');
             toggleIntervals(true, 'reload');
         }
@@ -507,8 +520,7 @@
             iframes.forEach((iframe, index) => {
                 const urlType = iframe.getAttribute('data-url-type');
                 
-                // NEW LOGIC: Only scroll for general websites (AdSense earning) and Facebook
-                // YouTube/Instagram often use fixed viewports or non-scrollable videos
+                // YouTube/Instagram par scroll skip karein
                 if (urlType === 'youtube' || urlType === 'instagram') return; 
 
                 if (iframe.scrollDirection === undefined) iframe.scrollDirection = 1; 
@@ -519,24 +531,20 @@
                         const currentScroll = iframe.contentWindow.scrollY;
                         const maxScroll = doc.body.scrollHeight - iframe.clientHeight;
                         
-                        // Scroll Step ko bahut slow aur random rakhein (5-10 pixels)
                         const scrollStep = Math.random() * 5 + 5; 
                         const direction = iframe.scrollDirection;
 
                         iframe.contentWindow.scrollBy(0, scrollStep * direction);
                         
-                        // Agar bottom ya top par pahunch gaye to direction change karein
                         if ((currentScroll >= maxScroll && direction === 1) || (currentScroll <= 0 && direction === -1)) {
-                            iframe.scrollDirection = 0; // Stop for a pause
+                            iframe.scrollDirection = 0; 
                             
-                            // 1.5 to 3.5 seconds ka random pause (Reading/Watching)
                             setTimeout(() => {
                                 iframe.scrollDirection = (currentScroll >= maxScroll) ? -1 : 1; 
                             }, Math.random() * 2000 + 1500); 
                         }
                     }
                 } catch (e) {
-                    // Cross-Origin iframe content
                 }
             });
         }
@@ -548,11 +556,8 @@
             
             const urlType = iframe.getAttribute('data-url-type'); 
             
-            // NEW LOGIC: YouTube/Social Media (FB/Insta) par Click Skip karein!
+            // YouTube/Social Media (FB/Insta) par Click Skip karein!
             if (urlType !== 'website') {
-                // Social Media par views/watch time par dhyan dena he, clicks par nahi
-                console.log(`Clicking skipped for ${urlType.toUpperCase()}: Focus on View Time.`);
-                // Interval reset karna zaroori he
                 toggleIntervals(false, 'click');
                 toggleIntervals(true, 'click');
                 return;
@@ -562,11 +567,10 @@
             try {
                 const doc = iframe.contentDocument || iframe.contentWindow.document;
                 if (doc) {
-                    // Links or buttons jo page change karte hain (AdSense Clicks)
                     const elements = doc.querySelectorAll('a:not([target="_blank"]), button'); 
                     
                     if (elements.length > 0) {
-                        const numClicks = Math.floor(Math.random() * 2) + 1; // 1 or 2 clicks
+                        const numClicks = Math.floor(Math.random() * 2) + 1; 
                         
                         updateStatus(randomIndex, 'clicking', 'Aggressive Click...');
 
@@ -583,18 +587,15 @@
 
                             if (clickableElement) {
                                 if (indicator) indicator.classList.add('click-active');
-                                // Real click simluation
                                 clickableElement.click(); 
                                 clickCount++;
                             }
-                            // Click ke beech mein random pause
                             setTimeout(performClick, Math.random() * 1000 + 500); 
                         }
                         performClick();
                     }
                 }
             } catch (e) {
-                // Cross-Origin error
             }
             toggleIntervals(false, 'click');
             toggleIntervals(true, 'click');
@@ -604,5 +605,3 @@
 
 </body>
 </html>
-
-            
