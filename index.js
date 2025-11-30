@@ -1140,11 +1140,6 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // ===================================================================
 // Sirf ek hi baar server start hoga
 app.listen(PORT, () => {
-    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
-    console.log(`\n======================================================`);
-    console.log(`🔥 TOOL 4 FIXES COMPLETE!`);
-    console.log(`🚀 /proxy-request now uses Premium Proxies and Stealth Headers.`);
-    console.log(`📊 YouTube GA4 tracking is integrated.`);
-    console.log(`======================================================`);
+    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`)
 });
   
