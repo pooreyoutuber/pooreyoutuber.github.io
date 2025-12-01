@@ -471,7 +471,7 @@ Original Caption: "${originalCaption}"
 Requested Change: "${requestedChange}"`;
     
     try {
-         const response = await ai.models.generateContent({
+          const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
             config: {
@@ -490,14 +490,12 @@ Requested Change: "${requestedChange}"`;
 
     } catch (error) {
         console.error('Gemini API Error (Edit):', error.message);
-        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` }
-    );
+        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
 
 // ===================================================================
 // --- END OF PART 1 ---
-// =veryslowly
 // ===================================================================
 // index.js (ULTIMATE FINAL VERSION - Part 2/2)
 // --- Tool 4 Helpers, Tool 4, Tool 5, and Server Start ---
@@ -992,6 +990,28 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
                  didLike = true; 
              } else allSuccess = false;
         }
+        
+        // 5b. SUBSCRIBE TO CHANNEL EVENT (30% chance of a subscribe, within the 35% engagement block)
+        if (Math.random() < 0.3) { 
+             const subscribePayload = {
+                client_id: cid,
+                user_properties: userProperties, 
+                events: [{ 
+                    name: 'subscribe', 
+                    params: { 
+                        channel_url: channelUrl, 
+                        session_id: session_id,
+                        debug_mode: true
+                    } 
+                }]
+            };
+            result = await sendData(gaId, apiSecret, subscribePayload, viewCount, 'subscribe');
+            if (result.success) {
+                 eventsSent++;
+                 didSubscribe = true; 
+             } else allSuccess = false;
+        }
+    }
           // 6. USER ENGAGEMENT (The final watch time/duration metric)
     const engagementPayload = {
         client_id: cid,
