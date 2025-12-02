@@ -1,420 +1,431 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDU-TKN माइनिंग डैशबोर्ड (Real Transfer)</title>
+    <title>Gemini AI Lead Mining Dashboard</title>
+    
     <style>
-        /* --- CSS स्टाइल --- */
+        /* --- General Styling --- */
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #0d1117; /* Dark Background */
-            color: #c9d1d9; /* Light Text */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); /* Deep Blue Background */
+            color: #ecf0f1;
+            padding: 20px;
             margin: 0;
-            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
 
-        .dashboard-container {
-            background-color: #161b22; 
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            width: 100%;
+        .dashboard {
+            background-color: #1c2833;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 90%;
             max-width: 800px;
+            padding: 30px;
         }
 
-        header {
+        h2 {
+            color: #76ff03; /* Bright Green Accent */
             text-align: center;
-            margin-bottom: 30px;
-        }
-
-        header h1 {
-            color: #58a6ff; 
-            font-size: 2.5em;
-            margin-bottom: 5px;
-        }
-
-        .control-panel {
-            text-align: center;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 15px;
             margin-bottom: 25px;
         }
 
-        #mining-status-text {
-            font-size: 1.5em;
-            margin-bottom: 15px;
+        /* --- Section Styling --- */
+        .mining-controls, .withdrawal-section, .status-panel {
+            background-color: #2c3e50;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
-
-        .speed-control {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
 
-        #mining-speed {
-            padding: 10px;
+        .stat-box {
+            background-color: #34495e;
+            padding: 15px;
             border-radius: 6px;
-            border: 1px solid #30363d;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            width: 150px;
+            text-align: center;
+            border-left: 5px solid #76ff03;
         }
 
-        .btn-start, .btn-stop, .btn-withdraw {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s;
+        .stat-box strong {
+            display: block;
+            font-size: 0.9em;
+            color: #bdc3c7;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
             font-weight: bold;
+            color: #ecf0f1;
         }
-
-        .btn-start {
-            background-color: #2ea44f; /* Green */
-            color: white;
-        }
-        .btn-start:hover { background-color: #2c974b; }
-
-        .btn-stop {
-            background-color: #f85149; /* Red */
-            color: white;
-        }
-        .btn-stop:hover { background-color: #da3633; }
-
-        .btn-withdraw {
-            background-color: #58a6ff; /* Blue */
-            color: white;
-            width: 100%;
+        
+        /* --- Controls and Inputs --- */
+        .controls-group {
+            display: flex;
+            gap: 10px;
             margin-top: 15px;
         }
-        .btn-withdraw:disabled {
-            background-color: #30363d;
+
+        select, input[type="text"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #34495e;
+            background-color: #1c2833;
+            color: #ecf0f1;
+            flex-grow: 1;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        
+        #startBtn {
+            background-color: #76ff03;
+            color: #1c2833;
+        }
+        #startBtn:hover:not(:disabled) {
+            background-color: #64dd17;
+            transform: translateY(-1px);
+        }
+
+        #withdrawBtn {
+            background-color: #e74c3c;
+            color: white;
+            flex-basis: 150px;
+            flex-grow: 0;
+        }
+        #withdrawBtn:hover:not(:disabled) {
+            background-color: #c0392b;
+            transform: translateY(-1px);
+        }
+        
+        button:disabled {
+            background-color: #95a5a6;
             cursor: not-allowed;
         }
 
-        .metrics-panel {
-            margin-bottom: 30px;
-        }
-
-        .metrics-panel h2 {
+        /* --- Dynamic Status Styling --- */
+        #mining-status {
+            font-weight: bold;
             text-align: center;
-            color: #79c0ff;
-            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
         }
+        .status-idle { background-color: #34495e; color: #f1c40f; }
+        .status-running { background-color: #2ecc71; color: #1c2833; }
+        .status-complete { background-color: #9b59b6; color: white; }
+        .status-error { background-color: #c0392b; color: white; }
 
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .metric-card {
-            background-color: #21262d;
+        /* --- Last Lead Info Box --- */
+        .last-lead-box {
+            grid-column: 1 / -1; /* Full width */
+            background-color: #1a5276; /* Darker blue */
             padding: 20px;
             border-radius: 8px;
-            text-align: center;
-            border: 1px solid #30363d;
-        }
-
-        .metric-card h3 {
-            margin-top: 0;
-            font-size: 0.9em;
-            color: #8b949e;
-        }
-
-        .metric-card p {
-            font-size: 2em;
-            font-weight: bold;
-            color: #c9d1d9;
-            margin: 5px 0 0;
-        }
-
-        .withdrawal-panel h2 {
-            text-align: center;
-            color: #79c0ff;
-            margin-bottom: 20px;
-        }
-
-        .info-text {
-            text-align: center;
-            color: #e3b341; 
-            margin-bottom: 15px;
-        }
-
-        .withdrawal-form input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #30363d;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-size: 1em;
-            box-sizing: border-box;
-        }
-
-        .message {
-            text-align: center;
             margin-top: 15px;
-            font-weight: bold;
+            border-left: 5px solid #3498db;
+        }
+        .last-lead-box h3 {
+            margin-top: 0;
+            color: #3498db;
+            font-size: 1.2em;
+        }
+        .lead-detail {
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+        .lead-detail strong {
+            color: #f1c40f;
+            font-weight: normal;
+            width: 120px;
+            display: inline-block;
         }
 
-        hr {
-            border: 0;
-            height: 1px;
-            background-color: #30363d;
-            margin: 30px 0;
-        }
-        /* --- CSS स्टाइल खत्म --- */
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <header>
-            <h1>EDU-TKN माइनिंग सिस्टम ⛏️</h1>
-            <p>प्रोफेसरों के लिए वास्तविक क्रिप्टो रिवॉर्ड</p>
-        </header>
-
-        <section class="control-panel">
-            <h2 id="mining-status-text">माइनिंग स्टेटस: STOPPED</h2>
-            <button id="mining-toggle-btn" class="btn-start">माइनिंग शुरू करें</button>
-            <div class="speed-control">
-                <label for="mining-speed">माइनिंग स्पीड (Earning Rate):</label>
+    <div class="dashboard">
+        <h2>💰 Gemini B2B Lead Mining Simulation</h2>
+        <p>This tool simulates a high-speed B2B lead generation process using a Node.js backend and Gemini AI for qualified lead analysis (1-hour simulation).</p>
+        
+        <div class="mining-controls">
+            <h3>Start Lead Mining</h3>
+            <div class="controls-group">
                 <select id="mining-speed">
-                    <option value="Low">Low (5 TKN/मिनट)</option>
-                    <option value="Medium">Medium (10 TKN/मिनट)</option>
-                    <option value="High">High (20 TKN/मिनट)</option>
+                    <option value="basic">Basic (2 Leads/min)</option>
+                    <option value="standard" selected>Standard (5 Leads/min)</option>
+                    <option value="turbo">Turbo (10 Leads/min)</option>
                 </select>
+                <button id="startBtn">START MINING</button>
             </div>
-        </section>
+            <div id="mining-status" class="status-idle">STATUS: Idle (Click Start to begin)</div>
+        </div>
 
-        <hr>
-
-        <section class="metrics-panel">
-            <h2>कमाई के आंकड़े</h2>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <h3>वर्तमान बैलेंस (EDU-TKN)</h3>
-                    <p id="tkn-balance">0</p>
+        <div class="stats-container">
+            <h3>Live Stats</h3>
+            <div class="status-panel">
+                <div class="stat-box">
+                    <strong>Total Leads Mined</strong>
+                    <div id="totalLeads" class="stat-value">0</div>
                 </div>
-                <div class="metric-card">
-                    <h3>USD के बराबर (लगभग)</h3>
-                    <p id="usd-equivalent">$0.00</p>
+                <div class="stat-box">
+                    <strong>Current Earnings ($1/Lead)</strong>
+                    <div id="currentEarnings" class="stat-value">$0.00</div>
                 </div>
-                <div class="metric-card">
-                    <h3>सिम्युलेटेड हैश रेट</h3>
-                    <p id="hash-rate">0 H/s</p>
+                <div class="stat-box">
+                    <strong>Status</strong>
+                    <div id="statusText" class="stat-value">IDLE</div>
+                </div>
+                <div class="stat-box">
+                    <strong>Elapsed Time</strong>
+                    <div id="elapsedTime" class="stat-value">00:00:00</div>
+                </div>
+                
+                <div class="last-lead-box">
+                    <h3>AI-Analyzed Qualified Lead (Last Hit)</h3>
+                    <div id="lastLeadInfo">
+                        <p class="lead-detail"><strong>Name:</strong> <span id="leadName">N/A</span></p>
+                        <p class="lead-detail"><strong>Industry:</strong> <span id="leadIndustry">N/A</span></p>
+                        <p class="lead-detail"><strong>Pain Point:</strong> <span id="leadPainPoint">N/A</span></p>
+                        <p class="lead-detail"><strong>Score:</strong> <span id="leadScore">N/A</span></p>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <hr>
-
-        <section class="withdrawal-panel">
-            <h2>निकासी (Withdrawal)</h2>
-            <p class="info-text">निकासी के लिए न्यूनतम 10,000 EDU-TKN ($1) आवश्यक है। वास्तविक क्रिप्टो (GUSD/DAI) ट्रांसफर होगा।</p>
-            <div class="withdrawal-form">
-                <input type="text" id="wallet-address" placeholder="Binance / Trust Wallet का पता यहाँ डालें">
-                <button id="withdraw-btn" class="btn-withdraw" disabled>निकासी का अनुरोध करें</button>
+        <div class="withdrawal-section">
+            <h3>Withdrawal (Minimum: $5.00)</h3>
+            <div class="controls-group">
+                <input type="text" id="withdrawalAddress" placeholder="Enter Withdrawal Address (e.g., Wallet ID)" required>
+                <button id="withdrawBtn" disabled>WITHDRAW ALL</button>
             </div>
-            <p id="withdrawal-message" class="message"></p>
-        </section>
+        </div>
+
     </div>
 
     <script>
-        // --- JavaScript लॉजिक ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const TKN_TO_USD_RATE = 10000; // 10,000 TKN = $1 USD
-            const MIN_WITHDRAWAL_TKN = 10000;
-            // आपका Render Cloud URL यहाँ है
-            const BASE_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com'; 
+        // --- Configuration ---
+        const BACKEND_URL = window.location.origin; // Same origin as the served page
 
-            let isMining = false;
-            let balanceTKN = 0; // यह अस्थायी बैलेंस है, Node.js बैकएंड इसे संभालेगा
-            let timerInterval;
+        // --- DOM Elements ---
+        const startBtn = document.getElementById('startBtn');
+        const speedSelect = document.getElementById('mining-speed');
+        const miningStatusDiv = document.getElementById('mining-status');
+        const withdrawBtn = document.getElementById('withdrawBtn');
+        const addressInput = document.getElementById('withdrawalAddress');
+        
+        // Stats Elements
+        const totalLeadsDiv = document.getElementById('totalLeads');
+        const currentEarningsDiv = document.getElementById('currentEarnings');
+        const statusTextDiv = document.getElementById('statusText');
+        const elapsedTimeDiv = document.getElementById('elapsedTime');
+        
+        // Last Lead Elements (NEW)
+        const leadNameSpan = document.getElementById('leadName');
+        const leadIndustrySpan = document.getElementById('leadIndustry');
+        const leadPainPointSpan = document.getElementById('leadPainPoint');
+        const leadScoreSpan = document.getElementById('leadScore');
 
-            // DOM Elements
-            const statusText = document.getElementById('mining-status-text');
-            const toggleBtn = document.getElementById('mining-toggle-btn');
-            const speedSelect = document.getElementById('mining-speed');
-            const tknBalanceEl = document.getElementById('tkn-balance');
-            const usdEquivalentEl = document.getElementById('usd-equivalent');
-            const hashRateEl = document.getElementById('hash-rate');
-            const withdrawBtn = document.getElementById('withdraw-btn');
-            const walletAddressInput = document.getElementById('wallet-address');
-            const withdrawalMessageEl = document.getElementById('withdrawal-message');
+
+        // --- Global State ---
+        let miningIsRunning = false;
+        let totalMinedLeads = 0;
+        let currentEarnings = 0;
+        let lastLeadData = null; // Store the last lead data
+
+
+        // --- Utility Functions ---
+        function formatTime(ms) {
+            if (ms < 0) ms = 0;
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
             
-            // यह एक डमी प्रोफेसर ID है, जिसे बाद में लॉगिन सिस्टम से बदला जाएगा
-            const PROFESSOR_ID = 'clg_prof_123'; 
+            return [
+                hours.toString().padStart(2, '0'),
+                minutes.toString().padStart(2, '0'),
+                seconds.toString().padStart(2, '0')
+            ].join(':');
+        }
 
-            // --- Core Functions ---
-
-            /**
-             * स्पीड के आधार पर TKN/मिनट दिखाता है।
-             */
-            function getTokensPerMinute() {
-                const speed = speedSelect.value;
-                if (speed === 'High') return 20;
-                if (speed === 'Medium') return 10;
-                return 5; // Low
+        function updateUI() {
+            // 1. Update Stats
+            totalLeadsDiv.textContent = Math.floor(totalMinedLeads).toLocaleString();
+            currentEarningsDiv.textContent = `$${currentEarnings.toFixed(2)}`;
+            
+            // 2. Update Status Text & Styling
+            statusTextDiv.textContent = miningIsRunning ? 'RUNNING' : (totalMinedLeads > 0 ? 'COMPLETED' : 'IDLE');
+            miningStatusDiv.textContent = miningIsRunning ? 
+                `STATUS: Mining in progress... Speed: ${speedSelect.options[speedSelect.selectedIndex].text}` : 
+                `STATUS: ${statusTextDiv.textContent}`;
+            
+            miningStatusDiv.className = `status-${statusTextDiv.textContent.toLowerCase().replace(/[^a-z]/g, '')}`;
+            
+            // 3. Update Controls
+            startBtn.disabled = miningIsRunning;
+            speedSelect.disabled = miningIsRunning;
+            
+            // Withdrawal button logic
+            withdrawBtn.disabled = currentEarnings < 5.00 || miningIsRunning;
+            
+            // 4. Update Last Lead Info (FIXED TO SHOW DATA FROM BACKEND)
+            if (lastLeadData && lastLeadData.leadName) {
+                leadNameSpan.textContent = lastLeadData.leadName;
+                leadIndustrySpan.textContent = lastLeadData.industry;
+                leadPainPointSpan.textContent = lastLeadData.painPoint;
+                leadScoreSpan.textContent = `${lastLeadData.score} / 100`;
+            } else {
+                leadNameSpan.textContent = 'N/A';
+                leadIndustrySpan.textContent = 'N/A';
+                leadPainPointSpan.textContent = 'N/A';
+                leadScoreSpan.textContent = 'N/A';
             }
+        }
 
-            /**
-             * UI को वर्तमान बैलेंस और स्थिति के साथ अपडेट करता है।
-             */
-            function updateUI() {
-                const usdValue = (balanceTKN / TKN_TO_USD_RATE).toFixed(4);
-                const tknPerMin = getTokensPerMinute();
 
-                tknBalanceEl.textContent = Math.floor(balanceTKN).toLocaleString(); // पूर्णांक दिखाना
-                usdEquivalentEl.textContent = `$${usdValue}`;
-                
-                // माइनिंग सिमुलेशन दिखाने के लिए हैश रेट
-                hashRateEl.textContent = isMining ? `${tknPerMin * 100} MH/s` : '0 H/s';
+        // --- Backend Communication ---
+        
+        async function checkBackendStatus() {
+            try {
+                // FIX 1: Corrected API path to include /b2b/ prefix
+                const response = await fetch(`${BACKEND_URL}/b2b/stats`); 
+                const stats = await response.json();
 
-                // निकासी बटन की स्थिति
-                const isAddressValid = walletAddressInput.value.length > 20;
-                if (balanceTKN >= MIN_WITHDRAWAL_TKN && isAddressValid) {
-                    withdrawBtn.disabled = false;
-                } else {
-                    withdrawBtn.disabled = true;
-                }
+                // Update global state from backend
+                totalMinedLeads = stats.totalLeads || 0;
+                currentEarnings = stats.currentEarnings || 0;
+                miningIsRunning = stats.status === 'running';
+                lastLeadData = stats.lastQualifiedLead || null; // NEW: Fetch the qualified lead data
 
-                // स्टेटस अपडेट
-                statusText.textContent = isMining ? 'माइनिंग स्टेटस: RUNNING' : 'माइनिंग स्टेटस: STOPPED';
-                statusText.style.color = isMining ? '#2ea44f' : '#f85149';
-            }
+                // Update elapsed time dynamically
+                elapsedTimeDiv.textContent = formatTime(stats.elapsedTimeMs || 0);
 
-            /**
-             * माइनिंग सिमुलेशन को शुरू/बंद करता है।
-             */
-            function toggleMining() {
-                isMining = !isMining;
-                
-                if (isMining) {
-                    // माइनिंग शुरू करें
-                    toggleBtn.textContent = 'माइनिंग बंद करें';
-                    toggleBtn.className = 'btn-stop';
-                    speedSelect.disabled = true;
-                    
-                    // हर 1 सेकंड में अपडेट करने का सिमुलेशन
-                    timerInterval = setInterval(simulateMiningCycle, 1000); 
-
-                    // TODO: Node.js API Call to START MINING
-                    // fetch(`${BASE_URL}/api/start-mining`, { method: 'POST', ... });
-
-                } else {
-                    // माइनिंग बंद करें
-                    clearInterval(timerInterval);
-                    toggleBtn.textContent = 'माइनिंग शुरू करें';
-                    toggleBtn.className = 'btn-start';
-                    speedSelect.disabled = false;
-
-                    // TODO: Node.js API Call to STOP MINING
-                }
                 updateUI();
-            }
-
-            /**
-             * माइनिंग का एक चक्र चलाता है (हर 1 सेकंड में)।
-             */
-            function simulateMiningCycle() {
-                const tknEarnedPerMinute = getTokensPerMinute();
-                // 1 मिनट में 60 सेकंड होते हैं
-                const tknEarnedPerSecond = tknEarnedPerMinute / 60; 
-                balanceTKN += tknEarnedPerSecond;
                 
-                // TODO: Node.js API Call to UPDATE BALANCE (यह सर्वर साइड पर होना चाहिए)
-                /*
-                fetch(`${BASE_URL}/api/mine`, { 
+                if (miningIsRunning) {
+                    // Poll every 5 seconds if running
+                    setTimeout(checkBackendStatus, 5000); 
+                }
+
+            } catch (error) {
+                console.error("Error fetching status from backend:", error);
+                miningStatusDiv.textContent = "STATUS: ERROR (Backend connection failed!)";
+                miningStatusDiv.className = "status-error";
+            }
+        }
+
+        async function startMining() {
+            if (miningIsRunning) return;
+            startBtn.disabled = true;
+            miningStatusDiv.textContent = "STATUS: Sending command to backend...";
+            
+            const selectedSpeed = speedSelect.value;
+            
+            try {
+                 // FIX 2: Corrected API path to include /b2b/ prefix
+                const response = await fetch(`${BACKEND_URL}/b2b/start-mining`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        user_id: PROFESSOR_ID, 
-                        speed: speedSelect.value, 
-                        tkn_earned: tknEarnedPerSecond 
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                     // balanceTKN = data.current_balance; // Real balance from server
-                     updateUI();
+                    body: JSON.stringify({ speed: selectedSpeed })
                 });
-                */
-                
-                updateUI();
-            }
-            
-            // --- Event Listeners ---
-            toggleBtn.addEventListener('click', toggleMining);
-            speedSelect.addEventListener('change', updateUI);
-            walletAddressInput.addEventListener('input', updateUI);
 
-            withdrawBtn.addEventListener('click', () => {
-                const address = walletAddressInput.value;
-                const amountTKN = balanceTKN;
+                const result = await response.json();
 
-                if (amountTKN < MIN_WITHDRAWAL_TKN || !address) {
-                    withdrawalMessageEl.textContent = 'निकासी की आवश्यकताएँ पूरी नहीं हुई हैं।';
-                    withdrawalMessageEl.style.color = '#f85149';
-                    return;
+                if (response.ok && result.success) {
+                    miningIsRunning = true;
+                    updateUI();
+                    alert(`Mining Started at ${selectedSpeed.toUpperCase()} speed! Check stats in a few seconds.`);
+                    checkBackendStatus(); // Start polling
+                } else {
+                    alert(`START FAILED: ${result.message || 'Unknown error at backend.'}`);
+                    startBtn.disabled = false;
+                    updateUI();
                 }
 
-                // UI अपडेट
-                withdrawalMessageEl.textContent = 'निकासी का अनुरोध भेजा जा रहा है... कृपया प्रतीक्षा करें।';
-                withdrawalMessageEl.style.color = '#e3b341';
+            } catch (error) {
+                alert("Error communicating with backend to start mining.");
+                startBtn.disabled = false;
+                updateUI();
+            }
+        }
+        
+        async function handleWithdrawal() {
+            if (currentEarnings < 5.00) {
+                alert("Minimum withdrawal is $5.00.");
+                return;
+            }
+
+            const address = addressInput.value.trim();
+            if (address.length < 5) {
+                alert("Please enter a valid withdrawal address.");
+                return;
+            }
+
+            const amount = currentEarnings.toFixed(2);
+            const confirmWithdraw = confirm(`Confirm withdrawal of $${amount} to address: ${address}?`);
+
+            if (confirmWithdraw) {
                 withdrawBtn.disabled = true;
 
-                // TODO: Node.js API Call for REAL TRANSFER (Gemini Withdrawal)
-                /*
-                fetch(`${BASE_URL}/api/withdraw`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        user_id: PROFESSOR_ID,
-                        address: address, 
-                        amount_usd: (amountTKN / TKN_TO_USD_RATE).toFixed(2) // $USD amount
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    withdrawBtn.disabled = false;
-                    if (data.success) {
-                        balanceTKN = 0; // Server cleared the balance
-                        withdrawalMessageEl.textContent = `सफल! ${data.message}`; 
-                        withdrawalMessageEl.style.color = '#2ea44f';
+                try {
+                    // FIX 3: Corrected API path to include /b2b/ prefix
+                    const response = await fetch(`${BACKEND_URL}/b2b/withdraw`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: amount, address: address })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        alert(`WITHDRAWAL SUCCESS! \n\nAmount: $${amount} \nTo Address: ${address}\n\nTransaction ID: ${result.txnId || 'N/A'}`);
+                        
+                        // Reset stats after successful simulation
+                        totalMinedLeads = 0;
+                        currentEarnings = 0;
+                        lastLeadData = null; // Reset qualified lead on withdrawal
+                        updateUI();
                     } else {
-                        withdrawalMessageEl.textContent = `त्रुटि: ${data.message}`; 
-                        withdrawalMessageEl.style.color = '#f85149';
+                        alert(`WITHDRAWAL FAILED: ${result.message || 'Unknown error at backend.'}`);
                     }
-                    updateUI();
-                })
-                .catch(error => {
-                    //... Error handling
-                });
-                */
 
-                // 3 सेकंड के बाद सिमुलेशन सफल दिखाएं
-                setTimeout(() => {
-                    const withdrawnUSD = (amountTKN / TKN_TO_USD_RATE).toFixed(2);
-                    balanceTKN = 0;
-                    withdrawalMessageEl.textContent = `निकासी सफल! $${withdrawnUSD} का ट्रांसफर अनुरोध भेजा गया है। (यह आपके वॉलेट में वास्तविक क्रिप्टो भेजेगा)`;
-                    withdrawalMessageEl.style.color = '#2ea44f';
-                    withdrawBtn.disabled = false;
+                } catch (error) {
+                    alert("Error communicating with backend for withdrawal.");
+                } finally {
+                    withdrawBtn.disabled = false; 
                     updateUI();
-                }, 3000);
-            });
+                }
+            }
+        }
 
-            // Initial load
-            updateUI();
-        });
-        // --- JavaScript लॉजिक खत्म ---
+
+        // --- Event Listeners and Initialization ---\
+        startBtn.addEventListener('click', startMining);
+        withdrawBtn.addEventListener('click', handleWithdrawal);
+        
+        // Initial setup and status check
+        updateUI(); 
+        checkBackendStatus(); 
     </script>
 </body>
 </html>
