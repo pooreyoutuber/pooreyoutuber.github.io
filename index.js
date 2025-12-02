@@ -1157,6 +1157,186 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
 
 // ===================================================================
+// 6. B2B LEAD MINING TOOL (API: /b2b/*) - NEW GEMINI TOOL
+// ===================================================================
+
+// --- AI FUNCTION FOR LEAD ANALYSIS (Simulates Mining) ---
+async function generateLeadAnalysis(speed) {
+    if (!ai || !GEMINI_KEY) { return null; }
+    
+    const randomTopic = [
+        "SaaS startup using AI for education", 
+        "FinTech company launching a new investment app", 
+        "HealthTech firm developing a remote patient monitoring platform", 
+        "B2B logistics software provider in India"
+    ][randomInt(0, 3)];
+
+    const prompt = `Simulate a B2B Lead Analysis task. Identify one highly qualified sales lead from the following industry: ${randomTopic}. The analysis should simulate the 'mining' process.
+Output only a JSON object containing the simulated lead details.
+--- CRITICAL INSTRUCTION ---
+1. Use a high temperature (0.9) for creativity.
+2. Output should be strictly JSON.
+3. The 'score' field must be a number between 90 and 99.
+4. The final output MUST be a JSON object with keys: leadName, industry, painPoint, requiredProduct, score.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "object",
+                    properties: { 
+                        leadName: { type: "string" },
+                        industry: { type: "string" },
+                        painPoint: { type: "string" },
+                        requiredProduct: { type: "string" },
+                        score: { type: "integer" }
+                    },
+                    required: ["leadName", "industry", "painPoint", "requiredProduct", "score"]
+                },
+                temperature: 0.9, 
+            },
+        });
+        const analysis = JSON.parse(response.text.trim());
+        console.log(`[B2B MINING SUCCESS] Analyzed Lead: ${analysis.leadName} (Score: ${analysis.score})`);
+        return analysis;
+    } catch (error) {
+        console.error('Gemini Lead Analysis Failed:', error.message);
+    }
+    return null; 
+}
+
+
+// --- FUNCTION TO START THE MINING SIMULATION (Runs in background) ---
+function startMiningProcess(speed) {
+    if (miningState === 'running') return;
+    
+    miningState = 'running';
+    miningStartTime = Date.now();
+    let leadsPerMinute = 5; // Default (Standard)
+
+    if (speed === 'basic') leadsPerMinute = 2;
+    else if (speed === 'turbo') leadsPerMinute = 10;
+
+    const intervalMs = 60000 / leadsPerMinute; // Time to mine 1 lead
+    
+    console.log(`\n[B2B MINING START] Speed: ${speed} (${leadsPerMinute} leads/min).`);
+    
+    // Clear any old interval
+    if (miningIntervalId) clearInterval(miningIntervalId);
+
+    // This interval will handle the actual lead generation/tally
+    miningIntervalId = setInterval(async () => {
+        const elapsedTime = Date.now() - miningStartTime;
+
+        // 1. Check if the simulation hour is complete
+        if (elapsedTime >= SIMULATION_DURATION_MS) {
+            clearInterval(miningIntervalId);
+            miningState = 'complete';
+            console.log(`[B2B MINING STOP] 1-Hour simulation complete. Total leads: ${Math.floor(totalMinedLeads)}.`);
+            return;
+        }
+
+        // 2. Simulate the AI/Scraping work
+        // Instead of calling Gemini every time (which would be too costly/slow),
+        // we'll call it randomly (e.g., 10% chance) and mostly just increment the counter.
+        const shouldCallGemini = Math.random() < 0.1; 
+        
+        if (shouldCallGemini) {
+            const analysis = await generateLeadAnalysis(speed);
+            if (analysis) {
+                 console.log(`[B2B Lead Mined] New Qualified Lead! Value: $${LEAD_VALUE}`);
+            }
+        }
+        
+        // Always increment the counter based on speed
+        totalMinedLeads += 1;
+        console.log(`[B2B MINING] Current Leads: ${Math.floor(totalMinedLeads)}. Elapsed: ${Math.floor(elapsedTime / 60000)} min.`);
+
+    }, intervalMs);
+}
+
+
+// A. START MINING ENDPOINT (POST)
+app.post('/b2b/start-mining', async (req, res) => {
+    const { speed } = req.body;
+    
+    if (miningState === 'running') {
+        return res.status(200).json({ success: true, message: 'Mining already running.' });
+    }
+    
+    if (!GEMINI_KEY) {
+        return res.status(500).json({ success: false, message: 'Gemini API Key is missing for B2B Analysis.' });
+    }
+
+    // Reset old state and start the process
+    totalMinedLeads = 0;
+    startMiningProcess(speed);
+
+    res.status(200).json({ 
+        success: true, 
+        message: 'B2B Lead Mining simulation started.',
+        startTime: miningStartTime
+    });
+});
+
+
+// B. GET STATS ENDPOINT (GET)
+app.get('/b2b/stats', (req, res) => {
+    const earnings = (totalMinedLeads * LEAD_VALUE).toFixed(2);
+    let elapsedTime = 0;
+    if (miningStartTime && miningState === 'running') {
+        elapsedTime = Date.now() - miningStartTime;
+    }
+
+    res.status(200).json({
+        totalLeads: Math.floor(totalMinedLeads),
+        currentEarnings: parseFloat(earnings),
+        isComplete: miningState === 'complete',
+        status: miningState,
+        elapsedTimeMs: elapsedTime
+    });
+});
+
+
+// C. WITHDRAW ENDPOINT (POST)
+app.post('/b2b/withdraw', (req, res) => {
+    const { amount, address } = req.body;
+    
+    const currentEarnings = (totalMinedLeads * LEAD_VALUE);
+    const requiredAmount = parseFloat(amount);
+
+    if (currentEarnings < 5.00) {
+        return res.status(400).json({ success: false, message: 'Minimum withdrawal is $5.00.' });
+    }
+    
+    if (!address || address.length < 5) {
+         return res.status(400).json({ success: false, message: 'Valid withdrawal address required.' });
+    }
+    
+    // 1. Stop any running mining process
+    if (miningIntervalId) {
+        clearInterval(miningIntervalId);
+        miningIntervalId = null;
+    }
+    
+    // 2. Reset the balance
+    const finalLeads = Math.floor(totalMinedLeads);
+    totalMinedLeads = 0;
+    miningState = 'idle';
+    
+    // 3. Send success response
+    res.status(200).json({
+        success: true,
+        message: `Withdrawal of $${requiredAmount} successful. ${finalLeads} leads transferred (simulated sale).`,
+        txnId: crypto.randomBytes(16).toString('hex') 
+    });
+});
+
+
+// ===================================================================
 // --- SERVER START ---
 // ===================================================================
 // Sirf ek hi baar server start hoga
