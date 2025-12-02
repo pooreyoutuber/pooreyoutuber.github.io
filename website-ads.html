@@ -241,7 +241,8 @@
         // --- Backend Connection Test ---
         async function checkBackendStatus() {
              try {
-                const response = await fetch(`${BACKEND_URL}/status`);
+                // FIX 1: Backend status is on the root path '/' in your index.js
+                const response = await fetch(`${BACKEND_URL}/`);
                 if (response.ok) {
                     backendStatusDisplay.textContent = 'Online';
                     backendStatusDisplay.style.color = '#76ff03';
@@ -263,7 +264,8 @@
             const speed = speedSelect.value;
             
             try {
-                const response = await fetch(`${BACKEND_URL}/start-mining`, {
+                // FIX 2: Added /b2b/ prefix to match the Node.js backend route
+                const response = await fetch(`${BACKEND_URL}/b2b/start-mining`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ speed: speed })
@@ -288,7 +290,8 @@
         // --- Fetch Stats Logic ---
         async function fetchMiningStats() {
              try {
-                const response = await fetch(`${BACKEND_URL}/stats`);
+                // FIX 3: Added /b2b/ prefix to match the Node.js backend route
+                const response = await fetch(`${BACKEND_URL}/b2b/stats`);
                 const data = await response.json();
 
                 if (data && typeof data.totalLeads === 'number') {
@@ -327,7 +330,8 @@
             withdrawBtn.disabled = true;
 
             try {
-                const response = await fetch(`${BACKEND_URL}/withdraw`, {
+                // FIX 4: Added /b2b/ prefix to match the Node.js backend route
+                const response = await fetch(`${BACKEND_URL}/b2b/withdraw`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ amount: amount, address: address })
