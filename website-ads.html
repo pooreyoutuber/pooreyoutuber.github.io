@@ -3,287 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional YouTube Engagement Booster</title>
+    <title>Gemini AI Lead Mining Dashboard</title>
+    
     <style>
-        /* Base Styling & Professional Look */
+        /* --- General Styling --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); /* Deep Blue Background */
+            color: #ecf0f1;
+            padding: 20px;
             margin: 0;
-            padding: 0;
-            background-color: #f0f3f6; /* Light Background */
-        }
-        
-        /* Main Container */
-        .container {
-            max-width: 750px;
-            margin: 40px auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        /* Tool Header - YouTube Theme */
-        .tool-header {
-            text-align: center;
-            padding: 30px 0;
-            background-color: #cc0000; /* YouTube Red */
-            color: white;
-        }
-        .tool-header h2 {
-            margin: 0;
-            font-size: 32px;
-            font-weight: 700;
-        }
-        .tool-header p {
-            margin: 8px 0 0;
-            font-size: 18px;
-            opacity: 0.9;
-        }
-
-        /* Form Section */
-        .form-section {
+        .dashboard {
+            background-color: #1c2833;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 800px;
             padding: 30px;
         }
-        .form-group {
+
+        h2 {
+            color: #76ff03; /* Bright Green Accent */
+            text-align: center;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 15px;
             margin-bottom: 25px;
-            border: 1px solid #e0e0e0;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #cc0000; /* Step Red */
-            font-size: 18px;
-        }
-        .input-url-group {
-            margin-bottom: 15px;
-        }
-        .input-url-group label {
-             color: #333;
-             font-size: 14px;
-             font-weight: normal;
-             margin-bottom: 5px;
-        }
-        .input-url-group input[type="text"], 
-        .form-group input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 15px;
-            transition: border-color 0.3s;
-        }
-        .input-url-group input[type="text"]:focus, 
-        .form-group input[type="number"]:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        
-        /* Action Button */
-        .action-button-container {
-            padding: 0 30px 30px;
-        }
-        .action-button {
-            width: 100%;
-            padding: 20px;
-            background-color: #007bff; /* Primary Blue */
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
-        }
-        .action-button:hover {
-            background-color: #0056b3;
-        }
-        .action-button:active {
-            transform: scale(0.99);
-        }
-        
-        /* Summary Section */
-        .summary-section {
-            background-color: #e6f7ff; /* Light Blue Background */
-            border: 1px solid #b3e0ff;
-            padding: 25px;
-            margin: 30px;
-            border-radius: 8px;
-        }
-        .summary-section h3 {
-            color: #007bff;
-            font-size: 20px;
-            margin-top: 0;
-            border-bottom: 2px solid #b3e0ff;
-            padding-bottom: 10px;
-        }
-        .summary-section ul {
-            list-style-type: '👉';
-            padding-left: 20px;
-            margin-top: 15px;
-        }
-        .summary-section li {
-            font-size: 15px;
-            margin-bottom: 10px;
-            color: #333;
         }
 
+        .mining-controls, .withdrawal-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #2c3e50;
+        }
+
+        /* --- Input/Select Styling --- */
+        .speed-selection label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .speed-selection select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #34495e;
+            background-color: #34495e;
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            appearance: none;
+        }
+
+        /* --- Buttons --- */
+        .start-btn {
+            background-color: #76ff03;
+            color: #1c2833;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background-color: #64dd17;
+        }
+
+        .start-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        /* --- Stats Display --- */
+        .mining-stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 10px;
+            width: 45%;
+        }
+
+        .stat-box h4 {
+            margin: 0 0 5px 0;
+            color: #bdc3c7;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #f1c40f; /* Yellow for earnings */
+        }
+        
+        /* --- Withdrawal Section --- */
+        .withdrawal-section input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #34495e;
+            background-color: #34495e;
+            color: #ecf0f1;
+        }
+
+        .withdrawal-section p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+        }
+
+        .withdraw-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .withdraw-btn:hover:not(:disabled) {
+            background-color: #c0392b;
+        }
+        
+        .withdraw-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
+    <div class="dashboard">
+        <h2>⛏️ Gemini AI Lead Miner Dashboard</h2>
 
-<div class="container">
-
-    <div class="tool-header">
-        <h2>🎬 Professional YouTube Engagement Booster</h2>
-        <p>Server-Side Watch Time & High-Retention View Injection</p>
-    </div>
-
-    <div class="form-section">
-        
-        <div class="form-group">
-            <label>1. Target YouTube Video URLs (Up to 4 Videos):</label>
-            
-            <div class="input-url-group">
-                <label for="videoUrl1">Video 1 URL (Required)</label>
-                <input type="text" id="videoUrl1" placeholder="https://www.youtube.com/watch?v=XXXXXXXXX">
+        <div class="mining-controls">
+            <div class="speed-selection">
+                <label for="miningSpeed">Mining Speed / Resource Allocation:</label>
+                <select id="miningSpeed">
+                    <option value="basic">Basic (Slow - 2 Leads/min)</option>
+                    <option value="standard" selected>Standard (Medium - 5 Leads/min)</option>
+                    <option value="turbo">Turbo (Fast - 10 Leads/min)</option>
+                </select>
             </div>
             
-            <div class="input-url-group">
-                <label for="videoUrl2">Video 2 URL (Optional)</label>
-                <input type="text" id="videoUrl2" placeholder="https://www.youtube.com/watch?v=YYYYYYYYY">
+            <button class="start-btn" id="startBtn">START AI MINING</button>
+        </div>
+
+        <div class="mining-stats">
+            <div class="stat-box">
+                <h4>MINED LEADS (TOTAL)</h4>
+                <div class="stat-value" id="totalMinedLeads">0</div>
             </div>
-            
-            <div class="input-url-group">
-                <label for="videoUrl3">Video 3 URL (Optional)</label>
-                <input type="text" id="videoUrl3" placeholder="https://www.youtube.com/watch?v=ZZZZZZZZZ">
-            </div>
-            
-            <div class="input-url-group">
-                <label for="videoUrl4">Video 4 URL (Optional)</label>
-                <input type="text" id="videoUrl4" placeholder="https://www.youtube.com/watch?v=WWWWWWWWW">
+            <div class="stat-box">
+                <h4>ESTIMATED EARNINGS (USD)</h4>
+                <div class="stat-value" id="currentEarnings">$0.00</div>
             </div>
         </div>
         
-        <div class="form-group">
-            <label for="channelUrl">2. Target YouTube Channel URL (For Subscriptions):</label>
-            <input type="text" id="channelUrl" placeholder="Example: https://www.youtube.com/@YourChannelName">
-        </div>
+        <p style="text-align: center; margin-top: 25px; color: #bdc3c7;">
+            * Current Lead Value: $1.00 per Qualified Lead (as determined by Gemini Analysis)
+        </p>
+        
+        <hr style="border-color: #34495e; margin: 25px 0;">
 
-        <div class="form-group">
-            <label for="totalViews">3. Total Views to Distribute (Max 500):</label>
-            <input type="number" id="totalViews" value="50" min="1" max="500" placeholder="50">
-        </div>
+        <div class="withdrawal-section">
+            <h3>💸 Withdrawal Center</h3>
+            
+            <label for="walletAddress">Withdrawal Address (Wallet/UPI/Bank Account):</label>
+            <input type="text" id="walletAddress" placeholder="Enter Wallet Address, UPI ID, or Bank Account">
+            
+            <p>
+                Minimum Withdrawal: $5.00. (Fees: 2% Network Fee)
+            </p>
 
-        <div class="form-group">
-            <label for="gaId">4. Google Analytics ID (G-XXXXX):</label>
-            <input type="text" id="gaId" placeholder="Enter your GA4 Measurement ID (Must be linked to YouTube)">
+            <button class="withdraw-btn" id="withdrawBtn" disabled>WITHDRAW $0.00</button>
         </div>
         
-        <div class="form-group">
-            <label for="apiSecret">5. API Secret (Measurement Protocol Key):</label>
-            <input type="text" id="apiSecret" placeholder="Enter your GA4 API Secret">
-        </div>
+        <p style="text-align: center; font-size: 0.8em; color: #5dade2;">
+            Node.js Backend Status: <span id="backendStatus">Connecting...</span>
+        </p>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const withdrawBtn = document.getElementById('withdrawBtn');
+        const speedSelect = document.getElementById('miningSpeed');
+        const totalLeadsDisplay = document.getElementById('totalMinedLeads');
+        const earningsDisplay = document.getElementById('currentEarnings');
+        const walletInput = document.getElementById('walletAddress');
+        const backendStatusDisplay = document.getElementById('backendStatus');
+
+        // ************************************************
+        // 🚨 IMPORTANT: REPLACE THIS URL WITH YOUR LIVE RENDER CLOUD NODE.JS BACKEND URL
+        // Example: const BACKEND_URL = 'https://your-node-server.onrender.com';
+        // ************************************************
+        const BACKEND_URL = 'http://localhost:3000'; 
+
+        let isMining = false;
+        let totalMinedLeads = 0;
+        const LEAD_VALUE = 1.00; // $1.00 per lead
+        let miningInterval;
         
-    </div>
-    
-    <div class="action-button-container">
-        <button class="action-button" onclick="startYoutubeBoost()">🚀 Initiate Server-Side Boost</button>
-        <p id="statusMessage" style="text-align: center; color: green; margin-top: 15px; font-weight: bold;"></p>
-    </div>
-
-    <div class="summary-section">
-        <h3>💡 How This Tool Works:</h3>
-        <ul>
-            <li>**Multi-Target Distribution:** The total views requested are automatically **distributed evenly** across all valid URLs provided (up to 4 videos).</li>
-            <li>**Realistic Retention:** Sessions simulate **human-like** viewing behavior (variable watch time, likes, and subscriptions).</li>
-            <li>**Engagement Boost:** Injects **`like_video`** and **`subscribe_channel`** events for a 35% engagement rate.</li>
-            <li>**Server-Side:** Uses GA4 Measurement Protocol to run sessions in the background, ensuring views continue **after closing the browser**.</li>
-        </ul>
-    </div>
-
-</div>
-
-<script>
-    // ⚠️ HARDCODED URL: This URL is set to ensure connection to your Render server.
-    const API_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com/youtube-boost-mp'; 
-
-    function startYoutubeBoost() {
-        const gaId = document.getElementById('gaId').value.trim();
-        const apiSecret = document.getElementById('apiSecret').value.trim();
-        const channelUrl = document.getElementById('channelUrl').value.trim();
-        const totalViews = parseInt(document.getElementById('totalViews').value);
-        const statusMessage = document.getElementById('statusMessage');
-
-        // Collect all video URLs, filtering out empty ones
-        const videoUrls = [
-            document.getElementById('videoUrl1').value.trim(),
-            document.getElementById('videoUrl2').value.trim(),
-            document.getElementById('videoUrl3').value.trim(),
-            document.getElementById('videoUrl4').value.trim(),
-        ].filter(url => url !== '');
-
-        // --- Validation ---
-        if (!gaId || !apiSecret || !channelUrl || totalViews < 1 || totalViews > 500) {
-            statusMessage.style.color = 'red';
-            statusMessage.innerText = '⚠️ Please fill in all required fields (GA ID, API Secret, Channel URL, and Views 1-500).';
-            return;
+        // --- Utility Functions ---
+        function updateUI() {
+            const currentEarnings = (totalMinedLeads * LEAD_VALUE).toFixed(2);
+            totalLeadsDisplay.textContent = Math.floor(totalMinedLeads);
+            earningsDisplay.textContent = `$${currentEarnings}`;
+            withdrawBtn.textContent = `WITHDRAW $${currentEarnings}`;
+            
+            withdrawBtn.disabled = (parseFloat(currentEarnings) < 5.00 || isMining);
         }
 
-        if (videoUrls.length === 0) {
-            statusMessage.style.color = 'red';
-            statusMessage.innerText = '⚠️ At least one Video URL is required.';
-            return;
-        }
-        
-        // Basic URL format check
-        const isUrlValid = (url) => url.includes('youtube.com') || url.includes('youtu.be');
-        if (!isUrlValid(channelUrl) || videoUrls.some(url => !isUrlValid(url))) {
-            statusMessage.style.color = 'red';
-            statusMessage.innerText = '⚠️ Please ensure all URLs are valid YouTube links.';
-            return;
+        function setMiningUIState(running) {
+            isMining = running;
+            startBtn.textContent = running ? 'MINING IN PROGRESS...' : 'START AI MINING';
+            startBtn.disabled = running;
+            speedSelect.disabled = running;
+            updateUI();
         }
 
-        statusMessage.style.color = '#ff8c00'; // Orange
-        statusMessage.innerText = '⏳ Initiating boost... (Validating Keys and Starting Server Process)';
-
-        // Data payload matching the new /youtube-boost-mp endpoint
-        const payload = {
-            ga_id: gaId,
-            api_key: apiSecret,
-            views: totalViews,
-            video_urls: videoUrls, // Array of URLs is now accepted by backend (index 3.js)
-            channel_url: channelUrl
-        };
-
-        fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'accepted') {
-                statusMessage.style.color = 'green';
-                statusMessage.innerText = `✅ SUCCESS! ${data.message} You can now close your browser.`;
-            } else {
-                statusMessage.style.color = 'red';
-                statusMessage.innerText = `❌ ERROR: ${data.message || 'Unknown error occurred.'}`;
+        // --- Backend Connection Test ---
+        async function checkBackendStatus() {
+             try {
+                const response = await fetch(`${BACKEND_URL}/status`);
+                if (response.ok) {
+                    backendStatusDisplay.textContent = 'Online';
+                    backendStatusDisplay.style.color = '#76ff03';
+                } else {
+                    throw new Error('Server not responding with 200.');
+                }
+            } catch (error) {
+                backendStatusDisplay.textContent = 'Offline/Error';
+                backendStatusDisplay.style.color = '#e74c3c';
             }
-        })
-        .catch(error => {
-            console.error('Fetch Error:', error);
-            statusMessage.style.color = 'red';
-            statusMessage.innerText = `❌ CRITICAL ERROR: Could not connect to the server. Check if your Render server is running.`;
-        });
-    }
-</script>
+        }
 
+
+        // --- Mining Logic ---
+        async function startMining() {
+            if (isMining) return;
+            setMiningUIState(true);
+            
+            const speed = speedSelect.value;
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/start-mining`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ speed: speed })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Backend failed to start mining.');
+                }
+                
+                // Start polling for stats update
+                miningInterval = setInterval(fetchMiningStats, 5000); // Polls every 5 seconds
+
+            } catch (error) {
+                console.error("Mining start error:", error);
+                alert(`Error starting mining: ${error.message}. Please check your Node.js server.`);
+                setMiningUIState(false);
+            }
+        }
+
+        // --- Fetch Stats Logic ---
+        async function fetchMiningStats() {
+             try {
+                const response = await fetch(`${BACKEND_URL}/stats`);
+                const data = await response.json();
+
+                if (data && typeof data.totalLeads === 'number') {
+                    totalMinedLeads = data.totalLeads;
+                    updateUI();
+                }
+
+                // If the backend signals that the one-hour simulation is complete
+                if (data && data.isComplete) {
+                    clearInterval(miningInterval);
+                    setMiningUIState(false);
+                    alert("Mining session completed (1 Hour Simulation Complete!). You can now withdraw.");
+                }
+
+            } catch (error) {
+                console.warn("Could not fetch stats. Check backend URL/connection.");
+            }
+        }
+
+        // --- Withdrawal Logic ---
+        async function handleWithdrawal() {
+            if (totalMinedLeads * LEAD_VALUE < 5.00) {
+                alert("Minimum withdrawal is $5.00.");
+                return;
+            }
+            
+            const amount = (totalMinedLeads * LEAD_VALUE).toFixed(2);
+            const address = walletInput.value;
+            
+            if (address.length < 5) {
+                alert("Please enter a valid Withdrawal Address (Wallet/UPI ID).");
+                return;
+            }
+
+            // Temporarily disable the button to prevent double-click
+            withdrawBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/withdraw`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: amount, address: address })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert(`WITHDRAWAL SUCCESS! \n\nAmount: $${amount} \nTo Address: ${address}\n\nTransaction ID: ${result.txnId || 'N/A'}`);
+                    
+                    // Reset stats after successful simulation
+                    totalMinedLeads = 0;
+                    updateUI();
+                } else {
+                    alert(`WITHDRAWAL FAILED: ${result.message || 'Unknown error at backend.'}`);
+                }
+
+            } catch (error) {
+                alert("Error communicating with backend for withdrawal.");
+            } finally {
+                withdrawBtn.disabled = false; // Re-enable if needed
+                updateUI();
+            }
+        }
+
+
+        // --- Event Listeners and Initialization ---
+        startBtn.addEventListener('click', startMining);
+        withdrawBtn.addEventListener('click', handleWithdrawal);
+        
+        // Initial setup and status check
+        updateUI(); 
+        checkBackendStatus(); 
+    </script>
 </body>
 </html>
