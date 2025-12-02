@@ -1157,6 +1157,65 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
 
 // ===================================================================
+// 🔥 TOOL 6: MINING FOR STUDENTS - SIMULATED LOGIC (ADDED HERE) 🔥
+// ------------------------------------------------------------------
+
+// --- TOOL 6: MINING FOR STUDENTS (SIMULATED POOL DATA & LOGIC) ---
+let activeMiningSession = null; 
+
+// Simulated Hash Rates (kH/s) for different user profiles (used for fake pool data)
+const HASH_RATE_PROFILES = {
+    low_cpu: 3,   // 3 kH/s (Monero only)
+    medium_gpu: 25, // 25 kH/s (Ravencoin/ETC)
+    high_gpu: 50  // 50 kH/s (Ravencoin/ETC)
+};
+
+// Function to calculate simulated earnings and time to target
+function calculateSimulatedEarnings(coin, speedProfile, target) {
+    const kHPerSec = HASH_RATE_PROFILES[speedProfile] || 3;
+    
+    // Fake base earnings per 24 hours (24h) in USD for 1 kH/s 
+    const BASE_EARNINGS_PER_KH_PER_DAY = {
+        XMR: 0.04, // $0.04/day/kH
+        ETC: 0.06, // $0.06/day/kH
+        RVN: 0.08, // $0.08/day/kH
+        ZEC: 0.05,
+        VRSC: 0.03
+    };
+
+    const baseEarning = BASE_EARNINGS_PER_KH_PER_DAY[coin] || 0.04;
+    
+    const dailyEarningUSD = baseEarning * kHPerSec;
+    
+    if (dailyEarningUSD === 0) {
+         return {
+            hashRate: kHPerSec * 1000,
+            dailyEarning: 0,
+            estimatedTime: 'N/A'
+         };
+    }
+    
+    // Calculate time to target
+    const hoursToTarget = target / (dailyEarningUSD / 24);
+    
+    let estimatedTime;
+    if (hoursToTarget < 1) {
+        estimatedTime = `${Math.round(hoursToTarget * 60)} Minutes`;
+    } else if (hoursToTarget < 24) {
+        estimatedTime = `${hoursToTarget.toFixed(1)} Hours`;
+    } else {
+        estimatedTime = `${(hoursToTarget / 24).toFixed(1)} Days`;
+    }
+    
+    return {
+        hashRate: kHPerSec * 1000, // Return in H/s
+        dailyEarning: dailyEarningUSD.toFixed(2),
+        estimatedTime: estimatedTime
+    };
+}
+
+
+// ===================================================================
 // 6. MINING FOR STUDENTS ENDPOINTS (API: /api/start-mining, /api/stop-mining, /api/mining-status) - SIMULATED
 // ===================================================================
 
@@ -1233,7 +1292,7 @@ app.get('/api/mining-status', (req, res) => {
     const increasePerTick = 0.005; 
     
     // Total simulated balance accumulated during this single session
-    const simulatedBalance = (timeFactor * increasePerTick) * (activeMiningSession.simulatedHashRate / 3000); // Scale by hash rate
+    const simulatedBalance = (timeFactor * increasePerTick) * (activeMiningSession.simulatedHashRate / 3000); // Scale by hash rate (3000 H/s = 3 kH/s base)
     
     // Ensure balance doesn't exceed the target dramatically
     const currentBalance = Math.min(simulatedBalance, activeMiningSession.target * 1.10);
