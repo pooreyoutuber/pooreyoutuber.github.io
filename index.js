@@ -1166,6 +1166,7 @@ let miningStartTime = 0;
 let miningState = 'idle'; // 'idle', 'running', 'complete'
 const LEAD_VALUE = 1.00;
 const SIMULATION_DURATION_MS = 60 * 60 * 1000; // 1 Hour Simulation
+let lastQualifiedLead = null; // ADDED: Stores the last AI-analyzed, high-score lead
 
 
 // --- AI FUNCTION FOR LEAD ANALYSIS (Simulates Mining) ---
@@ -1222,7 +1223,12 @@ function startMiningProcess(speed) {
     if (miningState === 'running') return;
     
     miningState = 'running';
+    
+    // CORRECTION 1: Ensure state is fully reset on start
+    totalMinedLeads = 0; 
+    lastQualifiedLead = null; // Reset qualified lead on new start
     miningStartTime = Date.now();
+    
     let leadsPerMinute = 5; // Default (Standard)
 
     if (speed === 'basic') leadsPerMinute = 2;
@@ -1255,7 +1261,8 @@ function startMiningProcess(speed) {
         if (shouldCallGemini) {
             const analysis = await generateLeadAnalysis(speed);
             if (analysis) {
-                 console.log(`[B2B Lead Mined] New Qualified Lead! Value: $${LEAD_VALUE}`);
+                 lastQualifiedLead = analysis; // CORRECTION 2: Store the AI analysis result
+                 console.log(`[B2B Lead Mined] New Qualified Lead! Value: $${LEAD_VALUE}. Last Lead: ${analysis.leadName}`);
             }
         }
         
@@ -1279,8 +1286,7 @@ app.post('/b2b/start-mining', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Gemini API Key is missing for B2B Analysis.' });
     }
 
-    // Reset old state and start the process
-    totalMinedLeads = 0;
+    // Start the process (startMiningProcess handles the full reset now)
     startMiningProcess(speed);
 
     res.status(200).json({ 
@@ -1304,7 +1310,8 @@ app.get('/b2b/stats', (req, res) => {
         currentEarnings: parseFloat(earnings),
         isComplete: miningState === 'complete',
         status: miningState,
-        elapsedTimeMs: elapsedTime
+        elapsedTimeMs: elapsedTime,
+        lastQualifiedLead: lastQualifiedLead // CORRECTION 3: Expose the last qualified lead
     });
 });
 
@@ -1330,9 +1337,10 @@ app.post('/b2b/withdraw', (req, res) => {
         miningIntervalId = null;
     }
     
-    // 2. Reset the balance
+    // 2. Reset the balance and qualified lead state
     const finalLeads = Math.floor(totalMinedLeads);
     totalMinedLeads = 0;
+    lastQualifiedLead = null; // Reset the last lead on withdrawal
     miningState = 'idle';
     
     // 3. Send success response
