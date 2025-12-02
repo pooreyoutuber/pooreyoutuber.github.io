@@ -1159,6 +1159,14 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // ===================================================================
 // 6. B2B LEAD MINING TOOL (API: /b2b/*) - NEW GEMINI TOOL
 // ===================================================================
+// --- GLOBAL MINING STATE (SIMULATION) ---
+let totalMinedLeads = 0;
+let miningIntervalId = null;
+let miningStartTime = 0;
+let miningState = 'idle'; // 'idle', 'running', 'complete'
+const LEAD_VALUE = 1.00;
+const SIMULATION_DURATION_MS = 60 * 60 * 1000; // 1 Hour Simulation
+
 
 // --- AI FUNCTION FOR LEAD ANALYSIS (Simulates Mining) ---
 async function generateLeadAnalysis(speed) {
