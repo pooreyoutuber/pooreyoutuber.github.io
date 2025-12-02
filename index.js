@@ -1157,197 +1157,96 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 6. B2B LEAD MINING TOOL (API: /b2b/*) - NEW GEMINI TOOL
+// 6. MINING FOR STUDENTS ENDPOINTS (API: /api/start-mining, /api/stop-mining, /api/mining-status) - SIMULATED
 // ===================================================================
-// --- GLOBAL MINING STATE (SIMULATION) ---
-let totalMinedLeads = 0;
-let miningIntervalId = null;
-let miningStartTime = 0;
-let miningState = 'idle'; // 'idle', 'running', 'complete'
-const LEAD_VALUE = 1.00;
-const SIMULATION_DURATION_MS = 60 * 60 * 1000; // 1 Hour Simulation
-let lastQualifiedLead = null; // ADDED: Stores the last AI-analyzed, high-score lead
 
+app.post('/api/start-mining', async (req, res) => {
+    // Expected payload: { coin, target, speed_profile, wallet_address }
+    const { coin, target, speed_profile, wallet_address } = req.body;
 
-// --- AI FUNCTION FOR LEAD ANALYSIS (Simulates Mining) ---
-async function generateLeadAnalysis(speed) {
-    if (!ai || !GEMINI_KEY) { return null; }
-    
-    const randomTopic = [
-        "SaaS startup using AI for education", 
-        "FinTech company launching a new investment app", 
-        "HealthTech firm developing a remote patient monitoring platform", 
-        "B2B logistics software provider in India"
-    ][randomInt(0, 3)];
-
-    const prompt = `Simulate a B2B Lead Analysis task. Identify one highly qualified sales lead from the following industry: ${randomTopic}. The analysis should simulate the 'mining' process.
-Output only a JSON object containing the simulated lead details.
---- CRITICAL INSTRUCTION ---
-1. Use a high temperature (0.9) for creativity.
-2. Output should be strictly JSON.
-3. The 'score' field must be a number between 90 and 99.
-4. The final output MUST be a JSON object with keys: leadName, industry, painPoint, requiredProduct, score.`;
-
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "object",
-                    properties: { 
-                        leadName: { type: "string" },
-                        industry: { type: "string" },
-                        painPoint: { type: "string" },
-                        requiredProduct: { type: "string" },
-                        score: { type: "integer" }
-                    },
-                    required: ["leadName", "industry", "painPoint", "requiredProduct", "score"]
-                },
-                temperature: 0.9, 
-            },
-        });
-        const analysis = JSON.parse(response.text.trim());
-        console.log(`[B2B MINING SUCCESS] Analyzed Lead: ${analysis.leadName} (Score: ${analysis.score})`);
-        return analysis;
-    } catch (error) {
-        console.error('Gemini Lead Analysis Failed:', error.message);
-    }
-    return null; 
-}
-
-
-// --- FUNCTION TO START THE MINING SIMULATION (Runs in background) ---
-function startMiningProcess(speed) {
-    if (miningState === 'running') return;
-    
-    miningState = 'running';
-    
-    // CORRECTION 1: Ensure state is fully reset on start
-    totalMinedLeads = 0; 
-    lastQualifiedLead = null; // Reset qualified lead on new start
-    miningStartTime = Date.now();
-    
-    let leadsPerMinute = 5; // Default (Standard)
-
-    if (speed === 'basic') leadsPerMinute = 2;
-    else if (speed === 'turbo') leadsPerMinute = 10;
-
-    const intervalMs = 60000 / leadsPerMinute; // Time to mine 1 lead
-    
-    console.log(`\n[B2B MINING START] Speed: ${speed} (${leadsPerMinute} leads/min).`);
-    
-    // Clear any old interval
-    if (miningIntervalId) clearInterval(miningIntervalId);
-
-    // This interval will handle the actual lead generation/tally
-    miningIntervalId = setInterval(async () => {
-        const elapsedTime = Date.now() - miningStartTime;
-
-        // 1. Check if the simulation hour is complete
-        if (elapsedTime >= SIMULATION_DURATION_MS) {
-            clearInterval(miningIntervalId);
-            miningState = 'complete';
-            console.log(`[B2B MINING STOP] 1-Hour simulation complete. Total leads: ${Math.floor(totalMinedLeads)}.`);
-            return;
-        }
-
-        // 2. Simulate the AI/Scraping work
-        // Instead of calling Gemini every time (which would be too costly/slow),
-        // we'll call it randomly (e.g., 10% chance) and mostly just increment the counter.
-        const shouldCallGemini = Math.random() < 0.1; 
-        
-        if (shouldCallGemini) {
-            const analysis = await generateLeadAnalysis(speed);
-            if (analysis) {
-                 lastQualifiedLead = analysis; // CORRECTION 2: Store the AI analysis result
-                 console.log(`[B2B Lead Mined] New Qualified Lead! Value: $${LEAD_VALUE}. Last Lead: ${analysis.leadName}`);
-            }
-        }
-        
-        // Always increment the counter based on speed
-        totalMinedLeads += 1;
-        console.log(`[B2B MINING] Current Leads: ${Math.floor(totalMinedLeads)}. Elapsed: ${Math.floor(elapsedTime / 60000)} min.`);
-
-    }, intervalMs);
-}
-
-
-// A. START MINING ENDPOINT (POST)
-app.post('/b2b/start-mining', async (req, res) => {
-    const { speed } = req.body;
-    
-    if (miningState === 'running') {
-        return res.status(200).json({ success: true, message: 'Mining already running.' });
+    if (!coin || !target || !speed_profile || !wallet_address) {
+        return res.status(400).json({ status: 'error', message: 'Missing coin, target, speed, or wallet address.' });
     }
     
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ success: false, message: 'Gemini API Key is missing for B2B Analysis.' });
+    if (activeMiningSession) {
+         return res.status(409).json({ status: 'error', message: 'A mining session is already active. Please stop it first.' });
     }
 
-    // Start the process (startMiningProcess handles the full reset now)
-    startMiningProcess(speed);
+    // --- SIMULATION START LOGIC ---
+    const simData = calculateSimulatedEarnings(coin, speed_profile, parseFloat(target));
+
+    // Store session data (for monitoring)
+    activeMiningSession = {
+        processId: crypto.randomBytes(4).toString('hex'), // Fake Process ID
+        coin: coin,
+        target: parseFloat(target),
+        wallet: wallet_address,
+        startTime: Date.now(),
+        simulatedHashRate: simData.hashRate,
+        simulatedTime: simData.estimatedTime
+    };
+    
+    console.log(`\n[MINING START SIMULATED] Coin: ${coin}, Target: $${target}, Est. Time: ${simData.estimatedTime}`);
 
     res.status(200).json({ 
-        success: true, 
-        message: 'B2B Lead Mining simulation started.',
-        startTime: miningStartTime
+        status: 'OK', 
+        message: `Simulated mining started successfully for ${coin} on the Backend.`,
+        processId: activeMiningSession.processId,
+        initialHashRate: activeMiningSession.simulatedHashRate,
+        estimatedTime: activeMiningSession.simulatedTime
+    });
+
+});
+
+
+app.post('/api/stop-mining', (req, res) => {
+    
+    if (!activeMiningSession) {
+         return res.status(404).json({ status: 'error', message: 'No active mining session found to stop.' });
+    }
+    
+    const stoppedCoin = activeMiningSession.coin;
+    
+    // Clear the active session
+    activeMiningSession = null;
+    
+    console.log(`[MINING STOPPED] Simulated mining for ${stoppedCoin} stopped.`);
+
+    res.status(200).json({ 
+        status: 'OK', 
+        message: `Mining for ${stoppedCoin} has been successfully stopped.`
     });
 });
 
 
-// B. GET STATS ENDPOINT (GET)
-app.get('/b2b/stats', (req, res) => {
-    const earnings = (totalMinedLeads * LEAD_VALUE).toFixed(2);
-    let elapsedTime = 0;
-    if (miningStartTime && miningState === 'running') {
-        elapsedTime = Date.now() - miningStartTime;
+app.get('/api/mining-status', (req, res) => {
+    if (!activeMiningSession) {
+        return res.status(200).json({ isActive: false, unpaidBalanceUSD: 0, hashRate: 0, runningTimeSeconds: 0 });
     }
-
+    
+    // --- SIMULATED LIVE DATA ---
+    const currentTime = Date.now();
+    const elapsedTimeSeconds = Math.round((currentTime - activeMiningSession.startTime) / 1000);
+    
+    // Simulate gradual increase of balance (e.g., $0.005 per 15 seconds)
+    const timeFactor = elapsedTimeSeconds / 15; // Every 15 seconds, we increase balance
+    const increasePerTick = 0.005; 
+    
+    // Total simulated balance accumulated during this single session
+    const simulatedBalance = (timeFactor * increasePerTick) * (activeMiningSession.simulatedHashRate / 3000); // Scale by hash rate
+    
+    // Ensure balance doesn't exceed the target dramatically
+    const currentBalance = Math.min(simulatedBalance, activeMiningSession.target * 1.10);
+    
     res.status(200).json({
-        totalLeads: Math.floor(totalMinedLeads),
-        currentEarnings: parseFloat(earnings),
-        isComplete: miningState === 'complete',
-        status: miningState,
-        elapsedTimeMs: elapsedTime,
-        lastQualifiedLead: lastQualifiedLead // CORRECTION 3: Expose the last qualified lead
-    });
-});
-
-
-// C. WITHDRAW ENDPOINT (POST)
-app.post('/b2b/withdraw', (req, res) => {
-    const { amount, address } = req.body;
-    
-    const currentEarnings = (totalMinedLeads * LEAD_VALUE);
-    const requiredAmount = parseFloat(amount);
-
-    if (currentEarnings < 5.00) {
-        return res.status(400).json({ success: false, message: 'Minimum withdrawal is $5.00.' });
-    }
-    
-    if (!address || address.length < 5) {
-         return res.status(400).json({ success: false, message: 'Valid withdrawal address required.' });
-    }
-    
-    // 1. Stop any running mining process
-    if (miningIntervalId) {
-        clearInterval(miningIntervalId);
-        miningIntervalId = null;
-    }
-    
-    // 2. Reset the balance and qualified lead state
-    const finalLeads = Math.floor(totalMinedLeads);
-    totalMinedLeads = 0;
-    lastQualifiedLead = null; // Reset the last lead on withdrawal
-    miningState = 'idle';
-    
-    // 3. Send success response
-    res.status(200).json({
-        success: true,
-        message: `Withdrawal of $${requiredAmount} successful. ${finalLeads} leads transferred (simulated sale).`,
-        txnId: crypto.randomBytes(16).toString('hex') 
+        isActive: true,
+        coin: activeMiningSession.coin,
+        hashRate: activeMiningSession.simulatedHashRate,
+        unpaidBalanceUSD: parseFloat(currentBalance.toFixed(2)),
+        wallet: activeMiningSession.wallet,
+        processId: activeMiningSession.processId,
+        runningTimeSeconds: elapsedTimeSeconds,
+        estimatedTime: activeMiningSession.simulatedTime
     });
 });
 
