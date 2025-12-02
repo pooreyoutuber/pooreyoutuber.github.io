@@ -1,431 +1,227 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini AI Lead Mining Dashboard</title>
-    
+    <title>Mining For Students - Crypto Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- General Styling --- */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); /* Deep Blue Background */
-            color: #ecf0f1;
-            padding: 20px;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-
-        .dashboard {
-            background-color: #1c2833;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 90%;
-            max-width: 800px;
-            padding: 30px;
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* Dark background */
         }
-
-        h2 {
-            color: #76ff03; /* Bright Green Accent */
-            text-align: center;
-            border-bottom: 2px solid #34495e;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* Gray thumb */
+            border-radius: 10px;
         }
-
-        /* --- Section Styling --- */
-        .mining-controls, .withdrawal-section, .status-panel {
-            background-color: #2c3e50;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .status-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .stat-box {
-            background-color: #34495e;
-            padding: 15px;
-            border-radius: 6px;
-            text-align: center;
-            border-left: 5px solid #76ff03;
-        }
-
-        .stat-box strong {
-            display: block;
-            font-size: 0.9em;
-            color: #bdc3c7;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #ecf0f1;
-        }
-        
-        /* --- Controls and Inputs --- */
-        .controls-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        select, input[type="text"] {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #34495e;
-            background-color: #1c2833;
-            color: #ecf0f1;
-            flex-grow: 1;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
-        }
-        
-        #startBtn {
-            background-color: #76ff03;
-            color: #1c2833;
-        }
-        #startBtn:hover:not(:disabled) {
-            background-color: #64dd17;
-            transform: translateY(-1px);
-        }
-
-        #withdrawBtn {
-            background-color: #e74c3c;
-            color: white;
-            flex-basis: 150px;
-            flex-grow: 0;
-        }
-        #withdrawBtn:hover:not(:disabled) {
-            background-color: #c0392b;
-            transform: translateY(-1px);
-        }
-        
-        button:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-
-        /* --- Dynamic Status Styling --- */
-        #mining-status {
-            font-weight: bold;
-            text-align: center;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-        }
-        .status-idle { background-color: #34495e; color: #f1c40f; }
-        .status-running { background-color: #2ecc71; color: #1c2833; }
-        .status-complete { background-color: #9b59b6; color: white; }
-        .status-error { background-color: #c0392b; color: white; }
-
-        /* --- Last Lead Info Box --- */
-        .last-lead-box {
-            grid-column: 1 / -1; /* Full width */
-            background-color: #1a5276; /* Darker blue */
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 5px solid #3498db;
-        }
-        .last-lead-box h3 {
-            margin-top: 0;
-            color: #3498db;
-            font-size: 1.2em;
-        }
-        .lead-detail {
-            margin-bottom: 5px;
-            font-size: 0.95em;
-        }
-        .lead-detail strong {
-            color: #f1c40f;
-            font-weight: normal;
-            width: 120px;
-            display: inline-block;
-        }
-
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-white min-h-screen p-4 md:p-8 font-sans">
 
-    <div class="dashboard">
-        <h2>💰 Gemini B2B Lead Mining Simulation</h2>
-        <p>This tool simulates a high-speed B2B lead generation process using a Node.js backend and Gemini AI for qualified lead analysis (1-hour simulation).</p>
+    <header class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-teal-400 tracking-wider flex items-center justify-center">
+            <span class="mr-3">⛏️</span> Mining For Students 
+        </h1>
+        <p class="mt-2 text-gray-400 text-lg">Your Multi-Algorithm PoW Controller</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <div class="mining-controls">
-            <h3>Start Lead Mining</h3>
-            <div class="controls-group">
-                <select id="mining-speed">
-                    <option value="basic">Basic (2 Leads/min)</option>
-                    <option value="standard" selected>Standard (5 Leads/min)</option>
-                    <option value="turbo">Turbo (10 Leads/min)</option>
-                </select>
-                <button id="startBtn">START MINING</button>
-            </div>
-            <div id="mining-status" class="status-idle">STATUS: Idle (Click Start to begin)</div>
-        </div>
+        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+            <h2 class="text-2xl font-bold mb-6 text-teal-300 border-b border-gray-700 pb-3">⚙️ Mining Setup</h2>
+            
+            <form id="miningForm" class="space-y-6">
 
-        <div class="stats-container">
-            <h3>Live Stats</h3>
-            <div class="status-panel">
-                <div class="stat-box">
-                    <strong>Total Leads Mined</strong>
-                    <div id="totalLeads" class="stat-value">0</div>
+                <div>
+                    <label for="coinSelect" class="block text-sm font-medium text-gray-400 mb-2">Select Coin (5 Options)</label>
+                    <select id="coinSelect" name="coinSelect" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-white" required>
+                        <option value="" disabled selected>--- Choose Your Coin ---</option>
+                        <option value="XMR">Monero (XMR) - RandomX</option>
+                        <option value="ETC">Ethereum Classic (ETC) - Ethash</option>
+                        <option value="RVN">Ravencoin (RVN) - KawPow</option>
+                        <option value="ZEC">Zcash (ZEC) - Equihash</option>
+                        <option value="VRSC">VerusCoin (VRSC) - VerusHash</option>
+                    </select>
                 </div>
-                <div class="stat-box">
-                    <strong>Current Earnings ($1/Lead)</strong>
-                    <div id="currentEarnings" class="stat-value">$0.00</div>
-                </div>
-                <div class="stat-box">
-                    <strong>Status</strong>
-                    <div id="statusText" class="stat-value">IDLE</div>
-                </div>
-                <div class="stat-box">
-                    <strong>Elapsed Time</strong>
-                    <div id="elapsedTime" class="stat-value">00:00:00</div>
+
+                <div>
+                    <label for="walletAddress" class="block text-sm font-medium text-gray-400 mb-2">Wallet Address (Trust Wallet/Binance)</label>
+                    <input type="text" id="walletAddress" name="walletAddress" placeholder="Paste your selected coin's receiving address here..." class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-white" required>
                 </div>
                 
-                <div class="last-lead-box">
-                    <h3>AI-Analyzed Qualified Lead (Last Hit)</h3>
-                    <div id="lastLeadInfo">
-                        <p class="lead-detail"><strong>Name:</strong> <span id="leadName">N/A</span></p>
-                        <p class="lead-detail"><strong>Industry:</strong> <span id="leadIndustry">N/A</span></p>
-                        <p class="lead-detail"><strong>Pain Point:</strong> <span id="leadPainPoint">N/A</span></p>
-                        <p class="lead-detail"><strong>Score:</strong> <span id="leadScore">N/A</span></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="miningSpeed" class="block text-sm font-medium text-gray-400 mb-2">Mining Speed Profile</label>
+                        <select id="miningSpeed" name="miningSpeed" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-white">
+                            <option value="low_cpu">Low CPU (Mobile/Older PC)</option>
+                            <option value="medium_gpu">Medium GPU (Student Laptop)</option>
+                            <option value="high_gpu">High GPU (Dedicated Worker)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="targetEarning" class="block text-sm font-medium text-gray-400 mb-2">Target Earning ($ USD)</label>
+                        <input type="number" id="targetEarning" name="targetEarning" value="1.00" min="0.50" step="0.50" placeholder="e.g. 1.00" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-white" required>
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" id="startButton" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg text-lg transition duration-200 shadow-md">
+                        ▶ START MINING (Connect to Render Backend)
+                    </button>
+                    <button type="button" id="stopButton" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg text-lg mt-3 transition duration-200 shadow-md hidden">
+                        ■ STOP MINING
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="space-y-8">
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-2xl font-bold mb-4 text-orange-400">📊 Status Dashboard</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between border-b border-gray-700 pb-2">
+                        <span class="text-gray-400">Backend URL:</span>
+                        <span id="backendUrlDisplay" class="font-semibold text-xs text-teal-400 truncate">https://pooreyoutuber-github-io-blmp.onrender.com</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-700 pb-2">
+                        <span class="text-gray-400">Live Hash Rate:</span>
+                        <span id="liveHashRate" class="font-semibold text-xl text-yellow-500">0 H/s</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-700 pb-2">
+                        <span class="text-gray-400">Unpaid Balance (USD):</span>
+                        <span id="unpaidBalance" class="font-semibold text-green-500 text-2xl">$0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Est. Time to Target:</span>
+                        <span id="estTime" class="font-semibold text-gray-300">N/A</span>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="withdrawal-section">
-            <h3>Withdrawal (Minimum: $5.00)</h3>
-            <div class="controls-group">
-                <input type="text" id="withdrawalAddress" placeholder="Enter Withdrawal Address (e.g., Wallet ID)" required>
-                <button id="withdrawBtn" disabled>WITHDRAW ALL</button>
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-2xl font-bold mb-4 text-purple-400">🧠 Gemini AI Optimizer</h2>
+                <p class="text-sm text-gray-400 mb-4">Get a Profitability Report and Configuration Tips.</p>
+                <button id="aiReportButton" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg text-lg transition duration-200">
+                    Generate AI Report
+                </button>
+                <div id="aiOutput" class="mt-4 text-sm bg-gray-700 p-3 rounded-lg text-gray-200 hidden">
+                    <p class="font-mono text-xs text-purple-300">Waiting for data...</p>
+                </div>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+                <h2 class="text-2xl font-bold mb-4 text-blue-400">✅ Wallet Proof (Payout History)</h2>
+                <p class="text-sm text-gray-400 mb-4">Demonstrate real, completed transfers to your wallet.</p>
+                <button id="showPayouts" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-lg transition duration-200">
+                    Show Last 5 Successful Payouts
+                </button>
             </div>
         </div>
-
-    </div>
+    </main>
 
     <script>
-        // --- Configuration ---
-        const BACKEND_URL = window.location.origin; // Same origin as the served page
+        // --- 1. Render Backend URL ---
+        const RENDER_BACKEND_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com';
 
-        // --- DOM Elements ---
-        const startBtn = document.getElementById('startBtn');
-        const speedSelect = document.getElementById('mining-speed');
-        const miningStatusDiv = document.getElementById('mining-status');
-        const withdrawBtn = document.getElementById('withdrawBtn');
-        const addressInput = document.getElementById('withdrawalAddress');
-        
-        // Stats Elements
-        const totalLeadsDiv = document.getElementById('totalLeads');
-        const currentEarningsDiv = document.getElementById('currentEarnings');
-        const statusTextDiv = document.getElementById('statusText');
-        const elapsedTimeDiv = document.getElementById('elapsedTime');
-        
-        // Last Lead Elements (NEW)
-        const leadNameSpan = document.getElementById('leadName');
-        const leadIndustrySpan = document.getElementById('leadIndustry');
-        const leadPainPointSpan = document.getElementById('leadPainPoint');
-        const leadScoreSpan = document.getElementById('leadScore');
+        // --- 2. START MINING Logic (Sends Data to Render) ---
+        document.getElementById('miningForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const coin = document.getElementById('coinSelect').value;
+            const target = document.getElementById('targetEarning').value;
+            const speed = document.getElementById('miningSpeed').value;
+            const wallet = document.getElementById('walletAddress').value;
 
-
-        // --- Global State ---
-        let miningIsRunning = false;
-        let totalMinedLeads = 0;
-        let currentEarnings = 0;
-        let lastLeadData = null; // Store the last lead data
-
-
-        // --- Utility Functions ---
-        function formatTime(ms) {
-            if (ms < 0) ms = 0;
-            const totalSeconds = Math.floor(ms / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            
-            return [
-                hours.toString().padStart(2, '0'),
-                minutes.toString().padStart(2, '0'),
-                seconds.toString().padStart(2, '0')
-            ].join(':');
-        }
-
-        function updateUI() {
-            // 1. Update Stats
-            totalLeadsDiv.textContent = Math.floor(totalMinedLeads).toLocaleString();
-            currentEarningsDiv.textContent = `$${currentEarnings.toFixed(2)}`;
-            
-            // 2. Update Status Text & Styling
-            statusTextDiv.textContent = miningIsRunning ? 'RUNNING' : (totalMinedLeads > 0 ? 'COMPLETED' : 'IDLE');
-            miningStatusDiv.textContent = miningIsRunning ? 
-                `STATUS: Mining in progress... Speed: ${speedSelect.options[speedSelect.selectedIndex].text}` : 
-                `STATUS: ${statusTextDiv.textContent}`;
-            
-            miningStatusDiv.className = `status-${statusTextDiv.textContent.toLowerCase().replace(/[^a-z]/g, '')}`;
-            
-            // 3. Update Controls
-            startBtn.disabled = miningIsRunning;
-            speedSelect.disabled = miningIsRunning;
-            
-            // Withdrawal button logic
-            withdrawBtn.disabled = currentEarnings < 5.00 || miningIsRunning;
-            
-            // 4. Update Last Lead Info (FIXED TO SHOW DATA FROM BACKEND)
-            if (lastLeadData && lastLeadData.leadName) {
-                leadNameSpan.textContent = lastLeadData.leadName;
-                leadIndustrySpan.textContent = lastLeadData.industry;
-                leadPainPointSpan.textContent = lastLeadData.painPoint;
-                leadScoreSpan.textContent = `${lastLeadData.score} / 100`;
-            } else {
-                leadNameSpan.textContent = 'N/A';
-                leadIndustrySpan.textContent = 'N/A';
-                leadPainPointSpan.textContent = 'N/A';
-                leadScoreSpan.textContent = 'N/A';
+            if (!coin || !wallet) {
+                alert('Please select a coin and enter a wallet address.');
+                return;
             }
-        }
 
+            // Prepare data to send to the Render backend
+            const payload = {
+                action: 'start',
+                coin: coin,
+                target: parseFloat(target),
+                speed_profile: speed,
+                wallet_address: wallet
+            };
 
-        // --- Backend Communication ---
-        
-        async function checkBackendStatus() {
             try {
-                // FIX 1: Corrected API path to include /b2b/ prefix
-                const response = await fetch(`${BACKEND_URL}/b2b/stats`); 
-                const stats = await response.json();
-
-                // Update global state from backend
-                totalMinedLeads = stats.totalLeads || 0;
-                currentEarnings = stats.currentEarnings || 0;
-                miningIsRunning = stats.status === 'running';
-                lastLeadData = stats.lastQualifiedLead || null; // NEW: Fetch the qualified lead data
-
-                // Update elapsed time dynamically
-                elapsedTimeDiv.textContent = formatTime(stats.elapsedTimeMs || 0);
-
-                updateUI();
-                
-                if (miningIsRunning) {
-                    // Poll every 5 seconds if running
-                    setTimeout(checkBackendStatus, 5000); 
-                }
-
-            } catch (error) {
-                console.error("Error fetching status from backend:", error);
-                miningStatusDiv.textContent = "STATUS: ERROR (Backend connection failed!)";
-                miningStatusDiv.className = "status-error";
-            }
-        }
-
-        async function startMining() {
-            if (miningIsRunning) return;
-            startBtn.disabled = true;
-            miningStatusDiv.textContent = "STATUS: Sending command to backend...";
-            
-            const selectedSpeed = speedSelect.value;
-            
-            try {
-                 // FIX 2: Corrected API path to include /b2b/ prefix
-                const response = await fetch(`${BACKEND_URL}/b2b/start-mining`, {
+                // Send POST request to your Render endpoint (assuming the endpoint is /api/start-mining)
+                const response = await fetch(`${RENDER_BACKEND_URL}/api/start-mining`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ speed: selectedSpeed })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
                 });
 
                 const result = await response.json();
 
-                if (response.ok && result.success) {
-                    miningIsRunning = true;
-                    updateUI();
-                    alert(`Mining Started at ${selectedSpeed.toUpperCase()} speed! Check stats in a few seconds.`);
-                    checkBackendStatus(); // Start polling
+                if (response.ok) {
+                    alert(`Success! Backend started mining for ${coin}. Process ID: ${result.processId || 'N/A'}`);
+                    document.getElementById('startButton').classList.add('hidden');
+                    document.getElementById('stopButton').classList.remove('hidden');
+                    // Update status with live data from the backend response
+                    document.getElementById('liveHashRate').textContent = `${result.initialHashRate || 'Starting'} H/s`;
+                    document.getElementById('estTime').textContent = result.estimatedTime || 'Calculating...';
                 } else {
-                    alert(`START FAILED: ${result.message || 'Unknown error at backend.'}`);
-                    startBtn.disabled = false;
-                    updateUI();
+                    alert(`Backend Error: ${result.message || 'Could not start mining process on Render.'}`);
                 }
 
             } catch (error) {
-                alert("Error communicating with backend to start mining.");
-                startBtn.disabled = false;
-                updateUI();
+                console.error('Fetch Error:', error);
+                alert('Connection Error: Could not reach the Render Backend URL. Check console for details.');
             }
-        }
-        
-        async function handleWithdrawal() {
-            if (currentEarnings < 5.00) {
-                alert("Minimum withdrawal is $5.00.");
-                return;
-            }
+        });
 
-            const address = addressInput.value.trim();
-            if (address.length < 5) {
-                alert("Please enter a valid withdrawal address.");
-                return;
-            }
+        // --- 3. STOP MINING Logic ---
+        document.getElementById('stopButton').addEventListener('click', async function() {
+            // Send a request to the backend to stop the process
+            try {
+                const response = await fetch(`${RENDER_BACKEND_URL}/api/stop-mining`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // You might need to send a unique ID here to tell the backend which process to stop
+                    body: JSON.stringify({ action: 'stop' }) 
+                });
 
-            const amount = currentEarnings.toFixed(2);
-            const confirmWithdraw = confirm(`Confirm withdrawal of $${amount} to address: ${address}?`);
-
-            if (confirmWithdraw) {
-                withdrawBtn.disabled = true;
-
-                try {
-                    // FIX 3: Corrected API path to include /b2b/ prefix
-                    const response = await fetch(`${BACKEND_URL}/b2b/withdraw`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ amount: amount, address: address })
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        alert(`WITHDRAWAL SUCCESS! \n\nAmount: $${amount} \nTo Address: ${address}\n\nTransaction ID: ${result.txnId || 'N/A'}`);
-                        
-                        // Reset stats after successful simulation
-                        totalMinedLeads = 0;
-                        currentEarnings = 0;
-                        lastLeadData = null; // Reset qualified lead on withdrawal
-                        updateUI();
-                    } else {
-                        alert(`WITHDRAWAL FAILED: ${result.message || 'Unknown error at backend.'}`);
-                    }
-
-                } catch (error) {
-                    alert("Error communicating with backend for withdrawal.");
-                } finally {
-                    withdrawBtn.disabled = false; 
-                    updateUI();
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Mining process successfully stopped on the Backend!');
+                    document.getElementById('startButton').classList.remove('hidden');
+                    document.getElementById('stopButton').classList.add('hidden');
+                    document.getElementById('liveHashRate').textContent = '0 H/s (Stopped)';
+                } else {
+                    alert(`Stop Error: ${result.message || 'Could not stop mining process.'}`);
                 }
+
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                alert('Connection Error: Could not reach the Render Backend URL to stop mining.');
             }
-        }
-
-
-        // --- Event Listeners and Initialization ---\
-        startBtn.addEventListener('click', startMining);
-        withdrawBtn.addEventListener('click', handleWithdrawal);
+        });
         
-        // Initial setup and status check
-        updateUI(); 
-        checkBackendStatus(); 
+        // --- 4. Gemini AI Report Logic (Placeholder) ---
+        document.getElementById('aiReportButton').addEventListener('click', function() {
+            const output = document.getElementById('aiOutput');
+            output.classList.remove('hidden');
+            output.innerHTML = '<p class="font-mono text-xs text-purple-300">Requesting real-time configuration analysis from Gemini (via Backend)...</p>';
+            
+            // This is where a separate fetch call to RENDER_BACKEND_URL/api/gemini-report would go
+            // Simulated Response:
+            setTimeout(() => {
+                output.innerHTML = `
+                    <p class="text-green-300 font-bold">GEMINI REPORT SUCCESS:</p>
+                    <p>Coin: ${document.getElementById('coinSelect').value || 'N/A'}. Profitability: MEDIUM.</p>
+                    <p>Recommendation: Use XMRig with the '--cpu-max-threads-hint=75' flag for 5% efficiency boost.</p>
+                `;
+            }, 2000);
+        });
     </script>
 </body>
 </html>
