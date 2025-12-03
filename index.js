@@ -14,6 +14,7 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 // NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
 const http = require('http'); 
 const { URL } = require('url'); // Added URL import
+const { spawn } = require('child_process'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
