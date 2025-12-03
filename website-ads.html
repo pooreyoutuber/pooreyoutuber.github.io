@@ -195,10 +195,12 @@
 <script>
     // --- JavaScript: Frontend Logic ---
 
-    // Node.js Backend API Endpoints (इन्हें आपके Node.js कोड से मैच होना चाहिए)
-    const API_START = 'https://pooreyoutuber-github-io-blmp.onrender.com/api/start-mining';
-    const API_STOP = 'https://pooreyoutuber-github-io-blmp-onrender.com/api/stop-mining';
-    const API_STATUS = 'https://pooreyoutuber-github-io-blmp.onrender.com/api/status'; // Pool API data
+    // ✅ Render Cloud URL यहां सेट किया गया है:
+    const RENDER_BASE_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com'; 
+    
+    const API_START = `${RENDER_BASE_URL}/api/mining/start`;
+    const API_STOP = `${RENDER_BASE_URL}/api/mining/stop`;
+    const API_STATUS = `${RENDER_BASE_URL}/api/mining/status`; 
 
     let statusInterval;
 
@@ -215,6 +217,13 @@
             return;
         }
 
+        // स्टेटस रीसेट करें
+        clearInterval(statusInterval); 
+        document.getElementById('hashRate').textContent = '0.0 H/s';
+        document.getElementById('totalCoin').textContent = '0.000000 XMR';
+        document.getElementById('payoutEstimate').textContent = 'N/A';
+        document.getElementById('temperature').textContent = '-- °C';
+        
         document.getElementById('current-status').textContent = 'स्थिति: ⏳ ' + coin + ' माइनिंग शुरू हो रही है...';
         
         // --- 1. Node.js बैकएंड को स्टार्ट कमांड भेजें ---
@@ -227,15 +236,18 @@
         .then(data => {
             if (data.success) {
                 document.getElementById('current-status').textContent = `स्थिति: ✅ ${coin} माइनिंग चल रही है!`;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
                 // माइनिंग शुरू होने के बाद स्टेटस अपडेट करना शुरू करें
+                updateStatus(); // तुरंत पहला अपडेट
                 statusInterval = setInterval(updateStatus, 15000); // हर 15 सेकंड में अपडेट
             } else {
-                document.getElementById('current-status').textContent = 'स्थिति: ❌ माइनिंग शुरू करने में विफलता: ' + data.error;
+                document.getElementById('current-status').textContent = 'स्थिति: ❌ माइनिंग शुरू करने में विफलता: ' + (data.error || 'अज्ञात त्रुटि');
             }
         })
         .catch(error => {
             console.error('API Error:', error);
-            document.getElementById('current-status').textContent = 'स्थिति: ❌ सर्वर/नेटवर्क त्रुटि।';
+            document.getElementById('current-status').textContent = 'स्थिति: ❌ सर्वर/नेटवर्क त्रुटि। (Render URL या CORS समस्या)';
         });
     }
 
@@ -251,6 +263,8 @@
         .then(data => {
             if (data.success) {
                 document.getElementById('current-status').textContent = 'स्थिति: माइनिंग बंद है।';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
                 // सभी स्टेटस को रीसेट करें
                 document.getElementById('hashRate').textContent = '0.0 H/s';
                 document.getElementById('totalCoin').textContent = '0.000000 XMR';
@@ -274,14 +288,24 @@
         const selectedCoin = document.getElementById('coinSelect').value;
         const wallet = document.getElementById('walletInput').value;
 
-        // यदि माइनिंग शुरू नहीं हुई है, तो आगे न बढ़ें
-        if (!statusInterval || !wallet) return; 
+        // यदि वॉलेट नहीं है, तो Pool API को कॉल न करें
+        if (!wallet) return; 
 
         // --- 2. Node.js बैकएंड से स्टेटस डेटा प्राप्त करें ---
+        // (वॉलेट और कॉइन को Query Params में भेजें)
         fetch(`${API_STATUS}?coin=${selectedCoin}&wallet=${wallet}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // यदि माइनिंग बंद हो गई है लेकिन स्टेटस चेक चल रहा था
+                if (!data.isRunning) {
+                     clearInterval(statusInterval);
+                     document.getElementById('current-status').textContent = 'स्थिति: माइनिंग बंद है।';
+                     document.getElementById('startBtn').disabled = false;
+                     document.getElementById('stopBtn').disabled = true;
+                     return;
+                }
+                
                 // पूल डेटा के आधार पर UI को अपडेट करें
                 document.getElementById('hashRate').textContent = `${data.hashRate} ${data.unit}`;
                 
@@ -289,24 +313,23 @@
                 document.getElementById('totalCoin').textContent = `${data.balance.toFixed(6)} ${selectedCoin}`;
                 
                 // Auto-Transfer Timing (पेआउट अनुमान)
-                if (data.timeToPayout) {
-                    document.getElementById('payoutEstimate').textContent = data.timeToPayout;
-                    if (data.isThresholdReached) {
-                        document.getElementById('payoutEstimate').style.color = '#ff64da';
-                        document.getElementById('payoutEstimate').textContent = '✅ पेआउट सीमा पूरी! जल्द ही Trust Wallet में ट्रांसफर होगा।';
-                    } else {
-                         document.getElementById('payoutEstimate').style.color = '#64ffda';
-                    }
+                document.getElementById('payoutEstimate').textContent = data.timeToPayout;
+                
+                if (data.isThresholdReached) {
+                    document.getElementById('payoutEstimate').style.color = '#ff64da';
+                    document.getElementById('payoutEstimate').textContent = '✅ पेआउट सीमा पूरी! जल्द ही Trust Wallet में ट्रांसफर होगा।';
                 } else {
-                    document.getElementById('payoutEstimate').textContent = 'गणना जारी...';
+                     document.getElementById('payoutEstimate').style.color = '#64ffda';
                 }
                 
                 // तापमान (GPU माइनिंग के लिए)
                 document.getElementById('temperature').textContent = data.temp ? `${data.temp} °C` : '-- °C';
                 
+                document.getElementById('current-status').textContent = `स्थिति: ✅ ${selectedCoin} माइनिंग चल रही है!`;
+                
             } else {
                 console.error("Status fetch failed:", data.error);
-                document.getElementById('current-status').textContent = 'स्थिति: ⚠️ डेटा सिंक त्रुटि।';
+                document.getElementById('current-status').textContent = 'स्थिति: ⚠️ डेटा सिंक त्रुटि। (पूल API या वॉलेट पता)';
             }
         })
         .catch(error => {
