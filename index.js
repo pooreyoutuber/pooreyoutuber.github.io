@@ -1157,156 +1157,253 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 🔥 TOOL 6: MINING FOR STUDENTS - SIMULATED LOGIC (ADDED HERE) 🔥
-// ------------------------------------------------------------------
+// 6. COIN MINING MANAGER ENDPOINTS (API: /api/mining/*) - NEW TOOL
+// ===================================================================
 
-// --- TOOL 6: MINING FOR STUDENTS (SIMULATED POOL DATA & LOGIC) ---
-let activeMiningSession = null; 
-
-// Simulated Hash Rates (kH/s) for different user profiles (used for fake pool data)
-const HASH_RATE_PROFILES = {
-    low_cpu: 3,   // 3 kH/s (Monero only)
-    medium_gpu: 25, // 25 kH/s (Ravencoin/ETC)
-    high_gpu: 50  // 50 kH/s (Ravencoin/ETC)
+// --- MINER CONFIGURATION (Update paths if running locally) ---
+// NOTE: These paths MUST be absolute or relative to the server's execution directory.
+// For Render/Cloud deployment, you need to ensure these binaries are in your container/environment.
+const MINER_PATHS = {
+    XMR: '/usr/bin/xmrig', // Example path for Linux (Ubuntu/Debian) or common cloud setup
+    ETC: 't-rex',          // Assuming T-Rex is in the PATH or same directory
+    RVN: 't-rex'           // T-Rex supports both ETC (Ethash) and RVN (KawPow)
 };
 
-// Function to calculate simulated earnings and time to target
-function calculateSimulatedEarnings(coin, speedProfile, target) {
-    const kHPerSec = HASH_RATE_PROFILES[speedProfile] || 3;
-    
-    // Fake base earnings per 24 hours (24h) in USD for 1 kH/s 
-    const BASE_EARNINGS_PER_KH_PER_DAY = {
-        XMR: 0.04, // $0.04/day/kH
-        ETC: 0.06, // $0.06/day/kH
-        RVN: 0.08, // $0.08/day/kH
-        ZEC: 0.05,
-        VRSC: 0.03
-    };
+// --- MINING POOL CONFIGURATION ---
+const MINING_POOLS = {
+    XMR: { 
+        pool: 'pool.supportxmr.com:3333', 
+        algo: 'rx/0', 
+        api: 'https://api.supportxmr.com/miner/' 
+    },
+    ETC: { 
+        pool: 'etc.2miners.com:1010', 
+        algo: 'ethash', 
+        api: 'https://etc.2miners.com/api/miner/' 
+    },
+    RVN: { 
+        pool: 'rvn.2miners.com:6060', 
+        algo: 'kawpow', 
+        api: 'https://rvn.2miners.com/api/miner/' 
+    }
+};
 
-    const baseEarning = BASE_EARNINGS_PER_KH_PER_DAY[coin] || 0.04;
+// Global variable to hold the running miner process
+let minerProcess = null;
+let currentMiningConfig = null;
+
+// --- UTILITY: GET MINER ARGS BASED ON COIN AND SPEED ---
+function getMinerArgs(coin, wallet, speed) {
+    const config = MINING_POOLS[coin];
+    const minerPath = MINER_PATHS[coin];
+    const args = [];
     
-    const dailyEarningUSD = baseEarning * kHPerSec;
-    
-    if (dailyEarningUSD === 0) {
-         return {
-            hashRate: kHPerSec * 1000,
-            dailyEarning: 0,
-            estimatedTime: 'N/A'
-         };
+    if (coin === 'XMR') {
+        // XMRig args
+        args.push("-o", config.pool);
+        args.push("-a", config.algo);
+        args.push("-u", wallet);
+        
+        // Speed Control (CPU Throttling)
+        if (speed === 'Low') args.push("--cpu-max-threads-hint", "30"); // 30% hint
+        else if (speed === 'Medium') args.push("--cpu-max-threads-hint", "60"); // 60% hint
+        // 'High' uses default max threads
+        
+    } else if (coin === 'ETC' || coin === 'RVN') {
+        // T-Rex args
+        args.push("-a", config.algo);
+        args.push("-o", `stratum+tcp://${config.pool}`);
+        args.push("-u", wallet);
+        args.push("-p", "x"); // Password
+        
+        // Speed Control (GPU Power Limit)
+        if (speed === 'Low') args.push("--pl", "50"); // 50% power limit
+        else if (speed === 'Medium') args.push("--pl", "75"); // 75% power limit
+        // 'High' uses default power limit
     }
     
-    // Calculate time to target
-    const hoursToTarget = target / (dailyEarningUSD / 24);
-    
-    let estimatedTime;
-    if (hoursToTarget < 1) {
-        estimatedTime = `${Math.round(hoursToTarget * 60)} Minutes`;
-    } else if (hoursToTarget < 24) {
-        estimatedTime = `${hoursToTarget.toFixed(1)} Hours`;
-    } else {
-        estimatedTime = `${(hoursToTarget / 24).toFixed(1)} Days`;
-    }
-    
-    return {
-        hashRate: kHPerSec * 1000, // Return in H/s
-        dailyEarning: dailyEarningUSD.toFixed(2),
-        estimatedTime: estimatedTime
-    };
+    return { minerPath, args };
 }
 
 
-// ===================================================================
-// 6. MINING FOR STUDENTS ENDPOINTS (API: /api/start-mining, /api/stop-mining, /api/mining-status) - SIMULATED
-// ===================================================================
-
-app.post('/api/start-mining', async (req, res) => {
-    // Expected payload: { coin, target, speed_profile, wallet_address }
-    const { coin, target, speed_profile, wallet_address } = req.body;
-
-    if (!coin || !target || !speed_profile || !wallet_address) {
-        return res.status(400).json({ status: 'error', message: 'Missing coin, target, speed, or wallet address.' });
+// -------------------------------------------------------------------
+// 6a. START MINING ENDPOINT (POST: /api/mining/start)
+// -------------------------------------------------------------------
+app.post('/api/mining/start', (req, res) => {
+    const { coin, wallet, speed } = req.body;
+    
+    if (!coin || !wallet || !MINING_POOLS[coin]) {
+        return res.status(400).json({ success: false, error: "Missing coin, wallet, or invalid coin selected." });
     }
     
-    if (activeMiningSession) {
-         return res.status(409).json({ status: 'error', message: 'A mining session is already active. Please stop it first.' });
+    if (minerProcess) {
+        return res.status(200).json({ success: false, error: "Mining already running. Please stop current session first." });
     }
 
-    // --- SIMULATION START LOGIC ---
-    const simData = calculateSimulatedEarnings(coin, speed_profile, parseFloat(target));
+    const { minerPath, args } = getMinerArgs(coin, wallet, speed);
 
-    // Store session data (for monitoring)
-    activeMiningSession = {
-        processId: crypto.randomBytes(4).toString('hex'), // Fake Process ID
-        coin: coin,
-        target: parseFloat(target),
-        wallet: wallet_address,
-        startTime: Date.now(),
-        simulatedHashRate: simData.hashRate,
-        simulatedTime: simData.estimatedTime
+    if (!minerPath) {
+         return res.status(500).json({ success: false, error: `Miner binary not configured for ${coin}.` });
+    }
+
+    try {
+        // Use 'spawn' to launch the miner in the background
+        minerProcess = spawn(minerPath, args, { detached: true, stdio: 'ignore' });
+        
+        currentMiningConfig = { coin, wallet, speed, pid: minerProcess.pid };
+
+        // Handle errors (e.g., file not found, permission denied)
+        minerProcess.on('error', (err) => {
+            console.error(`[MINER ERROR] Failed to start ${coin} miner: ${err.message}`);
+            minerProcess = null;
+            currentMiningConfig = null;
+            // NOTE: Cannot send response here as request is already finished.
+        });
+
+        console.log(`[MINING START] Started ${coin} miner (PID: ${minerProcess.pid}) with speed: ${speed}`);
+        
+        res.json({ 
+            success: true, 
+            message: `${coin} mining started successfully! (PID: ${minerProcess.pid})`, 
+            config: currentMiningConfig 
+        });
+
+    } catch (e) {
+        console.error("Critical spawn error:", e.message);
+        minerProcess = null;
+        currentMiningConfig = null;
+        res.status(500).json({ success: false, error: `Critical server error launching miner: ${e.message}` });
+    }
+});
+
+
+// -------------------------------------------------------------------
+// 6b. STOP MINING ENDPOINT (POST: /api/mining/stop)
+// -------------------------------------------------------------------
+app.post('/api/mining/stop', (req, res) => {
+    if (!minerProcess) {
+        return res.json({ success: true, message: "No active miner process found." });
+    }
+
+    try {
+        // Kill the detached process by its PID
+        process.kill(minerProcess.pid, 'SIGTERM'); 
+        
+        // Clean up
+        minerProcess = null;
+        currentMiningConfig = null;
+        console.log("[MINING STOP] Miner process terminated.");
+
+        res.json({ success: true, message: "Mining process successfully stopped." });
+
+    } catch (e) {
+        console.error("Error stopping miner process:", e.message);
+        minerProcess = null;
+        currentMiningConfig = null;
+        res.status(500).json({ success: false, error: `Failed to stop miner: ${e.message}` });
+    }
+});
+
+
+// -------------------------------------------------------------------
+// 6c. GET MINING STATUS ENDPOINT (GET: /api/mining/status)
+// -------------------------------------------------------------------
+app.get('/api/mining/status', async (req, res) => {
+    
+    // Default response structure
+    const statusData = {
+        isRunning: !!minerProcess,
+        coin: currentMiningConfig?.coin || 'N/A',
+        hashRate: '0.0',
+        unit: 'H/s',
+        balance: 0,
+        timeToPayout: 'N/A',
+        isThresholdReached: false,
+        temp: '--',
+        error: null
     };
     
-    console.log(`\n[MINING START SIMULATED] Coin: ${coin}, Target: $${target}, Est. Time: ${simData.estimatedTime}`);
-
-    res.status(200).json({ 
-        status: 'OK', 
-        message: `Simulated mining started successfully for ${coin} on the Backend.`,
-        processId: activeMiningSession.processId,
-        initialHashRate: activeMiningSession.simulatedHashRate,
-        estimatedTime: activeMiningSession.simulatedTime
-    });
-
-});
-
-
-app.post('/api/stop-mining', (req, res) => {
-    
-    if (!activeMiningSession) {
-         return res.status(404).json({ status: 'error', message: 'No active mining session found to stop.' });
+    if (!minerProcess || !currentMiningConfig) {
+        return res.json(statusData);
     }
-    
-    const stoppedCoin = activeMiningSession.coin;
-    
-    // Clear the active session
-    activeMiningSession = null;
-    
-    console.log(`[MINING STOPPED] Simulated mining for ${stoppedCoin} stopped.`);
 
-    res.status(200).json({ 
-        status: 'OK', 
-        message: `Mining for ${stoppedCoin} has been successfully stopped.`
-    });
-});
+    const { coin, wallet } = currentMiningConfig;
+    const poolConfig = MINING_POOLS[coin];
+    const api_url = `${poolConfig.api}${wallet}`;
 
+    try {
+        const response = await axios.get(api_url, { timeout: 10000 });
+        const data = response.data;
 
-app.get('/api/mining-status', (req, res) => {
-    if (!activeMiningSession) {
-        return res.status(200).json({ isActive: false, unpaidBalanceUSD: 0, hashRate: 0, runningTimeSeconds: 0 });
+        // --- COMMON LOGIC FOR 2MINERS (ETC/RVN) and SUPPORTXMR (XMR) ---
+        let balanceValue = 0;
+        let hashRateValue = 0;
+        let minPayout = 0;
+        let unit = '';
+
+        if (coin === 'XMR') {
+            // SupportXMR API
+            balanceValue = data?.stats?.balance || 0;
+            hashRateValue = data?.hashRate || 0; // H/s in API
+            minPayout = 0.005; 
+            unit = 'H/s';
+            // Convert Piconero to XMR (12 decimals)
+            statusData.balance = balanceValue / 1000000000000; 
+
+        } else if (coin === 'ETC' || coin === 'RVN') {
+            // 2Miners API (Data is often in WEI/Satoshis, check documentation)
+            // Assuming 2Miners returns balance in coin unit (simplified for project demo)
+            balanceValue = data?.stats?.balance || 0;
+            hashRateValue = data?.currentHashrate || 0; // MH/s in API
+            minPayout = coin === 'ETC' ? 0.1 : 50; // Example payouts (0.1 ETC, 50 RVN)
+            unit = 'MH/s';
+            // 2Miners balance is typically returned as a number (float/string)
+            statusData.balance = parseFloat(balanceValue); 
+        }
+
+        // --- CALCULATE TIME TO PAYOUT (Simplified) ---
+        const remainingToMine = Math.max(0, minPayout - statusData.balance);
+        
+        if (hashRateValue > 0 && remainingToMine > 0) {
+            // This calculation is highly simplified and depends on the API unit (H/s vs MH/s)
+            // Assuming the pool calculates time to next payout for simplicity in demo
+            
+            // For XMR (H/s) to mine remainingToMine XMR:
+            // Very rough estimate of Hashrate needed for 1 XMR per day: ~50,000 H/s (50 KH/s)
+            // Simplified: Time to mine 1 coin * remaining amount
+            const timeToMineOneCoinHours = 50000 / hashRateValue * 24; // If 50KH/s is 1 coin/day
+            const totalHours = timeToMineOneCoinHours * remainingToMine; 
+
+            if (totalHours > 720) { // 30 days
+                statusData.timeToPayout = '> 30 Days (Need more power)';
+            } else if (totalHours > 24) {
+                statusData.timeToPayout = `${(totalHours / 24).toFixed(1)} Days`;
+            } else if (totalHours > 1) {
+                statusData.timeToPayout = `${totalHours.toFixed(1)} Hours`;
+            } else {
+                statusData.timeToPayout = `< 1 Hour`;
+            }
+
+        } else if (remainingToMine <= 0) {
+            statusData.isThresholdReached = true;
+            statusData.timeToPayout = 'Threshold Reached! Auto-transfer imminent.';
+        } else {
+            statusData.timeToPayout = 'Mining... (Waiting for Hash Rate)';
+        }
+
+        // --- FINAL DATA ASSEMBLY ---
+        statusData.hashRate = hashRateValue.toFixed(2);
+        statusData.unit = unit;
+        // Temperature is not directly available via pool API, so we skip it for now.
+        
+        res.json({ success: true, ...statusData });
+
+    } catch (e) {
+        console.error(`[POOL API ERROR] Coin: ${coin}, Error: ${e.message.substring(0, 50)}...`);
+        statusData.error = "Could not fetch pool data (Check wallet address or API key/network).";
+        statusData.isRunning = !!minerProcess; // Re-check if miner is still running
+        res.json({ success: true, ...statusData });
     }
-    
-    // --- SIMULATED LIVE DATA ---
-    const currentTime = Date.now();
-    const elapsedTimeSeconds = Math.round((currentTime - activeMiningSession.startTime) / 1000);
-    
-    // Simulate gradual increase of balance (e.g., $0.005 per 15 seconds)
-    const timeFactor = elapsedTimeSeconds / 15; // Every 15 seconds, we increase balance
-    const increasePerTick = 0.005; 
-    
-    // Total simulated balance accumulated during this single session
-    const simulatedBalance = (timeFactor * increasePerTick) * (activeMiningSession.simulatedHashRate / 3000); // Scale by hash rate (3000 H/s = 3 kH/s base)
-    
-    // Ensure balance doesn't exceed the target dramatically
-    const currentBalance = Math.min(simulatedBalance, activeMiningSession.target * 1.10);
-    
-    res.status(200).json({
-        isActive: true,
-        coin: activeMiningSession.coin,
-        hashRate: activeMiningSession.simulatedHashRate,
-        unpaidBalanceUSD: parseFloat(currentBalance.toFixed(2)),
-        wallet: activeMiningSession.wallet,
-        processId: activeMiningSession.processId,
-        runningTimeSeconds: elapsedTimeSeconds,
-        estimatedTime: activeMiningSession.simulatedTime
-    });
 });
 
 
