@@ -3,348 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining For Students - Cloud Controller</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Universal Mining Manager - College Project</title>
     <style>
-        /* Custom styles */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
-        .blinking-dot {
-            animation: blink 1s infinite;
+        /* --- CSS: Modern Dark Theme --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e2f; /* Dark Purple/Blue Background */
+            color: #f0f0f0; /* Light Text */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        @keyframes blink {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
+
+        .dashboard-container {
+            background-color: #2a2a44;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            color: #64ffda; /* Aqua accent color */
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3c3c5a;
+            padding-bottom: 10px;
+        }
+
+        /* --- Control Panel Styling --- */
+        .control-panel, .status-panel {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #3c3c5a;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #c9c9d8;
+        }
+
+        input[type="text"], select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #4a4a6b;
+            border-radius: 5px;
+            background-color: #1e1e2f;
+            color: #f0f0f0;
+            font-size: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        #startBtn {
+            background-color: #64ffda;
+            color: #1e1e2f;
+        }
+
+        #startBtn:hover {
+            background-color: #30f0c0;
+        }
+
+        #stopBtn {
+            background-color: #ff6464;
+            color: white;
+        }
+
+        #stopBtn:hover {
+            background-color: #e04a4a;
+        }
+
+        /* --- Status Panel Styling --- */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .status-box {
+            background-color: #2a2a44;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 14px;
+            color: #a0a0b8;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #64ffda;
+        }
+        
+        #current-status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffcc66;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4 md:p-8 font-sans">
+<body>
 
-    <header class="text-center mb-10">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-teal-400 tracking-wider flex items-center justify-center">
-            <span class="mr-3">⛏️</span> Mining For Students 
-        </h1>
-        <p class="mt-2 text-gray-400 text-lg">Connected to Render Backend: <span id="backendUrlDisplay" class="font-mono text-sm text-yellow-400">https://pooreyoutuber-github-io-blmp.onrender.com</span></p>
-    </header>
+<div class="dashboard-container">
+    <h1>🚀 यूनिवर्सल माइनिंग मैनेजर</h1>
 
-    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
-            <h2 class="text-2xl font-bold mb-6 text-teal-300 border-b border-gray-700 pb-3">⚙️ Mining Setup</h2>
-            
-            <form id="miningForm" class="space-y-6">
+    <div class="control-panel">
+        <h2>नियंत्रण पैनल (Control Panel)</h2>
 
-                <div>
-                    <label for="coinSelect" class="block text-sm font-medium text-gray-400 mb-2">Select Coin (5 Options)</label>
-                    <select id="coinSelect" name="coinSelect" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-white" required>
-                        <option value="" disabled selected>--- Choose Your Coin ---</option>
-                        <option value="XMR">Monero (XMR) - CPU (Low Power)</option>
-                        <option value="ETC">Ethereum Classic (ETC) - GPU</option>
-                        <option value="RVN">Ravencoin (RVN) - GPU (High Profit)</option>
-                        <option value="ZEC">Zcash (ZEC) - GPU/CPU</option>
-                        <option value="VRSC">VerusCoin (VRSC) - CPU (Light)</option>
-                    </select>
-                </div>
+        <label for="coinSelect">क्रिप्टोकरेंसी चुनें (Select Coin):</label>
+        <select id="coinSelect">
+            <option value="XMR">1. Monero (XMR) - CPU Mining</option>
+            <option value="ETC">2. Ethereum Classic (ETC) - GPU Mining</option>
+            <option value="RVN">3. Ravencoin (RVN) - GPU Mining</option>
+        </select>
 
-                <div>
-                    <label for="walletAddress" class="block text-sm font-medium text-gray-400 mb-2">Wallet Address (Payout Destination)</label>
-                    <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter selected coin's receiving address..." class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-white" required>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="miningSpeed" class="block text-sm font-medium text-gray-400 mb-2">Mining Speed Profile</label>
-                        <select id="miningSpeed" name="miningSpeed" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-white">
-                            <option value="low_cpu">Low CPU (Demo Mode)</option>
-                            <option value="medium_gpu">Medium GPU</option>
-                            <option value="high_gpu">High GPU</option>
-                        </select>
-                    </div>
+        <label for="speedSelect">माइनिंग स्पीड / रिसोर्स उपयोग (Speed / Resource Usage):</label>
+        <select id="speedSelect">
+            <option value="Low">Low (30% CPU/GPU Load)</option>
+            <option value="Medium">Medium (60% CPU/GPU Load)</option>
+            <option value="High">High (90% CPU/GPU Load)</option>
+        </select>
 
-                    <div>
-                        <label for="targetEarning" class="block text-sm font-medium text-gray-400 mb-2">Target Earning ($ USD)</label>
-                        <input type="number" id="targetEarning" name="targetEarning" value="0.50" min="0.50" step="0.50" placeholder="e.g. 1.00" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-white" required>
-                    </div>
-                </div>
+        <label for="walletInput">Trust Wallet पता (Withdrawal Wallet Address):</label>
+        <input type="text" id="walletInput" placeholder="जैसे: 0x... (ETC/RVN) या 4... (XMR)">
 
-                <div class="pt-4">
-                    <button type="submit" id="startButton" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg text-lg transition duration-200 shadow-md">
-                        ▶ START MINING (Send to Render)
-                    </button>
-                    <button type="button" id="stopButton" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg text-lg mt-3 transition duration-200 shadow-md hidden">
-                        ■ STOP MINING (Stop Cloud Worker)
-                    </button>
-                    <p id="systemMessage" class="mt-3 text-center text-sm font-medium text-yellow-500"></p>
-                </div>
-            </form>
+        <div class="button-group">
+            <button class="btn" id="startBtn" onclick="startMining()">⛏️ Mining शुरू करें</button>
+            <button class="btn" id="stopBtn" onclick="stopMining()">🛑 Mining बंद करें</button>
         </div>
+    </div>
 
-        <div class="space-y-8">
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
-                <h2 class="text-2xl font-bold mb-4 text-orange-400 flex items-center">
-                    <span id="statusDot" class="w-3 h-3 rounded-full bg-gray-500 mr-2"></span> 📊 Live Status
-                </h2>
-                <div class="space-y-4">
-                    <div class="flex justify-between border-b border-gray-700 pb-2">
-                        <span class="text-gray-400">Current Coin:</span>
-                        <span id="currentCoinAlgo" class="font-semibold text-teal-400">N/A</span>
-                    </div>
-                    <div class="flex justify-between border-b border-gray-700 pb-2">
-                        <span class="text-gray-400">Live Hash Rate:</span>
-                        <span id="liveHashRate" class="font-semibold text-xl text-yellow-500">0 H/s</span>
-                    </div>
-                    <div class="flex justify-between border-b border-gray-700 pb-2">
-                        <span class="text-gray-400">Unpaid Balance (USD):</span>
-                        <span id="unpaidBalance" class="font-semibold text-green-500 text-2xl">$0.00</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Time to Target:</span>
-                        <span id="estTime" class="font-semibold text-gray-300">N/A</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Running Time:</span>
-                        <span id="runningTime" class="font-semibold text-gray-300">0 sec</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
-                <h2 class="text-2xl font-bold mb-4 text-purple-400">🧠 Gemini AI Optimizer</h2>
-                <p class="text-sm text-gray-400 mb-4">Get a Profitability Report and Configuration Tips.</p>
-                <button id="aiReportButton" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg text-lg transition duration-200">
-                    Generate AI Report
-                </button>
-                <div id="aiOutput" class="mt-4 text-sm bg-gray-700 p-3 rounded-lg text-gray-200 hidden">
-                    <p class="font-mono text-xs text-purple-300">Waiting for data...</p>
-                </div>
-            </div>
-            
-            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
-                <h2 class="text-2xl font-bold mb-4 text-blue-400">✅ Wallet Proof</h2>
-                <p class="text-sm text-gray-400 mb-4">Click to view the payout link for the current wallet address.</p>
-                <button id="showPayouts" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-lg transition duration-200">
-                    View Wallet Payout History
-                </button>
-            </div>
-
-        </div>
-    </main>
-
-    <script>
-        // --- CORE CONFIGURATION ---
-        // Your Render Backend URL
-        const RENDER_BACKEND_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com';
+    <div class="status-panel">
+        <h2>रियल-टाइम स्टेटस (Real-Time Status)</h2>
         
-        // Polling interval for status updates (e.g., every 5 seconds)
-        const STATUS_POLL_INTERVAL = 5000; 
-        let statusInterval = null;
+        <div id="current-status">स्थिति: माइनिंग बंद है।</div>
 
-        // --- UTILITY FUNCTIONS ---
-        function updateStatusUI(data) {
-            document.getElementById('currentCoinAlgo').textContent = data.coin || 'N/A';
-            document.getElementById('liveHashRate').textContent = `${data.hashRate || 0} H/s`;
-            document.getElementById('unpaidBalance').textContent = `$${data.unpaidBalanceUSD.toFixed(2) || '0.00'}`;
-            document.getElementById('estTime').textContent = data.estimatedTime || 'N/A';
-            document.getElementById('runningTime').textContent = `${data.runningTimeSeconds || 0} sec`;
+        <div class="status-grid">
             
-            const statusDot = document.getElementById('statusDot');
-            if (data.isActive) {
-                statusDot.className = 'w-3 h-3 rounded-full bg-green-500 mr-2 blinking-dot';
+            <div class="status-box">
+                <div class="status-label">वर्तमान हैश रेट (Current Hash Rate)</div>
+                <div class="status-value" id="hashRate">0.0 H/s</div>
+            </div>
+
+            <div class="status-box">
+                <div class="status-label">पूल बैलेंस / टोटल कॉइन (Unpaid Balance)</div>
+                <div class="status-value" id="totalCoin">0.000000 XMR</div>
+            </div>
+            
+            <div class="status-box">
+                <div class="status-label">अगला पेआउट अनुमान (Auto-Transfer Timing)</div>
+                <div class="status-value" id="payoutEstimate">N/A</div>
+            </div>
+            
+            <div class="status-box">
+                <div class="status-label">तापमान (Temperature)</div>
+                <div class="status-value" id="temperature">-- °C</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- JavaScript: Frontend Logic ---
+
+    // Node.js Backend API Endpoints (इन्हें आपके Node.js कोड से मैच होना चाहिए)
+    const API_START = 'https://pooreyoutuber-github-io-blmp.onrender.com/api/start-mining';
+    const API_STOP = 'https://pooreyoutuber-github-io-blmp-onrender.com/api/stop-mining';
+    const API_STATUS = 'https://pooreyoutuber-github-io-blmp.onrender.com/api/status'; // Pool API data
+
+    let statusInterval;
+
+    /**
+     * माइनिंग शुरू करने के लिए Node.js बैकएंड को डेटा भेजें।
+     */
+    function startMining() {
+        const coin = document.getElementById('coinSelect').value;
+        const speed = document.getElementById('speedSelect').value;
+        const wallet = document.getElementById('walletInput').value;
+
+        if (!wallet) {
+            alert('कृपया अपना Trust Wallet पता दर्ज करें।');
+            return;
+        }
+
+        document.getElementById('current-status').textContent = 'स्थिति: ⏳ ' + coin + ' माइनिंग शुरू हो रही है...';
+        
+        // --- 1. Node.js बैकएंड को स्टार्ट कमांड भेजें ---
+        fetch(API_START, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ coin, speed, wallet })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('current-status').textContent = `स्थिति: ✅ ${coin} माइनिंग चल रही है!`;
+                // माइनिंग शुरू होने के बाद स्टेटस अपडेट करना शुरू करें
+                statusInterval = setInterval(updateStatus, 15000); // हर 15 सेकंड में अपडेट
             } else {
-                statusDot.className = 'w-3 h-3 rounded-full bg-gray-500 mr-2';
+                document.getElementById('current-status').textContent = 'स्थिति: ❌ माइनिंग शुरू करने में विफलता: ' + data.error;
             }
-        }
-        
-        function setControlState(isMining) {
-            document.getElementById('startButton').classList.toggle('hidden', isMining);
-            document.getElementById('stopButton').classList.toggle('hidden', !isMining);
-        }
-
-        function showSystemMessage(message, isError = false) {
-            const msgElement = document.getElementById('systemMessage');
-            msgElement.textContent = message;
-            msgElement.className = isError 
-                ? 'mt-3 text-center text-sm font-medium text-red-500' 
-                : 'mt-3 text-center text-sm font-medium text-yellow-500';
-        }
-
-        // --- 1. LIVE STATUS POLLING ---
-        async function fetchMiningStatus() {
-            try {
-                const response = await fetch(`${RENDER_BACKEND_URL}/api/mining-status`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    updateStatusUI(data);
-                    
-                    // If backend thinks it's running but UI doesn't, sync UI
-                    if (data.isActive) {
-                        setControlState(true);
-                    } else if (statusInterval) {
-                        // If backend says stopped, and we have an interval, clear it
-                        clearInterval(statusInterval);
-                        statusInterval = null;
-                        setControlState(false);
-                    }
-                } else {
-                    console.error("Status check failed:", data.message);
-                }
-            } catch (error) {
-                console.error("Status Polling Error:", error);
-                // If connection fails, treat as stopped
-                if (statusInterval) {
-                    clearInterval(statusInterval);
-                    statusInterval = null;
-                    setControlState(false);
-                    showSystemMessage("Connection to Render lost. Mining might have stopped.", true);
-                }
-                updateStatusUI({ isActive: false, hashRate: 0, unpaidBalanceUSD: 0, runningTimeSeconds: 0 });
-            }
-        }
-
-        // --- 2. START MINING LOGIC ---
-        document.getElementById('miningForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const coin = document.getElementById('coinSelect').value;
-            const target = document.getElementById('targetEarning').value;
-            const speed = document.getElementById('miningSpeed').value;
-            const wallet = document.getElementById('walletAddress').value;
-
-            if (!coin || !wallet) {
-                showSystemMessage('Please select a coin and enter a wallet address.', true);
-                return;
-            }
-
-            const payload = {
-                coin: coin,
-                target: parseFloat(target),
-                speed_profile: speed,
-                wallet_address: wallet
-            };
-            
-            showSystemMessage('Sending START request to Render Backend...');
-
-            try {
-                const response = await fetch(`${RENDER_BACKEND_URL}/api/start-mining`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showSystemMessage(`Success! Mining started for ${coin}. Est. Time: ${result.estimatedTime}`, false);
-                    setControlState(true);
-                    
-                    // Start live polling immediately after successful start
-                    fetchMiningStatus(); 
-                    if (!statusInterval) {
-                        statusInterval = setInterval(fetchMiningStatus, STATUS_POLL_INTERVAL);
-                    }
-                } else {
-                    showSystemMessage(`Backend Error: ${result.message || 'Could not start mining.'}`, true);
-                }
-
-            } catch (error) {
-                console.error('Fetch Error:', error);
-                showSystemMessage('Connection Error: Could not reach the Render Backend URL.', true);
-            }
+        })
+        .catch(error => {
+            console.error('API Error:', error);
+            document.getElementById('current-status').textContent = 'स्थिति: ❌ सर्वर/नेटवर्क त्रुटि।';
         });
+    }
 
-        // --- 3. STOP MINING LOGIC ---
-        document.getElementById('stopButton').addEventListener('click', async function() {
-            showSystemMessage('Sending STOP request to Render Backend...');
-            
-            try {
-                const response = await fetch(`${RENDER_BACKEND_URL}/api/stop-mining`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'stop' }) 
-                });
+    /**
+     * माइनिंग बंद करने के लिए Node.js बैकएंड को कमांड भेजें।
+     */
+    function stopMining() {
+        clearInterval(statusInterval);
+        document.getElementById('current-status').textContent = 'स्थिति: 🛑 माइनिंग बंद हो रही है...';
+        
+        fetch(API_STOP, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('current-status').textContent = 'स्थिति: माइनिंग बंद है।';
+                // सभी स्टेटस को रीसेट करें
+                document.getElementById('hashRate').textContent = '0.0 H/s';
+                document.getElementById('totalCoin').textContent = '0.000000 XMR';
+                document.getElementById('payoutEstimate').textContent = 'N/A';
+                document.getElementById('temperature').textContent = '-- °C';
 
-                const result = await response.json();
+            } else {
+                document.getElementById('current-status').textContent = 'स्थिति: ❌ माइनिंग बंद करने में विफलता।';
+            }
+        })
+        .catch(error => {
+            console.error('API Error:', error);
+            document.getElementById('current-status').textContent = 'स्थिति: ❌ सर्वर/नेटवर्क त्रुटि।';
+        });
+    }
+
+    /**
+     * Node.js बैकएंड से रियल-टाइम माइनिंग स्टेटस और पूल डेटा प्राप्त करें।
+     */
+    function updateStatus() {
+        const selectedCoin = document.getElementById('coinSelect').value;
+        const wallet = document.getElementById('walletInput').value;
+
+        // यदि माइनिंग शुरू नहीं हुई है, तो आगे न बढ़ें
+        if (!statusInterval || !wallet) return; 
+
+        // --- 2. Node.js बैकएंड से स्टेटस डेटा प्राप्त करें ---
+        fetch(`${API_STATUS}?coin=${selectedCoin}&wallet=${wallet}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // पूल डेटा के आधार पर UI को अपडेट करें
+                document.getElementById('hashRate').textContent = `${data.hashRate} ${data.unit}`;
                 
-                if (response.ok) {
-                    showSystemMessage(`Mining successfully stopped! Final balance will be processed.`, false);
-                    setControlState(false);
-                    if (statusInterval) {
-                        clearInterval(statusInterval);
-                        statusInterval = null;
+                // Total Coin (पूल बैलेंस)
+                document.getElementById('totalCoin').textContent = `${data.balance.toFixed(6)} ${selectedCoin}`;
+                
+                // Auto-Transfer Timing (पेआउट अनुमान)
+                if (data.timeToPayout) {
+                    document.getElementById('payoutEstimate').textContent = data.timeToPayout;
+                    if (data.isThresholdReached) {
+                        document.getElementById('payoutEstimate').style.color = '#ff64da';
+                        document.getElementById('payoutEstimate').textContent = '✅ पेआउट सीमा पूरी! जल्द ही Trust Wallet में ट्रांसफर होगा।';
+                    } else {
+                         document.getElementById('payoutEstimate').style.color = '#64ffda';
                     }
-                    // Final status update to show 0 H/s
-                    updateStatusUI({ isActive: false, hashRate: 0, unpaidBalanceUSD: parseFloat(document.getElementById('unpaidBalance').textContent.replace('$', '')), runningTimeSeconds: 0 });
                 } else {
-                    showSystemMessage(`Stop Error: ${result.message || 'Could not stop mining process.'}`, true);
+                    document.getElementById('payoutEstimate').textContent = 'गणना जारी...';
                 }
+                
+                // तापमान (GPU माइनिंग के लिए)
+                document.getElementById('temperature').textContent = data.temp ? `${data.temp} °C` : '-- °C';
+                
+            } else {
+                console.error("Status fetch failed:", data.error);
+                document.getElementById('current-status').textContent = 'स्थिति: ⚠️ डेटा सिंक त्रुटि।';
+            }
+        })
+        .catch(error => {
+            console.error('API Error:', error);
+            document.getElementById('current-status').textContent = 'स्थिति: ❌ डेटा प्राप्त करने में नेटवर्क त्रुटि।';
+        });
+    }
+    
+    // UI शुरू होने पर माइनर को बंद दिखाने के लिए।
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('stopBtn').disabled = true;
+        document.getElementById('startBtn').disabled = false;
+    });
+</script>
 
-            } catch (error) {
-                console.error('Fetch Error:', error);
-                showSystemMessage('Connection Error: Could not reach the Render Backend URL to stop mining.', true);
-            }
-        });
-        
-        // --- 4. Wallet Proof Button Logic ---
-        document.getElementById('showPayouts').addEventListener('click', function() {
-            const coin = document.getElementById('coinSelect').value;
-            const wallet = document.getElementById('walletAddress').value;
-            
-            if (!coin || !wallet) {
-                alert("Please select a coin and enter a wallet address first.");
-                return;
-            }
-            
-            // This is for demonstration to the teacher: link to a real pool's dashboard
-            let poolDashboardUrl;
-            
-            switch(coin) {
-                case 'XMR':
-                    poolDashboardUrl = `https://supportxmr.com/#/dashboard?wallet=${wallet}`;
-                    break;
-                case 'ETC':
-                    poolDashboardUrl = `https://www.ethermine.org/etc/miner/${wallet}`;
-                    break;
-                case 'RVN':
-                    poolDashboardUrl = `https://ravencoin.miningpoolhub.com/workers/${wallet}`;
-                    break;
-                default:
-                    alert(`No public pool link available for ${coin}.`);
-                    return;
-            }
-            
-            if (poolDashboardUrl) {
-                alert(`Redirecting to the public pool dashboard for ${coin}. This is where you track the real $0.50 payout!`);
-                window.open(poolDashboardUrl, '_blank');
-            }
-        });
-        
-        // --- 5. Gemini AI Report Logic (Placeholder connected to backend logic) ---
-        document.getElementById('aiReportButton').addEventListener('click', function() {
-            const output = document.getElementById('aiOutput');
-            output.classList.remove('hidden');
-            output.innerHTML = '<p class="font-mono text-xs text-purple-300">Requesting real-time configuration analysis from Gemini (via Backend)...</p>';
-            
-            // Simulate a call to a Gemini endpoint (e.g., /api/gemini-report)
-            setTimeout(() => {
-                output.innerHTML = `
-                    <p class="text-green-300 font-bold">GEMINI REPORT SUCCESS (Simulated):</p>
-                    <p>Coin: ${document.getElementById('coinSelect').value || 'N/A'}. Profitability is HIGH on the selected speed.</p>
-                    <p>Recommendation: Check Pool Fees on your selected pool for ${document.getElementById('coinSelect').value} to maximize profit!</p>
-                `;
-            }, 2000);
-        });
-
-        // Initialize status check when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-             // Check if a session is already running on the backend
-             fetchMiningStatus(); 
-             // Start the interval if the backend confirms it's running
-             if (!statusInterval) {
-                 statusInterval = setInterval(fetchMiningStatus, STATUS_POLL_INTERVAL);
-             }
-        });
-    </script>
 </body>
 </html>
