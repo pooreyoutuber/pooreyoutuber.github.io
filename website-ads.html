@@ -221,14 +221,11 @@
             submitBtn.textContent = 'अनुरोध भेज रहा है...';
             showMessage('आपका वीडियो सर्वर को भेजा जा रहा है।', 'loading');
 
-            // --- Node.js बैक-एंड को यहाँ कॉल किया जाएगा ---
-            // (यह हिस्सा तब काम करेगा जब आपका Node.js सर्वर रेडी होगा)
+            // --- Node.js बैक-एंड को यहाँ कॉल किया जाएगा (सुधार किया गया) ---
             
             try {
-                // यहाँ हम एक नकली (mock) कॉल दिखा रहे हैं क्योंकि Node.js अभी नहीं बना है
-                // आपको बाद में '/submit-job' जैसे अपने Node.js एंडपॉइंट को कॉल करना होगा
-                
-                const response = await fetch('https://pooreyoutuber-github-io-v2fo.onrender.com', {
+                // FIX: सही Node.js एंडपॉइंट '/submit-anime-job' यहाँ जोड़ा गया है।
+                const response = await fetch('https://pooreyoutuber-github-io-v2fo.onrender.com/submit-anime-job', {
                     method: 'POST',
                     body: formData
                 });
@@ -244,7 +241,7 @@
                 showMessage('त्रुटि: सर्वर तक नहीं पहुंचा जा सका। सुनिश्चित करें कि Node.js बैक-एंड चल रहा है।', 'error');
             }
             
-            // अंत में, बटन को फिर से सक्षम करें (अगर यह सफल नहीं होता है तो)
+            // अंत में, बटन को फिर से सक्षम करें
             submitBtn.disabled = false;
             submitBtn.textContent = 'सबमिट अनुरोध';
         });
