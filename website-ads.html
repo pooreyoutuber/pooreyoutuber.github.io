@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Mining Manager - College Project</title>
+    <title>AI Video to Anime Converter</title>
     <style>
-        /* --- CSS: Modern Dark Theme --- */
+        /* Modern and Clean CSS */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e2f; /* Dark Purple/Blue Background */
-            color: #f0f0f0; /* Light Text */
+            background-color: #0d1117; /* Dark background like GitHub/Dev tools */
+            color: #c9d1d9;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -18,332 +18,243 @@
             min-height: 100vh;
         }
 
-        .dashboard-container {
-            background-color: #2a2a44;
-            padding: 30px;
+        .container {
+            background-color: #161b22;
+            padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 800px;
+            max-width: 550px;
+            border: 1px solid #30363d;
         }
 
         h1 {
-            color: #64ffda; /* Aqua accent color */
             text-align: center;
+            color: #58a6ff; /* Blue accent */
             margin-bottom: 30px;
-            border-bottom: 2px solid #3c3c5a;
-            padding-bottom: 10px;
+            font-weight: 600;
         }
 
-        /* --- Control Panel Styling --- */
-        .control-panel, .status-panel {
-            margin-bottom: 25px;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #3c3c5a;
+        .form-group {
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
-            color: #c9c9d8;
+            font-weight: 500;
+            color: #8b949e;
         }
 
-        input[type="text"], select {
-            width: calc(100% - 20px);
+        input[type="email"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            transition: border-color 0.3s;
+        }
+
+        input[type="email"]:focus,
+        select:focus {
+            border-color: #58a6ff;
+            outline: none;
+        }
+
+        /* File input specific styling (may vary by browser) */
+        input[type="file"] {
             padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #4a4a6b;
-            border-radius: 5px;
-            background-color: #1e1e2f;
-            color: #f0f0f0;
-            font-size: 16px;
         }
 
-        .button-group {
+        /* Style Select Options */
+        .style-options {
             display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #0d1117;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
         }
 
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
+        .style-option {
+            display: flex;
+            align-items: center;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
         }
 
-        #startBtn {
-            background-color: #64ffda;
-            color: #1e1e2f;
+        .style-option input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #58a6ff;
         }
 
-        #startBtn:hover {
-            background-color: #30f0c0;
-        }
-
-        #stopBtn {
-            background-color: #ff6464;
+        /* Submit Button */
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #238636; /* GitHub Green */
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
         }
 
-        #stopBtn:hover {
-            background-color: #e04a4a;
+        button:hover {
+            background-color: #2ea043;
         }
 
-        /* --- Status Panel Styling --- */
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+        button:disabled {
+            background-color: #30363d;
+            cursor: not-allowed;
         }
 
-        .status-box {
-            background-color: #2a2a44;
+        /* Message Display */
+        #message {
+            margin-top: 20px;
             padding: 15px;
             border-radius: 8px;
             text-align: center;
+            display: none;
         }
 
-        .status-label {
-            font-size: 14px;
-            color: #a0a0b8;
-            margin-bottom: 5px;
+        .success {
+            background-color: #213c2c;
+            color: #2ea043;
+            border: 1px solid #238636;
         }
 
-        .status-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #64ffda;
+        .error {
+            background-color: #401f23;
+            color: #f85149;
+            border: 1px solid #f85149;
         }
-        
-        #current-status {
+
+        .loading {
+            background-color: #1c273a;
+            color: #58a6ff;
+            border: 1px solid #58a6ff;
+        }
+
+        /* Footer for instructions */
+        .footer {
+            margin-top: 30px;
             text-align: center;
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffcc66;
+            font-size: 0.9em;
+            color: #8b949e;
         }
+
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🎬 AI Video Anime Transformer</h1>
+        <form id="conversionForm">
 
-<div class="dashboard-container">
-    <h1>🚀 यूनिवर्सल माइनिंग मैनेजर</h1>
+            <div class="form-group">
+                <label for="videoFile">अपलोड 30-सेकंड वीडियो (MP4, MOV)</label>
+                <input type="file" id="videoFile" name="videoFile" accept="video/mp4,video/quicktime" required>
+            </div>
 
-    <div class="control-panel">
-        <h2>नियंत्रण पैनल (Control Panel)</h2>
+            <div class="form-group">
+                <label for="emailId">परिणाम के लिए अपना Gmail ID दर्ज करें</label>
+                <input type="email" id="emailId" name="emailId" placeholder="youremail@gmail.com" required>
+            </div>
 
-        <label for="coinSelect">क्रिप्टोकरेंसी चुनें (Select Coin):</label>
-        <select id="coinSelect">
-            <option value="XMR">1. Monero (XMR) - CPU Mining</option>
-            <option value="ETC">2. Ethereum Classic (ETC) - GPU Mining</option>
-            <option value="RVN">3. Ravencoin (RVN) - GPU Mining</option>
-        </select>
+            <div class="form-group">
+                <label>एनीमे स्टाइल का चयन करें</label>
+                <div class="style-options">
+                    <div class="style-option">
+                        <input type="radio" id="styleWhatIf" name="animeStyle" value="High contrast comic book style, highly stylized, inspired by Marvel What If series, 3D shading" required>
+                        <label for="styleWhatIf">व्हाट इफ़ (What If) स्टाइल</label>
+                    </div>
+                    <div class="style-option">
+                        <input type="radio" id="styleBen10" name="animeStyle" value="Classic 2D animation style, bold outlines, simple shading, inspired by Ben 10 classic series" required>
+                        <label for="styleBen10">बेन 10 (Ben 10) स्टाइल</label>
+                    </div>
+                    <div class="style-option">
+                        <input type="radio" id="styleJujutsuKaisen" name="animeStyle" value="Dark modern shonen anime style, dynamic motion, detailed shadows, inspired by Jujutsu Kaisen" required>
+                        <label for="styleJujutsuKaisen">जुजुत्सु काइसेन (Jujutsu Kaisen) स्टाइल</label>
+                    </div>
+                </div>
+            </div>
 
-        <label for="speedSelect">माइनिंग स्पीड / रिसोर्स उपयोग (Speed / Resource Usage):</label>
-        <select id="speedSelect">
-            <option value="Low">Low (30% CPU/GPU Load)</option>
-            <option value="Medium">Medium (60% CPU/GPU Load)</option>
-            <option value="High">High (90% CPU/GPU Load)</option>
-        </select>
+            <button type="submit" id="submitBtn">सबमिट अनुरोध</button>
+        </form>
 
-        <label for="walletInput">Trust Wallet पता (Withdrawal Wallet Address):</label>
-        <input type="text" id="walletInput" placeholder="जैसे: 0x... (ETC/RVN) या 4... (XMR)">
+        <div id="message" class="loading" style="display: none;"></div>
 
-        <div class="button-group">
-            <button class="btn" id="startBtn" onclick="startMining()">⛏️ Mining शुरू करें</button>
-            <button class="btn" id="stopBtn" onclick="stopMining()">🛑 Mining बंद करें</button>
+        <div class="footer">
+            <p>ℹ️ ध्यान दें: यह प्रक्रिया पूरी होने में 2-4 घंटे लग सकते हैं। काम पूरा होने पर आपको ईमेल प्राप्त होगा।</p>
         </div>
     </div>
 
-    <div class="status-panel">
-        <h2>रियल-टाइम स्टेटस (Real-Time Status)</h2>
-        
-        <div id="current-status">स्थिति: माइनिंग बंद है।</div>
+    <script>
+        const form = document.getElementById('conversionForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageDiv = document.getElementById('message');
 
-        <div class="status-grid">
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            <div class="status-box">
-                <div class="status-label">वर्तमान हैश रेट (Current Hash Rate)</div>
-                <div class="status-value" id="hashRate">0.0 H/s</div>
-            </div>
-
-            <div class="status-box">
-                <div class="status-label">पूल बैलेंस / टोटल कॉइन (Unpaid Balance)</div>
-                <div class="status-value" id="totalCoin">0.000000 XMR</div>
-            </div>
+            // फ़ॉर्म से डेटा लें
+            const formData = new FormData(form);
             
-            <div class="status-box">
-                <div class="status-label">अगला पेआउट अनुमान (Auto-Transfer Timing)</div>
-                <div class="status-value" id="payoutEstimate">N/A</div>
-            </div>
-            
-            <div class="status-box">
-                <div class="status-label">तापमान (Temperature)</div>
-                <div class="status-value" id="temperature">-- °C</div>
-            </div>
-        </div>
-    </div>
-</div>
+            // फ्रंट-एंड वैलिडेशन
+            const videoFile = document.getElementById('videoFile').files[0];
+            const email = formData.get('emailId');
+            const style = formData.get('animeStyle');
 
-<script>
-    // --- JavaScript: Frontend Logic ---
-
-    // ✅ Render Cloud URL यहां सेट किया गया है:
-    const RENDER_BASE_URL = 'https://pooreyoutuber-github-io-blmp.onrender.com'; 
-    
-    const API_START = `${RENDER_BASE_URL}/api/mining/start`;
-    const API_STOP = `${RENDER_BASE_URL}/api/mining/stop`;
-    const API_STATUS = `${RENDER_BASE_URL}/api/mining/status`; 
-
-    let statusInterval;
-
-    /**
-     * माइनिंग शुरू करने के लिए Node.js बैकएंड को डेटा भेजें।
-     */
-    function startMining() {
-        const coin = document.getElementById('coinSelect').value;
-        const speed = document.getElementById('speedSelect').value;
-        const wallet = document.getElementById('walletInput').value;
-
-        if (!wallet) {
-            alert('कृपया अपना Trust Wallet पता दर्ज करें।');
-            return;
-        }
-
-        // स्टेटस रीसेट करें
-        clearInterval(statusInterval); 
-        document.getElementById('hashRate').textContent = '0.0 H/s';
-        document.getElementById('totalCoin').textContent = '0.000000 XMR';
-        document.getElementById('payoutEstimate').textContent = 'N/A';
-        document.getElementById('temperature').textContent = '-- °C';
-        
-        document.getElementById('current-status').textContent = 'स्थिति: ⏳ ' + coin + ' माइनिंग शुरू हो रही है...';
-        
-        // --- 1. Node.js बैकएंड को स्टार्ट कमांड भेजें ---
-        fetch(API_START, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ coin, speed, wallet })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('current-status').textContent = `स्थिति: ✅ ${coin} माइनिंग चल रही है!`;
-                document.getElementById('startBtn').disabled = true;
-                document.getElementById('stopBtn').disabled = false;
-                // माइनिंग शुरू होने के बाद स्टेटस अपडेट करना शुरू करें
-                updateStatus(); // तुरंत पहला अपडेट
-                statusInterval = setInterval(updateStatus, 15000); // हर 15 सेकंड में अपडेट
-            } else {
-                document.getElementById('current-status').textContent = 'स्थिति: ❌ माइनिंग शुरू करने में विफलता: ' + (data.error || 'अज्ञात त्रुटि');
+            if (!videoFile || !email || !style) {
+                showMessage('कृपया सभी फ़ील्ड भरें।', 'error');
+                return;
             }
-        })
-        .catch(error => {
-            console.error('API Error:', error);
-            document.getElementById('current-status').textContent = 'स्थिति: ❌ सर्वर/नेटवर्क त्रुटि। (Render URL या CORS समस्या)';
-        });
-    }
 
-    /**
-     * माइनिंग बंद करने के लिए Node.js बैकएंड को कमांड भेजें।
-     */
-    function stopMining() {
-        clearInterval(statusInterval);
-        document.getElementById('current-status').textContent = 'स्थिति: 🛑 माइनिंग बंद हो रही है...';
-        
-        fetch(API_STOP, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('current-status').textContent = 'स्थिति: माइनिंग बंद है।';
-                document.getElementById('startBtn').disabled = false;
-                document.getElementById('stopBtn').disabled = true;
-                // सभी स्टेटस को रीसेट करें
-                document.getElementById('hashRate').textContent = '0.0 H/s';
-                document.getElementById('totalCoin').textContent = '0.000000 XMR';
-                document.getElementById('payoutEstimate').textContent = 'N/A';
-                document.getElementById('temperature').textContent = '-- °C';
+            // UI को अपडेट करें
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'अनुरोध भेज रहा है...';
+            showMessage('आपका वीडियो सर्वर को भेजा जा रहा है।', 'loading');
 
-            } else {
-                document.getElementById('current-status').textContent = 'स्थिति: ❌ माइनिंग बंद करने में विफलता।';
-            }
-        })
-        .catch(error => {
-            console.error('API Error:', error);
-            document.getElementById('current-status').textContent = 'स्थिति: ❌ सर्वर/नेटवर्क त्रुटि।';
-        });
-    }
-
-    /**
-     * Node.js बैकएंड से रियल-टाइम माइनिंग स्टेटस और पूल डेटा प्राप्त करें।
-     */
-    function updateStatus() {
-        const selectedCoin = document.getElementById('coinSelect').value;
-        const wallet = document.getElementById('walletInput').value;
-
-        // यदि वॉलेट नहीं है, तो Pool API को कॉल न करें
-        if (!wallet) return; 
-
-        // --- 2. Node.js बैकएंड से स्टेटस डेटा प्राप्त करें ---
-        // (वॉलेट और कॉइन को Query Params में भेजें)
-        fetch(`${API_STATUS}?coin=${selectedCoin}&wallet=${wallet}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // यदि माइनिंग बंद हो गई है लेकिन स्टेटस चेक चल रहा था
-                if (!data.isRunning) {
-                     clearInterval(statusInterval);
-                     document.getElementById('current-status').textContent = 'स्थिति: माइनिंग बंद है।';
-                     document.getElementById('startBtn').disabled = false;
-                     document.getElementById('stopBtn').disabled = true;
-                     return;
-                }
+            // --- Node.js बैक-एंड को यहाँ कॉल किया जाएगा ---
+            // (यह हिस्सा तब काम करेगा जब आपका Node.js सर्वर रेडी होगा)
+            
+            try {
+                // यहाँ हम एक नकली (mock) कॉल दिखा रहे हैं क्योंकि Node.js अभी नहीं बना है
+                // आपको बाद में '/submit-job' जैसे अपने Node.js एंडपॉइंट को कॉल करना होगा
                 
-                // पूल डेटा के आधार पर UI को अपडेट करें
-                document.getElementById('hashRate').textContent = `${data.hashRate} ${data.unit}`;
+                const response = await fetch('YOUR_NODEJS_BACKEND_URL/submit-job', {
+                    method: 'POST',
+                    body: formData
+                });
                 
-                // Total Coin (पूल बैलेंस)
-                document.getElementById('totalCoin').textContent = `${data.balance.toFixed(6)} ${selectedCoin}`;
-                
-                // Auto-Transfer Timing (पेआउट अनुमान)
-                document.getElementById('payoutEstimate').textContent = data.timeToPayout;
-                
-                if (data.isThresholdReached) {
-                    document.getElementById('payoutEstimate').style.color = '#ff64da';
-                    document.getElementById('payoutEstimate').textContent = '✅ पेआउट सीमा पूरी! जल्द ही Trust Wallet में ट्रांसफर होगा।';
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`सफलता! आपकी अनुरोध ID: ${data.jobId} पृष्ठभूमि में शुरू कर दी गई है। आपको जल्द ही ${email} पर एक ईमेल प्राप्त होगा।`, 'success');
                 } else {
-                     document.getElementById('payoutEstimate').style.color = '#64ffda';
+                    showMessage(`त्रुटि: ${data.message || 'सर्वर पर कोई समस्या हुई।'}`, 'error');
                 }
-                
-                // तापमान (GPU माइनिंग के लिए)
-                document.getElementById('temperature').textContent = data.temp ? `${data.temp} °C` : '-- °C';
-                
-                document.getElementById('current-status').textContent = `स्थिति: ✅ ${selectedCoin} माइनिंग चल रही है!`;
-                
-            } else {
-                console.error("Status fetch failed:", data.error);
-                document.getElementById('current-status').textContent = 'स्थिति: ⚠️ डेटा सिंक त्रुटि। (पूल API या वॉलेट पता)';
+            } catch (error) {
+                showMessage('त्रुटि: सर्वर तक नहीं पहुंचा जा सका। सुनिश्चित करें कि Node.js बैक-एंड चल रहा है।', 'error');
             }
-        })
-        .catch(error => {
-            console.error('API Error:', error);
-            document.getElementById('current-status').textContent = 'स्थिति: ❌ डेटा प्राप्त करने में नेटवर्क त्रुटि।';
+            
+            // अंत में, बटन को फिर से सक्षम करें (अगर यह सफल नहीं होता है तो)
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'सबमिट अनुरोध';
         });
-    }
-    
-    // UI शुरू होने पर माइनर को बंद दिखाने के लिए।
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('stopBtn').disabled = true;
-        document.getElementById('startBtn').disabled = false;
-    });
-</script>
 
+        function showMessage(msg, type) {
+            messageDiv.textContent = msg;
+            messageDiv.className = '';
+            messageDiv.classList.add(type);
+            messageDiv.style.display = 'block';
+        }
+    </script>
 </body>
 </html>
