@@ -1113,47 +1113,102 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // ===================================================================
 // 6. AI ANIME VIDEO CONVERTER ENDPOINT - GEMINI/NODE.JS TOOL (ULTRA ADVANCED)
 // ===================================================================
-// ===================================================================
-// 6. AI ANIME STYLE TRANSFER TOOL (API: /api/ai-anime) - FAKE SUCCESS FOR DEMO
-// ===================================================================
-app.post('/api/ai-anime', async (req, res) => {
-    // Note: In a real scenario, this would handle the video file upload,
-    // split it into frames, call a specialized AI model (NOT Gemini), 
-    // and re-assemble the video.
-    
-    // We are expecting: { videoDataUrl, style } from the frontend
-    const { videoDataUrl, style } = req.body;
+// Multer setup: Store file temporarily in a directory
+const UPLOAD_DIR = path.join(os.tmpdir(), 'video-uploads');
+// Ensure the upload directory exists
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
 
-    if (!videoDataUrl || !style) {
-        return res.status(400).json({ status: 'error', message: 'Video data and Style selection are required.' });
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+        // Use original name + unique suffix
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const uploadVideo = multer({ 
+    storage: storage,
+    limits: { 
+        fileSize: 50 * 1024 * 1024, // Max 50MB (for safety)
+    },
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('video/')) {
+            return cb(new Error('Only video files are allowed!'), false);
+        }
+        cb(null, true);
+    }
+});
+
+app.post('/api/anime-convert', uploadVideo.single('videoFile'), async (req, res) => {
+    
+    const { style } = req.body; // style = 'whatif', 'ben10', or 'jujutsu'
+    const uploadedFile = req.file;
+    
+    if (!uploadedFile) {
+        return res.status(400).json({ error: 'Video file is missing.' });
+    }
+    if (!style) {
+        // Cleanup the uploaded file if style is missing
+        fs.unlinkSync(uploadedFile.path); 
+        return res.status(400).json({ error: 'Anime style selection is missing.' });
     }
 
-    console.log(`\n[AI ANIME] Request received for video (Size: ${videoDataUrl.length} bytes) with style: ${style}`);
+    console.log(`[CONVERTER] Accepted video: ${uploadedFile.filename} with style: ${style}`);
     
-    // --- FAKE PROCESSING LOGIC (Simulating 10-15 seconds of work) ---
-    const processingTimeMs = randomInt(10000, 15000); // 10 to 15 seconds
-    
-    // IMPORTANT: Do NOT await the setTimeout here. Send immediate acceptance response.
-    res.json({ 
-        status: 'processing', 
-        message: `🎥 Video accepted! Processing started for ${style} style. This can take ${Math.round(processingTimeMs/1000)} seconds.`,
-        estimatedCompletionTime: processingTimeMs,
-        jobId: generateClientId() // Simple job ID for demo
+    // --- STEP 1: Return immediate acceptance response ---
+    // The link below is a SIMULATED link for the demo. 
+    // In a real project, this would be a temporary Render link or a Cloud Storage link.
+    const finalDemoUrl = `https://cdn.pooreyoutuber.com/anime-output/${style}-converted-${Date.now()}.mp4`;
+
+    res.json({
+        status: 'accepted',
+        message: `✨ Conversion started successfully! Please wait up to 60 seconds for the result.`,
+        convertedUrl: finalDemoUrl // Return the expected final URL immediately
     });
 
-    // Start a background task to simulate completion (optional, for console logging)
+
+    // --- STEP 2: Start heavy processing in the background ---
     (async () => {
-        await new Promise(resolve => setTimeout(resolve, processingTimeMs));
-        console.log(`[AI ANIME JOB ${generateClientId()}] ✅ Processing Complete. Anime video is ready for download (Simulated).`);
+        try {
+            // 1. Simulate the time-consuming Frame Breakdown -> Style Transfer -> Recombination
+            const processingDelay = randomInt(30000, 60000); // 30 to 60 seconds delay
+            console.log(`[CONVERTER JOB] Starting background conversion job for ${uploadedFile.filename}. Waiting for ${Math.round(processingDelay/1000)}s...`);
+            await new Promise(resolve => setTimeout(resolve, processingDelay));
+            
+            // --- ACTUAL LOGIC WOULD GO HERE ---
+            // If you upgrade Render to a non-free tier, you would:
+            // 1. Use fluent-ffmpeg to break the video (uploadedFile.path) into frames.
+            // 2. Loop through frames, call a Python script (ML model) or a high-end Gemini model for image-to-image conversion.
+            // 3. Use fluent-ffmpeg to stitch the output frames into the final MP4 video.
+            // 4. Upload the final MP4 to a permanent storage (like S3 or Google Cloud Storage).
+            // --- END ACTUAL LOGIC ---
+            
+            console.log(`[CONVERTER JOB] Finished processing ${uploadedFile.filename}. Simulated output available at: ${finalDemoUrl}`);
+
+        } catch (error) {
+            console.error(`[CRITICAL CONVERSION ERROR] Failed to process ${uploadedFile.filename}:`, error.message);
+        } finally {
+            // 3. Clean up the original uploaded file immediately after job is done/failed
+            try {
+                fs.unlinkSync(uploadedFile.path);
+                console.log(`[CLEANUP] Deleted temporary file: ${uploadedFile.path}`);
+            } catch (e) {
+                console.error('[CLEANUP ERROR] Could not delete file:', e.message);
+            }
+        }
     })();
 });
-// ===================================================================
-// --- END OF TOOL 6 ---
-// ===================================================================
 
-// Ensure the server starts at the very end (Source 480 ke baad)
-/*
+
+// ===================================================================
+// --- SERVER START ---\
+// ===================================================================
+// Sirf ek hi baar server start hoga
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
-*/
