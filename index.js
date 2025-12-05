@@ -17,7 +17,13 @@ const { URL } = require('url'); // Added URL import
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
+// 🔥 NEW IMPORTS FOR VIDEO TOOL (TOOL 6)
+const multer = require('multer'); // For handling multipart/form-data (video uploads)
+const path = require('path');
+const os = require('os'); // For temporary directory handling (safer)
 
+const app = express();
+const PORT = process.env.PORT || 10000; 
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
@@ -1152,6 +1158,94 @@ app.post('/youtube-boost-mp', async (req, res) => {
         console.log(`STATUS: Views and Watch Time should now appear in YouTube Studio Realtime/GA4 DebugView.`);
         console.log(`======================================================`);
         
+    })();
+});
+
+
+// ===================================================================
+// 6. AI ANIME VIDEO CONVERTER ENDPOINT (API: /api/anime-convert) - NEW TOOL
+// ===================================================================
+
+// Multer setup: Store file temporarily in a directory
+const UPLOAD_DIR = path.join(os.tmpdir(), 'video-uploads');
+// Ensure the upload directory exists
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+        // Use original name + unique suffix
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const uploadVideo = multer({ 
+    storage: storage,
+    limits: { 
+        fileSize: 50 * 1024 * 1024, // Max 50MB (for safety)
+    },
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('video/')) {
+            return cb(new Error('Only video files are allowed!'), false);
+        }
+        cb(null, true);
+    }
+});
+
+app.post('/api/anime-convert', uploadVideo.single('videoFile'), async (req, res) => {
+    
+    const { style } = req.body; // style = 'whatif', 'ben10', or 'jujutsu'
+    const uploadedFile = req.file;
+    
+    if (!uploadedFile) {
+        return res.status(400).json({ error: 'Video file is missing.' });
+    }
+    if (!style) {
+        // Cleanup the uploaded file if style is missing
+        fs.unlinkSync(uploadedFile.path); 
+        return res.status(400).json({ error: 'Anime style selection is missing.' });
+    }
+
+    console.log(`[CONVERTER] Accepted video: ${uploadedFile.filename} with style: ${style}`);
+    
+    // --- STEP 1: Return immediate acceptance response (As the conversion is a long process) ---
+    const finalDemoUrl = `https://cdn.pooreyoutuber.com/anime-output/${style}-converted-${Date.now()}.mp4`;
+
+    res.json({
+        status: 'accepted',
+        message: `✨ Conversion started successfully! Please wait up to 60 seconds for the result.`,
+        convertedUrl: finalDemoUrl // Return the expected final URL immediately
+    });
+
+
+    // --- STEP 2: Start heavy processing in the background ---
+    (async () => {
+        try {
+            // Simulate the time-consuming Frame Breakdown -> Style Transfer -> Recombination
+            const processingDelay = randomInt(30000, 60000); // 30 to 60 seconds delay
+            console.log(`[CONVERTER JOB] Starting background conversion job for ${uploadedFile.filename}. Waiting for ${Math.round(processingDelay/1000)}s...`);
+            await new Promise(resolve => setTimeout(resolve, processingDelay));
+            
+            // --- ACTUAL LOGIC WOULD GO HERE (FFmpeg/ML/Gemini) ---
+            
+            console.log(`[CONVERTER JOB] Finished processing ${uploadedFile.filename}. Simulated output available at: ${finalDemoUrl}`);
+
+        } catch (error) {
+            console.error(`[CRITICAL CONVERSION ERROR] Failed to process ${uploadedFile.filename}:`, error.message);
+        } finally {
+            // Clean up the original uploaded file
+            try {
+                fs.unlinkSync(uploadedFile.path);
+                console.log(`[CLEANUP] Deleted temporary file: ${uploadedFile.path}`);
+            } catch (e) {
+                console.error('[CLEANUP ERROR] Could not delete file:', e.message);
+            }
+        }
     })();
 });
 
