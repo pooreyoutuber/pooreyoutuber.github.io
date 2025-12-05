@@ -204,8 +204,8 @@
         const submitBtn = document.getElementById('submitBtn');
         const messageDiv = document.getElementById('message');
         
-        // ⚠️ अपनी Render URL यहाँ सेट करें
-        const BASE_RENDER_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com';
+        // ⚠️ Render URL को ध्यान से चेक करें
+        const BASE_RENDER_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com'; 
         let pollingInterval = null; 
 
         form.addEventListener('submit', async function(e) {
@@ -227,13 +227,16 @@
             showMessage('आपका वीडियो सर्वर को भेजा जा रहा है।', 'loading');
 
             try {
-                // 1. सर्वर को जॉब भेजें
-                const response = await fetch(`${BASE_RENDER_URL}/submit-anime-job`, {
+                // 1. सर्वर को जॉब भेजें - सही पाथ: /submit-anime-job
+                const API_URL = `${BASE_RENDER_URL}/submit-anime-job`;
+                
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     body: formData
                 });
                 
-                const data = await response.json();
+                // अगर सर्वर चल रहा है, लेकिन उसने JSON नहीं भेजा, तो यह JSON.parse त्रुटि देगा।
+                const data = await response.json(); 
 
                 if (response.ok) {
                     const jobId = data.jobId;
@@ -243,9 +246,11 @@
                     startPolling(jobId);
 
                 } else {
-                    showMessage(`❌ त्रुटि: ${data.message || 'सर्वर पर कोई समस्या हुई।'}`, 'error');
+                    showMessage(`❌ त्रुटि: ${data.message || 'सर्वर ने अपेक्षित प्रतिक्रिया नहीं दी।'}`, 'error');
                 }
             } catch (error) {
+                // यह कैच ब्लॉक तभी ट्रिगर होता है जब नेटवर्क कनेक्शन पूरी तरह विफल हो जाता है।
+                console.error("Fetch Error:", error);
                 showMessage('❌ त्रुटि: सर्वर तक नहीं पहुंचा जा सका। सुनिश्चित करें कि Render Backend चल रहा है।', 'error');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'सबमिट अनुरोध';
@@ -257,7 +262,7 @@
             
             const checkStatus = async () => {
                 try {
-                    // सर्वर पर नया एंडपॉइंट कॉल करें
+                    // स्टेटस चेक करने के लिए सही पाथ: /check-anime-status
                     const statusResponse = await fetch(`${BASE_RENDER_URL}/check-anime-status?jobId=${jobId}`);
                     const statusData = await statusResponse.json();
 
@@ -274,7 +279,7 @@
 
                     } else if (status === 'FAILED' || status === 'NOT_FOUND') {
                         clearInterval(pollingInterval); 
-                        showMessage(`❌ कन्वर्जन विफल हो गया। कृपया पुनः प्रयास करें।`, 'error');
+                        showMessage(`❌ कन्वर्जन विफल हो गया या जॉब की स्थिति खो गई। कृपया पुनः प्रयास करें।`, 'error');
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'सबमिट अनुरोध';
                         
@@ -284,7 +289,6 @@
                     }
                 } catch (error) {
                     console.error("Polling error:", error);
-                    // यहां पोलिंग को बंद न करें, ताकि अस्थायी नेटवर्क समस्या ठीक होने पर यह जारी रहे
                 }
             };
 
