@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Video to Anime Converter</title>
+    <title>AI Video to Anime Converter - College Project</title>
     <style>
-        /* Modern and Clean CSS */
+        /* --- MODERN DARK THEME CSS --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d1117; /* Dark background like GitHub/Dev tools */
+            background-color: #0d1117; /* GitHub Dark */
             color: #c9d1d9;
             margin: 0;
             padding: 20px;
@@ -22,7 +22,7 @@
             background-color: #161b22;
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
             width: 100%;
             max-width: 550px;
             border: 1px solid #30363d;
@@ -32,82 +32,89 @@
             text-align: center;
             color: #58a6ff; /* Blue accent */
             margin-bottom: 30px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
-            color: #8b949e;
+            font-weight: 600;
+            color: #c9d1d9;
         }
 
-        input[type="email"],
-        input[type="file"],
-        select {
+        input[type="file"], input[type="email"] {
             width: 100%;
             padding: 12px;
+            border-radius: 6px;
             border: 1px solid #30363d;
-            border-radius: 8px;
-            box-sizing: border-box;
-            background-color: #0d1117;
+            background-color: #21262d;
             color: #c9d1d9;
-            transition: border-color 0.3s;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        
+        /* Custom File Input Styling */
+        input[type="file"]::-webkit-file-upload-button {
+            background: #58a6ff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
 
-        input[type="email"]:focus,
-        select:focus {
-            border-color: #58a6ff;
-            outline: none;
-        }
-
-        /* File input specific styling (may vary by browser) */
-        input[type="file"] {
-            padding: 10px;
-        }
-
-        /* Style Select Options */
         .style-options {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background-color: #0d1117;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #30363d;
-        }
-
-        .style-option {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .style-option input[type="radio"] {
-            margin-right: 10px;
-            accent-color: #58a6ff;
+            opacity: 0;
+            position: fixed;
+            width: 0;
         }
 
-        /* Submit Button */
+        .style-option label {
+            display: inline-block;
+            background-color: #21262d;
+            padding: 10px 15px;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .style-option input[type="radio"]:checked + label {
+            background-color: #2b394e;
+            border-color: #58a6ff; /* Highlight color */
+            color: #58a6ff;
+            box-shadow: 0 0 5px #58a6ff;
+        }
+
         button {
             width: 100%;
             padding: 15px;
-            background-color: #238636; /* GitHub Green */
-            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 600;
+            border-radius: 6px;
+            background-color: #58a6ff; /* Primary button color */
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s;
+            margin-top: 10px;
         }
 
-        button:hover {
-            background-color: #2ea043;
+        button:hover:not([disabled]) {
+            background-color: #4489e3;
         }
 
         button:disabled {
@@ -115,72 +122,65 @@
             cursor: not-allowed;
         }
 
-        /* Message Display */
+        /* Status Messages */
         #message {
-            margin-top: 20px;
             padding: 15px;
-            border-radius: 8px;
+            margin-top: 25px;
+            border-radius: 6px;
+            font-weight: 600;
             text-align: center;
-            display: none;
         }
 
-        .success {
-            background-color: #213c2c;
-            color: #2ea043;
-            border: 1px solid #238636;
+        .error { background-color: #382d30; color: #ff7b72; border: 1px solid #ff7b72; } 
+        .success { background-color: #334433; color: #4caf50; border: 1px solid #4caf50; } 
+        .loading { background-color: #1e3a5f; color: #58a6ff; border: 1px solid #58a6ff; }
+        
+        .download-link {
+            padding: 12px 25px;
+            background-color: #28a745; /* Green color for download */
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .download-link:hover {
+            background-color: #1e8736;
         }
 
-        .error {
-            background-color: #401f23;
-            color: #f85149;
-            border: 1px solid #f85149;
-        }
-
-        .loading {
-            background-color: #1c273a;
-            color: #58a6ff;
-            border: 1px solid #58a6ff;
-        }
-
-        /* Footer for instructions */
         .footer {
             margin-top: 30px;
             text-align: center;
-            font-size: 0.9em;
+            font-size: 14px;
             color: #8b949e;
         }
-
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎬 AI Video Anime Transformer</h1>
         <form id="conversionForm">
-
-            <div class="form-group">
-                <label for="videoFile">अपलोड 30-सेकंड वीडियो (MP4, MOV)</label>
+             <div class="form-group">
+                <label for="videoFile">अपलोड वीडियो (अधिकतम 30 सेकंड)</label>
                 <input type="file" id="videoFile" name="videoFile" accept="video/mp4,video/quicktime" required>
             </div>
-
-            <div class="form-group">
-                <label for="emailId">परिणाम के लिए अपना Gmail ID दर्ज करें</label>
-                <input type="email" id="emailId" name="emailId" placeholder="youremail@gmail.com" required>
-            </div>
-
+            
             <div class="form-group">
                 <label>एनीमे स्टाइल का चयन करें</label>
                 <div class="style-options">
                     <div class="style-option">
-                        <input type="radio" id="styleWhatIf" name="animeStyle" value="High contrast comic book style, highly stylized, inspired by Marvel What If series, 3D shading" required>
-                        <label for="styleWhatIf">व्हाट इफ़ (What If) स्टाइल</label>
+                        <input type="radio" id="styleWhatIf" name="animeStyle" value="What If" required>
+                        <label for="styleWhatIf">व्हाट इफ़</label>
                     </div>
                     <div class="style-option">
-                        <input type="radio" id="styleBen10" name="animeStyle" value="Classic 2D animation style, bold outlines, simple shading, inspired by Ben 10 classic series" required>
-                        <label for="styleBen10">बेन 10 (Ben 10) स्टाइल</label>
+                        <input type="radio" id="styleBen10" name="animeStyle" value="Ben 10" required>
+                        <label for="styleBen10">बेन 10</label>
                     </div>
                     <div class="style-option">
-                        <input type="radio" id="styleJujutsuKaisen" name="animeStyle" value="Dark modern shonen anime style, dynamic motion, detailed shadows, inspired by Jujutsu Kaisen" required>
-                        <label for="styleJujutsuKaisen">जुजुत्सु काइसेन (Jujutsu Kaisen) स्टाइल</label>
+                        <input type="radio" id="styleJujutsuKaisen" name="animeStyle" value="Jujutsu Kaisen" required>
+                        <label for="styleJujutsuKaisen">जुजुत्सु काइसेन</label>
                     </div>
                 </div>
             </div>
@@ -188,10 +188,11 @@
             <button type="submit" id="submitBtn">सबमिट अनुरोध</button>
         </form>
 
-        <div id="message" class="loading" style="display: none;"></div>
+        <div id="message" style="display: none;"></div>
 
         <div class="footer">
-            <p>ℹ️ ध्यान दें: यह प्रक्रिया पूरी होने में 2-4 घंटे लग सकते हैं। काम पूरा होने पर आपको ईमेल प्राप्त होगा।</p>
+            <p>ℹ️ कॉलेज प्रोजेक्ट: यह टूल FFMPEG का उपयोग करके वीडियो को एनीमे स्टाइल में बदलता है।</p>
+            <p>स्थिति इस पेज पर लाइव अपडेट होगी।</p>
         </div>
     </div>
 
@@ -199,33 +200,31 @@
         const form = document.getElementById('conversionForm');
         const submitBtn = document.getElementById('submitBtn');
         const messageDiv = document.getElementById('message');
+        // Render क्लाउड URL
+        const BASE_RENDER_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com'; 
+        let pollingInterval = null; // Polling को कंट्रोल करने के लिए
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // फ़ॉर्म से डेटा लें
-            const formData = new FormData(form);
-            
-            // फ्रंट-एंड वैलिडेशन
-            const videoFile = document.getElementById('videoFile').files[0];
-            const email = formData.get('emailId');
-            const style = formData.get('animeStyle');
+            if (pollingInterval) clearInterval(pollingInterval); 
 
-            if (!videoFile || !email || !style) {
-                showMessage('कृपया सभी फ़ील्ड भरें।', 'error');
+            const formData = new FormData(form);
+            const videoFile = document.getElementById('videoFile').files[0];
+            const style = formData.get('animeStyle');
+            
+            if (!videoFile || !style) {
+                showMessage('कृपया वीडियो और एनीमे स्टाइल चुनें।', 'error');
                 return;
             }
 
-            // UI को अपडेट करें
             submitBtn.disabled = true;
             submitBtn.textContent = 'अनुरोध भेज रहा है...';
-            showMessage('आपका वीडियो सर्वर को भेजा जा रहा है।', 'loading');
+            showMessage('आपका वीडियो सर्वर को भेजा जा रहा है। कृपया प्रतीक्षा करें...', 'loading');
 
-            // --- Node.js बैक-एंड को यहाँ कॉल किया जाएगा (सुधार किया गया) ---
-            
             try {
-                // FIX: सही Node.js एंडपॉइंट '/submit-anime-job' यहाँ जोड़ा गया है।
-                const response = await fetch('https://pooreyoutuber-github-io-v2fo.onrender.com', {
+                // 1. सर्वर को जॉब भेजें
+                const response = await fetch(`${BASE_RENDER_URL}/submit-anime-job`, {
                     method: 'POST',
                     body: formData
                 });
@@ -233,21 +232,67 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    showMessage(`सफलता! आपकी अनुरोध ID: ${data.jobId} पृष्ठभूमि में शुरू कर दी गई है। आपको जल्द ही ${email} पर एक ईमेल प्राप्त होगा।`, 'success');
+                    const jobId = data.jobId;
+                    showMessage(`✅ अनुरोध स्वीकार किया गया। जॉब ID: <b>${jobId}</b>. अब लाइव स्टेटस चेक कर रहे हैं...`, 'loading');
+                    
+                    // 2. पोलिंग शुरू करें
+                    startPolling(jobId);
+
                 } else {
-                    showMessage(`त्रुटि: ${data.message || 'सर्वर पर कोई समस्या हुई।'}`, 'error');
+                    showMessage(`❌ त्रुटि: ${data.message || 'सर्वर पर कोई समस्या हुई।'}`, 'error');
                 }
             } catch (error) {
-                showMessage('त्रुटि: सर्वर तक नहीं पहुंचा जा सका। सुनिश्चित करें कि Node.js बैक-एंड चल रहा है।', 'error');
+                showMessage('❌ त्रुटि: सर्वर तक नहीं पहुंचा जा सका। सुनिश्चित करें कि Render Backend चल रहा है।', 'error');
             }
             
-            // अंत में, बटन को फिर से सक्षम करें
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'सबमिट अनुरोध';
+            // अगर पोलिंग शुरू नहीं हुई तो बटन को वापस लाएं
+            if (!pollingInterval) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'सबमिट अनुरोध';
+            }
         });
 
+        // --- POLLING FUNCTION (स्टेटस चेक करने के लिए) ---
+        function startPolling(jobId) {
+            
+            const checkStatus = async () => {
+                try {
+                    // नया API एंडपॉइंट /check-anime-status को कॉल करें
+                    const statusResponse = await fetch(`${BASE_RENDER_URL}/check-anime-status?jobId=${jobId}`);
+                    const statusData = await statusResponse.json();
+
+                    if (statusData.status === 'DONE') {
+                        clearInterval(pollingInterval); // 🔴 पोलिंग बंद करें
+                        
+                        // डाउनलोड बटन दिखाएं
+                        showMessage(`🎉 कन्वर्जन पूरा हुआ! <br><a href="${statusData.downloadLink}" class="download-link" target="_blank">वीडियो डाउनलोड करें</a>`, 'success');
+                        
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'नया वीडियो बनाएं';
+
+                    } else if (statusData.status === 'FAILED' || statusData.status === 'NOT_FOUND') {
+                        clearInterval(pollingInterval); // 🔴 पोलिंग बंद करें
+                        showMessage(`❌ कन्वर्जन विफल हो गया। कृपया पुनः प्रयास करें।`, 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'सबमिट अनुरोध';
+                        
+                    } else {
+                        // WORKING:
+                        showMessage(`⏳ जॉब ID: <b>${jobId}</b> पर काम चल रहा है। कृपया प्रतीक्षा करें...`, 'loading');
+                    }
+                } catch (error) {
+                    console.error("Polling error:", error);
+                    // यहां बटन को डिसएबल न करें ताकि पोलिंग चलती रहे (अगर नेटवर्क अस्थायी रूप से डाउन है)
+                }
+            };
+
+            // हर 10 सेकंड में चेक करें (कॉलेज प्रोजेक्ट के लिए 10 सेकंड पर्याप्त है)
+            checkStatus(); 
+            pollingInterval = setInterval(checkStatus, 10000); 
+        }
+        
         function showMessage(msg, type) {
-            messageDiv.textContent = msg;
+            messageDiv.innerHTML = msg; 
             messageDiv.className = '';
             messageDiv.classList.add(type);
             messageDiv.style.display = 'block';
