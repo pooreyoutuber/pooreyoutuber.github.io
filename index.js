@@ -1130,13 +1130,15 @@ const upload = multer({
     limits: { fileSize: 20 * 1024 * 1024 } 
 });
 
-// --- CONCURRENCY QUEUE ---
+// --- CONCURRENCY QUEUE (Job Queue) ---
 const conversionQueue = new PQueue({ concurrency: 2 }); 
 
 // --- CORE FRAME CONVERSION FUNCTION (FFMPEG NO-BILLING) ---
+// Note: यह केवल FFMPEG filters का उपयोग करता है, कोई billed AI नहीं।
 async function convertFrameToAnime(inputPath, outputPath, stylePrompt) {
     return new Promise((resolve, reject) => {
         let vfOptions;
+        
         // FFMPEG Filters based on style selection
         if (stylePrompt.includes("Jujutsu Kaisen")) {
             vfOptions = 'eq=brightness=0.0:saturation=1.4:contrast=1.3, unsharp=5:5:1.0:5:5:0.0, format=yuv420p';
@@ -1145,6 +1147,7 @@ async function convertFrameToAnime(inputPath, outputPath, stylePrompt) {
         } else if (stylePrompt.includes("What If")) {
             vfOptions = 'eq=brightness=0.1:saturation=1.8:contrast=1.5, curves=all=\'0/0.1 0.5/0.8 1/0.9\', format=yuv420p';
         } else {
+            // Default/Fallback
             vfOptions = 'eq=saturation=1.3:contrast=1.2, hqdn3d=3:2:5:2, format=yuv420p';
         }
 
@@ -1154,7 +1157,7 @@ async function convertFrameToAnime(inputPath, outputPath, stylePrompt) {
                 '-q:v', '5' // JPG quality set low for speed
             ])
             .on('end', () => { resolve(outputPath); })
-            .on('error', (err) => { reject(err); })
+            .on('error', (err) => { reject(`FFMPEG Frame conversion failed: ${err.message}`); })
             .save(outputPath); 
     });
 }
@@ -1162,7 +1165,7 @@ async function convertFrameToAnime(inputPath, outputPath, stylePrompt) {
 
 // --- LONG-RUNNING BACKGROUND JOB ---
 async function runAnimeConversionJob(jobId, originalFilePath, stylePrompt) {
-    console.log(`[JOB ${jobId}] STARTED...`);
+    console.log(`[JOB ${jobId}] STARTED... Style: ${stylePrompt}`);
     jobStatusTracker[jobId] = { status: 'WORKING', downloadLink: null };
 
     const tempDir = path.join(path.dirname(originalFilePath), jobId);
@@ -1170,23 +1173,82 @@ async function runAnimeConversionJob(jobId, originalFilePath, stylePrompt) {
     const inputFrameDir = path.join(tempDir, 'input_frames');
     const finalVideoPath = path.join(tempDir, `final_anime_video_${jobId}.mp4`);
     
-    // Setup directories and move file
-    // ...
+    // Setup directories
+    try {
+        fs.mkdirSync(tempDir, { recursive: true });
+        fs.mkdirSync(outputFrameDir, { recursive: true });
+        fs.mkdirSync(inputFrameDir, { recursive: true });
+    } catch(e) { /* Already exists or fatal error */ }
 
     let fps = 30; 
     let originalDurationSeconds = 0;
 
     try {
         // 1. वीडियो को फ़्रेम में तोड़ना (Splitting)
-        // ... (FFMPEG metadata check and frame generation logic)
+        console.log(`[JOB ${jobId}] 1. Splitting video into frames...`);
         
-        // 2. फ़्रेम को एनीमे में बदलना (Conversion)
-        // ... (Frame conversion logic using conversionQueue and convertFrameToAnime)
-        await conversionQueue.onIdle(); 
+        await new Promise((resolve, reject) => {
+             // FFMPEG से वीडियो मेटाडेटा प्राप्त करें और फ़्रेम दर सेट करें
+             ffmpeg.ffprobe(originalFilePath, (err, metadata) => {
+                if (err) return reject(new Error(`FFprobe error: ${err.message}`));
+                originalDurationSeconds = metadata.format.duration || 30;
+                const videoStream = metadata.streams.find(s => s.codec_type === 'video');
+                if (videoStream && videoStream.avg_frame_rate) {
+                    const [num, den] = videoStream.avg_frame_rate.split('/').map(n => parseInt(n));
+                    fps = num / den || 30;
+                }
+                resolve();
+            });
+        });
         
-        // 3. एनीमे फ़्रेम को वापस वीडियो में जोड़ना (Recombining)
-        // ... (FFMPEG recombination logic)
+        // FFMPEG का उपयोग करके फ़्रेम जेनरेट करें
+        await new Promise((resolve, reject) => {
+            ffmpeg(originalFilePath)
+                .on('end', () => resolve())
+                .on('error', (err) => reject(new Error(`FFMPEG frame generation failed: ${err.message}`)))
+                .save(path.join(inputFrameDir, 'frame-%05d.jpg'));
+        });
+        
+        let framePaths = fs.readdirSync(inputFrameDir).filter(f => f.endsWith('.jpg')).map(f => path.join(inputFrameDir, f));
+        if (framePaths.length === 0) { throw new Error("FFMPEG failed to generate input frames."); }
+        
+        console.log(`[JOB ${jobId}] Total frames generated: ${framePaths.length}.`);
 
+        // 2. फ़्रेम को एनीमे में बदलना (Conversion)
+        console.log(`[JOB ${jobId}] 2. Converting frames using FFMPEG filters...`);
+        
+        const frameConversionPromises = framePaths.map(inputFramePath => 
+            conversionQueue.add(async () => {
+                const outputFrameName = `anime-${path.basename(inputFramePath)}`;
+                const outputFramePath = path.join(outputFrameDir, outputFrameName);
+                
+                // FFMPEG फ़िल्टर लागू करें
+                await convertFrameToAnime(inputFramePath, outputFramePath, stylePrompt);
+            })
+        );
+        
+        await conversionQueue.onIdle(); 
+        console.log(`[JOB ${jobId}] All frames converted successfully!`);
+
+
+        // 3. एनीमे फ़्रेम को वापस वीडियो में जोड़ना (Recombining)
+        console.log(`[JOB ${jobId}] 3. Recombining frames into final MP4...`);
+        
+        // FFMPEG इनपुट पैटर्न को ठीक करें
+        await new Promise((resolve, reject) => {
+            ffmpeg(path.join(outputFrameDir, 'anime-frame-%05d.jpg')) 
+                .inputOptions(`-framerate ${fps}`) 
+                .outputOptions([
+                    '-c:v libx264',
+                    '-pix_fmt yuv420p',
+                    '-crf 23',
+                    `-t ${originalDurationSeconds}` 
+                ])
+                .on('end', () => resolve())
+                .on('error', (err) => reject(new Error(`FFMPEG recombination failed: ${err.message}`)))
+                .save(finalVideoPath);
+        });
+        
         // 🔴 4. सफलता: जॉब को DONE पर सेट करें
         const downloadLink = `${RENDER_BASE_URL}/download-anime?jobId=${jobId}`; 
         console.log(`[JOB ${jobId}] SUCCESS 🎉! Video is ready. Download Link: ${downloadLink}`);
@@ -1200,10 +1262,11 @@ async function runAnimeConversionJob(jobId, originalFilePath, stylePrompt) {
         // 5. टेंपरेरी फ़ाइलों को साफ़ करें (Cleanup)
         console.log(`[JOB ${jobId}] Cleaning up temp files...`);
         try { 
-            // केवल इनपुट और आउटपुट फ़्रेम हटा दें, अंतिम वीडियो रहने दें
-            if (fs.existsSync(path.join(tempDir, 'input_frames'))) fs.rmSync(path.join(tempDir, 'input_frames'), { recursive: true, force: true }); 
-            if (fs.existsSync(path.join(tempDir, 'output_frames'))) fs.rmSync(path.join(tempDir, 'output_frames'), { recursive: true, force: true }); 
-        } catch(e) { console.error(`Failed partial cleanup for ${jobId}`); }
+            // केवल इनपुट फ़ाइल और फ़्रेम हटा दें, अंतिम वीडियो को डाउनलोड के लिए रहने दें
+            if (fs.existsSync(originalFilePath)) fs.unlinkSync(originalFilePath);
+            if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true }); 
+            // Note: Final video path (finalVideoPath) को cleanup में न हटाएं।
+        } catch(e) { console.error(`Failed partial cleanup for ${jobId}: ${e.message}`); }
     }
 }
 
@@ -1211,7 +1274,7 @@ async function runAnimeConversionJob(jobId, originalFilePath, stylePrompt) {
 // --- API ENDPOINT (1): SUBMIT JOB ---
 app.post('/submit-anime-job', upload.single('videoFile'), async (req, res) => {
     
-    if (!req.file || !req.body.animeStyle) { 
+    if (!req.file || !req.body.animeStyle) {
         if (req.file) fs.unlinkSync(req.file.path); 
         return res.status(400).json({ status: 'FAILED', message: 'Missing video file or anime style selection.' });
     }
@@ -1220,6 +1283,9 @@ app.post('/submit-anime-job', upload.single('videoFile'), async (req, res) => {
     const jobId = crypto.randomBytes(8).toString('hex'); 
     const originalFilePath = req.file.path;
     
+    // ensure job status tracker is initialized immediately
+    jobStatusTracker[jobId] = { status: 'ACCEPTED', downloadLink: null }; 
+
     res.status(202).json({ 
         status: 'ACCEPTED', 
         jobId: jobId,
@@ -1230,18 +1296,19 @@ app.post('/submit-anime-job', upload.single('videoFile'), async (req, res) => {
     runAnimeConversionJob(jobId, originalFilePath, animeStyle);
 });
 
-// --- API ENDPOINT (2): CHECK STATUS ---
+// --- API ENDPOINT (2): CHECK STATUS --- (फ्रंट-एंड इस एंडपॉइंट को कॉल करेगा)
 app.get('/check-anime-status', (req, res) => {
     const { jobId } = req.query;
 
     if (!jobId || !jobStatusTracker[jobId]) {
+        // यह 'NOT_FOUND' तब आता है जब सर्वर रीस्टार्ट हुआ हो या ID गलत हो
         return res.status(200).json({ status: 'NOT_FOUND', message: 'Job ID invalid or expired.' });
     }
     
     const jobData = jobStatusTracker[jobId];
     
     res.status(200).json({
-        status: jobData.status, // WORKING, DONE, या FAILED
+        status: jobData.status, // ACCEPTED, WORKING, DONE, या FAILED
         downloadLink: jobData.downloadLink
     });
 });
@@ -1252,10 +1319,12 @@ app.get('/download-anime', (req, res) => {
     const { jobId } = req.query;
     if (!jobId) { return res.status(400).send("Job ID is missing."); }
     
+    // Note: यहाँ आपको फाइनल वीडियो का सही path देना होगा
     const videoPath = path.join('./temp_uploads', jobId, `final_anime_video_${jobId}.mp4`);
     
     if (fs.existsSync(videoPath)) {
         res.download(videoPath, `anime_converted_${jobId}.mp4`);
+        // TODO: डाउनलोड के बाद फाइल डिलीट करने का लॉजिक यहाँ डालें (Optional)
     } else {
         res.status(404).send("वीडियो अभी तक तैयार नहीं हुआ है या फ़ाइल हटा दी गई है।");
     }
