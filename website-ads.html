@@ -3,38 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PooreYouTuber API Client</title>
+    <title>⚡ YouTube Caption Gen ⚡ - Anime Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jaro:wght@400&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #333; text-align: center; }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        textarea, input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; width: 100%; font-size: 16px; }
-        button:hover { background-color: #0056b3; }
-        .result { margin-top: 25px; padding: 15px; border: 2px solid #28a745; background-color: #e2f9e9; border-radius: 4px; white-space: pre-wrap; }
-        .error { margin-top: 25px; padding: 15px; border: 2px solid #dc3545; background-color: #f8d7da; color: #dc3545; border-radius: 4px; }
+        /* Global Reset */
+        body {
+            background-color: #1a1a2e; /* Dark Purple Background */
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif; /* Tech/Anime Font */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: auto;
+        }
+        /* Main Container */
+        .container {
+            max-width: 700px;
+            width: 90%;
+            background: rgba(43, 43, 66, 0.85); /* Semi-transparent dark container */
+            border: 3px solid #00f0ff; /* Neon Blue Border */
+            box-shadow: 0 0 20px #00f0ff80, 0 0 5px #ff1b6b; /* Neon Glow */
+            border-radius: 12px;
+            padding: 40px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Titles and Headers */
+        h1 {
+            font-family: 'Jaro', sans-serif; /* Display Font */
+            color: #ff1b6b; /* Neon Pink */
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 0 0 5px #ff1b6b, 0 0 10px #ff1b6b;
+            margin-bottom: 30px;
+        }
+
+        /* Form Elements */
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 700;
+            color: #00f0ff; /* Neon Blue Label */
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #00f0ff;
+            background-color: #0d0d1a; /* Very dark input background */
+            color: #ffffff;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #ff1b6b; /* Focus color change */
+            box-shadow: 0 0 8px #ff1b6b80;
+        }
+        
+        /* Button Style (Cyber Button) */
+        button {
+            background: linear-gradient(45deg, #00f0ff, #ff1b6b); /* Dual color gradient */
+            color: #1a1a2e; /* Dark text on button */
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            font-size: 1.1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 27, 107, 0.6);
+        }
+
+        /* Status & Output Areas */
+        #status {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 700;
+            color: #ffc107; /* Yellow for processing */
+            min-height: 20px;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border: 2px solid #00f0ff;
+            background-color: rgba(0, 240, 255, 0.1); /* Light blue transparent background */
+            border-radius: 6px;
+            white-space: pre-wrap;
+            color: #ffffff;
+            font-size: 1em;
+        }
+        
+        .error {
+            margin-top: 25px;
+            padding: 20px;
+            border: 2px solid #dc3545;
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        /* Keyframe for animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>YouTube Caption Generator (Gemini API)</h1>
+        <h1>[NEO-YOUTUBER] CAPTION GENERATOR ⚡</h1>
         
-        <label for="renderUrl">Render API Base URL (HTTPS):</label>
-        <input type="text" id="renderUrl" value="https://YOUR_RENDER_URL_HERE.onrender.com" placeholder="जैसे: https://my-youtube-api.onrender.com" />
+        <label for="renderUrl">API Endpoint (Render URL):</label>
+        <input type="text" id="renderUrl" value="https://YOUR_RENDER_URL_HERE.onrender.com" placeholder="जैसे: https://my-project-yt.onrender.com" />
 
-        <label for="videoDescription">Video Description:</label>
-        <textarea id="videoDescription" rows="4" placeholder="वीडियो किस बारे में है, विस्तार से लिखें। (उदाहरण: आज मैंने दिल्ली में स्ट्रीट फूड खाया और उसका अनुभव साझा किया।)"></textarea>
+        <label for="videoDescription">VIDEO DATA INPUT:</label>
+        <textarea id="videoDescription" rows="4" placeholder="वीडियो का विषय/कंटेंट यहाँ लिखें। (उदाहरण: मैंने एक 1000 साल पुराने महल के रहस्य का पर्दाफाश किया।)" required></textarea>
 
-        <button onclick="generateCaption()">Caption Generate करें</button>
+        <button onclick="generateCaption()">INITIATE GENERATION PROTOCOL</button>
 
-        <div id="status" style="margin-top: 15px; text-align: center; font-weight: bold; color: #ffc107;"></div>
+        <div id="status"></div>
         <div id="output"></div>
     </div>
 
     <script>
-        // फंक्शन जो API को कॉल करेगा
+        // JavaScript Logic: API Calling
         async function generateCaption() {
             const description = document.getElementById('videoDescription').value;
             const baseUrl = document.getElementById('renderUrl').value.trim();
@@ -43,19 +153,23 @@
             
             outputDiv.innerHTML = '';
             
-            // 1. Render URL चेक करें
-            if (!baseUrl || baseUrl.includes("https://pooreyoutuber-github-io-v2fo.onrender.com")) {
-                outputDiv.innerHTML = '<div class="error">❌ कृपया Render URL को सही करें।</div>';
+            // Render URL validation
+            if (!baseUrl || baseUrl.includes("YOUR_RENDER_URL_HERE")) {
+                outputDiv.innerHTML = '<div class="error">❌ ERROR: Render URL को सही करना ज़रूरी है। (API Endpoint Invalid)</div>';
+                return;
+            }
+            if (description.trim() === "") {
+                outputDiv.innerHTML = '<div class="error">❌ ERROR: कृपया Video Data Input दर्ज करें।</div>';
                 return;
             }
 
-            statusDiv.innerHTML = '✨ Caption Generate हो रहा है... कृपया प्रतीक्षा करें।';
+            statusDiv.innerHTML = '✨ [PROCESSING...] Gemini Protocol Activated. Please Wait.';
 
-            // 2. Fetch URL (Caption API)
+            // API Endpoint (आपके index.js में यह रूट है)
             const apiUrl = `${baseUrl}/api/caption-generate`;
             
             try {
-                // Fetch Call
+                // The Fetch Call
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
@@ -64,31 +178,36 @@
                     body: JSON.stringify({ description: description })
                 });
 
-                // 3. Response हैंडलिंग
+                // Check for HTTP errors (404, 500, etc.)
                 if (!response.ok) {
-                    // यदि सर्वर ने 400 या 500 जैसी कोई त्रुटि भेजी है
-                    const errorData = await response.json();
-                    throw new Error(`Server Error (${response.status}): ${errorData.error || 'Unknown server error'}`);
+                    const errorData = await response.json().catch(() => ({ error: 'No response body' }));
+                    throw new Error(`[SERVER RESPONSE FAILURE] HTTP Status: ${response.status}. Detail: ${errorData.error || response.statusText}`);
                 }
 
-                // 4. Successful Response
+                // Success
                 const data = await response.json();
                 
-                statusDiv.innerHTML = '✅ सफलतापूर्वक प्राप्त हुआ!';
-                outputDiv.innerHTML = `<div class="result"><strong>Generated Caption:</strong><br>${data.caption}</div>`;
+                statusDiv.innerHTML = '✅ [COMPLETE] Output Data Received.';
+                outputDiv.innerHTML = `<div class="result"><strong>[GENERATED CAPTION]</strong><br>${data.caption}</div>`;
 
             } catch (error) {
-                // 5. Network Error (जैसे 'Failed to fetch')
-                statusDiv.innerHTML = ''; // Status हटा दें
+                // Network Error Handling (This is where "Failed to fetch" lands)
+                statusDiv.innerHTML = ''; // Clear status
                 console.error("Fetch Error:", error);
                 
-                let errorMessage = `❌ Fetch त्रुटि: ${error.message}`;
+                let errorMessage = `❌ [CRITICAL ERROR] Failed to fetch. (${error.message})`;
                 
                 if (error.message.includes('Failed to fetch')) {
-                    errorMessage = `❌ Failed to fetch. यह अक्सर तब होता है जब:
-                        1. Render सर्वर डाउन हो (Sleep Mode में चला गया हो)। 
-                        2. Render URL गलत हो।
-                        3. CORS या नेटवर्क कनेक्शन में समस्या हो।`;
+                    errorMessage = `
+                    ❌ [CONNECTION FAILED] "Failed to fetch" Error. 
+                    <br><br>
+                    <strong>MOST LIKELY CAUSE:</strong>
+                    <br>
+                    1. <strong>Render Sleep Mode:</strong> सर्वर निष्क्रिय (Sleep Mode) में है। 1 मिनट इंतज़ार करके फिर से कोशिश करें।
+                    <br>
+                    2. <strong>Incorrect URL:</strong> ऊपर दिया गया Render URL गलत है या `https://` प्रोटोकॉल मिसिंग है।
+                    <br>
+                    3. <strong>Backend Issue:</strong> बैकएंड क्रैश हो गया है। Render Logs की जाँच करें।`;
                 }
 
                 outputDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
