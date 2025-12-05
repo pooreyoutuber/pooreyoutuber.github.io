@@ -21,9 +21,6 @@ const PORT = process.env.PORT || 10000;
 const multer = require('multer'); // For handling multipart/form-data (video uploads)
 const path = require('path');
 const os = require('os'); // For temporary directory handling (safer)
-
-const app = express();
-const PORT = process.env.PORT || 10000; 
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
