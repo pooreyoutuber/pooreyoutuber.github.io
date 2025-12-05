@@ -3,258 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool 6: AI Anime Style Video Transfer</title>
+    <title>AI Anime Style Video Converter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
-        /* Basic Reset and Layout */
+        /* Base Styling */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f9;
-            color: #333;
-            margin: 0;
-            padding: 20px;
+            background-color: #121212;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             min-height: 100vh;
-        }
-
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-        }
-
-        h1 {
-            color: #1a73e8;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-        
-        h2 {
-            font-size: 1.1em;
-            color: #555;
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        /* Form Elements */
-        label {
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        input[type="file"], select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-            background-color: #f9f9f9;
-            font-size: 1em;
-        }
-
-        /* Custom File Input Styling */
-        input[type="file"] {
-            border: 2px dashed #a0c3ff;
-            background-color: #e8f0fe;
-            cursor: pointer;
+            margin: 0;
             padding: 20px;
-            text-align: center;
-            color: #1a73e8;
         }
 
-        button {
-            background-color: #1a73e8;
-            color: white;
-            padding: 15px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+        /* Main Container */
+        .converter-container {
+            background-color: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             width: 100%;
-            font-size: 1.1em;
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s;
+            max-width: 500px;
+            text-align: center;
         }
 
-        button:hover:not(:disabled) {
-            background-color: #0d47a1;
-            transform: translateY(-1px);
+        /* Header */
+        .app-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .back-icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+            color: #00bcd4; /* Light Blue Accent */
+        }
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .tagline {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        /* Upload Area (Drag & Drop) */
+        .upload-area {
+            border: 2px dashed #3a3a3a;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 40px 20px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .upload-area.drag-over {
+            border-color: #00bcd4;
+        }
+        .upload-area p {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        .upload-button {
+            background-color: #00bcd4;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        .upload-button:hover {
+            background-color: #0097a7;
+        }
+        .max-time {
+            color: #ff9800; /* Orange accent for max time */
+            font-weight: bold;
+        }
+
+        /* Style Selection */
+        .select-style-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        .style-options {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .style-card {
+            display: block;
+            cursor: pointer;
+            text-align: center;
+            padding: 5px;
+            border-radius: 8px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .style-card input[type="radio"] {
+            display: none;
+        }
+
+        .style-content img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid transparent;
+            transition: border-color 0.3s;
+            margin-bottom: 5px;
         }
         
-        button:disabled {
-            background-color: #a0c3ff;
+        /* Highlight selected style */
+        .style-card input[type="radio"]:checked + .style-content img {
+            border-color: #00bcd4;
+            box-shadow: 0 0 10px #00bcd4;
+        }
+        .style-content span {
+            display: block;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        /* Submit Button */
+        .submit-button {
+            background-color: #ff9800; /* Orange for Submit */
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        .submit-button:hover:not(:disabled) {
+            background-color: #f57c00;
+        }
+        .submit-button:disabled {
+            background-color: #555;
             cursor: not-allowed;
         }
 
-        /* Result Area */
-        #result-area {
+        /* Status and Result Area */
+        .status-message {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #00bcd4;
+        }
+        .result-area {
             margin-top: 25px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #e8f0fe;
-            border-left: 5px solid #1a73e8;
-            font-size: 1em;
-            font-weight: 500;
         }
-        
-        .loading {
-            /* Simple Spinner Animation */
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-top: 4px solid #1a73e8;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
+        .download-button {
+            background-color: #4CAF50; /* Green Download Button */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
             display: inline-block;
-            vertical-align: middle;
-            margin-right: 10px;
+            margin-bottom: 15px;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        #converted-video-preview {
+            width: 100%;
+            max-height: 250px;
+            background-color: #000;
+            border-radius: 8px;
+        }
+        /* Responsiveness */
+        @media (max-width: 600px) {
+            .style-options {
+                flex-direction: column;
+            }
+            .style-card {
+                padding: 10px;
+                background-color: #2a2a2a;
+                margin-bottom: 10px;
+            }
+            .style-content {
+                display: flex;
+                align-items: center;
+                text-align: left;
+            }
+            .style-content img {
+                margin-right: 15px;
+                margin-bottom: 0;
+            }
         }
     </style>
-</head>
+    </head>
 <body>
-    <div class="container">
-        <h1>🎥 AI Anime Style Transfer</h1>
-        <h2>Tool 6: Video to Cartoon Conversion (College Project Demo)</h2>
-        <form id="anime-form">
-            
-            <label for="video-file">Upload 5-15 Second Video (.mp4 preferred)</label>
-            <input type="file" id="video-file" accept="video/mp4" required>
-            
-            <label for="style-select">Select Anime Style</label>
-            <select id="style-select" required>
-                <option value="" disabled selected>--- Choose a Style ---</option>
-                <option value="Jujutsu Kaisen">Jujutsu Kaisen (Dark, High Contrast)</option>
-                <option value="Ben 10 Classic">Ben 10 Classic (Thick Outlines, 2D)</option>
-                <option value="What If (Marvel)">What If? (Semi-Realistic 3D)</option>
-                <option value="Ghibli Studio">Ghibli Studio (Hand-Drawn, Soft Colors)</option>
-            </select>
-            
-            <button type="submit" id="submit-btn">Convert Video to Anime</button>
-        </form>
+
+    <div class="converter-container">
+        <header class="app-header">
+            <i class="fas fa-arrow-left back-icon" onclick="window.history.back()"></i>
+            <div class="header-title">Anime Style Video Converter</div>
+        </header>
+
+        <p class="tagline">Transform Your Videos into Anime! (Max 15 seconds)</p>
         
-        <div id="result-area" style="display: none;">
+        <form id="conversionForm">
+            <div id="upload-area" class="upload-area">
+                <p>Drag & Drop your video here, or Click to Upload <span class="max-time">(Max 15 secnds)</span></p>
+                <input type="file" id="video-upload" name="videoFile" accept="video/mp4,video/quicktime,video/webm" required style="display: none;">
+                <button type="button" id="upload-button" class="upload-button">Upload Video</button>
             </div>
+            
+            <div class="style-selection">
+                <p class="select-style-title">Select Anime Style:</p>
+                <div class="style-options">
+                    
+                    <label class="style-card" for="style-whatif">
+                        <input type="radio" name="animeStyle" id="style-whatif" value="whatif" required>
+                        <div class="style-content">
+                            <img src="https://via.placeholder.com/80/00bcd4/FFFFFF?text=What+if..?" alt="What if...?">
+                            <span>What if...?</span>
+                        </div>
+                    </label>
+
+                    <label class="style-card" for="style-ben10">
+                        <input type="radio" name="animeStyle" id="style-ben10" value="ben10">
+                        <div class="style-content">
+                            <img src="https://via.placeholder.com/80/ff9800/FFFFFF?text=Ben+10" alt="Ben 10 Classic">
+                            <span>Ben 10 Classic</span>
+                        </div>
+                    </label>
+
+                    <label class="style-card" for="style-jujutsu">
+                        <input type="radio" name="animeStyle" id="style-jujutsu" value="jujutsu">
+                        <div class="style-content">
+                            <img src="https://via.placeholder.com/80/f44336/FFFFFF?text=Jujutsu" alt="Jujutsu Kaisen">
+                            <span>Jujutsu Kaisen</span>
+                        </div>
+                    </label>
+                    </div>
+            </div>
+            
+            <button type="submit" id="submit-conversion" class="submit-button" disabled>
+                Convert Now
+            </button>
+        </form>
+
+        <div id="status-message" class="status-message"></div>
+        <div id="result-area" class="result-area" style="display: none;">
+            <a id="download-link" href="#" class="download-button" download>
+                <i class="fas fa-download"></i> Download Converted Video
+            </a>
+            <video id="converted-video-preview" controls></video>
+        </div>
+
     </div>
 
     <script>
-        // Use your Render URL here
-        const API_BASE_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com';
-        const form = document.getElementById('anime-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const resultArea = document.getElementById('result-area');
-        const videoFile = document.getElementById('video-file');
-        
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // 1. UI State Update (Disable button, show loading)
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading"></span> Sending to Render...';
-            resultArea.style.display = 'block';
-            resultArea.innerHTML = '<p>Initiating file read...</p>';
-            
-            // 2. Read Video File as Data URL (Base64)
-            const file = videoFile.files[0];
-            if (!file) {
-                alert('Please select a video file.');
-                resetUI();
-                return;
+        document.addEventListener('DOMContentLoaded', () => {
+            // RENDER API URL (इसे अपने Render URL से बदलें)
+            const RENDER_API_URL = "https://pooreyoutuber-github-io-v2fo.onrender.com";
+            // यह endpoint आपके index.js (Node.js) में जोड़ा जाएगा
+            const API_ENDPOINT = `${RENDER_API_URL}/api/anime-convert`; 
+
+            const uploadArea = document.getElementById('upload-area');
+            const videoUpload = document.getElementById('video-upload');
+            const uploadButton = document.getElementById('upload-button');
+            const conversionForm = document.getElementById('conversionForm');
+            const submitButton = document.getElementById('submit-conversion');
+            const statusMessage = document.getElementById('status-message');
+            const resultArea = document.getElementById('result-area');
+            const downloadLink = document.getElementById('download-link');
+            const videoPreview = document.getElementById('converted-video-preview');
+
+            let uploadedFile = null;
+
+            // --- 1. Video Upload and Drag & Drop Logic ---
+
+            // Click on button opens file dialog
+            uploadButton.addEventListener('click', () => {
+                videoUpload.click();
+            });
+
+            // Handle file selection change
+            videoUpload.addEventListener('change', (e) => {
+                handleFile(e.target.files[0]);
+            });
+
+            // Drag & Drop Handlers
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'), false);
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                let dt = e.dataTransfer;
+                let files = dt.files;
+                handleFile(files[0]);
+            }, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
 
-            // Simple size check (Optional: 10MB limit)
-            if (file.size > 10 * 1024 * 1024) {
-                alert('Video size must be less than 10MB for this demo.');
-                resetUI();
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.readAsDataURL(file); // Convert file to Base64 string
+            // Process the file
+            function handleFile(file) {
+                if (!file || !file.type.startsWith('video/')) {
+                    alert('कृपया एक वैध वीडियो फ़ाइल अपलोड करें।');
+                    return;
+                }
 
-            reader.onload = async () => {
-                const videoDataUrl = reader.result;
-                const style = document.getElementById('style-select').value;
+                // Basic file size check (e.g., Max 50MB)
+                if (file.size > 50 * 1024 * 1024) { 
+                    alert('वीडियो बहुत बड़ा है। कृपया 50MB से छोटी फ़ाइल अपलोड करें।');
+                    return;
+                }
                 
-                // 3. Prepare Payload
-                const payload = {
-                    videoDataUrl: videoDataUrl, // Base64 encoded video
-                    style: style
-                };
+                uploadedFile = file;
+                uploadArea.querySelector('p').innerHTML = `✅ **फ़ाइल चयनित:** ${file.name} (<span class="max-time">Max 15 secnds</span>)`;
                 
-                // 4. Update UI & Call API
-                submitBtn.innerHTML = '<span class="loading"></span> Processing on Render Cloud...';
-                resultArea.innerHTML = `<p>Style: <strong>${style}</strong>. Sending data to ${API_BASE_URL}/api/ai-anime</p>`;
+                // Check if a style is already selected to enable the button
+                const selectedStyle = document.querySelector('input[name="animeStyle"]:checked');
+                if (selectedStyle) {
+                    submitButton.disabled = false;
+                }
+            }
+
+            // --- 2. Form Submission Logic ---
+            conversionForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
                 
+                if (!uploadedFile) {
+                    alert('कृपया पहले एक वीडियो अपलोड करें।');
+                    return;
+                }
+                
+                const selectedStyleInput = document.querySelector('input[name="animeStyle"]:checked');
+                if (!selectedStyleInput) {
+                    alert('कृपया एक एनीमे स्टाइल चुनें।');
+                    return;
+                }
+                const selectedStyle = selectedStyleInput.value;
+                
+                // Show loading status
+                statusMessage.style.color = '#00bcd4';
+                statusMessage.innerHTML = 'Converting... Please wait! (यह प्रक्रिया 30-60 सेकंड ले सकती है)';
+                submitButton.disabled = true;
+                resultArea.style.display = 'none';
+
+                const formData = new FormData();
+                formData.append('videoFile', uploadedFile);
+                formData.append('style', selectedStyle);
+
                 try {
-                    const response = await fetch(`${API_BASE_URL}/api/ai-anime`, {
+                    const response = await fetch(API_ENDPOINT, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
+                        body: formData,
                     });
 
-                    const data = await response.json();
-                    
-                    if (data.status === 'processing') {
-                        // 5. Success Response (Processing Started)
-                        const timeInSec = Math.round(data.estimatedCompletionTime / 1000);
-                        resultArea.innerHTML = `
-                            <p style="color:#1a73e8; font-weight:bold;">✅ Request Accepted! (Job ID: ${data.jobId})</p>
-                            <p><strong>Message:</strong> ${data.message}</p>
-                            <p>Simulated processing will take about <strong>${timeInSec} seconds</strong>.</p>
-                            <p>In a real app, the processed video would now be available for download.</p>
-                        `;
-                        
-                        // Simulate download button appearing after the estimated time
-                        setTimeout(() => {
-                            resultArea.innerHTML += `
-                                <hr style="border-color: #a0c3ff;">
-                                <p style="font-size: 1.1em; color: green; font-weight: bold;">🎉 SUCCESS! Video Converted (Simulated).</p>
-                                <button onclick="alert('Demo Complete! Now integrate with a real video AI API like Replicate/RunwayML.');" 
-                                    style="background-color: green; margin-top: 10px;">Download Anime Video</button>
-                            `;
-                            resetUI();
-                        }, data.estimatedCompletionTime);
-                        
-                    } else {
-                        // 6. Error Response
-                        resultArea.innerHTML = `<p style="color:red;">❌ Error: ${data.message || 'Unknown API Error'}</p>`;
-                        resetUI();
+                    if (!response.ok) {
+                        // Try to read JSON error message if available
+                        let errorMessage = 'वीडियो रूपांतरण विफल रहा।';
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.message || errorMessage;
+                        } catch (e) {
+                            // If response is not JSON, use the status text
+                            errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                        }
+                        throw new Error(errorMessage);
                     }
-                    
-                } catch (error) {
-                    resultArea.innerHTML = `<p style="color:red;">❌ Network Error: Could not connect to the Render Server.</p>`;
-                    console.error('Fetch Error:', error);
-                    resetUI();
-                }
-            };
 
-            reader.onerror = () => {
-                alert('Error reading file.');
-                resetUI();
-            };
+                    const data = await response.json();
+
+                    // Success Handling
+                    statusMessage.style.color = '#4CAF50';
+                    statusMessage.innerHTML = '🎉 रूपांतरण सफल रहा!';
+                    
+                    // Assuming the backend returns the public URL to the converted video
+                    const convertedVideoUrl = data.convertedUrl; 
+                    
+                    downloadLink.href = convertedVideoUrl;
+                    downloadLink.download = `anime-${uploadedFile.name}`;
+                    videoPreview.src = convertedVideoUrl;
+                    
+                    resultArea.style.display = 'block';
+
+                } catch (error) {
+                    statusMessage.style.color = '#f44336';
+                    statusMessage.innerHTML = `❌ Error: ${error.message}.`;
+                    console.error('Conversion Error:', error);
+                } finally {
+                    submitButton.disabled = false;
+                }
+            });
+
+            // Enable submit button once a style is selected (if file is already present)
+            conversionForm.querySelectorAll('input[name="animeStyle"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (uploadedFile) {
+                        submitButton.disabled = false;
+                    }
+                });
+            });
         });
-        
-        function resetUI() {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Convert Video to Anime';
-        }
     </script>
-</body>
+    </body>
 </html>
