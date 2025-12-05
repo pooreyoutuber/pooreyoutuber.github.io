@@ -1,427 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Anime Style Video Converter</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <title>PooreYouTuber API Client</title>
     <style>
-        /* Base Styling */
-        body {
-            background-color: #121212;
-            color: #f0f0f0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        /* Main Container */
-        .converter-container {
-            background-color: #1e1e1e;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        /* Header */
-        .app-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .back-icon {
-            font-size: 1.5rem;
-            cursor: pointer;
-            margin-right: 15px;
-            color: #00bcd4; /* Light Blue Accent */
-        }
-        .header-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .tagline {
-            font-size: 0.9rem;
-            color: #999;
-            margin-bottom: 30px;
-        }
-
-        /* Upload Area (Drag & Drop) */
-        .upload-area {
-            border: 2px dashed #3a3a3a;
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            padding: 40px 20px;
-            margin-bottom: 25px;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-        .upload-area.drag-over {
-            border-color: #00bcd4;
-        }
-        .upload-area p {
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-        .upload-button {
-            background-color: #00bcd4;
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s;
-        }
-        .upload-button:hover {
-            background-color: #0097a7;
-        }
-        .max-time {
-            color: #ff9800; /* Orange accent for max time */
-            font-weight: bold;
-        }
-
-        /* Style Selection */
-        .select-style-title {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #fff;
-        }
-        .style-options {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-        .style-card {
-            display: block;
-            cursor: pointer;
-            text-align: center;
-            padding: 5px;
-            border-radius: 8px;
-            transition: background-color 0.2s, box-shadow 0.2s;
-        }
-
-        .style-card input[type="radio"] {
-            display: none;
-        }
-
-        .style-content img {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid transparent;
-            transition: border-color 0.3s;
-            margin-bottom: 5px;
-        }
-        
-        /* Highlight selected style */
-        .style-card input[type="radio"]:checked + .style-content img {
-            border-color: #00bcd4;
-            box-shadow: 0 0 10px #00bcd4;
-        }
-        .style-content span {
-            display: block;
-            font-size: 0.8rem;
-            color: #ccc;
-        }
-
-        /* Submit Button */
-        .submit-button {
-            background-color: #ff9800; /* Orange for Submit */
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: bold;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-        .submit-button:hover:not(:disabled) {
-            background-color: #f57c00;
-        }
-        .submit-button:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-
-        /* Status and Result Area */
-        .status-message {
-            margin-top: 20px;
-            font-weight: bold;
-            color: #00bcd4;
-        }
-        .result-area {
-            margin-top: 25px;
-        }
-        .download-button {
-            background-color: #4CAF50; /* Green Download Button */
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-        #converted-video-preview {
-            width: 100%;
-            max-height: 250px;
-            background-color: #000;
-            border-radius: 8px;
-        }
-        /* Responsiveness */
-        @media (max-width: 600px) {
-            .style-options {
-                flex-direction: column;
-            }
-            .style-card {
-                padding: 10px;
-                background-color: #2a2a2a;
-                margin-bottom: 10px;
-            }
-            .style-content {
-                display: flex;
-                align-items: center;
-                text-align: left;
-            }
-            .style-content img {
-                margin-right: 15px;
-                margin-bottom: 0;
-            }
-        }
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        textarea, input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; width: 100%; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        .result { margin-top: 25px; padding: 15px; border: 2px solid #28a745; background-color: #e2f9e9; border-radius: 4px; white-space: pre-wrap; }
+        .error { margin-top: 25px; padding: 15px; border: 2px solid #dc3545; background-color: #f8d7da; color: #dc3545; border-radius: 4px; }
     </style>
-    </head>
+</head>
 <body>
 
-    <div class="converter-container">
-        <header class="app-header">
-            <i class="fas fa-arrow-left back-icon" onclick="window.history.back()"></i>
-            <div class="header-title">Anime Style Video Converter</div>
-        </header>
-
-        <p class="tagline">Transform Your Videos into Anime! (Max 15 seconds)</p>
+    <div class="container">
+        <h1>YouTube Caption Generator (Gemini API)</h1>
         
-        <form id="conversionForm">
-            <div id="upload-area" class="upload-area">
-                <p>Drag & Drop your video here, or Click to Upload <span class="max-time">(Max 15 secnds)</span></p>
-                <input type="file" id="video-upload" name="videoFile" accept="video/mp4,video/quicktime,video/webm" required style="display: none;">
-                <button type="button" id="upload-button" class="upload-button">Upload Video</button>
-            </div>
-            
-            <div class="style-selection">
-                <p class="select-style-title">Select Anime Style:</p>
-                <div class="style-options">
-                    
-                    <label class="style-card" for="style-whatif">
-                        <input type="radio" name="animeStyle" id="style-whatif" value="whatif" required>
-                        <div class="style-content">
-                            <img src="https://via.placeholder.com/80/00bcd4/FFFFFF?text=What+if..?" alt="What if...?">
-                            <span>What if...?</span>
-                        </div>
-                    </label>
+        <label for="renderUrl">Render API Base URL (HTTPS):</label>
+        <input type="text" id="renderUrl" value="https://YOUR_RENDER_URL_HERE.onrender.com" placeholder="जैसे: https://my-youtube-api.onrender.com" />
 
-                    <label class="style-card" for="style-ben10">
-                        <input type="radio" name="animeStyle" id="style-ben10" value="ben10">
-                        <div class="style-content">
-                            <img src="https://via.placeholder.com/80/ff9800/FFFFFF?text=Ben+10" alt="Ben 10 Classic">
-                            <span>Ben 10 Classic</span>
-                        </div>
-                    </label>
+        <label for="videoDescription">Video Description:</label>
+        <textarea id="videoDescription" rows="4" placeholder="वीडियो किस बारे में है, विस्तार से लिखें। (उदाहरण: आज मैंने दिल्ली में स्ट्रीट फूड खाया और उसका अनुभव साझा किया।)"></textarea>
 
-                    <label class="style-card" for="style-jujutsu">
-                        <input type="radio" name="animeStyle" id="style-jujutsu" value="jujutsu">
-                        <div class="style-content">
-                            <img src="https://via.placeholder.com/80/f44336/FFFFFF?text=Jujutsu" alt="Jujutsu Kaisen">
-                            <span>Jujutsu Kaisen</span>
-                        </div>
-                    </label>
-                    </div>
-            </div>
-            
-            <button type="submit" id="submit-conversion" class="submit-button" disabled>
-                Convert Now
-            </button>
-        </form>
+        <button onclick="generateCaption()">Caption Generate करें</button>
 
-        <div id="status-message" class="status-message"></div>
-        <div id="result-area" class="result-area" style="display: none;">
-            <a id="download-link" href="#" class="download-button" download>
-                <i class="fas fa-download"></i> Download Converted Video
-            </a>
-            <video id="converted-video-preview" controls></video>
-        </div>
-
+        <div id="status" style="margin-top: 15px; text-align: center; font-weight: bold; color: #ffc107;"></div>
+        <div id="output"></div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // RENDER API URL (इसे अपने Render URL से बदलें)
-            const RENDER_API_URL = "https://pooreyoutuber-github-io-v2fo.onrender.com";
-            // यह endpoint आपके index.js (Node.js) में जोड़ा जाएगा
-            const API_ENDPOINT = `${RENDER_API_URL}/api/anime-convert`; 
-
-            const uploadArea = document.getElementById('upload-area');
-            const videoUpload = document.getElementById('video-upload');
-            const uploadButton = document.getElementById('upload-button');
-            const conversionForm = document.getElementById('conversionForm');
-            const submitButton = document.getElementById('submit-conversion');
-            const statusMessage = document.getElementById('status-message');
-            const resultArea = document.getElementById('result-area');
-            const downloadLink = document.getElementById('download-link');
-            const videoPreview = document.getElementById('converted-video-preview');
-
-            let uploadedFile = null;
-
-            // --- 1. Video Upload and Drag & Drop Logic ---
-
-            // Click on button opens file dialog
-            uploadButton.addEventListener('click', () => {
-                videoUpload.click();
-            });
-
-            // Handle file selection change
-            videoUpload.addEventListener('change', (e) => {
-                handleFile(e.target.files[0]);
-            });
-
-            // Drag & Drop Handlers
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                uploadArea.addEventListener(eventName, preventDefaults, false);
-            });
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'), false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'), false);
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                let dt = e.dataTransfer;
-                let files = dt.files;
-                handleFile(files[0]);
-            }, false);
-
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
+        // फंक्शन जो API को कॉल करेगा
+        async function generateCaption() {
+            const description = document.getElementById('videoDescription').value;
+            const baseUrl = document.getElementById('renderUrl').value.trim();
+            const statusDiv = document.getElementById('status');
+            const outputDiv = document.getElementById('output');
+            
+            outputDiv.innerHTML = '';
+            
+            // 1. Render URL चेक करें
+            if (!baseUrl || baseUrl.includes("YOUR_RENDER_URL_HERE")) {
+                outputDiv.innerHTML = '<div class="error">❌ कृपया Render URL को सही करें।</div>';
+                return;
             }
 
-            // Process the file
-            function handleFile(file) {
-                if (!file || !file.type.startsWith('video/')) {
-                    alert('कृपया एक वैध वीडियो फ़ाइल अपलोड करें।');
-                    return;
-                }
+            statusDiv.innerHTML = '✨ Caption Generate हो रहा है... कृपया प्रतीक्षा करें।';
 
-                // Basic file size check (e.g., Max 50MB)
-                if (file.size > 50 * 1024 * 1024) { 
-                    alert('वीडियो बहुत बड़ा है। कृपया 50MB से छोटी फ़ाइल अपलोड करें।');
-                    return;
-                }
-                
-                uploadedFile = file;
-                uploadArea.querySelector('p').innerHTML = `✅ **फ़ाइल चयनित:** ${file.name} (<span class="max-time">Max 15 secnds</span>)`;
-                
-                // Check if a style is already selected to enable the button
-                const selectedStyle = document.querySelector('input[name="animeStyle"]:checked');
-                if (selectedStyle) {
-                    submitButton.disabled = false;
-                }
-            }
-
-            // --- 2. Form Submission Logic ---
-            conversionForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                if (!uploadedFile) {
-                    alert('कृपया पहले एक वीडियो अपलोड करें।');
-                    return;
-                }
-                
-                const selectedStyleInput = document.querySelector('input[name="animeStyle"]:checked');
-                if (!selectedStyleInput) {
-                    alert('कृपया एक एनीमे स्टाइल चुनें।');
-                    return;
-                }
-                const selectedStyle = selectedStyleInput.value;
-                
-                // Show loading status
-                statusMessage.style.color = '#00bcd4';
-                statusMessage.innerHTML = 'Converting... Please wait! (यह प्रक्रिया 30-60 सेकंड ले सकती है)';
-                submitButton.disabled = true;
-                resultArea.style.display = 'none';
-
-                const formData = new FormData();
-                formData.append('videoFile', uploadedFile);
-                formData.append('style', selectedStyle);
-
-                try {
-                    const response = await fetch(API_ENDPOINT, {
-                        method: 'POST',
-                        body: formData,
-                    });
-
-                    if (!response.ok) {
-                        // Try to read JSON error message if available
-                        let errorMessage = 'वीडियो रूपांतरण विफल रहा।';
-                        try {
-                            const errorData = await response.json();
-                            errorMessage = errorData.message || errorMessage;
-                        } catch (e) {
-                            // If response is not JSON, use the status text
-                            errorMessage = `Server error: ${response.status} ${response.statusText}`;
-                        }
-                        throw new Error(errorMessage);
-                    }
-
-                    const data = await response.json();
-
-                    // Success Handling
-                    statusMessage.style.color = '#4CAF50';
-                    statusMessage.innerHTML = '🎉 रूपांतरण सफल रहा!';
-                    
-                    // Assuming the backend returns the public URL to the converted video
-                    const convertedVideoUrl = data.convertedUrl; 
-                    
-                    downloadLink.href = convertedVideoUrl;
-                    downloadLink.download = `anime-${uploadedFile.name}`;
-                    videoPreview.src = convertedVideoUrl;
-                    
-                    resultArea.style.display = 'block';
-
-                } catch (error) {
-                    statusMessage.style.color = '#f44336';
-                    statusMessage.innerHTML = `❌ Error: ${error.message}.`;
-                    console.error('Conversion Error:', error);
-                } finally {
-                    submitButton.disabled = false;
-                }
-            });
-
-            // Enable submit button once a style is selected (if file is already present)
-            conversionForm.querySelectorAll('input[name="animeStyle"]').forEach(radio => {
-                radio.addEventListener('change', () => {
-                    if (uploadedFile) {
-                        submitButton.disabled = false;
-                    }
+            // 2. Fetch URL (Caption API)
+            const apiUrl = `${baseUrl}/api/caption-generate`;
+            
+            try {
+                // Fetch Call
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ description: description })
                 });
-            });
-        });
+
+                // 3. Response हैंडलिंग
+                if (!response.ok) {
+                    // यदि सर्वर ने 400 या 500 जैसी कोई त्रुटि भेजी है
+                    const errorData = await response.json();
+                    throw new Error(`Server Error (${response.status}): ${errorData.error || 'Unknown server error'}`);
+                }
+
+                // 4. Successful Response
+                const data = await response.json();
+                
+                statusDiv.innerHTML = '✅ सफलतापूर्वक प्राप्त हुआ!';
+                outputDiv.innerHTML = `<div class="result"><strong>Generated Caption:</strong><br>${data.caption}</div>`;
+
+            } catch (error) {
+                // 5. Network Error (जैसे 'Failed to fetch')
+                statusDiv.innerHTML = ''; // Status हटा दें
+                console.error("Fetch Error:", error);
+                
+                let errorMessage = `❌ Fetch त्रुटि: ${error.message}`;
+                
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = `❌ Failed to fetch. यह अक्सर तब होता है जब:
+                        1. Render सर्वर डाउन हो (Sleep Mode में चला गया हो)। 
+                        2. Render URL गलत हो।
+                        3. CORS या नेटवर्क कनेक्शन में समस्या हो।`;
+                }
+
+                outputDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
+            }
+        }
     </script>
-    </body>
+
+</body>
 </html>
