@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Video to Anime Converter - Live Status</title>
     <style>
-        /* --- MODERN DARK THEME CSS (आपके UI से) --- */
+        /* --- MODERN DARK THEME CSS --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0d1117;
@@ -42,264 +42,271 @@
         label {
             display: block;
             margin-bottom: 8px;
+            color: #c9d1d9;
             font-weight: 500;
-            color: #8b949e;
         }
 
+        /* File Upload Styling */
         input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            box-sizing: border-box;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            transition: border-color 0.3s;
+            display: none;
         }
-        
-        .style-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background-color: #0d1117;
+
+        .custom-file-upload {
+            border: 2px dashed #30363d;
             padding: 15px;
             border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #0d1117;
+        }
+
+        .custom-file-upload:hover {
+            border-color: #58a6ff;
+            background-color: #1f252c;
+        }
+
+        #file-name-display {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #58a6ff;
+        }
+
+        /* Style Selection */
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
             border: 1px solid #30363d;
-        }
-
-        .style-option {
-            display: flex;
-            align-items: center;
+            background-color: #21262d;
+            color: #c9d1d9;
+            font-size: 1em;
+            appearance: none;
             cursor: pointer;
         }
 
-        .style-option label {
-             margin-bottom: 0px; 
-             color: #c9d1d9;
-             font-weight: 400;
-             cursor: pointer;
-        }
-        
-        .style-option input[type="radio"] {
-            margin-right: 10px;
-            accent-color: #58a6ff;
-            cursor: pointer;
-        }
-
+        /* Submit Button */
         button {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background-color: #238636;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s ease;
         }
 
-        button:hover:not([disabled]) {
+        button:hover:not(:disabled) {
             background-color: #2ea043;
         }
 
         button:disabled {
             background-color: #30363d;
+            color: #8b949e;
             cursor: not-allowed;
         }
 
-        /* Message Display */
-        #message {
-            margin-top: 20px;
+        /* Message Area */
+        #message-area {
+            margin-top: 30px;
             padding: 15px;
             border-radius: 8px;
-            text-align: center;
-            display: none;
-            font-weight: 600;
-        }
-
-        .success {
-            background-color: #213c2c;
-            color: #2ea043;
-            border: 1px solid #238636;
-        }
-
-        .error {
-            background-color: #401f23;
-            color: #f85149;
-            border: 1px solid #f85149;
+            font-size: 1em;
+            display: none; /* Initially hidden */
+            border: 1px solid;
         }
 
         .loading {
-            background-color: #1c273a;
+            background-color: #202b3c;
             color: #58a6ff;
-            border: 1px solid #58a6ff;
+            border-color: #58a6ff;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(88, 166, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(88, 166, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(88, 166, 255, 0); }
+        }
+
+        .success {
+            background-color: #1c3623;
+            color: #238636;
+            border-color: #238636;
+        }
+
+        .error {
+            background-color: #490e0c;
+            color: #f85149;
+            border-color: #f85149;
         }
 
         .download-link {
-            padding: 10px 20px;
-            background-color: #28a745; 
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            display: inline-block;
-            margin-top: 15px;
+            color: #58a6ff;
             font-weight: bold;
-            transition: background-color 0.3s;
+            text-decoration: none;
         }
-        .download-link:hover {
-            background-color: #1e8736;
-        }
-        
-        /* Footer for instructions */
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #8b949e;
-        }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 AI Video Anime Transformer</h1>
-        <form id="conversionForm">
+        <h1>🎬 AI Video to Anime Converter</h1>
+        <p style="text-align: center; color: #8b949e;">अपने वीडियो को 30FPS एनीमे स्टाइल में बदलें। (फ़ाइल साइज़: Max 20MB)</p>
 
-            <div class="form-group">
-                <label for="videoFile">अपलोड वीडियो (MP4, MOV)</label>
-                <input type="file" id="videoFile" name="videoFile" accept="video/mp4,video/quicktime" required>
-            </div>
+        <form id="anime-form" enctype="multipart/form-data">
             
             <div class="form-group">
-                <label>एनीमे स्टाइल का चयन करें</label>
-                <div class="style-options">
-                    <div class="style-option">
-                        <input type="radio" id="styleWhatIf" name="animeStyle" value="What If" required>
-                        <label for="styleWhatIf">व्हाट इफ़ (What If) स्टाइल</label>
-                    </div>
-                    <div class="style-option">
-                        <input type="radio" id="styleBen10" name="animeStyle" value="Ben 10" required>
-                        <label for="styleBen10">बेन 10 (Ben 10) स्टाइल</label>
-                    </div>
-                    <div class="style-option">
-                        <input type="radio" id="styleJujutsuKaisen" name="animeStyle" value="Jujutsu Kaisen" required>
-                        <label for="styleJujutsuKaisen">जुजुत्सु काइसेन (Jujutsu Kaisen) स्टाइल</label>
-                    </div>
+                <label for="videoFile">वीडियो अपलोड करें:</label>
+                <input type="file" name="videoFile" id="videoFile" accept="video/mp4,video/quicktime,video/mov" required>
+                <div class="custom-file-upload" onclick="document.getElementById('videoFile').click()">
+                    वीडियो चुनने के लिए क्लिक करें
                 </div>
+                <div id="file-name-display">कोई फ़ाइल नहीं चुनी गई।</div>
             </div>
 
-            <button type="submit" id="submitBtn">सबमिट अनुरोध</button>
+            <div class="form-group">
+                <label for="animeStyle">एनीमे स्टाइल चुनें:</label>
+                <select name="animeStyle" id="animeStyle" required>
+                    <option value="" disabled selected>--- स्टाइल चुनें ---</option>
+                    <option value="Jujutsu Kaisen">呪術廻戦 (Jujutsu Kaisen)</option>
+                    <option value="Ben 10 Classic">Ben 10 Classic</option>
+                    <option value="Marvel What If">Marvel What If...?</option>
+                    <option value="Classic Anime">Classic 90s Anime Style</option>
+                </select>
+            </div>
+
+            <button type="submit" id="submit-btn">सबमिट अनुरोध</button>
         </form>
-
-        <div id="message" style="display: none;"></div>
-
-        <div class="footer">
-            <p>ℹ️ स्थिति लाइव अपडेट होगी। यह FFMPEG का उपयोग करता है (कोई बिलिंग नहीं)।</p>
-        </div>
+        
+        <div id="message-area" style="display: none;">
+            </div>
     </div>
 
     <script>
-        const form = document.getElementById('conversionForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const messageDiv = document.getElementById('message');
+        const form = document.getElementById('anime-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const messageDiv = document.getElementById('message-area');
+        const videoFileInput = document.getElementById('videoFile');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        let pollingInterval = null;
         
-        // 🚨 यह आपका सही URL है 🚨
-        const BASE_RENDER_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com'; 
-        let pollingInterval = null; 
-
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (pollingInterval) clearInterval(pollingInterval); 
-
-            const formData = new FormData(form);
-            const videoFile = document.getElementById('videoFile').files[0];
-            const style = formData.get('animeStyle');
-
-            if (!videoFile || !style) {
-                showMessage('कृपया वीडियो और एनीमे स्टाइल चुनें।', 'error');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'अनुरोध भेज रहा है...';
-            showMessage('आपका वीडियो सर्वर को भेजा जा रहा है।', 'loading');
-
-            try {
-                // 1. सर्वर को जॉब भेजें - यहाँ सही पाथ जोड़ा गया है!
-                const API_URL = `${BASE_RENDER_URL}/submit-anime-job`;
-                
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                // अगर सर्वर चल रहा है, लेकिन उसने JSON नहीं भेजा, तो यह JSON.parse त्रुटि देगा।
-                const data = await response.json(); 
-
-                if (response.ok) {
-                    const jobId = data.jobId;
-                    showMessage(`✅ अनुरोध स्वीकार किया गया। जॉब ID: <b>${jobId}</b>. अब लाइव स्टेटस चेक कर रहे हैं...`, 'loading');
-                    
-                    // 2. पोलिंग शुरू करें
-                    startPolling(jobId);
-
-                } else {
-                    showMessage(`❌ त्रुटि: ${data.message || 'सर्वर ने अपेक्षित प्रतिक्रिया नहीं दी।'}`, 'error');
-                }
-            } catch (error) {
-                // यह कैच ब्लॉक तभी ट्रिगर होता है जब नेटवर्क कनेक्शन पूरी तरह विफल हो जाता है।
-                console.error("Fetch Error:", error);
-                showMessage('❌ त्रुटि: सर्वर तक नहीं पहुंचा जा सका। सुनिश्चित करें कि Render Backend चल रहा है।', 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'सबमिट अनुरोध';
+        // --- EVENT LISTENERS ---
+        
+        // 1. File Name Display
+        videoFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileNameDisplay.textContent = `चयनित: ${this.files[0].name}`;
+            } else {
+                fileNameDisplay.textContent = 'कोई फ़ाइल नहीं चुनी गई।';
             }
         });
 
-        // --- POLLING FUNCTION (लाइव स्टेटस चेक) ---
-        function startPolling(jobId) {
+        // 2. Form Submission
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
             
+            const MAX_FILE_SIZE_MB = 20;
+            const videoFile = videoFileInput.files[0];
+            const animeStyle = document.getElementById('animeStyle').value;
+            
+            // Validation
+            if (!videoFile || !animeStyle) {
+                showMessage('⚠️ कृपया वीडियो फ़ाइल चुनें और एक स्टाइल चुनें।', 'error');
+                return;
+            }
+            if (videoFile.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+                 showMessage(`⚠️ फ़ाइल साइज़ ${MAX_FILE_SIZE_MB}MB से अधिक नहीं होना चाहिए।`, 'error');
+                 return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'अपलोड हो रहा है...';
+            showMessage('🚀 वीडियो अपलोड हो रहा है। कृपया प्रतीक्षा करें...', 'loading');
+
+            const formData = new FormData(form);
+
+            try {
+                // Submit Job to Node.js Backend
+                const response = await fetch('/submit-anime-job', {
+                    method: 'POST',
+                    body: formData 
+                });
+
+                const data = await response.json();
+                
+                if (response.status === 202 && data.status === 'ACCEPTED' && data.jobId) {
+                    showMessage(`✅ अनुरोध स्वीकार किया गया! जॉब ID: <b>${data.jobId}</b>. अब स्टेटस चेक किया जा रहा है...`, 'loading');
+                    startPolling(data.jobId);
+                } else {
+                    // Handle server-side validation or error
+                    showMessage(`❌ सबमिशन विफल हुआ: ${data.message || 'अज्ञात त्रुटि'}`, 'error');
+                    resetFormState();
+                }
+
+            } catch (error) {
+                console.error("Submission error:", error);
+                showMessage('❌ नेटवर्क या सर्वर त्रुटि। पुनः प्रयास करें।', 'error');
+                resetFormState();
+            }
+        });
+
+
+        // --- UTILITY FUNCTIONS ---
+        
+        function resetFormState() {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'सबमिट अनुरोध';
+        }
+
+        // Status Polling Logic
+        function startPolling(jobId) {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+
             const checkStatus = async () => {
                 try {
-                    // स्टेटस चेक करने के लिए सही पाथ: /check-anime-status
-                    const statusResponse = await fetch(`${BASE_RENDER_URL}/check-anime-status?jobId=${jobId}`);
+                    const statusResponse = await fetch(`/check-anime-status?jobId=${jobId}`);
                     const statusData = await statusResponse.json();
-
                     const status = statusData.status;
 
-                    if (status === 'DONE') {
+                    if (status === 'DONE' && statusData.downloadLink) {
                         clearInterval(pollingInterval); 
-                        
-                        // डाउनलोड बटन दिखाएं
                         showMessage(`🎉 कन्वर्जन पूरा हुआ! <br><a href="${statusData.downloadLink}" class="download-link" target="_blank">वीडियो डाउनलोड करें</a>`, 'success');
-                        
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'नया वीडियो बनाएं';
+                        resetFormState();
 
                     } else if (status === 'FAILED' || status === 'NOT_FOUND') {
                         clearInterval(pollingInterval); 
                         showMessage(`❌ कन्वर्जन विफल हो गया या जॉब की स्थिति खो गई। कृपया पुनः प्रयास करें।`, 'error');
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'सबमिट अनुरोध';
+                        resetFormState();
                         
                     } else {
                         // WORKING/ACCEPTED
-                        showMessage(`⏳ जॉब ID: <b>${jobId}</b> पर काम चल रहा है। स्टेटस: <b>${status}</b>. कृपया प्रतीक्षा करें...`, 'loading');
+                        const statusMap = {
+                            'ACCEPTED': 'स्वीकार कर लिया गया',
+                            'WORKING': 'फ्रेम प्रोसेसिंग जारी है'
+                        };
+                        const currentStatusMsg = statusMap[status] || 'प्रगति में है';
+
+                        showMessage(`⏳ जॉब ID: <b>${jobId}</b> पर काम चल रहा है। स्टेटस: <b>${currentStatusMsg}</b>. कृपया प्रतीक्षा करें... (यह प्रक्रिया लंबी हो सकती है)`, 'loading');
                     }
                 } catch (error) {
                     console.error("Polling error:", error);
                 }
             };
 
-            // हर 10 सेकंड में चेक करें
+            // हर 10 सेकंड (10000ms) में चेक करें
             checkStatus(); 
             pollingInterval = setInterval(checkStatus, 10000); 
         }
         
         function showMessage(msg, type) {
+            // Cleanup previous classes
+            messageDiv.classList.remove('success', 'error', 'loading');
             messageDiv.innerHTML = msg; 
-            messageDiv.className = '';
             messageDiv.classList.add(type);
             messageDiv.style.display = 'block';
         }
