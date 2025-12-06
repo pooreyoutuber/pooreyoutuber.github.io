@@ -1083,7 +1083,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 6. ANIME VIDEO CONVERTER ENDPOINT (API: /anime-convert) - WORKING FFmpeg 5 FPS (STABLE FIX)
+// 6. ANIME VIDEO CONVERTER ENDPOINT (API: /anime-convert) - FINAL ZORDAAR FFmpeg FILTERS
 // ===================================================================
 app.post('/anime-convert', (req, res) => {
     // 1. Multer middleware के माध्यम से फ़ाइल अपलोड को हैंडल करें
@@ -1109,24 +1109,28 @@ app.post('/anime-convert', (req, res) => {
 
         console.log(`\n[CONVERTER START] Received file: ${videoFile.originalname}. Target FPS: 5`);
         
-        // --- 🚀 FFmpeg प्रोसेसिंग लॉजिक (STABLE FILTERS) ---
+        // --- 🚀 FFmpeg प्रोसेसिंग लॉजिक (FINAL COMPLEX FILTERS) ---
         
         const conversionPromise = new Promise((resolve, reject) => {
             
-            // 🔥 स्थिर फ़िल्टर श्रृंखला (Stable Filter Chain): geq को eq और gblur से बदला गया
+            // 🔥 FINAL COMPLEX FILTER CHAIN: Posterization, Edge Detection, and Extreme Color
             let filterString = [
-                // 1. Color Enhancement (eq): कंट्रास्ट (1.5x) और सेचुरेशन (2.0x) बढ़ाता है (VIVID LOOK)
-                'eq=contrast=1.5:saturation=2.0', 
-                // 2. Gaussian Blur: विवरणों को नरम (soften) करता है जिससे पेंट किया हुआ/कार्टून लुक मिलता है।
-                'gblur=sigma=1.0', 
-                // 3. Scaling: Processing को तेज़ रखने के लिए 720p तक सीमित करें
-                'scale=1280:-2' 
+                // 1. Posterization: Downscale with neighbor flag for color simplification
+                'scale=iw/2:ih/2:flags=neighbor',
+                // 2. Strong Gaussian Blur: Detail removal
+                'gblur=sigma=1.5',
+                // 3. Edge Detection (OUTLINE ATTEMPT): Adds harsh lines
+                'edgedetect=low=0.1:high=0.4:mode=colormix', 
+                // 4. Extreme Color and Contrast Boost
+                'eq=contrast=3.5:saturation=3.5', 
+                // 5. Final Scaling and Upscale (with smooth flag)
+                'scale=1280:-2:flags=lanczos', 
             ];
             
             if (style === 'jujutsu-kaisen') {
                 filterString = [
-                    'eq=contrast=2.0:saturation=1.5', 
-                    'gblur=sigma=1.5', 
+                    'eq=contrast=4.0:saturation=1.5:gamma=0.8', 
+                    'gblur=sigma=1.0', 
                     'scale=1280:-2'
                 ];
             }
@@ -1171,7 +1175,7 @@ app.post('/anime-convert', (req, res) => {
         
         res.status(200).json({ 
             status: 'success', 
-            message: `✅ Video successfully converted to ${style} style at 5 FPS (Stable Filters Used).`,
+            message: `✅ Video successfully converted to ${style} style at 5 FPS (FINAL ZORDAAR Filters Used). This is the deepest non-AI transformation possible.`,
             downloadUrl: downloadUrl
         });
         
