@@ -10,6 +10,9 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
+const multer = require('multer'); // For handling file uploads
+// Multer setup for file uploads (File storage configuration)
+const upload = multer({ dest: 'uploads/' });
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
 // NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
 const http = require('http'); 
@@ -1154,8 +1157,107 @@ app.post('/youtube-boost-mp', async (req, res) => {
         
     })();
 });
+// =========================================================
+// --- 5. NEW: Anime Style Video Converter Tool ---
+// =========================================================
 
+// Endpoint jaisa ki aapke frontend (website-ads (2).html) mein define kiya gaya hai
+const ANIME_CONVERSION_ENDPOINT = '/anime-convert'; 
 
+// Multer 'upload.single('video')' ensures only one file named 'video' is handled
+app.post(ANIME_CONVERSION_ENDPOINT, upload.single('video'), async (req, res) => {
+    // ⚠️ Jaruri: Aapke Render Environment mein HUGGINGFACE_ACCESS_TOKEN set hona chahiye.
+    const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
+    const filePath = req.file ? req.file.path : null;
+    const style = req.body.style; // e.g., 'jujutsu-kaisen', 'ben-10-classic'
+    
+    // Agar HUGGINGFACE_ACCESS_TOKEN set nahi hai, toh turant error dein
+    if (!HUGGINGFACE_ACCESS_TOKEN) {
+        return res.status(500).json({ error: "Server Configuration Error", message: "HUGGINGFACE_ACCESS_TOKEN is not set." });
+    }
+
+    if (!filePath || !style) {
+        // Agar file ya style missing hai, toh error dein
+        if (filePath) await fs.unlink(filePath); // Uploaded file ko delete kar dein
+        return res.status(400).json({ 
+            error: "Video file or style is missing.",
+            message: "Please upload a video and select a style."
+        });
+    }
+
+    try {
+        console.log(`Starting conversion for file: ${req.file.originalname} with style: ${style}`);
+        
+        // ------------------------------------------------------------------
+        // *** CORE CONVERSION LOGIC (Hugging Face Inference) ***
+        // ------------------------------------------------------------------
+        
+        // 1. Hugging Face Video Model select karein:
+        //    (Aapko ek Video-to-Video Model ka naam yahan daalna hoga)
+        const HF_MODEL_NAME = "Your-Preferred-Video-Style-Transfer-Model-on-HF"; 
+        
+        // 2. Video file ko Hugging Face API par bhejein
+        const hfResponse = await axios.post(
+            `https://api-inference.huggingface.co/models/${HF_MODEL_NAME}`,
+            await fs.readFile(filePath), // File ko binary buffer ke roop mein bhej rahe hain
+            {
+                headers: { 
+                    Authorization: `Bearer ${HUGGINGFACE_ACCESS_TOKEN}`, 
+                    // Content-Type ko set karne ki zaroorat nahi hai jab aap file buffer bhejte hain
+                },
+                responseType: 'arraybuffer' // Response ko video data (binary) ke roop mein receive karein
+            }
+        );
+
+        // 3. Converted Video ko Save karna:
+        //    Hugging Face se aaya hua video data 'hfResponse.data' mein hoga.
+        //    Isko ab Render Cloud Storage ya S3/GCS mein save karna hoga.
+        
+        const convertedFileName = `converted-${Date.now()}-${style}.mp4`;
+        const convertedFilePath = path.join(__dirname, 'public', convertedFileName);
+        
+        // Temporary public folder mein save kar rahe hain (Only for testing)
+        // Production mein, aapko Cloud Storage (S3/GCS) use karna chahiye.
+        await fs.writeFile(convertedFilePath, hfResponse.data, 'binary');
+
+        // ------------------------------------------------------------------
+
+        // Cleanup: Upload ki gayi original file ko delete karein
+        await fs.unlink(filePath);
+
+        // Client ko final result bhejein
+        const downloadUrl = `https://pooreyoutuber-github-io-v2fo.onrender.com/${convertedFileName}`;
+        
+        res.json({
+            message: "Conversion successful!",
+            downloadUrl: downloadUrl, // Converted video ka public URL
+            styleUsed: style
+        });
+
+    } catch (error) {
+        console.error("Anime Conversion Error:", error);
+        
+        // Error hone par bhi uploaded file ko delete karna zaroori hai
+        if (filePath) {
+            try {
+                await fs.unlink(filePath);
+            } catch (cleanupError) {
+                console.error("Error during file cleanup:", cleanupError);
+            }
+        }
+
+        // Agar Hugging Face se error aata hai
+        const errorMessage = error.response && error.response.data 
+                             ? error.response.data.toString() 
+                             : error.message;
+
+        res.status(500).json({ 
+            error: "Video conversion failed.",
+            message: `Server Error: ${errorMessage}. Check if model name is correct.`
+        });
+    }
+});
+// =========================================================
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
