@@ -1014,8 +1014,7 @@ result = await sendData(gaId, apiSecret, videoProgressPayload, viewCount, 'video
     // 5. LIKE & SUBSCRIBE ACTION (35% Chance)
     if (Math.random() < YOUTUBE_ENGAGEMENT_CHANCE) { 
         
-        // 5a.
-LIKE VIDEO EVENT (50% chance of a like, within the 35% engagement block)
+        // 5a. LIKE VIDEO EVENT (50% chance of a like, within the 35% engagement block)
         if (Math.random() < 0.5) { 
              const likeVideoPayload = {
                 client_id: cid,
@@ -1031,13 +1030,12 @@ LIKE VIDEO EVENT (50% chance of a like, within the 35% engagement block)
                     } 
                 }]
             };
-result = await sendData(gaId, apiSecret, likeVideoPayload, viewCount, 'like_video');
+            result = await sendData(gaId, apiSecret, likeVideoPayload, viewCount, 'like_video');
             if (result.success) {
                  eventsSent++;
-didLike = true; 
-             } else allSuccess = false;
-        }
-        
+                 didLike = true; 
+            } else allSuccess = false;
+        }  
         // 5b.
 SUBSCRIBE TO CHANNEL EVENT (30% chance of a subscribe, within the 35% engagement block)
         if (Math.random() < 0.3) { 
