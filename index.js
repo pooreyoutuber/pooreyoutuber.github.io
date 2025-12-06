@@ -1,5 +1,5 @@
 // ===================================================================
-// index.js (ULTIMATE FINAL VERSION - Corrected)
+// index.js (ULTIMATE FINAL VERSION - WORKING FFmpeg)
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
@@ -14,8 +14,10 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const http = require('http'); 
 const { URL } = require('url'); 
 
-// --- IMPORT FOR FILE UPLOAD ---
+// --- FILE UPLOAD IMPORTS ---
 const multer = require('multer'); 
+// 🔥 NEW REQUIRED IMPORT FOR VIDEO PROCESSING
+const ffmpeg = require('fluent-ffmpeg'); 
 // -----------------------------------------------------------------
 
 const app = express();
@@ -35,7 +37,7 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         // Unique filename generation
-        cb(null, `${crypto.randomBytes(16).toString('hex')}-${file.originalname}`);
+        cb(null, `${crypto.randomBytes(16).toString('hex')}-${file.originalname.replace(/ /g, '_')}`);
     }
 });
 
@@ -49,19 +51,13 @@ const upload = multer({
 // -----------------------------------------------------------------
 
 
-// --- GEMINI KEY CONFIGURATION (SIMPLIFIED & CORRECTED) ---
-// **ध्यान दें: SyntaxError: Unexpected identifier को ठीक करने के लिए यह सबसे संभावित क्षेत्र है।**
+// --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
 try {
     // Attempt to read from Replit secret store (preferred method)
-    if (fs.existsSync('/etc/secrets/gemini')) {
-        GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
-    } else {
-        // Fallback to environment variables
-        GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
-    }
+    GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
 } catch (e) {
-    // Fallback to environment variables if Replit read fails for any reason
+    // Fallback to environment variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
 }
 
@@ -71,7 +67,6 @@ if (GEMINI_KEY) {
 } else {
     // Fallback in case AI key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
-    console.error("⚠️ GEMINI_KEY is missing. AI functionality disabled.");
 }
 
 // --- MIDDLEWARE & UTILITIES ---
@@ -82,8 +77,9 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// Static file serving for converted videos (The download link)
+// NEW: Static file serving for converted videos (The download link)
 app.use('/downloads', express.static(uploadDir)); 
 
 // General CORS headers
@@ -117,7 +113,7 @@ const geoLocations = [
     { country: "Germany", region: "Bavaria", timezone: "Europe/Berlin" },
     { country: "France", region: "Ile-de-France", timezone: "Europe/Paris" },
     { country: "United Kingdom", region: "England", timezone: "Europe/London" },
-  { country: "Canada", region: "Ontario", timezone: "America/Toronto" }
+    { country: "Canada", region: "Ontario", timezone: "America/Toronto" }
 ];
 function getRandomGeo() {
     return geoLocations[randomInt(0, geoLocations.length - 1)];
@@ -129,7 +125,7 @@ function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
 }
 
-// --- TRAFFIC SOURCE LOGIC (Used for Tool 1) ---
+// --- TRAFFIC SOURCE LOGIC (Used by Tool 1) ---
 const TRAFFIC_SOURCES_GA4 = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
@@ -150,13 +146,13 @@ function getRandomTrafficSource(isProxyTool = false) {
     if (isProxyTool) {
         // Reduced direct traffic chance for Proxy Tool to simulate better sources
         if (Math.random() < 0.2) {
-             return TRAFFIC_SOURCES_PROXY[4];
+             return TRAFFIC_SOURCES_PROXY[4]; // (direct) / (none)
         }
         return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 2)];
     }
     // Logic for /boost-mp (Tool 1)
     if (Math.random() < 0.5) {
-        return TRAFFIC_SOURCES_GA4[5];
+        return TRAFFIC_SOURCES_GA4[5]; // (direct) / (none)
     }
     return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 2)];
 }
@@ -178,9 +174,9 @@ function getYoutubeTrafficSource() {
     }
     // 40% chance for External Social/Direct/General GA4 sources
     if (Math.random() < 0.5) {
-        return getRandomTrafficSource(false);
+        return getRandomTrafficSource(false); // Use existing GA4 logic (Direct/Google/Bing/Reddit/Facebook)
     }
-    return YOUTUBE_INTERNAL_SOURCES[3];
+    return YOUTUBE_INTERNAL_SOURCES[3]; // External Social (Facebook)
 }
 // --- END YOUTUBE TRAFFIC SOURCE LOGIC ---
 
@@ -274,7 +270,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId();
     const session_id = Date.now(); 
     const geo = getRandomGeo(); 
-    const traffic = getRandomTrafficSource(false);
+    const traffic = getRandomTrafficSource(false); // Use GA4 specific traffic logic
     const engagementTime = randomInt(30000, 120000);
     // User Properties are crucial for custom dimensions like geo
     const userProperties = {
@@ -292,8 +288,7 @@ async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
                 session_id: session_id, 
                 campaign_source: traffic.source, 
                 campaign_medium: traffic.medium,
-                session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ?
-traffic.medium : "Direct",
+                session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ? traffic.medium : "Direct",
                 page_referrer: traffic.referrer, // The referrer URL
                 
                 _ss: 1, 
@@ -318,8 +313,7 @@ traffic.medium : "Direct",
             name: 'page_view', 
             params: { 
                 page_location: url, 
-                page_title: (traffic.medium === "organic" && searchKeyword) ?
-`Organic Search: ${searchKeyword}` : "Simulated Content View",
+                page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : "Simulated Content View",
                 session_id: session_id, 
                 debug_mode: true,
                 language: "en-US",
@@ -419,11 +413,12 @@ app.post('/boost-mp', async (req, res) => {
             const url = viewPlan[i];
             const currentView = i + 1;
 
-           if (i > 0) {
+            if (i > 0) {
                 const delay = getOptimalDelay(totalViews);
                 console.log(`[View ${currentView}/${totalViews}] Waiting for ${Math.round(delay / 1000)}s...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
+
             
             await simulateView(ga_id, api_key, url, search_keyword, currentView);
         }
@@ -517,15 +512,11 @@ Requested Change: "${requestedChange}"`;
     }
 });
 // ===================================================================
-// --- END OF PART 1 ---
-// ===================================================================
-// index.js (ULTIMATE FINAL VERSION - Part 2/2)
-// --- Tool 4 Helpers, Tool 4, Tool 5, and Server Start ---
-// ===================================================================
 
 // --- AI FUNCTION FOR KEYWORD GENERATION (Used by Tool 4) ---
 async function generateSearchKeyword(targetUrl, isHighValue = false) {
-    if (!ai || !GEMINI_KEY) { return null; }
+    if (!ai || !GEMINI_KEY) { return null;
+}
     
     let urlPath;
     try {
@@ -708,7 +699,7 @@ app.get('/proxy-request', async (req, res) => {
         let searchKeyword = null;
         if (traffic.source === 'google' && GEMINI_KEY) { 
              if (useHighCpcKeywords) {
-                searchKeyword = await generateSearchKeyword(target, true);
+                searchKeyword = await generateSearchKeyword(target, true); // true = HighValue (Max Earning)
                 if (searchKeyword) {
                     traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
                     console.log(`[GEMINI BOOST: MAX CPC] Generated Keyword: "${searchKeyword}"`);
@@ -765,8 +756,7 @@ app.get('/proxy-request', async (req, res) => {
                         language: "en-US",
                         source: traffic.source,
                         medium: traffic.medium,
-                        session_default_channel_group: traffic.medium === "organic" ?
-"Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), 
+                        session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), 
                         page_referrer: traffic.referrer
                     } 
                 }]
@@ -781,8 +771,7 @@ app.get('/proxy-request', async (req, res) => {
                     name: 'page_view', 
                     params: { 
                         page_location: target, 
-                        page_title: (traffic.medium === "organic" && searchKeyword) ?
-`Organic Search: ${searchKeyword}` : target, 
+                        page_title: (traffic.medium === "organic" && searchKeyword) ? `Organic Search: ${searchKeyword}` : target, 
                         session_id: session_id, 
                         debug_mode: true,
                         language: "en-US",
@@ -848,8 +837,7 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
     const traffic = getYoutubeTrafficSource(); 
 
     // --- WATCH TIME & RETENTION LOGIC (Simulated video duration is 8 to 12 minutes) ---
-    const simulatedSessionDuration = randomInt(480000, 720000);
-    // 8 minutes to 12 minutes (480s to 720s)
+    const simulatedSessionDuration = randomInt(480000, 720000); // 8 minutes to 12 minutes (480s to 720s)
     const retentionRoll = Math.random(); 
     let engagementTime;
     let didCompleteVideo = false;
@@ -866,8 +854,7 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
         didCompleteVideo = false;
     }
     
-    engagementTime = Math.max(30000, engagementTime);
-    // Must be at least 30 seconds
+    engagementTime = Math.max(30000, engagementTime); // Must be at least 30 seconds
 
     const userProperties = {
         simulated_geo: { value: geo.country }, 
@@ -887,8 +874,7 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
                 session_id: session_id, 
                 campaign_source: traffic.source, 
                 campaign_medium: traffic.medium,
-                session_default_channel_group: traffic.medium === "organic" ?
-"Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"),
+                session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"),
                 page_referrer: traffic.referrer, 
                 page_location: videoUrl, 
                 _ss: 1, 
@@ -1006,7 +992,7 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
                 client_id: cid,
                 user_properties: userProperties, 
                 events: [{ 
-                   name: 'subscribe', 
+                    name: 'subscribe', 
                     params: { 
                         channel_url: channelUrl, 
                         session_id: session_id,
@@ -1017,7 +1003,7 @@ async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCo
             result = await sendData(gaId, apiSecret, subscribePayload, viewCount, 'subscribe');
             if (result.success) {
                  eventsSent++;
-                 didSubscribe = true; 
+                didSubscribe = true; 
              } else allSuccess = false;
         }
     }
@@ -1120,6 +1106,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
         
         console.log(`\n[YOUTUBE BOOSTER START] Starting real simulation for ${finalTotalViews} views across ${numTargets} URLs.`);
         
+        
         for (let i = 0; i < finalTotalViews; i++) {
             const url = viewPlan[i];
             const currentView = i + 1;
@@ -1162,7 +1149,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 6. ANIME VIDEO CONVERTER ENDPOINT (API: /anime-convert) - NEW TOOL 
+// 6. ANIME VIDEO CONVERTER ENDPOINT (API: /anime-convert) - WORKING FFmpeg 5 FPS
 // ===================================================================
 app.post('/anime-convert', (req, res) => {
     // 1. Multer middleware के माध्यम से फ़ाइल अपलोड को हैंडल करें
@@ -1175,64 +1162,91 @@ app.post('/anime-convert', (req, res) => {
             return res.status(500).json({ status: 'error', message: 'An unknown error occurred during upload.' });
         }
 
-        // 2. वीडियो फ़ाइल और स्टाइल की जाँच करें
         const videoFile = req.file;
-        const style = req.body.style;
+        const style = req.body.style || 'default-anime'; 
 
         if (!videoFile) {
             return res.status(400).json({ status: 'error', message: 'No video file uploaded.' });
         }
-        if (!style) {
-            // style missing होने पर uploaded file को clean up करें
-            fs.unlink(videoFile.path, (e) => e && console.error(`Failed to delete temp file: ${e.message}`));
-            return res.status(400).json({ status: 'error', message: 'Anime style selection is required.' });
-        }
-        
-        const originalFileName = videoFile.originalname;
-        const tempFilePath = videoFile.path;
 
-        console.log(`\n[CONVERTER START] Received file: ${originalFileName} with style: ${style}`);
-        
-        // 3. AI Conversion Process का सिमुलेशन
-        
-        // 5 से 15 सेकंड का एक लंबा AI प्रोसेस सिमुलेट करें
-        const conversionTimeMs = randomInt(5000, 15000); 
-        console.log(`[CONVERTER SIMULATION] Simulating conversion for ${Math.round(conversionTimeMs/1000)}s...`);
-        
-        await new Promise(resolve => setTimeout(resolve, conversionTimeMs));
-        
-        // --- Conversion Finished: Mock File Creation ---
-        const newFileName = `${videoFile.filename.split('-')[0]}-${style}-anime.mp4`;
+        const tempFilePath = videoFile.path;
+        // Output file name में 5 FPS शामिल करें
+        const newFileName = `${videoFile.filename.split('-')[0]}-${style}-anime_5fps.mp4`;
         const convertedFilePath = `${uploadDir}/${newFileName}`;
 
-        // अपलोड की गई फ़ाइल को "converted" फ़ाइल के नाम में बदलें
-        try {
-            // fs.renameSync is atomic and ensures the file is moved before proceeding
-            fs.renameSync(tempFilePath, convertedFilePath);
-            console.log(`[CONVERTER SUCCESS] File renamed to: ${newFileName}`);
-        } catch (e) {
-            // If rename fails, try copy and unlink (less safe, but ensures file is not stuck)
-            try {
-                fs.copyFileSync(tempFilePath, convertedFilePath);
-                fs.unlinkSync(tempFilePath);
-                console.log(`[CONVERTER SUCCESS] File copied/deleted successfully: ${newFileName}`);
-            } catch (copyErr) {
-                console.error(`[CONVERTER RENAME/COPY FAIL] Critical Error: ${copyErr.message}`);
+        console.log(`\n[CONVERTER START] Received file: ${videoFile.originalname}. Target FPS: 5`);
+        
+        // --- 🚀 FFmpeg प्रोसेसिंग लॉजिक ---
+        
+        const conversionPromise = new Promise((resolve, reject) => {
+            
+            // यह FFmpeg फ़िल्टर एक मजबूत 'Posterize' और 'Vivid Color' प्रभाव लागू करता है 
+            // जो एनिमे/कार्टून लुक को नक़ल करता है।
+            let filterString = [
+                // 1. Posterize Effect (geq): रंगों को 32 स्तरों तक कम करता है 
+                'geq=lum=\'round(val/32)*32\':cr=\'round(val/32)*32\':cb=\'round(val/32)*32\'',
+                // 2. Color Enhancement (eq): कंट्रास्ट (1.5x) और सेचुरेशन (1.8x) को बढ़ाता है
+                'eq=contrast=1.5:saturation=1.8', 
+                // 3. Scaling: Processing को तेज़ रखने के लिए 720p तक सीमित करें
+                'scale=1280:-2' 
+            ];
+            
+            // स्टाइल के आधार पर फ़िल्टर को थोड़ा बदलें
+            if (style === 'jujutsu-kaisen') {
+                // हाई कंट्रास्ट और मोशन के लिए हल्का ब्लर 
+                filterString = ['boxblur=1:1', 'eq=contrast=2.0:saturation=1.2', 'scale=1280:-2'];
             }
-        }
 
-        // 4. Download URL बनाएँ
-        // यह URL Static Serving Middleware (ऊपर जोड़ा गया) का उपयोग करेगा।
+            ffmpeg(tempFilePath)
+                .videoFilters(filterString) 
+                .outputOptions([
+                    // 🔥 मुख्य अनुरोध: फ्रेम रेट को 5 FPS पर सेट करें (कार्टून जैसा मोशन)
+                    '-r 5', 
+                    // कॉम्प्रेसन (CRF 25 छोटे 5-10 सेकंड के वीडियो के लिए अच्छा है)
+                    '-crf 25', 
+                    '-preset fast', // Processing speed के लिए 'fast' प्रीसेट
+                    '-acodec copy', // ऑडियो को बिना बदले कॉपी करें
+                    '-pix_fmt yuv420p',
+                ])
+                .on('start', function(commandLine) {
+                    console.log('FFmpeg Command: ' + commandLine);
+                })
+                .on('end', () => {
+                    console.log('FFmpeg Conversion finished successfully.');
+                    // tempFilePath को डिलीट करें (Cleanup Step 1: मूल फ़ाइल हटाना)
+                    fs.unlink(tempFilePath, (e) => e && console.error(`Failed to delete temp file: ${e.message}`));
+                    resolve();
+                })
+                .on('error', (err) => {
+                    console.error('FFmpeg Error:', err.message);
+                    // असफलता पर भी tempFilePath डिलीट करें
+                    fs.unlink(tempFilePath, (e) => e && console.error(`Failed to delete temp file after error: ${e.message}`));
+                    // FFmpeg error को क्लाइंट को भेजें
+                    reject(new Error(`Video processing failed. FFmpeg Error: ${err.message}`));
+                })
+                .save(convertedFilePath);
+        });
+
+        // FFmpeg प्रॉसेस के पूरा होने का इंतज़ार करें
+        try {
+            await conversionPromise;
+        } catch (error) {
+            return res.status(500).json({ 
+                status: 'error', 
+                message: error.message 
+            });
+        }
+        
+        // --- Conversion Finished: Success Response ---
         const downloadUrl = `${req.protocol}://${req.get('host')}/downloads/${newFileName}`;
         
-        // 5. Success Response भेजें
         res.status(200).json({ 
             status: 'success', 
-            message: `Video successfully converted to ${style} style.`,
+            message: `✅ Video successfully converted to ${style} style at 5 FPS.`,
             downloadUrl: downloadUrl
         });
         
-        // 6. 5 मिनट बाद converted file को साफ़ करें (Temporary storage के लिए महत्वपूर्ण)
+        // 5 मिनट बाद converted file को साफ़ करें (Cleanup Step 2: परिणाम फ़ाइल हटाना)
         setTimeout(() => {
             fs.unlink(convertedFilePath, (e) => {
                 if (e) {
@@ -1241,7 +1255,7 @@ app.post('/anime-convert', (req, res) => {
                     console.log(`[CLEANUP SUCCESS] Deleted temporary converted file: ${convertedFilePath}`);
                 }
             });
-        }, 5 * 60 * 1000); // 5 minutes delay
+        }, 5 * 60 * 1000); 
     });
 });
 
