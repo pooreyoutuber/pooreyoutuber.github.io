@@ -1,5 +1,5 @@
 // ===================================================================
-// index.js (ULTIMATE FINAL VERSION - Part 1/2)
+// index.js (ULTIMATE FINAL VERSION - Corrected)
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
@@ -11,11 +11,10 @@ const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
 const http = require('http'); 
-const { URL } = require('url'); // Added URL import
+const { URL } = require('url'); 
 
-// --- NEW IMPORT FOR FILE UPLOAD (Requires: npm install multer) ---
+// --- IMPORT FOR FILE UPLOAD ---
 const multer = require('multer'); 
 // -----------------------------------------------------------------
 
@@ -50,13 +49,19 @@ const upload = multer({
 // -----------------------------------------------------------------
 
 
-// --- GEMINI KEY CONFIGURATION ---
+// --- GEMINI KEY CONFIGURATION (SIMPLIFIED & CORRECTED) ---
+// **ध्यान दें: SyntaxError: Unexpected identifier को ठीक करने के लिए यह सबसे संभावित क्षेत्र है।**
 let GEMINI_KEY;
 try {
     // Attempt to read from Replit secret store (preferred method)
-    GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
+    if (fs.existsSync('/etc/secrets/gemini')) {
+        GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
+    } else {
+        // Fallback to environment variables
+        GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
+    }
 } catch (e) {
-    // Fallback to environment variables
+    // Fallback to environment variables if Replit read fails for any reason
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
 }
 
@@ -66,6 +71,7 @@ if (GEMINI_KEY) {
 } else {
     // Fallback in case AI key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
+    console.error("⚠️ GEMINI_KEY is missing. AI functionality disabled.");
 }
 
 // --- MIDDLEWARE & UTILITIES ---
@@ -77,7 +83,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '5mb' }));
 
-// NEW: Static file serving for converted videos (The download link)
+// Static file serving for converted videos (The download link)
 app.use('/downloads', express.static(uploadDir)); 
 
 // General CORS headers
@@ -111,7 +117,6 @@ const geoLocations = [
     { country: "Germany", region: "Bavaria", timezone: "Europe/Berlin" },
     { country: "France", region: "Ile-de-France", timezone: "Europe/Paris" },
     { country: "United Kingdom", region: "England", timezone: "Europe/London" },
-  
   { country: "Canada", region: "Ontario", timezone: "America/Toronto" }
 ];
 function getRandomGeo() {
@@ -124,7 +129,7 @@ function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
 }
 
-// --- TRAFFIC SOURCE LOGIC (Used by Tool 1) ---
+// --- TRAFFIC SOURCE LOGIC (Used for Tool 1) ---
 const TRAFFIC_SOURCES_GA4 = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
@@ -146,14 +151,12 @@ function getRandomTrafficSource(isProxyTool = false) {
         // Reduced direct traffic chance for Proxy Tool to simulate better sources
         if (Math.random() < 0.2) {
              return TRAFFIC_SOURCES_PROXY[4];
-// (direct) / (none)
         }
         return TRAFFIC_SOURCES_PROXY[randomInt(0, TRAFFIC_SOURCES_PROXY.length - 2)];
-}
+    }
     // Logic for /boost-mp (Tool 1)
     if (Math.random() < 0.5) {
         return TRAFFIC_SOURCES_GA4[5];
-// (direct) / (none)
     }
     return TRAFFIC_SOURCES_GA4[randomInt(0, TRAFFIC_SOURCES_GA4.length - 2)];
 }
@@ -172,14 +175,12 @@ function getYoutubeTrafficSource() {
     if (Math.random() < 0.60) {
         // Pick from internal sources (0, 1, 2)
         return YOUTUBE_INTERNAL_SOURCES[randomInt(0, 2)];
-}
+    }
     // 40% chance for External Social/Direct/General GA4 sources
     if (Math.random() < 0.5) {
         return getRandomTrafficSource(false);
-// Use existing GA4 logic (Direct/Google/Bing/Reddit/Facebook)
     }
     return YOUTUBE_INTERNAL_SOURCES[3];
-// External Social (Facebook)
 }
 // --- END YOUTUBE TRAFFIC SOURCE LOGIC ---
 
@@ -198,72 +199,70 @@ function getRandomUserAgent() {
 // --- UTILITIES (for Tool 1) ---
 const getOptimalDelay = (totalViews) => {
     const targetDurationMs = 14400000;
-const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
+    const avgDelayMs = totalViews > 0 ? targetDurationMs / totalViews : 0;
     const minDelay = Math.max(5000, avgDelayMs * 0.5);
-const maxDelay = avgDelayMs * 1.5;
+    const maxDelay = avgDelayMs * 1.5;
     const finalMaxDelay = Math.min(maxDelay, 1800000); 
     return randomInt(minDelay, finalMaxDelay);
 };
 // --- GA4 DATA SENDING (for /boost-mp and /youtube-boost-mp) ---
 async function sendData(gaId, apiSecret, payload, currentViewId, eventType) {
     const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
-payload.timestamp_micros = String(Date.now() * 1000); 
+    payload.timestamp_micros = String(Date.now() * 1000); 
     const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
-try {
+    try {
         const response = await nodeFetch(gaEndpoint, { 
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 
                 'Content-Type': 'application/json',
                 'User-Agent': USER_AGENT 
-          
-   }
+            }
         });
-if (response.status === 204) { 
+        if (response.status === 204) { 
             console.log(`[View ${currentViewId}] SUCCESS ✅ | Sent: ${eventType}`);
-return { success: true };
+            return { success: true };
         } else {
             const errorText = await response.text();
-console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
+            console.error(`[View ${currentViewId}] FAILURE ❌ | Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
             return { success: false, error: errorText };
-}
+        }
     } catch (error) {
         console.error(`[View ${currentViewId}] CRITICAL ERROR ⚠️ | Event: ${eventType}. Connection Failed: ${error.message}`);
-return { success: false, error: error.message };
+        return { success: false, error: error.message };
     }
 }
 
 // Validation function (for all GA4 tools)
 async function validateKeys(gaId, apiSecret, cid) {
     const validationEndpoint = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${gaId}&api_secret=${apiSecret}`;
-const testPayload = {
+    const testPayload = {
         client_id: cid,
         events: [{ name: "test_event", params: { debug_mode: true, language: "en-US" } }]
     };
-try {
+    try {
         const response = await nodeFetch(validationEndpoint, {
             method: 'POST',
             body: JSON.stringify(testPayload),
             headers: { 'Content-Type': 'application/json' }
         });
-const responseData = await response.json();
+        const responseData = await response.json();
         if (responseData.validationMessages && responseData.validationMessages.length > 0) {
             const errors = responseData.validationMessages.filter(msg => msg.validationCode !== 'VALIDATION_SUCCESS');
-if (errors.length > 0) {
+            if (errors.length > 0) {
                 const message = errors[0].description;
-if (message.includes("Invalid measurement_id") || message.includes("API Secret is not valid")) {
-                    return { valid: false, message: "GA ID or API Secret is invalid. Please check keys."
-};
+                if (message.includes("Invalid measurement_id") || message.includes("API Secret is not valid")) {
+                    return { valid: false, message: "GA ID or API Secret is invalid. Please check keys." };
                 }
                 return { valid: false, message: `Validation Error: ${message.substring(0, 80)}` };
-}
+            }
         }
         console.log("[VALIDATION SUCCESS] Keys and basic payload passed Google's check.");
-return { valid: true };
+        return { valid: true };
     } catch (error) {
         console.error('Validation Connection Error:', error.message);
-return { valid: false, message: `Could not connect to Google validation server: ${error.message}` };
-}
+        return { valid: false, message: `Could not connect to Google validation server: ${error.message}` };
+    }
 }
 
 
@@ -273,28 +272,26 @@ return { valid: false, message: `Could not connect to Google validation server: 
  */
 async function simulateView(gaId, apiSecret, url, searchKeyword, viewCount) {
     const cid = generateClientId();
-const session_id = Date.now(); 
+    const session_id = Date.now(); 
     const geo = getRandomGeo(); 
     const traffic = getRandomTrafficSource(false);
-// Use GA4 specific traffic logic
     const engagementTime = randomInt(30000, 120000);
-// User Properties are crucial for custom dimensions like geo
+    // User Properties are crucial for custom dimensions like geo
     const userProperties = {
         simulated_geo: { value: geo.country }, 
         user_timezone: { value: geo.timezone }
     };
-let allSuccess = true;
+    let allSuccess = true;
     
     console.log(`\n--- [View ${viewCount}] Session (Geo: ${geo.country}, Source/Medium: ${traffic.source}/${traffic.medium}) ---`);
-// 1. SESSION START EVENT (The primary event for traffic attribution)
+    // 1. SESSION START EVENT (The primary event for traffic attribution)
     let sessionStartEvents = [
         { 
             name: "session_start", 
             params: { 
                 session_id: session_id, 
                 campaign_source: traffic.source, 
-          
-        campaign_medium: traffic.medium,
+                campaign_medium: traffic.medium,
                 session_default_channel_group: (traffic.medium === "organic" || traffic.medium === "social") ?
 traffic.medium : "Direct",
                 page_referrer: traffic.referrer, // The referrer URL
@@ -302,18 +299,17 @@ traffic.medium : "Direct",
                 _ss: 1, 
                 debug_mode: true,
                 language: "en-US"
-         
-       } 
+            } 
         }
     ];
-const sessionStartPayload = {
+    const sessionStartPayload = {
         client_id: cid,
         user_properties: userProperties, 
         events: sessionStartEvents
     };
-let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'session_start');
+    let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'session_start');
     if (!result.success) allSuccess = false;
-await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
+    await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
 
 
     // 2. PAGE VIEW EVENT
@@ -329,20 +325,19 @@ await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
                 language: "en-US",
                 engagement_time_msec: engagementTime,
                 page_referrer: traffic.referrer 
-       
-         } 
+            } 
         }
     ];
-const pageViewPayload = {
+    const pageViewPayload = {
         client_id: cid,
         user_properties: userProperties, 
         events: pageViewEvents
     };
-result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
+    result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (!result.success) allSuccess = false;
 
     await new Promise(resolve => setTimeout(resolve, randomInt(20000, 40000)));
-// 3. USER ENGAGEMENT
+    // 3. USER ENGAGEMENT
     const engagementPayload = {
         client_id: cid,
         user_properties: userProperties, 
@@ -350,17 +345,16 @@ result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view'
             { 
                 name: "user_engagement", 
                 params: { 
-             
-        engagement_time_msec: engagementTime, 
+                    engagement_time_msec: engagementTime, 
                     session_id: session_id,
                     debug_mode: true 
                 } 
             }
         ]
     };
-result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
+    result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
     if (!result.success) allSuccess = false;
-console.log(`[View ${viewCount}] Completed session. Total Engagement Time: ${Math.round(engagementTime/1000)}s.`);
+    console.log(`[View ${viewCount}] Completed session. Total Engagement Time: ${Math.round(engagementTime/1000)}s.`);
 
     return allSuccess;
 }
@@ -369,10 +363,10 @@ console.log(`[View ${viewCount}] Completed session. Total Engagement Time: ${Mat
 // --- VIEW PLAN GENERATION (for /boost-mp) ---
 function generateViewPlan(totalViews, pages) {
     const viewPlan = [];
-const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
-if (totalPercentage < 99.9 || totalPercentage > 100.1) {
+    const totalPercentage = pages.reduce((sum, page) => sum + (parseFloat(page.percent) || 0), 0);
+    if (totalPercentage < 99.9 || totalPercentage > 100.1) {
         return [];
-}
+    }
     
     pages.forEach(page => {
         const viewsForPage = Math.round(totalViews * (parseFloat(page.percent) / 100));
@@ -382,7 +376,7 @@ if (totalPercentage < 99.9 || totalPercentage > 100.1) {
             }
         }
     });
-viewPlan.sort(() => Math.random() - 0.5);
+    viewPlan.sort(() => Math.random() - 0.5);
     return viewPlan;
 }
 
@@ -397,8 +391,7 @@ app.post('/boost-mp', async (req, res) => {
 
     if (!ga_id || !api_key || !totalViewsRequested || totalViewsRequested < 1 || totalViewsRequested > 500 || !Array.isArray(pages) || pages.length === 0) {
         return res.status(400).json({ status: 'error', message: 'Missing GA keys, Views (1-500), or Page data.' });
-   
-   }
+    }
     
     const viewPlan = generateViewPlan(totalViewsRequested, pages.filter(p => p.percent > 0)); 
     if (viewPlan.length === 0) {
@@ -406,18 +399,18 @@ app.post('/boost-mp', async (req, res) => {
     }
 
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
-if (!validationResult.valid) {
+    if (!validationResult.valid) {
          return res.status(400).json({ 
             status: 'error', 
             message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
         });
-}
+    }
 
     res.json({ 
         status: 'accepted', 
         message: `✨ Request accepted. Keys validated. Processing started in the background (Approximate run time: ${Math.round(getOptimalDelay(totalViewsRequested) * totalViewsRequested / 3600000)} hours). CHECK DEBUGVIEW NOW!`
     });
-// Start the heavy, time-consuming simulation in the background
+    // Start the heavy, time-consuming simulation in the background
     (async () => {
         const totalViews = viewPlan.length;
         console.log(`\n[BOOSTER START] Starting real simulation for ${totalViews} views.`);
@@ -426,15 +419,13 @@ if (!validationResult.valid) {
             const url = viewPlan[i];
             const currentView = i + 1;
 
-  
            if (i > 0) {
                 const delay = getOptimalDelay(totalViews);
                 console.log(`[View ${currentView}/${totalViews}] Waiting for ${Math.round(delay / 1000)}s...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
-
             
-await simulateView(ga_id, api_key, url, search_keyword, currentView);
+            await simulateView(ga_id, api_key, url, search_keyword, currentView);
         }
         
         console.log(`\n[BOOSTER COMPLETE] Successfully finished ${totalViews} view simulations.`);
@@ -463,26 +454,25 @@ exactly 10 unique, highly trending, and viral Instagram Reels captions. The reel
 2. Captions 7 through 10 MUST be in a foreign language (mix of Japanese and Chinese/Mandarin) to target international viewers.
 3. For each caption, provide exactly 5 trending, high-reach, and relevant hashtags below the caption text, separated by a new line.
 4. The final output MUST be a JSON array of 10 objects, where each object has a single key called 'caption'.`;
-try {
+    try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
                 responseSchema: {
-              
-               type: "array",
+                    type: "array",
                     items: { type: "object", properties: { caption: { type: "string" } }, required: ["caption"] }
                 },
                 temperature: 0.8,
             },
         });
-const captions = JSON.parse(response.text.trim());
+        const captions = JSON.parse(response.text.trim());
         res.status(200).json({ captions: captions });
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
-res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
+        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
 // ===================================================================
@@ -510,22 +500,20 @@ Requested Change: "${requestedChange}"`;
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
- 
                 responseSchema: {
                     type: "object",
                     properties: { editedCaption: { type: "string" } },
                     required: ["editedCaption"]
-               
-  },
+                },
                 temperature: 0.7,
             },
         });
-const result = JSON.parse(response.text.trim());
+        const result = JSON.parse(response.text.trim());
         res.status(200).json(result);
 
     } catch (error) {
         console.error('Gemini API Error (Edit):', error.message);
-res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
+        res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
 // ===================================================================
@@ -537,18 +525,17 @@ res.status(500).json({ error: `AI Editing Failed. Reason: ${error.message.substr
 
 // --- AI FUNCTION FOR KEYWORD GENERATION (Used by Tool 4) ---
 async function generateSearchKeyword(targetUrl, isHighValue = false) {
-    if (!ai || !GEMINI_KEY) { return null;
-}
+    if (!ai || !GEMINI_KEY) { return null; }
     
     let urlPath;
-try {
+    try {
         urlPath = new URL(targetUrl).pathname;
-} catch (e) {
+    } catch (e) {
         urlPath = targetUrl;
-}
+    }
     
     let prompt;
-if (isHighValue) {
+    if (isHighValue) {
         // High-CPC Prompt (Max Earning Intent)
         prompt = `Generate exactly 5 highly expensive, transactional search queries (keywords) for high-CPC niches like Finance, Insurance, Software, or Legal, which are still related to the topic/URL path: ${urlPath}.
 The goal is to maximize ad revenue. Queries can be a mix of Hindi and English.
@@ -557,7 +544,7 @@ Format the output as a JSON array of strings.`;
         // Safe and Realistic Prompt (Default Mode)
         prompt = `Generate exactly 5 realistic and highly relevant search queries (keywords) that an actual person might use to find a webpage with the topic/URL path: ${urlPath}.
 Queries can be a mix of Hindi and English. Format the output as a JSON array of strings.`;
-}
+    }
     
     try {
         const response = await ai.models.generateContent({
@@ -566,20 +553,19 @@ Queries can be a mix of Hindi and English. Format the output as a JSON array of 
             config: {
                 responseMimeType: "application/json",
                 responseSchema: {
-      
-               type: "array",
+                    type: "array",
                     items: { type: "string" }
                    },
                 temperature: 0.9, 
             },
         });
-const keywords = JSON.parse(response.text.trim());
+        const keywords = JSON.parse(response.text.trim());
         if (Array.isArray(keywords) && keywords.length > 0) {
             return keywords[randomInt(0, keywords.length - 1)];
-}
+        }
     } catch (error) {
         console.error('Gemini Keyword Generation Failed:', error.message);
-}
+    }
     return null; 
 }
 
@@ -587,17 +573,17 @@ const keywords = JSON.parse(response.text.trim());
 // --- FUNCTION TO SIMULATE HIGH-VALUE CONVERSION (Used by Tool 4) ---
 async function simulateConversion(targetUrl, proxyAgent, originalReferrer, userAgent) {
     const parsedUrl = new URL(targetUrl);
-const domain = parsedUrl.origin;
+    const domain = parsedUrl.origin;
     
     // 1. Simulate Mouse Movement (AdSense Safety)
     console.log(`[ACTION 1] Simulating 2s mouse movement and pause (Human Interaction).`);
-await new Promise(resolve => setTimeout(resolve, randomInt(1500, 2500)));
+    await new Promise(resolve => setTimeout(resolve, randomInt(1500, 2500)));
 
     // 2. Simulate Click & Second Page Load (High Earning Strategy)
     const conversionTarget = domain + '/random-page-' + randomInt(100, 999) + '.html';
-try {
+    try {
         console.log(`[ACTION 2] Simulating Conversion: Loading second page (${conversionTarget}).`);
-await nodeFetch(conversionTarget, {
+        await nodeFetch(conversionTarget, {
             method: 'GET',
             headers: { 
                 'User-Agent': userAgent,
@@ -606,11 +592,11 @@ await nodeFetch(conversionTarget, {
             agent: proxyAgent, // Use the proxy agent for the second request 
             timeout: 5000 
         });
-console.log(`[CONVERSION SUCCESS] Second page loaded successfully (Simulated high-value action).`);
+        console.log(`[CONVERSION SUCCESS] Second page loaded successfully (Simulated high-value action).`);
         return true;
-} catch (error) {
+    } catch (error) {
         console.log(`[CONVERSION FAIL] Simulated second page load failed: ${error.message}`);
-return false;
+        return false;
     }
 }
 
@@ -629,7 +615,7 @@ app.get('/proxy-request', async (req, res) => {
     }
 
     
-const isGaMpEnabled = ga_id && api_secret; 
+    const isGaMpEnabled = ga_id && api_secret; 
     const USER_AGENT = getRandomUserAgent(); 
     
     // --- Proxy Setup (FIXED: Using HttpsProxyAgent) ---
@@ -640,78 +626,77 @@ const isGaMpEnabled = ga_id && api_secret;
     // Determine the proxy URL format (authenticated or unauthenticated)
     if (auth && auth.includes(':') && auth !== ':') {
         const [username, password] = auth.split(':');
-// Use 'http' protocol for the proxy URL
+        // Use 'http' protocol for the proxy URL
         proxyUrl = `http://${username}:${password}@${proxyAddress}`;
-console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
+        console.log(`[PROXY AGENT] Using Authenticated Proxy: ${ip}`);
     } else {
         proxyUrl = `http://${proxyAddress}`;
-console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
+        console.log(`[PROXY AGENT] Using Non-Authenticated Proxy: ${ip}`);
     }
     
     try {
         proxyAgent = new HttpsProxyAgent(proxyUrl);
-} catch (e) {
+    } catch (e) {
         console.error("[PROXY SETUP ERROR] Failed to create proxy agent:", e.message);
-return res.status(500).json({ status: 'FAILED', error: 'Proxy setup failed due to internal error.' });
-}
+        return res.status(500).json({ status: 'FAILED', error: 'Proxy setup failed due to internal error.' });
+    }
     // --- END Proxy Setup (FIXED) ---
     
     // --- EARNING CONTROL LOGIC ---
     let shouldRunConversion = false;
-let earningMode = 'ADSENSE SAFE (High Impression Mode)';
+    let earningMode = 'ADSENSE SAFE (High Impression Mode)';
     let useHighCpcKeywords = false;
-if (clicker === '1') {
+    if (clicker === '1') {
         if (Math.random() < HIGH_VALUE_ACTION_CHANCE) {
             shouldRunConversion = true;
-useHighCpcKeywords = true; 
+            useHighCpcKeywords = true; 
             earningMode = 'MAX EARNING (High-CPC & Conversion Mode)';
-}
+        }
     }
     
     // --- GA4 MP Session Data Generation ---
     const cid = uid;
-const session_id = Date.now(); 
+    const session_id = Date.now(); 
     const geo = getRandomGeo(); 
     const traffic = getRandomTrafficSource(true); 
     const engagementTime = randomInt(30000, 120000);
-const userProperties = {
+    const userProperties = {
         simulated_geo: { value: geo.country }, 
         user_timezone: { value: geo.timezone }
     };
-let eventCount = 0;
+    let eventCount = 0;
 
     // --- FUNCTION TO SEND DATA VIA PROXY ---
     async function sendDataViaProxy(payload, eventType) {
         if (!isGaMpEnabled) {
              console.log(`[PROXY MP SKIP] Keys missing. Skipped: ${eventType}.`);
-return false; 
+            return false; 
         }
         
         const gaEndpoint = `https://www.google-analytics.com/mp/collect?measurement_id=${ga_id}&api_secret=${api_secret}`;
-payload.timestamp_micros = String(Date.now() * 1000); 
+        payload.timestamp_micros = String(Date.now() * 1000); 
         const USER_AGENT_GA4 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
-try { 
+        try { 
             const response = await nodeFetch(gaEndpoint, { 
                 method: 'POST',
                 body: JSON.stringify(payload),
                 headers: { 
                     'Content-Type': 'application/json',
-       
-              'User-Agent': USER_AGENT_GA4 
+                    'User-Agent': USER_AGENT_GA4 
                 },
                 agent: proxyAgent 
             });
-if (response.status === 204) { 
+            if (response.status === 204) { 
                 console.log(`[PROXY MP SUCCESS] Sent: ${eventType} via ${ip}:${port}`);
-return true;
+                return true;
             } else {
                 const errorText = await response.text();
-console.error(`[PROXY MP FAILURE] Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
+                console.error(`[PROXY MP FAILURE] Status: ${response.status}. Event: ${eventType}. GA4 Error: ${errorText.substring(0, 100)}...`);
                 return false;
-}
+            }
         } catch (error) {
             console.error(`[PROXY MP CRITICAL ERROR] Event: ${eventType}. Connection Failed (Code: ${error.code || 'N/A'}). Error: ${error.message}`);
-return false;
+            return false;
         }
     }
     // --- END: FUNCTION TO SEND DATA VIA PROXY ---
@@ -721,50 +706,48 @@ return false;
         
         // 🚀 STEP 0 - GEMINI AI Keyword Generation
         let searchKeyword = null;
-if (traffic.source === 'google' && GEMINI_KEY) { 
+        if (traffic.source === 'google' && GEMINI_KEY) { 
              if (useHighCpcKeywords) {
                 searchKeyword = await generateSearchKeyword(target, true);
-// true = HighValue (Max Earning)
                 if (searchKeyword) {
                     traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-console.log(`[GEMINI BOOST: MAX CPC] Generated Keyword: "${searchKeyword}"`);
+                    console.log(`[GEMINI BOOST: MAX CPC] Generated Keyword: "${searchKeyword}"`);
                 }
              } else if (Math.random() < 0.3) {
                  searchKeyword = await generateSearchKeyword(target, false);
-if (searchKeyword) {
+                 if (searchKeyword) {
                     traffic.referrer = `https://www.google.com/search?q=${encodeURIComponent(searchKeyword)}`;
-console.log(`[GEMINI BOOST: REALISTIC] Generated Keyword: "${searchKeyword}"`);
+                    console.log(`[GEMINI BOOST: REALISTIC] Generated Keyword: "${searchKeyword}"`);
                  }
              }
         }
 
         // 🔥 STEP 1: TARGET URL VISIT
         console.log(`[TARGET VISIT] Hitting target ${target}.`);
-const targetResponse = await nodeFetch(target, {
+        const targetResponse = await nodeFetch(target, {
             method: 'GET', 
             headers: { 
                 'User-Agent': USER_AGENT,
                 'Referer': traffic.referrer 
             }, 
             agent: proxyAgent 
-     
-       });
+        });
 
         if (targetResponse.status < 200 || targetResponse.status >= 300) {
              throw new Error(`Target visit failed with status ${targetResponse.status}`);
-}
+        }
         console.log(`[TARGET VISIT SUCCESS] Target visited.`);
-// 💡 ADVANCED IDEA: REALISTIC WAIT TIME
+        // 💡 ADVANCED IDEA: REALISTIC WAIT TIME
         const waitTime = randomInt(20000, 40000);
-console.log(`[WAIT] Simulating human behavior: Waiting for ${Math.round(waitTime/1000)} seconds.`);
+        console.log(`[WAIT] Simulating human behavior: Waiting for ${Math.round(waitTime/1000)} seconds.`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
-// 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION
+        // 🔥 STEP 2: SIMULATE CONVERSION/HIGH-VALUE ACTION
         if (shouldRunConversion) { 
             console.log(`[HIGH-VALUE ACTION] Conversion Mode is ON (Randomized Check Passed).`);
-await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
+            await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
         } else {
              console.log(`[ADSENSE SAFE MODE] Conversion Mode is OFF (Randomized Check Failed or Disabled). Skipping high-value action.`);
-}
+        }
         
         // 🔥 STEP 3: Send GA4 MP data
         if (isGaMpEnabled) {
@@ -772,18 +755,15 @@ await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
             // 1. SESSION START EVENT
             const sessionStartPayload = {
                 client_id: cid,
-       
-           user_properties: userProperties,
+                user_properties: userProperties,
                 events: [{ 
                     name: "session_start", 
                     params: { 
                         session_id: session_id, 
-  
                         _ss: 1, 
                         debug_mode: true,
                         language: "en-US",
                         source: traffic.source,
- 
                         medium: traffic.medium,
                         session_default_channel_group: traffic.medium === "organic" ?
 "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"), 
@@ -791,7 +771,7 @@ await simulateConversion(target, proxyAgent, traffic.referrer, USER_AGENT);
                     } 
                 }]
             };
-if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
+            if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
             
             // 2. PAGE VIEW EVENT
             const pageViewPayload = {
@@ -799,7 +779,6 @@ if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
                 user_properties: userProperties,
                 events: [{ 
                     name: 'page_view', 
-  
                     params: { 
                         page_location: target, 
                         page_title: (traffic.medium === "organic" && searchKeyword) ?
@@ -807,13 +786,12 @@ if (await sendDataViaProxy(sessionStartPayload, 'session_start')) eventCount++;
                         session_id: session_id, 
                         debug_mode: true,
                         language: "en-US",
-                   
-         engagement_time_msec: engagementTime,
+                        engagement_time_msec: engagementTime,
                         page_referrer: traffic.referrer 
                     } 
                 }]
             };
-if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
+            if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
             
             // 3. USER ENGAGEMENT
             const engagementPayload = {
@@ -821,40 +799,37 @@ if (await sendDataViaProxy(pageViewPayload, 'page_view')) eventCount++;
                 user_properties: userProperties, 
                 events: [
                     { 
-    
-                      name: "user_engagement", 
+                        name: "user_engagement", 
                         params: { 
                             engagement_time_msec: engagementTime, 
-                      
-              session_id: session_id,
+                            session_id: session_id,
                             debug_mode: true 
                         } 
                     }
                 ]
-  
             };
             if (await sendDataViaProxy(engagementPayload, 'user_engagement')) eventCount++;
-}
+        }
 
         
         // 4. Send success response back to the frontend
         const message = `✅ Success!
 Action simulated. Earning Status: ${earningMode}. GA4 Events Sent: ${eventCount}. CTR Check: ${shouldRunConversion ? 'HIT' : 'MISS'}.`;
-res.status(200).json({ 
+        res.status(200).json({ 
             status: 'OK', 
             message: message,
             eventsSent: eventCount
         });
-} catch (error) {
+    } catch (error) {
         const errorCode = error.code || error.message;
-console.error(`[PROXY REQUEST HANDLER FAILED] Error:`, errorCode);
+        console.error(`[PROXY REQUEST HANDLER FAILED] Error:`, errorCode);
         
         res.status(502).json({ 
             status: 'FAILED', 
             error: 'Connection ya Target URL se connect nahi ho paya. VPN/Proxy check karein.', 
             details: errorCode
         });
-}
+    }
 });
 
 
@@ -869,40 +844,40 @@ console.error(`[PROXY REQUEST HANDLER FAILED] Error:`, errorCode);
 async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCount) {
     const cid = generateClientId(); 
     const session_id = Date.now();
-const geo = getRandomGeo(); 
+    const geo = getRandomGeo(); 
     const traffic = getYoutubeTrafficSource(); 
 
     // --- WATCH TIME & RETENTION LOGIC (Simulated video duration is 8 to 12 minutes) ---
     const simulatedSessionDuration = randomInt(480000, 720000);
-// 8 minutes to 12 minutes (480s to 720s)
+    // 8 minutes to 12 minutes (480s to 720s)
     const retentionRoll = Math.random(); 
     let engagementTime;
-let didCompleteVideo = false;
+    let didCompleteVideo = false;
     let didLike = false;
     let didSubscribe = false;
-if (retentionRoll < YOUTUBE_FULL_RETENTION_PERCENT) { // 25% chance
+    if (retentionRoll < YOUTUBE_FULL_RETENTION_PERCENT) { // 25% chance
         engagementTime = simulatedSessionDuration;
-didCompleteVideo = true;
+        didCompleteVideo = true;
     } else if (retentionRoll < (YOUTUBE_FULL_RETENTION_PERCENT + YOUTUBE_MID_RETENTION_PERCENT)) { // 65% chance
         engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.70), Math.floor(simulatedSessionDuration * 0.90));
-didCompleteVideo = false;
+        didCompleteVideo = false;
     } else { // 10% chance
         engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.10), Math.floor(simulatedSessionDuration * 0.20));
-didCompleteVideo = false;
+        didCompleteVideo = false;
     }
     
     engagementTime = Math.max(30000, engagementTime);
-// Must be at least 30 seconds
+    // Must be at least 30 seconds
 
     const userProperties = {
         simulated_geo: { value: geo.country }, 
         user_timezone: { value: geo.timezone }
     };
-let allSuccess = true;
+    let allSuccess = true;
     let eventsSent = 0;
     
     console.log(`\n--- [YT View ${viewCount}] Session (Geo: ${geo.country}, Duration: ${Math.round(engagementTime/1000)}s) ---`);
-// 1. SESSION START EVENT
+    // 1. SESSION START EVENT
     const sessionStartPayload = {
         client_id: cid,
         user_properties: userProperties, 
@@ -910,8 +885,7 @@ let allSuccess = true;
             name: "session_start", 
             params: { 
                 session_id: session_id, 
-              
-              campaign_source: traffic.source, 
+                campaign_source: traffic.source, 
                 campaign_medium: traffic.medium,
                 session_default_channel_group: traffic.medium === "organic" ?
 "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"),
@@ -920,13 +894,12 @@ let allSuccess = true;
                 _ss: 1, 
                 debug_mode: true,
                 language: "en-US"
-   
-           } 
+            } 
         }]
     };
-let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'yt_session_start');
+    let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'yt_session_start');
     if (result.success) eventsSent++; else allSuccess = false;
-await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
+    await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
 
     // 2. PAGE VIEW EVENT (Video Page Load)
     const pageViewPayload = {
@@ -936,20 +909,18 @@ await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
             name: 'page_view', 
             params: { 
                 page_location: videoUrl, 
-    
-              page_title: "Simulated YouTube Video Page",
+                page_title: "Simulated YouTube Video Page",
                 session_id: session_id, 
                 debug_mode: true,
                 language: "en-US",
                 page_referrer: traffic.referrer,
-               
-              engagement_time_msec: randomInt(300, 800) 
+                engagement_time_msec: randomInt(300, 800) 
             } 
         }]
     };
-result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
+    result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
     if (result.success) eventsSent++; else allSuccess = false;
-await new Promise(resolve => setTimeout(resolve, randomInt(500, 1500)));
+    await new Promise(resolve => setTimeout(resolve, randomInt(500, 1500)));
     
     // 3. VIDEO START EVENT
     const videoStartPayload = {
@@ -959,16 +930,15 @@ await new Promise(resolve => setTimeout(resolve, randomInt(500, 1500)));
             name: 'video_start', 
             params: { 
                 video_url: videoUrl, 
-       
-              session_id: session_id,
+                session_id: session_id,
                 debug_mode: true,
                 video_provider: 'youtube'
             } 
         }]
     };
-result = await sendData(gaId, apiSecret, videoStartPayload, viewCount, 'video_start');
+    result = await sendData(gaId, apiSecret, videoStartPayload, viewCount, 'video_start');
     if (result.success) eventsSent++; else allSuccess = false;
-await new Promise(resolve => setTimeout(resolve, randomInt(500, 1000)));
+    await new Promise(resolve => setTimeout(resolve, randomInt(500, 1000)));
 
     // 4. VIDEO COMPLETE/PROGRESS EVENT
     if (didCompleteVideo) {
@@ -977,39 +947,35 @@ await new Promise(resolve => setTimeout(resolve, randomInt(500, 1000)));
             user_properties: userProperties, 
             events: [{ 
                 name: 'video_complete', 
-            
-              params: { 
+                params: { 
                     video_url: videoUrl, 
                     session_id: session_id,
                     debug_mode: true,
                     video_provider: 'youtube'
-         
-           } 
+            } 
             }]
         };
-result = await sendData(gaId, apiSecret, videoCompletePayload, viewCount, 'video_complete');
+        result = await sendData(gaId, apiSecret, videoCompletePayload, viewCount, 'video_complete');
         if (result.success) eventsSent++; else allSuccess = false;
-} else if (engagementTime > simulatedSessionDuration * 0.5) {
+    } else if (engagementTime > simulatedSessionDuration * 0.5) {
         // VIDEO PROGRESS (For mid-retention, signal 50% progress)
         const videoProgressPayload = {
             client_id: cid,
             user_properties: userProperties, 
             events: [{ 
                 name: 'video_progress', 
-       
-              params: { 
+                params: { 
                     video_url: videoUrl, 
                     session_id: session_id,
                     debug_mode: true,
                     video_provider: 'youtube',
-    
-                  video_percent: 50 // Signal 50% watched
+                    video_percent: 50 // Signal 50% watched
                 } 
             }]
         };
-result = await sendData(gaId, apiSecret, videoProgressPayload, viewCount, 'video_progress (50%)');
+        result = await sendData(gaId, apiSecret, videoProgressPayload, viewCount, 'video_progress (50%)');
         if (result.success) eventsSent++; else allSuccess = false;
-}
+    }
     
     // 5. LIKE & SUBSCRIBE ACTION (35% Chance)
     if (Math.random() < YOUTUBE_ENGAGEMENT_CHANCE) { 
@@ -1020,13 +986,11 @@ result = await sendData(gaId, apiSecret, videoProgressPayload, viewCount, 'video
                 client_id: cid,
                 user_properties: userProperties, 
                 events: [{ 
-      
-                name: 'like_video', 
+                    name: 'like_video', 
                     params: { 
                         video_url: videoUrl, 
                         session_id: session_id,
-           
-              debug_mode: true
+                        debug_mode: true
                     } 
                 }]
             };
@@ -1036,27 +1000,24 @@ result = await sendData(gaId, apiSecret, videoProgressPayload, viewCount, 'video
                  didLike = true; 
             } else allSuccess = false;
         }  
-        // 5b.
-SUBSCRIBE TO CHANNEL EVENT (30% chance of a subscribe, within the 35% engagement block)
+        // 5b. SUBSCRIBE TO CHANNEL EVENT (30% chance of a subscribe, within the 35% engagement block)
         if (Math.random() < 0.3) { 
              const subscribePayload = {
                 client_id: cid,
                 user_properties: userProperties, 
                 events: [{ 
-     
                    name: 'subscribe', 
                     params: { 
                         channel_url: channelUrl, 
                         session_id: session_id,
-          
-              debug_mode: true
+                        debug_mode: true
                     } 
                 }]
             };
-result = await sendData(gaId, apiSecret, subscribePayload, viewCount, 'subscribe');
+            result = await sendData(gaId, apiSecret, subscribePayload, viewCount, 'subscribe');
             if (result.success) {
                  eventsSent++;
-didSubscribe = true; 
+                 didSubscribe = true; 
              } else allSuccess = false;
         }
     }
@@ -1067,16 +1028,15 @@ didSubscribe = true;
         events: [{ 
             name: "user_engagement", 
             params: { 
-      
-              engagement_time_msec: engagementTime, // The main metric for Watch Time
+                engagement_time_msec: engagementTime, // The main metric for Watch Time
                 session_id: session_id,
                 debug_mode: true 
             } 
         }]
     };
-result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
+    result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
     if (result.success) eventsSent++; else allSuccess = false;
-console.log(`[YT View ${viewCount}] Session Complete. Total Events Sent: ${eventsSent}.`);
+    console.log(`[YT View ${viewCount}] Session Complete. Total Events Sent: ${eventsSent}.`);
 
     // Return metrics for final summary 
     return { 
@@ -1098,7 +1058,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
     // 1. Basic Validation (Changed the max views)
     if (!ga_id || !api_key || !totalViewsRequested || totalViewsRequested < 1 || 
-totalViewsRequested > MAX_VIEWS || !channel_url || !Array.isArray(video_urls) || video_urls.length === 0) {
+        totalViewsRequested > MAX_VIEWS || !channel_url || !Array.isArray(video_urls) || video_urls.length === 0) {
         return res.status(400).json({ 
             status: 'error', 
             message: `Missing GA keys, Views (1-${MAX_VIEWS}), Channel URL, or Video URLs (min 1).` 
@@ -1107,31 +1067,30 @@ totalViewsRequested > MAX_VIEWS || !channel_url || !Array.isArray(video_urls) ||
 
     // Filter and ensure URLs are valid YouTube links
     const validVideoUrls = video_urls.filter(url => 
-       
-         url && (url.includes('youtube.com/watch') || url.includes('youtu.be/'))
+        url && (url.includes('youtube.com/watch') || url.includes('youtu.be/'))
     );
-if (validVideoUrls.length === 0) {
+    if (validVideoUrls.length === 0) {
         return res.status(400).json({ 
             status: 'error', 
             message: 'At least one valid YouTube Video URL is required.' 
         });
-}
+    }
 
     // 2. Key Validation
     const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
-if (!validationResult.valid) {
+    if (!validationResult.valid) {
          return res.status(400).json({ 
             status: 'error', 
             message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
         });
-}
+    }
 
     // 3. View Distribution Logic: Distribute totalViewsRequested evenly across validVideoUrls
     const viewPlan = [];
-const numTargets = validVideoUrls.length;
+    const numTargets = validVideoUrls.length;
     const baseViewsPerTarget = Math.floor(totalViewsRequested / numTargets);
     let remainder = totalViewsRequested % numTargets;
-validVideoUrls.forEach(url => {
+    validVideoUrls.forEach(url => {
         let viewsForUrl = baseViewsPerTarget;
         if (remainder > 0) {
             viewsForUrl++; // Distribute the remainder views one by one
@@ -1139,20 +1098,19 @@ validVideoUrls.forEach(url => {
         }
         for (let i = 0; i < viewsForUrl; i++) {
             viewPlan.push(url);
-      
         }
     });
     
     // Final shuffle for realistic distribution over time
     viewPlan.sort(() => Math.random() - 0.5);
-const finalTotalViews = viewPlan.length;
+    const finalTotalViews = viewPlan.length;
 
 
     res.json({ 
         status: 'accepted', 
         message: `✨ Request accepted. Keys validated. Processing ${finalTotalViews} views across ${numTargets} video(s) started in the background.`
     });
-// 4. Start the heavy, time-consuming simulation in the background
+    // 4. Start the heavy, time-consuming simulation in the background
     (async () => {
         const finalTotalViews = viewPlan.length;
         let successfulViews = 0;
@@ -1161,7 +1119,6 @@ const finalTotalViews = viewPlan.length;
         let totalSimulatedSubscribes = 0;
         
         console.log(`\n[YOUTUBE BOOSTER START] Starting real simulation for ${finalTotalViews} views across ${numTargets} URLs.`);
-  
         
         for (let i = 0; i < finalTotalViews; i++) {
             const url = viewPlan[i];
@@ -1169,37 +1126,36 @@ const finalTotalViews = viewPlan.length;
 
             if (i > 0) {
                 // Use a realistic, slow delay for YouTube traffic (3 to 5 minutes)
- 
                 const delay = randomInt(180000, 300000); // 3 minutes to 5 minutes
                 console.log(`[YT View ${currentView}/${finalTotalViews}] Waiting for ${Math.round(delay / 60000)} minutes...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
 
             const sessionResult = await simulateYoutubeView(ga_id, api_key, 
-url, channel_url, currentView);
+                url, channel_url, currentView);
             
             // Tally results
             if (sessionResult && sessionResult.watchTimeMs > 0) {
                 successfulViews++;
-totalSimulatedWatchTimeMs += sessionResult.watchTimeMs;
+                totalSimulatedWatchTimeMs += sessionResult.watchTimeMs;
                 if (sessionResult.liked) totalSimulatedLikes++;
                 if (sessionResult.subscribed) totalSimulatedSubscribes++;
             }
         }
         
         const watchTimeInHours = (totalSimulatedWatchTimeMs / 3600000).toFixed(2);
-// --- FINAL CONSOLE PROOF (Teacher Demo Log) ---
+        // --- FINAL CONSOLE PROOF (Teacher Demo Log) ---
         console.log(`\n======================================================`);
         console.log(`\n======================================================`);
-console.log(`✅ YOUTUBE BOOSTER COMPLETE: DEMO PROOF`)
+        console.log(`✅ YOUTUBE BOOSTER COMPLETE: DEMO PROOF`)
         console.log(`======================================================`);
         console.log(`VIEWS SENT: ${successfulViews} / ${finalTotalViews}`);
         console.log(`TOTAL SIMULATED WATCH TIME: ${watchTimeInHours} HOURS`);
-console.log(`TOTAL SIMULATED LIKES: ${totalSimulatedLikes}`);
+        console.log(`TOTAL SIMULATED LIKES: ${totalSimulatedLikes}`);
         console.log(`TOTAL SIMULATED SUBSCRIBERS: ${totalSimulatedSubscribes}`);
         console.log(`------------------------------------------------------`);
         console.log(`STATUS: Views and Watch Time should now appear in YouTube Studio Realtime/GA4 DebugView.`);
-console.log(`======================================================`);
+        console.log(`======================================================`);
         
     })();
 });
@@ -1251,10 +1207,18 @@ app.post('/anime-convert', (req, res) => {
 
         // अपलोड की गई फ़ाइल को "converted" फ़ाइल के नाम में बदलें
         try {
+            // fs.renameSync is atomic and ensures the file is moved before proceeding
             fs.renameSync(tempFilePath, convertedFilePath);
             console.log(`[CONVERTER SUCCESS] File renamed to: ${newFileName}`);
         } catch (e) {
-            console.error(`[CONVERTER RENAME FAIL] Error: ${e.message}`);
+            // If rename fails, try copy and unlink (less safe, but ensures file is not stuck)
+            try {
+                fs.copyFileSync(tempFilePath, convertedFilePath);
+                fs.unlinkSync(tempFilePath);
+                console.log(`[CONVERTER SUCCESS] File copied/deleted successfully: ${newFileName}`);
+            } catch (copyErr) {
+                console.error(`[CONVERTER RENAME/COPY FAIL] Critical Error: ${copyErr.message}`);
+            }
         }
 
         // 4. Download URL बनाएँ
