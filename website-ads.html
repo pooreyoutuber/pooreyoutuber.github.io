@@ -1,219 +1,397 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ YouTube Caption Gen ⚡ - Anime Style</title>
-    <link href="https://fonts.googleapis.com/css2?family=Jaro:wght@400&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <title>Anime Style Video Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* Global Reset */
-        body {
-            background-color: #1a1a2e; /* Dark Purple Background */
-            color: #ffffff;
-            font-family: 'Orbitron', sans-serif; /* Tech/Anime Font */
+        /* Global Reset and Base Styles */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #0d1117; /* Dark Background */
+            color: #c9d1d9;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: auto;
-        }
-        /* Main Container */
-        .container {
-            max-width: 700px;
-            width: 90%;
-            background: rgba(43, 43, 66, 0.85); /* Semi-transparent dark container */
-            border: 3px solid #00f0ff; /* Neon Blue Border */
-            box-shadow: 0 0 20px #00f0ff80, 0 0 5px #ff1b6b; /* Neon Glow */
-            border-radius: 12px;
-            padding: 40px;
-            animation: fadeIn 1s ease-out;
+            padding: 20px;
         }
 
-        /* Titles and Headers */
-        h1 {
-            font-family: 'Jaro', sans-serif; /* Display Font */
-            color: #ff1b6b; /* Neon Pink */
+        .converter-container {
+            width: 100%;
+            max-width: 900px;
+            background: #161b22;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             text-align: center;
+        }
+
+        .title {
             font-size: 2.5em;
-            text-shadow: 0 0 5px #ff1b6b, 0 0 10px #ff1b6b;
+            font-weight: 700;
+            color: #58a6ff; /* Blue Highlight */
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #8b949e;
             margin-bottom: 30px;
         }
 
-        /* Form Elements */
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: 700;
-            color: #00f0ff; /* Neon Blue Label */
-            text-transform: uppercase;
-            font-size: 0.9em;
-        }
-        
-        input[type="text"], textarea {
-            width: 100%;
-            padding: 12px;
-            margin-top: 8px;
-            border: 1px solid #00f0ff;
-            background-color: #0d0d1a; /* Very dark input background */
-            color: #ffffff;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: 'Orbitron', sans-serif;
-            transition: border-color 0.3s;
-        }
-        input[type="text"]:focus, textarea:focus {
-            outline: none;
-            border-color: #ff1b6b; /* Focus color change */
-            box-shadow: 0 0 8px #ff1b6b80;
-        }
-        
-        /* Button Style (Cyber Button) */
-        button {
-            background: linear-gradient(45deg, #00f0ff, #ff1b6b); /* Dual color gradient */
-            color: #1a1a2e; /* Dark text on button */
-            padding: 15px 30px;
-            border: none;
+        /* --- Upload Box Styles --- */
+        .upload-box {
+            border: 3px dashed #30363d;
+            background: #0d1117;
+            padding: 40px 20px;
+            margin-bottom: 30px;
             border-radius: 8px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .upload-box.drag-over {
+            border-color: #58a6ff;
+            background: #1f2a3a;
+        }
+
+        .file-name-display {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #58a6ff;
+        }
+
+        /* --- Buttons Styles --- */
+        .main-btn, .convert-btn {
+            background: #238636; /* Green */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
             cursor: pointer;
-            margin-top: 30px;
-            width: 100%;
-            font-size: 1.1em;
-            font-weight: 700;
-            text-transform: uppercase;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 27, 107, 0.6);
-        }
-
-        /* Status & Output Areas */
-        #status {
-            margin-top: 20px;
-            text-align: center;
-            font-weight: 700;
-            color: #ffc107; /* Yellow for processing */
-            min-height: 20px;
-        }
-
-        .result {
-            margin-top: 25px;
-            padding: 20px;
-            border: 2px solid #00f0ff;
-            background-color: rgba(0, 240, 255, 0.1); /* Light blue transparent background */
-            border-radius: 6px;
-            white-space: pre-wrap;
-            color: #ffffff;
             font-size: 1em;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 15px;
         }
-        
-        .error {
-            margin-top: 25px;
+
+        .main-btn:hover, .convert-btn:hover {
+            background: #2ea043;
+        }
+
+        /* --- Style Grid Styles --- */
+        .styles-grid {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .style-item {
+            background: transparent;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            padding: 5px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 120px;
+        }
+
+        .style-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-item span {
+            color: #8b949e;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .style-item.selected {
+            border-color: #58a6ff;
+        }
+
+        .style-item.selected span {
+            color: #c9d1d9;
+        }
+
+        /* --- Status/Progress Styles --- */
+        .status-area {
             padding: 20px;
-            border: 2px solid #dc3545;
-            background-color: rgba(220, 53, 69, 0.2);
-            color: #dc3545;
-            border-radius: 6px;
-            font-weight: bold;
+        }
+
+        .progress-bar-container {
+            background: #30363d;
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #58a6ff, #238636);
+            transition: width 0.4s ease-in-out;
+        }
+
+        /* --- Download Styles --- */
+        .download-btn {
+            width: 200px;
+            background: #03c737;
+        }
+
+        .download-btn:hover {
+            background: #02a12c;
         }
         
-        /* Keyframe for animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #f8514933;
+            color: #f85149;
+            border: 1px solid #f85149;
+        }
+
+        .success {
+            background: #23863633;
+            color: #238636;
+            border: 1px solid #238636;
         }
     </style>
 </head>
 <body>
+    <div class="converter-container">
+        <h1 class="title">Anime Style Video Converter</h1>
+        <p class="subtitle">Transform Your Videos into Anime!</p>
 
-    <div class="container">
-        <h1>[NEO-YOUTUBER] CAPTION GENERATOR ⚡</h1>
+        <div id="upload-area" class="upload-box">
+            <p>Drag & Drop your video here, or Click to Upload (Max 30 seconds)</p>
+            <input type="file" id="videoFileInput" accept="video/*" hidden>
+            <button id="upload-btn" class="main-btn" onclick="document.getElementById('videoFileInput').click();">
+                Upload Video
+            </button>
+            <p id="file-name" class="file-name-display"></p>
+        </div>
+
+        <div id="style-selection" class="styles-grid" style="display: none;">
+            <button class="style-item" data-style="what-if">
+                <img src="https://i.imgur.com/kS9A00L.png" alt="What If...?">
+                <span>What If...?</span>
+            </button>
+            <button class="style-item selected" data-style="ben-10-classic">
+                <img src="https://i.imgur.com/z4Dq5fW.png" alt="Ben 10 Classic">
+                <span>Ben 10 Classic</span>
+            </button>
+            <button class="style-item" data-style="jujutsu-kaisen">
+                <img src="https://i.imgur.com/s6E7jU8.png" alt="Jujutsu Kaisen">
+                <span>Jujutsu Kaisen</span>
+            </button>
+        </div>
+
+        <div id="status-area" class="status-area" style="display: none;">
+            <p id="status-message">Converting... Please wait!</p>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
         
-        <label for="renderUrl">API Endpoint (Render URL):</label>
-        <input type="text" id="renderUrl" value="https://YOUR_RENDER_URL_HERE.onrender.com" placeholder="जैसे: https://my-project-yt.onrender.com" />
-
-        <label for="videoDescription">VIDEO DATA INPUT:</label>
-        <textarea id="videoDescription" rows="4" placeholder="वीडियो का विषय/कंटेंट यहाँ लिखें। (उदाहरण: मैंने एक 1000 साल पुराने महल के रहस्य का पर्दाफाश किया।)" required></textarea>
-
-        <button onclick="generateCaption()">INITIATE GENERATION PROTOCOL</button>
-
-        <div id="status"></div>
-        <div id="output"></div>
+        <div id="download-area" class="download-area" style="display: none;">
+            <a id="download-link" href="#" target="_blank">
+                <button class="main-btn download-btn">Download</button>
+            </a>
+        </div>
     </div>
 
     <script>
-        // JavaScript Logic: API Calling
-        async function generateCaption() {
-            const description = document.getElementById('videoDescription').value;
-            const baseUrl = document.getElementById('renderUrl').value.trim();
-            const statusDiv = document.getElementById('status');
-            const outputDiv = document.getElementById('output');
-            
-            outputDiv.innerHTML = '';
-            
-            // Render URL validation
-            if (!baseUrl || baseUrl.includes("YOUR_RENDER_URL_HERE")) {
-                outputDiv.innerHTML = '<div class="error">❌ ERROR: Render URL को सही करना ज़रूरी है। (API Endpoint Invalid)</div>';
+        // --- कॉन्फ़िगरेशन ---
+        // आपके Render Cloud URL का उपयोग API बेस URL के रूप में
+        const API_BASE_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com';
+        const CONVERSION_ENDPOINT = '/anime-convert'; 
+
+        // --- DOM एलीमेंट ---
+        const uploadArea = document.getElementById('upload-area');
+        const videoFileInput = document.getElementById('videoFileInput');
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileNameDisplay = document.getElementById('file-name');
+        const styleSelectionArea = document.getElementById('style-selection');
+        const styleButtons = document.querySelectorAll('.style-item');
+        const statusArea = document.getElementById('status-area');
+        const statusMessage = document.getElementById('status-message');
+        const progressBar = document.getElementById('progress-bar');
+        const downloadArea = document.getElementById('download-area');
+        const downloadLink = document.getElementById('download-link');
+
+        let selectedStyle = 'ben-10-classic'; 
+        let videoFile = null;
+
+        // --- इवेंट लिसनर्स ---
+
+        // 1. Drag & Drop इवेंट्स
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                handleFile(files[0]);
+            }
+        });
+
+        // 2. फ़ाइल इनपुट परिवर्तन
+        videoFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // 3. स्टाइल बटन क्लिक
+        styleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                styleButtons.forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedStyle = button.getAttribute('data-style');
+            });
+        });
+
+        // 4. अपलोड/कन्वर्ट बटन क्लिक
+        uploadBtn.addEventListener('click', (e) => {
+            if (videoFile) {
+                e.preventDefault();
+                startConversion();
+            }
+        });
+
+
+        // --- फ़ंक्शन लॉजिक ---
+
+        function handleFile(file) {
+            if (!file.type.startsWith('video/')) {
+                alert("कृपया केवल एक वीडियो फ़ाइल अपलोड करें।");
                 return;
             }
-            if (description.trim() === "") {
-                outputDiv.innerHTML = '<div class="error">❌ ERROR: कृपया Video Data Input दर्ज करें।</div>';
+            if (file.size > 30 * 1024 * 1024) { // 30 MB
+                alert("वीडियो का आकार 30 MB से अधिक नहीं होना चाहिए।");
                 return;
             }
-
-            statusDiv.innerHTML = '✨ [PROCESSING...] Gemini Protocol Activated. Please Wait.';
-
-            // API Endpoint (आपके index.js में यह रूट है)
-            const apiUrl = `${baseUrl}/api/caption-generate`;
             
+            videoFile = file;
+            fileNameDisplay.textContent = `Selected: ${file.name}`;
+            
+            // UI अपडेट करें: अपलोड बटन को कन्वर्ट बटन में बदलें
+            uploadBtn.textContent = 'Convert to Anime!';
+            uploadBtn.classList.add('convert-btn');
+            uploadBtn.classList.remove('main-btn');
+
+            // स्टाइल चयन क्षेत्र दिखाएँ
+            styleSelectionArea.style.display = 'flex';
+        }
+
+        function showStatus(message, isError = false) {
+            statusArea.style.display = 'block';
+            statusMessage.textContent = message;
+            statusMessage.className = 'message';
+            if (isError) {
+                statusMessage.classList.add('error');
+            } else {
+                statusMessage.classList.add('success');
+            }
+        }
+
+        function updateProgress(percent) {
+            progressBar.style.width = `${percent}%`;
+            statusMessage.textContent = `Converting... ${Math.floor(percent)}%`;
+        }
+
+
+        async function startConversion() {
+            if (!videoFile) return;
+
+            // UI को प्रोसेसिंग मोड में बदलें
+            uploadArea.style.display = 'none';
+            styleSelectionArea.style.display = 'none';
+            downloadArea.style.display = 'none';
+            statusArea.style.display = 'block';
+            
+            // --- 🚀 API कॉल ---
+            
+            const formData = new FormData();
+            formData.append('video', videoFile);
+            formData.append('style', selectedStyle);
+            
+            // डमी प्रोग्रेस अपडेट (क्योंकि हम क्लाइंट साइड से वास्तविक बैकएंड प्रोसेसिंग को ट्रैक नहीं कर सकते)
+            const interval = setInterval(() => {
+                let currentWidth = parseFloat(progressBar.style.width || 10);
+                if (currentWidth < 90) {
+                    // धीरे-धीरे 90% तक बढ़ाएँ
+                    updateProgress(currentWidth + Math.random() * 5); 
+                }
+            }, 1000);
+
+
             try {
-                // The Fetch Call
-                const response = await fetch(apiUrl, {
+                const response = await fetch(API_BASE_URL + CONVERSION_ENDPOINT, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ description: description })
+                    body: formData,
                 });
 
-                // Check for HTTP errors (404, 500, etc.)
+                clearInterval(interval); // प्रोग्रेस अपडेट बंद करें
+
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: 'No response body' }));
-                    throw new Error(`[SERVER RESPONSE FAILURE] HTTP Status: ${response.status}. Detail: ${errorData.error || response.statusText}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Conversion failed on the server.');
                 }
 
-                // Success
-                const data = await response.json();
+                const result = await response.json();
                 
-                statusDiv.innerHTML = '✅ [COMPLETE] Output Data Received.';
-                outputDiv.innerHTML = `<div class="result"><strong>[GENERATED CAPTION]</strong><br>${data.caption}</div>`;
+                // सफलता!
+                updateProgress(100);
+                showStatus('✅ Conversion Complete! Your Anime Video is Ready.', false);
+                
+                downloadLink.href = result.downloadUrl; 
+                downloadArea.style.display = 'block';
 
             } catch (error) {
-                // Network Error Handling (This is where "Failed to fetch" lands)
-                statusDiv.innerHTML = ''; // Clear status
-                console.error("Fetch Error:", error);
+                clearInterval(interval);
+                updateProgress(0); 
+                showStatus(`❌ Error: ${error.message}`, true);
                 
-                let errorMessage = `❌ [CRITICAL ERROR] Failed to fetch. (${error.message})`;
-                
-                if (error.message.includes('Failed to fetch')) {
-                    errorMessage = `
-                    ❌ [CONNECTION FAILED] "Failed to fetch" Error. 
-                    <br><br>
-                    <strong>MOST LIKELY CAUSE:</strong>
-                    <br>
-                    1. <strong>Render Sleep Mode:</strong> सर्वर निष्क्रिय (Sleep Mode) में है। 1 मिनट इंतज़ार करके फिर से कोशिश करें।
-                    <br>
-                    2. <strong>Incorrect URL:</strong> ऊपर दिया गया Render URL गलत है या `https://` प्रोटोकॉल मिसिंग है।
-                    <br>
-                    3. <strong>Backend Issue:</strong> बैकएंड क्रैश हो गया है। Render Logs की जाँच करें।`;
-                }
+                // विफल होने पर UI को वापस अपलोड मोड में रीसेट करें
+                setTimeout(() => {
+                    location.reload(); // सबसे आसान रीसेट
+                }, 5000);
 
-                outputDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
             }
         }
     </script>
-
 </body>
 </html>
