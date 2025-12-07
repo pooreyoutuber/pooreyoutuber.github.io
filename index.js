@@ -8,7 +8,6 @@ import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 
 // सुनिश्चित करें कि आपने `package.json` में "type": "module" जोड़ा है।
-// यह लाइब्रेरी FFmpeg पर निर्भर करती है
 import ffmpeg from 'fluent-ffmpeg'; 
 
 // Node.js ESM (Module) के लिए __dirname सेट करना
@@ -65,10 +64,8 @@ app.use('/processed_videos', express.static(PROCESSED_DIR));
 // --- 🗑️ फ़ाइल क्लीनअप फ़ंक्शन ---
 async function cleanupFiles(filePath, dirPath) {
     try {
-        // अपलोड की गई मूल वीडियो फ़ाइल हटाएँ
-        if (filePath) await fs.unlink(filePath).catch(() => console.log("Uploaded file already deleted."));
-        // फ़्रेम के लिए अस्थायी फ़ोल्डर हटाएँ
-        if (dirPath) await fs.rm(dirPath, { recursive: true, force: true }).catch(() => console.log("Temp directory already deleted."));
+        if (filePath) await fs.unlink(filePath).catch(() => {});
+        if (dirPath) await fs.rm(dirPath, { recursive: true, force: true }).catch(() => {});
     } catch (e) {
         console.error("Cleanup error:", e.message);
     }
@@ -115,7 +112,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         });
 
         // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना (Simulated) ---
-        // **असली AI कन्वर्जन यहाँ होगा, अभी यह केवल फ़्रेमों को कॉपी कर रहा है**
+        // असली AI कन्वर्जन यहाँ होगा, अभी यह केवल फ़्रेमों को कॉपी कर रहा है।
         
         const frameFiles = await fs.readdir(tempFramesDir);
         
@@ -128,8 +125,6 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 // DEMO: केवल कॉपी करें
                 await fs.copyFile(inputFramePath, outputFramePath); 
                 console.log(`Frame copied (Simulated conversion): ${fileName}`);
-                
-                // TODO: यहाँ Hugging Face API या Gemini Vision (यदि फ़्रेम को छोटा किया गया हो) का उपयोग करें
             });
 
         await Promise.all(conversionPromises);
@@ -144,15 +139,16 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 .input(processedFramesPattern)
                 .inputOptions([
                     '-framerate 10', 
-                    // ffmpeg इनपुट के लिए '-start_number 1' आवश्यक नहीं है यदि आपके पास 00001 से शुरू होने वाले क्रमबद्ध फ़्रेम हैं।
-                    // यह पैटर्न सुनिश्चित करता है कि यह processed/frame-00001.jpg, processed/frame-00002.jpg आदि को उठाता है।
                 ])
                 .outputOptions([
                     '-c:v libx264', 
                     '-preset fast', 
-                    '-pix_fmt yuv420p', 
-                    // फ़्रेम के आकार को सम (even) बनाने के लिए, जो अक्सर FFmpeg की आवश्यकता होती है
-                    '-vf "pad=ceil(iw/2)*2:ceil(ih/2)*2"' 
+                    
+                    // 🛑 मुख्य सुधार:
+                    // 1. पैडिंग फ़िल्टर सुनिश्चित करता है कि चौड़ाई/ऊँचाई सम (even) हो।
+                    // 2. format=yuv420p यह सुनिश्चित करता है कि पिक्सेल फ़ॉर्मेट वेब संगत हो।
+                    // यह पिछली दोनों FFmpeg त्रुटियों को हल करता है।
+                    '-vf "pad=ceil(iw/2)*2:ceil(ih/2)*2,format=yuv420p"', 
                 ])
                 .save(outputPath)
                 .on('end', () => {
