@@ -1,4 +1,6 @@
+
 // **ES Modules (ESM) Import Syntax**
+// Node.js v25.2.1 में dotenv को कॉन्फ़िगर करने का सही तरीका
 import 'dotenv/config'; 
 
 import express from 'express';
@@ -6,9 +8,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import ffmpeg from 'fluent-ffmpeg';
-// 🛑 FIX: HfInference क्लास को डिफ़ॉल्ट एक्सपोर्ट के रूप में इंपोर्ट करें।
-// यह 'SyntaxError' को हल करता है।
-import HfInference from "@huggingface/inference"; 
+// 🛑 FIX: InferenceClient को HfInference से बदला गया
+import { HfInference } from "@huggingface/inference"; 
 import { fileURLToPath } from 'url';
 
 // ESM में __dirname को परिभाषित करें
@@ -24,7 +25,7 @@ if (!HUGGINGFACE_ACCESS_TOKEN) {
     console.error("HUGGINGFACE_ACCESS_TOKEN is not set.");
 }
 
-// 🛑 FIX: HfInference क्लास का उपयोग करें
+// 🛑 FIX: यहाँ भी HfInference का उपयोग करें
 const inference = new HfInference(HUGGINGFACE_ACCESS_TOKEN);
 
 // --- ⚙️ कॉन्फ़िगरेशन ---
