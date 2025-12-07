@@ -1,26 +1,27 @@
-// index.js (Modified for @huggingface/inference SDK)
+// index.js (Fully converted to ES Modules)
 
-const express = require('express');
-const multer = require('multer');
-const fs = require('fs/promises');
-const path = require('path');
-const fsExtra = require('fs-extra'); // Cleanup के लिए
+import express from 'express';
+import multer from 'multer';
+import fs from 'fs/promises';
+import path from 'path';
+import fsExtra from 'fs-extra'; // Cleanup के लिए
 
 // Hugging Face SDK
-const { InferenceClient } = require('@huggingface/inference');
+import { InferenceClient } from '@huggingface/inference';
 
 // FFmpeg को कॉन्फ़िगर करें
-const ffmpeg = require('fluent-ffmpeg');
-const ffmpegStatic = require('@ffmpeg-installer/ffmpeg').path;
-ffmpeg.setFfmpegPath(ffmpegStatic);
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegStatic from '@ffmpeg-installer/ffmpeg';
+
+// FFmpeg का पाथ सेट करें
+ffmpeg.setFfmpegPath(ffmpegStatic.path);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Hugging Face क्लाइंट: HF_TOKEN पर्यावरण वेरिएबल से स्वचालित रूप से टोकन लेगा
+// सुनिश्चित करें कि 'HUGGINGFACE_ACCESS_TOKEN' Render पर सेट हो।
 const client = new InferenceClient(process.env.HUGGINGFACE_ACCESS_TOKEN); 
-// या process.env.HF_TOKEN, जैसा कि आपके उदाहरण में है। सुनिश्चित करें कि Render पर यह सेट हो।
-
 const HF_MODEL = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime";
 
 // अस्थायी फ़ाइल स्टोरेज सेटअप
@@ -32,11 +33,11 @@ async function convertFrameToAnime(imageBuffer, stylePrompt) {
     try {
         // SDK का उपयोग करके इमेज को सीधे Hugging Face API पर भेजें
         const imageBlob = await client.imageToImage({
-            provider: "wavespeed", // यदि यह आवश्यक हो
+            provider: "wavespeed",
             model: HF_MODEL,
             inputs: imageBuffer,
             parameters: {
-                prompt: stylePrompt,
+                prompt: stylePrompt, // उदाहरण: "Convert this photo to ben-10-classic anime style"
             },
         });
         
@@ -44,8 +45,10 @@ async function convertFrameToAnime(imageBuffer, stylePrompt) {
         return Buffer.from(await imageBlob.arrayBuffer()); 
         
     } catch (error) {
-        console.error("Hugging Face SDK Error:", error);
-        throw new Error(`Failed to convert frame: ${error.message}`);
+        // त्रुटि को विशिष्ट रूप से कैप्चर करें
+        const errorMessage = error.response ? await error.response.text() : error.message;
+        console.error("Hugging Face SDK Error:", errorMessage);
+        throw new Error(`Failed to convert frame via HF API: ${errorMessage}`);
     }
 }
 
@@ -57,12 +60,11 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     }
 
     const videoFile = req.file;
-    // 'style' इनपुट को एक प्रॉम्प्ट में बदलें जो मॉडल को एनीमे स्टाइल लागू करने के लिए मार्गदर्शन करे।
     const rawStyle = req.body.style || 'ben-10-classic'; 
     const stylePrompt = `Convert this photo to ${rawStyle} anime style, highly detailed.`;
     
     const jobId = Date.now();
-    const tempDir = path.join(__dirname, 'temp', String(jobId));
+    const tempDir = path.join(process.cwd(), 'temp', String(jobId)); // process.cwd() का उपयोग करें
 
     try {
         await fs.mkdir(tempDir, { recursive: true });
@@ -81,8 +83,8 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             ffmpeg(inputVideoPath)
                 .outputOptions([
                     `-r ${frameRate}`,
-                    `-q:v 2`,
-                    `-an` // ऑडियो स्ट्रीम हटाएँ, इसे बाद में वापस जोड़ा जाएगा
+                    `-q:v 2`, 
+                    `-an` // ऑडियो स्ट्रीम हटाएँ
                 ])
                 .save(extractedFramesPattern)
                 .on('end', () => resolve())
@@ -90,26 +92,24 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         });
 
         // --- 3. प्रत्येक फ़्रेम को एनीमे में परिवर्तित करें (Inference) ---
-        const frameFiles = (await fs.readdir(tempDir)).filter(f => f.endsWith('.jpg')).sort();
+        const frameFiles = (await fs.readdir(tempDir)).filter(f => f.match(/^frame-\d{5}\.jpg$/)).sort();
         
-        // 
-
+        // **प्रदर्शन नोट:** यह सबसे धीमा कदम है। लंबे वीडियो विफल हो सकते हैं।
         for (const filename of frameFiles) {
             const framePath = path.join(tempDir, filename);
             const frameBuffer = await fs.readFile(framePath);
 
-            // SDK कॉल
             const animeFrameBuffer = await convertFrameToAnime(frameBuffer, stylePrompt);
 
-            // परिवर्तित फ़्रेम को सहेजें
+            // परिवर्तित फ़्रेम को सहेजें (नामकरण क्रम बनाए रखें)
             await fs.writeFile(path.join(processedFramesDir, filename), animeFrameBuffer);
             await fs.unlink(framePath); // मूल फ़्रेम हटाएँ
         }
 
         // --- 4. संसाधित फ़्रेमों को वापस वीडियो में जोड़ें (Recombination) ---
         const processedFramesPattern = path.join(processedFramesDir, 'frame-%05d.jpg');
-        const finalOutputVideoPath = path.join(__dirname, 'converted', `anime-${jobId}.mp4`);
-        await fs.mkdir(path.join(__dirname, 'converted'), { recursive: true });
+        const finalOutputVideoPath = path.join(process.cwd(), 'converted', `anime-${jobId}.mp4`);
+        await fs.mkdir(path.join(process.cwd(), 'converted'), { recursive: true });
 
         await new Promise((resolve, reject) => {
             ffmpeg(processedFramesPattern)
@@ -119,7 +119,6 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 .outputOptions([
                     '-c:v libx264',
                     '-pix_fmt yuv420p',
-                    // यदि आप ऑडियो चाहते हैं, तो आपको इसे पहले एक अलग स्ट्रीम में निकालना होगा और यहां जोड़ना होगा।
                 ])
                 .save(finalOutputVideoPath)
                 .on('end', () => resolve())
@@ -138,14 +137,14 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         // Clean up even on error
         await fsExtra.remove(tempDir).catch(() => {});
         res.status(500).json({ 
-            message: "Video conversion failed. Check server logs for details.", 
+            message: "Video conversion failed. Please check the video length/size or server logs.", 
             error: error.message 
         });
     }
 });
 
 // --- स्टैटिक फ़ाइलें (डाउनलोड के लिए) ---
-app.use('/converted', express.static(path.join(__dirname, 'converted')));
+app.use('/converted', express.static(path.join(process.cwd(), 'converted')));
 
 // --- सर्वर शुरू करें ---
 app.listen(PORT, () => {
