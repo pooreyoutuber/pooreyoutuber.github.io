@@ -1,12 +1,14 @@
 // **ES Modules (ESM) Import Syntax**
-import 'dotenv/config'; // dotenv को तुरंत कॉन्फ़िगर करने का ESM तरीका
+// Node.js v25.2.1 में dotenv को कॉन्फ़िगर करने का सही तरीका
+import 'dotenv/config'; 
 
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import ffmpeg from 'fluent-ffmpeg';
-import { InferenceClient } from "@huggingface/inference";
+// 🛑 FIX: InferenceClient को HfInference से बदला गया
+import { HfInference } from "@huggingface/inference"; 
 import { fileURLToPath } from 'url';
 
 // ESM में __dirname को परिभाषित करें
@@ -21,7 +23,9 @@ const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 if (!HUGGINGFACE_ACCESS_TOKEN) {
     console.error("HUGGINGFACE_ACCESS_TOKEN is not set.");
 }
-const inference = new InferenceClient(HUGGINGFACE_ACCESS_TOKEN);
+
+// 🛑 FIX: यहाँ भी HfInference का उपयोग करें
+const inference = new HfInference(HUGGINGFACE_ACCESS_TOKEN);
 
 // --- ⚙️ कॉन्फ़िगरेशन ---
 const SAMPLE_FPS = 1; 
@@ -30,7 +34,7 @@ const CONVERTED_STORAGE = path.join(__dirname, 'converted_videos');
 const CORS_ORIGIN = '*'; 
 const HF_ANIME_MODEL = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime"; 
 
-// फ़ोल्डर सुनिश्चित करें (यदि मौजूद नहीं हैं तो बनाएँ)
+// फ़ोल्डर सुनिश्चित करें 
 if (!fs.existsSync(TEMP_STORAGE)) fs.mkdirSync(TEMP_STORAGE, { recursive: true });
 if (!fs.existsSync(CONVERTED_STORAGE)) fs.mkdirSync(CONVERTED_STORAGE, { recursive: true });
 
@@ -56,7 +60,6 @@ app.use('/static/downloads', express.static(CONVERTED_STORAGE));
 
 // 🤖 Hugging Face इमेज-टू-इमेज फ़ंक्शन
 async function convertImageToAnime(imageBuffer, prompt) {
-    // client.imageToImage Promise<Blob> देता है।
     const imageBlob = await inference.imageToImage({
         provider: "wavespeed", 
         model: HF_ANIME_MODEL,
@@ -64,7 +67,6 @@ async function convertImageToAnime(imageBuffer, prompt) {
         parameters: { prompt: prompt },
     });
     
-    // Blob को Node.js Buffer में बदलें
     return Buffer.from(await imageBlob.arrayBuffer());
 }
 
@@ -102,7 +104,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         await new Promise((resolve, reject) => {
             ffmpeg(inputVideoPath)
                 .outputOptions([
-                    `-r ${SAMPLE_FPS}`, // 1 FPS पर फ़्रेम एक्सट्रेक्ट करें
+                    `-r ${SAMPLE_FPS}`, 
                     `-q:v 2`          
                 ])
                 .save(path.join(tempFramesDir, 'frame_%04d.jpg')) 
@@ -131,7 +133,6 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         }
 
         // 3. बदले हुए फ़्रेमों को वापस वीडियो में जोड़ें (FFmpeg)
-        // यह यहाँ इनपुट फ़्रेम पैटर्न को 'converted_' से बदलता है।
         await new Promise((resolve, reject) => {
             ffmpeg()
                 .input(path.join(tempFramesDir, 'converted_frame_%04d.jpg')) 
@@ -150,7 +151,6 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         // 4. सफलता प्रतिक्रिया
         res.json({
             message: "Conversion successful!",
-            // फ़्रंटएंड को डाउनलोड लिंक /static/downloads/ एंडपॉइंट से मिलेगा
             downloadUrl: `/static/downloads/${outputVideoName}`, 
         });
 
@@ -169,4 +169,4 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
-            
+                
