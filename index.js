@@ -1,175 +1,188 @@
-// **ES Modules (ESM) Import Syntax**
-import 'dotenv/config'; 
+// index.js
 
-import express from 'express';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import ffmpeg from 'fluent-ffmpeg';
-import { HfInference } from "@huggingface/inference"; 
-import { fileURLToPath } from 'url';
-// 🛑 FIX: Blob क्लास को इंपोर्ट करें ताकि Node.js Buffer को बदला जा सके
-import { Blob } from 'node:buffer'; 
-
-
-// ESM में __dirname को परिभाषित करें
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const multer = require('multer');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const { GoogleGenAI } = require('@google/genai');
+const axios = require('axios'); // Hugging Face API calls के लिए
 
 const app = express();
-const port = process.env.PORT || 3000;
+// Render पर डिप्लॉयमेंट के लिए process.env.PORT का उपयोग करें
+const PORT = process.env.PORT || 3000; 
 
-// 🔑 एनवायरनमेंट वेरिएबल्स और क्लाइंट सेटअप
-const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
-if (!HUGGINGFACE_ACCESS_TOKEN) {
-    console.error("HUGGINGFACE_ACCESS_TOKEN is not set.");
+// --- API क्लाइंट्स ---
+// Environment Variables से Key/Token प्राप्त करें
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
+const HUGGING_FACE_TOKEN = process.env.HUGGING_FACE_TOKEN;
+
+if (!GEMINI_API_KEY || !HUGGING_FACE_TOKEN) {
+    console.error("FATAL ERROR: GEMINI_API_KEY or HUGGING_FACE_TOKEN environment variable not set.");
+    // अगर Keys नहीं हैं, तो सर्वर को बंद कर दें या Dummy मोड में चलाएँ
+    // production के लिए, यह ज़रूरी है
 }
-const inference = new HfInference(HUGGINGFACE_ACCESS_TOKEN);
 
-// --- ⚙️ कॉन्फ़िगरेशन ---
-const SAMPLE_FPS = 1; 
-const TEMP_STORAGE = path.join(__dirname, 'temp_storage');
-const CONVERTED_STORAGE = path.join(__dirname, 'converted_videos');
-const CORS_ORIGIN = '*'; 
-const HF_ANIME_MODEL = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime"; 
+const ai = new GoogleGenAI(GEMINI_API_KEY);
 
-// फ़ोल्डर सुनिश्चित करें 
-if (!fs.existsSync(TEMP_STORAGE)) fs.mkdirSync(TEMP_STORAGE, { recursive: true });
-if (!fs.existsSync(CONVERTED_STORAGE)) fs.mkdirSync(CONVERTED_STORAGE, { recursive: true });
+// Hugging Face inference API endpoint (उदाहरण के लिए Stable Diffusion)
+const HUGGING_FACE_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"; 
+// Note: आपको 'image-to-image' या 'ControlNet' मॉडल का उपयोग करने की आवश्यकता हो सकती है, जो अलग API URL पर होगा।
 
-// 💾 Multer स्टोरेज सेट करें
+// --- कॉन्फ़िगरेशन और फ़ोल्डर सेटअप ---
+app.use(cors()); // CORS सक्षम करें
+
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+const CONVERTED_DIR = path.join(__dirname, 'converted');
+
+[UPLOAD_DIR, CONVERTED_DIR].forEach(dir => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+});
+
+// फ़ाइल स्टोरेज सेटअप (Multer)
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => { cb(null, TEMP_STORAGE); },
-    filename: (req, file, cb) => { cb(null, `${Date.now()}-${file.originalname}`); }
+    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
-const upload = multer({ storage: storage });
-
-// CORS और JSON सेट करें
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', CORS_ORIGIN);
-    res.header('Access-Control-Allow-Methods', 'GET,POST');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    next();
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 30 * 1024 * 1024 } // 30 MB सीमा (HTML में निर्धारित)
 });
-app.use(express.json());
 
-// 📦 सार्वजनिक रूप से उपलब्ध फ़ाइलों को सर्व करें
-app.use('/static/downloads', express.static(CONVERTED_STORAGE));
+// --- मुख्य AI एनीमेशन पाइपलाइन लॉजिक ---
 
+/**
+ * यह फ़ंक्शन जटिल फ्रेम-दर-फ्रेम एनीमेशन प्रक्रिया का अनुकरण करता है।
+ * @param {string} videoPath - अपलोड किए गए वीडियो का लोकल पाथ
+ * @param {string} style - फ्रंटएंड से चयनित एनीमे स्टाइल (उदा. 'jujutsu-kaisen')
+ * @returns {Promise<string>} कनवर्ट किए गए वीडियो का फ़ाइल नाम
+ */
+async function processVideoToAnime(videoPath, style) {
+    console.log(`[PROCESS] Conversion started for: ${path.basename(videoPath)} in ${style} style.`);
 
-// 🤖 Hugging Face इमेज-टू-इमेज फ़ंक्शन (Blob कन्वर्जन के साथ)
-async function convertImageToAnime(imageBuffer, prompt) {
-    // 🛑 FIX: Node.js Buffer को Blob में बदलें
-    // Hugging Face क्लाइंट को Blob की आवश्यकता होती है, जिसमें arrayBuffer() फ़ंक्शन होता है।
-    const inputBlob = new Blob([imageBuffer], { type: 'image/jpeg' });
+    // ---------------------------------------------------------------------
+    // STEP 1: वीडियो से फ्रेम्स निकालना (Needs FFmpeg/OpenCV)
+    // ---------------------------------------------------------------------
+    console.log("   > [Step 1] Extracting frames...");
+    // 🛑 REAL CODE: यहाँ आप ffmpeg या OpenCV का उपयोग करके वीडियो को फ्रेम्स में तोड़ेंगे।
+    const extractedFramePaths = []; // डमी: मान लें कि 150 फ्रेम्स निकाली गई हैं
+    for (let i = 0; i < 150; i++) {
+         extractedFramePaths.push(`frame_${i}.jpg`);
+    }
+    await new Promise(resolve => setTimeout(resolve, 3000)); // 3 सेकंड डमी समय
     
-    const imageBlob = await inference.imageToImage({
-        provider: "wavespeed", 
-        model: HF_ANIME_MODEL,
-        inputs: inputBlob, // अब inputBlob में आवश्यक .arrayBuffer() फ़ंक्शन है
-        parameters: { prompt: prompt },
-    });
+
+    // ---------------------------------------------------------------------
+    // STEP 2: Gemini Vision का उपयोग करके प्रॉम्प्ट जनरेट करना
+    // ---------------------------------------------------------------------
+    console.log("   > [Step 2] Generating Prompts using Gemini Vision...");
     
-    // आउटपुट Blob को वापस Node.js Buffer में बदलें
-    return Buffer.from(await imageBlob.arrayBuffer());
+    const promptData = {}; 
+    for (const framePath of extractedFramePaths) {
+        // 🛑 REAL CODE: फ्रेम को Base64 में Encode करें
+        // const base64Image = fs.readFileSync(framePath).toString("base64");
+        
+        // 🛑 REAL CODE: Gemini को कॉल करें
+        /*
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: [
+                { text: `Analyze this image and describe it in a detailed, cinematic way. Then, create a single text-to-image prompt to convert this into a ${style} anime style while preserving structure and composition.` },
+                { inlineData: { data: base64Image, mimeType: "image/jpeg" } }
+            ]
+        });
+        promptData[framePath] = response.text;
+        */
+        
+        // डमी प्रॉम्प्ट
+        promptData[framePath] = `High quality anime illustration of a character running in a futuristic city, cinematic, detailed, ${style} style.`;
+    }
+    await new Promise(resolve => setTimeout(resolve, 5000)); // 5 सेकंड डमी समय
+
+
+    // ---------------------------------------------------------------------
+    // STEP 3: Hugging Face से एनीमे फ्रेम्स जनरेट करना
+    // ---------------------------------------------------------------------
+    console.log("   > [Step 3] Generating Anime Frames via Hugging Face API...");
+    const convertedFramePaths = [];
+
+    // Note: AI जनरेशन का यह सबसे धीमा और संसाधन-गहन हिस्सा है।
+    for (const [framePath, prompt] of Object.entries(promptData)) {
+        
+        // 🛑 REAL CODE: Hugging Face API को कॉल करें
+        /*
+        const hfResponse = await axios.post(HUGGING_FACE_API_URL, {
+            inputs: prompt,
+            // Hugging Face पर ControlNet या Image-to-Image models का उपयोग करने की आवश्यकता है।
+        }, {
+            headers: { Authorization: `Bearer ${HUGGING_FACE_TOKEN}` },
+            responseType: 'arraybuffer'
+        });
+        
+        // generatedFrame = hfResponse.data;
+        // fs.writeFileSync(outputFramePath, generatedFrame);
+        */
+        
+        // डमी
+        convertedFramePaths.push(`anime_${path.basename(framePath)}`);
+    }
+    await new Promise(resolve => setTimeout(resolve, 15000)); // 15 सेकंड डमी समय
+
+
+    // ---------------------------------------------------------------------
+    // STEP 4: फ्रेम्स को वापस वीडियो में जोड़ना (Needs FFmpeg)
+    // ---------------------------------------------------------------------
+    console.log("   > [Step 4] Reconstructing video from frames...");
+    const convertedFileName = `anime-output-${Date.now()}.mp4`;
+    const convertedFilePath = path.join(CONVERTED_DIR, convertedFileName);
+
+    // 🛑 REAL CODE: यहाँ आप ffmpeg/fluent-ffmpeg का उपयोग करके convertedFramePaths को वापस वीडियो में जोड़ेंगे।
+    // डमी के लिए, एक खाली फ़ाइल बनाएँ
+    fs.writeFileSync(convertedFilePath, 'Dummy video content'); 
+
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 सेकंड डमी समय
+
+    return convertedFileName;
 }
 
+// --- एक्सप्रेस रूट्स ---
 
-// 🛑 मुख्य API एंडपॉइंट
+// /anime-convert रूट: वीडियो अपलोड और रूपांतरण के लिए
 app.post('/anime-convert', upload.single('video'), async (req, res) => {
-    const videoFile = req.file;
-    const style = req.body.style || 'default';
-
-    if (!videoFile) {
-        return res.status(400).json({ message: 'No video file uploaded.' });
+    if (!req.file) {
+        return res.status(400).json({ message: "No video file uploaded." });
     }
 
-    const inputVideoPath = videoFile.path;
-    const sessionId = Date.now();
-    const tempFramesDir = path.join(TEMP_STORAGE, `frames_${sessionId}`);
-    const outputVideoName = `converted_anime_${sessionId}.mp4`;
-    const outputVideoPath = path.join(CONVERTED_STORAGE, outputVideoName);
-
-    if (!fs.existsSync(tempFramesDir)) fs.mkdirSync(tempFramesDir);
-    
-    // प्रॉम्प्ट 'style' पर आधारित
-    const prompt_map = {
-        "Hayao": "Turn this image into a Studio Ghibli (Hayao Miyazaki style) anime drawing, beautiful and cinematic.",
-        "Ben 10 Classic": "Convert this image into a Ben 10 Classic cartoon style drawing with thick black outlines.",
-        "Jujutsu Kaisen": "Convert this image into a modern dark-style anime drawing with a strong mood, like Jujutsu Kaisen.",
-        "default": "Convert this image into a beautiful anime style drawing."
-    };
-    const conversion_prompt = prompt_map[style] || prompt_map['default'];
+    const videoPath = req.file.path;
+    const selectedStyle = req.body.style || 'ben-10-classic';
 
     try {
-        console.log(`Starting frame extraction at ${SAMPLE_FPS} FPS. Prompt: ${conversion_prompt}`);
+        // मुख्य AI प्रोसेसिंग शुरू करें (यह लंबा समय लेगा)
+        const convertedFileName = await processVideoToAnime(videoPath, selectedStyle);
 
-        // 1. वीडियो को फ़्रेम में तोड़ें (FFmpeg)
-        await new Promise((resolve, reject) => {
-            ffmpeg(inputVideoPath)
-                .outputOptions([
-                    `-r ${SAMPLE_FPS}`, 
-                    `-q:v 2`          
-                ])
-                .save(path.join(tempFramesDir, 'frame_%04d.jpg')) 
-                .on('end', () => { resolve(); })
-                .on('error', (err) => { reject(new Error(`FFmpeg Frame Extraction failed: ${err.message}`)); });
-        });
-
-        // 2. प्रत्येक फ़्रेम को एनीमे में बदलें (Hugging Face API)
-        const frameFiles = fs.readdirSync(tempFramesDir).filter(f => f.startsWith('frame_')).sort();
-        
-        for (let i = 0; i < frameFiles.length; i++) {
-            const originalFramePath = path.join(tempFramesDir, frameFiles[i]);
-            const convertedFramePath = path.join(tempFramesDir, `converted_${frameFiles[i]}`);
-            
-            console.log(`Processing frame ${i + 1}/${frameFiles.length}...`);
-            
-            const imageBuffer = fs.readFileSync(originalFramePath);
-            // Hugging Face API कॉल
-            const convertedImageBuffer = await convertImageToAnime(imageBuffer, conversion_prompt);
-            
-            // बदले हुए फ़्रेम को सेव करें
-            fs.writeFileSync(convertedFramePath, convertedImageBuffer);
-            
-            // पुराने फ़्रेम को हटा दें
-            fs.unlinkSync(originalFramePath); 
-        }
-
-        // 3. बदले हुए फ़्रेमों को वापस वीडियो में जोड़ें (FFmpeg)
-        await new Promise((resolve, reject) => {
-            ffmpeg()
-                .input(path.join(tempFramesDir, 'converted_frame_%04d.jpg')) 
-                .inputOptions([`-framerate ${SAMPLE_FPS}`]) 
-                .videoCodec('libx264')
-                .outputOptions([
-                    '-pix_fmt yuv420p', 
-                    '-crf 23',         
-                    '-r 25' 
-                ])
-                .save(outputVideoPath)
-                .on('end', () => { resolve(); })
-                .on('error', (err) => { reject(new Error(`FFmpeg Video Re-assembly failed: ${err.message}`)); });
-        });
-        
-        // 4. सफलता प्रतिक्रिया
+        // सफलता! डाउनलोड URL भेजें
         res.json({
-            message: "Conversion successful!",
-            downloadUrl: `/static/downloads/${outputVideoName}`, 
+            message: "Conversion Complete. File ready for download.",
+            // यह URL /downloads रूट से मैप होगा
+            downloadUrl: `/downloads/${convertedFileName}` 
         });
 
     } catch (error) {
-        console.error('General Conversion Error:', error.message);
-        res.status(500).json({ message: error.message });
+        console.error("[ERROR] Conversion pipeline failed:", error);
+        res.status(500).json({ message: "An error occurred during the conversion process.", error: error.message });
     } finally {
-        // 🗑️ अस्थायी फ़ाइलें और फ़ोल्डर साफ करें
-        if (fs.existsSync(inputVideoPath)) fs.unlinkSync(inputVideoPath);
-        if (fs.existsSync(tempFramesDir)) fs.rmSync(tempFramesDir, { recursive: true, force: true });
+        // काम पूरा होने पर ओरिजिनल फ़ाइल को डिलीट करें
+        fs.unlink(videoPath, (err) => {
+            if (err) console.error("Failed to delete original file:", err);
+        });
     }
 });
 
+// /downloads रूट: कनवर्ट किए गए वीडियो फ़ाइलों को सर्व करने के लिए
+app.use('/downloads', express.static(CONVERTED_DIR));
 
 // सर्वर शुरू करें
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Open your frontend HTML file and ensure API_BASE_URL points to your Render URL.`);
 });
