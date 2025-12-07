@@ -1,252 +1,153 @@
-// index.js (ES Module Fixes के साथ फाइनल वर्ज़न)
+// index.js (Modified for @huggingface/inference SDK)
 
-import express from 'express';
-import multer from 'multer';
-import cors from 'cors';
-import path from 'path';
-import fs from 'fs/promises'; 
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { InferenceClient } from "@huggingface/inference"; 
-import ffmpeg from 'fluent-ffmpeg';
+const express = require('express');
+const multer = require('multer');
+const fs = require('fs/promises');
+const path = require('path');
+const fsExtra = require('fs-extra'); // Cleanup के लिए
 
-// Node.js ESM में 'static' पैकेजों के पाथ को ठीक करने का तरीका
-import ffmpegStatic from 'ffmpeg-static';
-import ffprobeStatic from 'ffprobe-static';
+// Hugging Face SDK
+const { InferenceClient } = require('@huggingface/inference');
 
-// Node.js ESM (Module) के लिए __dirname सेट करना
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// --- FFmpeg पाथ को कॉन्फ़िगर करें ---
-// Render पर FFmpeg का उपयोग करने के लिए आवश्यक
+// FFmpeg को कॉन्फ़िगर करें
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegStatic = require('@ffmpeg-installer/ffmpeg').path;
 ffmpeg.setFfmpegPath(ffmpegStatic);
-ffmpeg.setFfprobePath(ffprobeStatic);
-console.log("FFmpeg and FFprobe configured.");
 
-// --- ऐप और एनवायरनमेंट सेटअप ---
 const app = express();
-const port = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
-// Render Environment Variables का उपयोग
-const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
+// Hugging Face क्लाइंट: HF_TOKEN पर्यावरण वेरिएबल से स्वचालित रूप से टोकन लेगा
+const client = new InferenceClient(process.env.HUGGINGFACE_ACCESS_TOKEN); 
+// या process.env.HF_TOKEN, जैसा कि आपके उदाहरण में है। सुनिश्चित करें कि Render पर यह सेट हो।
 
-// Hugging Face Client को शुरू करें
-if (!HUGGINGFACE_ACCESS_TOKEN) {
-    console.error("FATAL: HUGGINGFACE_ACCESS_TOKEN environment variable is not set.");
-}
-const hfClient = new InferenceClient(HUGGINGFACE_ACCESS_TOKEN);
+const HF_MODEL = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime";
 
-// --- डायरेक्टरी कॉन्फ़िगरेशन ---
-const UPLOAD_DIR = path.join(__dirname, 'uploads');
-const PROCESSED_DIR = path.join(__dirname, 'processed');
+// अस्थायी फ़ाइल स्टोरेज सेटअप
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-// --- मिडलवेयर और सेटअप ---
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST'],
-}));
-app.use(express.json());
-
-// अपलोड स्टोरेज कॉन्फ़िगरेशन
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, UPLOAD_DIR); 
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 30 * 1024 * 1024 } // 30 MB लिमिट
-});
-
-// आवश्यक डायरेक्टरी बनाना
-(async () => {
+// --- Hugging Face SDK का उपयोग करके इमेज रूपांतरण ---
+async function convertFrameToAnime(imageBuffer, stylePrompt) {
     try {
-        await fs.mkdir(UPLOAD_DIR, { recursive: true });
-        await fs.mkdir(PROCESSED_DIR, { recursive: true });
-        console.log("Upload and Processed directories initialized.");
-    } catch (err) {
-        console.error("Error creating directories:", err);
-    }
-})();
-
-// --- स्टैटिक फ़ाइलें (Processed videos) ---
-app.use('/processed_videos', express.static(PROCESSED_DIR));
-
-// --- 🗑️ फ़ाइल क्लीनअप फ़ंक्शन ---
-async function cleanupFiles(filePath, dirPath) {
-    try {
-        if (filePath) await fs.unlink(filePath).catch(() => {});
-        if (dirPath) await fs.rm(dirPath, { recursive: true, force: true }).catch(() => {});
-    } catch (e) {
-        console.error("Cleanup error:", e.message);
-    }
-}
-
-// --- 🖼️ Hugging Face AI स्टाइल ट्रांसफर फ़ंक्शन (Img2Img) ---
-async function applyStyleTransfer(inputPath, outputPath, style) {
-    
-    const MODEL_ID = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime"; 
-    
-    const inputData = await fs.readFile(inputPath);
-
-    let promptText = "";
-    if (style === 'what-if') {
-        promptText = "highly detailed, comic book illustration, cell shading, What If...? animated series style";
-    } else if (style === 'ben-10-classic') {
-        promptText = "classic Ben 10 cartoon style, thick black outlines, bold primary colors, vector art, 2000s animation";
-    } else if (style === 'jujutsu-kaisen') {
-        promptText = "anime style, dark shading, high contrast, cinematic, Jujutsu Kaisen anime aesthetic";
-    } else {
-        promptText = "high quality anime transformation, detailed, clean lines, cinematic lighting";
-    }
-    
-    // 🛑 API Key चेक यहाँ दोहराना महत्वपूर्ण है
-    if (!HUGGINGFACE_ACCESS_TOKEN) {
-        throw new Error("HUGGINGFACE_ACCESS_TOKEN is not configured for AI call.");
-    }
-    
-    console.log(`🚀 Sending frame to AI with style: ${style}`);
-
-    try {
-        const resultBlob = await hfClient.imageToImage({
-            provider: "wavespeed",
-            model: MODEL_ID,
-            inputs: inputData,
-            parameters: { 
-                prompt: promptText, 
+        // SDK का उपयोग करके इमेज को सीधे Hugging Face API पर भेजें
+        const imageBlob = await client.imageToImage({
+            provider: "wavespeed", // यदि यह आवश्यक हो
+            model: HF_MODEL,
+            inputs: imageBuffer,
+            parameters: {
+                prompt: stylePrompt,
             },
         });
         
-        const resultBuffer = await resultBlob.arrayBuffer();
-        await fs.writeFile(outputPath, Buffer.from(resultBuffer));
-        console.log(`✅ Frame processed successfully by ${MODEL_ID}`);
+        // Blob को Node.js Buffer में बदलें
+        return Buffer.from(await imageBlob.arrayBuffer()); 
         
     } catch (error) {
-        console.error(`🛑 AI API Error for ${path.basename(inputPath)}: ${error.message.substring(0, 150)}...`);
-        // Fail होने पर original image को output path पर कॉपी करें (Fallback)
-        await fs.copyFile(inputPath, outputPath);
-        console.log(`Used original frame as fallback: ${path.basename(inputPath)}`);
+        console.error("Hugging Face SDK Error:", error);
+        throw new Error(`Failed to convert frame: ${error.message}`);
     }
 }
 
 
-// --- ⚙️ मुख्य कन्वर्जन एंडपॉइंट ---
+// --- मुख्य API एंडपॉइंट ---
 app.post('/anime-convert', upload.single('video'), async (req, res) => {
     if (!req.file) {
-        return res.status(400).json({ message: 'No video file uploaded.' });
-    }
-    
-    if (!HUGGINGFACE_ACCESS_TOKEN) {
-        return res.status(500).json({ 
-            message: 'Server Configuration Error', 
-            error: "HUGGINGFACE_ACCESS_TOKEN is not set. Cannot run AI processing." 
-        });
+        return res.status(400).json({ message: "No video file uploaded." });
     }
 
-    const videoPath = req.file.path;
-    const style = req.body.style || 'ben-10-classic'; 
+    const videoFile = req.file;
+    // 'style' इनपुट को एक प्रॉम्प्ट में बदलें जो मॉडल को एनीमे स्टाइल लागू करने के लिए मार्गदर्शन करे।
+    const rawStyle = req.body.style || 'ben-10-classic'; 
+    const stylePrompt = `Convert this photo to ${rawStyle} anime style, highly detailed.`;
     
-    const jobId = Date.now().toString();
-    const tempFramesDir = path.join(__dirname, 'temp_frames', jobId);
-    const processedFramesDir = path.join(tempFramesDir, 'processed');
-    const outputFileName = `anime-${jobId}-${style}.mp4`;
-    const outputPath = path.join(PROCESSED_DIR, outputFileName);
-    
+    const jobId = Date.now();
+    const tempDir = path.join(__dirname, 'temp', String(jobId));
+
     try {
-        console.log(`Conversion started for file: ${req.file.originalname} into style: ${style}`);
+        await fs.mkdir(tempDir, { recursive: true });
+        const inputVideoPath = path.join(tempDir, 'input.mp4');
+        const processedFramesDir = path.join(tempDir, 'processed_frames');
+        await fs.mkdir(processedFramesDir);
 
-        await fs.mkdir(tempFramesDir, { recursive: true });
-        await fs.mkdir(processedFramesDir, { recursive: true });
+        // 1. इनपुट वीडियो को डिस्क पर सहेजें
+        await fs.writeFile(inputVideoPath, videoFile.buffer);
 
-        // --- 1. वीडियो को फ्रेम में तोड़ना (Extract Frames @ 10 FPS) ---
-        await new Promise((resolve, reject) => {
-            ffmpeg(videoPath)
-                .outputOptions([
-                    '-r 10',
-                    '-q:v 2' 
-                ])
-                .save(path.join(tempFramesDir, 'frame-%05d.jpg')) 
-                .on('end', () => {
-                    console.log('Frame extraction finished (10 FPS).');
-                    resolve();
-                })
-                .on('error', (err) => {
-                    reject(new Error('Frame extraction failed: ' + err.message));
-                });
-        });
-
-        // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना ---
-        const frameFiles = (await fs.readdir(tempFramesDir)).filter(file => file.endsWith('.jpg'));
+        // --- 2. वीडियो को फ़्रेम में तोड़ें (Extraction) ---
+        const frameRate = 15; // 15 FPS पर प्रोसेस करें
+        const extractedFramesPattern = path.join(tempDir, 'frame-%05d.jpg'); // 5-digit indexing
         
-        // समानांतर (parallel) प्रोसेसिंग
-        const conversionPromises = frameFiles.map(async (fileName) => {
-            const inputFramePath = path.join(tempFramesDir, fileName);
-            const outputFramePath = path.join(processedFramesDir, fileName);
-            
-            await applyStyleTransfer(inputFramePath, outputFramePath, style);
+        await new Promise((resolve, reject) => {
+            ffmpeg(inputVideoPath)
+                .outputOptions([
+                    `-r ${frameRate}`,
+                    `-q:v 2`,
+                    `-an` // ऑडियो स्ट्रीम हटाएँ, इसे बाद में वापस जोड़ा जाएगा
+                ])
+                .save(extractedFramesPattern)
+                .on('end', () => resolve())
+                .on('error', (err) => reject(new Error('FFmpeg frame extraction failed: ' + err.message)));
         });
 
-        // सभी फ्रेम के पूरा होने का इंतज़ार करें
-        // ⚠️ Render पर यह स्टेप टाइम आउट हो सकता है यदि वीडियो लंबा हो।
-        await Promise.all(conversionPromises); 
-        console.log(`AI style transfer finished. ${conversionPromises.length} frames processed.`);
+        // --- 3. प्रत्येक फ़्रेम को एनीमे में परिवर्तित करें (Inference) ---
+        const frameFiles = (await fs.readdir(tempDir)).filter(f => f.endsWith('.jpg')).sort();
+        
+        // 
 
+        for (const filename of frameFiles) {
+            const framePath = path.join(tempDir, filename);
+            const frameBuffer = await fs.readFile(framePath);
 
-        // --- 3. फ़्रेम को वापस वीडियो में जोड़ना (Re-assemble Video) ---
+            // SDK कॉल
+            const animeFrameBuffer = await convertFrameToAnime(frameBuffer, stylePrompt);
+
+            // परिवर्तित फ़्रेम को सहेजें
+            await fs.writeFile(path.join(processedFramesDir, filename), animeFrameBuffer);
+            await fs.unlink(framePath); // मूल फ़्रेम हटाएँ
+        }
+
+        // --- 4. संसाधित फ़्रेमों को वापस वीडियो में जोड़ें (Recombination) ---
         const processedFramesPattern = path.join(processedFramesDir, 'frame-%05d.jpg');
+        const finalOutputVideoPath = path.join(__dirname, 'converted', `anime-${jobId}.mp4`);
+        await fs.mkdir(path.join(__dirname, 'converted'), { recursive: true });
 
         await new Promise((resolve, reject) => {
-            ffmpeg()
-                .input(processedFramesPattern)
+            ffmpeg(processedFramesPattern)
                 .inputOptions([
-                    '-framerate 10',
-                ])
-                .videoFilters([
-                    'pad=ceil(iw/2)*2:ceil(ih/2)*2',
-                    'format=yuv420p'
+                    `-framerate ${frameRate}`,
                 ])
                 .outputOptions([
-                    '-c:v libx264', 
-                    '-preset fast', 
+                    '-c:v libx264',
                     '-pix_fmt yuv420p',
+                    // यदि आप ऑडियो चाहते हैं, तो आपको इसे पहले एक अलग स्ट्रीम में निकालना होगा और यहां जोड़ना होगा।
                 ])
-                .save(outputPath)
-                .on('end', () => {
-                    console.log('Video re-assembly finished successfully.');
-                    resolve();
-                })
-                .on('error', (err) => {
-                    reject(new Error('Video re-assembly failed: ' + err.message));
-                });
-        });
-        
-        // --- 4. क्लीनअप और परिणाम भेजें ---
-        await cleanupFiles(videoPath, tempFramesDir);
-        
-        const downloadUrl = `/processed_videos/${outputFileName}`;
-        res.json({ 
-            message: 'Conversion successful!', 
-            downloadUrl: downloadUrl 
+                .save(finalOutputVideoPath)
+                .on('end', () => resolve())
+                .on('error', (err) => reject(new Error('FFmpeg video recombination failed: ' + err.message)));
         });
 
+        // --- 5. अस्थायी फ़ाइलें हटाएँ (Cleanup) ---
+        await fsExtra.remove(tempDir);
+
+        // 6. फ्रंटएंड को प्रतिक्रिया भेजें
+        const downloadUrl = `/converted/anime-${jobId}.mp4`;
+        res.json({ success: true, downloadUrl: downloadUrl });
 
     } catch (error) {
-        console.error('FATAL CONVERSION ERROR:', error.message);
-        await cleanupFiles(videoPath, tempFramesDir);
-
+        console.error("Conversion Pipeline Error:", error.message);
+        // Clean up even on error
+        await fsExtra.remove(tempDir).catch(() => {});
         res.status(500).json({ 
-            message: 'Conversion failed during processing.', 
+            message: "Video conversion failed. Check server logs for details.", 
             error: error.message 
         });
     }
 });
 
+// --- स्टैटिक फ़ाइलें (डाउनलोड के लिए) ---
+app.use('/converted', express.static(path.join(__dirname, 'converted')));
+
 // --- सर्वर शुरू करें ---
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
