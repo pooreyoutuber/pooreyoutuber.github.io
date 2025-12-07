@@ -3,7 +3,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs/promises'); // Promises-based fs for async operations
+const fs = require('fs/promises'); // Promises-based fs
 const { spawn } = require('child_process'); // FFMPEG और अन्य कमांड चलाने के लिए
 const fetch = require('node-fetch'); // Hugging Face API कॉल के लिए
 
@@ -11,26 +11,25 @@ const fetch = require('node-fetch'); // Hugging Face API कॉल के लि
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Render Environment Variables से सीधे एक्सेस करें
-const GEMINI_API_KEY = process.env.GEMINI_KEY; // एक्सेस के लिए रखा गया है, लेकिन यहाँ उपयोग नहीं होगा
+// Render Environment Variables से एक्सेस करें
 const HF_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 
-// Hugging Face Style Transfer Model Endpoint सेट किया गया है
+// एक मानक Anime Style Transfer Model Endpoint का उपयोग करें
 const HF_MODEL_ENDPOINT = 'https://api-inference.huggingface.co/models/p-wang/cartoon-style-transfer'; 
 
 // --- 2. मिडलवेयर और फ़ोल्डर सेटअप ---
 
 // CORS कॉन्फ़िगरेशन
 app.use((req, res, next) => {
-    // इसे अपने फ़्रंटएंड URL से बदलें
     res.header('Access-Control-Allow-Origin', 'https://pooreyoutuber.github.io'); 
     res.header('Access-Control-Allow-Methods', 'POST, GET');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     next();
 });
 
-const TEMP_DIR = path.join(__dirname, 'temp');
-const CONVERTED_DIR = path.join(__dirname, 'converted');
+// 💡 ENOTDIR त्रुटि को ठीक करने के लिए: Render पर सुरक्षित और लिखने योग्य /tmp फ़ोल्डर का उपयोग करें
+const TEMP_DIR = path.join('/tmp', 'anime-converter-temp');
+const CONVERTED_DIR = path.join('/tmp', 'anime-converter-output');
 
 async function setupDirectories() {
     await fs.mkdir(TEMP_DIR, { recursive: true });
@@ -50,10 +49,10 @@ const upload = multer({
 function runFFmpeg(args) {
     return new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', args);
-
         let errorOutput = '';
+        
+        // FFMPEG आउटपुट को कैप्चर करें
         ffmpeg.stderr.on('data', (data) => {
-            // FFMPEG आउटपुट आमतौर पर stderr पर आता है
             errorOutput += data.toString();
         });
 
@@ -62,8 +61,13 @@ function runFFmpeg(args) {
                 resolve();
             } else {
                 console.error("FFMPEG Error Details:", errorOutput);
-                reject(new Error(`FFMPEG process exited with code ${code}. See logs for details.`));
+                reject(new Error(`FFMPEG process exited with code ${code}. Please ensure FFMPEG is installed on Render.`));
             }
+        });
+        
+        ffmpeg.on('error', (err) => {
+             // अक्सर ENOENT (File not found) आता है अगर FFMPEG इंस्टॉल नहीं है
+            reject(new Error(`FFMPEG spawn failed. Is FFMPEG installed? Error: ${err.message}`));
         });
     });
 }
@@ -161,7 +165,6 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             return applyStyleToFrame(inputFrame, outputFrame, style);
         });
         
-        // सभी फ्रेम्स को एक साथ प्रोसेस करें (Concurrent processing)
         await Promise.all(processingPromises);
 
         // C. फ्रेम्स को वापस वीडियो में जोड़ना
@@ -215,7 +218,7 @@ app.get('/download/:filename', (req, res) => {
             }
         } else {
             console.log(`[DOWNLOADED] ${fileName}. Deleting...`);
-            // फ़ाइल डाउनलोड होने के बाद उसे हटा दें (स्टोरेज बचाने के लिए)
+            // फ़ाइल डाउनलोड होने के बाद उसे हटा दें
             await cleanUp(filePath); 
         }
     });
