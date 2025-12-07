@@ -1,72 +1,79 @@
-// index.js
+// index.js (Final Stable Version)
+
 import express from 'express';
 import multer from 'multer';
 import cors from 'cors';
-import * as dotenv from 'dotenv';
 import path from 'path';
-import fs from 'fs/promises'; // fs/promises for async file operations
+import fs from 'fs/promises'; 
 import { fileURLToPath } from 'url';
-import { GoogleGenAI } from '@google/genai'; // Gemini API for potential use
 
-// ffmpeg को वीडियो प्रोसेसिंग के लिए आवश्यक है, यह एक अलग dependency है।
-import ffmpeg from 'fluent-ffmpeg';
+// सुनिश्चित करें कि आपने `package.json` में "type": "module" जोड़ा है।
+// यह लाइब्रेरी FFmpeg पर निर्भर करती है
+import ffmpeg from 'fluent-ffmpeg'; 
 
-// Load environment variables (Render automatically loads them, but this is good practice)
-dotenv.config();
-
+// Node.js ESM (Module) के लिए __dirname सेट करना
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Render Cloud Environment Variables
-const GEMINI_KEY = process.env.GEMINI_KEY;
+// Render Environment Variables का उपयोग
 const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
+const GEMINI_KEY = process.env.GEMINI_KEY; 
 
-// Gemini Client (यदि हम Gemini Vision का उपयोग फ्रेम विश्लेषण के लिए करना चाहते हैं)
-// const ai = new GoogleGenAI(GEMINI_KEY);
+// --- डायरेक्टरी कॉन्फ़िगरेशन ---
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+const PROCESSED_DIR = path.join(__dirname, 'processed');
 
-// Hugging Face Inference API URL (Stable Diffusion Model के लिए)
-const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"; // एक उदाहरण मॉडल
-
-// --- मिडलवेयर ---
+// --- मिडलवेयर और सेटअप ---
 app.use(cors({
-    origin: '*', // production में इसे अपने Render domain पर सेट करें
+    origin: '*', 
     methods: ['GET', 'POST'],
 }));
 app.use(express.json());
 
-// अपलोड के लिए स्टोरेज कॉन्फ़िगरेशन
+// अपलोड स्टोरेज कॉन्फ़िगरेशन
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // सुनिश्चित करें कि 'uploads/' डायरेक्टरी मौजूद है
+        cb(null, UPLOAD_DIR); 
     },
     filename: (req, file, cb) => {
-        // वीडियो का नामकरण (timestamp + original name)
         cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 30 * 1024 * 1024 } // 30MB Limit
+    limits: { fileSize: 30 * 1024 * 1024 } 
 });
 
-// सुनिश्चित करें कि आवश्यक डायरेक्टरी मौजूद हैं
+// आवश्यक डायरेक्टरी बनाना
 (async () => {
     try {
-        await fs.mkdir('uploads', { recursive: true });
-        await fs.mkdir('processed', { recursive: true });
-        console.log("Upload and Processed directories created.");
+        await fs.mkdir(UPLOAD_DIR, { recursive: true });
+        await fs.mkdir(PROCESSED_DIR, { recursive: true });
+        console.log("Upload and Processed directories initialized.");
     } catch (err) {
         console.error("Error creating directories:", err);
     }
 })();
 
 // --- स्टैटिक फ़ाइलें (Processed videos) ---
-// यह एक पब्लिक URL प्रदान करेगा जहाँ से उपयोगकर्ता अपनी कनवर्ट की गई वीडियो डाउनलोड कर सकते हैं।
-app.use('/processed_videos', express.static(path.join(__dirname, 'processed')));
+app.use('/processed_videos', express.static(PROCESSED_DIR));
+
+// --- 🗑️ फ़ाइल क्लीनअप फ़ंक्शन ---
+async function cleanupFiles(filePath, dirPath) {
+    try {
+        // अपलोड की गई मूल वीडियो फ़ाइल हटाएँ
+        if (filePath) await fs.unlink(filePath).catch(() => console.log("Uploaded file already deleted."));
+        // फ़्रेम के लिए अस्थायी फ़ोल्डर हटाएँ
+        if (dirPath) await fs.rm(dirPath, { recursive: true, force: true }).catch(() => console.log("Temp directory already deleted."));
+    } catch (e) {
+        console.error("Cleanup error:", e.message);
+    }
+}
+
 
 // --- ⚙️ मुख्य कन्वर्जन एंडपॉइंट ---
 app.post('/anime-convert', upload.single('video'), async (req, res) => {
@@ -75,123 +82,107 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     }
 
     const videoPath = req.file.path;
-    const style = req.body.style || 'ben-10-classic'; // selected style
-    const outputFileName = `anime-${Date.now()}-${style}.mp4`;
-    const outputPath = path.join(__dirname, 'processed', outputFileName);
+    const style = req.body.style || 'ben-10-classic'; 
     
-    // फ्रेम डायरेक्टरी
-    const framesDir = path.join(__dirname, 'temp_frames', Date.now().toString());
-
-    console.log(`Conversion started for file: ${req.file.originalname} into style: ${style}`);
-    console.log(`Frames will be saved in: ${framesDir}`);
+    const jobId = Date.now().toString();
+    const tempFramesDir = path.join(__dirname, 'temp_frames', jobId);
+    const processedFramesDir = path.join(tempFramesDir, 'processed');
+    const outputFileName = `anime-${jobId}-${style}.mp4`;
+    const outputPath = path.join(PROCESSED_DIR, outputFileName);
     
     try {
+        console.log(`Conversion started for file: ${req.file.originalname} into style: ${style}`);
+
         // 1. फ्रेम एक्सट्रैक्शन के लिए डायरेक्टरी बनाएँ
-        await fs.mkdir(framesDir, { recursive: true });
+        await fs.mkdir(tempFramesDir, { recursive: true });
+        await fs.mkdir(processedFramesDir, { recursive: true });
 
         // --- 1. वीडियो को फ्रेम में तोड़ना (Extract Frames) ---
         await new Promise((resolve, reject) => {
             ffmpeg(videoPath)
                 .outputOptions([
-                    // प्रति सेकंड 10 फ्रेम (FPS) एक्सट्रैक्ट करें ताकि प्रोसेसिंग समय कम हो
-                    '-r 10', 
-                    // फ़्रेम को JPG फ़ॉर्मेट में सेव करें
-                    '-q:v 2'
+                    '-r 10', // 10 FPS
+                    '-q:v 2' // हाई क्वालिटी JPG
                 ])
-                // फ़्रेम को framesDir में frame-%05d.jpg नाम से सेव करें
-                .save(path.join(framesDir, 'frame-%05d.jpg')) 
+                .save(path.join(tempFramesDir, 'frame-%05d.jpg')) 
                 .on('end', () => {
                     console.log('Frame extraction finished.');
                     resolve();
                 })
                 .on('error', (err) => {
-                    console.error('An error occurred during frame extraction: ' + err.message);
-                    reject(err);
+                    reject(new Error('Frame extraction failed: ' + err.message));
                 });
         });
 
-        // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना (Apply Style Transfer) ---
-        // **यह वह जटिल भाग है जहाँ AI/Hugging Face का उपयोग होगा।**
-        // सुरक्षा और प्रदर्शन कारणों से, हम Hugging Face Inference API का उपयोग करने का सुझाव देते हैं।
-
-        const frameFiles = await fs.readdir(framesDir);
-        const processedFramesDir = path.join(framesDir, 'processed');
-        await fs.mkdir(processedFramesDir, { recursive: true });
+        // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना (Simulated) ---
+        // **असली AI कन्वर्जन यहाँ होगा, अभी यह केवल फ़्रेमों को कॉपी कर रहा है**
+        
+        const frameFiles = await fs.readdir(tempFramesDir);
         
         const conversionPromises = frameFiles
             .filter(file => file.endsWith('.jpg'))
             .map(async (fileName) => {
-                const inputFramePath = path.join(framesDir, fileName);
+                const inputFramePath = path.join(tempFramesDir, fileName);
                 const outputFramePath = path.join(processedFramesDir, fileName);
                 
-                // **यहाँ Hugging Face API या आपके लोकल Python स्क्रिप्ट को कॉल किया जाएगा**
-                // **डेमो के लिए, हम बस फ्रेम को कॉपी कर रहे हैं।** // **असल में, यह इमेज-टू-इमेज स्टाइल ट्रांसफर API कॉल होगी।**
-
-                // यहाँ असली कोड:
-                /* await convertFrameWithHuggingFace(inputFramePath, outputFramePath, style); 
-                */
-                
-                // डेमो कोड (सिर्फ कॉपी करना):
+                // DEMO: केवल कॉपी करें
                 await fs.copyFile(inputFramePath, outputFramePath); 
                 console.log(`Frame copied (Simulated conversion): ${fileName}`);
+                
+                // TODO: यहाँ Hugging Face API या Gemini Vision (यदि फ़्रेम को छोटा किया गया हो) का उपयोग करें
             });
 
-        // सभी फ़्रेमों के रूपांतरित होने तक प्रतीक्षा करें
         await Promise.all(conversionPromises);
+        console.log(`Simulated style transfer finished. ${conversionPromises.length} frames processed.`);
 
         // --- 3. फ़्रेम को वापस वीडियो में जोड़ना (Re-assemble Video) ---
         const processedFramesPattern = path.join(processedFramesDir, 'frame-%05d.jpg');
 
         await new Promise((resolve, reject) => {
             ffmpeg()
-                // इनपुट फ़ाइल पैटर्न को निर्दिष्ट करें
+                // FFmpeg को क्रमबद्ध इनपुट फ़ाइलें पढ़ने के लिए -i flag का उपयोग करें
                 .input(processedFramesPattern)
                 .inputOptions([
-                    // इनपुट फ्रेम दर, एक्सट्रैक्शन के समान (10 FPS)
                     '-framerate 10', 
-                    // Y-axis पर फ़्रेम को ज़ूम या स्केल किए बिना रखें
-                    '-pattern_type glob' 
+                    // ffmpeg इनपुट के लिए '-start_number 1' आवश्यक नहीं है यदि आपके पास 00001 से शुरू होने वाले क्रमबद्ध फ़्रेम हैं।
+                    // यह पैटर्न सुनिश्चित करता है कि यह processed/frame-00001.jpg, processed/frame-00002.jpg आदि को उठाता है।
                 ])
                 .outputOptions([
-                    // आउटपुट फ़ॉर्मेट H.264
                     '-c:v libx264', 
-                    // कम विलंबता (low latency) के लिए 
                     '-preset fast', 
-                    // पिक्सेल फ़ॉर्मेट
                     '-pix_fmt yuv420p', 
+                    // फ़्रेम के आकार को सम (even) बनाने के लिए, जो अक्सर FFmpeg की आवश्यकता होती है
+                    '-vf "pad=ceil(iw/2)*2:ceil(ih/2)*2"' 
                 ])
                 .save(outputPath)
                 .on('end', () => {
-                    console.log('Video re-assembly finished.');
+                    console.log('Video re-assembly finished successfully.');
                     resolve();
                 })
                 .on('error', (err) => {
-                    console.error('An error occurred during video re-assembly: ' + err.message);
-                    reject(err);
+                    reject(new Error('Video re-assembly failed: ' + err.message));
                 });
         });
         
-        // --- 4. फ़ाइलें साफ़ करें (Cleanup) ---
-        await fs.rm(framesDir, { recursive: true, force: true });
-        await fs.unlink(videoPath);
+        // --- 4. क्लीनअप और परिणाम भेजें ---
+        await cleanupFiles(videoPath, tempFramesDir);
         
-        console.log(`Conversion complete. Output saved at: ${outputPath}`);
-
-        // --- 5. परिणाम भेजें ---
         const downloadUrl = `/processed_videos/${outputFileName}`;
         res.json({ 
             message: 'Conversion successful!', 
-            downloadUrl: downloadUrl // यह URL Render पर आपके स्टैटिक फ़ोल्डर को पॉइंट करेगा
+            downloadUrl: downloadUrl 
         });
 
 
     } catch (error) {
-        console.error('Conversion process failed:', error);
-        // सुनिश्चित करें कि अगर कुछ गलत होता है तो भी हम अपलोड की गई फ़ाइल को साफ़ करें
-        await fs.rm(framesDir, { recursive: true, force: true }).catch(e => console.error("Cleanup failed:", e));
-        await fs.unlink(videoPath).catch(e => console.error("Cleanup failed:", e));
+        console.error('FATAL CONVERSION ERROR:', error.message);
+        // अगर कुछ गलत होता है, तो फ़ाइलों को साफ़ करें और 500 एरर भेजें
+        await cleanupFiles(videoPath, tempFramesDir);
 
-        res.status(500).json({ message: 'Internal Server Error during conversion.', error: error.message });
+        res.status(500).json({ 
+            message: 'Conversion failed during processing.', 
+            error: error.message 
+        });
     }
 });
 
@@ -199,37 +190,3 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-
-
-// --- Hugging Face API कॉल फ़ंक्शन (डेमो के लिए) ---
-/*
-async function convertFrameWithHuggingFace(inputPath, outputPath, style) {
-    // इस फ़ंक्शन में Hugging Face Inference API को कॉल करने के लिए Axios का उपयोग किया जाएगा।
-    // यह फ़ंक्शन Base64 एन्कोडिंग/डिकोडिंग और API के साथ इंटरैक्शन को संभालेगा।
-    // यह बहुत जटिल हो सकता है और Render Cloud पर चलने के लिए महंगा भी हो सकता है।
-    
-    // **अत्यधिक सुझाव:** Hugging Face पर एक स्पेस (Space) डिप्लॉय करें और उसका उपयोग करें।
-    
-    const prompt = `Convert this image into a ${style} anime style. High quality, detailed, trending on Artstation.`;
-    const imageBuffer = await fs.readFile(inputPath);
-
-    // यह एक उदाहरण API कॉल है, जिसे विशिष्ट Stable Diffusion Image-to-Image API के लिए अपडेट करना होगा।
-    const response = await axios.post(
-        HUGGINGFACE_API_URL,
-        {
-            inputs: prompt,
-            image: imageBuffer.toString('base64'), // या सीधे बाइनरी भेजें (API के आधार पर)
-        },
-        {
-            headers: {
-                Authorization: `Bearer ${HUGGINGFACE_ACCESS_TOKEN}`,
-                'Content-Type': 'application/json',
-            },
-            responseType: 'arraybuffer'
-        }
-    );
-
-    // API से प्राप्त परिणामी इमेज को outputPath पर सेव करें
-    // await fs.writeFile(outputPath, Buffer.from(response.data)); 
-}
-*/
