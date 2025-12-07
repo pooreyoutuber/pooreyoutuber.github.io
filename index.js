@@ -1,4 +1,4 @@
-// index.js (Final Stable Version)
+// index.js (Final Stable Version with VideoFilters Fix)
 
 import express from 'express';
 import multer from 'multer';
@@ -18,6 +18,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 // Render Environment Variables का उपयोग
+// चूंकि key Render में सुरक्षित हैं, हमें यहां dotenv की आवश्यकता नहीं है
 const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 const GEMINI_KEY = process.env.GEMINI_KEY; 
 
@@ -112,7 +113,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         });
 
         // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना (Simulated) ---
-        // असली AI कन्वर्जन यहाँ होगा, अभी यह केवल फ़्रेमों को कॉपी कर रहा है।
+        // असली AI कन्वर्जन यहाँ होगा।
         
         const frameFiles = await fs.readdir(tempFramesDir);
         
@@ -122,7 +123,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 const inputFramePath = path.join(tempFramesDir, fileName);
                 const outputFramePath = path.join(processedFramesDir, fileName);
                 
-                // DEMO: केवल कॉपी करें
+                // DEMO: केवल कॉपी करें (वास्तविक AI मॉडल कॉल को बदलें)
                 await fs.copyFile(inputFramePath, outputFramePath); 
                 console.log(`Frame copied (Simulated conversion): ${fileName}`);
             });
@@ -140,15 +141,16 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 .inputOptions([
                     '-framerate 10', 
                 ])
+                // 🚀 मुख्य सुधार: FFmpeg फ़िल्टर को dedicated method में पास करें
+                .videoFilters([
+                    // 1. पैडिंग सुनिश्चित करें (even dimensions)
+                    'pad=ceil(iw/2)*2:ceil(ih/2)*2', 
+                    // 2. yuv420p फ़ॉर्मेट लागू करें (वेब संगतता के लिए अनिवार्य)
+                    'format=yuv420p'
+                ])
                 .outputOptions([
                     '-c:v libx264', 
                     '-preset fast', 
-                    
-                    // 🛑 मुख्य सुधार:
-                    // 1. पैडिंग फ़िल्टर सुनिश्चित करता है कि चौड़ाई/ऊँचाई सम (even) हो।
-                    // 2. format=yuv420p यह सुनिश्चित करता है कि पिक्सेल फ़ॉर्मेट वेब संगत हो।
-                    // यह पिछली दोनों FFmpeg त्रुटियों को हल करता है।
-                    '-vf "pad=ceil(iw/2)*2:ceil(ih/2)*2,format=yuv420p"', 
                 ])
                 .save(outputPath)
                 .on('end', () => {
