@@ -1,4 +1,4 @@
-// index.js (Final Stable Version with VideoFilters Fix)
+// index.js (Final AI Integrated Version with Hugging Face)
 
 import express from 'express';
 import multer from 'multer';
@@ -6,6 +6,8 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs/promises'; 
 import { fileURLToPath } from 'url';
+// Hugging Face API को कॉल करने के लिए 'node-fetch' पैकेज आवश्यक है
+import fetch from 'node-fetch'; 
 
 // सुनिश्चित करें कि आपने `package.json` में "type": "module" जोड़ा है।
 import ffmpeg from 'fluent-ffmpeg'; 
@@ -18,9 +20,8 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 // Render Environment Variables का उपयोग
-// चूंकि key Render में सुरक्षित हैं, हमें यहां dotenv की आवश्यकता नहीं है
 const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
-const GEMINI_KEY = process.env.GEMINI_KEY; 
+const GEMINI_KEY = process.env.GEMINI_KEY; // वर्तमान में Hugging Face के लिए उपयोग नहीं किया जा रहा है
 
 // --- डायरेक्टरी कॉन्फ़िगरेशन ---
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
@@ -72,11 +73,54 @@ async function cleanupFiles(filePath, dirPath) {
     }
 }
 
+// --- 🖼️ Hugging Face AI स्टाइल ट्रांसफर फ़ंक्शन ---
+async function applyStyleTransfer(inputPath, outputPath, style, token) {
+    // 🛑 नोट: यह एक उदाहरण मॉडल है।
+    // वास्तविक स्टाइल ट्रांसफर/Image-to-Image मॉडल Hugging Face पर खोजें।
+    // मॉडल आईडी स्टाइल (e.g., ben-10-classic) के आधार पर बदल सकती है।
+    const MODEL_ID = "timbrooks/instagan-style-transfer"; 
+    const API_URL = `https://api-inference.huggingface.co/models/${MODEL_ID}`;
+    
+    // इनपुट इमेज को Buffer के रूप में लोड करें
+    const imageBuffer = await fs.readFile(inputPath);
+
+    console.log(`Calling Hugging Face API for style: ${style}`);
+
+    const response = await fetch(API_URL, {
+        headers: { 
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "image/jpeg" 
+        },
+        method: "POST",
+        body: imageBuffer,
+    });
+
+    if (!response.ok) {
+        // Hugging Face अक्सर 503 error देता है जब मॉडल लोड हो रहा होता है।
+        // हमें यह सुनिश्चित करने के लिए प्रतिक्रिया के पाठ को लॉग करना चाहिए कि वास्तविक त्रुटि क्या है।
+        const errorText = await response.text();
+        throw new Error(`Hugging Face API Error: ${response.status} - ${errorText.substring(0, 100)}...`);
+    }
+
+    // आउटपुट में हमें एक नई इमेज (बफ़र के रूप में) मिलती है
+    const resultBuffer = await response.buffer();
+    
+    // नई प्रोसेस्ड इमेज को आउटपुट पाथ पर सहेजें
+    await fs.writeFile(outputPath, resultBuffer);
+}
 
 // --- ⚙️ मुख्य कन्वर्जन एंडपॉइंट ---
 app.post('/anime-convert', upload.single('video'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No video file uploaded.' });
+    }
+    
+    // AI इंटीग्रेशन के लिए API टोकन की जाँच करें
+    if (!HUGGINGFACE_ACCESS_TOKEN) {
+        return res.status(500).json({ 
+            message: 'Server Error', 
+            error: "HUGGINGFACE_ACCESS_TOKEN environment variable is not set." 
+        });
     }
 
     const videoPath = req.file.path;
@@ -112,8 +156,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 });
         });
 
-        // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना (Simulated) ---
-        // असली AI कन्वर्जन यहाँ होगा।
+        // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना (REAL AI CONVERSION) ---
         
         const frameFiles = await fs.readdir(tempFramesDir);
         
@@ -123,13 +166,28 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 const inputFramePath = path.join(tempFramesDir, fileName);
                 const outputFramePath = path.join(processedFramesDir, fileName);
                 
-                // DEMO: केवल कॉपी करें (वास्तविक AI मॉडल कॉल को बदलें)
-                await fs.copyFile(inputFramePath, outputFramePath); 
-                console.log(`Frame copied (Simulated conversion): ${fileName}`);
+                try {
+                    // 🚀 REAL AI कॉल: Hugging Face API का उपयोग करें
+                    await applyStyleTransfer(
+                        inputFramePath, 
+                        outputFramePath, 
+                        style, 
+                        HUGGINGFACE_ACCESS_TOKEN
+                    );
+                    
+                    console.log(`Frame converted (AI Style: ${style}): ${fileName}`);
+                } catch (e) {
+                    console.error(`AI Conversion failed for ${fileName}: ${e.message}`);
+                    // अगर AI फेल हो जाता है, तो मूल फ़ाइल को कॉपी करें ताकि वीडियो टूटे नहीं।
+                    await fs.copyFile(inputFramePath, outputFramePath);
+                    console.log(`Used original frame as fallback: ${fileName}`);
+                }
             });
 
+        // सभी फ़्रेमों के पूरा होने का इंतज़ार करें
         await Promise.all(conversionPromises);
-        console.log(`Simulated style transfer finished. ${conversionPromises.length} frames processed.`);
+        console.log(`AI style transfer finished. ${conversionPromises.length} frames processed.`);
+
 
         // --- 3. फ़्रेम को वापस वीडियो में जोड़ना (Re-assemble Video) ---
         const processedFramesPattern = path.join(processedFramesDir, 'frame-%05d.jpg');
@@ -141,7 +199,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 .inputOptions([
                     '-framerate 10', 
                 ])
-                // 🚀 मुख्य सुधार: FFmpeg फ़िल्टर को dedicated method में पास करें
+                // 🚀 FFmpeg फ़िल्टर
                 .videoFilters([
                     // 1. पैडिंग सुनिश्चित करें (even dimensions)
                     'pad=ceil(iw/2)*2:ceil(ih/2)*2', 
