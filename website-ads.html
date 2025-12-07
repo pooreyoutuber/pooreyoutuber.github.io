@@ -248,8 +248,9 @@
 
     <script>
         // --- कॉन्फ़िगरेशन ---
+        // 🛑 सुनिश्चित करें कि यह URL आपके Render Service का सही URL है।
         const API_BASE_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com';
-        const CONVERSION_ENDPOINT = '/anime-convert'; // यह Node.js में बनाया जाएगा
+        const CONVERSION_ENDPOINT = '/anime-convert'; 
 
         // --- DOM एलीमेंट ---
         const uploadArea = document.getElementById('upload-area');
@@ -258,7 +259,7 @@
         const fileNameDisplay = document.getElementById('file-name');
         const styleSelectionArea = document.getElementById('style-selection');
         const styleButtons = document.querySelectorAll('.style-item');
-        const submitBtn = document.getElementById('submit-btn'); // नया सबमिट बटन
+        const submitBtn = document.getElementById('submit-btn');
         const statusArea = document.getElementById('status-area');
         const statusMessage = document.getElementById('status-message');
         const progressBar = document.getElementById('progress-bar');
@@ -397,10 +398,13 @@
                 
                 // सफलता!
                 updateProgress(100);
+
+                // 🛑 मुख्य सुधार: Absolute URL बनाएँ
+                const fullDownloadUrl = API_BASE_URL + result.downloadUrl;
                 
                 // डाउनलोड लिंक और वीडियो दिखाएँ
-                downloadLink.href = result.downloadUrl; 
-                convertedVideoPreview.src = result.downloadUrl;
+                downloadLink.href = fullDownloadUrl;
+                convertedVideoPreview.src = fullDownloadUrl;
                 convertedVideoPreview.style.display = 'block';
                 
                 downloadArea.style.display = 'block';
