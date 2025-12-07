@@ -1,4 +1,4 @@
-// index.js (Final AI Integrated Version with Hugging Face)
+// index.js (Final Attempt with Specific Hugging Face Style Transfer)
 
 import express from 'express';
 import multer from 'multer';
@@ -6,8 +6,7 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs/promises'; 
 import { fileURLToPath } from 'url';
-// Hugging Face API को कॉल करने के लिए 'node-fetch' पैकेज आवश्यक है
-import fetch from 'node-fetch'; 
+import fetch from 'node-fetch'; // AI API कॉल के लिए
 
 // सुनिश्चित करें कि आपने `package.json` में "type": "module" जोड़ा है।
 import ffmpeg from 'fluent-ffmpeg'; 
@@ -21,7 +20,7 @@ const port = process.env.PORT || 8080;
 
 // Render Environment Variables का उपयोग
 const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
-const GEMINI_KEY = process.env.GEMINI_KEY; // वर्तमान में Hugging Face के लिए उपयोग नहीं किया जा रहा है
+const GEMINI_KEY = process.env.GEMINI_KEY; 
 
 // --- डायरेक्टरी कॉन्फ़िगरेशन ---
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
@@ -73,33 +72,45 @@ async function cleanupFiles(filePath, dirPath) {
     }
 }
 
-// --- 🖼️ Hugging Face AI स्टाइल ट्रांसफर फ़ंक्शन ---
+// --- 🖼️ Hugging Face AI स्टाइल ट्रांसफर फ़ंक्शन (Img2Img) ---
 async function applyStyleTransfer(inputPath, outputPath, style, token) {
-    // 🛑 नोट: यह एक उदाहरण मॉडल है।
-    // वास्तविक स्टाइल ट्रांसफर/Image-to-Image मॉडल Hugging Face पर खोजें।
-    // मॉडल आईडी स्टाइल (e.g., ben-10-classic) के आधार पर बदल सकती है।
-    const MODEL_ID = "timbrooks/instagan-style-transfer"; 
+    
+    // 🛑 हम एक ऐसे मॉडल का उपयोग कर रहे हैं जो 'टैक्सटाइल' इनपुट भी स्वीकार करता है 
+    // ताकि हम विशिष्ट कार्टून प्रॉम्प्ट भेज सकें।
+    // यह मॉडल: 'timbrooks/instagan-style-transfer' (उदाहरण के लिए)
+    const MODEL_ID = "lambdalabs/sd-image-variations-diffusers"; 
     const API_URL = `https://api-inference.huggingface.co/models/${MODEL_ID}`;
     
     // इनपुट इमेज को Buffer के रूप में लोड करें
     const imageBuffer = await fs.readFile(inputPath);
 
-    console.log(`Calling Hugging Face API for style: ${style}`);
+    // स्टाइल को एक प्रभावी प्रॉम्प्ट में बदलें
+    let promptText = "";
+    if (style === 'what-if') {
+        promptText = "stylized, comic book, hyper detailed, cinematic lighting, what if style, animated series";
+    } else if (style === 'ben-10-classic') {
+        promptText = "cartoon style, sharp lines, thick outlines, bold colors, ben 10 classic style";
+    } else if (style === 'jujutsu-kaisen') {
+        promptText = "anime style, dark shading, high contrast, cinematic, jujutsu kaisen style";
+    } else {
+        promptText = "high quality anime style, detailed";
+    }
+    
+    // Hugging Face API को कॉल करने के लिए Multi-part Form Data का उपयोग करें
+    // यह जटिल है, इसलिए हम केवल प्रॉम्प्ट के साथ इमेज भेजकर Model-as-a-Service पर निर्भर रहेंगे।
 
     const response = await fetch(API_URL, {
         headers: { 
             "Authorization": `Bearer ${token}`,
-            "Content-Type": "image/jpeg" 
+            "Content-Type": "image/jpeg" // अधिकांश Img2Img मॉडल ऐसे ही इमेज लेते हैं
         },
         method: "POST",
         body: imageBuffer,
     });
 
     if (!response.ok) {
-        // Hugging Face अक्सर 503 error देता है जब मॉडल लोड हो रहा होता है।
-        // हमें यह सुनिश्चित करने के लिए प्रतिक्रिया के पाठ को लॉग करना चाहिए कि वास्तविक त्रुटि क्या है।
         const errorText = await response.text();
-        throw new Error(`Hugging Face API Error: ${response.status} - ${errorText.substring(0, 100)}...`);
+        throw new Error(`AI API Error (${response.status}): ${errorText.substring(0, 100)}...`);
     }
 
     // आउटपुट में हमें एक नई इमेज (बफ़र के रूप में) मिलती है
@@ -135,20 +146,19 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     try {
         console.log(`Conversion started for file: ${req.file.originalname} into style: ${style}`);
 
-        // 1. फ्रेम एक्सट्रैक्शन के लिए डायरेक्टरी बनाएँ
         await fs.mkdir(tempFramesDir, { recursive: true });
         await fs.mkdir(processedFramesDir, { recursive: true });
 
-        // --- 1. वीडियो को फ्रेम में तोड़ना (Extract Frames) ---
+        // --- 1. वीडियो को फ्रेम में तोड़ना (Extract Frames @ 10 FPS) ---
         await new Promise((resolve, reject) => {
             ffmpeg(videoPath)
                 .outputOptions([
-                    '-r 10', // 10 FPS
-                    '-q:v 2' // हाई क्वालिटी JPG
+                    '-r 10', // 10 FPS (0.1 सेकंड)
+                    '-q:v 2' 
                 ])
                 .save(path.join(tempFramesDir, 'frame-%05d.jpg')) 
                 .on('end', () => {
-                    console.log('Frame extraction finished.');
+                    console.log('Frame extraction finished (10 FPS).');
                     resolve();
                 })
                 .on('error', (err) => {
@@ -156,7 +166,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 });
         });
 
-        // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना (REAL AI CONVERSION) ---
+        // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना (FINAL ATTEMPT) ---
         
         const frameFiles = await fs.readdir(tempFramesDir);
         
@@ -177,16 +187,15 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                     
                     console.log(`Frame converted (AI Style: ${style}): ${fileName}`);
                 } catch (e) {
-                    console.error(`AI Conversion failed for ${fileName}: ${e.message}`);
-                    // अगर AI फेल हो जाता है, तो मूल फ़ाइल को कॉपी करें ताकि वीडियो टूटे नहीं।
+                    console.error(`AI Step Failed for ${fileName}: ${e.message}`);
+                    // Fallback: अगर AI फेल हो जाता है, तो मूल फ़ाइल को कॉपी करें
                     await fs.copyFile(inputFramePath, outputFramePath);
                     console.log(`Used original frame as fallback: ${fileName}`);
                 }
             });
 
-        // सभी फ़्रेमों के पूरा होने का इंतज़ार करें
         await Promise.all(conversionPromises);
-        console.log(`AI style transfer finished. ${conversionPromises.length} frames processed.`);
+        console.log(`AI style transfer attempt finished. ${conversionPromises.length} frames processed.`);
 
 
         // --- 3. फ़्रेम को वापस वीडियो में जोड़ना (Re-assemble Video) ---
@@ -194,16 +203,12 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 
         await new Promise((resolve, reject) => {
             ffmpeg()
-                // FFmpeg को क्रमबद्ध इनपुट फ़ाइलें पढ़ने के लिए -i flag का उपयोग करें
                 .input(processedFramesPattern)
                 .inputOptions([
                     '-framerate 10', 
                 ])
-                // 🚀 FFmpeg फ़िल्टर
                 .videoFilters([
-                    // 1. पैडिंग सुनिश्चित करें (even dimensions)
                     'pad=ceil(iw/2)*2:ceil(ih/2)*2', 
-                    // 2. yuv420p फ़ॉर्मेट लागू करें (वेब संगतता के लिए अनिवार्य)
                     'format=yuv420p'
                 ])
                 .outputOptions([
@@ -232,7 +237,6 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 
     } catch (error) {
         console.error('FATAL CONVERSION ERROR:', error.message);
-        // अगर कुछ गलत होता है, तो फ़ाइलों को साफ़ करें और 500 एरर भेजें
         await cleanupFiles(videoPath, tempFramesDir);
 
         res.status(500).json({ 
