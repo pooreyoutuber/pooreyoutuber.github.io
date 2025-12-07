@@ -7,8 +7,6 @@ import path from 'path';
 import fs from 'fs/promises'; 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
-// 🚀 AI और FFmpeg के लिए आवश्यक इम्पोर्ट
 import { InferenceClient } from "@huggingface/inference"; 
 import ffmpeg from 'fluent-ffmpeg';
 
