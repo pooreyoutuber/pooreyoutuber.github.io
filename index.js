@@ -1,12 +1,17 @@
-// Environment variables को .env फ़ाइल से लोड करने के लिए (स्थानीय परीक्षण के लिए)
-require('dotenv').config();
+// **ES Modules (ESM) Import Syntax**
+import 'dotenv/config'; // dotenv को तुरंत कॉन्फ़िगर करने का ESM तरीका
 
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const ffmpeg = require('fluent-ffmpeg');
-const { InferenceClient } = require("@huggingface/inference");
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import ffmpeg from 'fluent-ffmpeg';
+import { InferenceClient } from "@huggingface/inference";
+import { fileURLToPath } from 'url';
+
+// ESM में __dirname को परिभाषित करें
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,23 +19,22 @@ const port = process.env.PORT || 3000;
 // 🔑 एनवायरनमेंट वेरिएबल्स और क्लाइंट सेटअप
 const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 if (!HUGGINGFACE_ACCESS_TOKEN) {
-    console.error("HUGGINGFACE_ACCESS_TOKEN is not set in environment variables.");
+    console.error("HUGGINGFACE_ACCESS_TOKEN is not set.");
 }
 const inference = new InferenceClient(HUGGINGFACE_ACCESS_TOKEN);
 
 // --- ⚙️ कॉन्फ़िगरेशन ---
-const SAMPLE_FPS = 1; // 1 फ़्रेम प्रति सेकंड (आपके "कम स्पीड" अनुरोध को पूरा करने के लिए)
+const SAMPLE_FPS = 1; 
 const TEMP_STORAGE = path.join(__dirname, 'temp_storage');
 const CONVERTED_STORAGE = path.join(__dirname, 'converted_videos');
-const CORS_ORIGIN = '*'; // अपने GitHub Pages URL से बदलें
-const HF_ANIME_MODEL = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime"; // आपका पसंदीदा मॉडल
+const CORS_ORIGIN = '*'; 
+const HF_ANIME_MODEL = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime"; 
 
-// फ़ोल्डर सुनिश्चित करें
+// फ़ोल्डर सुनिश्चित करें (यदि मौजूद नहीं हैं तो बनाएँ)
 if (!fs.existsSync(TEMP_STORAGE)) fs.mkdirSync(TEMP_STORAGE, { recursive: true });
 if (!fs.existsSync(CONVERTED_STORAGE)) fs.mkdirSync(CONVERTED_STORAGE, { recursive: true });
 
 // 💾 Multer स्टोरेज सेट करें
-// वीडियो फ़ाइल को अस्थायी रूप से सेव करें
 const storage = multer.diskStorage({
     destination: (req, file, cb) => { cb(null, TEMP_STORAGE); },
     filename: (req, file, cb) => { cb(null, `${Date.now()}-${file.originalname}`); }
@@ -47,22 +51,20 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // 📦 सार्वजनिक रूप से उपलब्ध फ़ाइलों को सर्व करें
-// यह एंडपॉइंट आपके फ़्रंटएंड को कनवर्टेड वीडियो डाउनलोड करने की अनुमति देता है
 app.use('/static/downloads', express.static(CONVERTED_STORAGE));
 
 
-// 🤖 Hugging Face इमेज-टू-इमेज फ़ंक्शन (आपके द्वारा प्रदान किए गए क्लाइंट का उपयोग करके)
+// 🤖 Hugging Face इमेज-टू-इमेज फ़ंक्शन
 async function convertImageToAnime(imageBuffer, prompt) {
-    // client.imageToImage Blob के बजाय एक Promise<Blob> देता है।
+    // client.imageToImage Promise<Blob> देता है।
     const imageBlob = await inference.imageToImage({
-        // आपका पसंदीदा मॉडल और `wavespeed` प्रोवाइडर
         provider: "wavespeed", 
         model: HF_ANIME_MODEL,
         inputs: imageBuffer,
         parameters: { prompt: prompt },
     });
     
-    // Blob को Node.js Buffer में बदलें ताकि उसे फ़ाइल सिस्टम में सेव किया जा सके
+    // Blob को Node.js Buffer में बदलें
     return Buffer.from(await imageBlob.arrayBuffer());
 }
 
@@ -76,7 +78,6 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         return res.status(400).json({ message: 'No video file uploaded.' });
     }
 
-    // FFmpeg के लिए इनपुट/आउटपुट पथ सेट करें
     const inputVideoPath = videoFile.path;
     const sessionId = Date.now();
     const tempFramesDir = path.join(TEMP_STORAGE, `frames_${sessionId}`);
@@ -102,9 +103,9 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             ffmpeg(inputVideoPath)
                 .outputOptions([
                     `-r ${SAMPLE_FPS}`, // 1 FPS पर फ़्रेम एक्सट्रेक्ट करें
-                    `-q:v 2`           // अच्छी गुणवत्ता
+                    `-q:v 2`          
                 ])
-                .save(path.join(tempFramesDir, 'frame_%04d.jpg')) // फ़्रेमों को सेव करें
+                .save(path.join(tempFramesDir, 'frame_%04d.jpg')) 
                 .on('end', () => { resolve(); })
                 .on('error', (err) => { reject(new Error(`FFmpeg Frame Extraction failed: ${err.message}`)); });
         });
@@ -130,15 +131,16 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         }
 
         // 3. बदले हुए फ़्रेमों को वापस वीडियो में जोड़ें (FFmpeg)
+        // यह यहाँ इनपुट फ़्रेम पैटर्न को 'converted_' से बदलता है।
         await new Promise((resolve, reject) => {
             ffmpeg()
-                .input(path.join(tempFramesDir, 'converted_frame_%04d.jpg')) // इनपुट पैटर्न
-                .inputOptions([`-framerate ${SAMPLE_FPS}`]) // वही फ्रेमरेट
+                .input(path.join(tempFramesDir, 'converted_frame_%04d.jpg')) 
+                .inputOptions([`-framerate ${SAMPLE_FPS}`]) 
                 .videoCodec('libx264')
                 .outputOptions([
                     '-pix_fmt yuv420p', 
                     '-crf 23',         
-                    '-r 25' // आउटपुट वीडियो को 25 FPS पर चलाएं ताकि वह "नॉर्मल" स्पीड में दिखे
+                    '-r 25' 
                 ])
                 .save(outputVideoPath)
                 .on('end', () => { resolve(); })
@@ -167,3 +169,4 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
+            
