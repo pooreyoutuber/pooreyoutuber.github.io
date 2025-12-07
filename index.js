@@ -1,23 +1,26 @@
-// index.js (आपका बैकएंड सर्वर)
+// index.js (आपका Render बैकएंड सर्वर)
 
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs/promises'); // Promises-based fs for async operations
-const { spawn } = require('child_process'); // To run FFMPEG
-const fetch = require('node-fetch'); // For making API calls to Hugging Face
+const { spawn } = require('child_process'); // FFMPEG और अन्य कमांड चलाने के लिए
+const fetch = require('node-fetch'); // Hugging Face API कॉल के लिए
 
-// --- 1. कॉन्फ़िगरेशन और पर्यावरण चर ---
+// --- 1. कॉन्फ़िगरेशन और पर्यावरण चर (Render से सटीक नाम) ---
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HUGGING_FACE_TOKEN = process.env.HUGGING_FACE_TOKEN;
-// आपको Hugging Face पर एक Style Transfer मॉडल endpoint चुनना होगा
-// उदाहरण:
-const HF_MODEL_ENDPOINT = 'https://api-inference.huggingface.co/models/YourOrg/your-style-transfer-model'; 
 
-// --- 2. मिडलवेयर सेटअप ---
+// Render Environment Variables से सीधे एक्सेस करें
+const GEMINI_API_KEY = process.env.GEMINI_KEY; // एक्सेस के लिए रखा गया है, लेकिन यहाँ उपयोग नहीं होगा
+const HF_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 
-// CORS कॉन्फ़िगरेशन:
+// Hugging Face Style Transfer Model Endpoint सेट किया गया है
+const HF_MODEL_ENDPOINT = 'https://api-inference.huggingface.co/models/p-wang/cartoon-style-transfer'; 
+
+// --- 2. मिडलवेयर और फ़ोल्डर सेटअप ---
+
+// CORS कॉन्फ़िगरेशन
 app.use((req, res, next) => {
     // इसे अपने फ़्रंटएंड URL से बदलें
     res.header('Access-Control-Allow-Origin', 'https://pooreyoutuber.github.io'); 
@@ -26,11 +29,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// फ़ोल्डर जहाँ हम अस्थायी फ़ाइलें सहेजेंगे
 const TEMP_DIR = path.join(__dirname, 'temp');
 const CONVERTED_DIR = path.join(__dirname, 'converted');
 
-// सुनिश्चित करें कि फ़ोल्डर मौजूद हैं
 async function setupDirectories() {
     await fs.mkdir(TEMP_DIR, { recursive: true });
     await fs.mkdir(CONVERTED_DIR, { recursive: true });
@@ -40,7 +41,7 @@ setupDirectories();
 // Multer स्टोरेज: इनपुट फ़ाइल को 'temp' में सहेजें
 const upload = multer({
     dest: TEMP_DIR,
-    limits: { fileSize: 30 * 1024 * 1024 }, // 30 MB
+    limits: { fileSize: 30 * 1024 * 1024 },
 });
 
 // --- 3. हेल्पर फ़ंक्शंस ---
@@ -50,27 +51,29 @@ function runFFmpeg(args) {
     return new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', args);
 
+        let errorOutput = '';
         ffmpeg.stderr.on('data', (data) => {
             // FFMPEG आउटपुट आमतौर पर stderr पर आता है
-            console.log(`FFMPEG: ${data}`);
+            errorOutput += data.toString();
         });
 
         ffmpeg.on('close', (code) => {
             if (code === 0) {
                 resolve();
             } else {
-                reject(new Error(`FFMPEG process exited with code ${code}`));
+                console.error("FFMPEG Error Details:", errorOutput);
+                reject(new Error(`FFMPEG process exited with code ${code}. See logs for details.`));
             }
         });
     });
 }
 
-/** Hugging Face API को एक इमेज भेजने और स्टाइल ट्रांसफर करने के लिए */
-async function applyStyleToFrame(inputPath, outputPath) {
-    if (!HUGGING_FACE_TOKEN || !HF_MODEL_ENDPOINT.includes('your-style-transfer-model')) {
-        // अगर API key नहीं है या endpoint default है, तो डमी इमेज कॉपी करें
+/** Hugging Face API को एक इमेज भेजकर स्टाइल लागू करना */
+async function applyStyleToFrame(inputPath, outputPath, style) {
+    // अगर Token missing है, तो डमी कन्वर्ज़न करें
+    if (!HF_ACCESS_TOKEN) {
         await fs.copyFile(inputPath, outputPath);
-        console.warn("Using DUMMY CONVERSION: API keys missing or endpoint not set.");
+        await new Promise(resolve => setTimeout(resolve, 50)); 
         return;
     }
 
@@ -78,33 +81,37 @@ async function applyStyleToFrame(inputPath, outputPath) {
         const imageBuffer = await fs.readFile(inputPath);
 
         const response = await fetch(HF_MODEL_ENDPOINT, {
-            headers: { Authorization: `Bearer ${HUGGING_FACE_TOKEN}` },
+            headers: { Authorization: `Bearer ${HF_ACCESS_TOKEN}` },
             method: "POST",
-            body: imageBuffer,
+            body: imageBuffer, // इमेज बाइनरी भेजें
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`HF API failed: ${response.status} - ${errorText.substring(0, 100)}`);
+            throw new Error(`HF API failed (${response.status}): ${errorText.substring(0, 100)}`);
         }
 
-        // प्रतिक्रिया एक नई इमेज बाइनरी होनी चाहिए
         const resultImageBuffer = await response.buffer();
         await fs.writeFile(outputPath, resultImageBuffer);
         
     } catch (error) {
-        console.error(`Error processing frame ${inputPath}:`, error.message);
-        // अगर API विफल हो जाता है, तो मूल फ्रेम को कॉपी करें ताकि वीडियो टूटे नहीं
+        console.error(`Error processing frame ${path.basename(inputPath)}: ${error.message}`);
+        // अगर API विफल हो जाता है, तो मूल फ्रेम को कॉपी करें
         await fs.copyFile(inputPath, outputPath); 
     }
 }
 
-/** अस्थायी फ़ोल्डर और उसकी सामग्री हटाएँ */
-async function cleanUp(folderPath) {
+/** अस्थायी फ़ाइल/फ़ोल्डर हटाएँ */
+async function cleanUp(targetPath) {
     try {
-        await fs.rm(folderPath, { recursive: true, force: true });
+        const stats = await fs.stat(targetPath);
+        if (stats.isDirectory()) {
+            await fs.rm(targetPath, { recursive: true, force: true });
+        } else {
+            await fs.unlink(targetPath);
+        }
     } catch (e) {
-        console.error(`Cleanup failed for ${folderPath}:`, e.message);
+        // फ़ाइल पहले से मौजूद नहीं है, ठीक है
     }
 }
 
@@ -119,7 +126,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     // इनपुट
     const { style } = req.body;
     const inputFilePath = req.file.path;
-    const sessionId = path.basename(inputFilePath); // Multer द्वारा दिए गए unique नाम का उपयोग करें
+    const sessionId = path.basename(inputFilePath); 
     
     // अस्थायी फ़ोल्डर्स
     const sessionDir = path.join(TEMP_DIR, sessionId);
@@ -130,7 +137,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     const outputFileName = `converted_${sessionId}_${style}.mp4`;
     const outputFilePath = path.join(CONVERTED_DIR, outputFileName);
 
-    console.log(`[START] Processing session: ${sessionId} with style: ${style}`);
+    console.log(`[START] Session: ${sessionId}, Style: ${style}`);
 
     try {
         await fs.mkdir(frameInputPath, { recursive: true });
@@ -140,7 +147,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         console.log(`[STEP 1/4] Extracting frames...`);
         const frameExtractionArgs = [
             '-i', inputFilePath,
-            '-vf', 'fps=5', // 5 FPS (धीमी प्रोसेसिंग के लिए 10 या 15 का उपयोग करें)
+            '-vf', 'fps=5', // 5 FPS
             path.join(frameInputPath, '%05d.png')
         ];
         await runFFmpeg(frameExtractionArgs); 
@@ -151,7 +158,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         const processingPromises = frames.map(frameName => {
             const inputFrame = path.join(frameInputPath, frameName);
             const outputFrame = path.join(frameOutputPath, frameName);
-            return applyStyleToFrame(inputFrame, outputFrame);
+            return applyStyleToFrame(inputFrame, outputFrame, style);
         });
         
         // सभी फ्रेम्स को एक साथ प्रोसेस करें (Concurrent processing)
@@ -164,14 +171,14 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             '-i', path.join(frameOutputPath, '%05d.png'),
             '-c:v', 'libx264',
             '-pix_fmt', 'yuv420p',
-            '-y', // Overwrite output file
+            '-y', 
             outputFilePath
         ];
         await runFFmpeg(recompileArgs); 
 
         // D. क्लीनअप और प्रतिक्रिया
-        await cleanUp(inputFilePath); // अपलोड की गई फ़ाइल
-        await cleanUp(sessionDir); // अस्थायी फ्रेम्स फ़ोल्डर
+        await cleanUp(inputFilePath); 
+        await cleanUp(sessionDir); 
 
         const downloadUrl = `/download/${outputFileName}`;
 
@@ -182,13 +189,14 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         });
 
     } catch (error) {
-        console.error(`[FAILURE] Global Error in session ${sessionId}:`, error.message);
+        console.error(`[FAILURE] Global Error:`, error.message);
         
         // आपातकालीन क्लीनअप
         await cleanUp(inputFilePath); 
         await cleanUp(sessionDir);
+        await cleanUp(outputFilePath); 
 
-        return res.status(500).json({ message: error.message || "An unexpected server error occurred during conversion." });
+        return res.status(500).json({ message: "Conversion failed. Please check server logs for FFMPEG/API errors." });
     }
 });
 
@@ -207,7 +215,7 @@ app.get('/download/:filename', (req, res) => {
             }
         } else {
             console.log(`[DOWNLOADED] ${fileName}. Deleting...`);
-            // फ़ाइल डाउनलोड होने के बाद उसे हटा दें
+            // फ़ाइल डाउनलोड होने के बाद उसे हटा दें (स्टोरेज बचाने के लिए)
             await cleanUp(filePath); 
         }
     });
@@ -218,7 +226,7 @@ app.get('/download/:filename', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    if (!HUGGING_FACE_TOKEN) {
-        console.warn("!!! WARNING: HUGGING_FACE_TOKEN is missing. Using DUMMY conversion !!!");
+    if (!HF_ACCESS_TOKEN) {
+        console.warn("!!! WARNING: HUGGINGFACE_ACCESS_TOKEN is missing. Using DUMMY conversion !!!");
     }
 });
