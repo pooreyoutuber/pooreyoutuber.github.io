@@ -1,4 +1,4 @@
-// index.js (Render पर FFmpeg Static और Hugging Face Client के साथ)
+// index.js (ES Module Fixes के साथ फाइनल वर्ज़न)
 
 import express from 'express';
 import multer from 'multer';
@@ -6,19 +6,22 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs/promises'; 
 import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 // 🚀 AI और FFmpeg के लिए आवश्यक इम्पोर्ट
-import { InferenceClient } from "@huggingface/inference"; // Hugging Face Client
+import { InferenceClient } from "@huggingface/inference"; 
 import ffmpeg from 'fluent-ffmpeg';
-import ffmpegStatic from 'ffmpeg-static'; // FFmpeg बाइनरी
-import ffprobeStatic from 'ffprobe-static'; // FFprobe बाइनरी
+
+// Node.js ESM में 'static' पैकेजों के पाथ को ठीक करने का तरीका
+import ffmpegStatic from 'ffmpeg-static';
+import ffprobeStatic from 'ffprobe-static';
 
 // Node.js ESM (Module) के लिए __dirname सेट करना
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 // --- FFmpeg पाथ को कॉन्फ़िगर करें ---
-// Render पर Docker के बिना FFmpeg का उपयोग करने के लिए आवश्यक
+// Render पर FFmpeg का उपयोग करने के लिए आवश्यक
 ffmpeg.setFfmpegPath(ffmpegStatic);
 ffmpeg.setFfprobePath(ffprobeStatic);
 console.log("FFmpeg and FFprobe configured.");
@@ -36,14 +39,13 @@ if (!HUGGINGFACE_ACCESS_TOKEN) {
 }
 const hfClient = new InferenceClient(HUGGINGFACE_ACCESS_TOKEN);
 
-
 // --- डायरेक्टरी कॉन्फ़िगरेशन ---
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 const PROCESSED_DIR = path.join(__dirname, 'processed');
 
 // --- मिडलवेयर और सेटअप ---
 app.use(cors({
-    origin: '*', // फ्रंटएंड से सभी CORS अनुरोधों की अनुमति देता है
+    origin: '*',
     methods: ['GET', 'POST'],
 }));
 app.use(express.json());
@@ -92,10 +94,8 @@ async function applyStyleTransfer(inputPath, outputPath, style) {
     
     const MODEL_ID = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime"; 
     
-    // 1. इनपुट इमेज को Buffer के रूप में लोड करें
     const inputData = await fs.readFile(inputPath);
 
-    // 2. स्टाइल के आधार पर प्रॉम्प्ट सेट करें
     let promptText = "";
     if (style === 'what-if') {
         promptText = "highly detailed, comic book illustration, cell shading, What If...? animated series style";
@@ -107,21 +107,23 @@ async function applyStyleTransfer(inputPath, outputPath, style) {
         promptText = "high quality anime transformation, detailed, clean lines, cinematic lighting";
     }
     
-    console.log(`🚀 Sending frame to AI with prompt: "${promptText}"`);
+    // 🛑 API Key चेक यहाँ दोहराना महत्वपूर्ण है
+    if (!HUGGINGFACE_ACCESS_TOKEN) {
+        throw new Error("HUGGINGFACE_ACCESS_TOKEN is not configured for AI call.");
+    }
+    
+    console.log(`🚀 Sending frame to AI with style: ${style}`);
 
     try {
-        // 3. AI कॉल: imageToImage का उपयोग करें
         const resultBlob = await hfClient.imageToImage({
             provider: "wavespeed",
             model: MODEL_ID,
-            inputs: inputData, // Buffer as inputs
+            inputs: inputData,
             parameters: { 
                 prompt: promptText, 
-                // इस मॉडल के लिए 'image_guidance_scale' जैसे पैरामीटर्स आवश्यक हो सकते हैं।
             },
         });
         
-        // 4. Blob को Buffer में बदलें और सहेजें
         const resultBuffer = await resultBlob.arrayBuffer();
         await fs.writeFile(outputPath, Buffer.from(resultBuffer));
         console.log(`✅ Frame processed successfully by ${MODEL_ID}`);
@@ -167,7 +169,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         await new Promise((resolve, reject) => {
             ffmpeg(videoPath)
                 .outputOptions([
-                    '-r 10', // 10 FPS (10 frames per second)
+                    '-r 10',
                     '-q:v 2' 
                 ])
                 .save(path.join(tempFramesDir, 'frame-%05d.jpg')) 
@@ -183,17 +185,17 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         // --- 2. प्रत्येक फ्रेम पर स्टाइल ट्रांसफर लागू करना ---
         const frameFiles = (await fs.readdir(tempFramesDir)).filter(file => file.endsWith('.jpg'));
         
-        // समानांतर (parallel) प्रोसेसिंग के लिए Promise.all का उपयोग करें
+        // समानांतर (parallel) प्रोसेसिंग
         const conversionPromises = frameFiles.map(async (fileName) => {
             const inputFramePath = path.join(tempFramesDir, fileName);
             const outputFramePath = path.join(processedFramesDir, fileName);
             
-            // 🚀 AI कॉल: नया, विश्वसनीय applyStyleTransfer
             await applyStyleTransfer(inputFramePath, outputFramePath, style);
         });
 
         // सभी फ्रेम के पूरा होने का इंतज़ार करें
-        await Promise.all(conversionPromises);
+        // ⚠️ Render पर यह स्टेप टाइम आउट हो सकता है यदि वीडियो लंबा हो।
+        await Promise.all(conversionPromises); 
         console.log(`AI style transfer finished. ${conversionPromises.length} frames processed.`);
 
 
@@ -204,12 +206,11 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             ffmpeg()
                 .input(processedFramesPattern)
                 .inputOptions([
-                    '-framerate 10', // इनपुट फ्रेम दर 10 FPS
+                    '-framerate 10',
                 ])
-                // FFmpeg वीडियो फ़िल्टर (Format/Padding fixes)
                 .videoFilters([
-                    'pad=ceil(iw/2)*2:ceil(ih/2)*2', // H.264 संगतता के लिए
-                    'format=yuv420p' // QuickTime/Web संगतता के लिए
+                    'pad=ceil(iw/2)*2:ceil(ih/2)*2',
+                    'format=yuv420p'
                 ])
                 .outputOptions([
                     '-c:v libx264', 
@@ -238,7 +239,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 
     } catch (error) {
         console.error('FATAL CONVERSION ERROR:', error.message);
-        await cleanupFiles(videoPath, tempFramesDir); // सुनिश्चित करें कि सफाई हो जाए
+        await cleanupFiles(videoPath, tempFramesDir);
 
         res.status(500).json({ 
             message: 'Conversion failed during processing.', 
