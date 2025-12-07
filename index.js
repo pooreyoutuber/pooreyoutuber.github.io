@@ -1,6 +1,4 @@
-
 // **ES Modules (ESM) Import Syntax**
-// Node.js v25.2.1 में dotenv को कॉन्फ़िगर करने का सही तरीका
 import 'dotenv/config'; 
 
 import express from 'express';
@@ -8,9 +6,11 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import ffmpeg from 'fluent-ffmpeg';
-// 🛑 FIX: InferenceClient को HfInference से बदला गया
 import { HfInference } from "@huggingface/inference"; 
 import { fileURLToPath } from 'url';
+// 🛑 FIX: Blob क्लास को इंपोर्ट करें ताकि Node.js Buffer को बदला जा सके
+import { Blob } from 'node:buffer'; 
+
 
 // ESM में __dirname को परिभाषित करें
 const __filename = fileURLToPath(import.meta.url);
@@ -24,8 +24,6 @@ const HUGGINGFACE_ACCESS_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 if (!HUGGINGFACE_ACCESS_TOKEN) {
     console.error("HUGGINGFACE_ACCESS_TOKEN is not set.");
 }
-
-// 🛑 FIX: यहाँ भी HfInference का उपयोग करें
 const inference = new HfInference(HUGGINGFACE_ACCESS_TOKEN);
 
 // --- ⚙️ कॉन्फ़िगरेशन ---
@@ -59,15 +57,20 @@ app.use(express.json());
 app.use('/static/downloads', express.static(CONVERTED_STORAGE));
 
 
-// 🤖 Hugging Face इमेज-टू-इमेज फ़ंक्शन
+// 🤖 Hugging Face इमेज-टू-इमेज फ़ंक्शन (Blob कन्वर्जन के साथ)
 async function convertImageToAnime(imageBuffer, prompt) {
+    // 🛑 FIX: Node.js Buffer को Blob में बदलें
+    // Hugging Face क्लाइंट को Blob की आवश्यकता होती है, जिसमें arrayBuffer() फ़ंक्शन होता है।
+    const inputBlob = new Blob([imageBuffer], { type: 'image/jpeg' });
+    
     const imageBlob = await inference.imageToImage({
         provider: "wavespeed", 
         model: HF_ANIME_MODEL,
-        inputs: imageBuffer,
+        inputs: inputBlob, // अब inputBlob में आवश्यक .arrayBuffer() फ़ंक्शन है
         parameters: { prompt: prompt },
     });
     
+    // आउटपुट Blob को वापस Node.js Buffer में बदलें
     return Buffer.from(await imageBlob.arrayBuffer());
 }
 
