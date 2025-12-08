@@ -3,13 +3,13 @@
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
-const express = require('express');
+import express from 'express';
 const { GoogleGenAI } = require('@google/genai'); 
 const nodeFetch = require('node-fetch'); 
 const multer = require('multer');
 const { exec } = require('child_process');
 const cors = require('cors'); 
-const fs = require('fs'); 
+import fs from 'fs';
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
