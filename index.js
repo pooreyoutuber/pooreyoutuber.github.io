@@ -37,7 +37,25 @@ if (GEMINI_KEY) {
     // Fallback in case AI key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
+// --- HUGGING FACE CONFIGURATION ---
+// Render env vars का उपयोग करें
+const HF_ENDPOINT = process.env.HF_ENDPOINT;
+const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 
+// Temporary location for processed videos and setup map
+const DOWNLOAD_DIR = '/tmp/converted/';
+
+// सुनिश्चित करें कि यह फ़ोल्डर मौजूद है
+if (!fs.existsSync(DOWNLOAD_DIR)) {
+    fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
+}
+
+// स्टाइल और डमी मॉडल मैपिंग (Style and Model Mapping)
+const STYLE_MODEL_MAP = {
+    'what-if': 'stabilityai/stable-diffusion-xl-base-1.0', 
+    'ben-10-classic': 'hakurei/waifu-diffusion', 
+    'jujutsu-kaisen': 'lambdalabs/sd-image-variations-diffusers',
+};
 // --- MIDDLEWARE & UTILITIES ---
 // Updated CORS to allow all for simplicity in deployment
 app.use(cors({
@@ -1328,13 +1346,6 @@ app.get('/downloads/:filename', (req, res) => {
         res.status(404).json({ status: 'error', message: 'File not found or processing still running.' });
     }
 });
-
-
-// ===================================================================
-// --- SERVER START --- (Keep this section as is)
-// ===================================================================
-
-// ... Your existing server start code (app.listen) ...
 
 // ===================================================================
 // --- SERVER START ---
