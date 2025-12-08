@@ -1,5 +1,6 @@
 // ===================================================================
-// index.js (ULTIMATE FINAL VERSION - All Tools Integrated)
+// index.js (COMPLETE FINAL VERSION - 6 Working Tools)
+// CommonJS (require) format for all modules
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
@@ -7,15 +8,14 @@ const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
-const fs = require('fs'); // CommonJS syntax
+const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
-// Tool 4 और 6 के लिए आवश्यक नए imports
 const http = require('http'); 
 const { URL } = require('url'); 
-const multer = require('multer'); // NEW: File upload handling
-const { exec } = require('child_process'); // NEW: For running FFmpeg commands
+const multer = require('multer'); // Tool 6 के लिए आवश्यक
+const { exec } = require('child_process'); // Tool 6 के लिए FFmpeg आवश्यक
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -34,42 +34,81 @@ let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
-    // Fallback in case AI key is missing
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
 // --- HUGGING FACE & ANIME CONVERTER CONFIGURATION ---
-// Render env vars का उपयोग करें
 const HF_ENDPOINT = process.env.HF_ENDPOINT;
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 
 // Temporary location for processed videos
 const DOWNLOAD_DIR = '/tmp/converted/';
 
-// सुनिश्चित करें कि यह फ़ोल्डर मौजूद है
 if (!fs.existsSync(DOWNLOAD_DIR)) {
     fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
 }
 
-// स्टाइल और डमी मॉडल मैपिंग (Style and Model Mapping)
 const STYLE_MODEL_MAP = {
     'what-if': 'stabilityai/stable-diffusion-xl-base-1.0', 
     'ben-10-classic': 'hakurei/waifu-diffusion', 
     'jujutsu-kaisen': 'lambdalabs/sd-image-variations-diffusers',
 };
 
-// --- MIDDLEWARE & UTILITIES ---
+
+// ===================================================================
+// --- UTILITY FUNCTIONS (Correct Scope Fixes runCommand Error) ---
+// ===================================================================
+function generateUniqueId() {
+    return crypto.randomBytes(16).toString('hex');
+}
+
+function createProxyAgent(proxyUrl) {
+    try {
+        const parsedUrl = new URL(proxyUrl);
+        const auth = parsedUrl.username && parsedUrl.password ? `${parsedUrl.username}:${parsedUrl.password}` : null;
+        
+        if (parsedUrl.protocol === 'https:') {
+            return new HttpsProxyAgent(proxyUrl);
+        } else if (parsedUrl.protocol === 'http:') {
+            return new HttpsProxyAgent(proxyUrl);
+        }
+        return null;
+    } catch (error) {
+        console.error("Invalid proxy URL:", error);
+        return null;
+    }
+}
+
+/**
+ * FFmpeg कमांड चलाने के लिए Utility function (फिक्स: इसे Global Scope में रखा गया है)
+ * @param {string} command - The command string.
+ * @returns {Promise<void>}
+ */
+function runCommand(command) {
+    return new Promise((resolve, reject) => {
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`--- FFMPEG CRITICAL ERROR ---`);
+                console.error(`Command: ${command}`);
+                console.error(`Error: ${error.message}`);
+                console.error(`Stderr: ${stderr}`);
+                console.error(`-----------------------------`);
+                return reject(new Error(`Command failed: ${error.message}. Full Stderr: ${stderr}`));
+            }
+            resolve();
+        });
+    });
+}
+// --- MIDDLEWARE & MULTER SETUP ---
 app.use(cors()); 
 app.use(express.json({ limit: '5mb' }));
 
-// 🛑 NEW: MULTER SETUP FOR FILE UPLOADS (Tool 6: /anime-convert)
+// MULTER SETUP FOR FILE UPLOADS (Tool 6)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // Render के अस्थायी डायरेक्टरी का उपयोग करें
         cb(null, '/tmp/');
     },
     filename: (req, file, cb) => {
-        // एक अद्वितीय फ़ाइल नाम (timestamp + original name) बनाएं
         cb(null, `${Date.now()}-${file.originalname.replace(/[^a-z0-9.]/gi, '_')}`);
     }
 });
@@ -1235,10 +1274,10 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             // 2. Extract Frames (10 FPS: 0.1s per frame)
             console.log(`[FFMPEG 1] Extracting frames at 10 FPS to ${frameDir}`);
             const extractFramesCmd = `ffmpeg -i ${inputFilePath} -vf fps=10 ${frameDir}%05d.png`;
-            await runCommand(extractFramesCmd);
+            await runCommand(extractFramesCmd); // runCommand अब ग्लोबल स्कोप में है
             
             // 3. AI Processing (Frame-by-Frame - REAL HUGGING FACE LOGIC)
-            const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort(); // Sort for correct order
+            const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort();
             totalFrames = frames.length;
             console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting REAL AI conversion...`);
             
@@ -1249,7 +1288,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 const inputFramePath = frameDir + frame;
                 const outputFramePath = processedFrameDir + frame;
                 
-                if (!frame.match(/^\d{5}\.png$/)) continue; // Skip non-frame files
+                if (!frame.match(/^\d{5}\.png$/)) continue;
 
                 console.log(`[HF API] Processing frame ${i + 1}/${totalFrames}`);
                 
@@ -1266,7 +1305,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 // Save the processed image
                 fs.writeFileSync(outputFramePath, response.data);
                 
-                // Rate Limiting से बचने के लिए थोड़ा रुकें (Reduce load on HF API)
+                // Rate Limiting के लिए 300ms pause
                 await new Promise(resolve => setTimeout(resolve, 300)); 
             }
             
