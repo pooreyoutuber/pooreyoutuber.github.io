@@ -1192,30 +1192,13 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // ===================================================================
 // 6. ANIME STYLE VIDEO CONVERTER (API: /anime-convert) - NEW TOOL
 // ===================================================================
-/**
- * FFmpeg कमांड चलाने के लिए Utility function
- * @param {string} command - The command string.
- * @returns {Promise<void>}
- */
-function runCommand(command) {
-    return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Exec Error: ${error.message}`);
-                console.error(`Stderr: ${stderr}`);
-                return reject(new Error(`Command failed: ${error.message}. Stderr: ${stderr.substring(0, 100)}`));
-            }
-            resolve();
-        });
-    });
-}
-
-// --- MAIN CONVERTER ENDPOINT ---
 app.post('/anime-convert', upload.single('video'), async (req, res) => {
     
-    // 1. Initial Checks
     if (!req.file) {
         return res.status(400).json({ error: 'Video file upload failed or is missing.' });
+    }
+    if (!HF_TOKEN) {
+        return res.status(500).json({ error: 'Hugging Face Access Token is missing on the server.' });
     }
 
     const { style } = req.body;
@@ -1230,10 +1213,9 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     const outputFileName = `anime-${jobId}-${originalFileName.replace(/\.(mp4|mov|avi)$/i, '.mp4')}`;
     const outputFilePath = DOWNLOAD_DIR + outputFileName;
     
-    console.log(`\n[ANIME CONVERTER START] Job: ${jobId}. Style: ${style}`);
+    console.log(`\n[ANIME CONVERTER START] Job: ${jobId}. Style: ${style}. Model: ${selectedModel}`);
     
-    // 2. Send immediate response to frontend
-    // Frontend expects the downloadUrl immediately, even if processing is in background
+    // Send immediate response
     res.json({ 
         status: 'accepted', 
         message: 'Processing started in background.', 
@@ -1241,7 +1223,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     });
 
     // ----------------------------------------------------
-    // --- START ASYNCHRONOUS BACKGROUND PROCESSING ---
+    // --- ASYNCHRONOUS BACKGROUND PROCESSING ---
     // ----------------------------------------------------
     (async () => {
         let totalFrames = 0;
@@ -1255,21 +1237,40 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             const extractFramesCmd = `ffmpeg -i ${inputFilePath} -vf fps=10 ${frameDir}%05d.png`;
             await runCommand(extractFramesCmd);
             
-            // 3. AI Processing (Frame-by-Frame - MOCK LOGIC)
-            const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png'));
+            // 3. AI Processing (Frame-by-Frame - REAL HUGGING FACE LOGIC)
+            const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort(); // Sort for correct order
             totalFrames = frames.length;
-            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting MOCK AI conversion...`);
+            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting REAL AI conversion...`);
             
-            // Simulating processing by just copying frames
-            const mockProcessTime = totalFrames * 500; // 0.5s per frame mock time
-            console.log(`[AI MOCK] Simulating AI processing for ${Math.round(mockProcessTime / 1000)} seconds.`);
-            
-            // MOCK: Copy original frame to processed directory
-            for (const frame of frames) {
-                 fs.copyFileSync(frameDir + frame, processedFrameDir + frame); 
+            const modelUrl = `https://api-inference.huggingface.co/models/${selectedModel}`;
+
+            for (let i = 0; i < frames.length; i++) {
+                const frame = frames[i];
+                const inputFramePath = frameDir + frame;
+                const outputFramePath = processedFrameDir + frame;
+                
+                if (!frame.match(/^\d{5}\.png$/)) continue; // Skip non-frame files
+
+                console.log(`[HF API] Processing frame ${i + 1}/${totalFrames}`);
+                
+                const frameData = fs.readFileSync(inputFramePath);
+
+                const response = await axios.post(modelUrl, frameData, {
+                    headers: { 
+                        "Authorization": `Bearer ${HF_TOKEN}`,
+                        "Content-Type": "image/png" 
+                    },
+                    responseType: 'arraybuffer' 
+                });
+                
+                // Save the processed image
+                fs.writeFileSync(outputFramePath, response.data);
+                
+                // Rate Limiting से बचने के लिए थोड़ा रुकें (Reduce load on HF API)
+                await new Promise(resolve => setTimeout(resolve, 300)); 
             }
-            await new Promise(resolve => setTimeout(resolve, mockProcessTime)); 
-            console.log("[AI MOCK COMPLETE] Frames are ready for re-assembly.");
+            
+            console.log("[AI COMPLETE] Frames are ready for re-assembly.");
 
 
             // 4. Re-assemble Frames into Video
@@ -1293,13 +1294,15 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             }
         }
     })();
-    // --- END ASYNCHRONOUS BACKGROUND PROCESSING ---
 });
 
 
+// ===================================================================
 // 7. DOWNLOAD ENDPOINT (For frontend to access the final video)
+// ===================================================================
 app.get('/downloads/:filename', (req, res) => {
     const filename = req.params.filename;
+    
     // Security check:
     if (filename.includes('..') || !filename.startsWith('anime-')) {
         return res.status(403).json({ status: 'error', message: 'Invalid filename.' });
@@ -1308,11 +1311,9 @@ app.get('/downloads/:filename', (req, res) => {
     const filePath = DOWNLOAD_DIR + filename;
 
     if (fs.existsSync(filePath)) {
-        // Set content type and use res.download
         res.setHeader('Content-Type', 'video/mp4');
         res.download(filePath, filename); 
     } else {
-        // The file is either still processing or was not found
         res.status(404).json({ status: 'error', message: 'File not found or processing still running.' });
     }
 });
@@ -1321,7 +1322,6 @@ app.get('/downloads/:filename', (req, res) => {
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
-// Sirf ek hi baar server start hoga
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
