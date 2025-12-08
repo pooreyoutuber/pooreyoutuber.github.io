@@ -1,7 +1,7 @@
 // ===================================================================
-// index.js (COMPLETE FINAL VERSION - 6 Working Tools)
+// index.js (COMPLETE FINAL VERSION - 7 Working Tools)
 // CommonJS (require) format for all modules
-// 🚀 FIXED: Tool 6 & 7 (Anime Converter & Download) - Added 'path' module for correct file handling.
+// 🚀 FIXED: Tool 6 & 7 (Anime Converter & Download) - Added 'path' module and corrected HF API call.
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
@@ -15,9 +15,9 @@ const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
 const http = require('http'); 
 const { URL } = require('url'); 
-const multer = require('multer'); // Tool 6 के लिए आवश्यक
-const { exec } = require('child_process'); // Tool 6 के लिए FFmpeg आवश्यक
-const path = require('path'); // ✨ सुधार: 'path' मॉड्यूल जोड़ा गया
+const multer = require('multer'); 
+const { exec } = require('child_process'); 
+const path = require('path'); // ✨ सुधार 1: 'path' मॉड्यूल जोड़ा गया
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -44,23 +44,22 @@ const HF_ENDPOINT = process.env.HF_ENDPOINT;
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 
 // Temporary location for processed videos
-// ✨ सुधार: path.join का उपयोग करके सुरक्षित DOWNLOAD_DIR बनाया गया
+// ✨ सुधार 2: path.join का उपयोग करके सुरक्षित DOWNLOAD_DIR बनाया गया
 const DOWNLOAD_DIR = path.join('/tmp', 'converted');
 
 if (!fs.existsSync(DOWNLOAD_DIR)) {
     fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
 }
 
+// ✨ सुधार 3: सभी स्टाइल्स के लिए एक उच्च-गुणवत्ता वाला Anime मॉडल उपयोग किया गया
+const ANIME_MODEL = 'autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime'; 
 const STYLE_MODEL_MAP = {
-    'what-if': 'stabilityai/stable-diffusion-xl-base-1.0', 
-    'ben-10-classic': 'hakurei/waifu-diffusion', 
-    'jujutsu-kaisen': 'lambdalabs/sd-image-variations-diffusers',
+    'what-if': ANIME_MODEL, 
+    'ben-10-classic': ANIME_MODEL, 
+    'jujutsu-kaisen': ANIME_MODEL,
 };
 
-
-// ===================================================================
-// --- UTILITY FUNCTIONS (Correct Scope Fixes runCommand Error) ---
-// ===================================================================
+// --- UTILITY FUNCTIONS ---
 function generateUniqueId() {
     return crypto.randomBytes(16).toString('hex');
 }
@@ -83,7 +82,7 @@ function createProxyAgent(proxyUrl) {
 }
 
 /**
- * FFmpeg कमांड चलाने के लिए Utility function (फिक्स: इसे Global Scope में रखा गया है)
+ * FFmpeg कमांड चलाने के लिए Utility function 
  * @param {string} command - The command string.
  * @returns {Promise<void>}
  */
@@ -1232,7 +1231,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. ANIME STYLE VIDEO CONVERTER (API: /anime-convert) - NEW TOOL
+// 6. ANIME STYLE VIDEO CONVERTER (API: /anime-convert) - FIXED TOOL
 // ===================================================================
 app.post('/anime-convert', upload.single('video'), async (req, res) => {
     
@@ -1253,7 +1252,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     const frameDir = `/tmp/${jobId}_frames/`;
     const processedFrameDir = `/tmp/${jobId}_processed_frames/`;
     const outputFileName = `anime-${jobId}-${originalFileName.replace(/\.(mp4|mov|avi)$/i, '.mp4')}`;
-    // ✨ सुधार: path.join का उपयोग करके सुरक्षित आउटपुट पाथ बनाया गया
+    // path.join का उपयोग करके सुरक्षित आउटपुट पाथ
     const outputFilePath = path.join(DOWNLOAD_DIR, outputFileName);
     
     console.log(`\n[ANIME CONVERTER START] Job: ${jobId}. Style: ${style}. Model: ${selectedModel}`);
@@ -1278,12 +1277,12 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             // 2. Extract Frames (10 FPS: 0.1s per frame)
             console.log(`[FFMPEG 1] Extracting frames at 10 FPS to ${frameDir}`);
             const extractFramesCmd = `ffmpeg -i ${inputFilePath} -vf fps=10 ${frameDir}%05d.png`;
-            await runCommand(extractFramesCmd); // runCommand अब ग्लोबल स्कोप में है
+            await runCommand(extractFramesCmd); 
             
-            // 3. AI Processing (Frame-by-Frame - REAL HUGGING FACE LOGIC)
+            // 3. AI Processing (Frame-by-Frame - FIXED HUGGING FACE LOGIC)
             const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort();
             totalFrames = frames.length;
-            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting REAL AI conversion...`);
+            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting AI conversion...`);
             
             const modelUrl = `https://api-inference.huggingface.co/models/${selectedModel}`;
 
@@ -1297,11 +1296,22 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 console.log(`[HF API] Processing frame ${i + 1}/${totalFrames}`);
                 
                 const frameData = fs.readFileSync(inputFramePath);
+                
+                // --- ✨ CRITICAL FIX: Send image data as base64 within a JSON payload with a prompt ---
+                const payload = {
+                    inputs: Buffer.from(frameData).toString('base64'),
+                    parameters: { 
+                        // Prompt to guide the conversion to a better anime style
+                        prompt: "Convert to high-quality anime style, detailed, vibrant colors, Studio Ghibli, 4k",
+                        negative_prompt: "low quality, blurry, worst quality, noise, disfigured, watermark, cartoon",
+                        strength: 0.75 // Strength parameter for image-to-image models
+                    }
+                };
 
-                const response = await axios.post(modelUrl, frameData, {
+                const response = await axios.post(modelUrl, payload, {
                     headers: { 
                         "Authorization": `Bearer ${HF_TOKEN}`,
-                        "Content-Type": "image/png" 
+                        "Content-Type": "application/json" // Content type must be JSON now
                     },
                     responseType: 'arraybuffer' 
                 });
@@ -1309,7 +1319,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 // Save the processed image
                 fs.writeFileSync(outputFramePath, response.data);
                 
-                // Rate Limiting के लिए 300ms pause
+                // Rate Limiting के लिए pause
                 await new Promise(resolve => setTimeout(resolve, 300)); 
             }
             
@@ -1341,7 +1351,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 
 
 // ===================================================================
-// 7. DOWNLOAD ENDPOINT (For frontend to access the final video)
+// 7. DOWNLOAD ENDPOINT (For frontend to access the final video) - FIXED
 // ===================================================================
 app.get('/downloads/:filename', (req, res) => {
     const filename = req.params.filename;
