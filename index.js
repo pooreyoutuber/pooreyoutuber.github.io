@@ -6,6 +6,8 @@
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const nodeFetch = require('node-fetch'); 
+const multer = require('multer');
+const { exec } = require('child_process');
 const cors = require('cors'); 
 const fs = require('fs'); 
 const crypto = require('crypto');
@@ -1154,7 +1156,185 @@ app.post('/youtube-boost-mp', async (req, res) => {
         
     })();
 });
+// ===================================================================
+// 6. ANIME STYLE VIDEO CONVERTER (API: /anime-convert) - NEW TOOL
+// ===================================================================
 
+const HF_ENDPOINT = process.env.HF_ENDPOINT;
+const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
+
+// Temporary location for processed videos
+const DOWNLOAD_DIR = '/tmp/converted/';
+if (!fs.existsSync(DOWNLOAD_DIR)) {
+    fs.mkdirSync(DOWNLOAD_DIR);
+}
+
+// 🛑 WARNING: This model is a PLACEHOLDER for Image Style Transfer. 
+// For real video conversion, you must use a model optimized for that 
+// or implement the frame-by-frame loop logic.
+const STYLE_MODEL_MAP = {
+    'what-if': 'stabilityai/stable-diffusion-xl-base-1.0', // Placeholder
+    'ben-10-classic': 'hakurei/waifu-diffusion', // Placeholder for Anime Style
+    'jujutsu-kaisen': 'lambdalabs/sd-image-variations-diffusers', // Placeholder
+    // The actual model used should be a lightweight Image-to-Image model.
+    // For this demonstration, we'll use a simpler 'image-to-image' endpoint concept.
+};
+
+// --- CORE FRAME PROCESSING LOGIC (Simplified Placeholder) ---
+/**
+ * Executes a shell command (like FFmpeg).
+ * @param {string} command - The command string.
+ * @returns {Promise<void>}
+ */
+function runCommand(command) {
+    return new Promise((resolve, reject) => {
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Exec Error: ${error.message}`);
+                console.error(`Stderr: ${stderr}`);
+                return reject(new Error(`Command failed: ${error.message}`));
+            }
+            resolve();
+        });
+    });
+}
+
+// --- MAIN CONVERTER ENDPOINT ---
+app.post('/anime-convert', upload.single('video'), async (req, res) => {
+    
+    // 1. Initial Checks
+    if (!HF_TOKEN || !HF_ENDPOINT) {
+        return res.status(500).json({ error: 'Hugging Face API Key or Endpoint is missing.' });
+    }
+    if (!req.file) {
+        return res.status(400).json({ error: 'Video file upload failed or is missing.' });
+    }
+
+    const { style } = req.body;
+    const inputFilePath = req.file.path;
+    const originalFileName = req.file.originalname;
+    
+    // Use the selected style or default
+    const selectedModel = STYLE_MODEL_MAP[style] || STYLE_MODEL_MAP['ben-10-classic'];
+
+    // Generate unique names for processing
+    const jobId = crypto.randomBytes(8).toString('hex');
+    const frameDir = `/tmp/${jobId}_frames/`;
+    const outputFileName = `anime-${jobId}-${originalFileName.replace(/\.(mp4|mov|avi)$/i, '.mp4')}`;
+    const outputFilePath = DOWNLOAD_DIR + outputFileName;
+    
+    console.log(`\n[ANIME CONVERTER START] Job: ${jobId}. Model: ${selectedModel}`);
+    
+    // Send initial response (Asynchronous Processing)
+    res.json({ 
+        status: 'processing_started', 
+        message: 'Conversion started. Use the status endpoint to track progress (Not yet implemented).',
+        jobId: jobId 
+    });
+
+    // ----------------------------------------------------
+    // --- START ASYNCHRONOUS BACKGROUND PROCESSING ---
+    // ----------------------------------------------------
+    (async () => {
+        try {
+            // 1. Create Frame Directory
+            if (!fs.existsSync(frameDir)) {
+                fs.mkdirSync(frameDir);
+            }
+            
+            const processedFrameDir = `/tmp/${jobId}_processed_frames/`;
+            if (!fs.existsSync(processedFrameDir)) {
+                fs.mkdirSync(processedFrameDir);
+            }
+
+            // 2. Extract Frames (Your 0.1s speed requirement = 10 FPS)
+            // FFmpeg command: -vf fps=10 -> extracts 10 frames per second
+            console.log(`[FFMPEG 1] Extracting frames at 10 FPS to ${frameDir}`);
+            const extractFramesCmd = `ffmpeg -i ${inputFilePath} -vf fps=10 ${frameDir}%05d.png`;
+            await runCommand(extractFramesCmd);
+            
+            // 3. AI Processing (Frame-by-Frame - Requires real implementation)
+            const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png'));
+            console.log(`[AI STEP] Total frames extracted: ${frames.length}. Starting AI conversion...`);
+            
+            
+            // --- 🛑 MOCK AI/HUGGING FACE CALL (For deployment safety) ---
+            // A real implementation would loop through all frames and send them 
+            // one by one to the Hugging Face Inference API or a dedicated model.
+            
+            const mockProcessTime = frames.length * randomInt(500, 1000); // 0.5s to 1s per frame
+            console.log(`[AI MOCK] Simulating AI processing time of ${Math.round(mockProcessTime / 1000)} seconds.`);
+            
+            // Simulate processing by just copying the original frames to the processed folder
+            for (const frame of frames) {
+                 fs.copyFileSync(frameDir + frame, processedFrameDir + frame); 
+                 // Here, we would replace fs.copyFileSync with an actual API call 
+                 // to Hugging Face / Stable Diffusion for style transfer.
+            }
+            await new Promise(resolve => setTimeout(resolve, mockProcessTime)); // Wait for mock time
+            console.log("[AI MOCK COMPLETE] Frames are ready for re-assembly.");
+            // --- 🛑 END MOCK AI CALL ---
+
+
+            // 4. Re-assemble Frames into Video
+            console.log(`[FFMPEG 2] Assembling video from processed frames at 10 FPS.`);
+            // -r 10: Set input frame rate to 10 FPS
+            // -c:v libx264: Use H.264 codec
+            const assembleVideoCmd = `ffmpeg -r 10 -i ${processedFrameDir}%05d.png -c:v libx264 -pix_fmt yuv420p ${outputFilePath}`;
+            await runCommand(assembleVideoCmd);
+            
+            console.log(`[SUCCESS] Video converted and saved to: ${outputFilePath}`);
+
+            // 5. CLEANUP: Delete temporary files
+            fs.rmSync(inputFilePath, { force: true });
+            fs.rmSync(frameDir, { recursive: true, force: true });
+            fs.rmSync(processedFrameDir, { recursive: true, force: true });
+            console.log(`[CLEANUP] Temporary files deleted for job ${jobId}.`);
+
+            // 6. Final success log (For the server admin/developer)
+            console.log(`[JOB ${jobId} COMPLETE] Download URL: ${outputFileName}`);
+
+        } catch (error) {
+            console.error(`[CRITICAL FAILED JOB ${jobId}] Conversion pipeline failed: ${error.message}`);
+            // In a real app, you would notify the user (via a status check endpoint)
+            
+            // Ensure cleanup happens even on failure
+            fs.rmSync(inputFilePath, { force: true });
+            fs.rmSync(frameDir, { recursive: true, force: true });
+            fs.rmSync(processedFrameDir, { recursive: true, force: true });
+        }
+    })();
+    // --- END ASYNCHRONOUS BACKGROUND PROCESSING ---
+    
+    // The front-end needs the filename to check the result
+    return res.json({ 
+        status: 'accepted', 
+        message: 'Processing started in background.', 
+        downloadUrl: `/downloads/${outputFileName}` 
+    });
+});
+
+
+// 7. DOWNLOAD ENDPOINT (For frontend to access the final video)
+app.get('/downloads/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = DOWNLOAD_DIR + filename;
+
+    if (fs.existsSync(filePath)) {
+        // Set content type and send the file
+        res.setHeader('Content-Type', 'video/mp4');
+        res.download(filePath, filename); 
+    } else {
+        res.status(404).json({ status: 'error', message: 'File not found or processing still running.' });
+    }
+});
+
+
+// ===================================================================
+// --- SERVER START --- (Keep this section as is)
+// ===================================================================
+
+// ... Your existing server start code (app.listen) ...
 
 // ===================================================================
 // --- SERVER START ---
