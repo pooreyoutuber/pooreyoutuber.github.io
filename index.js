@@ -1,6 +1,7 @@
 // ===================================================================
 // index.js (COMPLETE FINAL VERSION - 6 Working Tools)
 // CommonJS (require) format for all modules
+// 🚀 FIXED: Tool 6 & 7 (Anime Converter & Download) - Added 'path' module for correct file handling.
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
@@ -16,6 +17,7 @@ const http = require('http');
 const { URL } = require('url'); 
 const multer = require('multer'); // Tool 6 के लिए आवश्यक
 const { exec } = require('child_process'); // Tool 6 के लिए FFmpeg आवश्यक
+const path = require('path'); // ✨ सुधार: 'path' मॉड्यूल जोड़ा गया
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -42,7 +44,8 @@ const HF_ENDPOINT = process.env.HF_ENDPOINT;
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 
 // Temporary location for processed videos
-const DOWNLOAD_DIR = '/tmp/converted/';
+// ✨ सुधार: path.join का उपयोग करके सुरक्षित DOWNLOAD_DIR बनाया गया
+const DOWNLOAD_DIR = path.join('/tmp', 'converted');
 
 if (!fs.existsSync(DOWNLOAD_DIR)) {
     fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
@@ -1250,7 +1253,8 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     const frameDir = `/tmp/${jobId}_frames/`;
     const processedFrameDir = `/tmp/${jobId}_processed_frames/`;
     const outputFileName = `anime-${jobId}-${originalFileName.replace(/\.(mp4|mov|avi)$/i, '.mp4')}`;
-    const outputFilePath = DOWNLOAD_DIR + outputFileName;
+    // ✨ सुधार: path.join का उपयोग करके सुरक्षित आउटपुट पाथ बनाया गया
+    const outputFilePath = path.join(DOWNLOAD_DIR, outputFileName);
     
     console.log(`\n[ANIME CONVERTER START] Job: ${jobId}. Style: ${style}. Model: ${selectedModel}`);
     
@@ -1347,7 +1351,8 @@ app.get('/downloads/:filename', (req, res) => {
         return res.status(403).json({ status: 'error', message: 'Invalid filename.' });
     }
     
-    const filePath = DOWNLOAD_DIR + filename;
+    // ✨ सुधार: path.join का उपयोग करके सुरक्षित फ़ाइल पाथ बनाया गया
+    const filePath = path.join(DOWNLOAD_DIR, filename);
 
     if (fs.existsSync(filePath)) {
         res.setHeader('Content-Type', 'video/mp4');
