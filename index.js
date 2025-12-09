@@ -129,21 +129,6 @@ app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
 // MULTER SETUP FOR FILE UPLOADS (Tool 6)
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, '/tmp/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname.replace(/[^a-z0-9.]/gi, '_')}`);
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
-    limits: { 
-        fileSize: 30 * 1024 * 1024 // 30 MB Limit
-    }
-});
 // General CORS headers
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
