@@ -35,30 +35,53 @@ try {
 let ai;
 if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-} else {
-    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// --- HUGGING FACE & ANIME CONVERTER CONFIGURATION ---
-const HF_ENDPOINT = process.env.HF_ENDPOINT;
-const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
+// --- GLOBAL CONFIGURATION & MIDDLEWARE ---
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Temporary location for processed videos
-// ✨ सुधार 2: path.join का उपयोग करके सुरक्षित DOWNLOAD_DIR बनाया गया
-const DOWNLOAD_DIR = path.join('/tmp', 'converted');
 
-if (!fs.existsSync(DOWNLOAD_DIR)) {
-    fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
-}
+// --- FILE/STORAGE CONFIGURATION ---
+const UPLOAD_DIR = '/tmp/uploads/';
+const FRAME_DIR = '/tmp/frames/';
+const PROCESSED_FRAME_DIR = '/tmp/processed_frames/';
+const DOWNLOAD_DIR = '/tmp/converted/';
 
-// ✨ सुधार 3: सभी स्टाइल्स के लिए एक उच्च-गुणवत्ता वाला Anime मॉडल उपयोग किया गया
-const ANIME_MODEL = 'autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime'; 
+// Ensure directories exist
+[UPLOAD_DIR, FRAME_DIR, PROCESSED_FRAME_DIR, DOWNLOAD_DIR].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+});
+
+// Multer storage for video upload
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 30 * 1024 * 1024 } // 30MB limit
+});
+
+// --- HUGGING FACE CONFIGURATION ---
+const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
+const ANIME_MODEL = 'autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime'; // Default Model
+
+// Mapping for different styles to models (if you expand later)
 const STYLE_MODEL_MAP = {
-    'what-if': ANIME_MODEL, 
+    'what-if': ANIME_MODEL,
     'ben-10-classic': ANIME_MODEL, 
     'jujutsu-kaisen': ANIME_MODEL,
+    // Add more models here if needed
 };
-
 // --- UTILITY FUNCTIONS ---
 function generateUniqueId() {
     return crypto.randomBytes(16).toString('hex');
@@ -1234,34 +1257,18 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // 6. ANIME STYLE VIDEO CONVERTER (API: /anime-convert) - FIXED TOOL
 // ===================================================================
 app.post('/anime-convert', upload.single('video'), async (req, res) => {
-    
     if (!req.file) {
-        return res.status(400).json({ error: 'Video file upload failed or is missing.' });
+        return res.status(400).json({ status: 'error', message: 'Video file is required.' });
     }
-    if (!HF_TOKEN) {
-        return res.status(500).json({ error: 'Hugging Face Access Token is missing on the server.' });
-    }
+    const style = req.body.style || 'ben-10-classic';
+    const jobId = crypto.randomBytes(4).toString('hex');
 
-    const { style } = req.body;
-    const inputFilePath = req.file.path;
-    const originalFileName = req.file.originalname;
-    
-    const selectedModel = STYLE_MODEL_MAP[style] || STYLE_MODEL_MAP['ben-10-classic'];
-
-    const jobId = crypto.randomBytes(8).toString('hex');
-    const frameDir = `/tmp/${jobId}_frames/`;
-    const processedFrameDir = `/tmp/${jobId}_processed_frames/`;
-    const outputFileName = `anime-${jobId}-${originalFileName.replace(/\.(mp4|mov|avi)$/i, '.mp4')}`;
-    // path.join का उपयोग करके सुरक्षित आउटपुट पाथ
-    const outputFilePath = path.join(DOWNLOAD_DIR, outputFileName);
-    
-    console.log(`\n[ANIME CONVERTER START] Job: ${jobId}. Style: ${style}. Model: ${selectedModel}`);
-    
-    // Send immediate response
-    res.json({ 
-        status: 'accepted', 
-        message: 'Processing started in background.', 
-        downloadUrl: `/downloads/${outputFileName}` 
+    // Send response back immediately to avoid timeout
+    res.json({
+        status: 'processing',
+        message: 'Conversion started in background.',
+        jobId: jobId,
+        downloadUrl: `/downloads/anime-${jobId}.mp4`
     });
 
     // ----------------------------------------------------
@@ -1269,76 +1276,104 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     // ----------------------------------------------------
     (async () => {
         let totalFrames = 0;
+        const videoPath = req.file.path;
+        const frameDir = path.join(FRAME_DIR, jobId);
+        const processedFrameDir = path.join(PROCESSED_FRAME_DIR, jobId);
+        const outputVideoPath = path.join(DOWNLOAD_DIR, `anime-${jobId}.mp4`);
+
         try {
-            // 1. Create Frame Directories
+            // 0. Setup Directories
             fs.mkdirSync(frameDir, { recursive: true });
             fs.mkdirSync(processedFrameDir, { recursive: true });
 
-            // 2. Extract Frames (10 FPS: 0.1s per frame)
-            console.log(`[FFMPEG 1] Extracting frames at 10 FPS to ${frameDir}`);
-            const extractFramesCmd = `ffmpeg -i ${inputFilePath} -vf fps=10 ${frameDir}%05d.png`;
-            await runCommand(extractFramesCmd); 
+            // 1. Frame Extraction (Using ffmpeg)
+            console.log(`[FFMPEG STEP] Starting frame extraction for ${jobId}...`);
             
-            // 3. AI Processing (Frame-by-Frame - FIXED HUGGING FACE LOGIC)
+            // FFMPEG command: -r 10 (10 frames per second)
+            const ffmpegExtractCommand = `ffmpeg -i ${videoPath} -r 10 ${frameDir}/%05d.png`;
+            await new Promise((resolve, reject) => {
+                exec(ffmpegExtractCommand, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`FFMPEG Extraction Error: ${error.message}`);
+                        return reject(error);
+                    }
+                    console.log(`[FFMPEG COMPLETE] Frames extracted to ${frameDir}`);
+                    resolve();
+                });
+            });
+
+            // 2. Setup AI Model
+            const selectedModel = STYLE_MODEL_MAP[style] || ANIME_MODEL; 
+            const modelUrl = `https://api-inference.huggingface.co/models/${selectedModel}`;
+            if (!HF_TOKEN) throw new Error("Hugging Face Access Token is missing.");
+
+            // 3. AI Processing (Frame-by-Frame - CRITICAL FIX APPLIED HERE)
             const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort();
             totalFrames = frames.length;
             console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting AI conversion...`);
             
-            const modelUrl = `https://api-inference.huggingface.co/models/${selectedModel}`;
-
             for (let i = 0; i < frames.length; i++) {
                 const frame = frames[i];
-                const inputFramePath = frameDir + frame;
-                const outputFramePath = processedFrameDir + frame;
+                const inputFramePath = path.join(frameDir, frame); 
+                const outputFramePath = path.join(processedFrameDir, frame); 
                 
-                if (!frame.match(/^\d{5}\.png$/)) continue;
+                if (!frame.match(/^\d{5}\.png$/)) continue; // Only process the numbered PNGs
 
-                console.log(`[HF API] Processing frame ${i + 1}/${totalFrames}`);
+                // console.log(`[HF API] Processing frame ${i + 1}/${totalFrames}`);
                 
                 const frameData = fs.readFileSync(inputFramePath);
                 
-                // --- ✨ CRITICAL FIX: Send image data as base64 within a JSON payload with a prompt ---
-                const payload = {
-                    inputs: Buffer.from(frameData).toString('base64'),
-                    parameters: { 
-                        // Prompt to guide the conversion to a better anime style
-                        prompt: "Convert to high-quality anime style, detailed, vibrant colors, Studio Ghibli, 4k",
-                        negative_prompt: "low quality, blurry, worst quality, noise, disfigured, watermark, cartoon",
-                        strength: 0.75 // Strength parameter for image-to-image models
-                    }
-                };
-
-                const response = await axios.post(modelUrl, payload, {
+                // --- ✨ CRITICAL FIX: Send RAW IMAGE DATA and use correct Content-Type ---
+                const response = await axios.post(modelUrl, frameData, { 
                     headers: { 
                         "Authorization": `Bearer ${HF_TOKEN}`,
-                        "Content-Type": "application/json" // Content type must be JSON now
+                        "Content-Type": "image/png" // <-- CORRECT CONTENT-TYPE
                     },
                     responseType: 'arraybuffer' 
                 });
                 
+                // Check if the response is actually an image
+                const contentType = response.headers['content-type'];
+                if (!contentType || !contentType.startsWith('image/')) {
+                     const errorText = Buffer.from(response.data).toString('utf8');
+                     throw new Error(`HF API did not return an image. Error: ${errorText.substring(0, 100)}`);
+                }
+                
                 // Save the processed image
                 fs.writeFileSync(outputFramePath, response.data);
                 
-                // Rate Limiting के लिए pause
+                // Rate Limiting pause to avoid 429 errors from Hugging Face
                 await new Promise(resolve => setTimeout(resolve, 300)); 
             }
             
             console.log("[AI COMPLETE] Frames are ready for re-assembly.");
 
-
-            // 4. Re-assemble Frames into Video
-            console.log(`[FFMPEG 2] Assembling video from processed frames at 10 FPS.`);
-            const assembleVideoCmd = `ffmpeg -r 10 -i ${processedFrameDir}%05d.png -c:v libx264 -pix_fmt yuv420p ${outputFilePath}`;
-            await runCommand(assembleVideoCmd);
-            
-            console.log(`[SUCCESS] Video converted and saved to: ${outputFilePath}`);
+            // 4. Re-assembly (Using ffmpeg)
+            // -r 10: 10 frames per second
+            // -c:v libx264 -pix_fmt yuv420p: Standard MP4 settings
+            const ffmpegReassembleCommand = `ffmpeg -r 10 -i ${processedFrameDir}/%05d.png -c:v libx264 -pix_fmt yuv420p -crf 23 ${outputVideoPath}`;
+            await new Promise((resolve, reject) => {
+                exec(ffmpegReassembleCommand, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`FFMPEG Re-assembly Error: ${error.message}`);
+                        return reject(error);
+                    }
+                    console.log(`[RE-ASSEMBLY COMPLETE] Video saved to ${outputVideoPath}`);
+                    resolve();
+                });
+            });
 
         } catch (error) {
-            console.error(`[CRITICAL FAILED JOB ${jobId}] Conversion pipeline failed.`, error);
+            console.error(`[JOB FAILED] Job ID ${jobId} failed: ${error.message}`);
+            // Error handling logic (e.g., logging or sending a notification)
         } finally {
-            // 5. CLEANUP: Delete temporary files
+            // 5. Cleanup
             try {
-                fs.rmSync(inputFilePath, { force: true });
+                // Delete original video file
+                if (req.file && fs.existsSync(req.file.path)) {
+                    fs.unlinkSync(req.file.path);
+                }
+                // Delete temporary frame folders
                 fs.rmSync(frameDir, { recursive: true, force: true });
                 fs.rmSync(processedFrameDir, { recursive: true, force: true });
                 console.log(`[CLEANUP] Temporary files deleted for job ${jobId}.`);
