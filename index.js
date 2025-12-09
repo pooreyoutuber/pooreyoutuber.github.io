@@ -1245,6 +1245,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     const { style } = req.body;
     const inputFilePath = req.file.path;
     const originalFileName = req.file.originalname;
+    const modelUrl = `https://router.huggingface.co/models/${selectedModel}`;
     
     const selectedModel = STYLE_MODEL_MAP[style] || STYLE_MODEL_MAP['ben-10-classic'];
 
