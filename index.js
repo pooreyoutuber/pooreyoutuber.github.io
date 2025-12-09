@@ -1,7 +1,7 @@
 // ===================================================================
 // index.js (COMPLETE FINAL VERSION - 7 Working Tools)
 // CommonJS (require) format for all modules
-// 🚀 FIXED: Tool 6 & 7 (Anime Converter & Download) - Added 'path' module and corrected HF API call.
+// ✅ FIXED: Tool 6 (Anime Converter) - Model और Audio Re-assembly दोनों को ठीक किया गया।
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
@@ -17,7 +17,7 @@ const http = require('http');
 const { URL } = require('url'); 
 const multer = require('multer'); 
 const { exec } = require('child_process'); 
-const path = require('path'); // ✨ सुधार 1: 'path' मॉड्यूल जोड़ा गया
+const path = require('path'); 
 
 const app = express();
 const PORT = process.env.PORT || 10000; 
@@ -72,8 +72,10 @@ const upload = multer({
 });
 
 // --- HUGGING FACE CONFIGURATION ---
+// 🚨 सुनिश्चित करें कि यह variable आपके Render/Server Environment में सेट है।
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
-const ANIME_MODEL = 'autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime'; // Default Model
+// 🛑 FIX 1: HATAAYE GAYE (GONE 410) MODEL KO NAYE, KAARYASHEEL MODEL SE BADLA GAYA
+const ANIME_MODEL = 'jinngy/Cartoonize-Image-to-Image'; 
 
 // Mapping for different styles to models (if you expand later)
 const STYLE_MODEL_MAP = {
@@ -1245,6 +1247,15 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ status: 'error', message: 'Video file is required.' });
     }
+    
+    // HF Token/Key Check
+    if (!HF_TOKEN) {
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+        return res.status(500).json({ status: 'error', message: 'Hugging Face Access Token (HF_TOKEN) is missing on the server.' });
+    }
+    
     const style = req.body.style || 'ben-10-classic';
     const jobId = crypto.randomBytes(4).toString('hex');
 
@@ -1290,9 +1301,9 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             // 2. Setup AI Model
             const selectedModel = STYLE_MODEL_MAP[style] || ANIME_MODEL; 
             const modelUrl = `https://api-inference.huggingface.co/models/${selectedModel}`;
-            if (!HF_TOKEN) throw new Error("Hugging Face Access Token is missing.");
+            
 
-            // 3. AI Processing (Frame-by-Frame - CRITICAL FIX APPLIED HERE)
+            // 3. AI Processing (Frame-by-Frame)
             const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort();
             totalFrames = frames.length;
             console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting AI conversion...`);
@@ -1308,7 +1319,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 
                 const frameData = fs.readFileSync(inputFramePath);
                 
-                // --- ✨ CRITICAL FIX: Send RAW IMAGE DATA and use correct Content-Type ---
+                // --- CRITICAL FIX: Send RAW IMAGE DATA and use correct Content-Type ---
                 const response = await axios.post(modelUrl, frameData, { 
                     headers: { 
                         "Authorization": `Bearer ${HF_TOKEN}`,
@@ -1321,6 +1332,10 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 const contentType = response.headers['content-type'];
                 if (!contentType || !contentType.startsWith('image/')) {
                      const errorText = Buffer.from(response.data).toString('utf8');
+                     // Check for common Hugging Face errors (e.g., model loading)
+                     if (errorText.includes('currently loading')) {
+                         throw new Error(`HF API Error: Model is still loading. Please try again in 30 seconds. Full Error: ${errorText.substring(0, 100)}`);
+                     }
                      throw new Error(`HF API did not return an image. Error: ${errorText.substring(0, 100)}`);
                 }
                 
@@ -1334,9 +1349,11 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             console.log("[AI COMPLETE] Frames are ready for re-assembly.");
 
             // 4. Re-assembly (Using ffmpeg)
+            // 🛑 FIX 2: AUDIO STREAM KO MAP KARNE KE LIYE ORIGINAL VIDEO (-i ${videoPath}) AUR MAPPING (-map 1:a:0) JODA GAYA.
             // -r 10: 10 frames per second
             // -c:v libx264 -pix_fmt yuv420p: Standard MP4 settings
-            const ffmpegReassembleCommand = `ffmpeg -r 10 -i ${processedFrameDir}/%05d.png -c:v libx264 -pix_fmt yuv420p -crf 23 ${outputVideoPath}`;
+            const ffmpegReassembleCommand = `ffmpeg -r 10 -i ${processedFrameDir}/%05d.png -i ${videoPath} -c:v libx264 -pix_fmt yuv420p -crf 23 -shortest -map 0:v:0 -map 1:a:0 ${outputVideoPath}`;
+            
             await new Promise((resolve, reject) => {
                 exec(ffmpegReassembleCommand, (error, stdout, stderr) => {
                     if (error) {
