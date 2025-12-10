@@ -1,7 +1,7 @@
 // ===================================================================
 // index.js (COMPLETE FINAL VERSION - 7 Working Tools)
 // CommonJS (require) format for all modules
-// ✅ FIXED: Tool 6 (Anime Converter) - Model और Audio Re-assembly दोनों को ठीक किया गया।
+// ✅ FIXED: Tool 6 (Anime Converter) - NEW Model और Audio Re-assembly के साथ अपडेट किया गया।
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
@@ -75,7 +75,7 @@ const upload = multer({
 // 🚨 सुनिश्चित करें कि यह variable आपके Render/Server Environment में सेट है।
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 // 🛑 FIX 1: HATAAYE GAYE (GONE 410) MODEL KO NAYE, KAARYASHEEL MODEL SE BADLA GAYA
-const ANIME_MODEL = 'jinngy/Cartoonize-Image-to-Image'; 
+const ANIME_MODEL = 'sauravsharma/anime-style-transfer'; // ✅ NEW WORKING MODEL
 
 // Mapping for different styles to models (if you expand later)
 const STYLE_MODEL_MAP = {
@@ -1306,7 +1306,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             // 3. AI Processing (Frame-by-Frame)
             const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort();
             totalFrames = frames.length;
-            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting AI conversion...`);
+            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting AI conversion with model: ${selectedModel}...`);
             
             for (let i = 0; i < frames.length; i++) {
                 const frame = frames[i];
@@ -1342,15 +1342,15 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 // Save the processed image
                 fs.writeFileSync(outputFramePath, response.data);
                 
-                // Rate Limiting pause to avoid 429 errors from Hugging Face
-                await new Promise(resolve => setTimeout(resolve, 300)); 
+                // 💡 Rate Limiting pause (300ms increased to 500ms) to avoid 429 errors from Hugging Face
+                await new Promise(resolve => setTimeout(resolve, 500)); 
             }
             
             console.log("[AI COMPLETE] Frames are ready for re-assembly.");
 
             // 4. Re-assembly (Using ffmpeg)
             // 🛑 FIX 2: AUDIO STREAM KO MAP KARNE KE LIYE ORIGINAL VIDEO (-i ${videoPath}) AUR MAPPING (-map 1:a:0) JODA GAYA.
-            // -r 10: 10 frames per second
+            // -r 10: 10 frames per second (matching extraction rate)
             // -c:v libx264 -pix_fmt yuv420p: Standard MP4 settings
             const ffmpegReassembleCommand = `ffmpeg -r 10 -i ${processedFrameDir}/%05d.png -i ${videoPath} -c:v libx264 -pix_fmt yuv420p -crf 23 -shortest -map 0:v:0 -map 1:a:0 ${outputVideoPath}`;
             
