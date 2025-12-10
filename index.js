@@ -1,7 +1,7 @@
 // ===================================================================
 // index.js (COMPLETE FINAL VERSION - 7 Working Tools)
 // CommonJS (require) format for all modules
-// ✅ FIXED: Tool 6 (Anime Converter) - NEW Model और Audio Re-assembly के साथ अपडेट किया गया।
+// ✅ FIXED: Tool 6 (Anime Converter) - Model और Audio Re-assembly दोनों को ठीक किया गया।
 // ===================================================================
 
 // --- Imports (Node.js Modules) ---
@@ -75,7 +75,7 @@ const upload = multer({
 // 🚨 सुनिश्चित करें कि यह variable आपके Render/Server Environment में सेट है।
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 // 🛑 FIX 1: HATAAYE GAYE (GONE 410) MODEL KO NAYE, KAARYASHEEL MODEL SE BADLA GAYA
-const ANIME_MODEL = 'sauravsharma/anime-style-transfer'; // ✅ NEW WORKING MODEL
+const ANIME_MODEL = 'jinngy/Cartoonize-Image-to-Image'; 
 
 // Mapping for different styles to models (if you expand later)
 const STYLE_MODEL_MAP = {
@@ -173,7 +173,7 @@ function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC (Used by Tool 1) ---
+// --- TRAFFIC SOURCE LOGIC (Used for Tool 1) ---
 const TRAFFIC_SOURCES_GA4 = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
@@ -534,7 +534,7 @@ app.post('/api/caption-generate', async (req, res) => {
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
-        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
+        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` } );
     }
 });
 
@@ -1342,15 +1342,15 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
                 // Save the processed image
                 fs.writeFileSync(outputFramePath, response.data);
                 
-                // 💡 Rate Limiting pause (300ms increased to 500ms) to avoid 429 errors from Hugging Face
-                await new Promise(resolve => setTimeout(resolve, 500)); 
+                // Rate Limiting pause to avoid 429 errors from Hugging Face
+                await new Promise(resolve => setTimeout(resolve, 300)); 
             }
             
             console.log("[AI COMPLETE] Frames are ready for re-assembly.");
 
             // 4. Re-assembly (Using ffmpeg)
             // 🛑 FIX 2: AUDIO STREAM KO MAP KARNE KE LIYE ORIGINAL VIDEO (-i ${videoPath}) AUR MAPPING (-map 1:a:0) JODA GAYA.
-            // -r 10: 10 frames per second (matching extraction rate)
+            // -r 10: 10 frames per second
             // -c:v libx264 -pix_fmt yuv420p: Standard MP4 settings
             const ffmpegReassembleCommand = `ffmpeg -r 10 -i ${processedFrameDir}/%05d.png -i ${videoPath} -c:v libx264 -pix_fmt yuv420p -crf 23 -shortest -map 0:v:0 -map 1:a:0 ${outputVideoPath}`;
             
