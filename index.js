@@ -75,7 +75,7 @@ const upload = multer({
 // 🚨 सुनिश्चित करें कि यह variable आपके Render/Server Environment में सेट है।
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 // 🛑 FIX 1: HATAAYE GAYE (GONE 410) MODEL KO NAYE, KAARYASHEEL MODEL SE BADLA GAYA
-const ANIME_MODEL = 'jinngy/Cartoonize-Image-to-Image'; 
+const ANIME_MODEL = 'timbrooks/instagan-cartoons'; // <--- CORRECTED LINE
 
 // Mapping for different styles to models (if you expand later)
 const STYLE_MODEL_MAP = {
@@ -130,7 +130,6 @@ function runCommand(command) {
 app.use(cors()); 
 app.use(express.json({ limit: '5mb' }));
 
-// MULTER SETUP FOR FILE UPLOADS (Tool 6)
 // General CORS headers
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -173,7 +172,7 @@ function generateClientId() {
     return Math.random().toString(36).substring(2, 12) + Date.now().toString(36); 
 }
 
-// --- TRAFFIC SOURCE LOGIC (Used for Tool 1) ---
+// --- TRAFFIC SOURCE LOGIC (Used by Tool 1) ---
 const TRAFFIC_SOURCES_GA4 = [ 
     { source: "google", medium: "organic", referrer: "https://www.google.com" },
     { source: "youtube", medium: "social", referrer: "https://www.youtube.com" },
@@ -534,7 +533,7 @@ app.post('/api/caption-generate', async (req, res) => {
 
     } catch (error) {
         console.error('Gemini API Error:', error.message);
-        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` } );
+        res.status(500).json({ error: `AI Generation Failed. Reason: ${error.message.substring(0, 50)}...` });
     }
 });
 
@@ -897,7 +896,7 @@ app.get('/proxy-request', async (req, res) => {
         
         res.status(502).json({ 
             status: 'FAILED', 
-            error: 'Connection ya Target URL se connect nahi ho paya. VPN/Proxy check karein.', 
+            error: 'Connection ya Target URL se connect nahi ho paya. VPN/Proxy check karein।', 
             details: errorCode
         });
     }
