@@ -75,7 +75,7 @@ const upload = multer({
 // 🚨 सुनिश्चित करें कि यह variable आपके Render/Server Environment में सेट है।
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 // 🛑 FIX 1: HATAAYE GAYE (GONE 410) MODEL KO NAYE, KAARYASHEEL MODEL SE BADLA GAYA
-const ANIME_MODEL = 'timbrooks/instagan-cartoons'; // <--- CORRECTED LINE
+const ANIME_MODEL = 'jinngy/Cartoonize-Image-to-Image'; 
 
 // Mapping for different styles to models (if you expand later)
 const STYLE_MODEL_MAP = {
@@ -130,6 +130,7 @@ function runCommand(command) {
 app.use(cors()); 
 app.use(express.json({ limit: '5mb' }));
 
+// MULTER SETUP FOR FILE UPLOADS (Tool 6)
 // General CORS headers
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -896,7 +897,7 @@ app.get('/proxy-request', async (req, res) => {
         
         res.status(502).json({ 
             status: 'FAILED', 
-            error: 'Connection ya Target URL se connect nahi ho paya. VPN/Proxy check karein।', 
+            error: 'Connection ya Target URL se connect nahi ho paya. VPN/Proxy check karein.', 
             details: errorCode
         });
     }
@@ -1305,7 +1306,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             // 3. AI Processing (Frame-by-Frame)
             const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort();
             totalFrames = frames.length;
-            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting AI conversion with model: ${selectedModel}...`);
+            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting AI conversion...`);
             
             for (let i = 0; i < frames.length; i++) {
                 const frame = frames[i];
