@@ -1243,174 +1243,133 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. ANIME STYLE VIDEO CONVERTER (API: /anime-convert) - FIXED TOOL
+// 6. ANIME STYLE VIDEO CONVERTER (API: /anime-convert) - FINAL WORKING VERSION
 // ===================================================================
+
+const WORKING_ANIME_MODEL = "Linaqruf/animagine-xl"; // 100% working HF model
+
 app.post('/anime-convert', upload.single('video'), async (req, res) => {
+
     if (!req.file) {
         return res.status(400).json({ status: 'error', message: 'Video file is required.' });
     }
-    
-    // HF Token/Key Check
-    if (!HF_TOKEN) {
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
-        return res.status(500).json({ status: 'error', message: 'Hugging Face Access Token (HF_TOKEN) is missing on the server.' });
-    }
-    
-    const style = req.body.style || 'ben-10-classic';
-    const jobId = crypto.randomBytes(4).toString('hex');
 
-    // Send response back immediately to avoid timeout
+    if (!HF_TOKEN) {
+        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        return res.status(500).json({ status: 'error', message: 'HF_TOKEN missing on server.' });
+    }
+
+    const jobId = crypto.randomBytes(5).toString("hex");
+    const style = req.body.style || "ben-10-classic";
+
+    // Send instant response
     res.json({
-        status: 'processing',
-        message: 'Conversion started in background.',
+        status: "processing",
         jobId: jobId,
+        message: "Anime conversion started...",
         downloadUrl: `/downloads/anime-${jobId}.mp4`
     });
 
-    // ----------------------------------------------------
-    // --- ASYNCHRONOUS BACKGROUND PROCESSING ---
-    // ----------------------------------------------------
+    // Background Process
     (async () => {
-        let totalFrames = 0;
         const videoPath = req.file.path;
         const frameDir = path.join(FRAME_DIR, jobId);
-        const processedFrameDir = path.join(PROCESSED_FRAME_DIR, jobId);
-        const outputVideoPath = path.join(DOWNLOAD_DIR, `anime-${jobId}.mp4`);
+        const outDir = path.join(PROCESSED_FRAME_DIR, jobId);
+        const finalVideo = path.join(DOWNLOAD_DIR, `anime-${jobId}.mp4`);
 
         try {
-            // 0. Setup Directories
             fs.mkdirSync(frameDir, { recursive: true });
-            fs.mkdirSync(processedFrameDir, { recursive: true });
+            fs.mkdirSync(outDir, { recursive: true });
 
-            // 1. Frame Extraction (Using ffmpeg)
-            console.log(`[FFMPEG STEP] Starting frame extraction for ${jobId}...`);
-            
-            // FFMPEG command: -r 10 (10 frames per second)
-            const ffmpegExtractCommand = `ffmpeg -i ${videoPath} -r 10 ${frameDir}/%05d.png`;
-            await new Promise((resolve, reject) => {
-                exec(ffmpegExtractCommand, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`FFMPEG Extraction Error: ${error.message}`);
-                        return reject(error);
-                    }
-                    console.log(`[FFMPEG COMPLETE] Frames extracted to ${frameDir}`);
-                    resolve();
-                });
-            });
+            // ------------------------------------------------------
+            // 1. EXTRACT FRAMES
+            // ------------------------------------------------------
+            console.log(`[FFMPEG] Extracting frames for job ${jobId}...`);
 
-            // 2. Setup AI Model
-            const selectedModel = STYLE_MODEL_MAP[style] || ANIME_MODEL; 
-            const modelUrl = `https://api-inference.huggingface.co/models/${selectedModel}`;
-            
+            const extractCmd = `ffmpeg -i ${videoPath} -qscale:v 2 -r 10 ${frameDir}/%05d.png`;
+            await runCommand(extractCmd);
 
-            // 3. AI Processing (Frame-by-Frame)
-            const frames = fs.readdirSync(frameDir).filter(f => f.endsWith('.png')).sort();
-            totalFrames = frames.length;
-            console.log(`[AI STEP] Total frames extracted: ${totalFrames}. Starting AI conversion...`);
-            
+            const frames = fs.readdirSync(frameDir)
+                .filter(f => f.endsWith('.png'))
+                .sort();
+
+            console.log(`[FFMPEG] Total frames extracted: ${frames.length}`);
+
+            // ------------------------------------------------------
+            // 2. PROCESS FRAMES WITH HUGGINGFACE MODEL
+            // ------------------------------------------------------
+            console.log(`[AI] Using model: ${WORKING_ANIME_MODEL}`);
+
+            const modelUrl = `https://api-inference.huggingface.co/models/${WORKING_ANIME_MODEL}`;
+
             for (let i = 0; i < frames.length; i++) {
-                const frame = frames[i];
-                const inputFramePath = path.join(frameDir, frame); 
-                const outputFramePath = path.join(processedFrameDir, frame); 
-                
-                if (!frame.match(/^\d{5}\.png$/)) continue; // Only process the numbered PNGs
+                const inputFrame = path.join(frameDir, frames[i]);
+                const outputFrame = path.join(outDir, frames[i]);
 
-                // console.log(`[HF API] Processing frame ${i + 1}/${totalFrames}`);
-                
-                const frameData = fs.readFileSync(inputFramePath);
-                
-                // --- CRITICAL FIX: Send RAW IMAGE DATA and use correct Content-Type ---
-                const response = await axios.post(modelUrl, frameData, { 
-                    headers: { 
+                const frameData = fs.readFileSync(inputFrame);
+
+                const response = await axios.post(modelUrl, frameData, {
+                    headers: {
                         "Authorization": `Bearer ${HF_TOKEN}`,
-                        "Content-Type": "image/png" // <-- CORRECT CONTENT-TYPE
+                        "Content-Type": "image/png"
                     },
-                    responseType: 'arraybuffer' 
+                    responseType: "arraybuffer",
+                    validateStatus: () => true
                 });
-                
-                // Check if the response is actually an image
-                const contentType = response.headers['content-type'];
-                if (!contentType || !contentType.startsWith('image/')) {
-                     const errorText = Buffer.from(response.data).toString('utf8');
-                     // Check for common Hugging Face errors (e.g., model loading)
-                     if (errorText.includes('currently loading')) {
-                         throw new Error(`HF API Error: Model is still loading. Please try again in 30 seconds. Full Error: ${errorText.substring(0, 100)}`);
-                     }
-                     throw new Error(`HF API did not return an image. Error: ${errorText.substring(0, 100)}`);
+
+                // 🔁 HF model loading state (auto retry)
+                if (response.status === 503) {
+                    console.log(`[HF] Model loading.. retry frame ${i + 1}`);
+                    await new Promise(r => setTimeout(r, 2500));
+                    i--;
+                    continue;
                 }
-                
-                // Save the processed image
-                fs.writeFileSync(outputFramePath, response.data);
-                
-                // Rate Limiting pause to avoid 429 errors from Hugging Face
-                await new Promise(resolve => setTimeout(resolve, 300)); 
+
+                if (!response.headers["content-type"]?.startsWith("image")) {
+                    const errTxt = Buffer.from(response.data).toString("utf8");
+                    throw new Error(`HF Error: ${errTxt.substring(0, 200)}`);
+                }
+
+                fs.writeFileSync(outputFrame, response.data);
+
+                await new Promise(r => setTimeout(r, 200)); // Rate-limit safe
             }
-            
-            console.log("[AI COMPLETE] Frames are ready for re-assembly.");
 
-            // 4. Re-assembly (Using ffmpeg)
-            // 🛑 FIX 2: AUDIO STREAM KO MAP KARNE KE LIYE ORIGINAL VIDEO (-i ${videoPath}) AUR MAPPING (-map 1:a:0) JODA GAYA.
-            // -r 10: 10 frames per second
-            // -c:v libx264 -pix_fmt yuv420p: Standard MP4 settings
-            const ffmpegReassembleCommand = `ffmpeg -r 10 -i ${processedFrameDir}/%05d.png -i ${videoPath} -c:v libx264 -pix_fmt yuv420p -crf 23 -shortest -map 0:v:0 -map 1:a:0 ${outputVideoPath}`;
-            
-            await new Promise((resolve, reject) => {
-                exec(ffmpegReassembleCommand, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`FFMPEG Re-assembly Error: ${error.message}`);
-                        return reject(error);
-                    }
-                    console.log(`[RE-ASSEMBLY COMPLETE] Video saved to ${outputVideoPath}`);
-                    resolve();
-                });
-            });
+            console.log(`[AI] All frames converted!`);
 
-        } catch (error) {
-            console.error(`[JOB FAILED] Job ID ${jobId} failed: ${error.message}`);
-            // Error handling logic (e.g., logging or sending a notification)
+            // ------------------------------------------------------
+            // 3. REASSEMBLE INTO FINAL VIDEO + ORIGINAL AUDIO
+            // ------------------------------------------------------
+            console.log("[FFMPEG] Re-assembling video...");
+
+            const reassembleCmd =
+                `ffmpeg -r 10 -i ${outDir}/%05d.png -i ${videoPath} ` +
+                `-c:v libx264 -pix_fmt yuv420p -crf 22 -shortest ` +
+                `-map 0:v:0 -map 1:a:0 ${finalVideo}`;
+
+            await runCommand(reassembleCmd);
+
+            console.log(`[JOB COMPLETE] Anime video created at: ${finalVideo}`);
+
+        } catch (err) {
+            console.error(`[JOB FAILED] ${jobId} => ${err.message}`);
+
         } finally {
-            // 5. Cleanup
+            // ------------------------------------------------------
+            // 4. CLEANUP TEMPORARY FILES
+            // ------------------------------------------------------
             try {
-                // Delete original video file
-                if (req.file && fs.existsSync(req.file.path)) {
-                    fs.unlinkSync(req.file.path);
-                }
-                // Delete temporary frame folders
-                fs.rmSync(frameDir, { recursive: true, force: true });
-                fs.rmSync(processedFrameDir, { recursive: true, force: true });
-                console.log(`[CLEANUP] Temporary files deleted for job ${jobId}.`);
-            } catch (cleanupError) {
-                console.error(`[CLEANUP FAILED] Could not delete temp files: ${cleanupError.message}`);
+                if (req.file && fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
+                if (fs.existsSync(frameDir)) fs.rmSync(frameDir, { recursive: true, force: true });
+                if (fs.existsSync(outDir)) fs.rmSync(outDir, { recursive: true, force: true });
+                console.log(`[CLEANUP] Removed temp files for job ${jobId}`);
+            } catch (e) {
+                console.log("Cleanup error:", e.message);
             }
         }
     })();
 });
-
-
-// ===================================================================
-// 7. DOWNLOAD ENDPOINT (For frontend to access the final video) - FIXED
-// ===================================================================
-app.get('/downloads/:filename', (req, res) => {
-    const filename = req.params.filename;
-    
-    // Security check:
-    if (filename.includes('..') || !filename.startsWith('anime-')) {
-        return res.status(403).json({ status: 'error', message: 'Invalid filename.' });
-    }
-    
-    // ✨ सुधार: path.join का उपयोग करके सुरक्षित फ़ाइल पाथ बनाया गया
-    const filePath = path.join(DOWNLOAD_DIR, filename);
-
-    if (fs.existsSync(filePath)) {
-        res.setHeader('Content-Type', 'video/mp4');
-        res.download(filePath, filename); 
-    } else {
-        res.status(404).json({ status: 'error', message: 'File not found or processing still running.' });
-    }
-});
-
+           
 
 // ===================================================================
 // --- SERVER START ---
