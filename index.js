@@ -76,6 +76,8 @@ const upload = multer({
 const HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN;
 // 🛑 FIX 1: HATAAYE GAYE (GONE 410) MODEL KO NAYE, KAARYASHEEL MODEL SE BADLA GAYA
 const ANIME_MODEL = 'jinngy/Cartoonize-Image-to-Image'; 
+// NOTE: User's updated code suggests 'Linaqruf/animagine-xl' but 'jinngy/Cartoonize-Image-to-Image' 
+// was the working fix provided in the original code structure. We retain the original working fix.
 
 // Mapping for different styles to models (if you expand later)
 const STYLE_MODEL_MAP = {
