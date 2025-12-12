@@ -19,7 +19,7 @@ const multer = require('multer');
 const { InferenceClient } = require('@huggingface/inference'); 
 const path = require('path');
 const { promisify } = require('util');
-const const { exec: originalExec } = require('child_process');
+const { exec: originalExec } = require('child_process');
 const exec = promisify(originalExec); // FFMPEG और अन्य कमांड चलाने के लिए
 
 const app = express();
