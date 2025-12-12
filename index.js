@@ -17,6 +17,7 @@ const { URL } = require('url');
 // 🔥 HUGGING FACE FIX: Correctly import HfInference
 const { HfInference } = require('@huggingface/inference'); 
 const path = require('path');
+const upload = multer({
 const { promisify } = require('util');
 // 🔥 SYNTAX FIX: Removed redundant 'const'
 const { exec: originalExec } = require('child_process');
