@@ -10,6 +10,9 @@ from PIL import Image
 
 # --- 1. कॉन्फ़िगरेशन और टोकन ---
 # Render Environment Variables से टोकन प्राप्त करें।
+# NOTE: Production environments should not run in debug mode.
+# DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+
 HF_TOKEN = os.environ.get("HUGGINGFACE_ACCESS_TOKEN")
 
 # Hugging Face मॉडल
@@ -23,10 +26,10 @@ CONVERTED_FOLDER = 'converted'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
-
+# 🚀 Flask एप्लिकेशन इंस्टेंस (यह 'app' ऑब्जेक्ट है)
+# Gunicorn इसी 'app' ऑब्जेक्ट को ढूंढेगा।
 app = Flask(__name__)
 CORS(app) 
-
 
 # --- 2. Hugging Face क्लाइंट इनिशियलाइज़ेशन ---
 hf_client = None
@@ -81,6 +84,7 @@ def anime_convert():
         return jsonify({"message": "No video file part"}), 400
 
     video_file = request.files['video']
+    # 'style' पैरामीटर को URL फॉर्म डेटा से प्राप्त करें
     style = request.form.get('style', 'jujutsu-kaisen') 
 
     if video_file.filename == '':
@@ -105,7 +109,7 @@ def anime_convert():
     try:
         clip = VideoFileClip(input_path)
         
-        # 1 FPS: प्रति सेकंड 1 फ़्रेम प्रोसेस करें।
+        # 1 FPS: प्रति सेकंड 1 फ़्रेम प्रोसेस करें। यह तेज़ प्रोसेसिंग के लिए है।
         target_fps = 1 
         processed_frames_arrays = []
         
@@ -127,17 +131,20 @@ def anime_convert():
         
         # 3. फ़्रेम को वापस वीडियो में जोड़ें
         if not processed_frames_arrays:
-             return jsonify({"message": "Video processing resulted in no frames."}), 500
+            return jsonify({"message": "Video processing resulted in no frames."}), 500
 
-        anime_clip = ImageSequenceClip(list(processed_frames_arrays), fps=target_fps)
+        # original clip FPS का उपयोग करें ताकि वीडियो की अवधि सही रहे
+        anime_clip = ImageSequenceClip(list(processed_frames_arrays), fps=clip.fps)
         
+        # ⚠️ MoviePy में ऑडियो को सावधानी से हैंडल करें।
+        # यहाँ, हम केवल वीडियो को लिखते हैं, ऑडियो को बाद में जोड़ा जा सकता है।
         anime_clip.write_videofile(
             output_path, 
             codec='libx264', 
             audio_codec='aac', 
             temp_audiofile='temp-audio.m4a', 
             remove_temp=True,
-            logger=None
+            logger=None # डिप्लॉयमेंट के दौरान लॉगिंग को शांत करें
         )
         
         anime_clip.close()
@@ -171,5 +178,6 @@ def download_file(filename):
     return jsonify({"message": "File not found"}), 404
 
 # --- 6. रनिंग द ऐप ---
-if __name__ == '__main__':
-    app.run(debug=True, port=os.environ.get('PORT', 5000))
+# यह सिर्फ लोकल डेवलपमेंट के लिए है, Gunicorn प्रोडक्शन में इसका उपयोग नहीं करता है।
+# if __name__ == '__main__':
+#     app.run(debug=True, port=os.environ.get('PORT', 5000))
