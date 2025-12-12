@@ -17,6 +17,7 @@ const { URL } = require('url');
 // 🔥 NEW IMPORTS FOR TOOL 6 (Anime Converter)
 const multer = require('multer'); 
 const { InferenceClient } = require('@huggingface/inference'); 
+const { HfInference } = require('@huggingface/inference');
 const path = require('path');
 const { promisify } = require('util');
 const { exec: originalExec } = require('child_process');
@@ -51,7 +52,7 @@ try {
     HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 }
 
-const hfClient = new InferenceClient(HF_TOKEN);
+const hfClient = new HfInference(HF_TOKEN);
 if (!HF_TOKEN) {
     console.warn("Hugging Face Access Token (HF_TOKEN) is missing. Anime converter will fail.");
 }
