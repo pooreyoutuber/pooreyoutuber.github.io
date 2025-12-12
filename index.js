@@ -14,10 +14,10 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const http = require('http'); 
 const { URL } = require('url'); 
 
-// 🔥 CRITICAL FIX: Add the missing 'multer' package for file uploads (Previous Error Fix)
+// CRITICAL FIX: Add the missing 'multer' package for file uploads
 const multer = require('multer'); 
 
-// 🔥 HUGGING FACE FIX: Correctly import HfInference
+// HUGGING FACE FIX: Correctly import HfInference
 const { HfInference } = require('@huggingface/inference'); 
 const path = require('path');
 const { promisify } = require('util');
@@ -43,7 +43,6 @@ if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
     console.warn("Gemini API Key is missing. AI-dependent tools will fail.");
-    // Fallback object to prevent crashes
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } }; 
 }
 
@@ -55,7 +54,12 @@ try {
     HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 }
 
-const hfClient = new HfInference(HF_TOKEN);
+// ✅ FIX APPLIED HERE: Using the new endpointUrl for Hugging Face Inference
+const hfClient = new HfInference({
+    accessToken: HF_TOKEN,
+    endpointUrl: 'https://router.huggingface.co' // New required URL
+}); 
+
 if (!HF_TOKEN) {
     console.warn("Hugging Face Access Token (HF_TOKEN) is missing. Anime converter will fail.");
 }
@@ -1117,7 +1121,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 
     const { style } = req.body;
     
-    // 🔥 CRITICAL FFMPEG FIX: Rename the uploaded file to include its extension.
+    // CRITICAL FFMPEG FIX: Rename the uploaded file to include its extension.
     const originalExtension = path.extname(req.file.originalname) || '.mp4'; 
     const tempFileWithExt = req.file.path + originalExtension;
     
@@ -1173,10 +1177,10 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             const outputFramePath = path.join(convertedFrameDir, frameFile);
             const frameData = fs.readFileSync(inputFramePath);
             
-            // 🔥 FIX: Convert Buffer to Blob for Hugging Face client compatibility
+            // FIX: Convert Buffer to Blob for Hugging Face client compatibility
             const imageBlobInput = new Blob([frameData], { type: 'image/png' });
             
-            // 🚀 Hugging Face API Call
+            // 🚀 Hugging Face API Call - Uses the new endpoint configured in hfClient
             const imageBlob = await hfClient.imageToImage({
                 provider: "wavespeed",
                 model: ANIME_MODEL,
