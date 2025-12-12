@@ -14,6 +14,9 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const http = require('http'); 
 const { URL } = require('url'); 
 
+// 🔥 CRITICAL FIX: Add the missing 'multer' package for file uploads (Error Fix)
+const multer = require('multer'); 
+
 // 🔥 HUGGING FACE FIX: Correctly import HfInference
 const { HfInference } = require('@huggingface/inference'); 
 const path = require('path');
