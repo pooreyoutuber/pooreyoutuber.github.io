@@ -1,5 +1,5 @@
 // ===================================================================
-// index.js (ULTIMATE FINAL VERSION - All 6 Tools Combined)
+// index.js (ULTIMATE FINAL VERSION - All 6 Tools Combined & Errors Fixed)
 // ===================================================================
 
 // --- 1. Imports (Node.js Modules) ---
@@ -14,12 +14,11 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const http = require('http'); 
 const { URL } = require('url'); 
 
-// 🔥 NEW IMPORTS FOR TOOL 6 (Anime Converter)
-const multer = require('multer'); 
-const { InferenceClient } = require('@huggingface/inference'); 
-const { HfInference } = require('@huggingface/inference');
+// 🔥 HUGGING FACE FIX: Correctly import HfInference
+const { HfInference } = require('@huggingface/inference'); 
 const path = require('path');
 const { promisify } = require('util');
+// 🔥 SYNTAX FIX: Removed redundant 'const'
 const { exec: originalExec } = require('child_process');
 const exec = promisify(originalExec); // FFMPEG और अन्य कमांड चलाने के लिए
 
@@ -44,7 +43,7 @@ if (GEMINI_KEY) {
     ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
 
-// 🔥 NEW: HUGGING FACE CONFIGURATION (Tool 6)
+// 🔥 HUGGING FACE CONFIGURATION (Tool 6)
 let HF_TOKEN;
 try {
     HF_TOKEN = fs.readFileSync('/etc/secrets/huggingface_access_token', 'utf8').trim(); 
@@ -52,6 +51,7 @@ try {
     HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 }
 
+// 🔥 HUGGING FACE FIX: Use the correct class name HfInference
 const hfClient = new HfInference(HF_TOKEN);
 if (!HF_TOKEN) {
     console.warn("Hugging Face Access Token (HF_TOKEN) is missing. Anime converter will fail.");
@@ -64,13 +64,11 @@ app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🔥 NEW: Configure Multer for video file uploads (Tool 6)
 const upload = multer({ 
     dest: 'uploads/',
     limits: { fileSize: 50 * 1024 * 1024 } // 50MB
 });
 
-// 🔥 NEW: Directory for converted files and setup (Tool 6)
 const OUTPUT_DIR = path.join(__dirname, 'converted_videos');
 if (!fs.existsSync(OUTPUT_DIR)) {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -1123,7 +1121,6 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     
     let promptText = "Turn the video content into a high-quality anime, detailed cartoon style.";
 
-    // Map style to specific prompt (as per your website-ads.html)
     if (style === 'what-if') {
         promptText = "Convert the image to a vibrant, comic-book style with thick outlines, similar to Marvel's What If.";
     } else if (style === 'ben-10-classic') {
@@ -1159,11 +1156,15 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             const outputFramePath = path.join(convertedFrameDir, frameFile);
             const frameData = fs.readFileSync(inputFramePath);
             
+            // 🔥 FIX: Convert Buffer to Blob for Hugging Face client compatibility
+            // This fixes the 'arrayBuffer is not a function' error.
+            const imageBlobInput = new Blob([frameData], { type: 'image/png' });
+            
             // 🚀 Hugging Face API Call
             const imageBlob = await hfClient.imageToImage({
                 provider: "wavespeed",
                 model: ANIME_MODEL,
-                inputs: frameData,
+                inputs: imageBlobInput, // Pass the Blob
                 parameters: { prompt: promptText },
             });
             
