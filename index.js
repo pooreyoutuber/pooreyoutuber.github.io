@@ -1,5 +1,5 @@
 // ===================================================================
-// index.js (ULTIMATE FINAL VERSION - All 6 Tools Combined & Errors Fixed)
+// index.js (ULTIMATE FINAL VERSION - All 6 Tools, All Fixes Included)
 // ===================================================================
 
 // --- 1. Imports (Node.js Modules) ---
@@ -14,14 +14,14 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const http = require('http'); 
 const { URL } = require('url'); 
 
-// 🔥 CRITICAL FIX: Add the missing 'multer' package for file uploads (Error Fix)
+// 🔥 CRITICAL FIX: Add the missing 'multer' package for file uploads (Previous Error Fix)
 const multer = require('multer'); 
 
 // 🔥 HUGGING FACE FIX: Correctly import HfInference
 const { HfInference } = require('@huggingface/inference'); 
 const path = require('path');
 const { promisify } = require('util');
-// 🔥 SYNTAX FIX: Removed redundant 'const'
+
 const { exec: originalExec } = require('child_process');
 const exec = promisify(originalExec); // FFMPEG और अन्य कमांड चलाने के लिए
 
@@ -43,7 +43,8 @@ if (GEMINI_KEY) {
     ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 } else {
     console.warn("Gemini API Key is missing. AI-dependent tools will fail.");
-    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
+    // Fallback object to prevent crashes
+    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } }; 
 }
 
 // 🔥 HUGGING FACE CONFIGURATION (Tool 6)
@@ -54,7 +55,6 @@ try {
     HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 }
 
-// 🔥 HUGGING FACE FIX: Use the correct class name HfInference
 const hfClient = new HfInference(HF_TOKEN);
 if (!HF_TOKEN) {
     console.warn("Hugging Face Access Token (HF_TOKEN) is missing. Anime converter will fail.");
@@ -69,7 +69,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const upload = multer({ 
     dest: 'uploads/',
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
 const OUTPUT_DIR = path.join(__dirname, 'converted_videos');
@@ -84,7 +84,8 @@ async function executeCommand(command) {
     console.log(`Executing: ${command}`);
     try {
         const { stdout, stderr } = await exec(command);
-        if (stderr) console.error(`[EXEC ERROR] stderr: ${stderr}`);
+        // FFMPEG often prints informational messages to stderr
+        if (stderr) console.error(`[EXEC WARN/INFO] stderr: ${stderr.substring(0, 500)}...`); 
         return { success: true, stdout, stderr };
     } catch (e) {
         console.error(`[EXEC FAILED] Command: ${command}. Error: ${e.message}`);
@@ -1100,7 +1101,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
 
 
 // ===================================================================
-// 6. AI ANIME VIDEO CONVERTER ENDPOINT (API: /anime-convert) - NEW TOOL
+// 6. AI ANIME VIDEO CONVERTER ENDPOINT (API: /anime-convert)
 // ===================================================================
 
 const ANIME_MODEL = "autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime";
@@ -1115,8 +1116,21 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
     }
 
     const { style } = req.body;
-    const inputFile = req.file.path;
-    const baseName = path.basename(inputFile, path.extname(inputFile));
+    
+    // 🔥 CRITICAL FFMPEG FIX: Rename the uploaded file to include its extension.
+    const originalExtension = path.extname(req.file.originalname) || '.mp4'; 
+    const tempFileWithExt = req.file.path + originalExtension;
+    
+    try {
+        fs.renameSync(req.file.path, tempFileWithExt);
+    } catch(e) {
+        return res.status(500).json({ status: 'error', message: `File system error renaming file: ${e.message}` });
+    }
+    
+    // Now use the renamed file with the extension
+    const inputFile = tempFileWithExt; 
+    const baseName = path.basename(inputFile, path.extname(inputFile)); 
+    
     const outputFileName = `anime-${baseName}-${Date.now()}.mp4`;
     const outputFilePath = path.join(OUTPUT_DIR, outputFileName);
     const frameDir = path.join(__dirname, 'temp_frames', baseName);
@@ -1160,14 +1174,13 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             const frameData = fs.readFileSync(inputFramePath);
             
             // 🔥 FIX: Convert Buffer to Blob for Hugging Face client compatibility
-            // This fixes the 'arrayBuffer is not a function' error.
             const imageBlobInput = new Blob([frameData], { type: 'image/png' });
             
             // 🚀 Hugging Face API Call
             const imageBlob = await hfClient.imageToImage({
                 provider: "wavespeed",
                 model: ANIME_MODEL,
-                inputs: imageBlobInput, // Pass the Blob
+                inputs: imageBlobInput, 
                 parameters: { prompt: promptText },
             });
             
@@ -1191,6 +1204,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 
         // --- 6. Cleanup and Response ---
         await executeCommand(`rm -rf ${frameDir} ${convertedFrameDir}`);
+        // Clean up the renamed file
         if (fs.existsSync(inputFile)) fs.unlinkSync(inputFile);
 
         res.status(200).json({
@@ -1208,7 +1222,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
 
         res.status(500).json({ 
             status: 'error', 
-            message: `Conversion failed: ${error.message.substring(0, 150)}... Check FFMPEG and HF Token.` 
+            message: `Conversion failed: ${error.message.substring(0, 150)}... Please check the video file, FFMPEG logs, and HF Token.` 
         });
     }
 });
