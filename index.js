@@ -1180,9 +1180,8 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
             // FIX: Convert Buffer to Blob for Hugging Face client compatibility
             const imageBlobInput = new Blob([frameData], { type: 'image/png' });
             
-            // 🚀 Hugging Face API Call - Uses the new endpoint configured in hfClient
+            // 🚀 Hugging Face API Call - FIX APPLIED HERE: Removed 'provider: "wavespeed"'
             const imageBlob = await hfClient.imageToImage({
-                provider: "wavespeed",
                 model: ANIME_MODEL,
                 inputs: imageBlobInput, 
                 parameters: { prompt: promptText },
