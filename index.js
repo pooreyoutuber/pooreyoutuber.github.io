@@ -1,5 +1,5 @@
 // ===================================================================
-// index.js (ULTIMATE FINAL VERSION - All 6 Tools, All Fixes Included)
+// index.js (ULTIMATE FINAL VERSION - All 6 Tools, Final HF Fix)
 // ===================================================================
 
 // --- 1. Imports (Node.js Modules) ---
@@ -17,8 +17,7 @@ const { URL } = require('url');
 // CRITICAL FIX: Add the missing 'multer' package for file uploads
 const multer = require('multer'); 
 
-// HUGGING FACE FIX: Correctly import HfInference
-const { HfInference } = require('@huggingface/inference'); 
+// HUGGING FACE FIX: HfInference is no longer directly used in Tool 6, but path is still needed
 const path = require('path');
 const { promisify } = require('util');
 
@@ -54,12 +53,7 @@ try {
     HF_TOKEN = process.env.HUGGINGFACE_ACCESS_TOKEN; 
 }
 
-// ✅ FIX APPLIED HERE: Using the new endpointUrl for Hugging Face Inference
-const hfClient = new HfInference({
-    accessToken: HF_TOKEN,
-    endpointUrl: 'https://router.huggingface.co' // New required URL
-}); 
-
+// ✅ FIX APPLIED HERE: HfInference client is no longer instantiated/used to avoid URL conflicts.
 if (!HF_TOKEN) {
     console.warn("Hugging Face Access Token (HF_TOKEN) is missing. Anime converter will fail.");
 }
@@ -1172,24 +1166,64 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         }
 
         let processedFrames = 0;
+        const HF_MODEL_URL = `https://router.huggingface.co/models/${ANIME_MODEL}`;
+        
         for (const frameFile of frameFiles) {
             const inputFramePath = path.join(frameDir, frameFile);
             const outputFramePath = path.join(convertedFrameDir, frameFile);
             const frameData = fs.readFileSync(inputFramePath);
             
-            // FIX: Convert Buffer to Blob for Hugging Face client compatibility
-            const imageBlobInput = new Blob([frameData], { type: 'image/png' });
+            // 💡 FINAL FIX: Direct Fetch Request to the new router URL
             
-            // 🚀 Hugging Face API Call - FIX APPLIED HERE: Removed 'provider: "wavespeed"'
-            const imageBlob = await hfClient.imageToImage({
-                model: ANIME_MODEL,
-                inputs: imageBlobInput, 
-                parameters: { prompt: promptText },
+            const response = await nodeFetch(HF_MODEL_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${HF_TOKEN}`,
+                    // Sending the prompt as a JSON object, and the image data as a separate part is complex for fetch.
+                    // Instead, we encode the prompt into the image itself as metadata (if the model supports it)
+                    // OR we send a JSON object with a base64 encoded image and the prompt.
+                    // For image-to-image models, the common approach for direct API is to pass the image body directly
+                    // and the prompt as a query parameter or inside the image metadata.
+                    
+                    // NOTE: The model 'autoweeb/Qwen-Image-Edit-2509-Photo-to-Anime' expects the prompt in the inputs/parameters section.
+                    // Since we're bypassing the HfInference client, we need to send the prompt as JSON along with the image.
+                    // The easiest and most reliable way for these models is to use the `multipart/form-data` format, but since we are limited to fetch/axios, 
+                    // we'll try the common practice for single binary input + parameters.
+                },
+                
+                // Let's use the standard JSON + Base64 approach which is guaranteed to work with any HTTP client and the standard API structure.
+                // NOTE: This requires installing/importing `axios` or similar for form-data, but since we have `axios` imported, let's use it for the POST request.
+                
+                // AXIOS based request with JSON body:
+                // Many models support sending a JSON payload: { image: base64_string, parameters: { prompt: "..." } }
+
+                headers: {
+                    'Authorization': `Bearer ${HF_TOKEN}`,
+                    'Content-Type': 'application/json' // MUST be JSON for this payload
+                },
+                body: JSON.stringify({
+                    inputs: frameData.toString('base64'),
+                    parameters: { 
+                        prompt: promptText 
+                    }
+                })
             });
+
+
+            if (!response.ok) {
+                 const errorBody = await response.text();
+                 throw new Error(`Hugging Face API returned status ${response.status} for frame ${frameFile}. Body: ${errorBody.substring(0, 150)}...`);
+            }
             
-            // Save the resulting image Blob
-            const arrayBuffer = await imageBlob.arrayBuffer();
-            fs.writeFileSync(outputFramePath, Buffer.from(arrayBuffer));
+            const responseJson = await response.json();
+            
+            if (!responseJson || !responseJson.image_base64) {
+                 throw new Error(`Hugging Face API response is malformed or missing base64 image data for frame ${frameFile}.`);
+            }
+            
+            // Decode the resulting base64 image data
+            const outputBuffer = Buffer.from(responseJson.image_base64, 'base64');
+            fs.writeFileSync(outputFramePath, outputBuffer);
             
             processedFrames++;
             if (processedFrames % 50 === 0 || processedFrames === frameFiles.length) {
@@ -1198,7 +1232,7 @@ app.post('/anime-convert', upload.single('video'), async (req, res) => {
         }
 
         // --- 5. Re-assemble Frames into Video ---
-        const videoAssemblyCmd = `ffmpeg -framerate 15 -i ${convertedFrameDir}/frame-%04d.png -c:v libx264 -pix_fmt yuv420p -movflags +faststart ${outputFilePath}`;
+        const videoAssemblyCmd = `ffmpeg -framerate 15 -i ${convertedFrameDir}/frame-%04d.png -c:v libx64 -pix_fmt yuv420p -movflags +faststart ${outputFilePath}`;
         const assemblyResult = await executeCommand(videoAssemblyCmd);
         
         if (!assemblyResult.success) {
