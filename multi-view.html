@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -242,7 +242,7 @@
 <body>
 
     <div class="header">
-        <h1>Multi-Browser Earning: Professional Fingerprinting System</h1>
+        <h1>Multi-Browser Earning: Professional Fingerprinting System (MODIFIED)</h1>
         <p>Advanced Tool for Multi-Platform (Website, YouTube, Social) Metric Boosting</p>
     </div>
 
@@ -353,11 +353,13 @@
         let clickIntervalId = null; 
 
         // --- FINGERPRINT SPOOFING ARRAYS (For better randomization) ---
+        // A list of common US timezones to match the suggested VPN usage.
         const US_TIMEZONES = [
             'America/New_York', 'America/Los_Angeles', 'America/Chicago', 
             'America/Denver', 'America/Phoenix', 'America/Anchorage',
         ];
         
+        // A list of languages to randomize
         const SPOOF_LANGUAGES = [
             { lang: 'en-US', list: ['en-US', 'en'] },
             { lang: 'en-GB', list: ['en-GB', 'en'] },
@@ -371,8 +373,8 @@
         // ==========================================================
 
         /**
-         * टाइमज़ोन, भाषा, और कैनवस/WebGL को रैंडमली Spoof करता है।
-         * यह फ़ंक्शन iframe में लोड होने वाले कोड को इंजेक्ट करेगा।
+         * Generates a JavaScript string to randomly Spoof Timezone, Language, Canvas, and WebGL.
+         * This script is injected into each iframe before the target URL loads.
          */
         function generateSpoofScript() {
             const randomTimezone = US_TIMEZONES[Math.floor(Math.random() * US_TIMEZONES.length)];
@@ -396,7 +398,9 @@
                         // Language Spoof
                         Object.defineProperty(navigator, 'language', { value: '${randomLangObj.lang}', configurable: true });
                         Object.defineProperty(navigator, 'languages', { value: [${randomLangObj.list.map(l => `'${l}'`).join(',')}], configurable: true });
-                    } catch (e) {}
+                    } catch (e) {
+                        // Suppress errors for cross-origin or restricted environments
+                    }
 
                     // 2. Canvas Fingerprint Spoofing (Adding Noise)
                     try {
@@ -411,25 +415,31 @@
                                 
                                 // Apply a slight, random noise based on the unique instance ID
                                 for(let i = 0; i < imgData.data.length; i += 4) {
+                                    // Bitwise operation to add subtle, non-reversible noise
                                     imgData.data[i + ${noise} % 4] = imgData.data[i + ${noise} % 4] ^ (${noise} % 2); 
                                 }
                                 ctx.putImageData(imgData, 0, 0);
                             }
                             return originalToDataURL.apply(this, arguments);
                         };
-                    } catch (e) {}
+                    } catch (e) {
+                        // Suppress errors
+                    }
 
-                    // 3. WebGL Fingerprint Spoofing (GPU Info hiding) - Complex, but we try a basic spoof
+                    // 3. WebGL Fingerprint Spoofing (GPU Info hiding)
                     try {
                         const getParameter = WebGLRenderingContext.prototype.getParameter;
                         WebGLRenderingContext.prototype.getParameter = function(parameter) {
                             // Spoofing the UNMASKED_RENDERER_WEBGL (GPU name)
                             if (parameter === 37446) { // UNMASKED_RENDERER_WEBGL
+                                // Provide a common, but slightly randomized fake GPU name
                                 return 'Mesa DRI Intel(R) HD Graphics 4000 (BDW) - Random ${noise}';
                             }
                             return getParameter.apply(this, arguments);
                         };
-                    } catch(e) {}
+                    } catch(e) {
+                        // Suppress errors
+                    }
                 </script>
             `;
         }
@@ -460,17 +470,17 @@
 
             const urlType = getUrlType(normalizedUrl);
 
-            // FIX: YouTube Links को Embed Format में बदलना
+            // FIX: Convert YouTube Links to Embed Format
             if (urlType === 'youtube') {
                 const videoIdMatch = normalizedUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|v\/|e\/|embed\/|watch\?v=|[^#]*\&v=)|youtu\.be\/)([^"&?\/\s]{11})/);
                 if (videoIdMatch && videoIdMatch[1]) {
-                    // Mute=1 और controls=0 के साथ Embed URL
+                    // Use Mute=1 and controls=0 for a stealthy embed URL
                     return `https://www.youtube.com/embed/${videoIdMatch[1]}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1`;
                 }
             }
             
             return normalizedUrl;
-             }
+        }
 
         function updateStatus(index, state, message = '') {
             const statusSpan = statusSpans[index];
@@ -491,7 +501,7 @@
             }
         }
         
-        // --- MODIFIED: loadIframes अब फिंगरप्रिंट स्क्रिप्ट इंजेक्ट करेगा ---
+        // --- MODIFIED: loadIframes now injects the fingerprint script ---
         function loadIframes(url) {
             const initialMinDelay = 1000; 
             const initialMaxDelay = 2000; 
@@ -505,6 +515,7 @@
                               ? initialMinDelay + (Math.random() * initialMaxDelay * index) 
                               : 0; 
                 
+                // Set to about:blank first to clear the content
                 iframe.src = 'about:blank'; 
                 updateStatus(index, 'loading', `Loading (${urlType.toUpperCase()})...`); 
                 
@@ -513,13 +524,13 @@
                     
                     iframe.setAttribute('data-url-type', urlType); 
                     
-                    // 1. Fingerprint Spoofing Script तैयार करें
+                    // 1. Generate the Fingerprint Spoofing Script
                     const spoofScript = generateSpoofScript();
 
-                    // 2. Iframe में Spoofing और HTML लोड करें
+                    // 2. Inject the Spoofing Script and HTML into the Iframe
                     const htmlContent = `
                         <!DOCTYPE html>
-                        <html lang="${randomLangObj ? randomLangObj.lang : 'en'}">
+                        <html lang="en">
                         <head>
                             <meta charset="UTF-8">
                             <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -527,14 +538,14 @@
                             ${spoofScript} </head>
                         <body style="margin:0; padding:0; overflow:hidden;">
                             <script>
-                                // Spoofing के बाद URL पर जाएँ
+                                // Navigate to the target URL after fingerprint spoofing
                                 window.location.replace('${finalAdaptedUrl}');
                             </script>
                         </body>
                         </html>
                     `;
 
-                    // Iframe में सामग्री लिखें
+                    // Write content into the Iframe
                     iframe.contentWindow.document.open();
                     iframe.contentWindow.document.write(htmlContent);
                     iframe.contentWindow.document.close();
@@ -548,7 +559,7 @@
         function startMultiBrowser() {
             let url = urlInput.value.trim();
             if (!url) {
-                alert('Kripya Target URL daalein.');
+                alert('Please enter the Target URL.');
                 return;
             }
 
@@ -557,7 +568,7 @@
 
             clearIntervals();
             
-            // Interval Logic remains the same
+            // Start Intervals based on user choice
             if (activeUserCheck.checked) toggleIntervals(true, 'reload');
             if (autoScrollCheck.checked) toggleIntervals(true, 'scroll');
             if (autoClicksCheck.checked) toggleIntervals(true, 'click'); 
@@ -579,7 +590,7 @@
                 
                 if (shouldStart) {
                     if (reloadIntervalId) return;
-                    // Random time generate karna
+                    // Generate random reload time
                     const randomReloadTime = Math.floor(Math.random() * (maxSec - minSec + 1) + minSec) * 1000;
                     reloadIntervalId = setInterval(reloadFrames, randomReloadTime);
                 } else {
@@ -599,7 +610,7 @@
                     if (clickIntervalId) return;
                     const minClickTime = 5000; 
                     const maxClickTime = 15000; 
-                    // Random time generate karna
+                    // Generate random click time
                     const randomTime = Math.floor(Math.random() * (maxClickTime - minClickTime + 1) + minClickTime); 
                     clickIntervalId = setInterval(realisticClickSimulation, randomTime);
                 } else {
@@ -635,7 +646,7 @@
             iframes.forEach((iframe, index) => {
                 const urlType = iframe.getAttribute('data-url-type');
                 
-                // YouTube/Instagram par scroll skip karein
+                // Skip scroll on YouTube/Instagram
                 if (urlType === 'youtube' || urlType === 'instagram') return; 
 
                 if (iframe.scrollDirection === undefined) iframe.scrollDirection = 1; 
@@ -651,22 +662,23 @@
                             const currentScroll = scrollWindow.scrollY;
                             const maxScroll = doc.body.scrollHeight - iframe.clientHeight;
                             
-                            const scrollStep = Math.random() * 5 + 5; 
+                            const scrollStep = Math.random() * 5 + 5; // Random step for realistic feel
                             const direction = iframe.scrollDirection;
 
                             scrollWindow.scrollBy(0, scrollStep * direction);
                             
+                            // Reverse direction at top/bottom with a random pause
                             if ((currentScroll >= maxScroll && direction === 1) || (currentScroll <= 0 && direction === -1)) {
-                                iframe.scrollDirection = 0; 
+                                iframe.scrollDirection = 0; // Pause scrolling briefly
                                 
                                 setTimeout(() => {
-                                    iframe.scrollDirection = (currentScroll >= maxScroll) ? -1 : 1; 
-                                }, Math.random() * 2000 + 1500); 
+                                    iframe.scrollDirection = (currentScroll >= maxScroll) ? -1 : 1; // Reverse direction
+                                }, Math.random() * 2000 + 1500); // Wait 1.5 - 3.5 seconds
                             }
                         }
                     }
                 } catch (e) {
-                    // console.error("Scroll error:", e);
+                    // Cross-origin error is expected here, ignore it.
                 }
             });
         }
@@ -678,7 +690,7 @@
             
             const urlType = iframe.getAttribute('data-url-type'); 
             
-            // YouTube/Social Media (FB/Insta) par Click Skip karein!
+            // Skip Click on YouTube/Social Media (FB/Insta)
             if (urlType !== 'website') {
                 toggleIntervals(false, 'click');
                 toggleIntervals(true, 'click');
@@ -689,11 +701,11 @@
             try {
                 const doc = iframe.contentDocument || iframe.contentWindow.document;
                 if (doc) {
-                    // Only target links/buttons that are visible and not too small
+                    // Target common clickable elements, including AdSense containers
                     const elements = doc.querySelectorAll('a:not([target="_blank"]), button, [onclick], .adsbygoogle'); 
                     
                     if (elements.length > 0) {
-                        const numClicks = Math.floor(Math.random() * 2) + 1; 
+                        const numClicks = Math.floor(Math.random() * 2) + 1; // 1 or 2 clicks
                         
                         updateStatus(randomIndex, 'clicking', 'Aggressive Click...');
 
@@ -720,7 +732,7 @@
                     }
                 }
             } catch (e) {
-                // console.error("Click error:", e);
+                // Cross-origin error is expected here, ignore it.
             }
             // Reset Interval to get a new random time
             toggleIntervals(false, 'click');
