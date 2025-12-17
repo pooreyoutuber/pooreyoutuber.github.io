@@ -16,7 +16,7 @@
         .header { text-align: center; padding: 20px; background: #212529; color: white; border-radius: 8px; margin-bottom: 20px; }
         .controls { background: var(--card); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .input-group { display: flex; flex-direction: column; gap: 8px; }
-        input, button { padding: 12px; border-radius: 5px; border: 1px solid #ddd; }
+        input[type="text"], button { padding: 12px; border-radius: 5px; border: 1px solid #ddd; }
         button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background: #218838; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; margin-top: 20px; }
@@ -26,6 +26,7 @@
         .status-tag { padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; }
         .active { background: #28a745; }
         .loading { background: #ffc107; color: black; }
+        .waiting { background: #17a2b8; color: white; }
     </style>
 </head>
 <body>
@@ -43,16 +44,16 @@
     </div>
     <div class="input-group">
         <label>Settings (Highly Recommended):</label>
-        <div style="font-size: 13px;">
+        <div style="font-size: 13px; line-height: 1.8;">
             <input type="checkbox" id="randFingerprint" checked> Randomize Fingerprint<br>
             <input type="checkbox" id="humanScroll" checked> Human-like Scrolling<br>
-            <input type="checkbox" id="smartClick" checked> Delayed Smart Clicks
+            <input type="checkbox" id="smartClick" checked> Delayed Smart Clicks<br>
+            <input type="checkbox" id="fastReload"> <b>Fast Auto-Reload (30s - 60s)</b>
         </div>
     </div>
 </div>
 
-<div class="grid" id="browserGrid">
-    </div>
+<div class="grid" id="browserGrid"></div>
 
 <script>
     const userAgents = [
@@ -73,7 +74,6 @@
     const grid = document.getElementById('browserGrid');
     const startBtn = document.getElementById('startBtn');
 
-    // स्लॉट्स बनाना
     for(let i=0; i<10; i++) {
         grid.innerHTML += `
             <div class="browser-box">
@@ -89,6 +89,9 @@
     startBtn.addEventListener('click', () => {
         const url = document.getElementById('urlInput').value;
         if(!url) return alert("Please enter a URL");
+        
+        startBtn.disabled = true;
+        startBtn.innerHTML = "<i class='fas fa-sync fa-spin'></i> System Running...";
 
         for(let i=0; i<10; i++) {
             startSlot(i, url);
@@ -99,18 +102,15 @@
         const frame = document.getElementById(`frame-${id}`);
         const status = document.getElementById(`status-${id}`);
         
-        // Random delay before starting (ताकि सब एक साथ शुरू न हों)
         status.innerText = "Waiting...";
-        await new Promise(r => setTimeout(r, Math.random() * 10000));
+        status.className = "status-tag waiting";
+        
+        // Initial random delay
+        await new Promise(r => setTimeout(r, Math.random() * 5000));
 
         status.innerText = "Loading...";
         status.className = "status-tag loading";
 
-        // Randomize Fingerprint Logic
-        const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)];
-        const randomRef = referrers[Math.floor(Math.random() * referrers.length)];
-
-        // YouTube Embed Fix
         let finalUrl = url;
         if(url.includes("youtube.com/watch")) {
             const vid = url.split("v=")[1].split("&")[0];
@@ -122,36 +122,45 @@
         frame.onload = () => {
             status.innerText = "Active";
             status.className = "status-tag active";
-            
-            // Simulation logic
             simulateBehavior(id);
         };
 
-        // Random Reload (3 से 7 मिनट के बीच)
-        const reloadTime = (Math.random() * (420000 - 180000) + 180000);
+        // RELOAD LOGIC
+        let reloadTime;
+        const isFastReload = document.getElementById('fastReload').checked;
+
+        if (isFastReload) {
+            // 30 से 60 सेकंड के बीच (30000ms to 60000ms)
+            reloadTime = Math.floor(Math.random() * (60000 - 30000 + 1) + 30000);
+        } else {
+            // पुराना लॉजिक: 3 से 7 मिनट (180000ms to 420000ms)
+            reloadTime = Math.floor(Math.random() * (420000 - 180000 + 1) + 180000);
+        }
+
         setTimeout(() => startSlot(id, url), reloadTime);
     }
 
     function simulateBehavior(id) {
         const frame = document.getElementById(`frame-${id}`);
         
-        // 1. Human Scrolling
-        setInterval(() => {
-            try {
-                const scrollAmt = Math.floor(Math.random() * 100);
-                frame.contentWindow.scrollBy(0, scrollAmt);
-            } catch(e) {}
-        }, 3000);
+        if(document.getElementById('humanScroll').checked) {
+            const scrollInterval = setInterval(() => {
+                try {
+                    const scrollAmt = Math.floor(Math.random() * 100);
+                    frame.contentWindow.scrollBy(0, scrollAmt);
+                } catch(e) {
+                    clearInterval(scrollInterval);
+                }
+            }, 3000);
+        }
 
-        // 2. Delayed Smart Click Simulation (बैन से बचने के लिए)
         if(document.getElementById('smartClick').checked) {
             setTimeout(() => {
-                console.log(`Slot ${id+1}: Attempting human-like interaction...`);
-                // Note: Cross-domain iframe restrictions may limit direct clicking on Adsense
-            }, 45000); // 45 सेकंड बाद ही कुछ करें
+                console.log(`Slot ${id+1}: Interaction simulation ready.`);
+            }, 45000);
         }
     }
 </script>
 
 </body>
-    </html>
+</html>
