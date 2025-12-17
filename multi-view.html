@@ -3,114 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Metric Booster v2.1 - Earning Optimized</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Smart Earning Booster v3.0</title>
     <style>
-        :root { --primary: #007bff; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .header { text-align: center; padding: 20px; background: #1e293b; border-bottom: 2px solid var(--primary); border-radius: 8px; margin-bottom: 20px; }
-        .controls { background: var(--card); padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border: 1px solid #334155; }
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
-        input[type="text"], button { padding: 12px; border-radius: 5px; border: 1px solid #334155; background: #0f172a; color: white; }
-        button { background: #22c55e; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #16a34a; transform: translateY(-2px); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-top: 20px; }
-        .browser-box { border: 1px solid #334155; border-radius: 8px; overflow: hidden; background: #1e293b; }
-        .browser-header { background: #334155; padding: 8px; font-size: 11px; display: flex; justify-content: space-between; }
-        iframe { width: 100%; height: 300px; border: none; background: #fff; transform: scale(0.98); }
-        .status-tag { padding: 2px 6px; border-radius: 4px; font-size: 10px; }
-        .active { background: #22c55e; }
-        .waiting { background: #3b82f6; }
+        :root { --primary: #3b82f6; --bg: #020617; --card: #1e293b; --text: #f1f5f9; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        .dashboard { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        .panel { background: var(--card); padding: 20px; border-radius: 12px; height: fit-content; border: 1px solid #334155; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .frame-box { background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #475569; position: relative; }
+        .badge { position: absolute; top: 5px; right: 5px; padding: 3px 8px; font-size: 10px; border-radius: 10px; background: #22c55e; }
+        iframe { width: 100%; height: 350px; border: none; background: #fff; }
+        input, button, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { background: var(--primary); color: white; cursor: pointer; font-weight: bold; }
+        .log { font-size: 12px; color: #94a3b8; height: 100px; overflow-y: auto; border-top: 1px solid #334155; padding-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>Earning Booster Engine v2.1</h1>
-    <p>Session Persistence | RPM Optimization | Multi-Fingerprint</p>
-</div>
-
-<div class="controls">
-    <div class="input-group">
-        <label>Target Website/URL:</label>
+<div class="dashboard">
+    <div class="panel">
+        <h3>Earning Engine v3.0</h3>
+        <label>Website URL:</label>
         <input type="text" id="urlInput" placeholder="https://yourwebsite.com">
-        <button id="startBtn"><i class="fas fa-bolt"></i> Start High-RPM Session</button>
-    </div>
-    <div class="input-group">
-        <label>Earning Optimization Settings:</label>
-        <div style="font-size: 13px;">
-            <input type="checkbox" id="fastReload"> <b>30s - 60s Fast Reload (Boost Impressions)</b><br>
-            <input type="checkbox" id="humanScroll" checked> Random Micro-Scrolling<br>
-            <input type="checkbox" id="randomSize" checked> Random Device Viewport
-        </div>
-    </div>
-</div>
+        
+        <label>Referrer (Traffic Source):</label>
+        <select id="refSource">
+            <option value="https://www.google.com">Google Search</option>
+            <option value="https://www.facebook.com">Facebook Social</option>
+            <option value="https://t.co">Twitter/X</option>
+        </select>
 
-<div class="grid" id="browserGrid"></div>
+        <label>Session Speed:</label>
+        <select id="speed">
+            <option value="60000">Slow (Safe)</option>
+            <option value="30000">Fast (Aggressive)</option>
+        </select>
+
+        <button id="startBtn">Launch Engine</button>
+        <div class="log" id="sysLog">System ready...</div>
+    </div>
+
+    <div class="grid" id="container"></div>
+</div>
 
 <script>
-    const userAgents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/119.0.0.0 Safari/537.36",
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-        "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36"
+    const container = document.getElementById('container');
+    const log = document.getElementById('sysLog');
+    
+    // Modern User Agents
+    const agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1",
+        "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
     ];
 
-    const grid = document.getElementById('browserGrid');
-    for(let i=0; i<10; i++) {
-        grid.innerHTML += `
-            <div class="browser-box">
-                <div class="browser-header">
-                    <span id="ua-type-${i}">Ready</span>
-                    <span id="status-${i}" class="status-tag waiting">Idle</span>
-                </div>
-                <iframe id="frame-${i}" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-            </div>
-        `;
+    function writeLog(msg) {
+        log.innerHTML += `<div>> ${msg}</div>`;
+        log.scrollTop = log.scrollHeight;
     }
 
     document.getElementById('startBtn').addEventListener('click', () => {
         const url = document.getElementById('urlInput').value;
-        if(!url) return alert("URL डालें");
-        for(let i=0; i<10; i++) startSession(i, url);
+        if(!url) return alert("URL डालें!");
+        
+        container.innerHTML = ''; // Reset
+        writeLog("Starting multi-fingerprint sessions...");
+
+        for(let i=0; i<8; i++) {
+            createSession(i, url);
+        }
     });
 
-    async function startSession(id, url) {
-        const frame = document.getElementById(`frame-${id}`);
-        const status = document.getElementById(`status-${id}`);
-        const uaText = document.getElementById(`ua-type-${id}`);
-        
-        status.innerText = "Initializing...";
-        await new Promise(r => setTimeout(r, Math.random() * 8000));
+    function createSession(id, targetUrl) {
+        const div = document.createElement('div');
+        div.className = 'frame-box';
+        div.innerHTML = `<div class="badge" id="stat-${id}">Connecting...</div><iframe id="ifr-${id}" src="about:blank"></iframe>`;
+        container.appendChild(div);
 
-        // Randomize Device Size for higher RPM
-        if(document.getElementById('randomSize').checked) {
-            const w = [360, 414, 1366, 1920][Math.floor(Math.random()*4)];
-            frame.style.width = "100%"; 
-        }
-
-        uaText.innerText = "Device: " + (id % 2 === 0 ? "Desktop" : "Mobile");
-        frame.src = url;
-
-        frame.onload = () => {
-            status.innerText = "Live";
-            status.className = "status-tag active";
-            simulateActivity(id);
-        };
-
-        const isFast = document.getElementById('fastReload').checked;
-        const delay = isFast ? (Math.random()*30000 + 30000) : (Math.random()*200000 + 100000);
-        setTimeout(() => startSession(id, url), delay);
+        loadPage(id, targetUrl);
     }
 
-    function simulateActivity(id) {
-        const frame = document.getElementById(`frame-${id}`);
+    function loadPage(id, url) {
+        const ifr = document.getElementById(`ifr-${id}`);
+        const stat = document.getElementById(`stat-${id}`);
+        const speed = document.getElementById('speed').value;
+        const ref = document.getElementById('refSource').value;
+
+        // Anti-Detection: Adding random parameters to avoid cache
+        const finalUrl = `${url}?utm_source=${ref}&id=${Math.random().toString(36).substring(7)}`;
+        
+        ifr.src = finalUrl;
+        stat.innerText = "Loading...";
+        stat.style.background = "#eab308";
+
+        ifr.onload = () => {
+            stat.innerText = "Active Session";
+            stat.style.background = "#22c55e";
+            writeLog(`Session ${id+1} loaded with Referrer.`);
+            
+            // Start Human Simulation
+            simulateHuman(ifr);
+        };
+
+        // Auto Refresh logic
+        setTimeout(() => loadPage(id, url), parseInt(speed) + (Math.random() * 10000));
+    }
+
+    function simulateHuman(ifr) {
         setInterval(() => {
             try {
-                // Real human scroll logic
-                const pos = Math.random() > 0.5 ? 200 : -100;
-                frame.contentWindow.scrollBy(0, pos);
-            } catch(e) {}
-        }, 5000);
+                // Random scrolling
+                const scrollAmt = Math.floor(Math.random() * 300) - 100;
+                ifr.contentWindow.scrollBy({ top: scrollAmt, behavior: 'smooth' });
+            } catch(e) {
+                // Same-origin policy might block direct scroll, but we try
+            }
+        }, 4000);
     }
 </script>
 </body>
