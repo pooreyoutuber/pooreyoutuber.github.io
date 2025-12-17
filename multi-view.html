@@ -3,605 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Browser Earning: Professional Fingerprinting System</title>
+    <title>Advanced Multi-Browser Fingerprinting System v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-ZPMC525FGT');
-    </script>
     <style>
-        /* CSS: Ultra-Modern Browser UI Look */
         :root {
-            --primary-color: #007bff;
-            --secondary-color: #f8f9fa;
-            --slot-bg: #ffffff;
-            --header-bg: #212529;
-            --control-bg: #e9ecef;
-            --button-success: #28a745; 
-            --button-danger: #dc3545; 
-            --status-ready: #6c757d;
-            --status-loading: #ffc107;
-            --status-running: #28a745;
-            --status-clicking: #dc3545;
+            --primary: #007bff;
+            --bg: #f4f7f6;
+            --card: #ffffff;
+            --text: #333;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--secondary-color);
-            overflow-x: hidden;
-        }
-
-        .container {
-            padding: 15px;
-        }
-
-        .header {
-            background-color: var(--header-bg);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        .controls {
-            background-color: var(--control-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
-        .controls h2 {
-            font-size: 1.2rem;
-            color: var(--header-bg);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-group label {
-            min-width: 150px;
-            font-weight: 600;
-        }
-
-        .input-group input[type="text"] {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .input-group button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-            margin-left: 10px;
-        }
-
-        #loadButton {
-            background-color: var(--button-success);
-            color: white;
-        }
-
-        #loadButton:hover {
-            background-color: #218838;
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            padding: 10px 0;
-        }
-
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            font-weight: normal;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            margin-right: 5px;
-            transform: scale(1.2);
-        }
-
-        .time-settings {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .time-settings .input-group {
-            margin-bottom: 0;
-        }
-
-        .time-settings input {
-            width: 80px;
-            text-align: center;
-        }
-
-        /* Iframe Grid */
-        .iframe-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .iframe-container {
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            position: relative;
-            background-color: var(--slot-bg);
-            transition: box-shadow 0.3s;
-        }
-
-        .iframe-container:hover {
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .iframe-header {
-            background-color: #343a40;
-            color: white;
-            padding: 8px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-
-        .browser-icon {
-            margin-right: 8px;
-            color: #ffc107;
-        }
-
-        .status {
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            transition: all 0.3s;
-        }
-        
-        /* Status Colors */
-        .status { background-color: var(--status-ready); color: white; }
-        .status.loading { background-color: var(--status-loading); color: black; }
-        .status.running { background-color: var(--status-running); color: white; }
-        .status.clicking { background-color: var(--status-clicking); color: white; }
-
-        .iframe-wrapper {
-            height: 350px; /* Standard browser height */
-            position: relative;
-        }
-
-        .iframe-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        .activity-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.3s;
-            background: rgba(40, 167, 69, 0.1);
-            border: 5px solid var(--button-success);
-        }
-
-        .activity-indicator.click-active {
-            opacity: 1;
-            background: rgba(220, 53, 69, 0.2);
-            border: 5px solid var(--button-danger);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .input-group {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .input-group input[type="text"], .input-group button {
-                width: 100%;
-                margin-left: 0;
-                margin-top: 10px;
-            }
-            .checkbox-group {
-                gap: 10px;
-            }
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .header { text-align: center; padding: 20px; background: #212529; color: white; border-radius: 8px; margin-bottom: 20px; }
+        .controls { background: var(--card); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        input, button { padding: 12px; border-radius: 5px; border: 1px solid #ddd; }
+        button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #218838; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; margin-top: 20px; }
+        .browser-box { border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white; }
+        .browser-header { background: #343a40; color: white; padding: 8px; font-size: 12px; display: flex; justify-content: space-between; }
+        iframe { width: 100%; height: 350px; border: none; background: #fff; }
+        .status-tag { padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; }
+        .active { background: #28a745; }
+        .loading { background: #ffc107; color: black; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Multi-Browser Earning: Professional Fingerprinting System</h1>
-        <p>Advanced Tool for Multi-Platform (Website, YouTube, Social) Metric Boosting</p>
+<div class="header">
+    <h1>Pro Metric & Earning Booster v2.0</h1>
+    <p>Fingerprint Randomization | Human Behavior Simulation</p>
+</div>
+
+<div class="controls">
+    <div class="input-group">
+        <label>Target URL (Website or Video):</label>
+        <input type="text" id="urlInput" placeholder="https://yourwebsite.com">
+        <button id="startBtn"><i class="fas fa-play"></i> Start System</button>
     </div>
-
-    <div class="container">
-        <div class="controls">
-            <h2><i class="fas fa-link"></i> Target URL & Controls</h2>
-            <div class="input-group">
-                <label for="urlInput">Target URL:</label>
-                <input type="text" id="urlInput" placeholder="Enter Website, YouTube, Facebook, or Instagram Link" required>
-                <button id="loadButton"><i class="fas fa-play"></i> Start Browsing</button>
-            </div>
-
-            <div class="checkbox-group">
-                <label>
-                    <input type="checkbox" id="activeUserCheck" checked>
-                    <i class="fas fa-redo"></i> Auto Reload (Simulate New Users)
-                </label>
-                <label>
-                    <input type="checkbox" id="autoScrollCheck" checked>
-                    <i class="fas fa-arrows-alt-v"></i> Realistic Auto Scroll (AdSense Viewability)
-                </label>
-                <label>
-                    <input type="checkbox" id="autoClicksCheck" checked>
-                    <i class="fas fa-mouse-pointer"></i> Aggressive Clicks (Only on Websites)
-                </label>
-                <label>
-                    <input type="checkbox" id="randomDelayCheck" checked>
-                    <i class="fas fa-clock"></i> Random Start Delay
-                </label>
-            </div>
-
-            <div class="time-settings">
-                <div class="input-group">
-                    <label for="minTimeInput">Min Session (Sec):</label>
-                    <input type="number" id="minTimeInput" value="120">
-                </div>
-                <div class="input-group">
-                    <label for="maxTimeInput">Max Session (Sec):</label>
-                    <input type="number" id="maxTimeInput" value="240">
-                </div>
-                <p style="font-size: 0.9rem; margin-left: 20px; color: #6c757d;">(Longer sessions = Higher Earning)</p>
-            </div>
-        </div>
-
-        <h2><i class="fas fa-desktop"></i> Multi-Browser View (10 Slots)</h2>
-        <div class="iframe-grid">
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 1 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe0" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 2 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe1" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 3 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe2" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 4 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe3" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 5 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe4" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 6 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe5" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 7 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe6" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 8 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe7" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 9 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe8" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
-            <div class="iframe-container">
-                <div class="iframe-header"><i class="fab fa-chrome browser-icon"></i> Browser 10 - <span class="status">Ready</span></div>
-                <div class="iframe-wrapper"><iframe id="iframe9" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe><div class="activity-indicator"></div></div>
-            </div>
+    <div class="input-group">
+        <label>Settings (Highly Recommended):</label>
+        <div style="font-size: 13px;">
+            <input type="checkbox" id="randFingerprint" checked> Randomize Fingerprint<br>
+            <input type="checkbox" id="humanScroll" checked> Human-like Scrolling<br>
+            <input type="checkbox" id="smartClick" checked> Delayed Smart Clicks
         </div>
     </div>
+</div>
 
-    <script>
-        // --- CONSTANTS ---
-        const urlInput = document.getElementById('urlInput');
-        const loadButton = document.getElementById('loadButton');
-        const activeUserCheck = document.getElementById('activeUserCheck'); 
-        const autoScrollCheck = document.getElementById('autoScrollCheck');
-        const autoClicksCheck = document.getElementById('autoClicksCheck');
-        const minTimeInput = document.getElementById('minTimeInput'); 
-        const maxTimeInput = document.getElementById('maxTimeInput');
-        
-        const numIframes = 10;
-        const iframeContainers = document.querySelectorAll('.iframe-container');
-        const iframes = Array.from({ length: numIframes }, (_, i) => document.getElementById(`iframe${i}`));
-        const statusSpans = Array.from({ length: numIframes }, (_, i) => iframeContainers[i].querySelector('.status'));
-        const indicators = Array.from({ length: numIframes }, (_, i) => iframeContainers[i].querySelector('.activity-indicator'));
-        
-        let reloadIntervalId = null;
-        let scrollIntervalId = null;
-        let clickIntervalId = null; 
+<div class="grid" id="browserGrid">
+    </div>
 
-        loadButton.addEventListener('click', startMultiBrowser);
-        
-        activeUserCheck.addEventListener('change', () => toggleIntervals(activeUserCheck.checked, 'reload'));
-        autoScrollCheck.addEventListener('change', () => toggleIntervals(autoScrollCheck.checked, 'scroll'));
-        autoClicksCheck.addEventListener('change', () => toggleIntervals(autoClicksCheck.checked, 'click'));
+<script>
+    const userAgents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/119.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/118.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Linux; Android 13; Pixel 7) Chrome/119.0.0.0 Mobile Safari/537.36",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) Version/17.1 Mobile/15E148 Safari/604.1",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0"
+    ];
 
-        // --- NEW UTILITY: URL Adaptation for Iframe Loading (FIXED YOUTUBE) ---
-        function getUrlType(url) {
-            if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
-            if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
-            if (url.includes('instagram.com') || url.includes('instagr.am')) return 'instagram';
-            return 'website'; // Default
+    const referrers = [
+        "https://www.google.com/",
+        "https://www.facebook.com/",
+        "https://t.co/",
+        "https://www.bing.com/"
+    ];
+
+    const grid = document.getElementById('browserGrid');
+    const startBtn = document.getElementById('startBtn');
+
+    // स्लॉट्स बनाना
+    for(let i=0; i<10; i++) {
+        grid.innerHTML += `
+            <div class="browser-box">
+                <div class="browser-header">
+                    <span><i class="fas fa-globe"></i> Slot ${i+1}</span>
+                    <span id="status-${i}" class="status-tag">Ready</span>
+                </div>
+                <iframe id="frame-${i}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            </div>
+        `;
+    }
+
+    startBtn.addEventListener('click', () => {
+        const url = document.getElementById('urlInput').value;
+        if(!url) return alert("Please enter a URL");
+
+        for(let i=0; i<10; i++) {
+            startSlot(i, url);
+        }
+    });
+
+    async function startSlot(id, url) {
+        const frame = document.getElementById(`frame-${id}`);
+        const status = document.getElementById(`status-${id}`);
+        
+        // Random delay before starting (ताकि सब एक साथ शुरू न हों)
+        status.innerText = "Waiting...";
+        await new Promise(r => setTimeout(r, Math.random() * 10000));
+
+        status.innerText = "Loading...";
+        status.className = "status-tag loading";
+
+        // Randomize Fingerprint Logic
+        const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)];
+        const randomRef = referrers[Math.floor(Math.random() * referrers.length)];
+
+        // YouTube Embed Fix
+        let finalUrl = url;
+        if(url.includes("youtube.com/watch")) {
+            const vid = url.split("v=")[1].split("&")[0];
+            finalUrl = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&rel=0`;
         }
 
-        /**
-         * URL को सामान्य बनाता है और Iframe में लोड होने के लिए ज़रूरी बदलाव करता है (जैसे YouTube Embed)।
-         */
-        function normalizeAndAdaptUrl(url) {
-            let normalizedUrl = url;
-            if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
-                normalizedUrl = 'https://' + normalizedUrl;
-            }
+        frame.src = finalUrl;
 
-            const urlType = getUrlType(normalizedUrl);
-
-            // FIX: YouTube Links को Embed Format में बदलना ताकि वे Iframe में लोड हो सकें
-            if (urlType === 'youtube') {
-                const videoIdMatch = normalizedUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|v\/|e\/|embed\/|watch\?v=|[^#]*\&v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-                if (videoIdMatch && videoIdMatch[1]) {
-                    // YouTube Embed URL with AutoPlay and Mute for better stealth
-                    return `https://www.youtube.com/embed/${videoIdMatch[1]}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1`;
-                }
-            }
+        frame.onload = () => {
+            status.innerText = "Active";
+            status.className = "status-tag active";
             
-            return normalizedUrl;
-        }
+            // Simulation logic
+            simulateBehavior(id);
+        };
 
-        function updateStatus(index, state, message = '') {
-            const statusSpan = statusSpans[index];
-            statusSpan.className = 'status'; 
-            statusSpan.textContent = message || (state.charAt(0).toUpperCase() + state.slice(1) + (state === 'running' ? ' (Active)' : ''));
-            if (state !== 'stopped' && state !== 'ready') {
-                statusSpan.classList.add(state);
-            }
-        }
+        // Random Reload (3 से 7 मिनट के बीच)
+        const reloadTime = (Math.random() * (420000 - 180000) + 180000);
+        setTimeout(() => startSlot(id, url), reloadTime);
+    }
+
+    function simulateBehavior(id) {
+        const frame = document.getElementById(`frame-${id}`);
         
-        function clearStorage(iframe) {
+        // 1. Human Scrolling
+        setInterval(() => {
             try {
-                // Clear local storage/session to simulate new user
-                iframe.contentWindow.localStorage.clear();
-                iframe.contentWindow.sessionStorage.clear();
-            } catch (e) {
-            }
+                const scrollAmt = Math.floor(Math.random() * 100);
+                frame.contentWindow.scrollBy(0, scrollAmt);
+            } catch(e) {}
+        }, 3000);
+
+        // 2. Delayed Smart Click Simulation (बैन से बचने के लिए)
+        if(document.getElementById('smartClick').checked) {
+            setTimeout(() => {
+                console.log(`Slot ${id+1}: Attempting human-like interaction...`);
+                // Note: Cross-domain iframe restrictions may limit direct clicking on Adsense
+            }, 45000); // 45 सेकंड बाद ही कुछ करें
         }
-        
-        function loadIframes(url) {
-            const initialMinDelay = 1000; 
-            const initialMaxDelay = 3000; 
-            
-            const finalAdaptedUrl = normalizeAndAdaptUrl(url); 
-            const urlType = getUrlType(finalAdaptedUrl);
-            
-            iframes.forEach((iframe, index) => {
-                const delay = document.getElementById('randomDelayCheck').checked 
-                              ? initialMinDelay + (Math.random() * initialMaxDelay * index) 
-                              : 0; 
-                
-                iframe.src = 'about:blank'; 
-                updateStatus(index, 'loading', `Loading (${urlType.toUpperCase()})...`); 
-                
-                setTimeout(() => {
-                    clearStorage(iframe); 
-                    
-                    iframe.setAttribute('data-url-type', urlType); 
-                    
-                    // Final adapted URL yahan load hogi
-                    iframe.src = finalAdaptedUrl; 
-                    
-                    updateStatus(index, 'running', `Running (${urlType.toUpperCase()})`);
-                }, delay); 
-            });
-        }
-
-        function startMultiBrowser() {
-            let url = urlInput.value.trim();
-            if (!url) {
-                alert('Kripya Target URL daalein.');
-                return;
-            }
-
-            loadIframes(url);
-
-            clearIntervals();
-            
-            if (activeUserCheck.checked) toggleIntervals(true, 'reload');
-            if (autoScrollCheck.checked) toggleIntervals(true, 'scroll');
-            if (autoClicksCheck.checked) toggleIntervals(true, 'click'); 
-        }
-        
-        function clearIntervals() {
-            clearInterval(reloadIntervalId);
-            clearInterval(scrollIntervalId);
-            clearInterval(clickIntervalId);
-            reloadIntervalId = null;
-            scrollIntervalId = null;
-            clickIntervalId = null;
-        }
-
-        function toggleIntervals(shouldStart, type) {
-            if (type === 'reload') {
-                const minSec = parseInt(minTimeInput.value) || 120; 
-                const maxSec = parseInt(maxTimeInput.value) || 240; 
-                
-                if (shouldStart) {
-                    if (reloadIntervalId) return;
-                    const randomReloadTime = Math.floor(Math.random() * (maxSec - minSec + 1) + minSec) * 1000;
-                    reloadIntervalId = setInterval(reloadFrames, randomReloadTime);
-                } else {
-                    clearInterval(reloadIntervalId);
-                    reloadIntervalId = null;
-                }
-            } else if (type === 'scroll') {
-                if (shouldStart) {
-                    if (scrollIntervalId) return;
-                    scrollIntervalId = setInterval(scrollFrames, 50); 
-                } else {
-                    clearInterval(scrollIntervalId);
-                    scrollIntervalId = null;
-                }
-            } else if (type === 'click') {
-                if (shouldStart) {
-                    if (clickIntervalId) return;
-                    const minClickTime = 5000; 
-                    const maxClickTime = 15000; 
-                    const randomTime = Math.floor(Math.random() * (maxClickTime - minClickTime + 1) + minClickTime); 
-                    clickIntervalId = setInterval(realisticClickSimulation, randomTime);
-                } else {
-                    clearInterval(clickIntervalId);
-                    clickIntervalId = null;
-                }
-            }
-        }
-
-        function reloadFrames() {
-            const reloadDelay = 500; 
-            
-            iframes.forEach((iframe, index) => {
-                if (iframe.src && iframe.src !== 'about:blank') {
-                    
-                    setTimeout(() => {
-                         clearStorage(iframe); 
-                         updateStatus(index, 'loading', 'Reloading...');
-                         iframe.contentWindow.location.reload(true);
-                         
-                         setTimeout(() => {
-                             updateStatus(index, 'running', `Running (${iframe.getAttribute('data-url-type').toUpperCase()})`);
-                         }, 2000); 
-                    }, reloadDelay * index);
-                }
-            });
-            toggleIntervals(false, 'reload');
-            toggleIntervals(true, 'reload');
-        }
-
-        function scrollFrames() {
-            iframes.forEach((iframe, index) => {
-                const urlType = iframe.getAttribute('data-url-type');
-                
-                // YouTube/Instagram par scroll skip karein
-                if (urlType === 'youtube' || urlType === 'instagram') return; 
-
-                if (iframe.scrollDirection === undefined) iframe.scrollDirection = 1; 
-                
-                try {
-                    const doc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (doc && doc.body) {
-                        const currentScroll = iframe.contentWindow.scrollY;
-                        const maxScroll = doc.body.scrollHeight - iframe.clientHeight;
-                        
-                        const scrollStep = Math.random() * 5 + 5; 
-                        const direction = iframe.scrollDirection;
-
-                        iframe.contentWindow.scrollBy(0, scrollStep * direction);
-                        
-                        if ((currentScroll >= maxScroll && direction === 1) || (currentScroll <= 0 && direction === -1)) {
-                            iframe.scrollDirection = 0; 
-                            
-                            setTimeout(() => {
-                                iframe.scrollDirection = (currentScroll >= maxScroll) ? -1 : 1; 
-                            }, Math.random() * 2000 + 1500); 
-                        }
-                    }
-                } catch (e) {
-                }
-            });
-        }
-        
-        function realisticClickSimulation() {
-            const randomIndex = Math.floor(Math.random() * numIframes);
-            const iframe = iframes[randomIndex];
-            const indicator = indicators[randomIndex];
-            
-            const urlType = iframe.getAttribute('data-url-type'); 
-            
-            // YouTube/Social Media (FB/Insta) par Click Skip karein!
-            if (urlType !== 'website') {
-                toggleIntervals(false, 'click');
-                toggleIntervals(true, 'click');
-                return;
-            }
-
-            // Website/AdSense Click Logic
-            try {
-                const doc = iframe.contentDocument || iframe.contentWindow.document;
-                if (doc) {
-                    const elements = doc.querySelectorAll('a:not([target="_blank"]), button'); 
-                    
-                    if (elements.length > 0) {
-                        const numClicks = Math.floor(Math.random() * 2) + 1; 
-                        
-                        updateStatus(randomIndex, 'clicking', 'Aggressive Click...');
-
-                        let clickCount = 0;
-                        function performClick() {
-                            if (clickCount >= numClicks) {
-                                if (indicator) indicator.classList.remove('click-active');
-                                updateStatus(randomIndex, 'running', `Running (${urlType.toUpperCase()})`);
-                                return;
-                            }
-                            
-                            const randomElementIndex = Math.floor(Math.random() * elements.length);
-                            const clickableElement = elements[randomElementIndex];
-
-                            if (clickableElement) {
-                                if (indicator) indicator.classList.add('click-active');
-                                clickableElement.click(); 
-                                clickCount++;
-                            }
-                            setTimeout(performClick, Math.random() * 1000 + 500); 
-                        }
-                        performClick();
-                    }
-                }
-            } catch (e) {
-            }
-            toggleIntervals(false, 'click');
-            toggleIntervals(true, 'click');
-        }
-        
-    </script>
+    }
+</script>
 
 </body>
-</html>
+    </html>
