@@ -3,117 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earning Booster v3.1 - Auto-Reload Optimized</title>
+    <title>Smart Earning Booster v3.2</title>
     <style>
-        :root { --primary: #2563eb; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
-        .control-panel { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid #334155; position: sticky; top: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .browser-box { background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #475569; position: relative; }
-        .status-bar { background: #334155; padding: 5px 10px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
-        .badge { padding: 2px 8px; border-radius: 4px; font-weight: bold; }
-        .online { background: #22c55e; color: white; }
-        .reloading { background: #f59e0b; color: white; }
-        iframe { width: 100%; height: 350px; border: none; background: #fff; pointer-events: auto; }
-        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box; }
-        button { background: #2563eb; cursor: pointer; border: none; font-size: 16px; transition: 0.3s; }
-        button:hover { background: #1d4ed8; }
-        .log-box { font-size: 12px; background: #020617; padding: 10px; border-radius: 5px; height: 120px; overflow-y: auto; color: #60a5fa; margin-top: 15px; border: 1px solid #334155; }
+        :root { --primary: #3b82f6; --bg: #020617; --card: #1e293b; --text: #f1f5f9; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        .dashboard { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        .panel { background: var(--card); padding: 20px; border-radius: 12px; height: fit-content; border: 1px solid #334155; position: sticky; top: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .frame-box { background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #475569; position: relative; }
+        .badge { position: absolute; top: 5px; right: 5px; padding: 3px 8px; font-size: 10px; border-radius: 10px; background: #22c55e; color: white; z-index: 10; font-weight: bold; }
+        .timer-tag { position: absolute; top: 5px; left: 5px; font-size: 10px; color: #94a3b8; background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 4px; }
+        iframe { width: 100%; height: 350px; border: none; background: #fff; }
+        input, button, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { background: var(--primary); cursor: pointer; font-weight: bold; border: none; transition: 0.3s; }
+        button:hover { background: #2563eb; }
+        .log { font-size: 12px; color: #94a3b8; height: 120px; overflow-y: auto; border-top: 1px solid #334155; padding-top: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="control-panel">
-        <h2 style="margin-top:0;">🚀 Engine v3.1</h2>
-        <p style="font-size: 13px; color: #94a3b8;">Status: AI Tracking Protection Active</p>
-        
+<div class="dashboard">
+    <div class="panel">
+        <h3>Earning Engine v3.2</h3>
         <label>Website URL:</label>
-        <input type="text" id="urlInput" placeholder="https://yourwebsite.com" value="">
-
-        <label>Traffic Source (Spoof):</label>
-        <select id="referrer">
-            <option value="https://www.google.com">Google Organic</option>
-            <option value="https://www.bing.com">Bing Search</option>
-            <option value="https://t.co">Twitter/X Referral</option>
+        <input type="text" id="urlInput" placeholder="https://yourwebsite.com">
+        
+        <label>Traffic Source:</label>
+        <select id="refSource">
+            <option value="https://www.google.com">Google Search</option>
             <option value="https://www.facebook.com">Facebook Social</option>
+            <option value="https://t.co">Twitter/X</option>
         </select>
 
-        <label>Reload Timing:</label>
-        <p style="font-size: 11px; color: #22c55e;">✔ Auto-Random: 30s - 60s Enabled</p>
+        <label>Auto-Reload:</label>
+        <div style="font-size: 12px; color: #22c55e; margin-bottom: 10px;">✔ Active: 30s - 60s (Random)</div>
 
-        <button id="launchBtn">Start Optimized Sessions</button>
-
-        <div class="log-box" id="logs">System idle. Waiting for URL...</div>
+        <button id="startBtn">Launch Engine</button>
+        <div class="log" id="sysLog">System ready...</div>
     </div>
 
-    <div class="grid" id="browserGrid"></div>
+    <div class="grid" id="container"></div>
 </div>
 
 <script>
-    const grid = document.getElementById('browserGrid');
-    const logs = document.getElementById('logs');
-
-    function addLog(text) {
+    const container = document.getElementById('container');
+    const log = document.getElementById('sysLog');
+    
+    function writeLog(msg) {
         const time = new Date().toLocaleTimeString();
-        logs.innerHTML = `<div>[${time}] ${text}</div>` + logs.innerHTML;
+        log.innerHTML = `<div>[${time}] > ${msg}</div>` + log.innerHTML;
     }
 
-    document.getElementById('launchBtn').addEventListener('click', () => {
-        const targetUrl = document.getElementById('urlInput').value;
-        if (!targetUrl.startsWith('http')) {
-            alert("कृपया सही URL डालें (http:// या https:// के साथ)");
-            return;
-        }
+    document.getElementById('startBtn').addEventListener('click', () => {
+        const url = document.getElementById('urlInput').value;
+        if(!url) return alert("URL डालें!");
+        
+        container.innerHTML = ''; 
+        writeLog("Starting multi-fingerprint sessions...");
 
-        grid.innerHTML = '';
-        addLog("Initializing 10 specialized profiles...");
-
-        for (let i = 0; i < 10; i++) {
-            setTimeout(() => createBrowser(i, targetUrl), i * 1500); // Staggered start
+        for(let i=0; i<8; i++) {
+            // Staggered start (हर सेशन 1 सेकंड के अंतर पर शुरू होगा)
+            setTimeout(() => createSession(i, url), i * 1000);
         }
     });
 
-    function createBrowser(id, url) {
-        const box = document.createElement('div');
-        box.className = 'browser-box';
-        box.innerHTML = `
-            <div class="status-bar">
-                <span>Profile #${id + 1}</span>
-                <span id="timer-${id}" class="badge online">Live</span>
-            </div>
-            <iframe id="frame-${id}" src="about:blank"></iframe>
+    function createSession(id, targetUrl) {
+        const div = document.createElement('div');
+        div.className = 'frame-box';
+        div.innerHTML = `
+            <div class="timer-tag" id="timer-${id}">Waiting...</div>
+            <div class="badge" id="stat-${id}">Connecting</div>
+            <iframe id="ifr-${id}" src="about:blank"></iframe>
         `;
-        grid.appendChild(box);
-        startSession(id, url);
+        container.appendChild(div);
+        loadPage(id, targetUrl);
     }
 
-    function startSession(id, url) {
-        const frame = document.getElementById(`frame-${id}`);
-        const status = document.getElementById(`timer-${id}`);
-        const ref = document.getElementById('referrer').value;
+    function loadPage(id, url) {
+        const ifr = document.getElementById(`ifr-${id}`);
+        const stat = document.getElementById(`stat-${id}`);
+        const timerTag = document.getElementById(`timer-${id}`);
+        const ref = document.getElementById('refSource').value;
 
-        // Smart URL: Adding unique tokens to prevent Google from caching the view
-        const cacheBuster = `?ptr=${Math.random().toString(36).substring(7)}&ref=${btoa(ref).substring(0,8)}`;
-        const finalUrl = url + (url.includes('?') ? '&' : '') + cacheBuster;
+        // URL को यूनिक बनाना ताकि Cache न हो
+        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}utm_source=${ref}&session_id=${Math.random().toString(36).substring(7)}`;
+        
+        ifr.src = finalUrl;
+        stat.innerText = "Loading";
+        stat.style.background = "#eab308";
 
-        frame.src = finalUrl;
-        status.innerText = "Live";
-        status.className = "badge online";
-        addLog(`Profile ${id + 1}: Page Loaded.`);
+        ifr.onload = () => {
+            stat.innerText = "Active";
+            stat.style.background = "#22c55e";
+            writeLog(`Session ${id+1} Loaded.`);
+            simulateHuman(ifr);
+        };
 
-        // --- RANDOM RELOAD LOGIC (30s to 60s) ---
+        // --- 30 to 60 Seconds Random Reload Logic ---
         const randomTime = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
         
+        let timeLeft = Math.round(randomTime / 1000);
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerTag.innerText = `Reload in: ${timeLeft}s`;
+            if(timeLeft <= 0) clearInterval(countdown);
+        }, 1000);
+
         setTimeout(() => {
-            status.innerText = "Reloading...";
-            status.className = "badge reloading";
-            addLog(`Profile ${id + 1}: Auto-refreshing in ${Math.round(randomTime/1000)}s`);
-            startSession(id, url);
+            writeLog(`Session ${id+1} auto-refreshing...`);
+            loadPage(id, url);
         }, randomTime);
     }
-</script>
 
+    function simulateHuman(ifr) {
+        const activity = setInterval(() => {
+            try {
+                // Random scrolling (इंसानी व्यवहार की तरह)
+                const scrollAmt = Math.floor(Math.random() * 400) - 150;
+                ifr.contentWindow.scrollBy({ top: scrollAmt, behavior: 'smooth' });
+            } catch(e) {
+                // Same-origin block error ignores
+            }
+        }, 5000);
+        
+        // अगले लोड पर पुराने इंटरवल को साफ करने के लिए
+        ifr.onunload = () => clearInterval(activity);
+    }
+</script>
 </body>
 </html>
