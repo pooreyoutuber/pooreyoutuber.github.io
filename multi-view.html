@@ -2,29 +2,26 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Hexa-Engine Earning Booster v9.0</title>
+    <title>Hexa-Engine v9.1 - Strict Close</title>
     <style>
         :root { --primary: #06b6d4; --bg: #020617; --card: #1e293b; --text: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
-        .box { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 550px; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        h2 { color: var(--primary); text-align: center; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        .box { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 550px; border: 1px solid #334155; }
+        h2 { color: var(--primary); text-align: center; text-transform: uppercase; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
-        .btn-launch { width: 100%; padding: 15px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        .btn-launch:hover { background: #0891b2; filter: brightness(1.2); }
+        .btn-launch { width: 100%; padding: 15px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
         .unit { background: #0f172a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #334155; font-size: 11px; }
-        .unit b { display: block; color: #94a3b8; margin-bottom: 3px; }
         .state { font-weight: bold; color: #64748b; }
-        .log { height: 130px; background: #000; border-radius: 8px; margin-top: 15px; padding: 12px; font-family: monospace; font-size: 10px; overflow-y: auto; color: #22c55e; border: 1px solid #334155; }
-        .hint { color: #ef4444; font-size: 11px; text-align: center; margin-top: 10px; font-weight: bold; }
+        .log { height: 130px; background: #000; border-radius: 8px; margin-top: 15px; padding: 12px; font-family: monospace; font-size: 10px; overflow-y: auto; color: #22c55e; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Hexa-Engine v9.0</h2>
-    <input type="text" id="urlInput" placeholder="https://yourwebsite.com" value="">
-    <button class="btn-launch" id="startBtn">ACTIVATE 6-TAB ENGINE</button>
+    <h2>Hexa-Engine v9.1</h2>
+    <input type="text" id="urlInput" placeholder="https://yourwebsite.com">
+    <button class="btn-launch" id="startBtn">START 6-TAB AUTO-CLEAN</button>
 
     <div class="status-grid">
         <div class="unit"><b>TAB-1</b><span id="s1" class="state">IDLE</span></div>
@@ -35,8 +32,7 @@
         <div class="unit"><b>TAB-6</b><span id="s6" class="state">IDLE</span></div>
     </div>
 
-    <div class="log" id="logBox">> Hexa-Core Ready...</div>
-    <div class="hint">⚠️ पप-अप ब्लॉक होने पर Address Bar में "Always Allow" करें!</div>
+    <div class="log" id="logBox">> Auto-Cleaner: ACTIVE</div>
 </div>
 
 <script>
@@ -54,58 +50,63 @@
         if(!url.startsWith('http')) return alert("Sahi URL dalein!");
 
         this.disabled = true;
-        this.innerText = "ENGINES ACTIVE";
-        addLog("Deploying 6 Independent Sessions...");
+        this.innerText = "ENGINES RUNNING";
+        addLog("Launching Engines with Strict Auto-Close...");
 
-        // 6 टैब को तेज़ी से लेकिन गैप के साथ खोलना (ताकि ब्लॉक न हों)
         for(let i=0; i<6; i++) {
-            setTimeout(() => launchEngine(i, url), i * 2500);
+            setTimeout(() => launchEngine(i, url), i * 3000);
         }
     });
 
     function launchEngine(id, url) {
-        if(activeTabs[id]) activeTabs[id].close();
+        // --- STRICT CLOSE LOGIC START ---
+        if(activeTabs[id]) {
+            try {
+                addLog(`Closing Old Tab ${id+1}...`);
+                activeTabs[id].close(); // पुराना टैब बंद करें
+            } catch (e) {
+                console.log("Tab already closed or blocked");
+            }
+        }
         if(intervals[id]) clearInterval(intervals[id]);
+        // --- STRICT CLOSE LOGIC END ---
 
         const status = document.getElementById(`s${id+1}`);
         const sessionID = Math.random().toString(36).substring(7);
-        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}hexa_id=${sessionID}`;
+        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}cache=${sessionID}`;
 
-        // 6 टैब्स के लिए स्क्रीन पोजीशन (Grid layout)
-        const w = 350;
-        const h = 500;
-        const x = (id % 3) * 360; // 3 टैब ऊपर की लाइन में
-        const y = (id < 3) ? 50 : 560; // 3 टैब नीचे की लाइन में
+        const w = 380;
+        const h = 600;
+        const x = (id % 3) * 400;
+        const y = (id < 3) ? 50 : 650;
 
-        status.innerText = "OPENING";
+        status.innerText = "REFRESHING";
         status.style.color = "#eab308";
 
-        activeTabs[id] = window.open(finalUrl, `hexa_win_${id}_${sessionID}`, 
-            `width=${w},height=${h},left=${x},top=${y}`);
+        // नया टैब खोलें
+        activeTabs[id] = window.open(finalUrl, `hexa_tab_${id}`, `width=${w},height=${h},left=${x},top=${y}`);
 
         if(!activeTabs[id]) {
             status.innerText = "BLOCKED";
-            status.style.color = "#ef4444";
-            addLog(`Tab ${id+1} blocked!`);
+            addLog(`Tab ${id+1} blocked by browser!`);
             return;
         }
 
         status.innerText = "ACTIVE";
         status.style.color = "#22c55e";
-        addLog(`Engine-${id+1} Live (ID: ${sessionID})`);
+        addLog(`Engine-${id+1} started fresh.`);
 
-        // Activity Simulation (Focus)
+        // Focus and Activity Simulation
         intervals[id] = setInterval(() => {
             if (activeTabs[id] && !activeTabs[id].closed) {
                 activeTabs[id].focus();
             }
         }, 15000);
 
-        // Reload Cycle (60s - 90s) - ज्यादा टैब होने पर समय बढ़ाना बेहतर है
-        const cycleTime = Math.floor(Math.random() * (90000 - 60000 + 1)) + 60000;
+        // Reload Cycle (45-70 Seconds)
+        const cycleTime = Math.floor(Math.random() * (70000 - 45000 + 1)) + 45000;
         setTimeout(() => {
-            clearInterval(intervals[id]);
-            launchEngine(id, url);
+            launchEngine(id, url); // खुद को कॉल करेगा और ऊपर 'close()' को ट्रिगर करेगा
         }, cycleTime);
     }
 </script>
