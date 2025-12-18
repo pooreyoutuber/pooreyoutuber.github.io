@@ -2,117 +2,112 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>AdSense Safe Booster v6.0</title>
+    <title>Ultimate Earning Booster v7.0</title>
     <style>
-        :root { --primary: #8b5cf6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        :root { --primary: #f59e0b; --bg: #070a13; --card: #111827; --text: #e5e7eb; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
-        .container { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 480px; border: 1px solid #4c1d95; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-        h2 { color: #a78bfa; text-align: center; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #020617; color: white; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        button:hover { background: #7c3aed; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
-        .stats { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
-        .stat-card { flex: 1; background: #020617; padding: 10px; border-radius: 8px; text-align: center; font-size: 11px; border: 1px solid #334155; }
-        .stat-card b { display: block; color: #22c55e; margin-bottom: 3px; }
-        .log { height: 120px; background: #000; border-radius: 8px; margin-top: 20px; padding: 10px; font-family: monospace; font-size: 10px; overflow-y: auto; color: #6ee7b7; border: 1px solid #334155; }
+        .box { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; border: 2px solid #374151; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        h2 { color: var(--primary); text-align: center; text-transform: uppercase; margin-bottom: 25px; text-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #374151; background: #030712; color: #fff; box-sizing: border-box; }
+        .btn-start { width: 100%; padding: 18px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; transition: 0.3s; margin-top: 10px; }
+        .btn-start:hover { background: #fbbf24; transform: scale(1.02); }
+        .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; }
+        .user-card { background: #1f2937; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #374151; }
+        .user-card span { font-size: 10px; color: #9ca3af; display: block; margin-bottom: 5px; }
+        .user-card b { font-size: 14px; color: #10b981; }
+        .log { height: 150px; background: #000; border-radius: 10px; margin-top: 20px; padding: 15px; font-family: 'Courier New', monospace; font-size: 11px; overflow-y: auto; color: #34d399; border: 1px solid #374151; }
+        .live-tag { display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; margin-right: 5px; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Fingerprint Spoofer 6.0</h2>
+<div class="box">
+    <h2>Triple Engine v7.0</h2>
     
-    <label>Target URL:</label>
-    <input type="text" id="urlInput" placeholder="https://yourwebsite.com">
+    <label>Website URL:</label>
+    <input type="text" id="urlInput" placeholder="https://example.com" value="">
 
-    <label>Traffic Mode:</label>
-    <select id="trafficMode">
-        <option value="high">High Earning (Slow - 60s)</option>
-        <option value="fast">Quick Traffic (Fast - 30s)</option>
-    </select>
+    <button class="btn-start" id="startBtn">Launch 3 Tabs Now</button>
 
-    <button id="startBtn">Launch Unique Sessions</button>
-
-    <div class="stats">
-        <div class="stat-card">User 1<b id="u1">OFFLINE</b></div>
-        <div class="stat-card">User 2<b id="u2">OFFLINE</b></div>
-        <div class="stat-card">User 3<b id="u3">OFFLINE</b></div>
+    <div class="status-grid">
+        <div class="user-card"><span>ENGINE 1</span><b id="s1">READY</b></div>
+        <div class="user-card"><span>ENGINE 2</span><b id="s2">READY</b></div>
+        <div class="user-card"><span>ENGINE 3</span><b id="s3">READY</b></div>
     </div>
 
-    <div class="log" id="sysLog">> Anti-Fingerprint Shield: Active</div>
+    <div class="log" id="logBox">> Fingerprint Protection: ACTIVE<br>> Waiting for Launch...</div>
 </div>
 
 <script>
-    let tabs = [null, null, null];
+    let activeTabs = [null, null, null];
     
-    // Alag-alag Device User-Agents (Fingerprinting bypass karne ke liye)
-    const deviceProfiles = [
-        { ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
-        { ua: "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36", w: 360, h: 800 },
-        { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36", w: 1280, h: 720 },
-        { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36", w: 1440, h: 900 },
-        { ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", w: 820, h: 1180 }
+    // Different Profiles to confuse Ad Networks
+    const profiles = [
+        { name: "iPhone 14", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)", w: 390, h: 844 },
+        { name: "Windows PC", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", w: 1366, h: 768 },
+        { name: "Galaxy S22", ua: "Mozilla/5.0 (Linux; Android 13; SM-S901B)", w: 360, h: 800 },
+        { name: "iPad Air", ua: "Mozilla/5.0 (iPad; CPU OS 16_3 like Mac OS X)", w: 820, h: 1180 },
+        { name: "MacBook Pro", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", w: 1440, h: 900 }
     ];
 
-    function writeLog(msg) {
-        const time = new Date().toLocaleTimeString();
-        document.getElementById('sysLog').innerHTML = `<div>[${time}] ${msg}</div>` + document.getElementById('sysLog').innerHTML;
+    function addLog(msg) {
+        const box = document.getElementById('logBox');
+        box.innerHTML += `<div>> ${msg}</div>`;
+        box.scrollTop = box.scrollHeight;
     }
 
     document.getElementById('startBtn').addEventListener('click', function() {
         const url = document.getElementById('urlInput').value;
-        if(!url) return alert("Enter URL!");
-        
-        writeLog("Generating Unique Device Profiles...");
-        this.disabled = true;
-        this.innerText = "Shield Active...";
+        if(!url) return alert("Please enter URL");
 
+        this.disabled = true;
+        this.innerText = "Engines Running...";
+        addLog("Initializing Triple Engine System...");
+
+        // Launch all 3 tabs with a slight delay between them
         for(let i=0; i<3; i++) {
-            setTimeout(() => launchSpoofedTab(i, url), i * 5000); 
+            setTimeout(() => startEngine(i, url), i * 2000);
         }
     });
 
-    function launchSpoofedTab(index, targetUrl) {
-        if(tabs[index]) tabs[index].close();
+    function startEngine(id, url) {
+        if(activeTabs[id]) activeTabs[id].close();
 
-        // 1. Random Profile select karna
-        const profile = deviceProfiles[Math.floor(Math.random() * deviceProfiles.length)];
-        const status = document.getElementById(`u${index+1}`);
-
-        // 2. URL mein Fingerprint Hack (Random ID + Cache Buster)
-        const uniqueId = Math.random().toString(36).substring(2, 10);
-        const spoofedUrl = `${targetUrl}?device=${uniqueId}&ua_id=${btoa(profile.ua).substring(0,8)}`;
-
-        status.innerText = "CONNECTING";
-        status.style.color = "#fbbf24";
-
-        // 3. Random Window Size aur Position (Google ko lagega alag PCs hain)
-        const leftPos = Math.floor(Math.random() * 500);
-        const topPos = Math.floor(Math.random() * 500);
+        const status = document.getElementById(`s${id+1}`);
+        const profile = profiles[Math.floor(Math.random() * profiles.length)];
         
-        tabs[index] = window.open(spoofedUrl, `session_${index}_${uniqueId}`, 
-            `width=${profile.w},height=${profile.h},left=${leftPos},top=${topPos}`);
+        // Anti-pattern URL generator
+        const noise = Math.random().toString(36).substring(7);
+        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}session=${noise}&dev=${btoa(profile.name)}`;
 
-        if(!tabs[index]) {
-            writeLog(`Tab ${index+1} BLOCKED. Enable Pop-ups!`);
+        status.innerHTML = `<span class="live-tag"></span>WORKING`;
+        status.style.color = "#fbbf24";
+        
+        // Open window with random position
+        const x = Math.floor(Math.random() * 400);
+        const y = Math.floor(Math.random() * 400);
+        
+        activeTabs[id] = window.open(finalUrl, `engine_${id}_${noise}`, 
+            `width=${profile.w},height=${profile.h},left=${x},top=${y}`);
+
+        if(!activeTabs[id]) {
+            addLog(`Engine ${id+1} BLOCKED! Enable Popups.`);
             status.innerText = "BLOCKED";
             return;
         }
 
-        status.innerText = "ACTIVE";
-        status.style.color = "#22c55e";
-        writeLog(`Session ${index+1}: Spoofing as ${profile.ua.substring(0,25)}...`);
+        addLog(`Engine ${id+1} launched as ${profile.name}`);
 
-        // 4. Timing Logic
-        const mode = document.getElementById('trafficMode').value;
-        const delay = mode === 'high' ? 60000 : 35000;
-        const randomFuzz = Math.random() * 10000; // 10s ka random farq taaki patterns na bane
-
+        // Random reload between 40-70 seconds (Natural behavior)
+        const nextRun = Math.floor(Math.random() * (70000 - 40000 + 1)) + 40000;
+        
         setTimeout(() => {
-            writeLog(`Rotating User ${index+1}...`);
-            launchSpoofedTab(index, targetUrl);
-        }, delay + randomFuzz);
+            addLog(`Cycling Engine ${id+1}...`);
+            startEngine(id, url);
+        }, nextRun);
     }
 </script>
+
 </body>
 </html>
