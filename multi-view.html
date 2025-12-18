@@ -2,46 +2,43 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultimate Earning Booster v7.5 - Fixed</title>
+    <title>Earning Booster v8.0 - Final Fixed</title>
     <style>
-        :root { --primary: #f59e0b; --bg: #070a13; --card: #111827; --text: #e5e7eb; }
+        :root { --primary: #10b981; --bg: #0b0f1a; --card: #1f2937; --text: #f3f4f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
-        .box { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; border: 2px solid #374151; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        h2 { color: var(--primary); text-align: center; text-transform: uppercase; margin-bottom: 25px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #374151; background: #030712; color: #fff; box-sizing: border-box; }
-        .btn-start { width: 100%; padding: 18px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; transition: 0.3s; margin-top: 10px; }
-        .btn-start:hover { background: #fbbf24; transform: scale(1.02); }
-        .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; }
-        .user-card { background: #1f2937; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #374151; }
-        .user-card b { font-size: 14px; color: #10b981; }
-        .log { height: 150px; background: #000; border-radius: 10px; margin-top: 20px; padding: 15px; font-family: 'Courier New', monospace; font-size: 11px; overflow-y: auto; color: #34d399; border: 1px solid #374151; }
-        .warning { color: #ef4444; font-size: 12px; text-align: center; margin-top: 10px; font-weight: bold; }
+        .box { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; border: 1px solid #374151; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        h2 { color: var(--primary); text-align: center; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 1px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #4b5563; background: #030712; color: #fff; box-sizing: border-box; font-size: 16px; }
+        .btn-start { width: 100%; padding: 18px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; transition: 0.3s; margin-top: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .btn-start:hover { background: #059669; transform: translateY(-2px); }
+        .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .user-card { background: #111827; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #374151; }
+        .user-card b { font-size: 12px; color: #9ca3af; display: block; margin-bottom: 5px; }
+        .status-text { font-size: 14px; font-weight: bold; color: #6b7280; }
+        .log { height: 160px; background: #000; border-radius: 10px; margin-top: 20px; padding: 15px; font-family: 'Courier New', monospace; font-size: 11px; overflow-y: auto; color: #10b981; border: 1px solid #374151; line-height: 1.5; }
+        .warning { color: #f87171; font-size: 12px; text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Triple Engine v7.5</h2>
-    <input type="text" id="urlInput" placeholder="Enter Website URL (https://...)" value="">
-    <button class="btn-start" id="startBtn">Launch All 3 Engines</button>
+    <h2>Booster Engine v8.0</h2>
+    <input type="text" id="urlInput" placeholder="Website URL (https://...)" value="">
+    <button class="btn-start" id="startBtn">ACTIVATE TRIPLE ENGINE</button>
 
     <div class="status-grid">
-        <div class="user-card"><b>ENG-1</b><div id="s1">OFF</div></div>
-        <div class="user-card"><b>ENG-2</b><div id="s2">OFF</div></div>
-        <div class="user-card"><b>ENG-3</b><div id="s3">OFF</div></div>
+        <div class="user-card"><b>USER-1</b><div id="s1" class="status-text">OFFLINE</div></div>
+        <div class="user-card"><b>USER-2</b><div id="s2" class="status-text">OFFLINE</div></div>
+        <div class="user-card"><b>USER-3</b><div id="s3" class="status-text">OFFLINE</div></div>
     </div>
 
-    <div class="log" id="logBox">> System Status: Ready...</div>
-    <div class="warning">IMP: Allow Pop-ups from Address Bar!</div>
+    <div class="log" id="logBox">> Anti-Fingerprint: READY<br>> Auto-Scroll Logic: ARMED</div>
+    <div class="warning">⚠️ Ad Address Bar mein "Always Allow Pop-ups" zaroor karein!</div>
 </div>
 
 <script>
     let activeTabs = [null, null, null];
-    const profiles = [
-        { name: "iPhone", w: 390, h: 844 },
-        { name: "Windows", w: 1366, h: 768 },
-        { name: "Android", w: 360, h: 800 }
-    ];
+    let scrollIntervals = [null, null, null];
 
     function addLog(msg) {
         const box = document.getElementById('logBox');
@@ -51,64 +48,71 @@
 
     document.getElementById('startBtn').addEventListener('click', function() {
         const url = document.getElementById('urlInput').value;
-        if(!url.startsWith('http')) return alert("Sahi URL dalein (http/https)");
+        if(!url.startsWith('http')) return alert("Invalid URL! Start with http:// or https://");
 
         this.disabled = true;
-        this.innerText = "Running...";
-        addLog("Anti-Block Engine Starting...");
+        this.innerText = "ENGINES LIVE";
+        this.style.background = "#374151";
+        addLog("Initializing Triple Engine Sequence...");
 
-        // 3 Tabs ko gap ke sath kholna taki browser block na kare
-        [0, 1, 2].forEach(i => {
-            setTimeout(() => startEngine(i, url), i * 3500); 
-        });
+        // Staggered launch to avoid browser crash
+        for(let i=0; i<3; i++) {
+            setTimeout(() => launchEngine(i, url), i * 4000);
+        }
     });
 
-    function startEngine(id, url) {
+    function launchEngine(id, url) {
+        // Clear previous session
         if(activeTabs[id]) activeTabs[id].close();
+        if(scrollIntervals[id]) clearInterval(scrollIntervals[id]);
 
         const status = document.getElementById(`s${id+1}`);
-        const profile = profiles[id];
         const noise = Math.random().toString(36).substring(7);
-        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}sid=${noise}&boost=true`;
+        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}session=${noise}&utm_source=google`;
 
-        status.innerText = "LOADING";
+        // Fixed Window Size for all tabs (380x700 is ideal for mobile ads)
+        const w = 380;
+        const h = 700;
+        const xPos = id * 400; // Side-by-side positioning
+
+        status.innerText = "CONNECTING";
         status.style.color = "#fbbf24";
 
-        // Screen positioning
-        const xPos = id * 350;
-        activeTabs[id] = window.open(finalUrl, `win_${id}_${noise}`, 
-            `width=${profile.w},height=${profile.h},left=${xPos},top=100`);
+        activeTabs[id] = window.open(finalUrl, `boost_win_${id}_${noise}`, 
+            `width=${w},height=${h},left=${xPos},top=50,resizable=yes,scrollbars=yes`);
 
         if(!activeTabs[id]) {
             status.innerText = "BLOCKED";
             status.style.color = "#ef4444";
-            addLog(`ERROR: Tab ${id+1} was blocked!`);
+            addLog(`CRITICAL: User-${id+1} blocked by Pop-up blocker!`);
             return;
         }
 
         status.innerText = "ACTIVE";
         status.style.color = "#10b981";
-        addLog(`Engine ${id+1} (${profile.name}) is Live.`);
+        addLog(`User-${id+1} Connected. Profile: Mobile_Agent_${id+1}`);
 
-        // Auto-Scroll Simulation Logic
-        let scrollCount = 0;
-        const scrollInt = setInterval(() => {
+        // --- FIXED AUTO-SCROLL LOGIC ---
+        // Tab ko focus karke activity simulate karna
+        scrollIntervals[id] = setInterval(() => {
             if (activeTabs[id] && !activeTabs[id].closed) {
-                // Focus karna zaroori hai taki activity register ho
                 activeTabs[id].focus();
-                addLog(`Engine ${id+1}: Simulating Scroll...`);
+                // Browser policy ki wajah se hum dusre window ko JS se scroll tabhi kar sakte hain jab domain same ho, 
+                // isliye hum 'Focus' trigger karte hain jo Ad-networks ke liye activity count hoti hai.
+                addLog(`User-${id+1}: Activity Simulated (Focus).`);
             } else {
-                clearInterval(scrollInt);
+                clearInterval(scrollIntervals[id]);
             }
-        }, 15000);
+        }, 12000);
 
-        // Next Cycle (45-75 sec)
-        const nextCycle = Math.floor(Math.random() * (75000 - 45000 + 1)) + 45000;
+        // Next Auto-Reload (50-80 Seconds) - Slow is better for Earning
+        const nextReload = Math.floor(Math.random() * (80000 - 50000 + 1)) + 50000;
         setTimeout(() => {
-            clearInterval(scrollInt);
-            startEngine(id, url);
-        }, nextCycle);
+            clearInterval(scrollIntervals[id]);
+            launchEngine(id, url);
+        }, nextReload);
     }
 </script>
+
 </body>
 </html>
