@@ -2,53 +2,45 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultimate Earning Booster v7.0</title>
+    <title>Ultimate Earning Booster v7.5 - Fixed</title>
     <style>
         :root { --primary: #f59e0b; --bg: #070a13; --card: #111827; --text: #e5e7eb; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
         .box { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; border: 2px solid #374151; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        h2 { color: var(--primary); text-align: center; text-transform: uppercase; margin-bottom: 25px; text-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+        h2 { color: var(--primary); text-align: center; text-transform: uppercase; margin-bottom: 25px; }
         input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #374151; background: #030712; color: #fff; box-sizing: border-box; }
         .btn-start { width: 100%; padding: 18px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; transition: 0.3s; margin-top: 10px; }
         .btn-start:hover { background: #fbbf24; transform: scale(1.02); }
         .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; }
         .user-card { background: #1f2937; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #374151; }
-        .user-card span { font-size: 10px; color: #9ca3af; display: block; margin-bottom: 5px; }
         .user-card b { font-size: 14px; color: #10b981; }
         .log { height: 150px; background: #000; border-radius: 10px; margin-top: 20px; padding: 15px; font-family: 'Courier New', monospace; font-size: 11px; overflow-y: auto; color: #34d399; border: 1px solid #374151; }
-        .live-tag { display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; margin-right: 5px; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .warning { color: #ef4444; font-size: 12px; text-align: center; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Triple Engine v7.0</h2>
-    
-    <label>Website URL:</label>
-    <input type="text" id="urlInput" placeholder="https://example.com" value="">
-
-    <button class="btn-start" id="startBtn">Launch 3 Tabs Now</button>
+    <h2>Triple Engine v7.5</h2>
+    <input type="text" id="urlInput" placeholder="Enter Website URL (https://...)" value="">
+    <button class="btn-start" id="startBtn">Launch All 3 Engines</button>
 
     <div class="status-grid">
-        <div class="user-card"><span>ENGINE 1</span><b id="s1">READY</b></div>
-        <div class="user-card"><span>ENGINE 2</span><b id="s2">READY</b></div>
-        <div class="user-card"><span>ENGINE 3</span><b id="s3">READY</b></div>
+        <div class="user-card"><b>ENG-1</b><div id="s1">OFF</div></div>
+        <div class="user-card"><b>ENG-2</b><div id="s2">OFF</div></div>
+        <div class="user-card"><b>ENG-3</b><div id="s3">OFF</div></div>
     </div>
 
-    <div class="log" id="logBox">> Fingerprint Protection: ACTIVE<br>> Waiting for Launch...</div>
+    <div class="log" id="logBox">> System Status: Ready...</div>
+    <div class="warning">IMP: Allow Pop-ups from Address Bar!</div>
 </div>
 
 <script>
     let activeTabs = [null, null, null];
-    
-    // Different Profiles to confuse Ad Networks
     const profiles = [
-        { name: "iPhone 14", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)", w: 390, h: 844 },
-        { name: "Windows PC", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", w: 1366, h: 768 },
-        { name: "Galaxy S22", ua: "Mozilla/5.0 (Linux; Android 13; SM-S901B)", w: 360, h: 800 },
-        { name: "iPad Air", ua: "Mozilla/5.0 (iPad; CPU OS 16_3 like Mac OS X)", w: 820, h: 1180 },
-        { name: "MacBook Pro", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", w: 1440, h: 900 }
+        { name: "iPhone", w: 390, h: 844 },
+        { name: "Windows", w: 1366, h: 768 },
+        { name: "Android", w: 360, h: 800 }
     ];
 
     function addLog(msg) {
@@ -59,55 +51,64 @@
 
     document.getElementById('startBtn').addEventListener('click', function() {
         const url = document.getElementById('urlInput').value;
-        if(!url) return alert("Please enter URL");
+        if(!url.startsWith('http')) return alert("Sahi URL dalein (http/https)");
 
         this.disabled = true;
-        this.innerText = "Engines Running...";
-        addLog("Initializing Triple Engine System...");
+        this.innerText = "Running...";
+        addLog("Anti-Block Engine Starting...");
 
-        // Launch all 3 tabs with a slight delay between them
-        for(let i=0; i<3; i++) {
-            setTimeout(() => startEngine(i, url), i * 2000);
-        }
+        // 3 Tabs ko gap ke sath kholna taki browser block na kare
+        [0, 1, 2].forEach(i => {
+            setTimeout(() => startEngine(i, url), i * 3500); 
+        });
     });
 
     function startEngine(id, url) {
         if(activeTabs[id]) activeTabs[id].close();
 
         const status = document.getElementById(`s${id+1}`);
-        const profile = profiles[Math.floor(Math.random() * profiles.length)];
-        
-        // Anti-pattern URL generator
+        const profile = profiles[id];
         const noise = Math.random().toString(36).substring(7);
-        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}session=${noise}&dev=${btoa(profile.name)}`;
+        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}sid=${noise}&boost=true`;
 
-        status.innerHTML = `<span class="live-tag"></span>WORKING`;
+        status.innerText = "LOADING";
         status.style.color = "#fbbf24";
-        
-        // Open window with random position
-        const x = Math.floor(Math.random() * 400);
-        const y = Math.floor(Math.random() * 400);
-        
-        activeTabs[id] = window.open(finalUrl, `engine_${id}_${noise}`, 
-            `width=${profile.w},height=${profile.h},left=${x},top=${y}`);
+
+        // Screen positioning
+        const xPos = id * 350;
+        activeTabs[id] = window.open(finalUrl, `win_${id}_${noise}`, 
+            `width=${profile.w},height=${profile.h},left=${xPos},top=100`);
 
         if(!activeTabs[id]) {
-            addLog(`Engine ${id+1} BLOCKED! Enable Popups.`);
             status.innerText = "BLOCKED";
+            status.style.color = "#ef4444";
+            addLog(`ERROR: Tab ${id+1} was blocked!`);
             return;
         }
 
-        addLog(`Engine ${id+1} launched as ${profile.name}`);
+        status.innerText = "ACTIVE";
+        status.style.color = "#10b981";
+        addLog(`Engine ${id+1} (${profile.name}) is Live.`);
 
-        // Random reload between 40-70 seconds (Natural behavior)
-        const nextRun = Math.floor(Math.random() * (70000 - 40000 + 1)) + 40000;
-        
+        // Auto-Scroll Simulation Logic
+        let scrollCount = 0;
+        const scrollInt = setInterval(() => {
+            if (activeTabs[id] && !activeTabs[id].closed) {
+                // Focus karna zaroori hai taki activity register ho
+                activeTabs[id].focus();
+                addLog(`Engine ${id+1}: Simulating Scroll...`);
+            } else {
+                clearInterval(scrollInt);
+            }
+        }, 15000);
+
+        // Next Cycle (45-75 sec)
+        const nextCycle = Math.floor(Math.random() * (75000 - 45000 + 1)) + 45000;
         setTimeout(() => {
-            addLog(`Cycling Engine ${id+1}...`);
+            clearInterval(scrollInt);
             startEngine(id, url);
-        }, nextRun);
+        }, nextCycle);
     }
 </script>
-
 </body>
 </html>
