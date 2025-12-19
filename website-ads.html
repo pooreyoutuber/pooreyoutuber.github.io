@@ -3,423 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Style Video Converter</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <title>GSC Booster Pro | Teacher Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Global Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            background: #0d1117; /* Dark Background */
-            color: #c9d1d9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .converter-container {
-            width: 100%;
-            max-width: 900px;
-            background: #161b22;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-
-        .title {
-            font-size: 2.5em;
-            font-weight: 700;
-            color: #58a6ff; /* Blue Highlight */
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            font-size: 1.1em;
-            color: #8b949e;
-            margin-bottom: 30px;
-        }
-
-        /* --- Upload Box Styles --- */
-        .upload-box {
-            border: 3px dashed #30363d;
-            background: #0d1117;
-            padding: 40px 20px;
-            margin-bottom: 30px;
-            border-radius: 8px;
-            transition: border-color 0.3s, background 0.3s;
-        }
-
-        .upload-box.drag-over {
-            border-color: #58a6ff;
-            background: #1f2a3a;
-        }
-
-        .file-name-display {
-            margin-top: 10px;
-            font-weight: 600;
-            color: #58a6ff;
-            min-height: 20px; /* Space reserved */
-        }
-
-        /* --- Buttons Styles --- */
-        .main-btn, .convert-btn {
-            background: #238636; /* Green */
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: background 0.2s, transform 0.1s;
-            margin-top: 15px;
-        }
-
-        .main-btn:hover, .convert-btn:hover {
-            background: #2ea043;
-        }
-        
-        /* Submit Button Style */
-        #submit-btn {
-            background: #58a6ff; /* Blue */
-            margin-top: 30px;
-            padding: 12px 30px;
-        }
-        #submit-btn:hover {
-            background: #79aefc;
-        }
-
-        /* --- Style Grid Styles --- */
-        .styles-grid {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .style-item {
-            background: transparent;
-            border: 3px solid transparent;
-            border-radius: 50%;
-            padding: 5px;
-            cursor: pointer;
-            transition: border-color 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 120px;
-        }
-
-        .style-item img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .style-item span {
-            color: #8b949e;
-            font-size: 0.9em;
-            font-weight: 600;
-        }
-
-        .style-item.selected {
-            border-color: #58a6ff;
-        }
-
-        .style-item.selected span {
-            color: #c9d1d9;
-        }
-
-        /* --- Status/Progress Styles --- */
-        .status-area {
-            padding: 20px;
-        }
-
-        .progress-bar-container {
-            background: #30363d;
-            height: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #58a6ff, #238636);
-            transition: width 0.4s ease-in-out;
-        }
-
-        /* --- Download Styles --- */
-        .download-btn {
-            width: 200px;
-            background: #03c737;
-        }
-
-        .download-btn:hover {
-            background: #02a12c;
-        }
-        
-        .message {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-
-        .error {
-            background: #f8514933;
-            color: #f85149;
-            border: 1px solid #f85149;
-        }
-
-        .success {
-            background: #23863633;
-            color: #238636;
-            border: 1px solid #238636;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 2rem; }
+        .loader { border-top-color: #4F46E5; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
-    <div class="converter-container">
-        <h1 class="title">Anime Style Video Converter</h1>
-        <p class="subtitle">Transform Your Videos into Anime!</p>
+<body class="min-h-screen flex items-center justify-center p-6">
 
-        <div id="upload-area" class="upload-box">
-            <p>Drag & Drop your video here, or Click to Upload (Max 30 seconds, 30MB)</p>
-            <input type="file" id="videoFileInput" accept="video/*" hidden>
-            
-            <button id="upload-btn" class="main-btn" onclick="document.getElementById('videoFileInput').click();">
-                Upload Video
-            </button>
-            <p id="file-name" class="file-name-display"></p>
+    <div class="max-w-xl w-full glass-card shadow-2xl p-8 md:p-12">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">🚀 GSC Traffic Booster</h1>
+            <p class="text-gray-500 font-medium">Teacher's Earning & SEO Optimizer</p>
         </div>
 
-        <div id="style-selection" style="display: none;">
-            <h2>✨ Select a Style:</h2>
-            <div class="styles-grid">
-                <button class="style-item" data-style="what-if">
-                    <img src="https://i.imgur.com/kS9A00L.png" alt="What If...?">
-                    <span>What If...?</span>
-                </button>
-                <button class="style-item selected" data-style="ben-10-classic">
-                    <img src="https://i.imgur.com/z4Dq5fW.png" alt="Ben 10 Classic">
-                    <span>Ben 10 Classic</span>
-                </button>
-                <button class="style-item" data-style="jujutsu-kaisen">
-                    <img src="https://i.imgur.com/s6E7jU8.png" alt="Jujutsu Kaisen">
-                    <span>Jujutsu Kaisen</span>
-                </button>
+        <div id="mainForm" class="space-y-6">
+            <div class="relative">
+                <label class="text-sm font-bold text-gray-700 ml-1">Target Keyword (GSC Search)</label>
+                <div class="mt-1 relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="keyword" 
+                        class="block w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all" 
+                        placeholder="e.g. Physics Chapter 1 Notes">
+                </div>
+            </div>
+
+            <div class="relative">
+                <label class="text-sm font-bold text-gray-700 ml-1">Your Website URL</label>
+                <div class="mt-1 relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-link"></i>
+                    </span>
+                    <input type="url" id="siteUrl" 
+                        class="block w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all" 
+                        placeholder="https://your-site.github.io">
+                </div>
+            </div>
+
+            <button onclick="submitTask()" id="btnText"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2">
+                <span>Start 400 Views Process</span>
+                <i class="fas fa-paper-plane"></i>
+            </button>
+
+            <div class="bg-indigo-50 p-4 rounded-2xl flex gap-3 items-start">
+                <i class="fas fa-shield-alt text-indigo-600 mt-1"></i>
+                <p class="text-xs text-indigo-800 leading-relaxed">
+                    <strong>Safe Mode:</strong> Views will be delivered slowly over 6 hours to keep your AdSense & GSC safe. Reports update in 24-48 hours.
+                </p>
+            </div>
+        </div>
+
+        <div id="progressScreen" class="hidden text-center py-10 space-y-6">
+            <div class="w-24 h-24 border-8 border-gray-100 border-t-indigo-600 rounded-full loader mx-auto"></div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Task Activated!</h2>
+                <p class="text-gray-500 mt-2">Hum background mein clicks bhej rahe hain.</p>
             </div>
             
-            <button id="submit-btn" class="main-btn">
-                Convert Video
-            </button>
-        </div>
-
-        <div id="status-area" class="status-area" style="display: none;">
-            <p id="status-message">Converting... Please wait!</p>
-            <div class="progress-bar-container">
-                <div id="progress-bar" class="progress-bar"></div>
+            <div class="grid grid-cols-2 gap-4 mt-8">
+                <div class="p-4 bg-green-50 rounded-2xl border border-green-100">
+                    <p class="text-2xl font-bold text-green-600">400</p>
+                    <p class="text-xs text-green-700 uppercase font-bold">Planned Clicks</p>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <p class="text-2xl font-bold text-blue-600">~6h</p>
+                    <p class="text-xs text-blue-700 uppercase font-bold">Estimated Time</p>
+                </div>
             </div>
-        </div>
-        
-        <div id="download-area" class="download-area" style="display: none;">
-            <p class="message success">✅ Conversion Complete! Download your video:</p>
-            <a id="download-link" href="#" target="_blank">
-                <button class="main-btn download-btn">Download Anime Video</button>
-            </a>
-            <video id="converted-video-preview" controls style="max-width: 100%; margin-top: 20px; border-radius: 8px; display: none;"></video>
+
+            <button onclick="location.reload()" class="text-indigo-600 font-semibold text-sm hover:underline">
+                New Request +
+            </button>
         </div>
     </div>
 
     <script>
-        // --- कॉन्फ़िगरेशन ---
-        // 🛑 सुनिश्चित करें कि यह URL आपके Render Service का सही URL है।
-        const API_BASE_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com';
-        const CONVERSION_ENDPOINT = '/anime-convert'; 
+        async function submitTask() {
+            const keyword = document.getElementById('keyword').value;
+            const siteUrl = document.getElementById('siteUrl').value;
+            const btn = document.getElementById('btnText');
 
-        // --- DOM एलीमेंट ---
-        const uploadArea = document.getElementById('upload-area');
-        const videoFileInput = document.getElementById('videoFileInput');
-        const uploadBtn = document.getElementById('upload-btn');
-        const fileNameDisplay = document.getElementById('file-name');
-        const styleSelectionArea = document.getElementById('style-selection');
-        const styleButtons = document.querySelectorAll('.style-item');
-        const submitBtn = document.getElementById('submit-btn');
-        const statusArea = document.getElementById('status-area');
-        const statusMessage = document.getElementById('status-message');
-        const progressBar = document.getElementById('progress-bar');
-        const downloadArea = document.getElementById('download-area');
-        const downloadLink = document.getElementById('download-link');
-        const convertedVideoPreview = document.getElementById('converted-video-preview');
-
-        let selectedStyle = 'ben-10-classic'; 
-        let videoFile = null;
-
-        // --- इवेंट लिसनर्स ---
-
-        // Drag & Drop
-        ['dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (eventName === 'dragover') uploadArea.classList.add('drag-over');
-                if (eventName === 'dragleave' || eventName === 'drop') uploadArea.classList.remove('drag-over');
-                if (eventName === 'drop' && e.dataTransfer.files.length) {
-                    handleFile(e.dataTransfer.files[0]);
-                }
-            });
-        });
-
-        // फ़ाइल इनपुट परिवर्तन
-        videoFileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleFile(e.target.files[0]);
-            }
-        });
-
-        // स्टाइल बटन क्लिक
-        styleButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                styleButtons.forEach(btn => btn.classList.remove('selected'));
-                button.classList.add('selected');
-                selectedStyle = button.getAttribute('data-style');
-            });
-        });
-
-        // सबमिट बटन क्लिक
-        submitBtn.addEventListener('click', startConversion);
-
-
-        // --- फ़ंक्शन लॉजिक ---
-
-        function handleFile(file) {
-            // फ़ाइल सत्यापन
-            if (!file.type.startsWith('video/')) {
-                alert("कृपया केवल एक वीडियो फ़ाइल अपलोड करें।");
+            if (!keyword || !siteUrl) {
+                alert("Please fill all details correctly!");
                 return;
             }
-            if (file.size > 30 * 1024 * 1024) { // 30 MB
-                alert("वीडियो का आकार 30 MB से अधिक नहीं होना चाहिए।");
-                return;
-            }
-            
-            videoFile = file;
-            fileNameDisplay.textContent = `Selected: ${file.name}`;
-            
-            // अपलोड बटन को छिपाएँ, स्टाइल चयन दिखाएँ
-            uploadBtn.style.display = 'none'; 
-            styleSelectionArea.style.display = 'block';
-        }
 
-        function showStatus(message, isError = false) {
-            statusArea.style.display = 'block';
-            statusMessage.textContent = message;
-            statusMessage.className = 'message';
-            if (isError) {
-                statusMessage.classList.add('error');
-            } else {
-                statusMessage.classList.add('success');
-            }
-        }
-
-        function updateProgress(percent) {
-            progressBar.style.width = `${percent}%`;
-            statusMessage.textContent = `Converting... ${Math.floor(percent)}%`;
-        }
-
-        function resetUI() {
-            videoFile = null;
-            fileNameDisplay.textContent = '';
-            uploadBtn.style.display = 'block'; 
-            styleSelectionArea.style.display = 'none';
-            statusArea.style.display = 'none';
-            downloadArea.style.display = 'none';
-            convertedVideoPreview.style.display = 'none';
-        }
-
-
-        async function startConversion() {
-            if (!videoFile) {
-                alert("कृपया पहले एक वीडियो फ़ाइल अपलोड करें।");
-                return;
-            }
-            
-            // UI को प्रोसेसिंग मोड में बदलें
-            uploadArea.style.display = 'none';
-            styleSelectionArea.style.display = 'none';
-            downloadArea.style.display = 'none';
-            statusArea.style.display = 'block';
-            
-            const formData = new FormData();
-            formData.append('video', videoFile);
-            formData.append('style', selectedStyle);
-            
-            // डमी प्रोग्रेस बार जो बैकएंड से प्रतिक्रिया आने तक चलती है
-            let progress = 10;
-            updateProgress(progress);
-
-            const interval = setInterval(() => {
-                if (progress < 90) {
-                    progress += Math.random() * 5; 
-                    updateProgress(progress);
-                }
-            }, 1000);
+            // Animation & UI Change
+            btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> Connecting...';
+            btn.disabled = true;
 
             try {
-                // --- 🚀 API कॉल ---
-                const response = await fetch(API_BASE_URL + CONVERSION_ENDPOINT, {
+                const response = await fetch('https://pooreyoutuber-github-io-1.onrender.com/start-task', {
                     method: 'POST',
-                    body: formData,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        keyword: keyword,
+                        url: siteUrl
+                    })
                 });
 
-                clearInterval(interval); // प्रोग्रेस अपडेट बंद करें
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Conversion failed on the server.');
+                if (response.ok) {
+                    document.getElementById('mainForm').classList.add('hidden');
+                    document.getElementById('progressScreen').classList.remove('hidden');
+                } else {
+                    alert("Server error! Please check if Render is active.");
+                    btn.innerHTML = 'Start 400 Views Process <i class="fas fa-paper-plane"></i>';
+                    btn.disabled = false;
                 }
-
-                const result = await response.json();
-                
-                // सफलता!
-                updateProgress(100);
-
-                // 🛑 मुख्य सुधार: Absolute URL बनाएँ
-                const fullDownloadUrl = API_BASE_URL + result.downloadUrl;
-                
-                // डाउनलोड लिंक और वीडियो दिखाएँ
-                downloadLink.href = fullDownloadUrl;
-                convertedVideoPreview.src = fullDownloadUrl;
-                convertedVideoPreview.style.display = 'block';
-                
-                downloadArea.style.display = 'block';
-                statusArea.style.display = 'none';
-
             } catch (error) {
-                clearInterval(interval);
-                updateProgress(0); 
-                showStatus(`❌ Error: ${error.message}`, true);
-                
-                // 5 सेकंड बाद UI रीसेट करें
-                setTimeout(resetUI, 5000);
-
+                console.error("Error:", error);
+                alert("Could not connect to Render cloud.");
+                btn.innerHTML = 'Start 400 Views Process <i class="fas fa-paper-plane"></i>';
+                btn.disabled = false;
             }
         }
     </script>
 </body>
 </html>
+
