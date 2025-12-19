@@ -3,32 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghost-Engine v10.2 - Compact Size</title>
+    <title>Ghost-Engine v10.5 - Stealth Mode</title>
     <style>
-        :root { --primary: #00f2ff; --bg: #05070a; --card: #11141d; --text: #e2e8f0; --accent: #ff0055; }
+        :root { --primary: #00f2ff; --bg: #05070a; --card: #11141d; --text: #e2e8f0; --accent: #ff0055; --success: #22c55e; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; margin: 0; }
         .main-panel { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 500px; border: 1px solid #1e293b; box-shadow: 0 0 40px rgba(0, 242, 255, 0.1); }
-        h1 { color: var(--primary); text-align: center; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #020617; color: #fff; box-sizing: border-box; font-size: 15px; }
-        .btn-launch { width: 100%; padding: 15px; background: linear-gradient(45deg, #00f2ff, #0066ff); color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; margin-top: 15px; }
+        h1 { color: var(--primary); text-align: center; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #020617; color: #fff; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
+        .btn-launch { width: 100%; padding: 15px; background: linear-gradient(45deg, #00f2ff, #0066ff); color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; margin-top: 15px; box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3); }
         .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
         .unit-box { background: #0a0f1a; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #1e293b; }
-        .unit-box b { font-size: 9px; color: #64748b; display: block; }
-        .engine-status { font-size: 12px; font-weight: bold; color: #334155; }
-        .log-container { height: 120px; background: #000; border-radius: 10px; margin-top: 15px; padding: 12px; font-family: monospace; font-size: 10px; overflow-y: auto; border: 1px solid #1e293b; color: #00ff41; }
-        .warning-footer { color: var(--accent); font-size: 10px; text-align: center; margin-top: 15px; font-weight: bold; }
+        .unit-box b { font-size: 9px; color: #64748b; display: block; margin-bottom: 5px; }
+        .engine-status { font-size: 11px; font-weight: bold; color: #334155; }
+        .log-container { height: 130px; background: #000; border-radius: 10px; margin-top: 15px; padding: 12px; font-family: 'Courier New', monospace; font-size: 10px; overflow-y: auto; border: 1px solid #1e293b; color: #00ff41; line-height: 1.4; }
+        .warning-footer { color: var(--accent); font-size: 10px; text-align: center; margin-top: 15px; font-weight: bold; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
 <div class="main-panel">
-    <h1>Ghost Engine v10.2</h1>
+    <h1>Ghost Engine v10.5</h1>
     
     <div class="input-group">
         <input type="text" id="urlInput" placeholder="https://yourwebsite.com" autocomplete="off">
     </div>
 
-    <button class="btn-launch" id="startBtn">Deploy 6 Mini Engines</button>
+    <button class="btn-launch" id="startBtn">Initialize Stealth Engines</button>
 
     <div class="status-grid">
         <div class="unit-box"><b>ENG-1</b><span id="s1" class="engine-status">OFFLINE</span></div>
@@ -39,8 +40,8 @@
         <div class="unit-box"><b>ENG-6</b><span id="s6" class="engine-status">OFFLINE</span></div>
     </div>
 
-    <div class="log-container" id="logBox">> Ready for Compact Mode...</div>
-    <div class="warning-footer">ENABLE POP-UPS FOR ALL 6 TABS!</div>
+    <div class="log-container" id="logBox">> Ghost-Protocol Ready...</div>
+    <div class="warning-footer">ENABLE POP-UPS & USE VPN (AUTO-PURGE ACTIVE)</div>
 </div>
 
 <script>
@@ -51,49 +52,54 @@
         const box = document.getElementById('logBox');
         box.innerHTML += `<div>[${new Date().toLocaleTimeString()}] > ${msg}</div>`;
         box.scrollTop = box.scrollHeight;
+        if(box.childNodes.length > 50) box.removeChild(box.firstChild); // मेमरी बचाने के लिए
     }
 
     document.getElementById('startBtn').addEventListener('click', function() {
         const url = document.getElementById('urlInput').value;
-        if(!url.startsWith('http')) return alert("URL डालें!");
+        if(!url.startsWith('http')) return alert("कृपया सही URL डालें!");
 
         this.disabled = true;
-        this.innerText = "Running...";
+        this.style.opacity = "0.5";
+        this.innerText = "Engines Running...";
 
         for(let i=0; i<6; i++) {
-            setTimeout(() => launchEngine(i, url), i * 3000);
+            // हर इंजन अलग टाइम पर शुरू होगा ताकि सर्वर को शक न हो
+            setTimeout(() => launchEngine(i, url), i * (Math.random() * 4000 + 2000));
         }
     });
 
     function launchEngine(id, url) {
-        // --- 1. STRICT AUTO-CLOSE ---
+        // --- 1. DATA PURGE & RESET ---
         if(activeTabs[id]) {
-            try { activeTabs[id].close(); } catch (e) {}
+            try { 
+                activeTabs[id].localStorage.clear(); 
+                activeTabs[id].sessionStorage.clear();
+                activeTabs[id].close(); 
+            } catch (e) { console.log("Cleaning cache..."); }
         }
         if(intervals[id]) clearInterval(intervals[id]);
 
         const status = document.getElementById(`s${id+1}`);
         const noise = Math.random().toString(36).substring(5);
         
-        // --- 2. REFERRER & URL ---
-        const referrers = ["google.com", "bing.com", "t.co", "facebook.com"];
-        const ref = referrers[Math.floor(Math.random() * referrers.length)];
-        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}ref=${ref}&s=${noise}`;
+        // --- 2. IDENTITY SPOOFING ---
+        const refs = ["https://www.google.com/", "https://t.co/", "https://www.bing.com/"];
+        const ref = refs[Math.floor(Math.random() * refs.length)];
+        // URL में रैंडम पैरामीटर ताकि हर विजिट नई लगे
+        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}utm_source=ghost&s_id=${noise}&ref=${btoa(ref).substring(0,8)}`;
 
-        // --- 3. SIZE & POSITION (FIXED FOR 6 TABS) ---
-        // साइज छोटा कर दिया (Mobile View)
-        const w = 300; 
-        const h = 480; 
-        
-        // स्क्रीन पर सेट करने का हिसाब (3 ऊपर, 3 नीचे)
-        const x = (id % 3) * 320; 
-        const y = (id < 3) ? 20 : 520;
+        // --- 3. RANDOM FINGERPRINT (Size/Pos) ---
+        const w = 320 + Math.floor(Math.random() * 50); 
+        const h = 500 + Math.floor(Math.random() * 100); 
+        const x = (id % 3) * 350; 
+        const y = (id < 3) ? 20 : 550;
 
-        status.innerText = "LOADING";
-        status.style.color = "#eab308";
+        status.innerText = "CLEANING";
+        status.style.color = "#fbbf24";
 
-        // --- 4. LAUNCH ---
-        activeTabs[id] = window.open(finalUrl, `tab_${id}`, 
+        // --- 4. DEPLOY ---
+        activeTabs[id] = window.open(finalUrl, `ghost_unit_${id}_${noise}`, 
             `width=${w},height=${h},left=${x},top=${y},resizable=yes,scrollbars=yes`);
 
         if(!activeTabs[id]) {
@@ -102,20 +108,29 @@
             return;
         }
 
-        status.innerText = "ACTIVE";
+        status.innerText = "STEALTH";
         status.style.color = "#00f2ff";
-        addLog(`Engine-${id+1} Open (${ref})`);
+        addLog(`Eng-${id+1}: Identity Reset & Deployed.`);
 
-        // Activity focus
+        // --- 5. HUMAN BEHAVIOR SIMULATION ---
         intervals[id] = setInterval(() => {
             if (activeTabs[id] && !activeTabs[id].closed) {
-                activeTabs[id].focus();
+                // रैंडम स्क्रॉलिंग (असली यूजर की तरह)
+                const scrollDown = Math.floor(Math.random() * 250);
+                activeTabs[id].scrollBy(0, scrollDown);
+                
+                // रैंडमली फोकस करना
+                if(Math.random() > 0.6) activeTabs[id].focus();
             }
-        }, 15000);
+        }, 7000);
 
-        // Reload cycle (90s - 120s)
-        const cycleTime = 90000 + (Math.random() * 30000); 
-        setTimeout(() => launchEngine(id, url), cycleTime);
+        // --- 6. LONG STAY CYCLE (For Earning) ---
+        // एड्स के लिए कम से कम 2-3 मिनट रुकना जरूरी है
+        const cycleTime = 120000 + (Math.random() * 90000); 
+        setTimeout(() => {
+            addLog(`Eng-${id+1}: Cycling Session...`);
+            launchEngine(id, url);
+        }, cycleTime);
     }
 </script>
 
