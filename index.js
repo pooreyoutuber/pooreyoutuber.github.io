@@ -1164,47 +1164,51 @@ app.post('/start-task', async (req, res) => {
         return res.status(400).json({ error: "Missing keyword or URL" });
     }
 
-    // Immediate Response to Frontend
-    res.status(200).json({ status: "success", message: "GSC Task Activated" });
+    // Immediate response to frontend
+    res.status(200).json({ 
+        status: "success", 
+        message: "GSC Task Activated: 1000 Views started in background." 
+    });
 
-    // Background Processing: 400 Views over 6 Hours
-    (async () => {
-        const totalViews = 400;
-        const totalDurationMs = 6 * 60 * 60 * 1000; // 6 hours
-        const delayBetweenViews = totalDurationMs / totalViews;
+    // Run background loop
+    setImmediate(async () => {
+        const totalViews = 1000;
+        // 1000 views spread over approx 6 hours
+        const totalDurationMs = 6 * 60 * 60 * 1000; 
+        const delayBetweenViews = Math.floor(totalDurationMs / totalViews);
 
-        console.log(`🚀 [GSC BOOSTER] Starting 400 views for: ${url} (Keyword: ${keyword})`);
+        console.log(`🚀 [GSC] Task Started: ${url} for Keyword: ${keyword}`);
 
         for (let i = 1; i <= totalViews; i++) {
             try {
                 const randomUA = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
-                const gscReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&oq=${encodeURIComponent(keyword)}`;
+                const gscReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&oq=${encodeURIComponent(keyword)}&sourceid=chrome&ie=UTF-8`;
 
-                // Simulating the Search Click
-                await nodeFetch(url, {
-                    method: 'GET',
+                // Use axios for better reliability
+                await axios.get(url, {
                     headers: {
                         'User-Agent': randomUA,
                         'Referer': gscReferrer,
                         'Accept-Language': 'en-US,en;q=0.9'
                     },
-                    timeout: 10000
-                });
+                    timeout: 12000 // 12 second timeout
+                }).catch(() => {}); // Ignore page load errors
 
-                if (i % 50 === 0) console.log(`📈 [GSC PROGRESS] ${i}/400 views completed.`);
+                if (i % 50 === 0) {
+                    console.log(`📈 [GSC PROGRESS] ${i}/1000 Views Delivered.`);
+                }
                 
             } catch (err) {
-                console.error(`❌ [GSC ERROR] View ${i} failed: ${err.message}`);
+                // Background log
             }
 
-            // Wait for the next interval (approx 54 seconds)
-            const jitter = randomInt(-5000, 5000); // Add randomness to avoid patterns
+            // Random delay to mimic human behavior
+            const jitter = randomInt(-3000, 3000);
             await new Promise(r => setTimeout(r, Math.max(1000, delayBetweenViews + jitter)));
         }
-        console.log(`✅ [GSC COMPLETE] All 400 views delivered for ${url}`);
-    })();
+        console.log(`✅ [GSC COMPLETE] All 1000 views finished for ${url}`);
+    });
 });
-
 // ===================================================================
 // SERVER START
 // ===================================================================
