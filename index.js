@@ -1154,12 +1154,62 @@ app.post('/youtube-boost-mp', async (req, res) => {
         
     })();
 });
+// ===================================================================
+// 6. NEW: GSC TRAFFIC BOOSTER (TEACHER PANEL) - /start-task
+// ===================================================================
+app.post('/start-task', async (req, res) => {
+    const { keyword, url } = req.body;
 
+    if (!keyword || !url) {
+        return res.status(400).json({ error: "Missing keyword or URL" });
+    }
+
+    // Immediate Response to Frontend
+    res.status(200).json({ status: "success", message: "GSC Task Activated" });
+
+    // Background Processing: 400 Views over 6 Hours
+    (async () => {
+        const totalViews = 400;
+        const totalDurationMs = 6 * 60 * 60 * 1000; // 6 hours
+        const delayBetweenViews = totalDurationMs / totalViews;
+
+        console.log(`🚀 [GSC BOOSTER] Starting 400 views for: ${url} (Keyword: ${keyword})`);
+
+        for (let i = 1; i <= totalViews; i++) {
+            try {
+                const randomUA = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
+                const gscReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&oq=${encodeURIComponent(keyword)}`;
+
+                // Simulating the Search Click
+                await nodeFetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': randomUA,
+                        'Referer': gscReferrer,
+                        'Accept-Language': 'en-US,en;q=0.9'
+                    },
+                    timeout: 10000
+                });
+
+                if (i % 50 === 0) console.log(`📈 [GSC PROGRESS] ${i}/400 views completed.`);
+                
+            } catch (err) {
+                console.error(`❌ [GSC ERROR] View ${i} failed: ${err.message}`);
+            }
+
+            // Wait for the next interval (approx 54 seconds)
+            const jitter = randomInt(-5000, 5000); // Add randomness to avoid patterns
+            await new Promise(r => setTimeout(r, Math.max(1000, delayBetweenViews + jitter)));
+        }
+        console.log(`✅ [GSC COMPLETE] All 400 views delivered for ${url}`);
+    })();
+});
 
 // ===================================================================
-// --- SERVER START ---
+// SERVER START
 // ===================================================================
-// Sirf ek hi baar server start hoga
+app.get('/', (req, res) => res.send('API is Online!'));
+
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
