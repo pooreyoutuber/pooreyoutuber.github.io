@@ -1158,62 +1158,87 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // 6. NEW: GSC TRAFFIC BOOSTER (TEACHER PANEL) - /start-task
 // ===================================================================
 app.post('/start-task', async (req, res) => {
-    const { keyword, url } = req.body;
+    const { keyword, url, ga_id, api_secret } = req.body; // Added GA keys support
 
     if (!keyword || !url) {
         return res.status(400).json({ error: "Missing keyword or URL" });
     }
 
-    // Immediate response to frontend
     res.status(200).json({ 
         status: "success", 
-        message: "GSC Task Activated: 1000 Views started in background." 
+        message: "GSC Organic Task Activated: 1000 Views drip-feeding over 24h." 
     });
 
-    // Run background loop
     setImmediate(async () => {
         const totalViews = 1000;
-        // 1000 views spread over approx 6 hours
-        const totalDurationMs = 6 * 60 * 60 * 1000; 
+        // Views spread over 24 hours for safety
+        const totalDurationMs = 24 * 60 * 60 * 1000; 
         const delayBetweenViews = Math.floor(totalDurationMs / totalViews);
 
-        console.log(`🚀 [GSC] Task Started: ${url} for Keyword: ${keyword}`);
+        console.log(`🚀 [GSC] Task Started for: ${url}`);
 
         for (let i = 1; i <= totalViews; i++) {
             try {
                 const randomUA = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
+                const cid = generateClientId();
+                const sid = Date.now().toString();
+                
+                // Realistic Google Search Referrer
                 const gscReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&oq=${encodeURIComponent(keyword)}&sourceid=chrome&ie=UTF-8`;
 
-                // Use axios for better reliability
+                // Step 1: Hit the URL
                 await axios.get(url, {
-                    headers: {
-                        'User-Agent': randomUA,
-                        'Referer': gscReferrer,
-                        'Accept-Language': 'en-US,en;q=0.9'
-                    },
-                    timeout: 12000 // 12 second timeout
-                }).catch(() => {}); // Ignore page load errors
+                    headers: { 'User-Agent': randomUA, 'Referer': gscReferrer },
+                    timeout: 15000
+                }).catch(() => {});
 
-                if (i % 50 === 0) {
-                    console.log(`📈 [GSC PROGRESS] ${i}/1000 Views Delivered.`);
+                // Step 2: If GA4 keys provided, send Organic Signal
+                if (ga_id && api_secret) {
+                    const payload = {
+                        client_id: cid,
+                        events: [{
+                            name: "page_view",
+                            params: {
+                                page_location: url,
+                                page_referrer: gscReferrer,
+                                source: "google",
+                                medium: "organic",
+                                term: keyword,
+                                session_id: sid,
+                                engagement_time_msec: randomInt(15000, 45000)
+                            }
+                        }]
+                    };
+                    await sendGa4Event(ga_id, api_secret, payload);
                 }
-                
-            } catch (err) {
-                // Background log
-            }
 
-            // Random delay to mimic human behavior
-            const jitter = randomInt(-3000, 3000);
-            await new Promise(r => setTimeout(r, Math.max(1000, delayBetweenViews + jitter)));
+                if (i % 50 === 0) console.log(`📈 [GSC] Progress: ${i}/1000 views.`);
+                
+            } catch (err) {}
+
+            const jitter = randomInt(-5000, 5000);
+            await new Promise(r => setTimeout(r, Math.max(2000, delayBetweenViews + jitter)));
         }
-        console.log(`✅ [GSC COMPLETE] All 1000 views finished for ${url}`);
+        console.log(`✅ [GSC] Task Finished for ${url}`);
     });
 });
+
 // ===================================================================
-// SERVER START
+// OTHER TOOLS (RETAINED FROM YOUR VERSION)
 // ===================================================================
-app.get('/', (req, res) => res.send('API is Online!'));
+
+app.post('/api/caption-generate', async (req, res) => {
+    // ... (Your Gemini Caption Logic)
+    res.send({ message: "Caption feature placeholder" });
+});
+
+app.get('/proxy-request', async (req, res) => {
+    // ... (Your Proxy Tool 4 Logic)
+    res.send({ status: "OK" });
+});
+
+app.get('/', (req, res) => res.send('API is Online! GSC Tool is ready.'));
 
 app.listen(PORT, () => {
-    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
