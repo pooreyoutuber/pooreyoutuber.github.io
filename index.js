@@ -1159,60 +1159,53 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // 6. NEW: GSC TRAFFIC BOOSTER (TEACHER PANEL) - /start-task
 // ===================================================================
 app.post('/start-task', async (req, res) => {
-    const { keyword, url, ga_id, api_secret } = req.body;
+    const { keyword, url } = req.body;
 
     if (!keyword || !url) {
-        return res.status(400).json({ error: "Missing keyword or URL" });
+        return res.status(400).json({ error: "Details missing" });
     }
 
     res.status(200).json({ 
         status: "success", 
-        message: "Task Activated: GSC & AdSense processing started in background." 
+        message: "Browser automation started on Render." 
     });
 
     (async () => {
         const totalViews = 1000;
-        const totalDurationMs = 24 * 60 * 60 * 1000; 
-        const delayBetweenViews = Math.floor(totalDurationMs / totalViews);
-
         console.log(`🚀 Starting Booster for: ${url}`);
 
         for (let i = 1; i <= totalViews; i++) {
             let browser;
             try {
-                // Render specific launch arguments
                 browser = await puppeteer.launch({
+                    // Render ke cache path ko force karna
                     headless: "new",
                     args: [
-                        '--no-sandbox', 
-                        '--disable-setuid-sandbox', 
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
                         '--disable-dev-shm-usage',
-                        '--disable-accelerated-2d-canvas',
                         '--disable-gpu'
                     ]
                 });
 
                 const page = await browser.newPage();
-                const randomUA = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
-                await page.setUserAgent(randomUA);
-
+                await page.setUserAgent(USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)]);
+                
                 // GSC Referrer Spoofing
-                const gscReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&sourceid=chrome&ie=UTF-8`;
+                const gscReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
                 await page.setExtraHTTPHeaders({ 'Referer': gscReferrer });
 
-                // Visit URL
+                // Website load and wait for Ads
                 await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // ADSENSE BOOSTER: Human Scroll Logic
+                // Human Behavior: Slow Scroll for AdSense
                 await page.evaluate(async () => {
                     await new Promise((resolve) => {
                         let totalHeight = 0;
-                        let distance = 100;
                         let timer = setInterval(() => {
-                            let scrollHeight = document.body.scrollHeight;
-                            window.scrollBy(0, distance);
-                            totalHeight += distance;
-                            if (totalHeight >= scrollHeight) {
+                            window.scrollBy(0, 100);
+                            totalHeight += 100;
+                            if (totalHeight >= document.body.scrollHeight) {
                                 clearInterval(timer);
                                 resolve();
                             }
@@ -1220,47 +1213,23 @@ app.post('/start-task', async (req, res) => {
                     });
                 });
 
-                // Wait for impression to register
-                const stayTime = randomInt(30000, 50000);
-                await new Promise(r => setTimeout(r, stayTime));
-
-                // GA4 Signal (GSC updates ke liye)
-                if (ga_id && api_secret) {
-                    const cid = generateClientId();
-                    const payload = {
-                        client_id: cid,
-                        events: [{
-                            name: "page_view",
-                            params: {
-                                page_location: url,
-                                page_referrer: gscReferrer,
-                                source: "google",
-                                medium: "organic",
-                                term: keyword,
-                                engagement_time_msec: stayTime
-                            }
-                        }]
-                    };
-                    await sendData(ga_id, api_secret, payload, i, 'gsc_organic');
-                }
-
-                console.log(`✅ [View ${i}] Browser session closed. Impression sent.`);
+                // Stay on page to register impression
+                await new Promise(r => setTimeout(r, 35000));
+                
                 await browser.close();
+                console.log(`✅ [View ${i}] Impression & GSC Hit Recorded.`);
 
             } catch (err) {
                 console.error(`❌ [View ${i}] Error:`, err.message);
                 if (browser) await browser.close();
             }
 
-            // Drip-feed delay
-            const jitter = randomInt(-5000, 5000);
-            await new Promise(r => setTimeout(r, Math.max(3000, delayBetweenViews + jitter)));
+            // Drip-feed delay (10 seconds minimum between views)
+            await new Promise(r => setTimeout(r, 10000));
         }
     })();
 });
 
-// --- Other Tools Placeholder ---
-app.get('/', (req, res) => res.send('GSC Booster Pro API is Live!'));
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.get('/', (req, res) => res.send('API is Online and Browser Fixed!'));
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
