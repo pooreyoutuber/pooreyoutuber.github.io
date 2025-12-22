@@ -1261,9 +1261,6 @@ app.post('/start-task', async (req, res) => {
 
 // --- Other Tools Placeholder ---
 app.get('/', (req, res) => res.send('GSC Booster Pro API is Live!'));
-
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-}); 
     console.log(`Server running on port ${PORT}`);
 });
