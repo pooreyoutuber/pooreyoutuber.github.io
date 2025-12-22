@@ -10,6 +10,7 @@ const cors = require('cors');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
+const puppeteer = require('puppeteer');
 const { HttpsProxyAgent } = require('https-proxy-agent'); 
 // NEW: Import 'http' for non-authenticated proxies, needed for Tool 4
 const http = require('http'); 
