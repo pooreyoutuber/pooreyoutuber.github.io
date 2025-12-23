@@ -1156,7 +1156,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. NEW: GSC TRAFFIC BOOSTER (TEACHER PANEL) - /start-task
+// 6. GSC TRAFFIC BOOSTER (OPTIMIZED FOR RENDER) - /start-task
 // ===================================================================
 app.post('/start-task', async (req, res) => {
     const { keyword, url } = req.body;
@@ -1165,67 +1165,86 @@ app.post('/start-task', async (req, res) => {
         return res.status(400).json({ error: "Details missing" });
     }
 
+    // Immediate response to frontend to prevent timeout
     res.status(200).json({ 
         status: "success", 
-        message: "Browser automation started on Render." 
+        message: "Browser automation started. Process is running in background via Uptime Robot." 
     });
 
     (async () => {
-        const totalViews = 1000;
-        console.log(`🚀 Starting Booster for: ${url}`);
+        let browser;
+        try {
+            console.log(`🚀 Starting GSC Booster for: ${url}`);
+            
+            // Render par Chrome ka path aksar yahi hota hai. 
+            // Browser ko loop ke BAHAR launch karein taaki RAM bache.
+            browser = await puppeteer.launch({
+                headless: "new",
+                executablePath: '/usr/bin/google-chrome', 
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--single-process' // Render Free Tier ke liye best hai
+                ]
+            });
 
-        for (let i = 1; i <= totalViews; i++) {
-            let browser;
-            try {
-                browser = await puppeteer.launch({
-                    // Render ke cache path ko force karna
-                    headless: "new",
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--disable-gpu'
-                    ]
-                });
+            const totalViews = 1000;
 
-                const page = await browser.newPage();
-                await page.setUserAgent(USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)]);
-                
-                // GSC Referrer Spoofing
-                const gscReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-                await page.setExtraHTTPHeaders({ 'Referer': gscReferrer });
+            for (let i = 1; i <= totalViews; i++) {
+                let page;
+                try {
+                    page = await browser.newPage();
+                    
+                    // Random User Agent pick karein
+                    const userAgent = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
+                    await page.setUserAgent(userAgent);
+                    
+                    // GSC Referrer Spoofing
+                    const gscReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+                    await page.setExtraHTTPHeaders({ 'Referer': gscReferrer });
 
-                // Website load and wait for Ads
-                await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+                    // Website load karein
+                    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Human Behavior: Slow Scroll for AdSense
-                await page.evaluate(async () => {
-                    await new Promise((resolve) => {
-                        let totalHeight = 0;
-                        let timer = setInterval(() => {
-                            window.scrollBy(0, 100);
-                            totalHeight += 100;
-                            if (totalHeight >= document.body.scrollHeight) {
-                                clearInterval(timer);
-                                resolve();
-                            }
-                        }, 250);
+                    // Human Behavior: Slow Scroll
+                    await page.evaluate(async () => {
+                        await new Promise((resolve) => {
+                            let totalHeight = 0;
+                            let distance = 100;
+                            let timer = setInterval(() => {
+                                window.scrollBy(0, distance);
+                                totalHeight += distance;
+                                if (totalHeight >= document.body.scrollHeight / 2) {
+                                    clearInterval(timer);
+                                    resolve();
+                                }
+                            }, 300);
+                        });
                     });
-                });
 
-                // Stay on page to register impression
-                await new Promise(r => setTimeout(r, 35000));
-                
-                await browser.close();
-                console.log(`✅ [View ${i}] Impression & GSC Hit Recorded.`);
+                    // Retention time (20-30 seconds wait)
+                    await new Promise(r => setTimeout(r, randomInt(20000, 30000)));
+                    
+                    console.log(`✅ [View ${i}] Impression & GSC Hit Recorded.`);
 
-            } catch (err) {
-                console.error(`❌ [View ${i}] Error:`, err.message);
-                if (browser) await browser.close();
+                } catch (err) {
+                    console.error(`❌ [View ${i}] Error:`, err.message);
+                } finally {
+                    // Page close karein taaki memory free ho jaye
+                    if (page) await page.close();
+                }
+
+                // Drip-feed delay: Har view ke beech gap rakhein
+                await new Promise(r => setTimeout(r, 15000));
             }
 
-            // Drip-feed delay (10 seconds minimum between views)
-            await new Promise(r => setTimeout(r, 10000));
+        } catch (fatalErr) {
+            console.error("FATAL BROWSER ERROR:", fatalErr.message);
+        } finally {
+            // Task khatam hone par hi browser close karein
+            if (browser) await browser.close();
         }
     })();
 });
