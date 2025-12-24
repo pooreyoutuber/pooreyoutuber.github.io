@@ -1220,10 +1220,9 @@ app.post('/start-task', async (req, res) => {
 // 7. NEW: YOUTUBE STUDIO-VERIFIED BOOSTER (ADVANCED)
 // ===================================================================
 // ===================================================================
-// 6. REAL YOUTUBE VIEW INCREASER (SEQUENTIAL RENDER FIX)
+// 6. ULTIMATE REAL-VIEW BOOSTER (FIXED FOR RENDER)
 // ===================================================================
-const puppeteer = require('puppeteer');
-const path = require('path');
+// Pehle se upar 'const fs = require("fs");' hona chahiye, isliye yahan dobara mat likhna.
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
@@ -1232,78 +1231,82 @@ app.post('/api/real-view-boost', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Missing Data' });
     }
 
-    // Response turant bhej rahe hain taaki frontend "Accepted" dikhaye
     res.json({ 
         status: 'accepted', 
-        message: 'Task started. Views will be delivered one-by-one on the cloud.' 
+        message: 'Cloud Browser Task Started. Sequential processing active.' 
     });
 
-    // Background Sequential Logic
     (async () => {
         console.log(`[REAL-BOOSTER] Starting session for: ${video_url}`);
         const total = parseInt(views_count);
         const duration = parseInt(watch_time) || 30;
 
-        // Render Chrome Path (Ye path Puppeteer installation ke baad banta hai)
-        const possibleChromePath = '/opt/render/.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux64/chrome';
+        // Render specific chrome path detection
+        const cacheBase = '/opt/render/.cache/puppeteer/chrome';
+        let chromePath = null;
+
+        if (fs.existsSync(cacheBase)) {
+            const versions = fs.readdirSync(cacheBase);
+            if (versions.length > 0) {
+                // Sabse latest version dhoondna
+                chromePath = `${cacheBase}/${versions[0]}/chrome-linux64/chrome`;
+            }
+        }
 
         for (let i = 1; i <= total; i++) {
             let browser;
             try {
-                console.log(`[View ${i}/${total}] Launching browser...`);
+                console.log(`[View ${i}/${total}] Launching browser instance...`);
                 
                 browser = await puppeteer.launch({
                     headless: "new",
-                    // Agar Render par manual install hua hai to wahan se uthayega
-                    executablePath: fs.existsSync(possibleChromePath) ? possibleChromePath : null,
+                    executablePath: chromePath, // Humara dhoonda hua path
                     args: [
                         '--no-sandbox', 
                         '--disable-setuid-sandbox', 
                         '--disable-dev-shm-usage',
-                        '--disable-gpu'
+                        '--single-process',
+                        '--no-zygote'
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                // Random User Agent
+                // Random User Agent from your existing list
                 const ua = (typeof USER_AGENTS !== 'undefined') ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
                 await page.setUserAgent(ua);
 
+                console.log(`[View ${i}] Navigation to video...`);
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play Button Click Simulation
+                // Play interaction
                 try {
                     await page.evaluate(() => {
-                        const playBtn = document.querySelector(".ytp-play-button");
-                        if (playBtn) playBtn.click();
+                        const btn = document.querySelector(".ytp-play-button");
+                        if (btn) btn.click();
                     });
-                } catch (e) { /* Auto-play already active */ }
+                } catch (e) {}
 
-                console.log(`[View ${i}] Playing video for ${duration} seconds...`);
+                console.log(`[View ${i}] Watching for ${duration} seconds...`);
                 await new Promise(r => setTimeout(r, duration * 1000));
 
                 await browser.close();
-                console.log(`[View ${i}] Success. Closing session.`);
+                console.log(`[View ${i}] Done. Waiting 10s before next view...`);
 
-                // Anti-detection: Wait 10 seconds before next view
+                // 10s gap to prevent RAM crash
                 await new Promise(r => setTimeout(r, 10000));
 
             } catch (err) {
                 console.error(`[View ${i}] Error: ${err.message}`);
                 if (browser) await browser.close();
-                
-                // Agar Chrome missing hai, toh loop ko rokh dein taaki logs na bharein
-                if (err.message.includes("Could not find Chrome")) {
-                    console.log("CRITICAL: Chrome not found. Check Build Command and Env Vars.");
-                    break;
-                }
+                // Agar Chrome nahi mila to 15s wait karke dobara check karega
+                await new Promise(r => setTimeout(r, 15000));
             }
         }
-        console.log("[TASK COMPLETE] All views processed.");
+        console.log("[TASK COMPLETE] All requested views processed.");
     })();
 });
-                                
+
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
