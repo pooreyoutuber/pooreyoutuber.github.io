@@ -1155,6 +1155,62 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 
+// ===================================================================
+// 6. GSC ORGANIC TRAFFIC BOOSTER (API: /start-task)
+// ===================================================================
+app.post('/start-task', async (req, res) => {
+    const { keyword, url } = req.body;
+
+    if (!keyword || !url) {
+        return res.status(400).json({ status: 'error', message: 'Keyword and URL are required!' });
+    }
+
+    // Response turant bhej rahe hain taaki frontend "Activated" dikhaye
+    res.status(200).json({ 
+        success: true, 
+        message: "GSC Boost Task Activated! 1000 views will be processed slowly." 
+    });
+
+    // Background process start
+    (async () => {
+        const totalViews = 1000;
+        console.log(`\n[GSC BOOSTER] Starting Organic Search Simulation for: ${keyword}`);
+
+        for (let i = 1; i <= totalViews; i++) {
+            try {
+                [span_5](start_span)[span_6](start_span)// 1. Random User Agent aur Geo select karna[span_5](end_span)[span_6](end_span)
+                const userAgent = getRandomUserAgent();
+                const geo = getRandomGeo();
+                
+                [span_7](start_span)[span_8](start_span)// 2. Google Search Referrer simulate karna[span_7](end_span)[span_8](end_span)
+                const googleReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&oq=${encodeURIComponent(keyword)}`;
+
+                [span_9](start_span)// 3. Website visit simulate karna (Using node-fetch)[span_9](end_span)
+                // Note: Agar aapke paas proxies hain toh aap yahan proxy agent bhi laga sakte hain.
+                await nodeFetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': userAgent,
+                        'Referer': googleReferrer,
+                        'Accept-Language': 'en-US,en;q=0.9'
+                    },
+                    timeout: 10000
+                });
+
+                console.log(`[GSC View ${i}/1000] Organic Click Simulated via Google: ${keyword}`);
+
+                [span_10](start_span)// 4. Safe Mode: Clicks ke beech me lamba delay (6-8 hours spread karne ke liye)[span_10](end_span)
+                // 1000 views in 7 hours (avg) = ~25 seconds delay per view
+                const delay = randomInt(20000, 30000); 
+                await new Promise(resolve => setTimeout(resolve, delay));
+
+            } catch (err) {
+                console.error(`[GSC Error] View ${i} failed: ${err.message}`);
+            }
+        }
+        console.log(`[GSC BOOSTER] All 1000 views completed for ${url}`);
+    })();
+});
 
 // ===================================================================
 // --- SERVER START ---
