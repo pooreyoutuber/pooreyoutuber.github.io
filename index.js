@@ -1217,11 +1217,10 @@ app.post('/start-task', async (req, res) => {
 });
 
 // ===================================================================
-// 7. REAL YOUTUBE VIEW INCREASER (CLOUD BROWSER ENGINE)
+// 6. ULTIMATE YOUTUBE VIEW ENGINE (RENDER CLOUD OPTIMIZED)
 // ===================================================================
 const puppeteer = require('puppeteer');
 
-// Tool 6: Real YouTube View Increaser with Render Fix
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
@@ -1229,23 +1228,20 @@ app.post('/api/real-view-boost', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Missing Data' });
     }
 
-    // Response turant bhej rahe hain taaki frontend band ho sake
     res.json({ 
         status: 'accepted', 
         message: 'Task running on Render Cloud. Check logs for progress.' 
     });
 
-    // Background Process
     (async () => {
         console.log(`[RENDER ENGINE] Target: ${video_url}`);
         
         for (let i = 0; i < parseInt(views_count); i++) {
             let browser;
             try {
+                // FIXED: Hum executablePath ko hata rahe hain taaki Puppeteer khud dhoond le
                 browser = await puppeteer.launch({
                     headless: "new",
-                    // RENDER FIX: Yeh line Chrome dhoondne mein madad karegi
-                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome', 
                     args: [
                         '--no-sandbox', 
                         '--disable-setuid-sandbox', 
@@ -1256,35 +1252,33 @@ app.post('/api/real-view-boost', async (req, res) => {
 
                 const page = await browser.newPage();
                 
-                // Random Identity
-                const ua = USER_AGENTS ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : 'Mozilla/5.0';
+                // Random Identity (Using your existing USER_AGENTS array)
+                const ua = (typeof USER_AGENTS !== 'undefined') ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36';
                 await page.setUserAgent(ua);
 
-                console.log(`[View ${i+1}] Browser Started...`);
+                console.log(`[View ${i+1}] Browser Started Successfully`);
                 
-                // Load Video
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play click simulation
+                // Play video simulation
                 try {
                     await page.click('.ytp-play-button');
-                } catch (e) { /* Auto-play active */ }
+                } catch (e) { /* Already playing */ }
 
-                // Wait for watch time
                 const seconds = (parseInt(watch_time) || 60);
                 await new Promise(r => setTimeout(r, seconds * 1000));
 
                 console.log(`[View ${i+1}] Success: Delivered ${seconds}s`);
                 await browser.close();
 
-                // 10-20 seconds break before next view
-                await new Promise(r => setTimeout(r, 15000));
+                // Break to avoid bot detection
+                await new Promise(r => setTimeout(r, 10000));
 
             } catch (err) {
                 console.error(`[View ${i+1}] Error: ${err.message}`);
                 if (browser) await browser.close();
-                // Agar Chrome nahi mila toh loop break kar do taaki server crash na ho
-                if (err.message.includes("Could not find Chrome")) break; 
+                // Agar Chrome issue hai toh break
+                if (err.message.includes("Browser was not found")) break;
             }
         }
     })();
