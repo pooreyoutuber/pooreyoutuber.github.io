@@ -1223,7 +1223,7 @@ app.post('/start-task', async (req, res) => {
 // 6. ULTIMATE REAL-VIEW BOOSTER (FIXED FOR RENDER)
 // ===================================================================
 // Pehle se upar 'const fs = require("fs");' hona chahiye, isliye yahan dobara mat likhna.
-
+const puppeteer = require('puppeteer');
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
