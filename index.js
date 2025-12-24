@@ -1220,9 +1220,11 @@ app.post('/start-task', async (req, res) => {
 // 7. NEW: YOUTUBE STUDIO-VERIFIED BOOSTER (ADVANCED)
 // ===================================================================
 // ===================================================================
-// 6. REAL YOUTUBE VIEW INCREASER (RENDER OPTIMIZED)
+// 6. REAL YOUTUBE VIEW INCREASER (SEQUENTIAL RENDER FIX)
 // ===================================================================
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
@@ -1231,24 +1233,30 @@ app.post('/api/real-view-boost', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Missing Data' });
     }
 
-    // User ko message dikhao ki kaam shuru ho gaya hai
+    // Response turant bhej rahe hain taaki frontend "Accepted" dikhaye
     res.json({ 
         status: 'accepted', 
-        message: `Task active. Delivering ${views_count} views sequentially on Render Cloud.` 
+        message: 'Task started. Views will be delivered one-by-one on the cloud.' 
     });
 
-    // Background Execution (Server par chalta rahega)
+    // Background Sequential Logic
     (async () => {
         console.log(`[REAL-BOOSTER] Starting session for: ${video_url}`);
-        
-        for (let i = 1; i <= parseInt(views_count); i++) {
+        const total = parseInt(views_count);
+        const duration = parseInt(watch_time) || 30;
+
+        // Render Chrome Path (Ye path Puppeteer installation ke baad banta hai)
+        const possibleChromePath = '/opt/render/.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux64/chrome';
+
+        for (let i = 1; i <= total; i++) {
             let browser;
             try {
-                // RENDER CHROME FIX: 
-                // Hum executablePath specify nahi karenge, Puppeteer ko default dhoondne denge
-                // Lekin 'headless: "new"' aur 'args' zaroori hain.
+                console.log(`[View ${i}/${total}] Launching browser...`);
+                
                 browser = await puppeteer.launch({
                     headless: "new",
+                    // Agar Render par manual install hua hai to wahan se uthayega
+                    executablePath: fs.existsSync(possibleChromePath) ? possibleChromePath : null,
                     args: [
                         '--no-sandbox', 
                         '--disable-setuid-sandbox', 
@@ -1259,47 +1267,44 @@ app.post('/api/real-view-boost', async (req, res) => {
 
                 const page = await browser.newPage();
                 
-                // Har view ke liye alag identity
+                // Random User Agent
                 const ua = (typeof USER_AGENTS !== 'undefined') ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
                 await page.setUserAgent(ua);
 
-                console.log(`[View ${i}] Browser started. Opening video...`);
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play Button click karne ki koshish (agar zarurat ho)
+                // Play Button Click Simulation
                 try {
                     await page.evaluate(() => {
                         const playBtn = document.querySelector(".ytp-play-button");
                         if (playBtn) playBtn.click();
                     });
-                } catch (e) { /* Auto-play active */ }
+                } catch (e) { /* Auto-play already active */ }
 
-                // Jitna watch time maanga gaya hai utni der ruko
-                const sleepTime = (parseInt(watch_time) || 30) * 1000;
-                console.log(`[View ${i}] Watching for ${sleepTime/1000} seconds...`);
-                await new Promise(r => setTimeout(r, sleepTime));
+                console.log(`[View ${i}] Playing video for ${duration} seconds...`);
+                await new Promise(r => setTimeout(r, duration * 1000));
 
                 await browser.close();
-                console.log(`[View ${i}] Completed.`);
+                console.log(`[View ${i}] Success. Closing session.`);
 
-                // Views ke beech mein 8-15 seconds ka random gap (Anti-Spam)
-                await new Promise(r => setTimeout(r, Math.random() * (15000 - 8000) + 8000));
+                // Anti-detection: Wait 10 seconds before next view
+                await new Promise(r => setTimeout(r, 10000));
 
             } catch (err) {
-                console.error(`[View ${i}] FAILED: ${err.message}`);
+                console.error(`[View ${i}] Error: ${err.message}`);
                 if (browser) await browser.close();
                 
-                // Agar Chrome ka wahi error aaye, toh loop stop kar do varna log bhar jayenge
+                // Agar Chrome missing hai, toh loop ko rokh dein taaki logs na bharein
                 if (err.message.includes("Could not find Chrome")) {
-                    console.log("CRITICAL ERROR: Chrome installation missing on Render.");
-                    break; 
+                    console.log("CRITICAL: Chrome not found. Check Build Command and Env Vars.");
+                    break;
                 }
             }
         }
-        console.log("[TASK FINISHED] All views processed.");
+        console.log("[TASK COMPLETE] All views processed.");
     })();
 });
-
+                                
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
