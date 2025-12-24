@@ -1219,9 +1219,11 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. NEW: YOUTUBE STUDIO-VERIFIED BOOSTER (ADVANCED)
 // ===================================================================
+// ===================================================================
+// 6. REAL YOUTUBE VIEW INCREASER (RENDER OPTIMIZED)
+// ===================================================================
 const puppeteer = require('puppeteer');
 
-// Tool: Real YouTube View Increaser (Sequential Mode)
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
@@ -1229,65 +1231,74 @@ app.post('/api/real-view-boost', async (req, res) => {
         return res.status(400).json({ status: 'error', message: 'Missing Data' });
     }
 
-    // User ko turant response mil jayega
+    // User ko message dikhao ki kaam shuru ho gaya hai
     res.json({ 
         status: 'accepted', 
-        message: `Task started: Delivering ${views_count} views one by one.` 
+        message: `Task active. Delivering ${views_count} views sequentially on Render Cloud.` 
     });
 
-    // Background Process (Sequential Logic)
+    // Background Execution (Server par chalta rahega)
     (async () => {
-        console.log(`[REAL-BOOSTER] Target URL: ${video_url}`);
-        const total = parseInt(views_count);
-        const duration = parseInt(watch_time) || 30; // Default 30 sec
-
-        for (let i = 1; i <= total; i++) {
+        console.log(`[REAL-BOOSTER] Starting session for: ${video_url}`);
+        
+        for (let i = 1; i <= parseInt(views_count); i++) {
             let browser;
             try {
-                console.log(`[View ${i}/${total}] Starting browser...`);
-                
+                // RENDER CHROME FIX: 
+                // Hum executablePath specify nahi karenge, Puppeteer ko default dhoondne denge
+                // Lekin 'headless: "new"' aur 'args' zaroori hain.
                 browser = await puppeteer.launch({
                     headless: "new",
-                    // Isse Render par Chrome mil jayega
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+                    args: [
+                        '--no-sandbox', 
+                        '--disable-setuid-sandbox', 
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu'
+                    ]
                 });
 
                 const page = await browser.newPage();
                 
-                // Random Identity (User Agent)
-                const ua = USER_AGENTS ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : 'Mozilla/5.0';
+                // Har view ke liye alag identity
+                const ua = (typeof USER_AGENTS !== 'undefined') ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
                 await page.setUserAgent(ua);
 
-                // Video Page par jana
+                console.log(`[View ${i}] Browser started. Opening video...`);
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play button click simulation (agar auto-play na ho)
+                // Play Button click karne ki koshish (agar zarurat ho)
                 try {
-                    await page.click('.ytp-play-button');
-                } catch (e) { }
+                    await page.evaluate(() => {
+                        const playBtn = document.querySelector(".ytp-play-button");
+                        if (playBtn) playBtn.click();
+                    });
+                } catch (e) { /* Auto-play active */ }
 
-                console.log(`[View ${i}] Watching for ${duration} seconds...`);
-                
-                // Utni der rukna jitna user ne bola hai
-                await new Promise(r => setTimeout(r, duration * 1000));
+                // Jitna watch time maanga gaya hai utni der ruko
+                const sleepTime = (parseInt(watch_time) || 30) * 1000;
+                console.log(`[View ${i}] Watching for ${sleepTime/1000} seconds...`);
+                await new Promise(r => setTimeout(r, sleepTime));
 
-                console.log(`[View ${i}] Success! Closing browser.`);
                 await browser.close();
+                console.log(`[View ${i}] Completed.`);
 
-                // 5-10 second ka gap doosre view se pehle (Safety ke liye)
-                await new Promise(r => setTimeout(r, 5000));
+                // Views ke beech mein 8-15 seconds ka random gap (Anti-Spam)
+                await new Promise(r => setTimeout(r, Math.random() * (15000 - 8000) + 8000));
 
             } catch (err) {
-                console.error(`[View ${i}] Error: ${err.message}`);
+                console.error(`[View ${i}] FAILED: ${err.message}`);
                 if (browser) await browser.close();
-                // Agar Chrome ka issue hai to thoda wait karke dobara try karega
-                await new Promise(r => setTimeout(r, 10000));
+                
+                // Agar Chrome ka wahi error aaye, toh loop stop kar do varna log bhar jayenge
+                if (err.message.includes("Could not find Chrome")) {
+                    console.log("CRITICAL ERROR: Chrome installation missing on Render.");
+                    break; 
+                }
             }
         }
-        console.log(`[TASK COMPLETE] Finished ${total} views.`);
+        console.log("[TASK FINISHED] All views processed.");
     })();
 });
-
 
 // ===================================================================
 // --- SERVER START ---
