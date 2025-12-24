@@ -1220,99 +1220,70 @@ app.post('/start-task', async (req, res) => {
 // 7. NEW: YOUTUBE STUDIO-VERIFIED BOOSTER (ADVANCED)
 // ===================================================================
 // ===================================================================
-// 6. REAL YOUTUBE VIEW INCREASER (AUTO-DETECTION & SEQUENTIAL)
-// ===================================================================
-// Note: const puppeteer, fs, path, etc. upar file mein hone chahiye
-const puppeteer = require('puppeteer');
 
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
+
+// ===================================================================
+// 6. REAL YOUTUBE VIEW INCREASER (SMART AUTO-VERSION)
+// ===================================================================
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    // Turant response taaki frontend process dikhaye
     if (!video_url || !views_count) {
         return res.status(400).json({ status: 'error', message: 'Missing Data' });
     }
 
-    res.json({ 
-        status: 'accepted', 
-        message: 'Cloud Worker active. Views are being processed sequentially.' 
-    });
+    res.json({ status: 'accepted', message: 'Task started with Smart Version Detection.' });
 
-    // Background Execution Logic
     (async () => {
-        console.log(`[REAL-BOOSTER] Starting session for: ${video_url}`);
-        const total = parseInt(views_count);
-        const duration = parseInt(watch_time) || 30;
-
-        // --- RENDER DYNAMIC PATH FINDER ---
-        // Ye logic automatic folder scan karke Chrome executable dhoondta hai
+        console.log(`[REAL-BOOSTER] Target: ${video_url}`);
+        
+        // --- SMART PATH LOGIC (Equivalent to using *) ---
         const cacheBase = '/opt/render/.cache/puppeteer/chrome';
         let detectedPath = null;
 
         try {
             if (fs.existsSync(cacheBase)) {
-                const versions = fs.readdirSync(cacheBase);
+                // Ye line folder scan karti hai (Wildcard logic)
+                const versions = fs.readdirSync(cacheBase); 
                 if (versions.length > 0) {
-                    // Ye pehle folder mein jaakar chrome-linux64 dhoond lega
+                    // Jo bhi folder mila, uska path set kar do
                     detectedPath = path.join(cacheBase, versions[0], 'chrome-linux64', 'chrome');
-                    console.log(`[SYSTEM] Chrome found at: ${detectedPath}`);
+                    console.log(`[SYSTEM] Auto-Detected Chrome: ${detectedPath}`);
                 }
             }
         } catch (e) {
-            console.log("[SYSTEM] Auto-path detection failed. Falling back to default.");
+            console.log("[SYSTEM] Wildcard detection failed.");
         }
 
-        for (let i = 1; i <= total; i++) {
+        for (let i = 1; i <= parseInt(views_count); i++) {
             let browser;
             try {
-                console.log(`[View ${i}/${total}] Launching Cloud Browser...`);
-                
+                console.log(`[View ${i}] Launching browser...`);
                 browser = await puppeteer.launch({
                     headless: "new",
-                    executablePath: detectedPath, // Auto-detected path
-                    args: [
-                        '--no-sandbox', 
-                        '--disable-setuid-sandbox', 
-                        '--disable-dev-shm-usage',
-                        '--single-process'
-                    ]
+                    executablePath: detectedPath, // Yahan '*' wala detected path use ho raha hai
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
                 });
 
                 const page = await browser.newPage();
-                
-                // Random User Agent (Agar upar USER_AGENTS array hai to)
-                const ua = (typeof USER_AGENTS !== 'undefined') ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
-                await page.setUserAgent(ua);
-
-                // Video URL par jana
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play Button simulation
-                try {
-                    await page.evaluate(() => {
-                        const btn = document.querySelector(".ytp-play-button");
-                        if (btn) btn.click();
-                    });
-                } catch (e) {}
-
-                console.log(`[View ${i}] Watching for ${duration} seconds...`);
-                await new Promise(r => setTimeout(r, duration * 1000));
+                console.log(`[View ${i}] Watching for ${watch_time}s...`);
+                await new Promise(r => setTimeout(r, parseInt(watch_time) * 1000));
 
                 await browser.close();
-                console.log(`[View ${i}] Success. Closing instance.`);
-
-                // Anti-detection gap: Render ki limited RAM ke liye zaroori hai
+                // 10 second ka gap taaki Render crash na ho
                 await new Promise(r => setTimeout(r, 10000));
 
             } catch (err) {
                 console.error(`[View ${i}] Error: ${err.message}`);
                 if (browser) await browser.close();
-                
-                // Agar Chrome na mile to 15s ruko varna logs bhar jayenge
-                await new Promise(r => setTimeout(r, 15000));
+                await new Promise(r => setTimeout(r, 10000));
             }
         }
-        console.log("[TASK COMPLETE] All views processed.");
     })();
 });
 
