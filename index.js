@@ -1223,7 +1223,6 @@ app.post('/start-task', async (req, res) => {
 // 6. REAL YOUTUBE VIEW INCREASER (SEQUENTIAL RENDER FIX)
 // ===================================================================
 const puppeteer = require('puppeteer');
-const fs = require('fs');
 const path = require('path');
 
 app.post('/api/real-view-boost', async (req, res) => {
