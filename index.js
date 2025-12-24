@@ -1219,11 +1219,12 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. NEW: YOUTUBE STUDIO-VERIFIED BOOSTER (ADVANCED)
 // ===================================================================
-// ===================================================================
-// 6. ULTIMATE REAL-VIEW BOOSTER (FIXED FOR RENDER)
-// ===================================================================
-// Pehle se upar 'const fs = require("fs");' hona chahiye, isliye yahan dobara mat likhna.
+// --- IMPORT AT THE TOP (Check if already exists) ---
 const puppeteer = require('puppeteer');
+
+// ===================================================================
+// 6. ULTIMATE YOUTUBE VIEW INCREASER (AUTO-PATH DETECTION)
+// ===================================================================
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
@@ -1233,50 +1234,51 @@ app.post('/api/real-view-boost', async (req, res) => {
 
     res.json({ 
         status: 'accepted', 
-        message: 'Cloud Browser Task Started. Sequential processing active.' 
+        message: 'Task accepted! Processing views one-by-one in the background.' 
     });
 
     (async () => {
-        console.log(`[REAL-BOOSTER] Starting session for: ${video_url}`);
+        console.log(`[REAL-BOOSTER] Target: ${video_url}`);
         const total = parseInt(views_count);
         const duration = parseInt(watch_time) || 30;
 
-        // Render specific chrome path detection
+        // --- DYNAMIC CHROME PATH DETECTION ---
         const cacheBase = '/opt/render/.cache/puppeteer/chrome';
-        let chromePath = null;
+        let detectedPath = null;
 
-        if (fs.existsSync(cacheBase)) {
-            const versions = fs.readdirSync(cacheBase);
-            if (versions.length > 0) {
-                // Sabse latest version dhoondna
-                chromePath = `${cacheBase}/${versions[0]}/chrome-linux64/chrome`;
+        try {
+            if (fs.existsSync(cacheBase)) {
+                const versions = fs.readdirSync(cacheBase);
+                if (versions.length > 0) {
+                    // Automatically finds the correct version folder (e.g. linux-126.x or 127.x)
+                    detectedPath = `${cacheBase}/${versions[0]}/chrome-linux64/chrome`;
+                    console.log(`[SYSTEM] Chrome detected at: ${detectedPath}`);
+                }
             }
-        }
+        } catch (e) { console.log("[SYSTEM] Path detection failed, using default."); }
 
         for (let i = 1; i <= total; i++) {
             let browser;
             try {
-                console.log(`[View ${i}/${total}] Launching browser instance...`);
+                console.log(`[View ${i}/${total}] Launching Cloud Browser...`);
                 
                 browser = await puppeteer.launch({
                     headless: "new",
-                    executablePath: chromePath, // Humara dhoonda hua path
+                    executablePath: detectedPath, // Using the detected path
                     args: [
                         '--no-sandbox', 
                         '--disable-setuid-sandbox', 
                         '--disable-dev-shm-usage',
-                        '--single-process',
-                        '--no-zygote'
+                        '--single-process'
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                // Random User Agent from your existing list
+                // Identity Randomizer
                 const ua = (typeof USER_AGENTS !== 'undefined') ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
                 await page.setUserAgent(ua);
 
-                console.log(`[View ${i}] Navigation to video...`);
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
                 // Play interaction
@@ -1287,26 +1289,26 @@ app.post('/api/real-view-boost', async (req, res) => {
                     });
                 } catch (e) {}
 
-                console.log(`[View ${i}] Watching for ${duration} seconds...`);
+                console.log(`[View ${i}] Watching video for ${duration} seconds...`);
                 await new Promise(r => setTimeout(r, duration * 1000));
 
                 await browser.close();
-                console.log(`[View ${i}] Done. Waiting 10s before next view...`);
+                console.log(`[View ${i}] Success! Session closed.`);
 
-                // 10s gap to prevent RAM crash
+                // 8-12 seconds gap to stay under Render RAM limits
                 await new Promise(r => setTimeout(r, 10000));
 
             } catch (err) {
                 console.error(`[View ${i}] Error: ${err.message}`);
                 if (browser) await browser.close();
-                // Agar Chrome nahi mila to 15s wait karke dobara check karega
+                // Delay on error to prevent rapid looping
                 await new Promise(r => setTimeout(r, 15000));
             }
         }
-        console.log("[TASK COMPLETE] All requested views processed.");
+        console.log("[TASK COMPLETE] Finalizing background worker.");
     })();
 });
-
+                    
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
