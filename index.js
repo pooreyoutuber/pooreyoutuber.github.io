@@ -1221,66 +1221,72 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 const puppeteer = require('puppeteer');
 
+// Tool 6: Real YouTube View Increaser with Render Fix
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    // Basic validation
     if (!video_url || !views_count) {
-        return res.status(400).json({ status: 'error', message: 'Video URL and View Count are required.' });
+        return res.status(400).json({ status: 'error', message: 'Missing Data' });
     }
 
-    // Send immediate response so the user can close their browser
+    // Response turant bhej rahe hain taaki frontend band ho sake
     res.json({ 
         status: 'accepted', 
-        message: `Task started for ${views_count} views on Render Cloud. Processing in background...` 
+        message: 'Task running on Render Cloud. Check logs for progress.' 
     });
 
-    // Background Execution (Server-side)
+    // Background Process
     (async () => {
-        console.log(`[CLOUD BOT] Starting view boost: ${video_url}`);
+        console.log(`[RENDER ENGINE] Target: ${video_url}`);
         
         for (let i = 0; i < parseInt(views_count); i++) {
             let browser;
             try {
-                // Launching Headless Browser on Render
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+                    // RENDER FIX: Yeh line Chrome dhoondne mein madad karegi
+                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome', 
+                    args: [
+                        '--no-sandbox', 
+                        '--disable-setuid-sandbox', 
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu'
+                    ]
                 });
 
                 const page = await browser.newPage();
                 
-                [span_2](start_span)// Use random user agents to avoid detection[span_2](end_span)
-                const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-                await page.setUserAgent(userAgent);
+                // Random Identity
+                const ua = USER_AGENTS ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : 'Mozilla/5.0';
+                await page.setUserAgent(ua);
 
-                console.log(`[View ${i+1}] Browser Instance Started...`);
-                await page.goto(video_url, { waitUntil: 'networkidle2' });
+                console.log(`[View ${i+1}] Browser Started...`);
+                
+                // Load Video
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Simulate 'Play' if video doesn't auto-start
+                // Play click simulation
                 try {
                     await page.click('.ytp-play-button');
-                } catch (e) {
-                    // Ignore if button is not found or already playing
-                }
+                } catch (e) { /* Auto-play active */ }
 
-                // Wait for the requested watch time (default 60s)
-                const waitTime = (parseInt(watch_time) || 60) * 1000;
-                await new Promise(r => setTimeout(r, waitTime));
+                // Wait for watch time
+                const seconds = (parseInt(watch_time) || 60);
+                await new Promise(r => setTimeout(r, seconds * 1000));
 
-                console.log(`[View ${i+1}] Success: ${waitTime/1000}s watch time delivered.`);
+                console.log(`[View ${i+1}] Success: Delivered ${seconds}s`);
                 await browser.close();
 
-                [span_3](start_span)// Randomized delay between views to mimic human behavior[span_3](end_span)
-                const sleepDelay = Math.floor(Math.random() * (15000 - 5000 + 1) + 5000);
-                await new Promise(r => setTimeout(r, sleepDelay));
+                // 10-20 seconds break before next view
+                await new Promise(r => setTimeout(r, 15000));
 
             } catch (err) {
-                console.error(`[View ${i+1}] Critical Error: ${err.message}`);
+                console.error(`[View ${i+1}] Error: ${err.message}`);
                 if (browser) await browser.close();
+                // Agar Chrome nahi mila toh loop break kar do taaki server crash na ho
+                if (err.message.includes("Could not find Chrome")) break; 
             }
         }
-        console.log(`[TASK COMPLETE] ${views_count} views delivered to ${video_url}`);
     })();
 });
 
