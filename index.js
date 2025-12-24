@@ -1155,36 +1155,33 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. GSC ORGANIC TRAFFIC BOOSTER (API: /start-task)
+// 6. GSC ORGANIC TRAFFIC BOOSTER (NEW TOOL)
 // ===================================================================
 
-async function simulateGscView(keyword, url, viewCount) {
-    // Aapke original code ke helpers use ho rahe hain
-    [span_3](start_span)const userAgent = getRandomUserAgent();[span_3](end_span)
-    [span_4](start_span)const geo = getRandomGeo();[span_4](end_span)
-    
-    // Realistic Google Search Referrer taaki GSC mein Organic Traffic dikhe
-    const googleReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&oq=${encodeURIComponent(keyword)}&sourceid=chrome&ie=UTF-8`;
-
+async function runGscTask(keyword, url, viewNumber) {
     try {
-        // Axios ka use karke request bhej rahe hain
-        [span_5](start_span)const response = await axios.get(url, {[span_5](end_span)
+        const userAgent = getRandomUserAgent();
+        const geo = getRandomGeo();
+        
+        // Google Search se traffic aata hua dikhane ke liye Referrer
+        const googleReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&oq=${encodeURIComponent(keyword)}&sourceid=chrome&ie=UTF-8`;
+
+        const response = await axios.get(url, {
             headers: {
                 'User-Agent': userAgent,
                 'Referer': googleReferrer,
                 'Accept-Language': 'en-US,en;q=0.9',
-                'Sec-Fetch-Mode': 'navigate'
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
             },
-            timeout: 15000 
+            timeout: 20000 // 20 seconds timeout
         });
 
         if (response.status === 200) {
-            console.log(`[GSC Success] View ${viewCount}/1000 | Keyword: ${keyword} | Geo: ${geo.country}`);
-            return true;
+            console.log(`[GSC-SUCCESS] View #${viewNumber} | Keyword: ${keyword} | Country: ${geo.country}`);
         }
     } catch (error) {
-        console.error(`[GSC Error] View ${viewCount} failed: ${error.message}`);
-        return false;
+        console.error(`[GSC-ERROR] View #${viewNumber} failed: ${error.message}`);
     }
 }
 
@@ -1192,33 +1189,32 @@ app.post('/start-task', async (req, res) => {
     const { keyword, url } = req.body;
 
     if (!keyword || !url) {
-        return res.status(400).json({ status: 'error', message: 'Keyword and URL are required!' });
+        return res.status(400).json({ error: "Keyword and URL are required" });
     }
 
-    // Frontend ko turant confirmation bhej rahe hain
+    // Frontend ko turant response bhejein
     res.status(200).json({ 
         success: true, 
-        message: "🚀 GSC Booster Activated! Views background mein ja rahe hain." 
+        message: "GSC Traffic Task Started! It will complete in 6-8 hours." 
     });
 
-    // Background process jo bina ruke chalti rahegi
+    // Background process jo chalti rahegi
     (async () => {
         const totalViews = 1000;
-        console.log(`\n--- GSC TASK STARTED: ${keyword} ---`);
+        console.log(`\n>>> STARTING GSC BOOST FOR: ${url} (Keyword: ${keyword})`);
 
         for (let i = 1; i <= totalViews; i++) {
-            await simulateGscView(keyword, url, i);
+            await runGscTask(keyword, url, i);
             
-            // Safe Delivery: Har click ke beech random delay
-            // 1000 views ko 6-8 ghante mein spread karne ke liye average 25-30 seconds
-            [span_6](start_span)const delay = randomInt(25000, 35000);[span_6](end_span)
+            // 1000 views ko 7 ghante mein spread karne ke liye delay
+            // Average 25 se 35 seconds ka gap har view ke beech mein
+            const delay = Math.floor(Math.random() * (35000 - 25000 + 1)) + 25000;
             await new Promise(resolve => setTimeout(resolve, delay));
         }
         
-        console.log(`\n--- GSC TASK COMPLETED for ${url} ---`);
+        console.log(`\n>>> GSC BOOST COMPLETED FOR: ${url}`);
     })();
 });
-            
 
 // ===================================================================
 // --- SERVER START ---
