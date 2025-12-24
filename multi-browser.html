@@ -353,7 +353,7 @@
 <script>
     function extractVideoId(url) {
         // Updated regex to handle all common Shorts and standard video formats
-        const shortsRegex = /(?:youtu\.be\/|youtube\.com\/(?:shorts\/|watch\?v=))([0-9A-Za-z_-]{11})/;
+     const shortsRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/;
         const match = url.match(shortsRegex);
         return match ? match[1] : null;
     }
@@ -404,6 +404,7 @@
             const iframe = document.createElement('iframe');
             // Using 'autoplay=0' so the user controls when the views start counting.
             iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&disablekb=1&controls=1`; 
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
             iframe.allowFullscreen = true;
             iframe.title = `YouTube Shorts Player ${i + 1}`;
             playersDiv.appendChild(iframe);
