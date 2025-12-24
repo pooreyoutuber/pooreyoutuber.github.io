@@ -1223,6 +1223,7 @@ app.post('/start-task', async (req, res) => {
 // 6. REAL YOUTUBE VIEW INCREASER (AUTO-DETECTION & SEQUENTIAL)
 // ===================================================================
 // Note: const puppeteer, fs, path, etc. upar file mein hone chahiye
+const puppeteer = require('puppeteer');
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
