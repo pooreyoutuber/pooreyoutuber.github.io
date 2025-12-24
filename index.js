@@ -1219,70 +1219,75 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. NEW: YOUTUBE STUDIO-VERIFIED BOOSTER (ADVANCED)
 // ===================================================================
+const puppeteer = require('puppeteer');
 
-app.post('/api/youtube-verified-boost', async (req, res) => {
-    const { video_url, views_count, proxy_list } = req.body;
+// Tool: Real YouTube View Increaser (Sequential Mode)
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
 
     if (!video_url || !views_count) {
-        return res.status(400).json({ error: "Video URL and Views are required." });
+        return res.status(400).json({ status: 'error', message: 'Missing Data' });
     }
 
-    // 1. Gemini AI se 'Organic' behavior strategy lena
-    let aiStrategy;
-    try {
-        const prompt = `Generate a realistic YouTube watch strategy for the video: ${video_url}. 
-        Provide a JSON object with: 
-        1. 'average_watch_time' (between 60-180 seconds)
-        2. 'playback_speed' (0.75, 1, or 1.25)
-        3. 'search_term' (how a human would search for this video)`;
-        
-        const aiResponse = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: prompt,
-            config: { responseMimeType: "application/json" }
-        });
-        aiStrategy = JSON.parse(aiResponse.text.trim());
-    } catch (e) {
-        aiStrategy = { average_watch_time: 60, playback_speed: 1, search_term: "trending video" };
-    }
-
-    // 2. Response turant bhej dena (Background task start karke)
-    res.status(202).json({
-        status: "PROCESSING",
-        message: "Cloud Nodes Active. AI Strategy: " + aiStrategy.search_term,
-        estimated_completion: `${(views_count * 2)} minutes`
+    // User ko turant response mil jayega
+    res.json({ 
+        status: 'accepted', 
+        message: `Task started: Delivering ${views_count} views one by one.` 
     });
 
-    // 3. Background Task (Actual View Simulation)
+    // Background Process (Sequential Logic)
     (async () => {
-        console.log(`[VERIFIED BOOST] Starting ${views_count} views with strategy:`, aiStrategy);
-        
-        for (let i = 0; i < views_count; i++) {
+        console.log(`[REAL-BOOSTER] Target URL: ${video_url}`);
+        const total = parseInt(views_count);
+        const duration = parseInt(watch_time) || 30; // Default 30 sec
+
+        for (let i = 1; i <= total; i++) {
+            let browser;
             try {
-                [span_3](start_span)// Har view ke liye ek naya User-Agent[span_3](end_span)
-                const userAgent = getRandomUserAgent();
+                console.log(`[View ${i}/${total}] Starting browser...`);
                 
-                // Actual request jo YouTube server ko hit karegi
-                [span_4](start_span)// Note: Agar proxies hain toh yahan axios/node-fetch mein agent pass karein[span_4](end_span)
-                await axios.get(video_url, {
-                    headers: { 
-                        'User-Agent': userAgent,
-                        'Referer': `https://www.youtube.com/results?search_query=${encodeURIComponent(aiStrategy.search_term)}`
-                    },
-                    timeout: 10000
+                browser = await puppeteer.launch({
+                    headless: "new",
+                    // Isse Render par Chrome mil jayega
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
                 });
 
-                console.log(`[View ${i+1}] Hit successful. Simulated Watch: ${aiStrategy.average_watch_time}s`);
+                const page = await browser.newPage();
                 
-                [span_5](start_span)// YouTube Studio mein detect hone ke liye delay zaroori hai[span_5](end_span)
-                const delay = randomInt(30000, 60000); 
-                await new Promise(r => setTimeout(r, delay));
+                // Random Identity (User Agent)
+                const ua = USER_AGENTS ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : 'Mozilla/5.0';
+                await page.setUserAgent(ua);
+
+                // Video Page par jana
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+                // Play button click simulation (agar auto-play na ho)
+                try {
+                    await page.click('.ytp-play-button');
+                } catch (e) { }
+
+                console.log(`[View ${i}] Watching for ${duration} seconds...`);
+                
+                // Utni der rukna jitna user ne bola hai
+                await new Promise(r => setTimeout(r, duration * 1000));
+
+                console.log(`[View ${i}] Success! Closing browser.`);
+                await browser.close();
+
+                // 5-10 second ka gap doosre view se pehle (Safety ke liye)
+                await new Promise(r => setTimeout(r, 5000));
+
             } catch (err) {
-                console.error("View Hit Failed:", err.message);
+                console.error(`[View ${i}] Error: ${err.message}`);
+                if (browser) await browser.close();
+                // Agar Chrome ka issue hai to thoda wait karke dobara try karega
+                await new Promise(r => setTimeout(r, 10000));
             }
         }
+        console.log(`[TASK COMPLETE] Finished ${total} views.`);
     })();
 });
+
 
 // ===================================================================
 // --- SERVER START ---
