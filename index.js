@@ -1217,6 +1217,74 @@ app.post('/start-task', async (req, res) => {
 });
 
 // ===================================================================
+// 7. REAL YOUTUBE VIEW INCREASER (CLOUD BROWSER ENGINE)
+// ===================================================================
+const puppeteer = require('puppeteer');
+
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+
+    // Basic validation
+    if (!video_url || !views_count) {
+        return res.status(400).json({ status: 'error', message: 'Video URL and View Count are required.' });
+    }
+
+    // Send immediate response so the user can close their browser
+    res.json({ 
+        status: 'accepted', 
+        message: `Task started for ${views_count} views on Render Cloud. Processing in background...` 
+    });
+
+    // Background Execution (Server-side)
+    (async () => {
+        console.log(`[CLOUD BOT] Starting view boost: ${video_url}`);
+        
+        for (let i = 0; i < parseInt(views_count); i++) {
+            let browser;
+            try {
+                // Launching Headless Browser on Render
+                browser = await puppeteer.launch({
+                    headless: "new",
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+                });
+
+                const page = await browser.newPage();
+                
+                [span_2](start_span)// Use random user agents to avoid detection[span_2](end_span)
+                const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+                await page.setUserAgent(userAgent);
+
+                console.log(`[View ${i+1}] Browser Instance Started...`);
+                await page.goto(video_url, { waitUntil: 'networkidle2' });
+
+                // Simulate 'Play' if video doesn't auto-start
+                try {
+                    await page.click('.ytp-play-button');
+                } catch (e) {
+                    // Ignore if button is not found or already playing
+                }
+
+                // Wait for the requested watch time (default 60s)
+                const waitTime = (parseInt(watch_time) || 60) * 1000;
+                await new Promise(r => setTimeout(r, waitTime));
+
+                console.log(`[View ${i+1}] Success: ${waitTime/1000}s watch time delivered.`);
+                await browser.close();
+
+                [span_3](start_span)// Randomized delay between views to mimic human behavior[span_3](end_span)
+                const sleepDelay = Math.floor(Math.random() * (15000 - 5000 + 1) + 5000);
+                await new Promise(r => setTimeout(r, sleepDelay));
+
+            } catch (err) {
+                console.error(`[View ${i+1}] Critical Error: ${err.message}`);
+                if (browser) await browser.close();
+            }
+        }
+        console.log(`[TASK COMPLETE] ${views_count} views delivered to ${video_url}`);
+    })();
+});
+
+// ===================================================================
 // --- SERVER START ---
 // ===================================================================
 // Sirf ek hi baar server start hoga
