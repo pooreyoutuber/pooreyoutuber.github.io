@@ -1,36 +1,16 @@
-# Render Blueprint Specification v1
-
 services:
   - type: web
-    name: ws-proxy-php-tool
-    # आपका Git रिपॉजिटरी URL (जैसे GitHub, GitLab)
-    repo: YOUR_GIT_REPOSITORY_URL
-    
-    # PHP के लिए आवश्यक
-    runtime: php
-
-    # PHP और Apache सर्वर को शुरू करने के लिए स्टैंडर्ड कमांड
-    buildCommand: ""
-    startCommand: "vendor/bin/heroku-php-apache2" 
-    
-    # --- Environment Variables (सुरक्षित प्रॉक्सी क्रेडेंशियल्स) ---
+    name: pooreyoutuber-combined-service
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npx puppeteer browsers install chrome
+    startCommand: node index.js
     envVars:
-      - key: PROXY_DOMAIN
-        value: "p.webshare.io" # Webshare का रोटेटिंग प्रॉक्सी डोमेन
-      
-      - key: PROXY_PORT
-        value: "80" # Webshare प्रॉक्सी पोर्ट
-      
-      - key: PROXY_USERNAME
-        value: "YOUR_WEBSHARE_USERNAME" # 🔴 अपना वास्तविक यूज़रनेम यहाँ डालें 🔴
-      
-      - key: PROXY_PASSWORD
-        value: "YOUR_WEBSHARE_PASSWORD" # 🔴 अपना वास्तविक पासवर्ड यहाँ डालें 🔴
-      
-      # Apache को index.html को रूट (/) पर सर्व करने के लिए
-      - key: WEB_DOCUMENT_ROOT
-        value: "." 
-
-    # फ्री प्लान का उपयोग करें
-    plan: free 
-    
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/.cache/puppeteer
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "false"
+      - key: NODE_VERSION
+        value: "20.0.0" # Stabilize node version
+        
