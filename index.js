@@ -1223,68 +1223,89 @@ app.post('/start-task', async (req, res) => {
 
 const puppeteer = require('puppeteer');
 const path = require('path');
+// ==========================================================
+// TOOL: YouTube View & Watch Time Boost (Render Optimized)
+// ==========================================
 
-// ===================================================================
-// 6. REAL YOUTUBE VIEW INCREASER (SMART AUTO-VERSION)
-// ===================================================================
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url || !views_count) {
-        return res.status(400).json({ status: 'error', message: 'Missing Data' });
+    if (!video_url) {
+        return res.status(400).json({ status: "error", message: "YouTube URL is required!" });
     }
 
-    res.json({ status: 'accepted', message: 'Task started with Smart Version Detection.' });
+    // Response turant bhej dein taaki frontend hang na ho
+    res.status(200).json({ 
+        status: "success", 
+        message: "Automation started on Cloud." 
+    });
 
+    // Background process shuru
     (async () => {
-        console.log(`[REAL-BOOSTER] Target: ${video_url}`);
-        
-        // --- SMART PATH LOGIC (Equivalent to using *) ---
-        const cacheBase = '/opt/render/.cache/puppeteer/chrome';
-        let detectedPath = null;
+        const count = parseInt(views_count) || 1;
+        const duration = (parseInt(watch_time) || 60) * 1000;
 
-        try {
-            if (fs.existsSync(cacheBase)) {
-                // Ye line folder scan karti hai (Wildcard logic)
-                const versions = fs.readdirSync(cacheBase); 
-                if (versions.length > 0) {
-                    // Jo bhi folder mila, uska path set kar do
-                    detectedPath = path.join(cacheBase, versions[0], 'chrome-linux64', 'chrome');
-                    console.log(`[SYSTEM] Auto-Detected Chrome: ${detectedPath}`);
-                }
-            }
-        } catch (e) {
-            console.log("[SYSTEM] Wildcard detection failed.");
-        }
-
-        for (let i = 1; i <= parseInt(views_count); i++) {
+        for (let i = 1; i <= count; i++) {
             let browser;
             try {
-                console.log(`[View ${i}] Launching browser...`);
+                console.log(`[View ${i}] Launching optimized browser...`);
+                
                 browser = await puppeteer.launch({
                     headless: "new",
-                    executablePath: detectedPath, // Yahan '*' wala detected path use ho raha hai
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+                    // Render specific binary path fix
+                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu',
+                        '--no-first-run',
+                        '--no-zygote',
+                        '--single-process' // Render ki 512MB RAM ke liye zaroori
+                    ]
                 });
 
                 const page = await browser.newPage();
-                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
+                
+                // Random User Agent choose karein (Aapki existing list se)
+                const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+                await page.setUserAgent(ua);
 
-                console.log(`[View ${i}] Watching for ${watch_time}s...`);
-                await new Promise(r => setTimeout(r, parseInt(watch_time) * 1000));
+                // Viewport size random karein taaki bot detect na ho
+                await page.setViewport({ width: 1280, height: 720 });
 
+                console.log(`[View ${i}] Visiting: ${video_url}`);
+                
+                // YouTube load karein
+                await page.goto(video_url, { 
+                    waitUntil: 'domcontentloaded', // 'networkidle2' ki jagah ye fast hai
+                    timeout: 90000 
+                });
+
+                // Video play karne ki koshish (kabhi kabhi auto-play off hota hai)
+                try {
+                    await page.click('.ytp-play-button');
+                } catch (e) {
+                    // Agar button nahi mila toh shayad video auto-play ho rahi hai
+                }
+
+                console.log(`[View ${i}] Watching for ${watch_time} seconds...`);
+                await new Promise(r => setTimeout(r, duration));
+                
                 await browser.close();
-                // 10 second ka gap taaki Render crash na ho
-                await new Promise(r => setTimeout(r, 10000));
+                console.log(`✅ [View ${i}] Completed.`);
 
             } catch (err) {
-                console.error(`[View ${i}] Error: ${err.message}`);
+                console.error(`❌ [View ${i}] Error:`, err.message);
                 if (browser) await browser.close();
-                await new Promise(r => setTimeout(r, 10000));
             }
+
+            // Views ke beech mein 10 sec ka gap (Server stability ke liye)
+            await new Promise(r => setTimeout(r, 10000));
         }
     })();
 });
+
 
 // ===================================================================
 // --- SERVER START ---
