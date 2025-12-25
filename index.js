@@ -1216,83 +1216,67 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
-// --- TOOL 7: ULTIMATE CLOUD BROWSER BOOST (RENDER FIXED) ---
+// --- TOOL 7: ULTIMATE CLOUD BROWSER BOOST (VERSION FIXED) ---
 // ===================================================================
 const puppeteer = require('puppeteer');
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url) {
-        return res.status(400).json({ message: "YouTube URL missing!" });
-    }
+    if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
-    // Response turant bhej dein
-    res.status(200).json({
-        status: "success",
-        message: "Cloud Browser threads started. Watching in background..."
-    });
+    res.status(200).json({ status: "success", message: "Cloud Threads Started!" });
 
     const startBrowser = async () => {
-        // Render Free Tier ke liye max 5-10 threads hi rakhein warna crash hoga
         const total = Math.min(parseInt(views_count), 10);
         
         for (let i = 0; i < total; i++) {
             let browser;
             try {
+                // Wildcard ya manual path ki jagah Puppeteer ka apna automatic path detector use karein
+                // Agar Render pe binary installed hai, toh ye hamesha sahi path uthayega
+                const autoPath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
+
                 browser = await puppeteer.launch({
-                    // Ye line Render ke download kiye huye Chrome ko auto-detect karegi
-                    executablePath: puppeteer.executablePath(),
+                    executablePath: autoPath,
                     headless: "new",
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
                         '--disable-dev-shm-usage',
                         '--disable-gpu',
-                        '--single-process',
-                        '--no-zygote'
+                        '--single-process'
                     ]
                 });
 
                 const page = await browser.newPage();
-                
-                // Random User Agent taaki YouTube block na kare
-                const userAgents = [
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-                ];
-                await page.setUserAgent(userAgents[Math.floor(Math.random() * userAgents.length)]);
+                await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
 
-                console.log(`🚀 [Thread ${i+1}] Opening: ${video_url}`);
+                console.log(`🚀 [Thread ${i+1}] Browser started using: ${autoPath}`);
                 
-                // Video Load karein
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play Button Click Simulation (Taaki Studio count kare)
+                // Play Button Click Logic
                 try {
-                    await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
+                    await page.waitForSelector('.ytp-play-button', { timeout: 8000 });
                     await page.click('.ytp-play-button');
-                    console.log(`▶️ [Thread ${i+1}] Video is playing.`);
+                    console.log(`▶️ [Thread ${i+1}] Video playing...`);
                 } catch (e) {
-                    console.log(`[Thread ${i+1}] Video playing automatically.`);
+                    console.log(`[Thread ${i+1}] Auto-play enabled.`);
                 }
 
-                // Watch Time Delay (Default 60s max for safety)
-                const sleepTime = Math.min(parseInt(watch_time) * 1000, 60000); 
-                await new Promise(r => setTimeout(r, sleepTime));
+                const sleep = Math.min(parseInt(watch_time) * 1000, 60000);
+                await new Promise(r => setTimeout(r, sleep));
 
                 await browser.close();
-                console.log(`✅ [Thread ${i+1}] Task Completed.`);
+                console.log(`✅ [Thread ${i+1}] Success!`);
 
             } catch (err) {
                 console.error(`❌ [Error] Thread ${i+1} failed: ${err.message}`);
                 if (browser) await browser.close();
-                // Agar Chrome nahi mila toh loop break kardein
-                if (err.message.includes("Could not find Chrome")) break;
             }
         }
     };
-
     startBrowser();
 });
 
