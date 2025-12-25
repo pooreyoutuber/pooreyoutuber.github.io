@@ -1215,89 +1215,89 @@ app.post('/start-task', async (req, res) => {
         console.log(`\n>>> GSC BOOST COMPLETED FOR: ${url}`);
     })();
 });
-
+/ ===================================================================
+// --- TOOL 7: ULTIMATE CLOUD BROWSER BOOST (FIXED PATH) ---
 // ===================================================================
-// --- TOOL 7: ULTIMATE CLOUD BROWSER BOOST (FIXED VERSION) ---
-// ===================================================================
-const puppeteer = require('puppeteer');
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
     if (!video_url) {
-        return res.status(400).json({ message: "YouTube URL is required!" });
+        return res.status(400).json({ message: "YouTube URL missing!" });
     }
 
-    // Response turant bhej dein taki frontend hang na ho
+    // Response turant bhej dein
     res.status(200).json({
         status: "success",
-        message: "Cloud Threads Started. Check your Studio Real-time."
+        message: "Cloud Browser threads started on Render!"
     });
 
-    // Background process shuru karein
-    const runBoost = async () => {
-        const totalViews = Math.min(parseInt(views_count), 50); // Server safety limit
+    const startBrowser = async () => {
+        // Render Free Tier ke liye limit (Max 10 threads)
+        const total = Math.min(parseInt(views_count), 10);
         
-        for (let i = 0; i < totalViews; i++) {
+        // AAPKA CHROME PATH (Jo aapne provide kiya)
+        const RENDER_CHROME_PATH = '/opt/render/.cache/puppeteer/chrome/linux-126.0.6478.126/chrome-linux64/chrome';
+
+        for (let i = 0; i < total; i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
-                    // Ye path Render par Chrome dhoondhne mein madad karta hai
-                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+                    executablePath: RENDER_CHROME_PATH,
                     headless: "new",
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
                         '--disable-dev-shm-usage',
                         '--disable-gpu',
-                        '--no-first-run',
-                        '--no-zygote',
-                        '--single-process' // Kam RAM kharch karta hai
+                        '--single-process',
+                        '--no-zygote'
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                // Random User Agent taaki YouTube block na kare
-                const userAgents = [
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
-                ];
-                await page.setUserAgent(userAgents[Math.floor(Math.random() * userAgents.length)]);
+                // Random User Agent set karein
+                const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+                await page.setUserAgent(ua);
 
-                console.log(`[Thread ${i+1}] Launching View...`);
+                console.log(`🚀 [Thread ${i+1}] Opening YouTube...`);
                 
-                // Video page par jayein
+                // Video Load karein
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play button click karne ki koshish karein
+                // Play Button Click Simulation
                 try {
-                    await page.waitForSelector('.ytp-play-button', { timeout: 5000 });
+                    await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
                     await page.click('.ytp-play-button');
-                } catch (e) { /* Auto-play active */ }
+                    console.log(`▶️ [Thread ${i+1}] Video playing.`);
+                } catch (e) {
+                    console.log(`[Thread ${i+1}] Autoplay active.`);
+                }
 
-                // Watch time tak rukein (max 60 sec per thread server load ke liye)
-                const waitTime = Math.min(parseInt(watch_time) * 1000, 60000);
-                await new Promise(r => setTimeout(r, waitTime));
+                // Watch Time (Wait)
+                const sleepTime = Math.min(parseInt(watch_time) * 1000, 60000); 
+                await new Promise(r => setTimeout(r, sleepTime));
 
                 await browser.close();
-                console.log(`[Thread ${i+1}] View Successful.`);
+                console.log(`✅ [Thread ${i+1}] Done.`);
 
             } catch (err) {
-                console.error(`[Error] Thread ${i+1} failed: Make sure Chrome is installed.`);
+                console.error(`❌ [Error] Thread ${i+1} failed:`, err.message);
                 if (browser) await browser.close();
-                // Agar Chrome nahi hai toh loop tod dein
-                if (err.message.includes("browser")) break;
+                
+                // Agar path galat ho toh loop break kar dein
+                if (err.message.includes("ENOENT")) break;
             }
         }
     };
 
-    runBoost();
+    startBrowser();
 });
+
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
-// Sirf ek hi baar server start hoga
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
