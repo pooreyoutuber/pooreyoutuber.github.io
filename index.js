@@ -1219,7 +1219,7 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // --- TOOL 7: ULTIMATE CLOUD BROWSER BOOST (FIXED PATH) ---
 // ===================================================================
-
+const puppeteer = require('puppeteer');
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
