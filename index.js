@@ -1244,17 +1244,18 @@ app.post('/api/real-view-boost', async (req, res) => {
             let browser;
             try {
                 browser = await puppeteer.launch({
-                  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(), 
-    headless: "new",  
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--disable-gpu',
-                        '--single-process',
-                        '--no-zygote'
-                    ]
-                });
+    // Render runtime path ko target karte hue
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/opt/render/.cache/puppeteer/chrome/linux-126.0.6478.126/chrome-linux64/chrome',
+    headless: "new",
+    args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+        '--no-zygote'
+    ]
+});
 
                 const page = await browser.newPage();
                 
