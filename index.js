@@ -1218,99 +1218,93 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // --- TOOL 7: ULTIMATE SEQUENTIAL BOOST (ONE BY ONE) ---
 // ===================================================================
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url) {
-        return res.status(400).json({ message: "YouTube URL missing!" });
-    }
+    if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
-    // Frontend ko turant response bhej do
-    res.status(200).json({
-        status: "success",
-        message: "Sequential Boost Initialized. Views will arrive one by one."
+    res.status(200).json({ 
+        status: "success", 
+        message: "Stealth Sequential Boost Started. Views will arrive slowly to avoid detection." 
     });
 
-    // Background function jo ek-ek karke chalega
     const runOneByOne = async () => {
         const total = parseInt(views_count);
-        // Render par Chrome ka automatic path
         const autoPath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
 
         for (let i = 0; i < total; i++) {
             let browser;
             try {
-                console.log(`🚀 [Step ${i+1}/${total}] Starting fresh browser session...`);
+                console.log(`🚀 [View ${i+1}/${total}] Launching Stealth Browser...`);
                 
                 browser = await puppeteer.launch({
                     executablePath: autoPath,
-                    headless: "new", // Render pe "new" headless mode best hai
+                    headless: "new",
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
                         '--disable-dev-shm-usage',
                         '--single-process',
-                        '--no-zygote',
-                        '--mute-audio' // Server load kam karne ke liye
+                        '--window-size=1280,720'
                     ]
                 });
 
                 const page = await browser.newPage();
-                
-                // Random User Agent har naye view ke liye
-                const userAgents = [
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
-                ];
-                await page.setUserAgent(userAgents[Math.floor(Math.random() * userAgents.length)]);
 
-                // Video Page Load karein
+                // 1. Fake User Agent aur Fingerprint Protection
+                await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+                
+                // 2. YouTube ko lage ki ye asli browser hai (Stealth)
+                await page.evaluateOnNewDocument(() => {
+                    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+                });
+
+                // 3. Direct URL ki jagah thoda referral behavior (Optional but good)
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Human Interaction: Play Button Click
+                // 4. Human-like Interactions (ASLI VIEWS KE LIYE)
+                console.log(`🎬 [View ${i+1}] Interacting with video...`);
                 try {
-                    await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
-                    await page.click('.ytp-play-button');
-                    console.log(`▶️ [Step ${i+1}] Video Playing...`);
-                } catch (e) {
-                    console.log(`[Step ${i+1}] Autoplay check passed.`);
-                }
+                    // Thoda scroll karein niche
+                    await page.evaluate(() => window.scrollBy(0, 400));
+                    await new Promise(r => setTimeout(r, 2000));
+                    
+                    // Volume 50% aur Play button click
+                    await page.keyboard.press('m'); // Unmute
+                    await page.keyboard.press('k'); // Play
+                    
+                    // Random mouse movement
+                    await page.mouse.move(100, 100);
+                    await page.mouse.move(200, 300);
+                } catch (e) {}
 
-                // Watch Time: Jitna user ne bola + 5-10 sec extra (Randomness ke liye)
-                const extraBuffer = Math.floor(Math.random() * 10000); 
-                const waitTime = (parseInt(watch_time) * 1000) + extraBuffer;
+                // 5. Dynamic Watch Time (Fixed nahi, thoda upar niche)
+                const randomBuffer = Math.floor(Math.random() * 15000); // 15s extra random
+                const finalWait = (parseInt(watch_time) * 1000) + randomBuffer;
                 
-                console.log(`⏳ [Step ${i+1}] Watching for ${Math.round(waitTime/1000)} seconds...`);
-                await new Promise(r => setTimeout(r, waitTime));
+                console.log(`⏳ Watching for ${Math.round(finalWait/1000)} seconds...`);
+                await new Promise(r => setTimeout(r, finalWait));
 
-                // Browser ko sahi se band karein (Isse RAM khali hogi)
                 await browser.close();
-                console.log(`✅ [Step ${i+1}] View Finished. Cooling down 5s...`);
+                console.log(`✅ [View ${i+1}] Session Closed.`);
                 
-                // Agle view se pehle gap (Taki YouTube ko bot na lage)
-                await new Promise(r => setTimeout(r, 5000));
+                // 6. View gap (Sabse zaroori: Taki YouTube ko pattern na dikhe)
+                const gap = 5000 + Math.floor(Math.random() * 5000); 
+                await new Promise(r => setTimeout(r, gap));
 
             } catch (err) {
-                console.error(`❌ [Step ${i+1}] Failed:`, err.message);
+                console.error(`❌ [View ${i+1}] Error:`, err.message);
                 if (browser) await browser.close();
-                
-                // Agar Chrome path ka issue hai toh loop ko yahi rok do
-                if (err.message.includes("ENOENT") || err.message.includes("Could not find Chrome")) {
-                    console.log("CRITICAL ERROR: Chrome not found. Stopping process.");
-                    break;
-                }
             }
         }
-        console.log("🏁 Sequential Boost Cycle Completed.");
     };
 
-    // Bina await ke call karein taki server response block na ho
     runOneByOne();
 });
-
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
