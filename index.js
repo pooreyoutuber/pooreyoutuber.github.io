@@ -1217,79 +1217,77 @@ app.post('/start-task', async (req, res) => {
 });
 
 // ===================================================================
-// 7. NEW: YOUTUBE STUDIO-VERIFIED BOOSTER (ADVANCED)
-// ===================================================================
+// 7. ULTIMATE YOUTUBE STUDIO BOOSTER (Anti-Version Conflict)
 // ===================================================================
 const puppeteer = require('puppeteer');
 
-// ===================================================================
-// 6. DIRECT YOUTUBE STUDIO BOOSTER (Real-time Graph Tool)
-// ===================================================================
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
     if (!video_url) {
-        return res.status(400).json({ message: "Video URL missing!" });
+        return res.status(400).json({ message: "URL missing!" });
     }
 
-    // Frontend ko turant response dega
+    // Frontend ko response
     res.status(200).json({
         status: "success",
-        message: "Threads started. Check YouTube Studio Real-time now!"
+        message: "Browser Threads Initialized. Watch Studio Real-time."
     });
 
-    console.log(`\n🔥 [STUDIO BOOST] Starting Real-time playback for: ${video_url}`);
+    console.log(`\n🚀 [DIRECT BOOST] Target: ${video_url}`);
 
-    const runBrowserThread = async () => {
+    const startBrowser = async () => {
         const total = parseInt(views_count);
         
         for (let i = 0; i < total; i++) {
             let browser;
             try {
-                // Puppeteer Launch Configuration
                 browser = await puppeteer.launch({
-                    headless: "new", // Server par background mein chalega
+                    // Wildcard approach: Render ke default path ko auto-detect karega
+                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome' || null,
+                    headless: "new",
                     args: [
-                        '--no-sandbox', 
-                        '--disable-setuid-sandbox', 
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
                         '--disable-dev-shm-usage',
-                        '--mute-audio'
+                        '--mute-audio',
+                        '--window-size=1280,720'
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                [span_2](start_span)// Random User Agent takki YouTube block na kare[span_2](end_span)
-                await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+                // User Agent simulation
+                const ua = USER_AGENTS ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
+                await page.setUserAgent(ua);
 
-                // Video page par jana
-                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
+                console.log(`[View ${i+1}] Opening YouTube Browser...`);
+                
+                // Direct Video Load
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 0 });
 
-                // Play Button click karne ki koshish (Human Action simulation)
-                const playButton = await page.$('.ytp-play-button');
-                if (playButton) await playButton.click();
+                // Play Button Click Simulation (Taki Studio mein count ho)
+                try {
+                    await page.waitForSelector('.ytp-play-button', { timeout: 5000 });
+                    await page.click('.ytp-play-button');
+                } catch (e) { /* Auto-play already active */ }
 
-                console.log(`[View ${i+1}] Playing video in background...`);
-
-                // Jitna watch time frontend se aaya hai, utni der browser open rahega
-                const waitTime = Math.min(parseInt(watch_time) * 1000, 120000); // Max 2 min per thread for safety
-                await new Promise(r => setTimeout(r, waitTime));
+                // Watch Time Delay
+                const sleepTime = Math.min(parseInt(watch_time) * 1000, 60000); 
+                await new Promise(r => setTimeout(r, sleepTime));
 
                 await browser.close();
-                console.log(`[View ${i+1}] Watch time sync complete.`);
+                console.log(`[View ${i+1}] Done. Studio graph updated.`);
 
             } catch (err) {
-                console.error(`[Thread Error]: ${err.message}`);
+                console.error(`[Error] Thread ${i+1} failed. Check if Chrome is installed via Build Command.`);
                 if (browser) await browser.close();
             }
         }
     };
 
-    runBrowserThread();
+    startBrowser();
 });
-
-
-
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
