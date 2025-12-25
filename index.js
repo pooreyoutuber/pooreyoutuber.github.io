@@ -1216,68 +1216,99 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
-// --- TOOL 7: ULTIMATE CLOUD BROWSER BOOST (VERSION FIXED) ---
+// --- TOOL 7: ULTIMATE SEQUENTIAL BOOST (ONE BY ONE) ---
 // ===================================================================
 const puppeteer = require('puppeteer');
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url) return res.status(400).json({ message: "URL missing!" });
+    if (!video_url) {
+        return res.status(400).json({ message: "YouTube URL missing!" });
+    }
 
-    res.status(200).json({ status: "success", message: "Cloud Threads Started!" });
+    // Frontend ko turant response bhej do
+    res.status(200).json({
+        status: "success",
+        message: "Sequential Boost Initialized. Views will arrive one by one."
+    });
 
-    const startBrowser = async () => {
-        const total = Math.min(parseInt(views_count), 10);
-        
+    // Background function jo ek-ek karke chalega
+    const runOneByOne = async () => {
+        const total = parseInt(views_count);
+        // Render par Chrome ka automatic path
+        const autoPath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
+
         for (let i = 0; i < total; i++) {
             let browser;
             try {
-                // Wildcard ya manual path ki jagah Puppeteer ka apna automatic path detector use karein
-                // Agar Render pe binary installed hai, toh ye hamesha sahi path uthayega
-                const autoPath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
-
+                console.log(`🚀 [Step ${i+1}/${total}] Starting fresh browser session...`);
+                
                 browser = await puppeteer.launch({
                     executablePath: autoPath,
-                    headless: "new",
+                    headless: "new", // Render pe "new" headless mode best hai
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
                         '--disable-dev-shm-usage',
-                        '--disable-gpu',
-                        '--single-process'
+                        '--single-process',
+                        '--no-zygote',
+                        '--mute-audio' // Server load kam karne ke liye
                     ]
                 });
 
                 const page = await browser.newPage();
-                await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
-
-                console.log(`🚀 [Thread ${i+1}] Browser started using: ${autoPath}`);
                 
+                // Random User Agent har naye view ke liye
+                const userAgents = [
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+                ];
+                await page.setUserAgent(userAgents[Math.floor(Math.random() * userAgents.length)]);
+
+                // Video Page Load karein
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play Button Click Logic
+                // Human Interaction: Play Button Click
                 try {
-                    await page.waitForSelector('.ytp-play-button', { timeout: 8000 });
+                    await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
                     await page.click('.ytp-play-button');
-                    console.log(`▶️ [Thread ${i+1}] Video playing...`);
+                    console.log(`▶️ [Step ${i+1}] Video Playing...`);
                 } catch (e) {
-                    console.log(`[Thread ${i+1}] Auto-play enabled.`);
+                    console.log(`[Step ${i+1}] Autoplay check passed.`);
                 }
 
-                const sleep = Math.min(parseInt(watch_time) * 1000, 60000);
-                await new Promise(r => setTimeout(r, sleep));
+                // Watch Time: Jitna user ne bola + 5-10 sec extra (Randomness ke liye)
+                const extraBuffer = Math.floor(Math.random() * 10000); 
+                const waitTime = (parseInt(watch_time) * 1000) + extraBuffer;
+                
+                console.log(`⏳ [Step ${i+1}] Watching for ${Math.round(waitTime/1000)} seconds...`);
+                await new Promise(r => setTimeout(r, waitTime));
 
+                // Browser ko sahi se band karein (Isse RAM khali hogi)
                 await browser.close();
-                console.log(`✅ [Thread ${i+1}] Success!`);
+                console.log(`✅ [Step ${i+1}] View Finished. Cooling down 5s...`);
+                
+                // Agle view se pehle gap (Taki YouTube ko bot na lage)
+                await new Promise(r => setTimeout(r, 5000));
 
             } catch (err) {
-                console.error(`❌ [Error] Thread ${i+1} failed: ${err.message}`);
+                console.error(`❌ [Step ${i+1}] Failed:`, err.message);
                 if (browser) await browser.close();
+                
+                // Agar Chrome path ka issue hai toh loop ko yahi rok do
+                if (err.message.includes("ENOENT") || err.message.includes("Could not find Chrome")) {
+                    console.log("CRITICAL ERROR: Chrome not found. Stopping process.");
+                    break;
+                }
             }
         }
+        console.log("🏁 Sequential Boost Cycle Completed.");
     };
-    startBrowser();
+
+    // Bina await ke call karein taki server response block na ho
+    runOneByOne();
 });
 
 // ===================================================================
