@@ -1220,91 +1220,74 @@ app.post('/start-task', async (req, res) => {
 // 7. NEW: YOUTUBE STUDIO-VERIFIED BOOSTER (ADVANCED)
 // ===================================================================
 // ===================================================================
-
 const puppeteer = require('puppeteer');
-const path = require('path');
-// ==========================================================
-// TOOL: YouTube View & Watch Time Boost (Render Optimized)
-// ==========================================
 
+// ===================================================================
+// 6. DIRECT YOUTUBE STUDIO BOOSTER (Real-time Graph Tool)
+// ===================================================================
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
     if (!video_url) {
-        return res.status(400).json({ status: "error", message: "YouTube URL is required!" });
+        return res.status(400).json({ message: "Video URL missing!" });
     }
 
-    // Response turant bhej dein taaki frontend hang na ho
-    res.status(200).json({ 
-        status: "success", 
-        message: "Automation started on Cloud." 
+    // Frontend ko turant response dega
+    res.status(200).json({
+        status: "success",
+        message: "Threads started. Check YouTube Studio Real-time now!"
     });
 
-    // Background process shuru
-    (async () => {
-        const count = parseInt(views_count) || 1;
-        const duration = (parseInt(watch_time) || 60) * 1000;
+    console.log(`\n🔥 [STUDIO BOOST] Starting Real-time playback for: ${video_url}`);
 
-        for (let i = 1; i <= count; i++) {
+    const runBrowserThread = async () => {
+        const total = parseInt(views_count);
+        
+        for (let i = 0; i < total; i++) {
             let browser;
             try {
-                console.log(`[View ${i}] Launching optimized browser...`);
-                
+                // Puppeteer Launch Configuration
                 browser = await puppeteer.launch({
-                    headless: "new",
-                    // Render specific binary path fix
-                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+                    headless: "new", // Server par background mein chalega
                     args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
+                        '--no-sandbox', 
+                        '--disable-setuid-sandbox', 
                         '--disable-dev-shm-usage',
-                        '--disable-gpu',
-                        '--no-first-run',
-                        '--no-zygote',
-                        '--single-process' // Render ki 512MB RAM ke liye zaroori
+                        '--mute-audio'
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                // Random User Agent choose karein (Aapki existing list se)
-                const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-                await page.setUserAgent(ua);
+                [span_2](start_span)// Random User Agent takki YouTube block na kare[span_2](end_span)
+                await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-                // Viewport size random karein taaki bot detect na ho
-                await page.setViewport({ width: 1280, height: 720 });
+                // Video page par jana
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                console.log(`[View ${i}] Visiting: ${video_url}`);
-                
-                // YouTube load karein
-                await page.goto(video_url, { 
-                    waitUntil: 'domcontentloaded', // 'networkidle2' ki jagah ye fast hai
-                    timeout: 90000 
-                });
+                // Play Button click karne ki koshish (Human Action simulation)
+                const playButton = await page.$('.ytp-play-button');
+                if (playButton) await playButton.click();
 
-                // Video play karne ki koshish (kabhi kabhi auto-play off hota hai)
-                try {
-                    await page.click('.ytp-play-button');
-                } catch (e) {
-                    // Agar button nahi mila toh shayad video auto-play ho rahi hai
-                }
+                console.log(`[View ${i+1}] Playing video in background...`);
 
-                console.log(`[View ${i}] Watching for ${watch_time} seconds...`);
-                await new Promise(r => setTimeout(r, duration));
-                
+                // Jitna watch time frontend se aaya hai, utni der browser open rahega
+                const waitTime = Math.min(parseInt(watch_time) * 1000, 120000); // Max 2 min per thread for safety
+                await new Promise(r => setTimeout(r, waitTime));
+
                 await browser.close();
-                console.log(`✅ [View ${i}] Completed.`);
+                console.log(`[View ${i+1}] Watch time sync complete.`);
 
             } catch (err) {
-                console.error(`❌ [View ${i}] Error:`, err.message);
+                console.error(`[Thread Error]: ${err.message}`);
                 if (browser) await browser.close();
             }
-
-            // Views ke beech mein 10 sec ka gap (Server stability ke liye)
-            await new Promise(r => setTimeout(r, 10000));
         }
-    })();
+    };
+
+    runBrowserThread();
 });
+
 
 
 // ===================================================================
