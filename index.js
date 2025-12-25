@@ -1219,8 +1219,6 @@ app.post('/start-task', async (req, res) => {
 // --- TOOL 7: ULTIMATE SEQUENTIAL BOOST (ONE BY ONE) ---
 // ===================================================================
 const puppeteer = require('puppeteer');
-
-const app = express();
 app.use(express.json());
 app.use(cors());
 
