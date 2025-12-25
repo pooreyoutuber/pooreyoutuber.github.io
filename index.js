@@ -1217,7 +1217,7 @@ app.post('/start-task', async (req, res) => {
 });
 
 // ===================================================================
-// 7. ULTIMATE YOUTUBE STUDIO BOOSTER (Anti-Version Conflict)
+// --- TOOL 7: ULTIMATE CLOUD BROWSER BOOST (FIXED VERSION) ---
 // ===================================================================
 const puppeteer = require('puppeteer');
 
@@ -1225,68 +1225,74 @@ app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
     if (!video_url) {
-        return res.status(400).json({ message: "URL missing!" });
+        return res.status(400).json({ message: "YouTube URL is required!" });
     }
 
-    // Frontend ko response
+    // Response turant bhej dein taki frontend hang na ho
     res.status(200).json({
         status: "success",
-        message: "Browser Threads Initialized. Watch Studio Real-time."
+        message: "Cloud Threads Started. Check your Studio Real-time."
     });
 
-    console.log(`\n🚀 [DIRECT BOOST] Target: ${video_url}`);
-
-    const startBrowser = async () => {
-        const total = parseInt(views_count);
+    // Background process shuru karein
+    const runBoost = async () => {
+        const totalViews = Math.min(parseInt(views_count), 50); // Server safety limit
         
-        for (let i = 0; i < total; i++) {
+        for (let i = 0; i < totalViews; i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
-                    // Wildcard approach: Render ke default path ko auto-detect karega
-                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome' || null,
+                    // Ye path Render par Chrome dhoondhne mein madad karta hai
+                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
                     headless: "new",
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
                         '--disable-dev-shm-usage',
-                        '--mute-audio',
-                        '--window-size=1280,720'
+                        '--disable-gpu',
+                        '--no-first-run',
+                        '--no-zygote',
+                        '--single-process' // Kam RAM kharch karta hai
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                // User Agent simulation
-                const ua = USER_AGENTS ? USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
-                await page.setUserAgent(ua);
+                // Random User Agent taaki YouTube block na kare
+                const userAgents = [
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+                ];
+                await page.setUserAgent(userAgents[Math.floor(Math.random() * userAgents.length)]);
 
-                console.log(`[View ${i+1}] Opening YouTube Browser...`);
+                console.log(`[Thread ${i+1}] Launching View...`);
                 
-                // Direct Video Load
-                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 0 });
+                // Video page par jayein
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Play Button Click Simulation (Taki Studio mein count ho)
+                // Play button click karne ki koshish karein
                 try {
                     await page.waitForSelector('.ytp-play-button', { timeout: 5000 });
                     await page.click('.ytp-play-button');
-                } catch (e) { /* Auto-play already active */ }
+                } catch (e) { /* Auto-play active */ }
 
-                // Watch Time Delay
-                const sleepTime = Math.min(parseInt(watch_time) * 1000, 60000); 
-                await new Promise(r => setTimeout(r, sleepTime));
+                // Watch time tak rukein (max 60 sec per thread server load ke liye)
+                const waitTime = Math.min(parseInt(watch_time) * 1000, 60000);
+                await new Promise(r => setTimeout(r, waitTime));
 
                 await browser.close();
-                console.log(`[View ${i+1}] Done. Studio graph updated.`);
+                console.log(`[Thread ${i+1}] View Successful.`);
 
             } catch (err) {
-                console.error(`[Error] Thread ${i+1} failed. Check if Chrome is installed via Build Command.`);
+                console.error(`[Error] Thread ${i+1} failed: Make sure Chrome is installed.`);
                 if (browser) await browser.close();
+                // Agar Chrome nahi hai toh loop tod dein
+                if (err.message.includes("browser")) break;
             }
         }
     };
 
-    startBrowser();
+    runBoost();
 });
 // ===================================================================
 // --- SERVER START ---
