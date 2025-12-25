@@ -1244,8 +1244,8 @@ app.post('/api/real-view-boost', async (req, res) => {
             let browser;
             try {
                 browser = await puppeteer.launch({
-                    executablePath: RENDER_CHROME_PATH,
-                    headless: "new",
+                  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(), 
+    headless: "new",  
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
