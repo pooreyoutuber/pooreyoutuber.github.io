@@ -1222,22 +1222,22 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-// --- TOOL 10: REAL VIEW BOOST (SMM-GRADE) ---
+// --- TOOL 10: UNIVERSAL VIDEO & SHORTS BOOSTER (SMM-GRADE) ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url) return res.status(400).json({ message: "Video URL is required!" });
+    if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
-    // Client ko turant response bhej do taaki timeout na ho
     res.status(200).json({
-        status: "Success",
-        message: "SMM Booster started. Monitoring logs for progress...",
-        config: { views: views_count, time: watch_time }
+        status: "Running",
+        message: "Stealth Engine Started. Checking URL type...",
+        type: video_url.includes('shorts') ? "YouTube Shorts" : "Normal Video"
     });
 
-    const runSMMBoost = async () => {
-        const total = Math.min(parseInt(views_count), 50); // Ek baar mein 50 max
-        
+    const startBoosting = async () => {
+        const total = Math.min(parseInt(views_count), 50);
+        const isShort = video_url.includes('/shorts/');
+
         for (let i = 0; i < total; i++) {
             let browser;
             try {
@@ -1246,71 +1246,67 @@ app.post('/api/real-view-boost', async (req, res) => {
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
-                        '--disable-blink-features=AutomationControlled', // Bypass bot detection
-                        '--disable-infobars',
-                        '--window-size=1280,720',
-                        '--mute-audio'
+                        '--disable-blink-features=AutomationControlled',
+                        '--mute-audio',
+                        isShort ? '--window-size=375,812' : '--window-size=1280,720'
                     ]
                 });
 
                 const page = await browser.newPage();
 
-                // 1. Human-like Fingerprint
-                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
-                await page.evaluateOnNewDocument(() => {
-                    Object.defineProperty(navigator, 'webdriver', { get: () => false });
-                });
+                // 1. IDENTITY MASKING
+                if (isShort) {
+                    // Mobile Identity for Shorts
+                    await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
+                    await page.setViewport({ width: 375, height: 812, isMobile: true, hasTouch: true });
+                } else {
+                    // Desktop Identity for Normal Videos
+                    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+                    await page.setViewport({ width: 1280, height: 720 });
+                }
 
-                // 2. Resource Optimization (Fast loading on Render)
-                await page.setRequestInterception(true);
-                page.on('request', (req) => {
-                    if (['image', 'font'].includes(req.resourceType())) {
-                        req.abort();
-                    } else {
-                        req.continue();
-                    }
-                });
+                // 2. LOAD VIDEO
+                console.log(`🚀 [View ${i+1}] Opening ${isShort ? 'Short' : 'Video'}...`);
+                await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-                // 3. YouTube par jana
-                console.log(`🚀 [View ${i+1}/${total}] Navigating to Video...`);
-                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-                // 4. Human Actions (SMM Panel Logic)
-                await new Promise(r => setTimeout(r, 5000)); // Wait for player
+                // 3. INTERACTION (Wait & Play)
+                await new Promise(r => setTimeout(r, 5000));
                 
-                // Play and Random Scroll
                 try {
-                    await page.keyboard.press('k'); // Play/Pause toggle
-                    await page.evaluate(() => {
-                        window.scrollBy(0, Math.floor(Math.random() * 400) + 200);
-                    });
+                    // Try to click play if not started
+                    const playBtn = await page.$('.ytp-play-button');
+                    if (playBtn) await playBtn.click();
+                    
+                    // Random Scroll (Human-like)
+                    await page.evaluate(() => window.scrollBy(0, 300));
                 } catch (e) {}
 
-                // 5. Dynamic Watch Time
-                const baseTime = parseInt(watch_time) * 1000;
-                const jitter = Math.floor(Math.random() * 15000); // 15s random variation
-                const finalWait = baseTime + jitter;
+                // 4. WATCH TIME LOGIC
+                // Shorts ko kam se kam 2-3 baar loop hone dena chahiye
+                let finalWait = parseInt(watch_time) * 1000;
+                if (isShort) finalWait = finalWait * 2; // Shorts double loop for retention
 
-                console.log(`⏳ Watching for ${Math.round(finalWait/1000)} seconds...`);
-                await new Promise(r => setTimeout(r, finalWait));
+                const jitter = Math.floor(Math.random() * 10000); // 10s random variation
+                console.log(`⏳ Watching for ${Math.round((finalWait + jitter)/1000)}s...`);
+                await new Promise(r => setTimeout(r, finalWait + jitter));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Session Closed Successfully.`);
+                console.log(`✅ [View ${i+1}] Success.`);
 
-                // 6. Anti-Spam Cooling Gap
-                const gap = 10000 + Math.floor(Math.random() * 10000);
+                // 5. ANTI-SPAM COOL DOWN
+                const gap = 15000 + Math.floor(Math.random() * 15000);
                 await new Promise(r => setTimeout(r, gap));
 
             } catch (err) {
-                console.error(`❌ Error in View ${i+1}: ${err.message}`);
+                console.error(`❌ [View ${i+1}] Error: ${err.message}`);
                 if (browser) await browser.close();
                 await new Promise(r => setTimeout(r, 5000));
             }
         }
-        console.log("🏁 Booster Job Completed.");
+        console.log("🏁 Task Finished.");
     };
 
-    runSMMBoost();
+    startBoosting();
 });
 // ===================================================================
 // --- SERVER START ---
