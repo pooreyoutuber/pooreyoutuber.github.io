@@ -1216,16 +1216,19 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
-// 7. ULTIMATE PROXY BROWSER BOOST (STABLE & TIMEOUT FIXED)
+// 7. ULTIMATE BROWSER BOOST (NO PROXY - STEALTH MODE)
 // ===================================================================
+const puppeteer = require('puppeteer');
+
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time, proxy_list } = req.body;
+    const { video_url, views_count, watch_time } = req.body;
 
     if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
+    // Frontend ko response bhej do
     res.status(200).json({
         status: "success",
-        message: "Sequential Boost Active. View 2 was success, continuing..."
+        message: "Stealth Boost started. Views will arrive one by one (Sequential)."
     });
 
     const runSequential = async () => {
@@ -1235,69 +1238,74 @@ app.post('/api/real-view-boost', async (req, res) => {
         for (let i = 0; i < total; i++) {
             let browser;
             try {
-                let args = [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--single-process',
-                    '--no-zygote'
-                ];
-
-                // Proxy Handling
-                if (proxy_list && proxy_list.length > 0) {
-                    const randomProxy = proxy_list[i % proxy_list.length];
-                    args.push(`--proxy-server=${randomProxy}`);
-                    console.log(`📡 [View ${i+1}] Using IP: ${randomProxy}`);
-                }
-
+                console.log(`🚀 [View ${i+1}/${total}] Launching Stealth Browser...`);
+                
                 browser = await puppeteer.launch({
                     executablePath: autoPath,
                     headless: "new",
-                    args: args
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--single-process',
+                        '--no-zygote',
+                        '--window-size=1280,720'
+                    ]
                 });
 
                 const page = await browser.newPage();
                 
-                // --- TIMEOUT FIX ---
-                // Timeout ko 60s se badha kar 90s kar diya taki slow proxy handle ho sake
-                await page.setDefaultNavigationTimeout(90000); 
-                
+                // 1. Random User Agent
                 await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-                // Google Search Referrer (Bypass Spam Filter)
-                await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
+                // 2. Hide Automation (Stealth)
+                await page.evaluateOnNewDocument(() => {
+                    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+                });
 
-                console.log(`🚀 [View ${i+1}] Opening YouTube...`);
-                await page.goto(video_url, { waitUntil: 'domcontentloaded' }); // Fast load
+                // 3. Google Referrer (Taki YouTube ko lage Google se banda aaya hai)
+                await page.setExtraHTTPHeaders({
+                    'Referer': 'https://www.google.com/search?q=youtube+trending'
+                });
 
-                // Human Behavior
-                await new Promise(r => setTimeout(r, 5000));
-                await page.evaluate(() => window.scrollBy(0, 300));
+                // 4. Load Video with high timeout
+                await page.setDefaultNavigationTimeout(90000);
+                await page.goto(video_url, { waitUntil: 'domcontentloaded' });
+
+                console.log(`🎬 [View ${i+1}] Simulating Human Behavior...`);
                 
-                // Play Commands
+                // 5. Human Interaction
+                await new Promise(r => setTimeout(r, 5000)); // Page load hone ka wait
+                await page.evaluate(() => window.scrollBy(0, 400)); // Thoda scroll
+                
+                // Keyboard Shortcuts for Play & Unmute
                 await page.keyboard.press('m'); // Unmute
                 await page.keyboard.press('k'); // Play
-                console.log(`🎬 [View ${i+1}] Interaction successful.`);
-
-                // Watch Time Calculation
-                const wait = (parseInt(watch_time) * 1000) + (Math.random() * 15000);
-                console.log(`⏳ Watching for ${Math.round(wait/1000)}s...`);
-                await new Promise(r => setTimeout(r, wait));
+                
+                // 6. Randomized Watch Time (Retention ke liye)
+                const extraBuffer = Math.floor(Math.random() * 20000); // 20s random extra
+                const finalWait = (parseInt(watch_time) * 1000) + extraBuffer;
+                
+                console.log(`⏳ [View ${i+1}] Watching for ${Math.round(finalWait/1000)}s...`);
+                await new Promise(r => setTimeout(r, finalWait));
 
                 await browser.close();
                 console.log(`✅ [View ${i+1}] Success.`);
 
-                // Gap between views (Anti-Bot)
-                await new Promise(r => setTimeout(r, 8000));
+                // 7. Gap between views (Very important for no-proxy)
+                const gap = 15000 + Math.floor(Math.random() * 15000); 
+                console.log(`😴 Cooling down for ${Math.round(gap/1000)}s...`);
+                await new Promise(r => setTimeout(r, gap));
 
             } catch (err) {
                 console.error(`❌ [View ${i+1}] Failed: ${err.message}`);
                 if (browser) await browser.close();
-                // Agar timeout baar-baar aa raha hai, toh 5 sec wait karke next view par jayein
                 await new Promise(r => setTimeout(r, 5000));
             }
         }
+        console.log("🏁 All views completed.");
     };
+
     runSequential();
 });
 // ===================================================================
