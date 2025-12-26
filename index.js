@@ -1226,85 +1226,85 @@ app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, video_title, views_count, watch_time } = req.body;
 
     res.status(200).json({ 
-        status: "Active", 
-        message: "Smart Engine 3.0 Started. Handling navigation errors..." 
+        status: "Running", 
+        message: "Organic Traffic Engine Started. Monitoring Studio Analytics..." 
     });
 
-    const runSafeTunnel = async () => {
-        for (let i = 0; i < Math.min(views_count, 15); i++) {
+    const runOrganicEngine = async () => {
+        for (let i = 0; i < Math.min(views_count, 20); i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
                 });
 
                 const page = await browser.newPage();
-                await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1');
-
-                console.log(`🚀 [View ${i+1}] Connecting to Proxy...`);
                 
-                // Proxyium use karte hain kyunki ye CroxyProxy se zyada stable hai Render par
-                await page.goto('https://www.proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+                // Random Mobile User-Agents taaki har view alag phone se lage
+                const phones = [
+                    'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1',
+                    'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36'
+                ];
+                await page.setUserAgent(phones[i % phones.length]);
 
-                // 1. Enter URL in Proxyium
-                await page.waitForSelector('#url', { timeout: 20000 });
-                await page.type('#url', video_url);
-                
-                // Navigation handle karne ke liye Promise.all ka use
-                await Promise.all([
-                    page.keyboard.press('Enter'),
-                    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => null)
-                ]);
+                // STEP 1: Pehle Google par jana (Referrer banane ke liye)
+                console.log(`🚀 [View ${i+1}] Masking via Google Search...`);
+                await page.goto('https://www.google.com/search?q=' + encodeURIComponent(video_title || 'YouTube'), { waitUntil: 'domcontentloaded' });
+                await new Promise(r => setTimeout(r, 3000));
 
-                console.log(`🔗 [View ${i+1}] Video Page Loaded. Waiting for Player...`);
-                await new Promise(r => setTimeout(r, 15000)); // Context stability ke liye wait
+                // STEP 2: Sidha Video URL par jana lekin Referer "Google" rahega
+                // Isse YouTube Studio ko traffic source "Google Search" dikhega
+                await page.goto(video_url, { 
+                    waitUntil: 'domcontentloaded', 
+                    referer: 'https://www.google.com/' 
+                });
 
-                // 2. Play Logic with Error Handling
+                console.log(`🔗 [View ${i+1}] Page Loaded. Triggering Video...`);
+                await new Promise(r => setTimeout(r, 10000));
+
+                // STEP 3: Force Play & Interaction
                 await page.evaluate(() => {
-                    try {
-                        const v = document.querySelector('video');
-                        if (v) {
-                            v.play();
-                            v.muted = false;
-                        }
-                        // Consent popup hatane ki koshish
-                        const btns = Array.from(document.querySelectorAll('button'));
-                        const okBtn = btns.find(b => b.innerText.includes('Accept') || b.innerText.includes('Agree'));
-                        if (okBtn) okBtn.click();
-                    } catch (e) {}
-                }).catch(() => console.log("Navigation Sync Issue - Skipping Evaluate"));
+                    const v = document.querySelector('video');
+                    if (v) {
+                        v.muted = false;
+                        v.play();
+                    }
+                    window.scrollBy(0, 500); // Scrolling for human touch
+                });
 
-                // 3. Force Play via Keyboard (Safe Method)
+                // Play shortcut 'k'
                 await page.keyboard.press('k'); 
-                
-                // 4. Final Play Check
+
+                // STEP 4: Verification
                 const isPlaying = await page.evaluate(() => {
                     const v = document.querySelector('video');
                     return !!(v && v.currentTime > 0 && !v.paused);
-                }).catch(() => false);
+                });
 
                 if (isPlaying) {
-                    console.log(`▶️ [View ${i+1}] SUCCESS: Playing through Tunnel!`);
+                    console.log(`▶️ [View ${i+1}] SUCCESS: Playing in Studio Analytics!`);
                 } else {
-                    console.log(`⚠️ [View ${i+1}] Play check failed, but staying on page for watch time...`);
+                    console.log(`⚠️ [View ${i+1}] Video paused, trying force-play...`);
+                    await page.click('body');
+                    await page.keyboard.press('Space');
                 }
 
-                // 5. Watch Time
-                const wait = (parseInt(watch_time) * 1000) + 5000;
+                // STEP 5: Retention (Watch Time)
+                const wait = (parseInt(watch_time) * 1000) + Math.floor(Math.random() * 5000);
                 await new Promise(r => setTimeout(r, wait));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Completed.`);
+                console.log(`✅ [View ${i+1}] View Finished.`);
+                await new Promise(r => setTimeout(r, 5000)); // Gap for RAM stability
 
             } catch (err) {
                 console.error(`❌ View ${i+1} Failed: ${err.message}`);
                 if (browser) await browser.close();
-                await new Promise(r => setTimeout(r, 5000));
             }
         }
     };
-    runSafeTunnel();
+    runOrganicEngine();
 });
 // ===================================================================
 // --- SERVER START ---
