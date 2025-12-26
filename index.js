@@ -1222,104 +1222,92 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-// --- TOOL 10: ADVANCED PROXY-TUNNEL WITH PLAY-CHECK ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, video_title, views_count, watch_time } = req.body;
 
-    if (!video_url) return res.status(400).json({ message: "URL missing!" });
-
     res.status(200).json({ 
         status: "Active", 
-        message: "Proxy-Tunneling Engine Started. Monitoring Real-time Analytics..." 
+        message: "Proxy Engine 2.0 Started. Bypassing Consent & Force-Playing..." 
     });
 
     const runSmartTunnel = async () => {
-        const total = Math.min(parseInt(views_count), 20);
-        
-        for (let i = 0; i < total; i++) {
+        for (let i = 0; i < Math.min(views_count, 15); i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
                 });
 
                 const page = await browser.newPage();
-                
-                // Real Identity
-                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+                // Mobile User-Agent (Shorts aur Proxy dono ke liye best hai)
+                await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1');
 
-                console.log(`🚀 [View ${i+1}] Connecting to Proxy Tunnel...`);
-                
-                // 1. CroxyProxy Loading
+                console.log(`🚀 [View ${i+1}] Tunneling via CroxyProxy...`);
                 await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // 2. Search URL (YouTube ko dhokha dene ke liye)
-                const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(video_title || 'trending video')}`;
-                
-                await page.waitForSelector('#url', { timeout: 15000 }); 
-                await page.type('#url', searchUrl);
+                // 1. YouTube Search within Proxy
+                const searchQuery = video_title || "trending shorts";
+                await page.waitForSelector('#url', { timeout: 10000 });
+                await page.type('#url', `https://m.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`);
                 await page.keyboard.press('Enter');
 
-                // Proxy load time
-                await new Promise(r => setTimeout(r, 15000)); 
+                await new Promise(r => setTimeout(r, 12000)); // Wait for proxy to tunnel
 
-                // 3. Navigate to Video within Proxy
-                console.log(`🔗 [View ${i+1}] Navigating to Video URL...`);
+                // 2. Load Actual Video
+                console.log(`🔗 [View ${i+1}] Loading Video Player...`);
                 await page.goto(video_url, { waitUntil: 'domcontentloaded' });
-                await new Promise(r => setTimeout(r, 10000));
+                await new Promise(r => setTimeout(r, 8000));
 
-                // 4. SMART PLAY CHECK (Sabse Zaroori)
+                // 3. BYPASS CONSENT & PLAY (Sabse important step)
                 await page.evaluate(() => {
+                    // "I Agree" ya "Accept All" button dhoondna
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const consentBtn = buttons.find(b => b.innerText.includes('Agree') || b.innerText.includes('Accept'));
+                    if (consentBtn) consentBtn.click();
+
+                    // Video play trigger
                     const video = document.querySelector('video');
                     if (video) {
-                        video.muted = false; // Unmute
-                        video.play();       // Force Play
+                        video.play();
+                        video.muted = false;
                     }
-                    // Layout click to ensure focus
-                    document.body.click();
                 });
-                
-                // Force shortcut 'k' for YouTube play
-                await page.keyboard.press('k'); 
-                await page.keyboard.press('m'); // Unmute
 
+                // Extra Play Trigger (Click on center of screen)
+                await page.click('body', { delay: 200 });
+                await page.keyboard.press('k'); 
+
+                // 4. Verification
                 const isPlaying = await page.evaluate(() => {
                     const v = document.querySelector('video');
                     return !!(v && v.currentTime > 0 && !v.paused);
                 });
 
                 if (isPlaying) {
-                    console.log(`▶️ [View ${i+1}] Video is CONFIRMED Playing!`);
+                    console.log(`▶️ [View ${i+1}] SUCCESS: Video is playing!`);
                 } else {
-                    console.log(`⚠️ [View ${i+1}] Video might be stuck, re-trying play...`);
-                    await page.click('.ytp-play-button').catch(() => null);
+                    console.log(`⚠️ [View ${i+1}] Still stuck, attempting final force play...`);
+                    await page.keyboard.press('Space'); // Last try
                 }
 
-                // 5. Watch Time with Human Scroll
-                const wait = (parseInt(watch_time) * 1000) + Math.floor(Math.random() * 10000);
-                console.log(`⏳ Watching for ${Math.round(wait/1000)}s...`);
-                
-                // Random scrolling for human behavior
-                await page.evaluate(() => window.scrollBy(0, 500));
+                // 5. Watch Time
+                const wait = (parseInt(watch_time) * 1000) + 5000;
                 await new Promise(r => setTimeout(r, wait));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Session Success.`);
-                
-                // Cool down to avoid IP ban
-                await new Promise(r => setTimeout(r, 8000));
+                console.log(`✅ [View ${i+1}] Finished.`);
+                await new Promise(r => setTimeout(r, 5000));
 
             } catch (err) {
-                console.error(`❌ Tunnel Error: ${err.message}`);
+                console.error(`❌ Error: ${err.message}`);
                 if (browser) await browser.close();
-                await new Promise(r => setTimeout(r, 5000));
             }
         }
     };
-
     runSmartTunnel();
 });
+              
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
