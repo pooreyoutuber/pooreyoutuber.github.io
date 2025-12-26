@@ -1222,18 +1222,21 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
+// --- TOOL 10: REAL VIEW BOOST (SMM-GRADE) ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url) return res.status(400).json({ message: "URL missing!" });
+    if (!video_url) return res.status(400).json({ message: "Video URL is required!" });
 
+    // Client ko turant response bhej do taaki timeout na ho
     res.status(200).json({
-        status: "success",
-        message: "SMM-Grade Stealth Boost started. Views are being processed."
+        status: "Success",
+        message: "SMM Booster started. Monitoring logs for progress...",
+        config: { views: views_count, time: watch_time }
     });
 
-    const runSequential = async () => {
-        const total = Math.min(parseInt(views_count), 50);
+    const runSMMBoost = async () => {
+        const total = Math.min(parseInt(views_count), 50); // Ek baar mein 50 max
         
         for (let i = 0; i < total; i++) {
             let browser;
@@ -1243,65 +1246,71 @@ app.post('/api/real-view-boost', async (req, res) => {
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
-                        '--disable-blink-features=AutomationControlled', // Bypass detection
-                        '--window-size=1920,1080'
+                        '--disable-blink-features=AutomationControlled', // Bypass bot detection
+                        '--disable-infobars',
+                        '--window-size=1280,720',
+                        '--mute-audio'
                     ]
                 });
 
                 const page = await browser.newPage();
-                
-                // 1. Real User Agent Rotation
-                const agents = [
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
-                ];
-                await page.setUserAgent(agents[Math.floor(Math.random() * agents.length)]);
 
-                // 2. Set Realistic Viewport
-                await page.setViewport({ width: 1920, height: 1080 });
-
-                // 3. YouTube Search se aana (Traffic Source mask)
-                await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
-                await new Promise(r => setTimeout(r, 2000));
-
-                // 4. Go to Video
-                console.log(`🚀 [View ${i+1}] Playing Video...`);
-                await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-
-                // 5. HUMAN INTERACTION (SMM Panel Technique)
-                await new Promise(r => setTimeout(r, 5000));
-                
-                // Click play and unmute
-                try {
-                    await page.click('.ytp-play-button'); 
-                    await page.keyboard.press('m'); 
-                } catch(e) {}
-
-                // Random Scrolling to simulate reading comments
-                await page.evaluate(() => {
-                    window.scrollBy(0, 500);
-                    setTimeout(() => window.scrollBy(0, -200), 2000);
+                // 1. Human-like Fingerprint
+                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+                await page.evaluateOnNewDocument(() => {
+                    Object.defineProperty(navigator, 'webdriver', { get: () => false });
                 });
 
-                // 6. Watch Time
-                const finalWait = (parseInt(watch_time) * 1000) + Math.floor(Math.random() * 15000);
+                // 2. Resource Optimization (Fast loading on Render)
+                await page.setRequestInterception(true);
+                page.on('request', (req) => {
+                    if (['image', 'font'].includes(req.resourceType())) {
+                        req.abort();
+                    } else {
+                        req.continue();
+                    }
+                });
+
+                // 3. YouTube par jana
+                console.log(`🚀 [View ${i+1}/${total}] Navigating to Video...`);
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+                // 4. Human Actions (SMM Panel Logic)
+                await new Promise(r => setTimeout(r, 5000)); // Wait for player
+                
+                // Play and Random Scroll
+                try {
+                    await page.keyboard.press('k'); // Play/Pause toggle
+                    await page.evaluate(() => {
+                        window.scrollBy(0, Math.floor(Math.random() * 400) + 200);
+                    });
+                } catch (e) {}
+
+                // 5. Dynamic Watch Time
+                const baseTime = parseInt(watch_time) * 1000;
+                const jitter = Math.floor(Math.random() * 15000); // 15s random variation
+                const finalWait = baseTime + jitter;
+
+                console.log(`⏳ Watching for ${Math.round(finalWait/1000)} seconds...`);
                 await new Promise(r => setTimeout(r, finalWait));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Counted.`);
+                console.log(`✅ [View ${i+1}] Session Closed Successfully.`);
 
-                // Important: 1-2 minute ka gap rakhein real dikhne ke liye
-                const gap = 60000 + Math.floor(Math.random() * 30000);
+                // 6. Anti-Spam Cooling Gap
+                const gap = 10000 + Math.floor(Math.random() * 10000);
                 await new Promise(r => setTimeout(r, gap));
 
             } catch (err) {
-                console.error(`❌ Error: ${err.message}`);
+                console.error(`❌ Error in View ${i+1}: ${err.message}`);
                 if (browser) await browser.close();
+                await new Promise(r => setTimeout(r, 5000));
             }
         }
+        console.log("🏁 Booster Job Completed.");
     };
 
-    runSequential();
+    runSMMBoost();
 });
 // ===================================================================
 // --- SERVER START ---
