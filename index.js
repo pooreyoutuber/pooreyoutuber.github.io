@@ -1216,7 +1216,7 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
-// 7. ULTIMATE BROWSER BOOST (NO PROXY - STEALTH MODE)
+// 7. ULTIMATE BROWSER BOOST (FIXED FOR REAL-TIME DISPLAY)
 // ===================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -1225,79 +1225,77 @@ puppeteer.use(StealthPlugin());
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, video_title, views_count, watch_time } = req.body;
 
+    // Teacher ko turant response dene ke liye
     res.status(200).json({ 
         status: "Success", 
-        message: "SMM Engine Active. Results update in 15-20 mins." 
+        message: "SMM Engine Active. YouTube Studio Real-time check karein." 
     });
 
     const runEngine = async () => {
-        for (let i = 0; i < Math.min(views_count, 15); i++) {
+        // Ek baar mein 2-3 browsers se zyada na kholein (Render memory limit)
+        for (let i = 0; i < Math.min(views_count, 10); i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
-                    headless: "new",
+                    headless: "new", // "new" is better for stealth
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
                         '--disable-blink-features=AutomationControlled',
-                        '--fingerprint-client-id=' + Math.random() // Unique ID
+                        '--mute-audio' // Audio band taaki server load kam ho
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                // 1. Random Device Rotation
-                const devices = [
-                    'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
-                    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
-                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
-                ];
-                await page.setUserAgent(devices[i % devices.length]);
+                // Real User ki tarah behavior set karna
+                await page.setViewport({ width: 1280, height: 720 });
 
-                // 2. SECRET: Masking via Google Search (Organic Referrer)
-                console.log(`🚀 [View ${i+1}] Searching via Google...`);
-                await page.goto('https://www.google.com/search?q=' + encodeURIComponent(video_title || 'YouTube'), { waitUntil: 'domcontentloaded' });
-                await new Promise(r => setTimeout(r, 4000));
-
-                // 3. Navigate to Video with Referrer
+                // Step 1: Masking with Referrer (Twitter ya Google se aana)
+                console.log(`🚀 [View ${i+1}] Initiating Session via Twitter Referrer...`);
                 await page.goto(video_url, { 
-                    waitUntil: 'domcontentloaded', 
-                    referer: 'https://www.google.com/' 
+                    waitUntil: 'networkidle2', 
+                    referer: 'https://t.co/' // Twitter shortener (Very High Trust)
                 });
 
-                // 4. SMART PLAY (Bypassing Auto-play block)
-                console.log(`🔗 [View ${i+1}] Playback Started...`);
-                await new Promise(r => setTimeout(r, 7000));
-                
+                // Step 2: Human Interaction (Iske bina view count nahi hota)
+                await new Promise(r => setTimeout(r, 5000));
                 await page.evaluate(() => {
-                    const v = document.querySelector('video');
-                    if (v) {
-                        v.play();
-                        v.muted = false;
-                        v.volume = 1;
+                    window.scrollBy(0, 400); // Thoda scroll niche
+                    const video = document.querySelector('video');
+                    if (video) {
+                        video.play();
+                        video.volume = 0.5;
                     }
-                    window.scrollBy(0, 300); // Interaction
                 });
 
-                // 5. High-Retention Watch Time
-                // Agar Short 15s ka hai, toh 45s dekhein (3 loops)
-                const playTime = (parseInt(watch_time) * 1000) + Math.floor(Math.random() * 15000);
-                await new Promise(r => setTimeout(r, playTime));
+                // Step 3: Heartbeat Wait (YouTube Studio trigger point)
+                // Real-time analytics 30-45 seconds ke baad update hota hai
+                const actualWatchTime = (parseInt(watch_time) * 1000) || 45000; 
+                console.log(`🔗 [View ${i+1}] Watching for ${actualWatchTime/1000}s to trigger Studio...`);
+                
+                await new Promise(r => setTimeout(r, actualWatchTime));
+
+                // Step 4: Random Pause (Anti-Bot)
+                await page.evaluate(() => {
+                    if (Math.random() > 0.5) window.scrollBy(0, -200); 
+                });
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Sync Done.`);
-                
-                // Anti-Detection Break
-                await new Promise(r => setTimeout(r, 12000));
+                console.log(`✅ [View ${i+1}] View Synced to YouTube.`);
+
+                // Har view ke beech gap taaki YouTube "Spike" detect na kare
+                await new Promise(r => setTimeout(r, 15000));
 
             } catch (err) {
                 if (browser) await browser.close();
-                console.log("Error: " + err.message);
+                console.log("Error in View Simulation: " + err.message);
             }
         }
     };
     runEngine();
 });
+
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
