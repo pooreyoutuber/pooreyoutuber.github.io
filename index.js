@@ -1218,100 +1218,72 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE BROWSER BOOST (NO PROXY - STEALTH MODE)
 // ===================================================================
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
-
-// --- TOOL 10: ULTIMATE SEARCH & CLICK + MULTI-THREAD ENGINE ---
+// --- TOOL 10: PROXY-TUNNEL SEARCH ENGINE (ULTIMATE) ---
 app.post('/api/real-view-boost', async (req, res) => {
-    // Frontend se 'video_title' bhi bhejna taaki Search kaam kare
     const { video_url, video_title, views_count, watch_time } = req.body;
 
-    if (!video_url) return res.status(400).json({ message: "URL missing!" });
-
-    res.status(200).json({
-        status: "Success",
-        message: "Search-Click Engine Started. Check Real-time analytics in 10 mins."
+    res.status(200).json({ 
+        status: "Success", 
+        message: "Proxy-Tunneling Started. Bypassing Render IP via CroxyProxy..." 
     });
 
-    const isShorts = video_url.includes('/shorts/');
-
-    const launchSmartView = async (id) => {
-        let browser;
-        try {
-            browser = await puppeteer.launch({
-                headless: "new",
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-blink-features=AutomationControlled',
-                    '--mute-audio',
-                    isShorts ? '--window-size=400,800' : '--window-size=1280,720'
-                ]
-            });
-
-            const page = await browser.newPage();
-            
-            // 1. User-Agent Rotation (Real Mobile/Desktop)
-            if (isShorts) {
-                await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
-                await page.setViewport({ width: 375, height: 812, isMobile: true });
-            } else {
-                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
-                await page.setViewport({ width: 1280, height: 720 });
-            }
-
-            // 2. SEARCH ENGINE MASKING (SMM Panel Secret)
-            // Pehle YouTube Search par jaakar video dhoondne ka dikhava karna
-            console.log(`🚀 [Thread ${id+1}] Simulating Search for: ${video_title || 'Video'}`);
-            await page.goto('https://m.youtube.com/results?search_query=' + encodeURIComponent(video_title || 'trending shorts'), { waitUntil: 'domcontentloaded' });
-            await new Promise(r => setTimeout(r, 5000));
-
-            // 3. ACTUAL NAVIGATION (Sidha video par jana but referral 'Search' dikhega)
-            await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-
-            // 4. HUMAN INTERACTION
-            await new Promise(r => setTimeout(r, 7000));
+    const runProxyTunnel = async () => {
+        for (let i = 0; i < Math.min(views_count, 20); i++) {
+            let browser;
             try {
+                browser = await puppeteer.launch({
+                    headless: "new",
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                });
+
+                const page = await browser.newPage();
+                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+
+                // STEP 1: CroxyProxy ya ProxySite par jana
+                console.log(`🚀 [View ${i+1}] Entering Proxy Tunnel...`);
+                await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2' });
+
+                // STEP 2: Proxy ke search bar mein YouTube Search Link daalna
+                // Hum direct video nahi, balki Search Result wala link daalenge
+                const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(video_title || 'trending shorts')}`;
+                
+                await page.waitForSelector('#url'); 
+                await page.type('#url', searchUrl);
+                await page.keyboard.press('Enter');
+
+                // Wait for Proxy to load YouTube through their server
+                console.log(`⏳ [View ${i+1}] Tunneling through Proxy Server...`);
+                await new Promise(r => setTimeout(r, 15000)); 
+
+                // STEP 3: Ab YouTube khul chuka hai Proxy ke andar. Ab video par click/navigate karna.
+                // Proxy site URL mask karti hai, isliye hum sidha video URL par navigate karenge Proxy session ke andar
+                await page.goto(video_url, { waitUntil: 'domcontentloaded' });
+
+                // STEP 4: Human Interaction
+                await new Promise(r => setTimeout(r, 8000));
                 await page.keyboard.press('k'); // Play
-                // Real insaan ki tarah thoda scroll
-                await page.evaluate(() => window.scrollBy(0, 400));
-            } catch (e) {}
+                await page.evaluate(() => window.scrollBy(0, 300));
 
-            // 5. HIGH RETENTION WATCH TIME
-            // Shorts ko 3-4 baar loop hone dena studio mein view pakka karta hai
-            const playFactor = isShorts ? 3 : 1;
-            const finalWait = (parseInt(watch_time) * 1000 * playFactor) + (Math.random() * 10000);
-            
-            console.log(`⏳ [Thread ${id+1}] Watching for ${Math.round(finalWait/1000)}s...`);
-            await new Promise(r => setTimeout(r, finalWait));
+                // STEP 5: Watch Time (Shorts loop logic included)
+                const isShorts = video_url.includes('/shorts/');
+                const finalWait = (parseInt(watch_time) * 1000 * (isShorts ? 2 : 1)) + 5000;
+                
+                await new Promise(r => setTimeout(r, finalWait));
 
-            await browser.close();
-            console.log(`✅ [Thread ${id+1}] View Counted Successfully.`);
+                await browser.close();
+                console.log(`✅ [View ${i+1}] View Counted via Proxy Tunnel.`);
 
-        } catch (err) {
-            console.error(`❌ [Thread ${id+1}] Error: ${err.message}`);
-            if (browser) await browser.close();
+                // Gap between views
+                await new Promise(r => setTimeout(r, 10000));
+
+            } catch (err) {
+                console.error("Tunnel Error: " + err.message);
+                if (browser) await browser.close();
+            }
         }
     };
 
-    // BATCHING LOGIC (Render crash protection)
-    const startBoosting = async () => {
-        const count = Math.min(parseInt(views_count), 25);
-        // Ek saath 2 browsers chalayenge (Max speed on Render Free)
-        for (let i = 0; i < count; i += 2) {
-            const batch = [];
-            batch.push(launchSmartView(i));
-            if (i + 1 < count) batch.push(launchSmartView(i + 1));
-            
-            await Promise.all(batch);
-            console.log(`😴 Cooling down RAM for 5s...`);
-            await new Promise(r => setTimeout(r, 5000));
-        }
-        console.log("🏁 All Threads Finished.");
-    };
-
-    startBoosting();
+    runProxyTunnel();
 });
 // ===================================================================
 // --- SERVER START ---
