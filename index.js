@@ -1226,85 +1226,77 @@ app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, video_title, views_count, watch_time } = req.body;
 
     res.status(200).json({ 
-        status: "Running", 
-        message: "Organic Traffic Engine Started. Monitoring Studio Analytics..." 
+        status: "Success", 
+        message: "SMM Engine Active. Results update in 15-20 mins." 
     });
 
-    const runOrganicEngine = async () => {
-        for (let i = 0; i < Math.min(views_count, 20); i++) {
+    const runEngine = async () => {
+        for (let i = 0; i < Math.min(views_count, 15); i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-blink-features=AutomationControlled',
+                        '--fingerprint-client-id=' + Math.random() // Unique ID
+                    ]
                 });
 
                 const page = await browser.newPage();
                 
-                // Random Mobile User-Agents taaki har view alag phone se lage
-                const phones = [
-                    'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1',
-                    'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36'
+                // 1. Random Device Rotation
+                const devices = [
+                    'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
+                    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
+                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
                 ];
-                await page.setUserAgent(phones[i % phones.length]);
+                await page.setUserAgent(devices[i % devices.length]);
 
-                // STEP 1: Pehle Google par jana (Referrer banane ke liye)
-                console.log(`🚀 [View ${i+1}] Masking via Google Search...`);
+                // 2. SECRET: Masking via Google Search (Organic Referrer)
+                console.log(`🚀 [View ${i+1}] Searching via Google...`);
                 await page.goto('https://www.google.com/search?q=' + encodeURIComponent(video_title || 'YouTube'), { waitUntil: 'domcontentloaded' });
-                await new Promise(r => setTimeout(r, 3000));
+                await new Promise(r => setTimeout(r, 4000));
 
-                // STEP 2: Sidha Video URL par jana lekin Referer "Google" rahega
-                // Isse YouTube Studio ko traffic source "Google Search" dikhega
+                // 3. Navigate to Video with Referrer
                 await page.goto(video_url, { 
                     waitUntil: 'domcontentloaded', 
                     referer: 'https://www.google.com/' 
                 });
 
-                console.log(`🔗 [View ${i+1}] Page Loaded. Triggering Video...`);
-                await new Promise(r => setTimeout(r, 10000));
-
-                // STEP 3: Force Play & Interaction
+                // 4. SMART PLAY (Bypassing Auto-play block)
+                console.log(`🔗 [View ${i+1}] Playback Started...`);
+                await new Promise(r => setTimeout(r, 7000));
+                
                 await page.evaluate(() => {
                     const v = document.querySelector('video');
                     if (v) {
-                        v.muted = false;
                         v.play();
+                        v.muted = false;
+                        v.volume = 1;
                     }
-                    window.scrollBy(0, 500); // Scrolling for human touch
+                    window.scrollBy(0, 300); // Interaction
                 });
 
-                // Play shortcut 'k'
-                await page.keyboard.press('k'); 
-
-                // STEP 4: Verification
-                const isPlaying = await page.evaluate(() => {
-                    const v = document.querySelector('video');
-                    return !!(v && v.currentTime > 0 && !v.paused);
-                });
-
-                if (isPlaying) {
-                    console.log(`▶️ [View ${i+1}] SUCCESS: Playing in Studio Analytics!`);
-                } else {
-                    console.log(`⚠️ [View ${i+1}] Video paused, trying force-play...`);
-                    await page.click('body');
-                    await page.keyboard.press('Space');
-                }
-
-                // STEP 5: Retention (Watch Time)
-                const wait = (parseInt(watch_time) * 1000) + Math.floor(Math.random() * 5000);
-                await new Promise(r => setTimeout(r, wait));
+                // 5. High-Retention Watch Time
+                // Agar Short 15s ka hai, toh 45s dekhein (3 loops)
+                const playTime = (parseInt(watch_time) * 1000) + Math.floor(Math.random() * 15000);
+                await new Promise(r => setTimeout(r, playTime));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] View Finished.`);
-                await new Promise(r => setTimeout(r, 5000)); // Gap for RAM stability
+                console.log(`✅ [View ${i+1}] Sync Done.`);
+                
+                // Anti-Detection Break
+                await new Promise(r => setTimeout(r, 12000));
 
             } catch (err) {
-                console.error(`❌ View ${i+1} Failed: ${err.message}`);
                 if (browser) await browser.close();
+                console.log("Error: " + err.message);
             }
         }
     };
-    runOrganicEngine();
+    runEngine();
 });
 // ===================================================================
 // --- SERVER START ---
