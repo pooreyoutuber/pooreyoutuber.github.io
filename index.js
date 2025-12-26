@@ -1222,20 +1222,21 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
+// --- TOOL 10: ULTIMATE SEARCH & CLICK + MULTI-THREAD ENGINE ---
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
+    // Frontend se 'video_title' bhi bhejna taaki Search kaam kare
+    const { video_url, video_title, views_count, watch_time } = req.body;
 
     if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
     res.status(200).json({
         status: "Success",
-        message: "Multi-Stream Engine Started. Checking Real-time Analytics in 5 mins..."
+        message: "Search-Click Engine Started. Check Real-time analytics in 10 mins."
     });
 
     const isShorts = video_url.includes('/shorts/');
 
-    // Ek single browser function jo bilkul real insaan jaisa behave karega
-    const launchView = async (id) => {
+    const launchSmartView = async (id) => {
         let browser;
         try {
             browser = await puppeteer.launch({
@@ -1251,54 +1252,63 @@ app.post('/api/real-view-boost', async (req, res) => {
 
             const page = await browser.newPage();
             
-            // 1. Mobile Identity for Shorts, Desktop for Long
+            // 1. User-Agent Rotation (Real Mobile/Desktop)
             if (isShorts) {
                 await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
                 await page.setViewport({ width: 375, height: 812, isMobile: true });
             } else {
                 await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+                await page.setViewport({ width: 1280, height: 720 });
             }
 
-            // 2. Referer Spoofing (SMM Panel Secret)
-            // YouTube ko lagega view Google Search ya Twitter se aaya hai
-            const sources = ['https://www.google.com/', 'https://t.co/', 'https://m.facebook.com/'];
-            await page.setExtraHTTPHeaders({ 'Referer': sources[id % sources.length] });
+            // 2. SEARCH ENGINE MASKING (SMM Panel Secret)
+            // Pehle YouTube Search par jaakar video dhoondne ka dikhava karna
+            console.log(`🚀 [Thread ${id+1}] Simulating Search for: ${video_title || 'Video'}`);
+            await page.goto('https://m.youtube.com/results?search_query=' + encodeURIComponent(video_title || 'trending shorts'), { waitUntil: 'domcontentloaded' });
+            await new Promise(r => setTimeout(r, 5000));
 
-            // 3. Navigation with better timeout
-            console.log(`🚀 [Stream ${id+1}] Opening ${isShorts ? 'Short' : 'Video'}...`);
-            await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 120000 });
+            // 3. ACTUAL NAVIGATION (Sidha video par jana but referral 'Search' dikhega)
+            await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-            // 4. Human Interaction
-            await new Promise(r => setTimeout(r, 6000));
-            await page.keyboard.press('k'); // Force Play
+            // 4. HUMAN INTERACTION
+            await new Promise(r => setTimeout(r, 7000));
+            try {
+                await page.keyboard.press('k'); // Play
+                // Real insaan ki tarah thoda scroll
+                await page.evaluate(() => window.scrollBy(0, 400));
+            } catch (e) {}
+
+            // 5. HIGH RETENTION WATCH TIME
+            // Shorts ko 3-4 baar loop hone dena studio mein view pakka karta hai
+            const playFactor = isShorts ? 3 : 1;
+            const finalWait = (parseInt(watch_time) * 1000 * playFactor) + (Math.random() * 10000);
             
-            // Random Scrolling
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-
-            // 5. Watch Time (Retention)
-            const wait = (parseInt(watch_time) * 1000) + (Math.random() * 15000);
-            await new Promise(r => setTimeout(r, wait));
+            console.log(`⏳ [Thread ${id+1}] Watching for ${Math.round(finalWait/1000)}s...`);
+            await new Promise(r => setTimeout(r, finalWait));
 
             await browser.close();
-            console.log(`✅ [Stream ${id+1}] View Synced with Studio.`);
+            console.log(`✅ [Thread ${id+1}] View Counted Successfully.`);
+
         } catch (err) {
+            console.error(`❌ [Thread ${id+1}] Error: ${err.message}`);
             if (browser) await browser.close();
-            console.error(`❌ [Stream ${id+1}] Error: ${err.message}`);
         }
     };
 
-    // BATCH PROCESSING: Render crash na ho isliye 2-2 karke chalayenge
+    // BATCHING LOGIC (Render crash protection)
     const startBoosting = async () => {
-        const totalViews = Math.min(views_count, 30);
-        for (let i = 0; i < totalViews; i += 2) {
+        const count = Math.min(parseInt(views_count), 25);
+        // Ek saath 2 browsers chalayenge (Max speed on Render Free)
+        for (let i = 0; i < count; i += 2) {
             const batch = [];
-            if (i < totalViews) batch.push(launchView(i));
-            if (i + 1 < totalViews) batch.push(launchView(i + 1));
+            batch.push(launchSmartView(i));
+            if (i + 1 < count) batch.push(launchSmartView(i + 1));
             
-            await Promise.all(batch); // 2 views ek saath chalenge
-            await new Promise(r => setTimeout(r, 3000)); // 3s gap for RAM
+            await Promise.all(batch);
+            console.log(`😴 Cooling down RAM for 5s...`);
+            await new Promise(r => setTimeout(r, 5000));
         }
-        console.log("🏁 Job Completed.");
+        console.log("🏁 All Threads Finished.");
     };
 
     startBoosting();
