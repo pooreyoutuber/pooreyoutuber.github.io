@@ -1216,7 +1216,7 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
-// 7. SEQUENTIAL CLOUD BROWSER TOOL (NEW TOOL)
+// 7. SEQUENTIAL CLOUD BROWSER TOOL (FINAL PRO VERSION)
 // ===================================================================
 const puppeteer = require('puppeteer');
 
@@ -1227,14 +1227,13 @@ app.post('/api/real-view-boost', async (req, res) => {
         return res.status(400).json({ message: "YouTube URL missing!" });
     }
 
-    // Frontend ko turant response bhejein
     res.status(200).json({
         status: "success",
-        message: "Cloud Browser threads started. Views will arrive one by one (Sequential)."
+        message: "Sequential Boost Started. Views will arrive one by one."
     });
 
     const runSequentialViews = async () => {
-        const total = Math.min(parseInt(views_count), 50); // Safe limit for Render
+        const total = Math.min(parseInt(views_count), 50); 
         const autoPath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
 
         console.log(`\n>>> STARTING BROWSER BOOST: ${video_url}`);
@@ -1242,7 +1241,7 @@ app.post('/api/real-view-boost', async (req, res) => {
         for (let i = 0; i < total; i++) {
             let browser;
             try {
-                console.log(`🚀 [View ${i+1}/${total}] Launching session...`);
+                console.log(`🚀 [View ${i+1}/${total}] Launching...`);
                 
                 browser = await puppeteer.launch({
                     executablePath: autoPath,
@@ -1253,56 +1252,69 @@ app.post('/api/real-view-boost', async (req, res) => {
                         '--disable-dev-shm-usage',
                         '--single-process',
                         '--no-zygote',
-                        '--mute-audio'
+                        '--autoplay-policy=no-user-gesture-required' // Force Autoplay
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                // Random User Agent from your existing list
+                // Random User Agent from your index.js list
                 await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-                // Bypass Bot Detection
+                // Anti-Detection
                 await page.evaluateOnNewDocument(() => {
                     Object.defineProperty(navigator, 'webdriver', { get: () => false });
                 });
 
-                // Load Video
+                // Set realistic screen size
+                await page.setViewport({ width: 1280, height: 720 });
+
+                // Go to Video
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Human-like Action: Play Button Click
+                // --- AGGRESSIVE PLAY LOGIC ---
+                console.log(`🎬 [View ${i+1}] Trying to play...`);
+                await new Promise(r => setTimeout(r, 5000)); // Wait for player to load
+
                 try {
-                    await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
-                    await page.click('.ytp-play-button');
-                    console.log(`▶️ [View ${i+1}] Video is playing.`);
+                    // Method 1: Click large play button
+                    const playBtn = await page.$('.ytp-large-play-button');
+                    if (playBtn) await playBtn.click();
+                    
+                    // Method 2: Press 'k' key (Global YT Play/Pause shortcut)
+                    await page.keyboard.press('k');
+                    
+                    // Method 3: Unmute (Keyboard 'm')
+                    await page.keyboard.press('m');
+                    
+                    console.log(`▶️ [View ${i+1}] Interaction successful.`);
                 } catch (e) {
-                    console.log(`[View ${i+1}] Autoplay or manual play failed, moving on.`);
+                    console.log(`⚠️ [View ${i+1}] Interaction error, but continuing...`);
                 }
 
-                // Random buffer to watch time (5-10 seconds)
-                const extraBuffer = Math.floor(Math.random() * 5000) + 5000;
+                // --- WATCH TIME ---
+                const extraBuffer = Math.floor(Math.random() * 10000);
                 const finalWait = (parseInt(watch_time) * 1000) + extraBuffer;
                 
                 console.log(`⏳ Watching for ${Math.round(finalWait/1000)}s...`);
                 await new Promise(r => setTimeout(r, finalWait));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Session closed successfully.`);
+                console.log(`✅ [View ${i+1}] Done.`);
 
-                // Agle view se pehle 5-10 seconds ka break
-                await new Promise(r => setTimeout(r, 5000 + Math.random() * 5000));
+                // Gap between views (Very important for Studio)
+                const gap = 5000 + Math.floor(Math.random() * 5000);
+                await new Promise(r => setTimeout(r, gap));
 
             } catch (err) {
-                console.error(`❌ [View ${i+1}] Thread error: ${err.message}`);
+                console.error(`❌ [View ${i+1}] Error: ${err.message}`);
                 if (browser) await browser.close();
-                // Agar Chrome path ka issue hai toh process rok dein
-                if (err.message.includes("Could not find Chrome")) break;
+                if (err.message.includes("Chrome")) break;
             }
         }
-        console.log(`\n>>> BROWSER BOOST COMPLETED FOR: ${video_url}`);
+        console.log(`\n🏁 BOOST COMPLETED.`);
     };
 
-    // Background mein process shuru karein
     runSequentialViews();
 });
 // ===================================================================
