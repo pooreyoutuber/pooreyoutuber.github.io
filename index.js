@@ -1216,6 +1216,96 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
+// 7. SEQUENTIAL CLOUD BROWSER TOOL (NEW TOOL)
+// ===================================================================
+const puppeteer = require('puppeteer');
+
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+
+    if (!video_url) {
+        return res.status(400).json({ message: "YouTube URL missing!" });
+    }
+
+    // Frontend ko turant response bhejein
+    res.status(200).json({
+        status: "success",
+        message: "Cloud Browser threads started. Views will arrive one by one (Sequential)."
+    });
+
+    const runSequentialViews = async () => {
+        const total = Math.min(parseInt(views_count), 50); // Safe limit for Render
+        const autoPath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
+
+        console.log(`\n>>> STARTING BROWSER BOOST: ${video_url}`);
+
+        for (let i = 0; i < total; i++) {
+            let browser;
+            try {
+                console.log(`🚀 [View ${i+1}/${total}] Launching session...`);
+                
+                browser = await puppeteer.launch({
+                    executablePath: autoPath,
+                    headless: "new",
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--single-process',
+                        '--no-zygote',
+                        '--mute-audio'
+                    ]
+                });
+
+                const page = await browser.newPage();
+                
+                // Random User Agent from your existing list
+                await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+                // Bypass Bot Detection
+                await page.evaluateOnNewDocument(() => {
+                    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+                });
+
+                // Load Video
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+                // Human-like Action: Play Button Click
+                try {
+                    await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
+                    await page.click('.ytp-play-button');
+                    console.log(`▶️ [View ${i+1}] Video is playing.`);
+                } catch (e) {
+                    console.log(`[View ${i+1}] Autoplay or manual play failed, moving on.`);
+                }
+
+                // Random buffer to watch time (5-10 seconds)
+                const extraBuffer = Math.floor(Math.random() * 5000) + 5000;
+                const finalWait = (parseInt(watch_time) * 1000) + extraBuffer;
+                
+                console.log(`⏳ Watching for ${Math.round(finalWait/1000)}s...`);
+                await new Promise(r => setTimeout(r, finalWait));
+
+                await browser.close();
+                console.log(`✅ [View ${i+1}] Session closed successfully.`);
+
+                // Agle view se pehle 5-10 seconds ka break
+                await new Promise(r => setTimeout(r, 5000 + Math.random() * 5000));
+
+            } catch (err) {
+                console.error(`❌ [View ${i+1}] Thread error: ${err.message}`);
+                if (browser) await browser.close();
+                // Agar Chrome path ka issue hai toh process rok dein
+                if (err.message.includes("Could not find Chrome")) break;
+            }
+        }
+        console.log(`\n>>> BROWSER BOOST COMPLETED FOR: ${video_url}`);
+    };
+
+    // Background mein process shuru karein
+    runSequentialViews();
+});
+// ===================================================================
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
