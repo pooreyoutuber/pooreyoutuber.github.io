@@ -1227,68 +1227,67 @@ app.post('/api/real-view-boost', async (req, res) => {
 
     res.status(200).json({ 
         status: "Active", 
-        message: "Proxy Engine 2.0 Started. Bypassing Consent & Force-Playing..." 
+        message: "Smart Engine 3.0 Started. Handling navigation errors..." 
     });
 
-    const runSmartTunnel = async () => {
+    const runSafeTunnel = async () => {
         for (let i = 0; i < Math.min(views_count, 15); i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
                 });
 
                 const page = await browser.newPage();
-                // Mobile User-Agent (Shorts aur Proxy dono ke liye best hai)
                 await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1');
 
-                console.log(`🚀 [View ${i+1}] Tunneling via CroxyProxy...`);
-                await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+                console.log(`🚀 [View ${i+1}] Connecting to Proxy...`);
+                
+                // Proxyium use karte hain kyunki ye CroxyProxy se zyada stable hai Render par
+                await page.goto('https://www.proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // 1. YouTube Search within Proxy
-                const searchQuery = video_title || "trending shorts";
-                await page.waitForSelector('#url', { timeout: 10000 });
-                await page.type('#url', `https://m.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`);
-                await page.keyboard.press('Enter');
+                // 1. Enter URL in Proxyium
+                await page.waitForSelector('#url', { timeout: 20000 });
+                await page.type('#url', video_url);
+                
+                // Navigation handle karne ke liye Promise.all ka use
+                await Promise.all([
+                    page.keyboard.press('Enter'),
+                    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => null)
+                ]);
 
-                await new Promise(r => setTimeout(r, 12000)); // Wait for proxy to tunnel
+                console.log(`🔗 [View ${i+1}] Video Page Loaded. Waiting for Player...`);
+                await new Promise(r => setTimeout(r, 15000)); // Context stability ke liye wait
 
-                // 2. Load Actual Video
-                console.log(`🔗 [View ${i+1}] Loading Video Player...`);
-                await page.goto(video_url, { waitUntil: 'domcontentloaded' });
-                await new Promise(r => setTimeout(r, 8000));
-
-                // 3. BYPASS CONSENT & PLAY (Sabse important step)
+                // 2. Play Logic with Error Handling
                 await page.evaluate(() => {
-                    // "I Agree" ya "Accept All" button dhoondna
-                    const buttons = Array.from(document.querySelectorAll('button'));
-                    const consentBtn = buttons.find(b => b.innerText.includes('Agree') || b.innerText.includes('Accept'));
-                    if (consentBtn) consentBtn.click();
+                    try {
+                        const v = document.querySelector('video');
+                        if (v) {
+                            v.play();
+                            v.muted = false;
+                        }
+                        // Consent popup hatane ki koshish
+                        const btns = Array.from(document.querySelectorAll('button'));
+                        const okBtn = btns.find(b => b.innerText.includes('Accept') || b.innerText.includes('Agree'));
+                        if (okBtn) okBtn.click();
+                    } catch (e) {}
+                }).catch(() => console.log("Navigation Sync Issue - Skipping Evaluate"));
 
-                    // Video play trigger
-                    const video = document.querySelector('video');
-                    if (video) {
-                        video.play();
-                        video.muted = false;
-                    }
-                });
-
-                // Extra Play Trigger (Click on center of screen)
-                await page.click('body', { delay: 200 });
+                // 3. Force Play via Keyboard (Safe Method)
                 await page.keyboard.press('k'); 
-
-                // 4. Verification
+                
+                // 4. Final Play Check
                 const isPlaying = await page.evaluate(() => {
                     const v = document.querySelector('video');
                     return !!(v && v.currentTime > 0 && !v.paused);
-                });
+                }).catch(() => false);
 
                 if (isPlaying) {
-                    console.log(`▶️ [View ${i+1}] SUCCESS: Video is playing!`);
+                    console.log(`▶️ [View ${i+1}] SUCCESS: Playing through Tunnel!`);
                 } else {
-                    console.log(`⚠️ [View ${i+1}] Still stuck, attempting final force play...`);
-                    await page.keyboard.press('Space'); // Last try
+                    console.log(`⚠️ [View ${i+1}] Play check failed, but staying on page for watch time...`);
                 }
 
                 // 5. Watch Time
@@ -1296,18 +1295,17 @@ app.post('/api/real-view-boost', async (req, res) => {
                 await new Promise(r => setTimeout(r, wait));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Finished.`);
-                await new Promise(r => setTimeout(r, 5000));
+                console.log(`✅ [View ${i+1}] Completed.`);
 
             } catch (err) {
-                console.error(`❌ Error: ${err.message}`);
+                console.error(`❌ View ${i+1} Failed: ${err.message}`);
                 if (browser) await browser.close();
+                await new Promise(r => setTimeout(r, 5000));
             }
         }
     };
-    runSmartTunnel();
+    runSafeTunnel();
 });
-              
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
