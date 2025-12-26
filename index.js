@@ -1218,92 +1218,87 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE BROWSER BOOST (NO PROXY - STEALTH MODE)
 // ===================================================================
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
     if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
-    // Frontend ko response bhej do
     res.status(200).json({
         status: "success",
-        message: "Stealth Boost started. Views will arrive one by one (Sequential)."
+        message: "SMM-Grade Stealth Boost started. Views are being processed."
     });
 
     const runSequential = async () => {
         const total = Math.min(parseInt(views_count), 50);
-        const autoPath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
-
+        
         for (let i = 0; i < total; i++) {
             let browser;
             try {
-                console.log(`🚀 [View ${i+1}/${total}] Launching Stealth Browser...`);
-                
                 browser = await puppeteer.launch({
-                    executablePath: autoPath,
                     headless: "new",
                     args: [
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--single-process',
-                        '--no-zygote',
-                        '--window-size=1280,720'
+                        '--disable-blink-features=AutomationControlled', // Bypass detection
+                        '--window-size=1920,1080'
                     ]
                 });
 
                 const page = await browser.newPage();
                 
-                // 1. Random User Agent
-                await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+                // 1. Real User Agent Rotation
+                const agents = [
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+                ];
+                await page.setUserAgent(agents[Math.floor(Math.random() * agents.length)]);
 
-                // 2. Hide Automation (Stealth)
-                await page.evaluateOnNewDocument(() => {
-                    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+                // 2. Set Realistic Viewport
+                await page.setViewport({ width: 1920, height: 1080 });
+
+                // 3. YouTube Search se aana (Traffic Source mask)
+                await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
+                await new Promise(r => setTimeout(r, 2000));
+
+                // 4. Go to Video
+                console.log(`🚀 [View ${i+1}] Playing Video...`);
+                await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+                // 5. HUMAN INTERACTION (SMM Panel Technique)
+                await new Promise(r => setTimeout(r, 5000));
+                
+                // Click play and unmute
+                try {
+                    await page.click('.ytp-play-button'); 
+                    await page.keyboard.press('m'); 
+                } catch(e) {}
+
+                // Random Scrolling to simulate reading comments
+                await page.evaluate(() => {
+                    window.scrollBy(0, 500);
+                    setTimeout(() => window.scrollBy(0, -200), 2000);
                 });
 
-                // 3. Google Referrer (Taki YouTube ko lage Google se banda aaya hai)
-                await page.setExtraHTTPHeaders({
-                    'Referer': 'https://www.google.com/search?q=youtube+trending'
-                });
-
-                // 4. Load Video with high timeout
-                await page.setDefaultNavigationTimeout(90000);
-                await page.goto(video_url, { waitUntil: 'domcontentloaded' });
-
-                console.log(`🎬 [View ${i+1}] Simulating Human Behavior...`);
-                
-                // 5. Human Interaction
-                await new Promise(r => setTimeout(r, 5000)); // Page load hone ka wait
-                await page.evaluate(() => window.scrollBy(0, 400)); // Thoda scroll
-                
-                // Keyboard Shortcuts for Play & Unmute
-                await page.keyboard.press('m'); // Unmute
-                await page.keyboard.press('k'); // Play
-                
-                // 6. Randomized Watch Time (Retention ke liye)
-                const extraBuffer = Math.floor(Math.random() * 20000); // 20s random extra
-                const finalWait = (parseInt(watch_time) * 1000) + extraBuffer;
-                
-                console.log(`⏳ [View ${i+1}] Watching for ${Math.round(finalWait/1000)}s...`);
+                // 6. Watch Time
+                const finalWait = (parseInt(watch_time) * 1000) + Math.floor(Math.random() * 15000);
                 await new Promise(r => setTimeout(r, finalWait));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Success.`);
+                console.log(`✅ [View ${i+1}] Counted.`);
 
-                // 7. Gap between views (Very important for no-proxy)
-                const gap = 15000 + Math.floor(Math.random() * 15000); 
-                console.log(`😴 Cooling down for ${Math.round(gap/1000)}s...`);
+                // Important: 1-2 minute ka gap rakhein real dikhne ke liye
+                const gap = 60000 + Math.floor(Math.random() * 30000);
                 await new Promise(r => setTimeout(r, gap));
 
             } catch (err) {
-                console.error(`❌ [View ${i+1}] Failed: ${err.message}`);
+                console.error(`❌ Error: ${err.message}`);
                 if (browser) await browser.close();
-                await new Promise(r => setTimeout(r, 5000));
             }
         }
-        console.log("🏁 All views completed.");
     };
 
     runSequential();
