@@ -1218,23 +1218,22 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE BROWSER BOOST (NO PROXY - STEALTH MODE)
 // ===================================================================
-// --- IMPORT SECTION (Code ke upar ye hona zaroori hai) ---
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-// --- TOOL 10: PROXY-TUNNEL SEARCH ENGINE (FINAL FIXED) ---
+// --- TOOL 10: ADVANCED PROXY-TUNNEL WITH PLAY-CHECK ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, video_title, views_count, watch_time } = req.body;
 
     if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
     res.status(200).json({ 
-        status: "Success", 
-        message: "Proxy-Tunneling Engine Started. Bypassing Render IP..." 
+        status: "Active", 
+        message: "Proxy-Tunneling Engine Started. Monitoring Real-time Analytics..." 
     });
 
-    const runProxyTunnel = async () => {
+    const runSmartTunnel = async () => {
         const total = Math.min(parseInt(views_count), 20);
         
         for (let i = 0; i < total; i++) {
@@ -1242,68 +1241,84 @@ app.post('/api/real-view-boost', async (req, res) => {
             try {
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: [
-                        '--no-sandbox', 
-                        '--disable-setuid-sandbox',
-                        '--disable-blink-features=AutomationControlled'
-                    ]
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
                 });
 
                 const page = await browser.newPage();
                 
-                // Real Identity (Mobile/Desktop mix)
+                // Real Identity
                 await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
 
-                console.log(`🚀 [View ${i+1}] Entering Proxy Tunnel (CroxyProxy)...`);
+                console.log(`🚀 [View ${i+1}] Connecting to Proxy Tunnel...`);
                 
-                // 1. CroxyProxy open karna
+                // 1. CroxyProxy Loading
                 await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // 2. YouTube Search URL banana
+                // 2. Search URL (YouTube ko dhokha dene ke liye)
                 const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(video_title || 'trending video')}`;
                 
-                // Proxy input box mein link daalna
                 await page.waitForSelector('#url', { timeout: 15000 }); 
                 await page.type('#url', searchUrl);
                 await page.keyboard.press('Enter');
 
-                // Proxy ko load hone ka time dena (Render par slow ho sakta hai)
-                console.log(`⏳ [View ${i+1}] Loading YouTube via Proxy Server...`);
+                // Proxy load time
                 await new Promise(r => setTimeout(r, 15000)); 
 
-                // 3. Proxy session ke andar hi Video URL par jana (Masking)
-                // Isse YouTube ko CroxyProxy ka IP dikhega
+                // 3. Navigate to Video within Proxy
+                console.log(`🔗 [View ${i+1}] Navigating to Video URL...`);
                 await page.goto(video_url, { waitUntil: 'domcontentloaded' });
+                await new Promise(r => setTimeout(r, 10000));
 
-                // 4. Human interaction (Play & Scroll)
-                await new Promise(r => setTimeout(r, 8000));
-                try {
-                    await page.keyboard.press('k'); // Play
-                    await page.evaluate(() => window.scrollBy(0, 400));
-                } catch(e) {}
-
-                // 5. Watch Time Logic
-                const isShorts = video_url.includes('/shorts/');
-                const finalWait = (parseInt(watch_time) * 1000) * (isShorts ? 2 : 1);
+                // 4. SMART PLAY CHECK (Sabse Zaroori)
+                await page.evaluate(() => {
+                    const video = document.querySelector('video');
+                    if (video) {
+                        video.muted = false; // Unmute
+                        video.play();       // Force Play
+                    }
+                    // Layout click to ensure focus
+                    document.body.click();
+                });
                 
-                console.log(`⏳ Watching for ${Math.round(finalWait/1000)}s...`);
-                await new Promise(r => setTimeout(r, finalWait));
+                // Force shortcut 'k' for YouTube play
+                await page.keyboard.press('k'); 
+                await page.keyboard.press('m'); // Unmute
+
+                const isPlaying = await page.evaluate(() => {
+                    const v = document.querySelector('video');
+                    return !!(v && v.currentTime > 0 && !v.paused);
+                });
+
+                if (isPlaying) {
+                    console.log(`▶️ [View ${i+1}] Video is CONFIRMED Playing!`);
+                } else {
+                    console.log(`⚠️ [View ${i+1}] Video might be stuck, re-trying play...`);
+                    await page.click('.ytp-play-button').catch(() => null);
+                }
+
+                // 5. Watch Time with Human Scroll
+                const wait = (parseInt(watch_time) * 1000) + Math.floor(Math.random() * 10000);
+                console.log(`⏳ Watching for ${Math.round(wait/1000)}s...`);
+                
+                // Random scrolling for human behavior
+                await page.evaluate(() => window.scrollBy(0, 500));
+                await new Promise(r => setTimeout(r, wait));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] Success! Proxy Session Closed.`);
-
-                // Next view se pehle break (Render RAM stability)
-                await new Promise(r => setTimeout(r, 10000));
+                console.log(`✅ [View ${i+1}] Session Success.`);
+                
+                // Cool down to avoid IP ban
+                await new Promise(r => setTimeout(r, 8000));
 
             } catch (err) {
                 console.error(`❌ Tunnel Error: ${err.message}`);
                 if (browser) await browser.close();
-                await new Promise(r => setTimeout(r, 10000));
+                await new Promise(r => setTimeout(r, 5000));
             }
         }
     };
 
-    runProxyTunnel();
+    runSmartTunnel();
 });
 // ===================================================================
 // --- SERVER START ---
