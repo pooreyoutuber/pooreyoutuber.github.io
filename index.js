@@ -1218,7 +1218,6 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE BROWSER BOOST (NO PROXY - STEALTH MODE)
 // ===================================================================
-// Is tool ko index.js ke sabse aakhiri me replace karein
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
@@ -1228,15 +1227,15 @@ app.post('/api/real-view-boost', async (req, res) => {
 
     if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
-    // Client ko turant response de do taaki frontend hang na ho
     res.status(200).json({
         status: "Success",
-        message: `Multi-Browser Engine started for ${views_count} threads.`,
-        note: "Check Render logs to see real-time progress."
+        message: "Multi-Stream Engine Started. Checking Real-time Analytics in 5 mins..."
     });
 
-    // Ek single browser instance kholne ka function
-    const launchBrowserThread = async (id) => {
+    const isShorts = video_url.includes('/shorts/');
+
+    // Ek single browser function jo bilkul real insaan jaisa behave karega
+    const launchView = async (id) => {
         let browser;
         try {
             browser = await puppeteer.launch({
@@ -1246,68 +1245,63 @@ app.post('/api/real-view-boost', async (req, res) => {
                     '--disable-setuid-sandbox',
                     '--disable-blink-features=AutomationControlled',
                     '--mute-audio',
-                    '--window-size=400,600' // Kam RAM consume karne ke liye chota size
+                    isShorts ? '--window-size=400,800' : '--window-size=1280,720'
                 ]
             });
 
             const page = await browser.newPage();
             
-            // 1. Random Identity (Taaki YouTube ko lage alag-alag log hain)
-            const agents = [
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
-                "Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36"
-            ];
-            await page.setUserAgent(agents[id % agents.length]);
+            // 1. Mobile Identity for Shorts, Desktop for Long
+            if (isShorts) {
+                await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
+                await page.setViewport({ width: 375, height: 812, isMobile: true });
+            } else {
+                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+            }
 
-            // 2. Traffic Source Masking (External Traffic)
-            // Isse YouTube Studio ko lagega ki view Twitter ya Facebook se aaya hai
-            const referers = ['https://t.co/', 'https://m.facebook.com/', 'https://l.instagram.com/'];
-            await page.setExtraHTTPHeaders({ 'Referer': referers[id % referers.length] });
+            // 2. Referer Spoofing (SMM Panel Secret)
+            // YouTube ko lagega view Google Search ya Twitter se aaya hai
+            const sources = ['https://www.google.com/', 'https://t.co/', 'https://m.facebook.com/'];
+            await page.setExtraHTTPHeaders({ 'Referer': sources[id % sources.length] });
 
-            console.log(`🚀 [Thread ${id+1}] Opening Video...`);
-            await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            // 3. Navigation with better timeout
+            console.log(`🚀 [Stream ${id+1}] Opening ${isShorts ? 'Short' : 'Video'}...`);
+            await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 120000 });
 
-            // 3. Auto-Play Logic
-            await new Promise(r => setTimeout(r, 7000));
-            try {
-                await page.keyboard.press('k'); // Play button shortcut
-                // Shorts ke liye scroll down simulation
-                await page.evaluate(() => window.scrollBy(0, 200));
-            } catch (e) {}
+            // 4. Human Interaction
+            await new Promise(r => setTimeout(r, 6000));
+            await page.keyboard.press('k'); // Force Play
+            
+            // Random Scrolling
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
 
-            // 4. Randomized Watch Time (Retention)
-            const baseTime = parseInt(watch_time) * 1000;
-            const jitter = Math.floor(Math.random() * 10000); 
-            console.log(`⏳ [Thread ${id+1}] Watching for ${Math.round((baseTime+jitter)/1000)}s...`);
-            await new Promise(r => setTimeout(r, baseTime + jitter));
+            // 5. Watch Time (Retention)
+            const wait = (parseInt(watch_time) * 1000) + (Math.random() * 15000);
+            await new Promise(r => setTimeout(r, wait));
 
             await browser.close();
-            console.log(`✅ [Thread ${id+1}] Success! View sent to Studio.`);
-
+            console.log(`✅ [Stream ${id+1}] View Synced with Studio.`);
         } catch (err) {
-            console.error(`❌ [Thread ${id+1}] Error: ${err.message}`);
             if (browser) await browser.close();
+            console.error(`❌ [Stream ${id+1}] Error: ${err.message}`);
         }
     };
 
-    // MULTI-THREADING EXECUTION
-    const startMultiThreading = async () => {
-        const batchSize = Math.min(parseInt(views_count), 8); // Render Free par 8-10 max threads hi chalayein
-        const tasks = [];
-
-        for (let i = 0; i < batchSize; i++) {
-            tasks.push(launchBrowserThread(i));
-            // Har thread ke beech 2 second ka gap taaki CPU crash na ho
-            await new Promise(r => setTimeout(r, 2000));
+    // BATCH PROCESSING: Render crash na ho isliye 2-2 karke chalayenge
+    const startBoosting = async () => {
+        const totalViews = Math.min(views_count, 30);
+        for (let i = 0; i < totalViews; i += 2) {
+            const batch = [];
+            if (i < totalViews) batch.push(launchView(i));
+            if (i + 1 < totalViews) batch.push(launchView(i + 1));
+            
+            await Promise.all(batch); // 2 views ek saath chalenge
+            await new Promise(r => setTimeout(r, 3000)); // 3s gap for RAM
         }
-
-        // Sabhi browsers ek saath (Parallel) chalenge
-        await Promise.all(tasks);
-        console.log("🏁 All Multi-Browser threads finished.");
+        console.log("🏁 Job Completed.");
     };
 
-    startMultiThreading();
+    startBoosting();
 });
 // ===================================================================
 // --- SERVER START ---
