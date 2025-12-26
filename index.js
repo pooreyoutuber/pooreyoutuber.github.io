@@ -1222,8 +1222,6 @@ const puppeteer = require('puppeteer');
 app.use(express.json());
 app.use(cors());
 
-const PORT = process.env.PORT || 10000;
-
 // User Agents taaki har view alag device se lage
 const USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
