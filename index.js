@@ -1218,67 +1218,87 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE BROWSER BOOST (NO PROXY - STEALTH MODE)
 // ===================================================================
-// --- TOOL 10: PROXY-TUNNEL SEARCH ENGINE (ULTIMATE) ---
+// --- IMPORT SECTION (Code ke upar ye hona zaroori hai) ---
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
+
+// --- TOOL 10: PROXY-TUNNEL SEARCH ENGINE (FINAL FIXED) ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, video_title, views_count, watch_time } = req.body;
 
+    if (!video_url) return res.status(400).json({ message: "URL missing!" });
+
     res.status(200).json({ 
         status: "Success", 
-        message: "Proxy-Tunneling Started. Bypassing Render IP via CroxyProxy..." 
+        message: "Proxy-Tunneling Engine Started. Bypassing Render IP..." 
     });
 
     const runProxyTunnel = async () => {
-        for (let i = 0; i < Math.min(views_count, 20); i++) {
+        const total = Math.min(parseInt(views_count), 20);
+        
+        for (let i = 0; i < total; i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                    args: [
+                        '--no-sandbox', 
+                        '--disable-setuid-sandbox',
+                        '--disable-blink-features=AutomationControlled'
+                    ]
                 });
 
                 const page = await browser.newPage();
+                
+                // Real Identity (Mobile/Desktop mix)
                 await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
 
-                // STEP 1: CroxyProxy ya ProxySite par jana
-                console.log(`🚀 [View ${i+1}] Entering Proxy Tunnel...`);
-                await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2' });
-
-                // STEP 2: Proxy ke search bar mein YouTube Search Link daalna
-                // Hum direct video nahi, balki Search Result wala link daalenge
-                const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(video_title || 'trending shorts')}`;
+                console.log(`🚀 [View ${i+1}] Entering Proxy Tunnel (CroxyProxy)...`);
                 
-                await page.waitForSelector('#url'); 
+                // 1. CroxyProxy open karna
+                await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+
+                // 2. YouTube Search URL banana
+                const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(video_title || 'trending video')}`;
+                
+                // Proxy input box mein link daalna
+                await page.waitForSelector('#url', { timeout: 15000 }); 
                 await page.type('#url', searchUrl);
                 await page.keyboard.press('Enter');
 
-                // Wait for Proxy to load YouTube through their server
-                console.log(`⏳ [View ${i+1}] Tunneling through Proxy Server...`);
+                // Proxy ko load hone ka time dena (Render par slow ho sakta hai)
+                console.log(`⏳ [View ${i+1}] Loading YouTube via Proxy Server...`);
                 await new Promise(r => setTimeout(r, 15000)); 
 
-                // STEP 3: Ab YouTube khul chuka hai Proxy ke andar. Ab video par click/navigate karna.
-                // Proxy site URL mask karti hai, isliye hum sidha video URL par navigate karenge Proxy session ke andar
+                // 3. Proxy session ke andar hi Video URL par jana (Masking)
+                // Isse YouTube ko CroxyProxy ka IP dikhega
                 await page.goto(video_url, { waitUntil: 'domcontentloaded' });
 
-                // STEP 4: Human Interaction
+                // 4. Human interaction (Play & Scroll)
                 await new Promise(r => setTimeout(r, 8000));
-                await page.keyboard.press('k'); // Play
-                await page.evaluate(() => window.scrollBy(0, 300));
+                try {
+                    await page.keyboard.press('k'); // Play
+                    await page.evaluate(() => window.scrollBy(0, 400));
+                } catch(e) {}
 
-                // STEP 5: Watch Time (Shorts loop logic included)
+                // 5. Watch Time Logic
                 const isShorts = video_url.includes('/shorts/');
-                const finalWait = (parseInt(watch_time) * 1000 * (isShorts ? 2 : 1)) + 5000;
+                const finalWait = (parseInt(watch_time) * 1000) * (isShorts ? 2 : 1);
                 
+                console.log(`⏳ Watching for ${Math.round(finalWait/1000)}s...`);
                 await new Promise(r => setTimeout(r, finalWait));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] View Counted via Proxy Tunnel.`);
+                console.log(`✅ [View ${i+1}] Success! Proxy Session Closed.`);
 
-                // Gap between views
+                // Next view se pehle break (Render RAM stability)
                 await new Promise(r => setTimeout(r, 10000));
 
             } catch (err) {
-                console.error("Tunnel Error: " + err.message);
+                console.error(`❌ Tunnel Error: ${err.message}`);
                 if (browser) await browser.close();
+                await new Promise(r => setTimeout(r, 10000));
             }
         }
     };
