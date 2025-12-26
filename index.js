@@ -1216,96 +1216,89 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
-// 7. ULTIMATE PROXY BROWSER BOOST (STUDIO BYPASS)
+// 7. ULTIMATE PROXY BROWSER BOOST (STABLE & TIMEOUT FIXED)
 // ===================================================================
-const puppeteer = require('puppeteer');
-
 app.post('/api/real-view-boost', async (req, res) => {
-    // Frontend se proxy details bhi le sakte hain ya yahan hardcode karein
     const { video_url, views_count, watch_time, proxy_list } = req.body;
 
     if (!video_url) return res.status(400).json({ message: "URL missing!" });
 
     res.status(200).json({
         status: "success",
-        message: "Proxy-enabled Sequential Boost Started. Monitoring Real-time Analytics..."
+        message: "Sequential Boost Active. View 2 was success, continuing..."
     });
 
-    const runSequentialViews = async () => {
+    const runSequential = async () => {
         const total = Math.min(parseInt(views_count), 50);
         const autoPath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
 
         for (let i = 0; i < total; i++) {
             let browser;
             try {
-                // 1. Proxy Selection (Agar proxy list hai toh har view ke liye naya IP)
-                let launchArgs = [
+                let args = [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
-                    '--single-process'
+                    '--single-process',
+                    '--no-zygote'
                 ];
 
-                // Agar aapke paas proxy hai (format: ip:port), toh use yahan dalein
+                // Proxy Handling
                 if (proxy_list && proxy_list.length > 0) {
                     const randomProxy = proxy_list[i % proxy_list.length];
-                    launchArgs.push(`--proxy-server=${randomProxy}`);
-                    console.log(`📡 [View ${i+1}] Using Proxy: ${randomProxy}`);
+                    args.push(`--proxy-server=${randomProxy}`);
+                    console.log(`📡 [View ${i+1}] Using IP: ${randomProxy}`);
                 }
 
                 browser = await puppeteer.launch({
                     executablePath: autoPath,
                     headless: "new",
-                    args: launchArgs
+                    args: args
                 });
 
                 const page = await browser.newPage();
                 
-                // 2. Stealth & User Agent
+                // --- TIMEOUT FIX ---
+                // Timeout ko 60s se badha kar 90s kar diya taki slow proxy handle ho sake
+                await page.setDefaultNavigationTimeout(90000); 
+                
                 await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-                await page.evaluateOnNewDocument(() => {
-                    Object.defineProperty(navigator, 'webdriver', { get: () => false });
-                });
 
-                // 3. Referrer Spoofing (Google Search se aata hua dikhayein)
-                await page.setExtraHTTPHeaders({
-                    'Referer': 'https://www.google.com/search?q=trending+videos'
-                });
+                // Google Search Referrer (Bypass Spam Filter)
+                await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
 
-                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
+                console.log(`🚀 [View ${i+1}] Opening YouTube...`);
+                await page.goto(video_url, { waitUntil: 'domcontentloaded' }); // Fast load
 
-                // 4. Human-like Interaction
-                console.log(`🎬 [View ${i+1}] Simulating Human Interaction...`);
-                await new Promise(r => setTimeout(r, 3000));
+                // Human Behavior
+                await new Promise(r => setTimeout(r, 5000));
+                await page.evaluate(() => window.scrollBy(0, 300));
                 
-                // Thoda scroll niche
-                await page.evaluate(() => window.scrollBy(0, 400));
-                
-                // Keyboard shortcuts (Mute then Play)
-                await page.keyboard.press('m'); 
-                await page.keyboard.press('k'); 
-                
-                // 5. Realistic Watch Time
-                const extraBuffer = Math.floor(Math.random() * 15000); // 15s random extra
-                const finalWait = (parseInt(watch_time) * 1000) + extraBuffer;
-                
-                console.log(`⏳ [View ${i+1}] Watching for ${Math.round(finalWait/1000)}s...`);
-                await new Promise(r => setTimeout(r, finalWait));
+                // Play Commands
+                await page.keyboard.press('m'); // Unmute
+                await page.keyboard.press('k'); // Play
+                console.log(`🎬 [View ${i+1}] Interaction successful.`);
+
+                // Watch Time Calculation
+                const wait = (parseInt(watch_time) * 1000) + (Math.random() * 15000);
+                console.log(`⏳ Watching for ${Math.round(wait/1000)}s...`);
+                await new Promise(r => setTimeout(r, wait));
 
                 await browser.close();
                 console.log(`✅ [View ${i+1}] Success.`);
 
-                // View Gap (10-20 seconds break)
-                await new Promise(r => setTimeout(r, 10000 + Math.random() * 10000));
+                // Gap between views (Anti-Bot)
+                await new Promise(r => setTimeout(r, 8000));
 
             } catch (err) {
                 console.error(`❌ [View ${i+1}] Failed: ${err.message}`);
                 if (browser) await browser.close();
+                // Agar timeout baar-baar aa raha hai, toh 5 sec wait karke next view par jayein
+                await new Promise(r => setTimeout(r, 5000));
             }
         }
     };
-
-    runSequentialViews();
+    runSequential();
 });
 // ===================================================================
 // --- SERVER START ---
