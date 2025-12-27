@@ -1220,7 +1220,6 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const app = express();
 app.use(cors());
 app.use(express.json());
 puppeteer.use(StealthPlugin());
