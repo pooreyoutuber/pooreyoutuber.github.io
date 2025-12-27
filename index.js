@@ -1218,86 +1218,58 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE HYBRID YOUTUBE BOOST (PRO VERSION)
 // ===================================================================
+const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
 puppeteer.use(StealthPlugin());
 
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, video_title, views_count, watch_time } = req.body;
+    const { video_url, views_count, watch_time } = req.body;
+    const video_title = "Trending YouTube Video"; // Aap dynamic bhi bhej sakte hain
 
-    res.status(200).json({ 
-        status: "High-Quality Engine Active", 
-        message: "Search + Interaction mode on. Check Real-time analytics in 15 mins." 
-    });
+    res.status(200).json({ status: "Success", message: "Cloud Engine Started" });
 
-    const runMasterInteraction = async () => {
-        for (let i = 0; i < Math.min(views_count, 15); i++) {
+    const runBoost = async () => {
+        for (let i = 0; i < Math.min(views_count, 10); i++) {
             let browser;
             try {
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
                 });
-
                 const page = await browser.newPage();
                 
-                // Real Phone Identity
-                await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1');
+                // Traffic Source: Google Search Masking
+                await page.goto('https://www.google.com/search?q=' + encodeURIComponent(video_title));
+                await new Promise(r => setTimeout(r, 3000));
 
-                // STEP 1: Google Search Masking
-                console.log(`🚀 [View ${i+1}] Simulating Google Search for: ${video_title}`);
-                await page.goto('https://www.google.com/search?q=' + encodeURIComponent(video_title || "YouTube Shorts"), { waitUntil: 'domcontentloaded' });
-                await new Promise(r => setTimeout(r, 4000));
+                // Video Entry with Referrer
+                await page.goto(video_url, { waitUntil: 'networkidle2', referer: 'https://www.google.com/' });
 
-                // STEP 2: Entry via Referrer
-                await page.goto(video_url, { 
-                    waitUntil: 'networkidle2', 
-                    referer: 'https://www.google.com/' 
-                });
-
-                // STEP 3: Auto-Play & Sound
-                await new Promise(r => setTimeout(r, 6000));
+                // Engagement: Auto-Play & Human Logic
                 await page.evaluate(() => {
                     const v = document.querySelector('video');
                     if (v) { v.play(); v.muted = false; }
+                    window.scrollBy(0, 400); 
                 });
-                await page.keyboard.press('k'); // Force play shortcut
+                await page.keyboard.press('k'); 
 
-                // STEP 4: LIKE & INTERACTION LOGIC
-                // Hum like button ko dhoond kar us par mouse le jayenge
-                console.log(`👍 [View ${i+1}] Simulating Like/Engagement...`);
-                await page.evaluate(() => {
-                    window.scrollBy(0, 350); // Scrolling down to see buttons
-                    // YouTube mobile par Like button dhoondne ka logic
-                    const buttons = Array.from(document.querySelectorAll('button'));
-                    const likeBtn = buttons.find(b => b.getAttribute('aria-label') && b.getAttribute('aria-label').includes('like'));
-                    if (likeBtn) {
-                        likeBtn.style.border = "2px solid red"; // Just for interaction focus
-                    }
-                });
-                
-                // STEP 5: Retention (Looping for Shorts)
-                const isShorts = video_url.includes('/shorts/');
-                const finalWait = (parseInt(watch_time) * 1000) * (isShorts ? 3 : 1);
-                
-                console.log(`⏳ Watching & Interacting for ${Math.round(finalWait/1000)}s...`);
-                await new Promise(r => setTimeout(r, finalWait));
-
+                // Retention Loop
+                await new Promise(r => setTimeout(r, watch_time * 1000));
                 await browser.close();
-                console.log(`✅ [View ${i+1}] View + Interaction Successful.`);
-                
-                // Random gap to avoid IP pattern
-                await new Promise(r => setTimeout(r, 10000 + Math.random() * 5000));
-
-            } catch (err) {
-                console.log("Error: " + err.message);
-                if (browser) await browser.close();
-            }
+                console.log(`View ${i+1} done`);
+            } catch (e) { if(browser) await browser.close(); }
         }
     };
-    runMasterInteraction();
+    runBoost();
 });
 
+app.listen(process.env.PORT || 3000);
 // ===================================================================
 // --- SERVER START ---
 // ===================================================================
