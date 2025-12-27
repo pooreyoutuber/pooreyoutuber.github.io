@@ -1157,63 +1157,103 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // ===================================================================
 // 6. GSC ORGANIC TRAFFIC BOOSTER (NEW TOOL)
 // ===================================================================
+const express = require('express');
+const cors = require('cors');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
+// Stealth plugin enable karein taaki Google ko bot ka pata na chale
+puppeteer.use(StealthPlugin());
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const PORT = process.env.PORT || 10000;
+
+// --- GSC TASK FUNCTION (The Core Fix) ---
 async function runGscTask(keyword, url, viewNumber) {
+    let browser;
     try {
-        const userAgent = getRandomUserAgent();
-        const geo = getRandomGeo();
-        
-        // Google Search se traffic aata hua dikhane ke liye Referrer
-        const googleReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}&oq=${encodeURIComponent(keyword)}&sourceid=chrome&ie=UTF-8`;
-
-        const response = await axios.get(url, {
-            headers: {
-                'User-Agent': userAgent,
-                'Referer': googleReferrer,
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            },
-            timeout: 20000 // 20 seconds timeout
+        // Puppeteer launch karein (Render compatibility ke liye args zaroori hain)
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--window-size=1920,1080'
+            ]
         });
 
-        if (response.status === 200) {
-            console.log(`[GSC-SUCCESS] View #${viewNumber} | Keyword: ${keyword} | Country: ${geo.country}`);
-        }
+        const page = await browser.newPage();
+        
+        // Real user behavior simulate karne ke liye screen size aur user agent
+        await page.setViewport({ width: 1920, height: 1080 });
+
+        // 1. Google Search par keyword search simulate karein
+        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        console.log(`[View #${viewNumber}] Searching on Google...`);
+        
+        await page.goto(googleSearchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // 2. Click Simulation (Referer ke saath site par jana)
+        // GSC ke liye 'referer' header sabse important hai
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            referer: googleSearchUrl 
+        });
+
+        // 3. Page Engagement (Sroll aur Stay)
+        // Google ko lagna chahiye ki user real hai
+        await page.evaluate(() => {
+            window.scrollBy(0, window.innerHeight);
+        });
+        
+        // 15-30 seconds ka random stay taaki "Bounce Rate" high na ho
+        const stayTime = Math.floor(Math.random() * 15000) + 15000;
+        await new Promise(r => setTimeout(r, stayTime));
+
+        console.log(`[GSC-SUCCESS] View #${viewNumber} completed successfully.`);
+        
     } catch (error) {
         console.error(`[GSC-ERROR] View #${viewNumber} failed: ${error.message}`);
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
     }
 }
 
+// --- API ENDPOINT ---
 app.post('/start-task', async (req, res) => {
-    const { keyword, url } = req.body;
+    const { keyword, url, views = 10 } = req.body; // Views limit karein Render ki RAM ke liye
 
     if (!keyword || !url) {
-        return res.status(400).json({ error: "Keyword and URL are required" });
+        return res.status(400).json({ error: "Keyword aur URL dena zaroori hai" });
     }
 
-    // Frontend ko turant response bhejein
     res.status(200).json({ 
         success: true, 
-        message: "GSC Traffic Task Started! It will complete in 6-8 hours." 
+        message: "GSC Booster started! Views browser se simulate ho rahe hain." 
     });
 
-    // Background process jo chalti rahegi
+    // Background process
     (async () => {
-        const totalViews = 1000;
-        console.log(`\n>>> STARTING GSC BOOST FOR: ${url} (Keyword: ${keyword})`);
-
+        const totalViews = parseInt(views);
         for (let i = 1; i <= totalViews; i++) {
             await runGscTask(keyword, url, i);
             
-            // 1000 views ko 7 ghante mein spread karne ke liye delay
-            // Average 25 se 35 seconds ka gap har view ke beech mein
-            const delay = Math.floor(Math.random() * (35000 - 25000 + 1)) + 25000;
-            await new Promise(resolve => setTimeout(resolve, delay));
+            // Views ke beech mein 1-3 minute ka gap rakhein (Natural behavior)
+            const gap = Math.floor(Math.random() * 120000) + 60000;
+            console.log(`Waiting ${gap/1000}s for next view...`);
+            await new Promise(resolve => setTimeout(resolve, gap));
         }
-        
-        console.log(`\n>>> GSC BOOST COMPLETED FOR: ${url}`);
     })();
+});
+
+app.listen(PORT, () => {
+    console.log(`GSC Booster API running on port ${PORT}`);
 });
 // ===================================================================
 // 7. ULTIMATE HYBRID YOUTUBE BOOST (PRO VERSION)
