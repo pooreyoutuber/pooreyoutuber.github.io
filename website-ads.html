@@ -96,18 +96,17 @@
                 return;
             }
 
-            // Animation & UI Change
             btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> Connecting...';
             btn.disabled = true;
 
             try {
-                // Yahan aapka Render URL hona chahiye
                 const response = await fetch('https://pooreyoutuber-github-io-v2fo.onrender.com/start-task', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         keyword: keyword,
-                        url: siteUrl
+                        url: siteUrl,
+                        views: 1000 // <--- Yeh 1000 backend ko bhej raha hai
                     })
                 });
 
@@ -115,7 +114,7 @@
                     document.getElementById('mainForm').classList.add('hidden');
                     document.getElementById('progressScreen').classList.remove('hidden');
                 } else {
-                    alert("Server error! Please check if Render is active.");
+                    alert("Server error! Please check Render logs.");
                     btn.innerHTML = 'Start 1000 Views Process <i class="fas fa-paper-plane"></i>';
                     btn.disabled = false;
                 }
@@ -129,3 +128,4 @@
     </script>
 </body>
 </html>
+
