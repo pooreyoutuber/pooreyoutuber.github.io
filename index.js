@@ -1216,84 +1216,90 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
-// 7. ULTIMATE BROWSER BOOST (FIXED FOR REAL-TIME DISPLAY)
+// 7. ULTIMATE HYBRID YOUTUBE BOOST (PRO VERSION)
 // ===================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, video_title, views_count, watch_time } = req.body;
+    const { video_url, ga_id, api_secret, watch_time, views_count } = req.body;
 
-    // Teacher ko turant response dene ke liye
+    if (!video_url || !ga_id || !api_secret) {
+        return res.status(400).json({ status: "Error", message: "Missing Video URL or GA4 Keys." });
+    }
+
+    // Frontend ko turant success message dena (College Demo ke liye)
     res.status(200).json({ 
-        status: "Success", 
-        message: "SMM Engine Active. YouTube Studio Real-time check karein." 
+        status: "Engine Started", 
+        message: "Real-time signals are being sent. Check YouTube Studio (Last 60 mins) chart." 
     });
 
-    const runEngine = async () => {
-        // Ek baar mein 2-3 browsers se zyada na kholein (Render memory limit)
-        for (let i = 0; i < Math.min(views_count, 10); i++) {
-            let browser;
+    const runHybridTask = async () => {
+        for (let i = 0; i < Math.min(views_count, 5); i++) {
+            const cid = generateClientId();
+            const session_id = Date.now().toString();
+
             try {
-                browser = await puppeteer.launch({
-                    headless: "new", // "new" is better for stealth
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-blink-features=AutomationControlled',
-                        '--mute-audio' // Audio band taaki server load kam ho
+                // PHASE 1: Send GA4 High-Trust Signal (Referrer spoofing)
+                // Hum YouTube ko bata rahe hain ki user Twitter/X se aaya hai
+                const engagementPayload = {
+                    client_id: cid,
+                    events: [
+                        {
+                            name: 'page_view',
+                            params: {
+                                page_location: video_url,
+                                page_referrer: 'https://t.co/', // Twitter Referrer (Very High Trust)
+                                session_id: session_id,
+                                debug_mode: true
+                            }
+                        },
+                        {
+                            name: 'video_start',
+                            params: {
+                                video_url: video_url,
+                                video_provider: 'youtube',
+                                session_id: session_id,
+                                debug_mode: true
+                            }
+                        }
                     ]
+                };
+
+                // Pehle Google ko signal bhejein
+                await sendData(ga_id, api_secret, engagementPayload, i + 1, 'yt_hybrid_signal');
+
+                // PHASE 2: Launch Stealth Browser for Engagement
+                const browser = await puppeteer.launch({
+                    headless: "new",
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
                 });
 
                 const page = await browser.newPage();
+                await page.setUserAgent(getRandomUserAgent());
                 
-                // Real User ki tarah behavior set karna
-                await page.setViewport({ width: 1280, height: 720 });
-
-                // Step 1: Masking with Referrer (Twitter ya Google se aana)
-                console.log(`🚀 [View ${i+1}] Initiating Session via Twitter Referrer...`);
-                await page.goto(video_url, { 
-                    waitUntil: 'networkidle2', 
-                    referer: 'https://t.co/' // Twitter shortener (Very High Trust)
-                });
-
-                // Step 2: Human Interaction (Iske bina view count nahi hota)
-                await new Promise(r => setTimeout(r, 5000));
-                await page.evaluate(() => {
-                    window.scrollBy(0, 400); // Thoda scroll niche
-                    const video = document.querySelector('video');
-                    if (video) {
-                        video.play();
-                        video.volume = 0.5;
-                    }
-                });
-
-                // Step 3: Heartbeat Wait (YouTube Studio trigger point)
-                // Real-time analytics 30-45 seconds ke baad update hota hai
-                const actualWatchTime = (parseInt(watch_time) * 1000) || 45000; 
-                console.log(`🔗 [View ${i+1}] Watching for ${actualWatchTime/1000}s to trigger Studio...`);
+                // Real human behavior simulate karna
+                await page.goto(video_url, { waitUntil: 'networkidle2', referer: 'https://t.co/' });
                 
-                await new Promise(r => setTimeout(r, actualWatchTime));
+                // Video play hone ka wait aur human-like scroll
+                await new Promise(r => setTimeout(r, 10000));
+                await page.evaluate(() => { window.scrollBy(0, 300); });
 
-                // Step 4: Random Pause (Anti-Bot)
-                await page.evaluate(() => {
-                    if (Math.random() > 0.5) window.scrollBy(0, -200); 
-                });
+                // Watch time loop (Heartbeat signal)
+                const playTime = (parseInt(watch_time) * 1000) || 60000;
+                await new Promise(r => setTimeout(r, playTime));
 
                 await browser.close();
-                console.log(`✅ [View ${i+1}] View Synced to YouTube.`);
-
-                // Har view ke beech gap taaki YouTube "Spike" detect na kare
-                await new Promise(r => setTimeout(r, 15000));
+                console.log(`✅ [Hybrid View ${i+1}] Session Synced Successfully.`);
 
             } catch (err) {
-                if (browser) await browser.close();
-                console.log("Error in View Simulation: " + err.message);
+                console.error(`❌ [View ${i+1}] Failed:`, err.message);
             }
         }
     };
-    runEngine();
+
+    runHybridTask();
 });
 
 // ===================================================================
