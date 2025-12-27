@@ -1155,106 +1155,100 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. GSC & ADSENSE REVENUE BOOSTER (FIXED VIEW ISSUE)
+// 6. GSC & ADSENSE REVENUE BOOSTER (CONCURRENCY MODE)
 // ==================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
+// Task Function (Ek single view ke liye)
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
 
         const page = await browser.newPage();
-        
-        // Sabhi real user agents use karein
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        // 1. Google Search simulate karein (Referrer banane ke liye)
+        
+        // Google Search se aana (Referrer)
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-        // 2. Direct URL par jayein with Referrer
-        // networkidle2 use kiya hai taaki Ads aur Scripts load ho jayein
+        // Website par jana (Wait for Ads)
         await page.goto(url, { 
-            waitUntil: 'networkidle2', 
+            waitUntil: 'networkidle2', // Ads load hone ke liye zaroori
             timeout: 90000, 
             referer: googleSearchUrl 
         });
 
-        console.log(`[VIEWER] View #${viewNumber} loading ads...`);
-
-        // 3. ADSENSE INTERACTION (Earning ke liye zaroori)
-        // Dhire-dhire scroll karein taaki Ads viewable ho sakein
+        // AdSense Engagement: Slow Scroll
         await page.evaluate(async () => {
-            await new Promise((resolve) => {
-                let totalHeight = 0;
-                let distance = 150;
-                let timer = setInterval(() => {
-                    window.scrollBy(0, distance);
-                    totalHeight += distance;
-                    if(totalHeight >= 800){ // 800px tak scroll
-                        clearInterval(timer);
-                        resolve();
-                    }
-                }, 500);
-            });
+            for(let i=0; i<3; i++) {
+                window.scrollBy(0, 300);
+                await new Promise(r => setTimeout(r, 2000));
+            }
         });
 
-        // 4. STAY TIME (Page par rukna)
-        // 20-25 seconds ka wait jaisa aapne kaha
+        // Stay time (Earning ke liye)
         await new Promise(r => setTimeout(r, 25000));
+        console.log(`[OK] View #${viewNumber} Done ✅`);
 
-        console.log(`[SUCCESS] View #${viewNumber} completed! ✅`);
-        
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
+        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            // 2 sec extra wait RAM clear karne ke liye
-            await new Promise(r => setTimeout(r, 2000));
+            browser = null;
         }
     }
 }
 
-// Updated Endpoint
+// Endpoint jo Queue manage karega
 app.post('/start-task', async (req, res) => {
     const { keyword, url, views = 5 } = req.body;
-    
-    if (!keyword || !url) {
-        return res.status(400).json({ error: "Keyword and URL are required" });
-    }
-
     const totalViews = parseInt(views);
+    const CONCURRENCY_LIMIT = 2; // EK SAATH SIRF 2 BROWSER (Render ke liye safe)
 
-    // Turant response bhejein taaki frontend block na ho
     res.status(200).json({ 
         success: true, 
-        message: `Task started for ${totalViews} views. Dhire-dhire background mein aayenge.` 
+        message: `Task started. Running ${CONCURRENCY_LIMIT} browsers at a time for ${totalViews} views.` 
     });
 
-    // Background Loop: Ek-ek karke views aayenge
+    // Background Queue logic
     (async () => {
-        for (let i = 1; i <= totalViews; i++) {
-            // Task chalao
-            await runGscTask(keyword, url, i);
+        let activeTasks = 0;
+        let completedTasks = 0;
+
+        async function startNextTask() {
+            if (completedTasks >= totalViews) return;
+
+            completedTasks++;
+            activeTasks++;
             
-            // Ek view khatam hone ke baad 20-25 sec ka gap
-            if (i < totalViews) {
-                console.log(`[QUEUE] Waiting 20s before next view...`);
-                await new Promise(r => setTimeout(r, 20000));
-            }
+            const currentView = completedTasks;
+            console.log(`[QUEUE] Launching Browser for View #${currentView}...`);
+            
+            await runGscTask(keyword, url, currentView);
+            
+            activeTasks--;
+            
+            // Har view ke baad 20 sec ka gap jaisa aapne kaha
+            console.log(`[WAIT] View #${currentView} finished. Waiting 20s...`);
+            await new Promise(r => setTimeout(r, 20000));
+            
+            // Agla task shuru karein
+            startNextTask();
         }
-        console.log("--- ALL VIEWS COMPLETED ---");
+
+        // Shuruat mein 2 browser ek saath chalao
+        for (let i = 0; i < CONCURRENCY_LIMIT; i++) {
+            if (i < totalViews) startNextTask();
+            // Dono browser ek dum saath na khulein, 5 sec ka gap ho
+            await new Promise(r => setTimeout(r, 5000)); 
+        }
     })();
 });
 
