@@ -9,15 +9,6 @@
     <meta name="keywords" content="YouTube Shorts viewer, multi Shorts player, watch multiple Shorts, YouTube multi viewer, free Shorts tool, Shorts autoplay">
     <meta name="robots" content="index, follow">
 
-    <meta property="og:title" content="YouTube Shorts Multi Viewer">
-    <meta property="og:description" content="Paste a YouTube Shorts link and watch multiple Shorts videos at the same time with this free tool.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://yourwebsite.com/shorts-multi-viewer">
-    <meta property="og:image" content="https://yourwebsite.com/thumbnail.jpg">
-
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -25,8 +16,7 @@
         gtag('js', new Date());
         gtag('config', 'G-ZPMC525FGT');
     </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541"
-        crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9877532310172541" crossorigin="anonymous"></script>
 
     <style>
         :root {
@@ -36,13 +26,8 @@
             --secondary-text-color: #555;
             --input-border: #ccc;
             --youtube-red: #ff0000;
-            --youtube-dark-red: #cc0000;
             --blue-accent: #007bff;
-            --blue-accent-hover: #0056b3;
-            --result-border: #eee;
             --explanation-bg: #f8f9fa;
-            --warning-bg: #e6f7ff;
-            --warning-border: #b3d9ff;
         }
 
         body.dark-mode {
@@ -51,154 +36,132 @@
             --text-color: #f0f0f0;
             --secondary-text-color: #b0b0b0;
             --input-border: #444;
-            --youtube-dark-red: #8b0000;
-            --blue-accent: #3498db;
-            --blue-accent-hover: #2980b9;
-            --result-border: #333;
-            --explanation-bg: #2d2d2d; 
-            --warning-bg: #1c2e4a; 
-            --warning-border: #3498db;
+            --explanation-bg: #2d2d2d;
         }
 
         body {
-            font-family: 'Arial', sans-serif; 
-            background: var(--bg-color); 
-            text-align: center; 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-color);
+            text-align: center;
+            margin: 0;
+            padding: 0;
             color: var(--text-color);
-            transition: background 0.3s, color 0.3s;
         }
+
         .container-wrapper {
-            width: 90%;
-            max-width: 1400px;
+            width: 95%;
+            max-width: 1600px;
             margin: 30px auto;
             background: var(--container-bg);
-            padding: 30px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-        h1 { color: var(--youtube-red); font-size: 2.2em; margin-top:0; }
-        p.subtitle { color: var(--secondary-text-color); margin-bottom: 25px; }
 
-        #input-section { 
-            display: flex; 
-            justify-content: center; 
-            gap: 10px; 
-            margin-bottom: 30px; 
+        h1 { color: var(--youtube-red); }
+
+        #input-section {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
         }
-        input, button {
-          padding:12px 15px;
-          border-radius:6px;
-          border:1px solid var(--input-border);
-          font-size:16px;
-          transition: 0.3s;
-        }
-        input { width: 350px; background: var(--container-bg); color: var(--text-color); }
-        input[type="number"] { width: 100px; }
-        button { background: var(--blue-accent); color: #fff; cursor:pointer; font-weight: bold; border:none; }
-        button:hover { background: var(--blue-accent-hover); }
 
+        input { width: 350px; padding: 12px; border-radius: 6px; border: 1px solid var(--input-border); }
+        button { padding: 12px 20px; background: var(--blue-accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* Yahan change kiya gaya hai side-by-side 5 videos ke liye */
         #players {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px 0;
-            border-top: 2px solid var(--result-border);
-            margin-bottom: 30px;
-            display: none; /* Initially hidden until Play is clicked */
+            grid-template-columns: repeat(5, 1fr); /* Ek line mein 5 players */
+            gap: 10px;
+            margin-top: 20px;
+            display: none;
         }
+
         iframe {
             width: 100%;
-            height: 480px;
-            border: none;
-            border-radius:12px;
-            background: black;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            height: 350px; /* Side by 5 ke liye thodi kam height sahi rehti hai */
+            border-radius: 8px;
+            background: #000;
         }
-
-        .ad-unit { margin: 25px 0; text-align: center; min-height: 90px; }
 
         .utility-explanation {
-            text-align: left; padding: 25px;
-            background-color: var(--explanation-bg); 
-            border-radius: 10px; border: 1px solid var(--input-border); 
-            line-height: 1.6; color: var(--secondary-text-color);
+            text-align: left;
+            padding: 25px;
+            background-color: var(--explanation-bg);
+            border-radius: 10px;
+            margin-top: 20px;
+            line-height: 1.6;
         }
-        .utility-explanation h3 { color: var(--blue-accent); border-bottom: 2px solid var(--blue-accent); padding-bottom: 5px; }
 
         .warning-note {
-            background-color: var(--warning-bg); color: var(--text-color); 
-            border-left: 5px solid var(--blue-accent); padding: 15px; margin: 20px 0; border-radius: 8px;
+            background-color: #e6f7ff;
+            border-left: 5px solid var(--blue-accent);
+            padding: 15px;
+            margin: 20px 0;
+            color: #333;
         }
 
-        @media (max-width: 650px) {
-            .container-wrapper { width: 100%; border-radius: 0; padding: 15px; }
-            #input-section { flex-direction: column; }
-            input, button { width: 100%; }
-            iframe { height: 350px; }
+        @media (max-width: 1024px) {
+            #players { grid-template-columns: repeat(2, 1fr); } /* Tablets par 2 */
+        }
+
+        @media (max-width: 600px) {
+            #players { grid-template-columns: 1fr; } /* Mobile par 1 */
         }
     </style>
 </head>
 <body>
 
 <div class="container-wrapper">
-    <h1>🚀 YouTube Video Multi Viewer</h1>
-    <p class="subtitle">Paste a Video URL and choose how many players you want to generate.</p>
+    <h1>🚀 YouTube Longh Video Multi Viewer</h1>
+    <p class="subtitle">Paste a Long Video URL and choose how many players you want to generate.</p>
 
     <div class="ad-unit">
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-format="fluid"
-            data-ad-layout-key="-fb+5w+4e-db+86"
-            data-ad-client="ca-pub-9877532310172541"
-            data-ad-slot="7558349440"></ins>
+        <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-9877532310172541" data-ad-slot="7558349440"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
-    
+
     <div id="input-section">
-        <input type="text" id="shortUrl" placeholder="Paste YouTube URL (Shorts or Long)">
-        <input type="number" id="count" value="10" min="1" max="50">
-        <button onclick="generatePlayers()">Play Now</button>
+        <input type="text" id="shortUrl" placeholder="Paste YouTube URL">
+        <input type="number" id="count" value="10" min="1">
+        <button onclick="generatePlayers()">Play</button>
     </div>
 
     <div id="players"></div>
-    
+
     <div class="ad-unit">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-format="autorelaxed"
-             data-ad-client="ca-pub-9877532310172541"
-             data-ad-slot="2730819749"></ins>
+        <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-9877532310172541" data-ad-slot="2730819749"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
-    
+
     <div id="explanation-section" class="utility-explanation">
-        <h3>✨ The Power of YouTube Multi Viewing</h3>
-        <p>Welcome to the **YouTube Multi Viewer**, a unique tool designed to help you analyze and boost your content's initial performance.</p>
+        <h3>✨ The Power of YouTube Longh Video Multi Viewing</h3>
+        <p>Welcome to the **YouTube Longh Video Multi Viewer**, a unique tool designed to help you analyze and boost your content's initial performance. In the world of short-form video, early views and engagement are crucial for signaling to the algorithm that your content is worth promoting.</p>
 
         <div class="warning-note">
-            <p>🤝 **Friendly Tip:** YouTube Studio updates real analytics **2 to 4 hours** after using the tool. Enjoy monitoring until then!</p>
+            <p>🤝 **A Friendly Tip:** Feel free to use this tool for an early view boost! Just remember that YouTube Studio needs time to process data. You'll see the **real and verified analytics** updated accurately in your official YouTube Studio **2 to 4 hours** after using the tool.</p>
         </div>
         
-        <h4>How This Tool Works?</h4>
-        <p>This tool creates multiple embedded instances of your video. By loading multiple players, you can test quality and distribution metrics. We recommend setting the count between 5 and 20 for best performance.</p>
-        
-        <p><strong>Note:</strong> Sustainable growth depends on high-quality content. Use this tool as a testing environment.</p>
+        <h4>How This Tool Works and Why It's Beneficial (Approx. 650 Words Total)</h4>
+        <p>This tool creates multiple embedded instances of your Shorts video on a single page. By rapidly loading and interacting with these players, you can generate an initial burst of views. This simulated boost helps create early momentum for your video.</p>
+
+        <p><strong>Key Advantages for Creators:</strong></p>
+        <ul>
+            <li><strong>Initial View Boost:</strong> Gain immediate traction.</li>
+            <li><strong>Rapid Testing:</strong> Quickly check if your video is loading correctly.</li>
+            <li><strong>SEO Analysis:</strong> Test how quickly embedded players load.</li>
+            <li><strong>Custom Control:</strong> You choose the exact number of players.</li>
+        </ul>
+
+        <p><strong>Ethical Use and Strategy:</strong></p>
+        <p>We advocate for ethical usage. This tool is best used for initial analytical testing and personal promotion of your own content.</p>
     </div>
 
     <div class="ad-unit">
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-9877532310172541"
-            data-ad-slot="2497594456"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9877532310172541" data-ad-slot="2497594456" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 </div>
@@ -214,44 +177,25 @@
         const url = document.getElementById('shortUrl').value.trim();
         const count = parseInt(document.getElementById('count').value);
         const playersDiv = document.getElementById('players');
-        
-        if (!url || isNaN(count) || count <= 0) {
-            alert("Please enter a valid URL and count.");
-            return;
-        }
-
         const videoId = extractVideoId(url);
+
         if (!videoId) {
-            alert("Invalid YouTube URL.");
+            alert("Please enter a valid YouTube URL");
             return;
         }
 
-        // Clear and Show players grid
         playersDiv.innerHTML = '';
         playersDiv.style.display = 'grid';
 
         for (let i = 0; i < count; i++) {
             const iframe = document.createElement('iframe');
-            // Added autoplay=1 and mute=1 for better performance
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0`; 
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0`;
             iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
             iframe.allowFullscreen = true;
             playersDiv.appendChild(iframe);
         }
-
         playersDiv.scrollIntoView({ behavior: 'smooth' });
     }
-
-    // Theme and Ads Initializer
-    document.addEventListener('DOMContentLoaded', () => {
-        // Dark Mode Check
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-        }
-        
-        // Safety: Ensure grid is hidden if no videos
-        document.getElementById('players').style.display = 'none';
-    });
 </script>
 </body>
 </html>
