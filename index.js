@@ -1157,17 +1157,6 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // ===================================================================
 // 6. GSC ORGANIC TRAFFIC BOOSTER (NEW TOOL)
 // ===================================================================
-const express = require('express');
-const cors = require('cors');
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-
-// Stealth plugin enable karein taaki Google ko bot ka pata na chale
-puppeteer.use(StealthPlugin());
-
-const app = express();
-app.use(cors());
-app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
 
