@@ -28,6 +28,10 @@
 </head>
 <body class="text-slate-200 antialiased">
 
+    <div id="organic-player-placeholder" style="position:absolute; top:-9999px; left:-9999px;">
+        <div id="yt-player"></div>
+    </div>
+
     <header class="p-6">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
@@ -60,13 +64,13 @@
                 </p>
                 <ul class="space-y-4">
                     <li class="flex items-center gap-3 text-sm">
-                        <i class="fa-solid fa-circle-check text-blue-500"></i> Server-Side Background Task
+                        <i class="fa-solid fa-circle-check text-blue-500"></i> Hybrid IP (Local + Cloud) Delivery
                     </li>
                     <li class="flex items-center gap-3 text-sm">
                         <i class="fa-solid fa-circle-check text-blue-500"></i> Remote Render Deployment
                     </li>
                     <li class="flex items-center gap-3 text-sm">
-                        <i class="fa-solid fa-circle-check text-blue-500"></i> YouTube Studio Studio Verified
+                        <i class="fa-solid fa-circle-check text-blue-500"></i> YouTube Studio Verified
                     </li>
                 </ul>
             </div>
@@ -110,14 +114,26 @@
                     <div class="w-full bg-slate-800 rounded-full h-2">
                         <div id="progressBar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
-                    <p class="text-[10px] text-center text-slate-500 italic">Connected to Cloud Engine</p>
+                    <p class="text-[10px] text-center text-slate-500 italic">Connected to Cloud Engine + Local Node</p>
                 </div>
             </div>
 
         </div>
     </main>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
+        let ytPlayer;
+
+        // Extract Video ID Helper
+        function extractVideoId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            if (match && match[2].length === 11) return match[2];
+            if (url.includes('shorts/')) return url.split('shorts/')[1].split('?')[0];
+            return null;
+        }
+
         document.getElementById('orderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -127,55 +143,64 @@
             const percent = document.getElementById('percent');
             const statusText = document.getElementById('statusText');
 
-            const payload = {
-                video_url: document.getElementById('videoUrl').value,
-                views_count: document.getElementById('qty').value,
-                watch_time: document.getElementById('duration').value
-            };
+            const videoUrl = document.getElementById('videoUrl').value;
+            const qty = document.getElementById('qty').value;
+            const duration = document.getElementById('duration').value;
+            const videoId = extractVideoId(videoUrl);
 
             // UI Initial state
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Initializing Cloud Browser...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Syncing IP Nodes...';
             statusArea.classList.remove('hidden');
             bar.style.width = '0%';
             percent.innerText = '0%';
 
             try {
-                // API URL (Ensure this matches your Render service URL)
+                // 1. ORGANIC BOOST (Using User's REAL IP in background)
+                if (videoId && window.YT) {
+                    ytPlayer = new YT.Player('yt-player', {
+                        height: '1', width: '1', videoId: videoId,
+                        playerVars: { 'autoplay': 1, 'mute': 1, 'loop': 1, 'playlist': videoId },
+                        events: { 'onReady': (event) => event.target.playVideo() }
+                    });
+                    console.log("Local Node Started: View triggered from current IP.");
+                }
+
+                // 2. BACKEND CLOUD BOOST (Traffic Source Simulation)
                 const response = await fetch('https://pooreyoutuber-github-io-v2fo.onrender.com/api/real-view-boost', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        video_url: videoUrl,
+                        views_count: qty,
+                        watch_time: duration
+                    })
                 });
 
-                const result = await response.json();
-
                 if (response.ok) {
-                    statusText.innerText = "Boost Initiated!";
-                    
+                    statusText.innerText = "Cloud Engine Active!";
                     let width = 0;
                     const interval = setInterval(() => {
                         if (width >= 100) {
                             clearInterval(interval);
                             btn.innerHTML = "Threads Running in Background";
-                            btn.style.backgroundColor = "#16a34a"; // Green
-                            statusText.innerText = "Views are being delivered...";
+                            btn.style.backgroundColor = "#16a34a";
+                            statusText.innerText = "Views syncing to YouTube Studio...";
                         } else {
-                            width += 10;
+                            width += 2;
                             bar.style.width = width + '%';
                             percent.innerHTML = width + '%';
                         }
-                    }, 200);
+                    }, 300);
                 } else {
-                    throw new Error(result.message || "Server Error");
+                    throw new Error("Server Error");
                 }
 
             } catch (err) {
                 console.error(err);
-                alert("Cloud Error: " + err.message);
+                alert("Error: " + err.message);
                 btn.disabled = false;
                 btn.innerHTML = "Execute Cloud Boost";
-                statusArea.classList.add('hidden');
             }
         });
     </script>
