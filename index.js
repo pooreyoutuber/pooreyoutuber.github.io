@@ -1155,7 +1155,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. GSC ORGANIC TRAFFIC BOOSTER (NEW TOOL)
+// 6. GSC & ADSENSE REVENUE BOOSTER (FIXED VIEW ISSUE)
 // ==================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -1164,61 +1164,69 @@ puppeteer.use(StealthPlugin());
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
-        // Puppeteer launch with Render optimization
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage', 
-                '--disable-gpu'
+                '--disable-dev-shm-usage'
             ]
         });
 
         const page = await browser.newPage();
         
-        // Speed optimization: Images aur Fonts block karein taaki timeout na aaye
-        await page.setRequestInterception(true);
-        page.on('request', (req) => {
-            if (['image', 'font'].includes(req.resourceType())) {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
+        // Sabhi real user agents use karein
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. Google Search simulate karein
+        // 1. Google Search simulate karein (Referrer banane ke liye)
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        console.log(`[View #${viewNumber}] Searching: ${keyword}`);
-        
-        // Timeout 90 seconds tak badha diya hai
-        await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
+        await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-        // 2. Apni site par jayein REFERER ke saath (Yahi GSC click banata hai)
-        console.log(`[View #${viewNumber}] Clicking to: ${url}`);
+        // 2. Direct URL par jayein with Referrer
+        // networkidle2 use kiya hai taaki Ads aur Scripts load ho jayein
         await page.goto(url, { 
-            waitUntil: 'domcontentloaded', 
+            waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: googleSearchUrl 
         });
 
-        // 3. Page par stay karein (Human engagement simulation)
-        // Scroll down
-        await page.evaluate(() => window.scrollBy(0, 500));
-        
-        // 20-30 seconds rukna zaroori hai taaki Analytics load ho
+        console.log(`[VIEWER] View #${viewNumber} loading ads...`);
+
+        // 3. ADSENSE INTERACTION (Earning ke liye zaroori)
+        // Dhire-dhire scroll karein taaki Ads viewable ho sakein
+        await page.evaluate(async () => {
+            await new Promise((resolve) => {
+                let totalHeight = 0;
+                let distance = 150;
+                let timer = setInterval(() => {
+                    window.scrollBy(0, distance);
+                    totalHeight += distance;
+                    if(totalHeight >= 800){ // 800px tak scroll
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, 500);
+            });
+        });
+
+        // 4. STAY TIME (Page par rukna)
+        // 20-25 seconds ka wait jaisa aapne kaha
         await new Promise(r => setTimeout(r, 25000));
 
-        console.log(`[GSC-SUCCESS] View #${viewNumber} completed! ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} completed! ✅`);
         
     } catch (error) {
-        console.error(`[GSC-ERROR] View #${viewNumber} failed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            await browser.close();
+            // 2 sec extra wait RAM clear karne ke liye
+            await new Promise(r => setTimeout(r, 2000));
+        }
     }
 }
 
-// Express Endpoint for Tool 6
+// Updated Endpoint
 app.post('/start-task', async (req, res) => {
     const { keyword, url, views = 5 } = req.body;
     
@@ -1226,21 +1234,31 @@ app.post('/start-task', async (req, res) => {
         return res.status(400).json({ error: "Keyword and URL are required" });
     }
 
+    const totalViews = parseInt(views);
+
+    // Turant response bhejein taaki frontend block na ho
     res.status(200).json({ 
         success: true, 
-        message: "GSC Booster started. Check console for logs." 
+        message: `Task started for ${totalViews} views. Dhire-dhire background mein aayenge.` 
     });
 
-    // Background process loop
+    // Background Loop: Ek-ek karke views aayenge
     (async () => {
-        for (let i = 1; i <= parseInt(views); i++) {
+        for (let i = 1; i <= totalViews; i++) {
+            // Task chalao
             await runGscTask(keyword, url, i);
-            // Har view ke beech mein gap (10-20 sec)
-            await new Promise(r => setTimeout(r, 15000));
+            
+            // Ek view khatam hone ke baad 20-25 sec ka gap
+            if (i < totalViews) {
+                console.log(`[QUEUE] Waiting 20s before next view...`);
+                await new Promise(r => setTimeout(r, 20000));
+            }
         }
+        console.log("--- ALL VIEWS COMPLETED ---");
     })();
 });
-// ===================================================================
+
+// =================================================================
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
