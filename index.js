@@ -1218,7 +1218,6 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE HYBRID YOUTUBE BOOST (PRO VERSION)
 // ===================================================================
-const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const cors = require('cors');
