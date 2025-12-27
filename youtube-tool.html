@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Description & Tags Generator</title>
+    <title>YouTube SEO Description & Tags Generator</title>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
@@ -16,9 +16,6 @@
         crossorigin="anonymous"></script>
 
     <style>
-        /* ================================================= */
-        /* 1. MODERN UI VARIABLES */
-        /* ================================================= */
         :root {
             --bg-color: #f8fafc;
             --header-bg: #ff0000;
@@ -30,7 +27,7 @@
             --blue-accent-hover: #1d4ed8;
             --green-accent: #10b981;
             --explanation-bg: #f1f5f9;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
         body.dark-mode {
@@ -44,12 +41,8 @@
             --blue-accent-hover: #60a5fa;
             --green-accent: #34d399;
             --explanation-bg: #334155;
-            --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
         }
 
-        /* ================================================= */
-        /* 2. BASE STYLES */
-        /* ================================================= */
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: var(--bg-color);
@@ -65,7 +58,6 @@
             text-align: center; color: white;
             font-size: 24px; font-weight: 800;
             box-shadow: var(--shadow);
-            letter-spacing: -0.5px;
         }
 
         .container {
@@ -76,9 +68,6 @@
             margin-bottom: 50px;
         }
 
-        .ad-container { margin: 25px auto; text-align: center; width: 100%; }
-
-        /* Input Group Modern Style */
         .input-group {
             display: flex; margin-bottom: 30px;
             background: var(--bg-color);
@@ -98,32 +87,14 @@
             color: white; padding: 12px 25px;
             border: none; border-radius: 8px;
             font-size: 15px; font-weight: 700;
-            cursor: pointer; transition: 0.2s;
+            cursor: pointer;
         }
 
-        button.generate-btn:hover { background: var(--blue-accent-hover); transform: translateY(-1px); }
-
-        /* Results Card UI */
-        .result h2 { font-size: 20px; margin-bottom: 20px; text-align: left; border-left: 4px solid var(--blue-accent); padding-left: 10px; }
-        
         .video-card {
             background: var(--bg-color);
             border: 1px solid var(--input-border);
             padding: 24px; border-radius: 12px;
             margin-bottom: 25px; text-align: left;
-            transition: transform 0.2s;
-        }
-
-        .video-card:hover { border-color: var(--blue-accent); }
-
-        .video-card h3 {
-            color: var(--blue-accent); margin: 0 0 15px 0;
-            font-size: 18px; display: flex; align-items: center; justify-content: space-between;
-        }
-
-        .video-card h3::after {
-            content: "SEO READY"; font-size: 10px; background: var(--blue-accent);
-            color: white; padding: 2px 8px; border-radius: 20px;
         }
 
         .video-card pre {
@@ -131,142 +102,130 @@
             border-radius: 8px; border: 1px solid var(--input-border);
             font-family: inherit; font-size: 14px; line-height: 1.6;
             white-space: pre-wrap; margin-bottom: 15px;
+            color: var(--text-color);
         }
 
         .tags-container {
-            background: #e0f2fe; color: #0369a1; padding: 10px;
+            background: #e0f2fe; color: #0369a1; padding: 15px;
             border-radius: 8px; font-size: 13px; font-weight: 500;
+            line-height: 1.5;
         }
         body.dark-mode .tags-container { background: #0c4a6e; color: #7dd3fc; }
 
         .copy-btn {
             background: var(--green-accent); color: white;
-            padding: 10px 20px; border: none; border-radius: 6px;
+            padding: 12px; border: none; border-radius: 6px;
             font-size: 14px; font-weight: bold; cursor: pointer;
-            margin-top: 15px; width: 100%; transition: 0.2s;
+            margin-top: 15px; width: 100%;
         }
-        .copy-btn:hover { opacity: 0.9; }
 
-        /* Explanation Section UI */
         .utility-explanation {
             margin-top: 30px; padding: 30px; border-radius: 12px;
             background-color: var(--explanation-bg);
             border: 1px solid var(--input-border); text-align: left;
         }
-        .utility-explanation h2 { color: var(--blue-accent); font-size: 22px; margin-top: 0; }
-        .utility-explanation ul { padding-left: 20px; }
-        .utility-explanation li { margin-bottom: 8px; }
-
-        /* Mobile View */
-        @media (max-width: 600px) {
-            .container { padding: 20px; width: 95%; }
-            .input-group { flex-direction: column; padding: 10px; gap: 10px; }
-            button.generate-btn { width: 100%; }
-        }
     </style>
 </head>
 <body>
 
-<header>🔴 YouTube Description & Tags Generator</header>
+<header>🔴 Advanced YouTube SEO Generator</header>
 
 <div class="container">
-    <div class="ad-container">
-        <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-9877532310172541" data-ad-slot="2730819749"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
     <div id="input-section" class="input-group">
-        <input type="text" id="videoTitle" placeholder="Enter Video Title (e.g., 'Easy Chicken Curry Recipe')">
-        <button class="generate-btn" onclick="generate()">Generate Content</button>
+        <input type="text" id="videoTitle" placeholder="Enter Video Title (e.g., 'How to Grow a YouTube Channel in 2025')">
+        <button class="generate-btn" onclick="generate()">Generate SEO</button>
     </div>
 
     <div class="result" id="output"></div>
-    
-    <div class="ad-container" id="ad-after-results" style="display: none;">
-        <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-9877532310172541" data-ad-slot="4343214500"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-    
+
     <div id="explanation-section" class="utility-explanation">
-        <h2>🚀 Unlock Your Video's Potential</h2>
-        <p>Welcome, Creator! This tool simplifies your publishing process by providing multiple, well-structured metadata options instantly. Focus on **creating great content** while we handle the SEO writing.</p>
-
-        <h3>Why You Should Use Our Generator</h3>
-        <ul>
-            <li><strong>Search Engine Ready:</strong> Naturally integrates keywords for better rankings.</li>
-            <li><strong>Audience Friendly:</strong> Structured for readability and high engagement.</li>
-            <li><strong>Time Saving:</strong> Get **10 unique versions** in one click.</li>
-        </ul>
-
-        <h3>How It Works</h3>
-        <p>Our tool expands your title into comprehensive text and tags, balancing creativity with SEO best practices to help you appear in "Suggested Videos."</p>
-        <p><strong>Note:</strong> These are starting points. Always review them to match your unique brand voice!</p>
-    </div>
-
-    <div class="ad-container">
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9877532310172541" data-ad-slot="9818547241" data-ad-format="auto" data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        <h2>🚀 Professional Long Video SEO</h2>
+        <p>This generator creates **Long-Form Descriptions** and **Extensive Tags** to help your video rank in search results and the "Suggested" feed.</p>
     </div>
 </div>
 
 <script>
-// Logic remains identical to your original code
-const intros = ["🔥 Breaking News!", "💡 Hey everyone!", "🎬 Welcome back!", "❓ Ever wonder how to master:", "✅ Check out this:", "🤯 Unbelievable guide:", "🙌 Join us as we:", "⭐ Definitive tutorial:", "👋 What's up, fam!", "🚀 Level up:"];
-const ctas = ["Don't forget to hit LIKE and SUBSCRIBE!", "Share it with a friend!", "Let me know your thoughts in comments!", "Click the notification bell!", "Comment your next topic!", "Subscribe for the community!", "Give a huge thumbs up!", "New videos every week!", "Watch till the end for tips!", "Support helps us create more!"];
-const body_paragraphs = ["In this comprehensive tutorial, we break down every essential step, making complex concepts easy to understand.", "The journey to mastering this skill starts here! We dive into common mistakes and quick fixes.", "This guide covers everything from the basics to advanced techniques for professionals.", "Understanding the 'why' is just as important as the 'how'. We explain the underlying principles.", "Looking for the fastest way to achieve your goal? This video is structured to be time-efficient."];
+const intros = [
+    "Welcome back to the channel! In today's video, we are taking a deep dive into",
+    "Have you ever struggled with? In this comprehensive guide, we'll show you exactly how to master",
+    "Ready to level up? Today we're exploring everything you need to know about",
+    "Stop wasting time! This video covers the most effective strategies for",
+    "Is it still possible to succeed with? Let's break down the truth about"
+];
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
+const bodyTours = [
+    "We spent countless hours researching and testing these methods to ensure you get the best results possible. Whether you are a complete beginner or looking for advanced tips, this video has something for everyone.",
+    "Understanding the core principles is the first step toward success. In this tutorial, we don't just show you the 'how', we explain the 'why' so you can apply these skills anywhere.",
+    "Many people fail because they miss small but crucial details. We've structured this guide to highlight those hidden tricks that experts use to stay ahead of the competition."
+];
+
+const baseTags = ["Tutorial", "2025", "Expert Guide", "Step by Step", "Tips and Tricks", "How to", "Secrets", "Growth", "Case Study", "Review", "Analysis", "Strategy", "Beginners Guide", "Advanced Techniques"];
 
 function generate() {
     const title = document.getElementById("videoTitle").value.trim();
     const output = document.getElementById("output");
-    const container = document.querySelector('.container');
-    const explanationSection = document.getElementById('explanation-section');
-    const adAfterResults = document.getElementById('ad-after-results'); 
-    output.innerHTML = "";
-
+    
     if (!title) {
-        output.innerHTML = "<p style='color: #ef4444; text-align:center;'>⚠️ Please enter a title!</p>";
+        alert("Please enter a title!");
         return;
     }
 
-    container.appendChild(explanationSection);
-    const baseTags = ["Tutorial", "Guide", "SEO", "Tips", "2025"]; 
-    const titleWords = title.toLowerCase().split(/\s+/).filter(word => word.length > 2);
-    const mainKeyword = titleWords.length > 0 ? titleWords[0] : "video";
+    const words = title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    const mainKey = words[0] || "video";
+    output.innerHTML = "<h2>✅ Generated Long SEO Options</h2>";
 
-    let html = "<h2>✅ SEO Content Options</h2>";
-    
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 5; i++) {
         const intro = intros[i % intros.length];
-        const cta = ctas[i % ctas.length];
-        const body = body_paragraphs[i % body_paragraphs.length];
-        const desc = `${intro} **"${title}"**.\n\n${body}\n\n🔔 ${cta}\n#${mainKeyword} #SEO #YouTube`;
-        const tags = [title, mainKeyword, `${mainKeyword} guide`, ...shuffleArray(baseTags).slice(0,3)].join(', ');
+        const body = bodyTours[i % bodyTours.length];
+        
+        // Long Description Building
+        let desc = `🔥 ${intro} **"${title}"**.\n\n`;
+        desc += `📌 **In this video, we cover:**\n`;
+        desc += `- Detailed breakdown of ${title}\n`;
+        desc += `- Top 5 tips for ${mainKey} you didn't know\n`;
+        desc += `- How to avoid common mistakes in ${mainKey}\n`;
+        desc += `- Future trends and updates for 2025\n\n`;
+        desc += `📖 **About this Video:**\n${body}\n\n`;
+        desc += `Don't forget to watch until the end for a special bonus tip! If you find this content helpful, please leave a LIKE and consider SUBSCRIBING for more weekly deep-dives.\n\n`;
+        desc += `✅ **Support the Channel:**\n`;
+        desc += `🔔 Subscribe: [Your Link Here]\n`;
+        desc += `📸 Instagram: [Your Link Here]\n`;
+        desc += `🐦 Twitter: [Your Link Here]\n\n`;
+        desc += `#${mainKey.replace(/\W/g, '')} #YouTubeSEO #2025 #Tutorial #${words[1] || 'Growth'}`;
 
-        html += `
+        // Expanded Tags Building (approx 15-20 tags)
+        let tagsSet = new Set([
+            title, 
+            `${mainKey} tutorial`, 
+            `${mainKey} guide 2025`, 
+            `how to ${mainKey}`, 
+            `${title} for beginners`,
+            `best ${mainKey} tips`,
+            `advanced ${mainKey} strategy`,
+            `${mainKey} explained`,
+            `learn ${mainKey} fast`
+        ]);
+        
+        // Adding more variety to tags
+        baseTags.forEach(bt => tagsSet.add(`${mainKey} ${bt}`));
+        words.forEach(w => tagsSet.add(w));
+        
+        const finalTags = Array.from(tagsSet).slice(0, 18).join(', ');
+
+        output.innerHTML += `
         <div class="video-card">
-            <h3>Option ${i + 1}</h3>
+            <h3>Option ${i + 1} (Long-Form)</h3>
             <pre>${desc}</pre>
-            <div class="tags-container"><strong>Tags:</strong> ${tags}</div>
-            <button class="copy-btn" onclick="copyText(\`${desc}\`, \`${tags}\`)">Copy This Option</button>
+            <div class="tags-container"><strong>Generated Tags:</strong><br>${finalTags}</div>
+            <button class="copy-btn" onclick="copyText(\`${desc.replace(/`/g, "'")}\`, \`${finalTags}\`)">Copy Description & Tags</button>
         </div>`;
     }
-    
-    output.innerHTML = html;
-    adAfterResults.style.display = "block";
     output.scrollIntoView({ behavior: 'smooth' });
 }
 
 function copyText(desc, tags) {
     const temp = document.createElement('textarea');
-    temp.value = `Description:\n${desc}\n\nTags:\n${tags}`;
+    temp.value = `DESCRIPTION:\n${desc}\n\nTAGS:\n${tags}`;
     document.body.appendChild(temp);
     temp.select();
     document.execCommand('copy');
@@ -274,12 +233,10 @@ function copyText(desc, tags) {
     alert("Copied to Clipboard!");
 }
 
-// Dark Mode Load
-(function() {
-    if (localStorage.getItem('darkModeEnabled') === 'true' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark-mode');
-    }
-})();
+// Check dark mode
+if (localStorage.getItem('darkModeEnabled') === 'true' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark-mode');
+}
 </script>
 </body>
 </html>
