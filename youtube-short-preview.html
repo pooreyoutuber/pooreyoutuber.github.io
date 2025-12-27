@@ -29,12 +29,7 @@
         crossorigin="anonymous"></script>
 
     <style>
-        /* (The CSS remains the same as before) */
-        /* ================================================= */
-        /* 1. DARK MODE CSS VARIABLES */
-        /* ================================================= */
         :root {
-            /* Light Mode Variables (Default) */
             --bg-color: #f4f6f9;
             --container-bg: #fff;
             --text-color: #333;
@@ -50,7 +45,6 @@
             --warning-border: #b3d9ff;
         }
 
-        /* Dark Mode Variables (Applied when body has dark-mode class) */
         body.dark-mode {
             --bg-color: #121212;
             --container-bg: #1e1e1e;
@@ -66,9 +60,6 @@
             --warning-border: #3498db;
         }
 
-        /* ================================================= */
-        /* 2. BASE STYLES & DARK MODE APPLICATION */
-        /* ================================================= */
         body {
             font-family: 'Arial', sans-serif; 
             background: var(--bg-color); 
@@ -83,26 +74,17 @@
             transition: background 0.3s, color 0.3s;
         }
         .container-wrapper {
-            width: 90%;
-            max-width: 1400px;
+            width: 95%;
+            max-width: 1600px;
             margin: 30px auto;
             background: var(--container-bg);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transition: background 0.3s, box-shadow 0.3s;
         }
-        h1 {
-            color: var(--youtube-red); 
-            margin-top:0; 
-            font-size: 2.2em;
-        }
-        p.subtitle {
-            color: var(--secondary-text-color); 
-            margin-bottom: 25px;
-        }
+        h1 { color: var(--youtube-red); font-size: 2.2em; margin-top:0; }
+        p.subtitle { color: var(--secondary-text-color); margin-bottom: 25px; }
 
-        /* Input & Button Styles */
         #input-section { 
             display: flex; 
             justify-content: center; 
@@ -112,147 +94,54 @@
         }
         input, button {
           padding:12px 15px;
-          margin:0;
           border-radius:6px;
           border:1px solid var(--input-border);
           font-size:16px;
-          box-sizing: border-box;
-          transition: background 0.3s, color 0.3s, border-color 0.3s;
         }
-        input { 
-            width: 350px; 
-            background: var(--container-bg);
-            color: var(--text-color);
-        }
-        input[type="number"] { 
-            width: 150px; 
-        }
-        button {
-          background: var(--blue-accent);
-          color: #fff;
-          cursor:pointer;
-          border: 1px solid var(--blue-accent);
-          font-weight: bold;
-        }
-        button:hover { 
-            background: var(--blue-accent-hover); 
-            border-color: var(--blue-accent-hover); 
-        }
+        input { width: 350px; background: var(--container-bg); color: var(--text-color); }
+        input[type="number"] { width: 100px; }
+        button { background: var(--blue-accent); color: #fff; cursor:pointer; font-weight: bold; }
 
-        /* Players Container Styles */
         #players {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            /* Desktop par side-by-side 5 videos */
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 15px;
             padding: 20px 0;
             border-top: 2px solid var(--result-border);
             margin-bottom: 30px;
-            transition: border-top 0.3s;
+            display: none; /* Initially hidden */
         }
         iframe {
             width: 100%;
-            height: 480px;
+            height: 350px;
             border: none;
             border-radius:12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             background: black;
         }
 
-        /* Ad Unit Spacing */
-        .ad-unit {
-            margin: 25px 0;
-            text-align: center;
-        }
-        .ad-top {
-            margin-bottom: 25px;
-        }
+        .ad-unit { margin: 25px 0; text-align: center; }
 
-        /* Utility Explanation Section */
         .utility-explanation {
-            text-align: left;
-            padding: 25px;
+            text-align: left; padding: 25px;
             background-color: var(--explanation-bg); 
-            border-radius: 10px;
-            border: 1px solid var(--input-border); 
-            line-height: 1.6;
-            color: var(--secondary-text-color);
-            transition: background 0.3s, border-color 0.3s;
+            border-radius: 10px; border: 1px solid var(--input-border); 
+            line-height: 1.6; color: var(--secondary-text-color);
         }
-        .utility-explanation h3 {
-            color: var(--blue-accent);
-            border-bottom: 2px solid var(--blue-accent);
-            padding-bottom: 5px;
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-        .utility-explanation strong { 
-            color: var(--text-color); 
-            transition: color 0.3s;
-        }
-        
-        /* Crucial Warning Highlight */
+        .utility-explanation h3 { color: var(--blue-accent); border-bottom: 2px solid var(--blue-accent); }
+
         .warning-note {
-            background-color: var(--warning-bg); 
-            color: var(--text-color); 
-            border: 1px solid var(--warning-border);
-            border-left: 5px solid var(--blue-accent); 
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 8px;
-            transition: background 0.3s, border-color 0.3s, color 0.3s;
-        }
-        .warning-note strong {
-            font-size: 1.1em;
-            color: var(--text-color); 
-            transition: color 0.3s;
+            background-color: var(--warning-bg); color: var(--text-color); 
+            border-left: 5px solid var(--blue-accent); padding: 15px; margin: 20px 0; border-radius: 8px;
         }
 
-        /* ================================================= */
-        /* 3. MOBILE RESPONSIVENESS FIX */
-        /* ================================================= */
+        @media (max-width: 1200px) { #players { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 800px) { #players { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 650px) {
-            body {
-                padding: 10px;
-            }
-            .container-wrapper {
-                margin: 15px auto;
-                padding: 15px;
-                width: 100%;
-                border-radius: 0;
-                box-shadow: none;
-            }
-            h1 {
-                font-size: 1.8em;
-            }
-
-            /* Stack Input and Button on Mobile */
-            #input-section {
-                flex-direction: column;
-                gap: 15px;
-            }
-            input, button {
-                width: 100%;
-                border-radius: 6px; 
-            }
-            input[type="number"] {
-                 width: 100%;
-            }
-
-            /* Players container adjustments */
-            #players {
-                /* Force single column for better vertical viewing experience of Shorts */
-                grid-template-columns: 1fr; 
-                gap: 15px;
-            }
-            iframe {
-                 /* Make Short player slightly shorter for smaller screens */
-                 height: 420px; 
-            }
-
-            .utility-explanation {
-                padding: 15px;
-            }
+            #input-section { flex-direction: column; }
+            input, button { width: 100%; }
+            #players { grid-template-columns: 1fr; }
+            iframe { height: 420px; }
         }
     </style>
 </head>
@@ -263,60 +152,36 @@
     <p class="subtitle">Paste a Shorts URL and choose how many players you want to generate.</p>
 
     <div class="ad-unit ad-top">
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-format="fluid"
-            data-ad-layout-key="-fb+5w+4e-db+86"
-            data-ad-client="ca-pub-9877532310172541"
-            data-ad-slot="7558349440"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+        <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="ca-pub-9877532310172541" data-ad-slot="7558349440"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
     
     <div id="input-section">
         <input type="text" id="shortUrl" placeholder="Paste YouTube Shorts URL">
-        <input type="number" id="count" placeholder="Number of players" value="10" min="1">
+        <input type="number" id="count" value="10" min="1" max="50">
         <button onclick="generatePlayers()">Play</button>
     </div>
 
-    <div class="container" id="players"></div>
+    <div id="players"></div>
     
     <div class="ad-unit">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-format="autorelaxed"
-             data-ad-client="ca-pub-9877532310172541"
-             data-ad-slot="2730819749"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+        <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-9877532310172541" data-ad-slot="2730819749"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
     <div class="ad-unit">
-        <ins class="adsbygoogle"
-            style="display:block; text-align:center;"
-            data-ad-layout="in-article"
-            data-ad-format="fluid"
-            data-ad-client="ca-pub-9877532310172541"
-            data-ad-slot="4932186104"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+        <ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-9877532310172541" data-ad-slot="4932186104"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
     
     <div id="explanation-section" class="utility-explanation">
         <h3>✨ The Power of YouTube Shorts Multi Viewing</h3>
-        
         <p>Welcome to the **YouTube Shorts Multi Viewer**, a unique tool designed to help you analyze and boost your content's initial performance. In the world of short-form video, early views and engagement are crucial for signaling to the algorithm that your content is worth promoting.</p>
 
         <div class="warning-note">
-            <p>
-                🤝 **A Friendly Tip:** Feel free to use this tool for an early view boost! Just remember that YouTube Studio needs time to process data. You'll see the **real and verified analytics** (views, watch time) updated accurately in your official YouTube Studio **2 to 4 hours** after using the tool. Until then, enjoy monitoring your videos right here!
-            </p>
+            <p>🤝 **A Friendly Tip:** Feel free to use this tool for an early view boost! Just remember that YouTube Studio needs time to process data. You'll see the **real and verified analytics** updated accurately in your official YouTube Studio **2 to 4 hours** after using the tool. Until then, enjoy monitoring your videos right here!</p>
         </div>
         
         <h4>How This Tool Works and Why It's Beneficial (Approx. 650 Words Total)</h4>
-        
         <p>This tool creates multiple embedded instances of your Shorts video on a single page. By rapidly loading and interacting with these players, you can generate an initial burst of views. This simulated boost helps create early momentum for your video, which can be particularly effective in pushing new Shorts into broader distribution.</p>
 
         <p><strong>Key Advantages for Creators:</strong></p>
@@ -324,7 +189,7 @@
             <li><strong>Initial View Boost:</strong> Gain immediate traction, helping your Shorts pass the critical first-hour testing phase set by the algorithm.</li>
             <li><strong>Rapid Testing:</strong> Quickly check if your video is loading correctly and ensure the sound/visual quality is consistent across different embeds.</li>
             <li><strong>SEO Analysis:</strong> Test how quickly embedded players load, which can be a minor factor in content distribution speed.</li>
-            <li><strong>Custom Control:</b> You choose the exact number of players, giving you control over the level of initial exposure you wish to generate for testing purposes.</li>
+            <li><strong>Custom Control:</strong> You choose the exact number of players, giving you control over the level of initial exposure you wish to generate for testing purposes.</li>
         </ul>
 
         <p><strong>Ethical Use and Strategy:</strong></p>
@@ -338,23 +203,15 @@
     </div>
 
     <div class="ad-unit">
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-9877532310172541"
-            data-ad-slot="2497594456"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9877532310172541" data-ad-slot="2497594456" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 </div>
 
 <script>
     function extractVideoId(url) {
-        // Updated regex to handle all common Shorts and standard video formats
-        const shortsRegex = /(?:youtu\.be\/|youtube\.com\/(?:shorts\/|watch\?v=))([0-9A-Za-z_-]{11})/;
-        const match = url.match(shortsRegex);
+        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/;
+        const match = url.match(regex);
         return match ? match[1] : null;
     }
 
@@ -365,77 +222,38 @@
         const container = document.querySelector('.container-wrapper');
         const explanationSection = document.getElementById('explanation-section');
         
-        playersDiv.innerHTML = '';
-        playersDiv.style.display = 'grid'; // Ensure it is visible
-
-        if (!url || isNaN(count) || count <= 0 || count > 50) {
-            alert("Please enter a valid YouTube Shorts URL and a number between 1 and 50.");
-            playersDiv.style.display = 'none';
-            // Reposition explanation section back up if an error occurs
-            if (explanationSection.parentNode !== container) {
-                 container.insertBefore(explanationSection, playersDiv); 
-            }
-            return;
-        }
-
         const videoId = extractVideoId(url);
-        if (!videoId) {
-            alert("Invalid YouTube Shorts URL format. Please ensure it links directly to a video.");
+
+        if (!url || isNaN(count) || count <= 0 || !videoId) {
+            alert("Please enter a valid YouTube URL and count.");
             playersDiv.style.display = 'none';
-            if (explanationSection.parentNode !== container) {
-                 container.insertBefore(explanationSection, playersDiv); 
-            }
             return;
         }
-        
-        // 1. Move Explanation Section BELOW the Output/Results (Ad Unit 2 is also between)
-        if (explanationSection) {
-            // Find Ad Unit 3's placement for correct insertion order
-            const adUnit3 = document.querySelector('.ad-unit:last-of-type');
-            if (adUnit3) {
-                container.insertBefore(explanationSection, adUnit3);
-            } else {
-                container.appendChild(explanationSection);
-            }
-        }
 
-        // 2. Generate Players
+        playersDiv.innerHTML = '';
+        playersDiv.style.display = 'grid'; 
+
+        // Move explanation below players on play
+        const lastAd = document.querySelector('.ad-unit:last-of-type');
+        container.insertBefore(explanationSection, lastAd);
+
         for (let i=0; i<count; i++) {
             const iframe = document.createElement('iframe');
-            // Using 'autoplay=0' so the user controls when the views start counting.
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&disablekb=1&controls=1`; 
+            // autoplay=1 and mute=1 added for instant multi-play
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0`; 
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
             iframe.allowFullscreen = true;
-            iframe.title = `YouTube Shorts Player ${i + 1}`;
             playersDiv.appendChild(iframe);
         }
 
-        // Optional: Scroll to the players section for better UX
         playersDiv.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Initial check: Ensure players container is hidden on load
     document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('players').style.display = 'none';
-        
-        // ==========================================================
-        // DARK MODE PERSISTENCE LOGIC
-        // ==========================================================
         const body = document.body;
-        
-        function applyThemeFromLocalStorage() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                body.classList.add('dark-mode');
-            } else {
-                body.classList.remove('dark-mode');
-            }
+        if (localStorage.getItem('theme') === 'dark') {
+            body.classList.add('dark-mode');
         }
-
-        // Apply theme on load
-        applyThemeFromLocalStorage();
-        
-        // Initialize all ads on page load
-        (adsbygoogle = window.adsbygoogle || []).push({});
     });
 </script>
 </body>
