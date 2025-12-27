@@ -1158,8 +1158,6 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // 6. GSC ORGANIC TRAFFIC BOOSTER (NEW TOOL)
 // ===================================================================
 
-const PORT = process.env.PORT || 10000;
-
 // --- GSC TASK FUNCTION (The Core Fix) ---
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
