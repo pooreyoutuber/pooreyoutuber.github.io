@@ -1220,48 +1220,59 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-app.use(cors());
-app.use(express.json());
 puppeteer.use(StealthPlugin());
 
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
-    const video_title = "Trending YouTube Video"; // Aap dynamic bhi bhej sakte hain
+    
+    // Frontend ko reply
+    res.json({ status: "Processing", message: "Cloud nodes initiated." });
 
-    res.status(200).json({ status: "Success", message: "Cloud Engine Started" });
+    console.log(`[LOG] Starting Boost for: ${video_url}`);
 
     const runBoost = async () => {
+        // Render ki RAM bhot kam hai, isliye sirf 1-1 karke browser chalayein
         for (let i = 0; i < Math.min(views_count, 10); i++) {
             let browser;
             try {
+                console.log(`[LOG] Launching Instance ${i+1}...`);
                 browser = await puppeteer.launch({
                     headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu'
+                    ]
                 });
+
                 const page = await browser.newPage();
                 
-                // Traffic Source: Google Search Masking
-                await page.goto('https://www.google.com/search?q=' + encodeURIComponent(video_title));
-                await new Promise(r => setTimeout(r, 3000));
+                // Human-like behavior
+                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+                
+                console.log(`[LOG] Navigating to Video...`);
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // Video Entry with Referrer
-                await page.goto(video_url, { waitUntil: 'networkidle2', referer: 'https://www.google.com/' });
-
-                // Engagement: Auto-Play & Human Logic
+                // Play video logic
                 await page.evaluate(() => {
-                    const v = document.querySelector('video');
-                    if (v) { v.play(); v.muted = false; }
-                    window.scrollBy(0, 400); 
+                    const video = document.querySelector('video');
+                    if(video) video.play();
                 });
-                await page.keyboard.press('k'); 
 
-                // Retention Loop
+                console.log(`[LOG] Watching for ${watch_time} seconds...`);
                 await new Promise(r => setTimeout(r, watch_time * 1000));
+
                 await browser.close();
-                console.log(`View ${i+1} done`);
-            } catch (e) { if(browser) await browser.close(); }
+                console.log(`[SUCCESS] View ${i+1} completed.`);
+            } catch (err) {
+                console.error(`[ERROR] Instance ${i+1} failed:`, err.message);
+                if (browser) await browser.close();
+            }
         }
     };
+
     runBoost();
 });
 // ===================================================================
