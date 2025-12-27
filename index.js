@@ -1155,102 +1155,113 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. GSC & ADSENSE REVENUE BOOSTER (CONCURRENCY MODE)
+// 6. GSC & ADSENSE REVENUE BOOSTER (ADVANCED SCROLLING & SERIAL MODE)
 // ==================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-// Task Function (Ek single view ke liye)
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu'
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
         
-        // Google Search se aana (Referrer)
+        // RAM bachane ke liye non-essential cheezein block
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            if (['font', 'media'].includes(req.resourceType())) {
+                req.abort();
+            } else {
+                req.continue();
+            }
+        });
+
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // 1. Google Search Simulation
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-        // Website par jana (Wait for Ads)
+        // 2. Main URL (Wait for Ads)
         await page.goto(url, { 
-            waitUntil: 'networkidle2', // Ads load hone ke liye zaroori
+            waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: googleSearchUrl 
         });
 
-        // AdSense Engagement: Slow Scroll
+        console.log(`[VIEWER] View #${viewNumber} | Starting Human-like Scrolling...`);
+
+        // 3. ADVANCED SCROLLING LOGIC (For AdSense Earning)
+        // Ye niche jayega, rukega, phir thoda upar aayega (Natural Behavior)
         await page.evaluate(async () => {
-            for(let i=0; i<3; i++) {
-                window.scrollBy(0, 300);
-                await new Promise(r => setTimeout(r, 2000));
+            const distance = 400; // Har baar kitna scroll karega
+            const delay = 3000;   // Har scroll ke baad kitne ms rukega
+            
+            for (let i = 0; i < 4; i++) {
+                window.scrollBy(0, distance);
+                await new Promise(r => setTimeout(r, delay));
+                
+                // Beech mein thoda upar scroll karna (Real human behavior)
+                if (i === 2) {
+                    window.scrollBy(0, -150);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
             }
         });
 
-        // Stay time (Earning ke liye)
+        // 25 sec ka total stay time
         await new Promise(r => setTimeout(r, 25000));
-        console.log(`[OK] View #${viewNumber} Done ✅`);
+        console.log(`[DONE] View #${viewNumber} completed with scrolling. ✅`);
 
     } catch (error) {
-        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close();
+            // Browser ko clean tareeke se close karna taaki RAM khali ho
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
             browser = null;
         }
     }
 }
 
-// Endpoint jo Queue manage karega
 app.post('/start-task', async (req, res) => {
     const { keyword, url, views = 5 } = req.body;
     const totalViews = parseInt(views);
-    const CONCURRENCY_LIMIT = 2; // EK SAATH SIRF 2 BROWSER (Render ke liye safe)
 
     res.status(200).json({ 
         success: true, 
-        message: `Task started. Running ${CONCURRENCY_LIMIT} browsers at a time for ${totalViews} views.` 
+        message: `Revenue Task started. Processing ${totalViews} views one-by-one with scrolling.` 
     });
 
-    // Background Queue logic
+    // Background Process: 1 Browser at a time
     (async () => {
-        let activeTasks = 0;
-        let completedTasks = 0;
+        for (let i = 1; i <= totalViews; i++) {
+            console.log(`[QUEUE] Starting View #${i} of ${totalViews}`);
+            
+            // Wait for this browser to FINISH and CLOSE before starting next
+            await runGscTask(keyword, url, i); 
 
-        async function startNextTask() {
-            if (completedTasks >= totalViews) return;
-
-            completedTasks++;
-            activeTasks++;
-            
-            const currentView = completedTasks;
-            console.log(`[QUEUE] Launching Browser for View #${currentView}...`);
-            
-            await runGscTask(keyword, url, currentView);
-            
-            activeTasks--;
-            
-            // Har view ke baad 20 sec ka gap jaisa aapne kaha
-            console.log(`[WAIT] View #${currentView} finished. Waiting 20s...`);
-            await new Promise(r => setTimeout(r, 20000));
-            
-            // Agla task shuru karein
-            startNextTask();
+            if (i < totalViews) {
+                console.log(`Waiting 20 seconds to clear RAM...`);
+                await new Promise(r => setTimeout(r, 20000));
+            }
         }
-
-        // Shuruat mein 2 browser ek saath chalao
-        for (let i = 0; i < CONCURRENCY_LIMIT; i++) {
-            if (i < totalViews) startNextTask();
-            // Dono browser ek dum saath na khulein, 5 sec ka gap ho
-            await new Promise(r => setTimeout(r, 5000)); 
-        }
+        console.log("--- ALL VIEWS FINISHED ---");
     })();
 });
+
 
 // =================================================================
 // --- SERVER START ---
