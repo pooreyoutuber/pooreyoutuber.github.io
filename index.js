@@ -1164,7 +1164,6 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 // Stealth plugin enable karein taaki Google ko bot ka pata na chale
 puppeteer.use(StealthPlugin());
 
-const app = express();
 app.use(cors());
 app.use(express.json());
 
