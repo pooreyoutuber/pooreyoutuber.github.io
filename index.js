@@ -1158,6 +1158,16 @@ app.post('/youtube-boost-mp', async (req, res) => {
 // 6. GSC ORGANIC TRAFFIC BOOSTER (NEW TOOL)
 // ===================================================================
 
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
+// Stealth plugin enable karein taaki Google ko bot ka pata na chale
+puppeteer.use(StealthPlugin());
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
 // --- GSC TASK FUNCTION (The Core Fix) ---
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
@@ -1237,70 +1247,6 @@ app.post('/start-task', async (req, res) => {
             await new Promise(resolve => setTimeout(resolve, gap));
         }
     })();
-});
-
-app.listen(PORT, () => {
-    console.log(`GSC Booster API running on port ${PORT}`);
-});
-// ===================================================================
-// 7. ULTIMATE HYBRID YOUTUBE BOOST (PRO VERSION)
-// ===================================================================
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
-
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    // Frontend ko reply
-    res.json({ status: "Processing", message: "Cloud nodes initiated." });
-
-    console.log(`[LOG] Starting Boost for: ${video_url}`);
-
-    const runBoost = async () => {
-        // Render ki RAM bhot kam hai, isliye sirf 1-1 karke browser chalayein
-        for (let i = 0; i < Math.min(views_count, 10); i++) {
-            let browser;
-            try {
-                console.log(`[LOG] Launching Instance ${i+1}...`);
-                browser = await puppeteer.launch({
-                    headless: "new",
-                    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--disable-gpu'
-                    ]
-                });
-
-                const page = await browser.newPage();
-                
-                // Human-like behavior
-                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
-                
-                console.log(`[LOG] Navigating to Video...`);
-                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-                // Play video logic
-                await page.evaluate(() => {
-                    const video = document.querySelector('video');
-                    if(video) video.play();
-                });
-
-                console.log(`[LOG] Watching for ${watch_time} seconds...`);
-                await new Promise(r => setTimeout(r, watch_time * 1000));
-
-                await browser.close();
-                console.log(`[SUCCESS] View ${i+1} completed.`);
-            } catch (err) {
-                console.error(`[ERROR] Instance ${i+1} failed:`, err.message);
-                if (browser) await browser.close();
-            }
-        }
-    };
-
-    runBoost();
 });
 // ===================================================================
 // --- SERVER START ---
