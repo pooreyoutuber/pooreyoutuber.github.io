@@ -1261,15 +1261,14 @@ app.post('/start-task', async (req, res) => {
         console.log("--- ALL VIEWS FINISHED ---");
     })();
 });
-
 // ===================================================================
-// 7. YOUTUBE CLOUD ENGINE (HIGH RETENTION & BROWSER-BASED)
+// 7. UNIVERSAL YOUTUBE BOOSTER (SHORTS + LONG COMPATIBLE)
 // ===================================================================
 
 async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
     let browser;
     try {
-        // 1. Launch Browser with Performance Optimization
+        // 1. Launch Browser with Advanced Bot-Hiding Args
         browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -1277,66 +1276,75 @@ async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--autoplay-policy=no-user-gesture-required',
-                '--mute-audio' // Server par awaaz band rakhva mate
+                '--disable-blink-features=AutomationControlled', // Bot hide karne ke liye
+                '--mute-audio'
             ]
         });
 
         const page = await browser.newPage();
-        
-        // Random User Agent badalva mate
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // Viewport size random rakhvi (Real mobile/desktop feel)
-        await page.setViewport({ width: 1280, height: 720 });
-
-        console.log(`[YT-BOOST] Starting View #${viewNumber}...`);
-
-        // 2. YouTube Video Link par javu
-        await page.goto(videoUrl, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000 
-        });
-
-        // 3. Play Button Simulation (Agar video automatic shuru na thay to)
-        try {
-            await page.waitForSelector('.ytp-large-play-button', { timeout: 5000 });
-            await page.click('.ytp-large-play-button');
-        } catch (e) {
-            // Video shayad auto-play thai gayu che
+        // 2. DEVICE SIMULATION (Shorts ke liye mobile feel zaroori hai)
+        const isShorts = videoUrl.includes('shorts/');
+        if (isShorts) {
+            await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
+            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+            console.log(`[YT-NODE] View #${viewNumber} | Mode: SHORTS (Mobile Sim)`);
+        } else {
+            await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+            await page.setViewport({ width: 1280, height: 720 });
+            console.log(`[YT-NODE] View #${viewNumber} | Mode: LONG VIDEO`);
         }
 
-        // 4. RETENTION LOGIC (70% to 95% Random Watch Time)
-        // User e aapela time ma thodo badlav karvo taaki YouTube ne bot na lage
-        const baseTime = parseInt(requestedDuration);
-        const retentionPercent = (Math.random() * (0.95 - 0.75) + 0.75); // 75% thi 95% ni vache
-        const finalWatchTime = Math.floor(baseTime * retentionPercent);
-
-        console.log(`[YT-BOOST] View #${viewNumber}: Watching for ${finalWatchTime}s (${Math.round(retentionPercent*100)}% retention)`);
-
-        // 5. Engagement Simulation (Human Behavior)
-        // Video joti vakhte thodu niche scroll karvu (comments/recommendations load karva)
-        await page.evaluate(async () => {
-            window.scrollBy(0, 400);
-            await new Promise(r => setTimeout(r, 2000));
-            window.scrollBy(0, -200);
+        // 3. HIDE PUPPETEER FOOTPRINTS
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
         });
 
-        // Requested time sudhi wait karvu
+        // 4. LOAD VIDEO
+        // Agar Shorts hai toh use normal format mein convert karke load karna safe rehta hai
+        let finalUrl = videoUrl;
+        if (isShorts) {
+            const videoId = videoUrl.split('shorts/')[1].split('?')[0];
+            finalUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        }
+
+        await page.goto(finalUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // 5. AUTO-PLAY & INTERACTION
+        try {
+            // Play button click simulation
+            await page.click('.ytp-large-play-button').catch(() => {});
+            await page.click('video').catch(() => {}); 
+        } catch (e) {}
+
+        // 6. RANDOM RETENTION (70% - 95%)
+        const baseTime = parseInt(requestedDuration);
+        const retentionFactor = (Math.random() * (0.95 - 0.70) + 0.70);
+        const finalWatchTime = Math.floor(baseTime * retentionFactor);
+
+        console.log(`[YT-NODE] Watching for ${finalWatchTime}s...`);
+
+        // Natural Scroll (Human-like)
+        await page.evaluate(async () => {
+            window.scrollBy(0, 300);
+            await new Promise(r => setTimeout(r, 2000));
+            window.scrollBy(0, -100);
+        });
+
         await new Promise(r => setTimeout(r, finalWatchTime * 1000));
 
-        // Random Like Logic (Darek 10 view ma thi 1 ma like karse - Optional)
+        // Random Like (10% Chance)
         if (Math.random() > 0.9) {
-            console.log(`[YT-BOOST] Random Engagement: Liking video...`);
-            await page.keyboard.press('l'); // 'l' key thi youtube ma video like thay che
+            await page.keyboard.press('l').catch(() => {});
+            console.log("[YT-NODE] Interaction: Liked!");
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished! ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished ✅`);
 
     } catch (error) {
         console.error(`[YT-FAIL] View #${viewNumber} Error: ${error.message}`);
     } finally {
         if (browser) {
-            // Clean exit mate badha pages close karva
             const pages = await browser.pages();
             for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
@@ -1345,43 +1353,26 @@ async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
     }
 }
 
-// ENDPOINT: Jo Frontend sathe connect thase
+// ENDPOINT
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
-    
-    const totalViews = parseInt(views_count) || 1;
+    const total = parseInt(views_count) || 1;
     const duration = parseInt(watch_time) || 60;
 
-    if (!video_url) {
-        return res.status(400).json({ error: "Video URL is required!" });
-    }
+    res.status(200).json({ success: true, message: "Cloud Engine Syncing..." });
 
-    // Response turant mokli devo taaki frontend progress bar shuru thai jay
-    res.status(200).json({ 
-        success: true, 
-        message: `Cloud Engine Activated for ${totalViews} views.` 
-    });
-
-    // Background Process (Aapna plan pramane: 1 by 1 browser)
     (async () => {
-        console.log(`[QUEUE] YouTube Task Started: ${totalViews} views to go...`);
-        
-        for (let i = 1; i <= totalViews; i++) {
-            console.log(`[PROGRESS] Current Session: ${i}/${totalViews}`);
-            
-            // Aa line wait karse jyadhi sudhi browser close na thay
+        for (let i = 1; i <= total; i++) {
             await runYoutubeBrowserTask(video_url, duration, i);
-
-            // 10 second gap taaki Render ni RAM flush thai jay
-            if (i < totalViews) {
-                console.log(`[COOLING] Waiting 10s before next session...`);
-                await new Promise(r => setTimeout(r, 10000));
+            // 15 sec cooling period for Render RAM
+            if (i < total) {
+                console.log(`[WAIT] Cooling 15s...`);
+                await new Promise(r => setTimeout(r, 15000));
             }
         }
-        console.log("--- ALL CLOUD ENGINE TASKS FINISHED ---");
     })();
 });
-         
+
 
 // =================================================================
 // --- SERVER START ---
