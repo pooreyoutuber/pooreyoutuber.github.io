@@ -1263,23 +1263,25 @@ app.post('/start-task', async (req, res) => {
 });
 
 // ===================================================================
-// 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
+// 7. FINAL YOUTUBE BOOSTER (FIXED: FINGERPRINTING & API REQUEST)
 // ===================================================================
-// ===================================================================
-// 7. FINAL YOUTUBE BOOSTER (FIXED: DYNAMIC FINGERPRINTING)
-// ===================================================================
+
+// --- Middleware Fix (Ise ensure karein ki ye app.use(cors) ke paas ho) ---
+app.use(express.json()); 
 
 async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
     let browser;
     try {
-        // 1. DYNAMIC HARDWARE FINGERPRINTING
+        // 1. HAR VIEW KE LIYE ALAG HARDWARE SPECS
+        const ramOptions = [4, 8, 16];
+        const cpuOptions = [2, 4, 8, 12];
         const screenRes = [
-            { w: 1920, h: 1080 }, { w: 1366, h: 768 }, { w: 1536, h: 864 }, 
-            { w: 414, h: 896 }, { w: 390, h: 844 } // Mobile resolutions
+            {w: 1920, h: 1080}, {w: 1366, h: 768}, {w: 390, h: 844}, {w: 414, h: 896}
         ];
-        const selectedRes = screenRes[Math.floor(Math.random() * screenRes.length)];
-        const ramOptions = [4, 8, 16]; // Simulated RAM in GB
-        const cpuOptions = [2, 4, 8]; // Simulated CPU Cores
+        
+        const selectedRes = screenRes[viewNumber % screenRes.length];
+        const selectedRam = ramOptions[viewNumber % ramOptions.length];
+        const selectedCpu = cpuOptions[viewNumber % cpuOptions.length];
 
         browser = await puppeteer.launch({
             headless: "new",
@@ -1287,76 +1289,109 @@ async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
-                '--window-size=' + selectedRes.w + ',' + selectedRes.h,
+                `--window-size=${selectedRes.w},${selectedRes.h}`,
                 '--mute-audio'
             ]
         });
 
         const page = await browser.newPage();
 
-        // 2. APPLY UNIQUE BROWSER FINGERPRINT
-        await page.evaluateOnNewDocument((res, ram, cpu) => {
-            // Overriding Webdriver
+        // 2. ADVANCED FINGERPRINT INJECTION (Har baar unique identity)
+        await page.evaluateOnNewDocument((ram, cpu, res) => {
+            // Webdriver ko hide karein
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
-            
-            // Overriding Hardware specs
+            // Hardware specs override karein
             Object.defineProperty(navigator, 'deviceMemory', { get: () => ram });
             Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => cpu });
-            
-            // Overriding Screen Resolution
+            // Screen resolution fix
             Object.defineProperty(window, 'screen', {
-                value: { width: res.w, height: res.h, availWidth: res.w, availHeight: res.h, colorDepth: 24 }
+                value: { width: res.w, height: res.h, availWidth: res.w, availHeight: res.h }
             });
-
-            // Randomizing Canvas Fingerprint (Slightly shifts pixels to make it unique)
+            // Canvas Fingerprint Poisoning (Anti-detection)
             const originalGetImageData = CanvasRenderingContext2D.prototype.getImageData;
-            CanvasRenderingContext2D.prototype.getImageData = function(x, y, w, h) {
-                const imageData = originalGetImageData.apply(this, arguments);
-                imageData.data[0] = imageData.data[0] + (Math.random() > 0.5 ? 1 : -1);
-                return imageData;
+            CanvasRenderingContext2D.prototype.getImageData = function() {
+                const image = originalGetImageData.apply(this, arguments);
+                image.data[0] = image.data[0] + (Math.random() > 0.5 ? 1 : -1);
+                return image;
             };
-        }, selectedRes, ramOptions[viewNumber % 3], cpuOptions[viewNumber % 3]);
+        }, selectedRam, selectedCpu, selectedRes);
 
-        // 3. DYNAMIC USER AGENT & REFERER
+        // 3. USER AGENT & REFERER ROTATION
         const uaList = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) Safari/604.1",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0 Safari/537.36"
         ];
         await page.setUserAgent(uaList[viewNumber % uaList.length]);
 
-        const referrers = ['https://www.google.com/', 'https://t.co/', 'https://www.youtube.com/'];
-        await page.setExtraHTTPHeaders({ 'Referer': referrers[Math.floor(Math.random() * referrers.length)] });
+        const referrers = ['https://www.google.com/', 'https://t.co/', 'https://www.facebook.com/'];
+        await page.setExtraHTTPHeaders({ 'Referer': referrers[viewNumber % referrers.length] });
 
-        // 4. LOAD & PLAY VIDEO
+        // Shorts to Watch URL conversion
         let finalUrl = videoUrl.includes('shorts/') ? videoUrl.replace('shorts/', 'watch?v=') : videoUrl;
+
+        console.log(`[YT-BOOST] View #${viewNumber} | RAM: ${selectedRam}GB | Res: ${selectedRes.w}x${selectedRes.h}`);
+        
         await page.goto(finalUrl, { waitUntil: 'networkidle2', timeout: 90000 });
 
-        // Random Delay before Play
-        await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
-        await page.keyboard.press('Space');
+        // 4. HUMAN INTERACTION
+        await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+        await page.keyboard.press('Space'); // Play video
 
-        // 5. NATURAL WATCH BEHAVIOR
-        const baseDuration = parseInt(requestedDuration);
-        const actualWatchTime = Math.floor(baseDuration * (0.85 + Math.random() * 0.12)); // 85-97% Retention
+        // 5. VARIABLE RETENTION (Crucial for Studio Count)
+        const baseTime = parseInt(requestedDuration);
+        const watchSeconds = Math.floor(baseTime * (0.85 + Math.random() * 0.12)); // 85% to 97% watch time
         
-        console.log(`[VIEW #${viewNumber}] Fingerprint Updated | RAM: ${ramOptions[viewNumber % 3]}GB | Watch: ${actualWatchTime}s`);
-
-        // Human-like scrolling during playback
-        for (let i = 0; i < 3; i++) {
-            await new Promise(r => setTimeout(r, (actualWatchTime / 3) * 1000));
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+        // Random Scrolling during playback
+        let elapsed = 0;
+        while (elapsed < watchSeconds) {
+            const wait = randomInt(5000, 10000);
+            await new Promise(r => setTimeout(r, wait));
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 200)));
+            elapsed += (wait / 1000);
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Done ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Completed ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
+
+// --- FIXED ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
+    try {
+        const { video_url, views_count, watch_time } = req.body;
+
+        if (!video_url) {
+            return res.status(400).json({ success: false, error: "Video URL missing" });
+        }
+
+        // Response turant bhejein taaki frontend "Server Error" na dikhaye
+        res.status(200).json({ 
+            success: true, 
+            message: `Boost started for ${views_count} views. Check Render logs for progress.` 
+        });
+
+        // Background loop
+        (async () => {
+            const total = parseInt(views_count) || 1;
+            for (let i = 1; i <= total; i++) {
+                await runYoutubeBrowserTask(video_url, watch_time || 60, i);
+                // 15 sec cooling to prevent Render OOM (Out of Memory)
+                await new Promise(r => setTimeout(r, 15000));
+            }
+        })();
+
+    } catch (err) {
+        console.error("API Error:", err);
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, error: "Internal Server Error" });
+        }
+    }
+});
 // =================================================================
 // --- SERVER START ---
 // ===================================================================
