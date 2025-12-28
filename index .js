@@ -1155,44 +1155,47 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. GSC & ADSENSE REVENUE BOOSTER (ADVANCED SCROLLING & SERIAL MODE)
-// ==================================================================
+// FIXED TOOL 6: GSC & ADSENSE REVENUE BOOSTER (FINAL)
+// ===================================================================
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new", // "new" headless mode zyada undetected hota hai
+            headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled' // Bot detection bypass karne ke liye
+                '--disable-blink-features=AutomationControlled' // Bot detection bypass
             ]
         });
 
         const page = await browser.newPage();
         
-        // Stealth settings
+        // Human-like Viewport aur User Agent
         await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // Step 1: Google Home par jana
-        console.log(`[VIEWER] #${viewNumber} | Searching Google for: ${keyword}`);
+        // 1. Google Search Simulation (Real Organic Signal)
+        console.log(`[VIEWER] View #${viewNumber} | Searching Google: ${keyword}`);
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-
-        // Step 2: Keyword Type karna aur Enter marna (Real Human Action)
-        await page.type('textarea[name="q"]', keyword, { delay: 100 }); 
+        
+        // Google Search Bar mein keyword type karna
+        await page.waitForSelector('textarea[name="q"]', { timeout: 10000 });
+        await page.type('textarea[name="q"]', keyword, { delay: 150 });
         await page.keyboard.press('Enter');
         await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-        // Step 3: Search Results mein aapki link dhund kar click karna
-        // Ye step GSC mein "Organic Click" count karwayega
+        // 2. REAL CLICK LOGIC (Search Console mein click count karwane ke liye)
         const clicked = await page.evaluate((targetUrl) => {
-            const links = Array.from(document.querySelectorAll('a'));
-            const match = links.find(l => l.href.includes(targetUrl));
+            const anchors = Array.from(document.querySelectorAll('a'));
+            // Aapki site ka link dhund kar click karna
+            const match = anchors.find(a => a.href.includes(targetUrl));
             if (match) {
                 match.scrollIntoView();
                 match.click();
@@ -1202,35 +1205,58 @@ async function runGscTask(keyword, url, viewNumber) {
         }, url);
 
         if (!clicked) {
-            console.log(`[!] Link search page par nahi mili, forcing navigation with Referrer...`);
-            await page.goto(url, { referer: 'https://www.google.com/' });
+            console.log(`[!] Link not found on page 1, forcing navigation with Referrer...`);
+            await page.goto(url, { referer: 'https://www.google.com/', waitUntil: 'networkidle2' });
         } else {
-            await page.waitForNavigation({ waitUntil: 'networkidle2' });
+            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {});
         }
 
-        // Step 4: Page par "Human Activity" dikhana (AdSense Earning ke liye)
-        console.log(`[ACTIVE] View #${viewNumber} | Simulating reading behavior...`);
+        // 3. ADSENSE REVENUE LOGIC (Smooth Scrolling for Viewability)
+        console.log(`[ACTIVE] View #${viewNumber} | Simulating Interaction...`);
         
-        const scrollPoints = [500, 1200, 1800, 2500, 800]; // Mix scrolls
-        for (let path of scrollPoints) {
-            await page.evaluate((y) => window.scrollTo({top: y, behavior: 'smooth'}), path);
-            await new Promise(r => setTimeout(r, randomInt(3000, 7000))); // Har scroll ke baad wait
+        // Natural scrolling points
+        const scrollSequence = [800, 1600, 2400, 400, 2000];
+        for (let pos of scrollSequence) {
+            await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'smooth' }), pos);
+            // Ads load hone ka time dena (4-7 sec wait)
+            await new Promise(r => setTimeout(r, Math.floor(Math.random() * 3000) + 4000));
         }
 
-        // Total 40-60 seconds ka stay time (Retention)
-        await new Promise(r => setTimeout(r, 15000)); 
-        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
+        // Final retention (10 seconds)
+        await new Promise(r => setTimeout(r, 10000));
+        console.log(`[SUCCESS] View #${viewNumber} Completed. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            browser = null;
         }
     }
 }
 
+// ENDPOINT FOR TOOL 6
+app.post('/start-task', async (req, res) => {
+    const { keyword, url, views = 5 } = req.body;
+    const totalViews = parseInt(views);
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started: ${totalViews} views. GSC aur AdSense update hone mein 24-48 ghante lagte hain.` 
+    });
+
+    // Serial processing (Ek-ek karke browser khulega RAM bachane ke liye)
+    (async () => {
+        for (let i = 1; i <= totalViews; i++) {
+            await runGscTask(keyword, url, i);
+            if (i < totalViews) {
+                console.log(`Waiting 20 seconds for next session...`);
+                await new Promise(r => setTimeout(r, 20000));
+            }
+        }
+        console.log("--- ALL TOOL 6 VIEWS FINISHED ---");
+    })();
+});
 
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
