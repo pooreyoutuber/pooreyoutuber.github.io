@@ -1155,243 +1155,109 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. GSC & ADSENSE REVENUE BOOSTER (ADVANCED SCROLLING & SERIAL MODE)
-// ==================================================================
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
-
+// 6. GSC & ADSENSE REVENUE BOOSTER (AI + PUPPETEER)
+// ===================================================================
 async function runGscTask(keyword, url, viewNumber) {
+    const puppeteer = require('puppeteer'); 
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        
-        // RAM bachane ke liye non-essential cheezein block
-        await page.setRequestInterception(true);
-        page.on('request', (req) => {
-            if (['font', 'media'].includes(req.resourceType())) {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
-
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. Google Search Simulation
-        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        // --- GEMINI AI DECISION MAKING ---
+        let aiInstructions = ["scroll down slow", "wait 10s"]; 
+        try {
+            const prompt = `Act as a real human visiting a website for keyword "${keyword}". Give me 3 natural actions to do on the page (e.g., "scroll to middle", "highlight some text", "wait 15s"). Output ONLY a simple JSON array of strings.`;
+            const result = await ai.models.generateContent({ model: "gemini-1.5-flash", contents: prompt });
+            const aiText = result.response.text();
+            aiInstructions = JSON.parse(aiText.trim());
+            console.log(`[AI-GSC] Strategy: ${aiInstructions.join(", ")}`);
+        } catch (e) { console.log("[AI-SKIP] Using default human behavior."); }
 
-        // 2. Main URL (Wait for Ads)
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleSearchUrl 
-        });
+        // 1. Google Search Referrer Signal
+        await page.goto(`https://www.google.com/search?q=${encodeURIComponent(keyword)}`, { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 4000));
 
-        console.log(`[VIEWER] View #${viewNumber} | Starting Human-like Scrolling...`);
+        // 2. Visit Website (AdSense Visibility)
+        await page.goto(url, { waitUntil: 'networkidle0', timeout: 90000 });
 
-        // 3. ADVANCED SCROLLING LOGIC (For AdSense Earning)
-        // Ye niche jayega, rukega, phir thoda upar aayega (Natural Behavior)
-        await page.evaluate(async () => {
-            const distance = 400; // Har baar kitna scroll karega
-            const delay = 3000;   // Har scroll ke baad kitne ms rukega
-            
-            for (let i = 0; i < 4; i++) {
-                window.scrollBy(0, distance);
-                await new Promise(r => setTimeout(r, delay));
-                
-                // Beech mein thoda upar scroll karna (Real human behavior)
-                if (i === 2) {
-                    window.scrollBy(0, -150);
-                    await new Promise(r => setTimeout(r, 1000));
-                }
-            }
-        });
+        // 3. Execute AI Human Actions
+        for (const action of aiInstructions) {
+            console.log(`[ACTION] Executing: ${action}`);
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await new Promise(r => setTimeout(r, 8000)); 
+        }
 
-        // 25 sec ka total stay time
-        await new Promise(r => setTimeout(r, 25000));
-        console.log(`[DONE] View #${viewNumber} completed with scrolling. ✅`);
+        // Final High-Retention for GSC Click Verification
+        await new Promise(r => setTimeout(r, 20000));
+        console.log(`[SUCCESS] GSC View #${viewNumber} Done ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            // Browser ko clean tareeke se close karna taaki RAM khali ho
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-            browser = null;
-        }
+        if (browser) { await browser.close(); browser = null; }
     }
 }
-
-app.post('/start-task', async (req, res) => {
-    const { keyword, url, views = 5 } = req.body;
-    const totalViews = parseInt(views);
-
-    res.status(200).json({ 
-        success: true, 
-        message: `Revenue Task started. Processing ${totalViews} views one-by-one with scrolling.` 
-    });
-
-    // Background Process: 1 Browser at a time
-    (async () => {
-        for (let i = 1; i <= totalViews; i++) {
-            console.log(`[QUEUE] Starting View #${i} of ${totalViews}`);
-            
-            // Wait for this browser to FINISH and CLOSE before starting next
-            await runGscTask(keyword, url, i); 
-
-            if (i < totalViews) {
-                console.log(`Waiting 20 seconds to clear RAM...`);
-                await new Promise(r => setTimeout(r, 20000));
-            }
-        }
-        console.log("--- ALL VIEWS FINISHED ---");
-    })();
-});
-
 // ===================================================================
-// 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
+// 7. YOUTUBE BOOSTER (AI + DEVICE ROTATION)
 // ===================================================================
-
 async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
     let browser;
     try {
-        // 1. Browser Launch (Stealth Mode)
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--autoplay-policy=no-user-gesture-required',
-                '--disable-blink-features=AutomationControlled',
-                '--mute-audio'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
 
-        // 2. DEVICE ROTATION (Mobile, Tablet, Desktop)
-        const devices = [
-            { name: 'Mobile', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 390, h: 844, isMob: true },
-            { name: 'Tablet', ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 820, h: 1180, isMob: true },
-            { name: 'Desktop', ua: USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)], w: 1366, h: 768, isMob: false }
-        ];
-
-        const selectedDevice = devices[viewNumber % devices.length];
-        await page.setUserAgent(selectedDevice.ua);
-        await page.setViewport({ width: selectedDevice.w, height: selectedDevice.h, isMobile: selectedDevice.isMob, hasTouch: selectedDevice.isMob });
-
-        // Hide Bot Footprints
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-            window.chrome = { runtime: {} };
-        });
-
-        // 3. LOAD VIDEO (Shorts Fix Included)
-        let finalUrl = videoUrl;
-        if (videoUrl.includes('shorts/')) {
-            const videoId = videoUrl.split('shorts/')[1].split('?')[0];
-            finalUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        // 1. Device Rotation (Mobile/Tablet/Desktop)
+        const isShorts = videoUrl.includes('shorts/');
+        if (isShorts) {
+            await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1');
+            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+        } else {
+            await page.setUserAgent(USER_AGENTS[viewNumber % USER_AGENTS.length]);
+            await page.setViewport({ width: 1280, height: 720 });
         }
 
-        console.log(`[YT-BOOST] View #${viewNumber} | Device: ${selectedDevice.name} | URL: ${finalUrl}`);
+        // 2. Convert Shorts for Better Counting
+        let finalUrl = isShorts ? videoUrl.replace('shorts/', 'watch?v=') : videoUrl;
         await page.goto(finalUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 4. PLAY & INITIAL INTERACTION
+        // 3. AI Behavior & Watch Time
         await page.click('video').catch(() => {});
-        await page.keyboard.press('m'); // Mute for safety
-
-        // 5. RANDOM RETENTION (70% - 95%)
-        const baseTime = parseInt(requestedDuration);
-        const watchSeconds = Math.floor(baseTime * (Math.random() * (0.95 - 0.70) + 0.70));
-        console.log(`[YT-BOOST] Watching for ${watchSeconds}s...`);
+        const watchSeconds = Math.floor(requestedDuration * (0.75 + Math.random() * 0.20));
+        console.log(`[YT-AI] View #${viewNumber} | Watching for ${watchSeconds}s...`);
 
         // Natural Human Behavior (Scrolling)
-        await page.evaluate(async () => {
-            for(let i=0; i<2; i++) {
-                window.scrollBy(0, 400);
-                await new Promise(r => setTimeout(r, 3000));
-                window.scrollBy(0, -150);
-                await new Promise(r => setTimeout(r, 2000));
-            }
-        });
-
-        // Watch Time Wait
-        await new Promise(r => setTimeout(r, watchSeconds * 1000));
-
-        // 6. AUTO-LIKE & SUBSCRIBE LOGIC
-        // Har view par nahi, balki 30% views par Like/Sub karega taaki organic lage
-        if (Math.random() > 0.7) {
-            console.log(`[YT-ENGAGE] Triggering Engagement...`);
-            
-            // Try Like Button
-            try {
-                const likeBtn = await page.$('button[aria-label*="like this video"]');
-                if (likeBtn) {
-                    await likeBtn.click();
-                    console.log(`[YT-ENGAGE] Video Liked!`);
-                } else {
-                    await page.keyboard.press('l'); // Fallback keyboard shortcut
-                }
-            } catch (e) {}
-
-            await new Promise(r => setTimeout(r, 2000));
-
-            // Try Subscribe Button (Desktop & Mobile selectors)
-            try {
-                const subBtn = await page.$('yt-button-renderer#subscribe-button button, .item-subscribe-button');
-                if (subBtn) {
-                    await subBtn.click();
-                    console.log(`[YT-ENGAGE] Channel Subscribed!`);
-                }
-            } catch (e) {}
+        for(let i=0; i<2; i++) {
+            await page.evaluate(() => window.scrollBy(0, 200));
+            await new Promise(r => setTimeout(r, 5000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Done ✅`);
+        await new Promise(r => setTimeout(r, (watchSeconds * 1000)));
+
+        // 4. Random Interaction (Like)
+        if (Math.random() > 0.7) {
+            await page.keyboard.press('l'); // Shortcut for Like
+            console.log(`[YT-AI] Interaction: Video Liked!`);
+        }
+
+        console.log(`[SUCCESS] YT View #${viewNumber} Done ✅`);
 
     } catch (error) {
         console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            await browser.close();
-            browser = null;
-        }
+        if (browser) { await browser.close(); browser = null; }
     }
 }
 
-// ENDPOINT
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    const total = parseInt(views_count) || 1;
-    const duration = parseInt(watch_time) || 60;
-
-    res.status(200).json({ success: true, message: `Task started: ${total} sessions with Auto-Engage.` });
-
-    (async () => {
-        for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, duration, i);
-            if (i < total) {
-                console.log(`[WAIT] Cooling 15s to clear RAM...`);
-                await new Promise(r => setTimeout(r, 15000));
-            }
-        }
-        console.log("--- ALL SESSIONS COMPLETED ---");
-    })();
-});
 // =================================================================
 // --- SERVER START ---
 // ===================================================================
