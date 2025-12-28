@@ -1265,7 +1265,7 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
 // ===================================================================
-async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
+    async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1273,91 +1273,77 @@ async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled',
-                '--incognito', // 1. Incognito Mode
-                '--no-first-run',
-                '--no-service-autorun',
-                '--password-store=basic'
+                '--disable-blink-features=AutomationControlled', // Hide automation
+                '--disable-infobars',
+                '--mute-audio',
+                '--window-size=1280,720'
             ]
         });
 
-        // 2. Browser Context aur Page setup
-        const context = await browser.createIncognitoBrowserContext();
-        const page = await context.newPage();
+        const page = await browser.newPage();
 
-        // 3. Audio ON and Video Quality Control
-        // Audio enable karne ke liye mute-audio hataya gaya hai
-        await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
-
-        // 4. Advanced Fingerprint Masking
+        // 1. ADVANCED STEALTH: Fingerprint bypass
         await page.evaluateOnNewDocument(() => {
-            // WebDriver hide karna
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
-            // Screen resolution badalna
-            Object.defineProperty(screen, 'height', { get: () => 1080 });
-            Object.defineProperty(screen, 'width', { get: () => 1920 });
-            // WebGL fingerprinting protection
-            const getParameter = WebGLRenderingContext.prototype.getParameter;
-            WebGLRenderingContext.prototype.getParameter = function(parameter) {
-                if (parameter === 37445) return 'Intel Open Source Technology Center';
-                if (parameter === 37446) return 'Mesa DRI Intel(R) HD Graphics 550 (Skylake GT2)';
-                return getParameter(parameter);
-            };
+            window.chrome = { runtime: {} };
         });
 
-        const selectedDevice = USER_AGENTS[viewNumber % USER_AGENTS.length];
-        await page.setUserAgent(selectedDevice);
+        // 2. RANDOM AGENT & REFERER
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
 
-        // 5. URL Processing
-        let finalUrl = videoUrl;
-        if (videoUrl.includes('shorts/')) {
-            const videoId = videoUrl.split('shorts/')[1].split('?')[0];
-            finalUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        }
-
-        console.log(`[YT-BOOST] View #${viewNumber} | Starting with Audio ON...`);
-        await page.goto(finalUrl, { waitUntil: 'networkidle2', timeout: 90000 });
-
-        // 6. Natural Playback & Audio
-        try {
-            // YouTube play button click karna agar auto-play block ho
-            const playButton = await page.$('.ytp-large-play-button');
-            if (playButton) await playButton.click();
-            
-            // Unmute shortcut
-            await page.keyboard.press('m'); 
-            // Volume Up
-            for(let i=0; i<5; i++) await page.keyboard.press('ArrowUp');
-        } catch (e) {}
-
-        // 7. Retention Logic (70-90% of Video Length)
-        // Yahan 'requestedDuration' video ki actual length honi chahiye (seconds mein)
-        const baseTime = parseInt(requestedDuration);
-        const watchPercentage = (Math.random() * (0.90 - 0.70) + 0.70); // 70% to 90%
-        const watchSeconds = Math.floor(baseTime * watchPercentage);
+        console.log(`[YT-BOOST] View #${viewNumber} | Navigating to Video...`);
         
-        console.log(`[YT-BOOST] Video Length: ${baseTime}s | Target: ${Math.round(watchPercentage*100)}% (${watchSeconds}s)`);
+        // 3. GOTO VIDEO & GET DURATION
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 90000 });
 
-        // Human-like Interaction (Scrolling during watch time)
-        const intervals = 4;
-        for (let i = 0; i < intervals; i++) {
-            await new Promise(r => setTimeout(r, (watchSeconds * 1000) / intervals));
-            await page.evaluate(() => {
-                window.scrollBy(0, Math.floor(Math.random() * 300) + 100);
-            });
-            console.log(`[YT-PROGRESS] #${viewNumber}: Viewed ${Math.round(((i+1)/intervals)*100)}%`);
+        // Video length (seconds) nikalne ka logic
+        const videoDuration = await page.evaluate(() => {
+            const video = document.querySelector('video');
+            return video ? video.duration : 0;
+        });
+
+        if (!videoDuration || videoDuration < 10) {
+            console.log("Could not get duration, using 60s fallback.");
+            var finalWatchTime = 60;
+        } else {
+            // 70% se 95% ke beech random retention
+            const percentage = Math.random() * (0.95 - 0.70) + 0.70;
+            var finalWatchTime = Math.floor(videoDuration * percentage);
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        console.log(`[YT-BOOST] Video Length: ${Math.floor(videoDuration)}s | Watching: ${finalWatchTime}s (${Math.floor((finalWatchTime/videoDuration)*100)}%)`);
+
+        // 4. HUMAN INTERACTION (Play & Random Scroll)
+        await page.click('video').catch(() => {});
+        await page.keyboard.press('k'); // Play/Pause toggle (failsafe)
+
+        // Simulated Scrolling (Real user behavior)
+        let spent = 0;
+        while (spent < finalWatchTime) {
+            const wait = Math.min(15, finalWatchTime - spent);
+            await new Promise(r => setTimeout(r, wait * 1000));
+            spent += wait;
+            
+            // Randomly scroll up/down
+            await page.evaluate(() => window.scrollBy(0, Math.random() > 0.5 ? 200 : -100));
+            console.log(`[View #${viewNumber}] Progress: ${spent}/${finalWatchTime}s`);
+        }
+
+        // 5. AUTO-ENGAGEMENT (Like/Sub 30% Chance)
+        if (Math.random() > 0.7) {
+            await page.keyboard.press('l'); // Like shortcut
+            console.log(`[YT-ENGAGE] Liked!`);
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} Done ✅`);
 
     } catch (error) {
         console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
-}
-    
+    }
 // ================================================================
 // --- SERVER START ---
 // ===================================================================
