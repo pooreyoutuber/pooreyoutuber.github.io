@@ -1265,106 +1265,87 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
 // ===================================================================
-
-async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
+async function runYoutubeBrowserTask(videoUrl, videoTitle, requestedDuration, viewNumber) {
     let browser;
     try {
-        // 1. Browser Launch (Stealth Mode)
+        // 1. BROWSER LAUNCH WITH STEALH & GPU ARGS
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--autoplay-policy=no-user-gesture-required',
                 '--disable-blink-features=AutomationControlled',
+                '--use-gl=swiftshader', // WebGL simulate karne ke liye
+                '--enable-webgl',
+                '--window-size=1280,720',
                 '--mute-audio'
             ]
         });
 
         const page = await browser.newPage();
 
-        // 2. DEVICE ROTATION (Mobile, Tablet, Desktop)
-        const devices = [
-            { name: 'Mobile', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 390, h: 844, isMob: true },
-            { name: 'Tablet', ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 820, h: 1180, isMob: true },
-            { name: 'Desktop', ua: USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)], w: 1366, h: 768, isMob: false }
-        ];
-
-        const selectedDevice = devices[viewNumber % devices.length];
-        await page.setUserAgent(selectedDevice.ua);
-        await page.setViewport({ width: selectedDevice.w, height: selectedDevice.h, isMobile: selectedDevice.isMob, hasTouch: selectedDevice.isMob });
-
-        // Hide Bot Footprints
+        // 2. ADVANCED FINGERPRINT & SPOOFING
         await page.evaluateOnNewDocument(() => {
+            // Webdriver Hide
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
-            window.chrome = { runtime: {} };
+            // Fake Languages & Platform
+            Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+            Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
+            // Canvas Spoofing (Simple noise)
+            const originalGetImageData = CanvasRenderingContext2D.prototype.getImageData;
+            CanvasRenderingContext2D.prototype.getImageData = function(x, y, w, h) {
+                const imageData = originalGetImageData.apply(this, arguments);
+                imageData.data[0] = imageData.data[0] + (Math.random() > 0.5 ? 1 : -1);
+                return imageData;
+            };
         });
 
-        // 3. LOAD VIDEO (Shorts Fix Included)
-        let finalUrl = videoUrl;
-        if (videoUrl.includes('shorts/')) {
-            const videoId = videoUrl.split('shorts/')[1].split('?')[0];
-            finalUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        // 3. DEVICE ROTATION
+        const uas = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        ];
+        await page.setUserAgent(uas[viewNumber % uas.length]);
+
+        // 4. SEARCH LOGIC (Direct URL ki jagah Search se aana)
+        console.log(`[YT-BOOST] View #${viewNumber} | Searching: ${videoTitle}`);
+        await page.goto(`https://www.youtube.com/results?search_query=${encodeURIComponent(videoTitle)}`, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
+        });
+
+        // Video par click karein (Title match karke)
+        try {
+            await page.waitForSelector('#video-title', { timeout: 10000 });
+            await page.click('#video-title');
+            console.log(`[YT-BOOST] Video found and clicked.`);
+        } catch (e) {
+            console.log(`[YT-BOOST] Search click failed, going direct.`);
+            await page.goto(videoUrl, { waitUntil: 'networkidle2' });
         }
 
-        console.log(`[YT-BOOST] View #${viewNumber} | Device: ${selectedDevice.name} | URL: ${finalUrl}`);
-        await page.goto(finalUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // 4. PLAY & INITIAL INTERACTION
-        await page.click('video').catch(() => {});
-        await page.keyboard.press('m'); // Mute for safety
-
-        // 5. RANDOM RETENTION (70% - 95%)
+        // 5. PLAYBACK & RETENTION (70-90%)
         const baseTime = parseInt(requestedDuration);
-        const watchSeconds = Math.floor(baseTime * (Math.random() * (0.95 - 0.70) + 0.70));
-        console.log(`[YT-BOOST] Watching for ${watchSeconds}s...`);
+        const retentionFactor = (Math.random() * (0.90 - 0.70) + 0.70); // 70% to 90%
+        const watchSeconds = Math.floor(baseTime * retentionFactor);
 
-        // Natural Human Behavior (Scrolling)
-        await page.evaluate(async () => {
-            for(let i=0; i<2; i++) {
-                window.scrollBy(0, 400);
-                await new Promise(r => setTimeout(r, 3000));
-                window.scrollBy(0, -150);
-                await new Promise(r => setTimeout(r, 2000));
-            }
-        });
-
-        // Watch Time Wait
+        // Natural Interaction: Thoda scroll
+        await page.evaluate(() => window.scrollBy(0, 500));
+        
+        console.log(`[WATCHING] View #${viewNumber} for ${watchSeconds}s (${Math.round(retentionFactor*100)}% Retention)`);
         await new Promise(r => setTimeout(r, watchSeconds * 1000));
 
-        // 6. AUTO-LIKE & SUBSCRIBE LOGIC
-        // Har view par nahi, balki 30% views par Like/Sub karega taaki organic lage
-        if (Math.random() > 0.7) {
-            console.log(`[YT-ENGAGE] Triggering Engagement...`);
-            
-            // Try Like Button
-            try {
-                const likeBtn = await page.$('button[aria-label*="like this video"]');
-                if (likeBtn) {
-                    await likeBtn.click();
-                    console.log(`[YT-ENGAGE] Video Liked!`);
-                } else {
-                    await page.keyboard.press('l'); // Fallback keyboard shortcut
-                }
-            } catch (e) {}
-
-            await new Promise(r => setTimeout(r, 2000));
-
-            // Try Subscribe Button (Desktop & Mobile selectors)
-            try {
-                const subBtn = await page.$('yt-button-renderer#subscribe-button button, .item-subscribe-button');
-                if (subBtn) {
-                    await subBtn.click();
-                    console.log(`[YT-ENGAGE] Channel Subscribed!`);
-                }
-            } catch (e) {}
+        // 6. FINAL ACTION BEFORE CLOSE
+        if (Math.random() > 0.8) {
+            await page.keyboard.press('l'); // Random Like attempt
+            console.log(`[ENGAGE] Key 'L' pressed.`);
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Done ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Complete. Closing browser...`);
 
     } catch (error) {
-        console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
+        console.error(`[YT-ERROR] View #${viewNumber} failed: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
@@ -1373,23 +1354,30 @@ async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
     }
 }
 
-// ENDPOINT
+// Updated Endpoint to handle Serial processing
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
+    const { video_url, video_title, views_count, watch_time } = req.body;
     const total = parseInt(views_count) || 1;
     const duration = parseInt(watch_time) || 60;
+    const title = video_title || "YouTube Video";
 
-    res.status(200).json({ success: true, message: `Task started: ${total} sessions with Auto-Engage.` });
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started: ${total} views in serial mode (Search + Spoofing).` 
+    });
 
+    // Background Serial Execution
     (async () => {
         for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, duration, i);
-            if (i < total) {
-                console.log(`[WAIT] Cooling 15s to clear RAM...`);
-                await new Promise(r => setTimeout(r, 15000));
-            }
+            console.log(`--- Starting View Process ${i}/${total} ---`);
+            await runYoutubeBrowserTask(video_url, title, duration, i);
+            
+            // Cool down to clear RAM and prevent IP patterns
+            const cooldown = 15000 + (Math.random() * 10000); 
+            console.log(`Waiting ${Math.round(cooldown/1000)}s for next fresh session...`);
+            await new Promise(r => setTimeout(r, cooldown));
         }
-        console.log("--- ALL SESSIONS COMPLETED ---");
+        console.log("--- ALL VIEWS COMPLETED ---");
     })();
 });
 // =================================================================
