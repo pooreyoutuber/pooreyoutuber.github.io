@@ -1268,90 +1268,132 @@ app.post('/start-task', async (req, res) => {
 async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
     let browser;
     try {
-        console.log(`\n--- STARTING FRESH SESSION: VIEW #${viewNumber} ---`);
+        console.log(`\n--- [SESSION START] View #${viewNumber} ---`);
 
-        // 1. GEMINI SE KEYWORD LENA (Organic Traffic Source banane ke liye)
-        let searchKeyword = "latest video";
-        if (ai && GEMINI_KEY) {
+        // 1. GEMINI SE SEARCH KEYWORD LENA
+        let searchKeyword = "latest trending video"; 
+        if (GEMINI_KEY) {
             try {
-                const prompt = `Based on this URL: ${videoUrl}, give me one short search keyword that a real human would use to find this video. Output only the keyword text.`;
-                const result = await ai.getGenerativeModel({ model: "gemini-1.5-flash" }).generateContent(prompt);
+                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const prompt = `This is a YouTube video URL: ${videoUrl}. Give me one short, realistic search keyword a human would use to find this video. Return ONLY the keyword.`;
+                const result = await model.generateContent(prompt);
                 searchKeyword = result.response.text().trim();
-                console.log(`[GEMINI] Generated Keyword: ${searchKeyword}`);
+                console.log(`[GEMINI] Keyword generated: ${searchKeyword}`);
             } catch (e) {
-                console.log("[GEMINI] Error, using default keyword.");
+                console.log("[GEMINI] AI Error, using default keyword.");
             }
         }
 
-        // 2. RANDOM DEVICE & USER AGENT (Laptop/Mobile/Tablet)
+        // 2. RANDOM USER AGENT (Laptop/Mobile/Tablet)
         const userAgents = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
-            "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1"
         ];
         const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)];
 
-        // 3. LAUNCH NEW BROWSER (Naya Instance)
+        // 3. LAUNCH FRESH BROWSER
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled' // Bot detection bypass
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
         await page.setUserAgent(randomUA);
         
-        // Browser ko "Real" dikhane ke liye extra setting
+        // Bot detection bypass logic
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
         });
 
-        // 4. GO TO YOUTUBE SEARCH FIRST (Direct link se bachne ke liye)
-        console.log(`[STEP 1] Searching for video...`);
-        await page.goto(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchKeyword)}`, { waitUntil: 'networkidle2' });
+        // 4. STEP 1: GO TO SEARCH (Organic Start)
+        console.log(`[STEP 1] Searching: ${searchKeyword}`);
+        await page.goto(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchKeyword)}`, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
+        });
         await new Promise(r => setTimeout(r, 4000));
 
-        // 5. OPEN VIDEO URL (With Referrer)
+        // 5. STEP 2: OPEN VIDEO (With Referrer)
         console.log(`[STEP 2] Opening Video...`);
         await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
             referer: `https://www.youtube.com/results?search_query=${encodeURIComponent(searchKeyword)}` 
         });
 
-        // 6. PLAY & ENGAGE (70-90% Watch Time)
+        // 6. STEP 3: PLAY VIDEO & SCROLL (70-90% Watch time)
         await page.evaluate(() => {
             const v = document.querySelector('video');
-            if(v) { v.play(); v.volume = 0.5; }
-            window.scrollBy(0, 400); // Niche scroll kiya
+            if(v) { 
+                v.play(); 
+                v.muted = false; 
+                v.volume = 0.5; 
+            }
+            window.scrollBy(0, 450); // Simulating human scroll
         });
 
-        // Calculate 70-90% duration
-        const retention = Math.random() * (0.90 - 0.70) + 0.70;
-        const actualWatchTime = Math.floor(requestedDuration * retention);
+        // Calculate 70-90% retention
+        const retentionFactor = Math.random() * (0.90 - 0.70) + 0.70;
+        const watchSeconds = Math.floor(parseInt(requestedDuration) * retentionFactor);
         
-        console.log(`[STEP 3] Watching for ${actualWatchTime} seconds (${Math.round(retention*100)}%)...`);
+        console.log(`[STEP 3] Watching for ${watchSeconds} seconds...`);
         
-        // Split watch time to simulate human behavior
-        await new Promise(r => setTimeout(r, (actualWatchTime * 1000) / 2));
-        await page.evaluate(() => window.scrollBy(0, -200)); // Upar scroll kiya
-        await new Promise(r => setTimeout(r, (actualWatchTime * 1000) / 2));
+        // Wait for calculated time
+        await new Promise(r => setTimeout(r, watchSeconds * 1000));
 
-        console.log(`[SUCCESS] View #${viewNumber} Done. Closing Browser...`);
+        console.log(`[SUCCESS] View #${viewNumber} Completed! ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[FATAL ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close(); // Browser puri tarah band
-            browser = null;
-            console.log(`[CLEANUP] Browser instance destroyed.\n`);
+            await browser.close(); // Browser ko puri tarah band karna zaroori hai
+            console.log(`[CLEANUP] Browser session closed.\n`);
         }
     }
 }
+
+// ENDPOINT JISPE FRONTEND REQUEST BHEJEGA
+app.post('/api/real-view-boost', async (req, res) => {
+    try {
+        const { video_url, views_count, watch_time } = req.body;
+        
+        if (!video_url) {
+            return res.status(400).json({ success: false, message: "Video URL is required!" });
+        }
+
+        const count = parseInt(views_count) || 1;
+        const time = parseInt(watch_time) || 60;
+
+        // Frontend ko turant response dena taaki loading na ruke
+        res.status(200).json({ 
+            success: true, 
+            message: `Task started! Processing ${count} organic views.` 
+        });
+
+        // Background mein loop chalana (One by one)
+        (async () => {
+            for (let i = 1; i <= count; i++) {
+                await runYoutubeBrowserTask(video_url, time, i);
+                // Har view ke baad 15-20 sec ka gap taaki RAM free ho aur YT pattern na pakde
+                console.log(`[WAIT] Cooling down for 20s...`);
+                await new Promise(r => setTimeout(r, 20000));
+            }
+            console.log("=== ALL VIEWS FINISHED ===");
+        })();
+
+    } catch (err) {
+        console.error("API Error:", err.message);
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, message: "Server Internal Error" });
+        }
+    }
+});
 // =================================================================
 // --- SERVER START ---
 // ===================================================================
