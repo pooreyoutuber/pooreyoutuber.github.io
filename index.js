@@ -1270,130 +1270,120 @@ async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
     try {
         console.log(`\n--- [SESSION START] View #${viewNumber} ---`);
 
-        // 1. GEMINI SE SEARCH KEYWORD LENA
-        let searchKeyword = "latest trending video"; 
-        if (GEMINI_KEY) {
+        // 1. GEMINI KEY RE-FETCH (Render Environment Variables se)
+        const RENDER_GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY || GEMINI_KEY;
+        let searchKeyword = "trending video"; 
+
+        if (RENDER_GEMINI_KEY) {
             try {
-                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-                const prompt = `This is a YouTube video URL: ${videoUrl}. Give me one short, realistic search keyword a human would use to find this video. Return ONLY the keyword.`;
+                const genAI = new GoogleGenAI(RENDER_GEMINI_KEY);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const prompt = `Based on this YouTube video: ${videoUrl}, give me one realistic 3-4 word search query to find it. Output ONLY the query.`;
                 const result = await model.generateContent(prompt);
-                searchKeyword = result.response.text().trim();
-                console.log(`[GEMINI] Keyword generated: ${searchKeyword}`);
+                searchKeyword = result.response.text().trim().replace(/['"]+/g, '');
+                console.log(`[GEMINI] Keyword: ${searchKeyword}`);
             } catch (e) {
-                console.log("[GEMINI] AI Error, using default keyword.");
+                console.log(`[GEMINI] Error: ${e.message}. Using default.`);
             }
         }
 
-        // 2. RANDOM USER AGENT (Laptop/Mobile/Tablet)
-        const userAgents = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36",
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1"
-        ];
-        const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)];
-
-        // 3. LAUNCH FRESH BROWSER
+        // 2. BROWSER LAUNCH (Puppeteer)
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                '--no-sandbox', 
+                '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(randomUA);
-        
-        // Bot detection bypass logic
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
 
-        // 4. STEP 1: GO TO SEARCH (Organic Start)
+        // 3. RANDOM IDENTITY (PC/Mobile)
+        const userAgents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
+            "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"
+        ];
+        await page.setUserAgent(userAgents[Math.floor(Math.random() * userAgents.length)]);
+
+        // 4. STEP 1: YOUTUBE SEARCH (Organic Traffic Source)
         console.log(`[STEP 1] Searching: ${searchKeyword}`);
         await page.goto(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchKeyword)}`, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000 
+            waitUntil: 'networkidle2' 
         });
         await new Promise(r => setTimeout(r, 4000));
 
-        // 5. STEP 2: OPEN VIDEO (With Referrer)
-        console.log(`[STEP 2] Opening Video...`);
+        // 5. STEP 2: OPEN VIDEO (Referrer ke saath taaki Studio mein Search Traffic dikhe)
+        console.log(`[STEP 2] Navigating to Video...`);
         await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
             referer: `https://www.youtube.com/results?search_query=${encodeURIComponent(searchKeyword)}` 
         });
 
-        // 6. STEP 3: PLAY VIDEO & SCROLL (70-90% Watch time)
+        // 6. STEP 3: PLAY & ENGAGE (Retention 70-90%)
         await page.evaluate(() => {
             const v = document.querySelector('video');
-            if(v) { 
-                v.play(); 
-                v.muted = false; 
-                v.volume = 0.5; 
+            if (v) {
+                v.play();
+                v.muted = false;
+                v.volume = 0.4;
             }
-            window.scrollBy(0, 450); // Simulating human scroll
+            window.scrollBy(0, 400); // Human scroll simulation
         });
 
-        // Calculate 70-90% retention
-        const retentionFactor = Math.random() * (0.90 - 0.70) + 0.70;
-        const watchSeconds = Math.floor(parseInt(requestedDuration) * retentionFactor);
+        const retention = Math.random() * (0.90 - 0.70) + 0.70;
+        const watchMs = (parseInt(requestedDuration) * retention) * 1000;
         
-        console.log(`[STEP 3] Watching for ${watchSeconds} seconds...`);
+        console.log(`[STEP 3] Watching for ${Math.floor(watchMs/1000)} seconds...`);
         
-        // Wait for calculated time
-        await new Promise(r => setTimeout(r, watchSeconds * 1000));
+        // Beech mein thoda scroll taaki YouTube detect na kare
+        await new Promise(r => setTimeout(r, watchMs / 2));
+        await page.evaluate(() => window.scrollBy(0, -200));
+        await new Promise(r => setTimeout(r, watchMs / 2));
 
-        console.log(`[SUCCESS] View #${viewNumber} Completed! ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} counted in Studio! ✅`);
 
     } catch (error) {
-        console.error(`[FATAL ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close(); // Browser ko puri tarah band karna zaroori hai
+            await browser.close(); // RAM clean karne ke liye hamesha close karein
             console.log(`[CLEANUP] Browser session closed.\n`);
         }
     }
 }
 
-// ENDPOINT JISPE FRONTEND REQUEST BHEJEGA
+// 7. API ENDPOINT (Frontend connection)
 app.post('/api/real-view-boost', async (req, res) => {
     try {
         const { video_url, views_count, watch_time } = req.body;
         
-        if (!video_url) {
-            return res.status(400).json({ success: false, message: "Video URL is required!" });
-        }
+        if (!video_url) return res.status(400).json({ success: false, message: "URL is required" });
 
         const count = parseInt(views_count) || 1;
         const time = parseInt(watch_time) || 60;
 
-        // Frontend ko turant response dena taaki loading na ruke
-        res.status(200).json({ 
-            success: true, 
-            message: `Task started! Processing ${count} organic views.` 
-        });
+        res.status(200).json({ success: true, message: `Task started! Running ${count} organic sessions.` });
 
-        // Background mein loop chalana (One by one)
+        // Background Loop (One by one taaki Render crash na ho)
         (async () => {
             for (let i = 1; i <= count; i++) {
                 await runYoutubeBrowserTask(video_url, time, i);
-                // Har view ke baad 15-20 sec ka gap taaki RAM free ho aur YT pattern na pakde
-                console.log(`[WAIT] Cooling down for 20s...`);
-                await new Promise(r => setTimeout(r, 20000));
+                // Har view ke baad 20 sec wait (Cooling period)
+                if (i < count) {
+                    console.log(`[WAIT] Cooling down for 20s...`);
+                    await new Promise(r => setTimeout(r, 20000));
+                }
             }
-            console.log("=== ALL VIEWS FINISHED ===");
+            console.log("--- ALL SESSIONS COMPLETED ---");
         })();
-
     } catch (err) {
         console.error("API Error:", err.message);
-        if (!res.headersSent) {
-            res.status(500).json({ success: false, message: "Server Internal Error" });
-        }
+        if (!res.headersSent) res.status(500).send("Server Error");
     }
 });
+
 // =================================================================
 // --- SERVER START ---
 // ===================================================================
