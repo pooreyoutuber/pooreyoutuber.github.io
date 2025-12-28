@@ -1262,6 +1262,126 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 
+// ===================================================================
+// 7. YOUTUBE CLOUD ENGINE (HIGH RETENTION & BROWSER-BASED)
+// ===================================================================
+
+async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
+    let browser;
+    try {
+        // 1. Launch Browser with Performance Optimization
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--autoplay-policy=no-user-gesture-required',
+                '--mute-audio' // Server par awaaz band rakhva mate
+            ]
+        });
+
+        const page = await browser.newPage();
+        
+        // Random User Agent badalva mate
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // Viewport size random rakhvi (Real mobile/desktop feel)
+        await page.setViewport({ width: 1280, height: 720 });
+
+        console.log(`[YT-BOOST] Starting View #${viewNumber}...`);
+
+        // 2. YouTube Video Link par javu
+        await page.goto(videoUrl, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
+        });
+
+        // 3. Play Button Simulation (Agar video automatic shuru na thay to)
+        try {
+            await page.waitForSelector('.ytp-large-play-button', { timeout: 5000 });
+            await page.click('.ytp-large-play-button');
+        } catch (e) {
+            // Video shayad auto-play thai gayu che
+        }
+
+        // 4. RETENTION LOGIC (70% to 95% Random Watch Time)
+        // User e aapela time ma thodo badlav karvo taaki YouTube ne bot na lage
+        const baseTime = parseInt(requestedDuration);
+        const retentionPercent = (Math.random() * (0.95 - 0.75) + 0.75); // 75% thi 95% ni vache
+        const finalWatchTime = Math.floor(baseTime * retentionPercent);
+
+        console.log(`[YT-BOOST] View #${viewNumber}: Watching for ${finalWatchTime}s (${Math.round(retentionPercent*100)}% retention)`);
+
+        // 5. Engagement Simulation (Human Behavior)
+        // Video joti vakhte thodu niche scroll karvu (comments/recommendations load karva)
+        await page.evaluate(async () => {
+            window.scrollBy(0, 400);
+            await new Promise(r => setTimeout(r, 2000));
+            window.scrollBy(0, -200);
+        });
+
+        // Requested time sudhi wait karvu
+        await new Promise(r => setTimeout(r, finalWatchTime * 1000));
+
+        // Random Like Logic (Darek 10 view ma thi 1 ma like karse - Optional)
+        if (Math.random() > 0.9) {
+            console.log(`[YT-BOOST] Random Engagement: Liking video...`);
+            await page.keyboard.press('l'); // 'l' key thi youtube ma video like thay che
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} Finished! ✅`);
+
+    } catch (error) {
+        console.error(`[YT-FAIL] View #${viewNumber} Error: ${error.message}`);
+    } finally {
+        if (browser) {
+            // Clean exit mate badha pages close karva
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+            browser = null;
+        }
+    }
+}
+
+// ENDPOINT: Jo Frontend sathe connect thase
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    const totalViews = parseInt(views_count) || 1;
+    const duration = parseInt(watch_time) || 60;
+
+    if (!video_url) {
+        return res.status(400).json({ error: "Video URL is required!" });
+    }
+
+    // Response turant mokli devo taaki frontend progress bar shuru thai jay
+    res.status(200).json({ 
+        success: true, 
+        message: `Cloud Engine Activated for ${totalViews} views.` 
+    });
+
+    // Background Process (Aapna plan pramane: 1 by 1 browser)
+    (async () => {
+        console.log(`[QUEUE] YouTube Task Started: ${totalViews} views to go...`);
+        
+        for (let i = 1; i <= totalViews; i++) {
+            console.log(`[PROGRESS] Current Session: ${i}/${totalViews}`);
+            
+            // Aa line wait karse jyadhi sudhi browser close na thay
+            await runYoutubeBrowserTask(video_url, duration, i);
+
+            // 10 second gap taaki Render ni RAM flush thai jay
+            if (i < totalViews) {
+                console.log(`[COOLING] Waiting 10s before next session...`);
+                await new Promise(r => setTimeout(r, 10000));
+            }
+        }
+        console.log("--- ALL CLOUD ENGINE TASKS FINISHED ---");
+    })();
+});
+         
 
 // =================================================================
 // --- SERVER START ---
