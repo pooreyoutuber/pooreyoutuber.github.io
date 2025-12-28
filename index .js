@@ -1160,107 +1160,77 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // "new" headless mode zyada undetected hota hai
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-gpu'
+                '--disable-blink-features=AutomationControlled' // Bot detection bypass karne ke liye
             ]
         });
 
         const page = await browser.newPage();
         
-        // RAM bachane ke liye non-essential cheezein block
-        await page.setRequestInterception(true);
-        page.on('request', (req) => {
-            if (['font', 'media'].includes(req.resourceType())) {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
-
+        // Stealth settings
+        await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. Google Search Simulation
-        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        // Step 1: Google Home par jana
+        console.log(`[VIEWER] #${viewNumber} | Searching Google for: ${keyword}`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
 
-        // 2. Main URL (Wait for Ads)
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleSearchUrl 
-        });
+        // Step 2: Keyword Type karna aur Enter marna (Real Human Action)
+        await page.type('textarea[name="q"]', keyword, { delay: 100 }); 
+        await page.keyboard.press('Enter');
+        await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-        console.log(`[VIEWER] View #${viewNumber} | Starting Human-like Scrolling...`);
-
-        // 3. ADVANCED SCROLLING LOGIC (For AdSense Earning)
-        // Ye niche jayega, rukega, phir thoda upar aayega (Natural Behavior)
-        await page.evaluate(async () => {
-            const distance = 400; // Har baar kitna scroll karega
-            const delay = 3000;   // Har scroll ke baad kitne ms rukega
-            
-            for (let i = 0; i < 4; i++) {
-                window.scrollBy(0, distance);
-                await new Promise(r => setTimeout(r, delay));
-                
-                // Beech mein thoda upar scroll karna (Real human behavior)
-                if (i === 2) {
-                    window.scrollBy(0, -150);
-                    await new Promise(r => setTimeout(r, 1000));
-                }
+        // Step 3: Search Results mein aapki link dhund kar click karna
+        // Ye step GSC mein "Organic Click" count karwayega
+        const clicked = await page.evaluate((targetUrl) => {
+            const links = Array.from(document.querySelectorAll('a'));
+            const match = links.find(l => l.href.includes(targetUrl));
+            if (match) {
+                match.scrollIntoView();
+                match.click();
+                return true;
             }
-        });
+            return false;
+        }, url);
 
-        // 25 sec ka total stay time
-        await new Promise(r => setTimeout(r, 25000));
-        console.log(`[DONE] View #${viewNumber} completed with scrolling. ✅`);
+        if (!clicked) {
+            console.log(`[!] Link search page par nahi mili, forcing navigation with Referrer...`);
+            await page.goto(url, { referer: 'https://www.google.com/' });
+        } else {
+            await page.waitForNavigation({ waitUntil: 'networkidle2' });
+        }
+
+        // Step 4: Page par "Human Activity" dikhana (AdSense Earning ke liye)
+        console.log(`[ACTIVE] View #${viewNumber} | Simulating reading behavior...`);
+        
+        const scrollPoints = [500, 1200, 1800, 2500, 800]; // Mix scrolls
+        for (let path of scrollPoints) {
+            await page.evaluate((y) => window.scrollTo({top: y, behavior: 'smooth'}), path);
+            await new Promise(r => setTimeout(r, randomInt(3000, 7000))); // Har scroll ke baad wait
+        }
+
+        // Total 40-60 seconds ka stay time (Retention)
+        await new Promise(r => setTimeout(r, 15000)); 
+        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
     } finally {
         if (browser) {
-            // Browser ko clean tareeke se close karna taaki RAM khali ho
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
+            await browser.close();
             browser = null;
         }
     }
 }
 
-app.post('/start-task', async (req, res) => {
-    const { keyword, url, views = 5 } = req.body;
-    const totalViews = parseInt(views);
-
-    res.status(200).json({ 
-        success: true, 
-        message: `Revenue Task started. Processing ${totalViews} views one-by-one with scrolling.` 
-    });
-
-    // Background Process: 1 Browser at a time
-    (async () => {
-        for (let i = 1; i <= totalViews; i++) {
-            console.log(`[QUEUE] Starting View #${i} of ${totalViews}`);
-            
-            // Wait for this browser to FINISH and CLOSE before starting next
-            await runGscTask(keyword, url, i); 
-
-            if (i < totalViews) {
-                console.log(`Waiting 20 seconds to clear RAM...`);
-                await new Promise(r => setTimeout(r, 20000));
-            }
-        }
-        console.log("--- ALL VIEWS FINISHED ---");
-    })();
-});
 
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
