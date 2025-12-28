@@ -1262,13 +1262,13 @@ app.post('/start-task', async (req, res) => {
     })();
 });
 // ===================================================================
-// 7. UNIVERSAL YOUTUBE BOOSTER (SHORTS + LONG COMPATIBLE)
+// 7. MULTI-DEVICE YOUTUBE BOOSTER (MOBILE + TABLET + DESKTOP)
 // ===================================================================
 
 async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
     let browser;
     try {
-        // 1. Launch Browser with Advanced Bot-Hiding Args
+        // 1. Browser Launch with Ultra-Stealth
         browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -1276,97 +1276,110 @@ async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--autoplay-policy=no-user-gesture-required',
-                '--disable-blink-features=AutomationControlled', // Bot hide karne ke liye
+                '--disable-blink-features=AutomationControlled',
                 '--mute-audio'
             ]
         });
 
         const page = await browser.newPage();
 
-        // 2. DEVICE SIMULATION (Shorts ke liye mobile feel zaroori hai)
-        const isShorts = videoUrl.includes('shorts/');
-        if (isShorts) {
-            await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
-            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-            console.log(`[YT-NODE] View #${viewNumber} | Mode: SHORTS (Mobile Sim)`);
-        } else {
-            await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-            await page.setViewport({ width: 1280, height: 720 });
-            console.log(`[YT-NODE] View #${viewNumber} | Mode: LONG VIDEO`);
-        }
+        // 2. DEVICE ROTATION LOGIC (Mobile, Tablet, Desktop)
+        const devices = [
+            { name: 'Mobile', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 390, h: 844, isMob: true },
+            { name: 'Tablet', ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 820, h: 1180, isMob: true },
+            { name: 'Desktop', ua: USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)], w: 1366, h: 768, isMob: false }
+        ];
 
-        // 3. HIDE PUPPETEER FOOTPRINTS
+        // Har view ke liye random device select karega
+        const selectedDevice = devices[viewNumber % devices.length];
+        
+        await page.setUserAgent(selectedDevice.ua);
+        await page.setViewport({ 
+            width: selectedDevice.w, 
+            height: selectedDevice.h, 
+            isMobile: selectedDevice.isMob, 
+            hasTouch: selectedDevice.isMob 
+        });
+
+        console.log(`[YT-BOOST] View #${viewNumber} | Device: ${selectedDevice.name} | Resolution: ${selectedDevice.w}x${selectedDevice.h}`);
+
+        // 3. HIDE AUTOMATION (Very Important)
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
+            window.chrome = { runtime: {} };
         });
 
         // 4. LOAD VIDEO
-        // Agar Shorts hai toh use normal format mein convert karke load karna safe rehta hai
+        // Shorts aur Long dono ko handle karega
         let finalUrl = videoUrl;
-        if (isShorts) {
+        if (videoUrl.includes('shorts/')) {
             const videoId = videoUrl.split('shorts/')[1].split('?')[0];
             finalUrl = `https://www.youtube.com/watch?v=${videoId}`;
         }
 
         await page.goto(finalUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 5. AUTO-PLAY & INTERACTION
-        try {
-            // Play button click simulation
-            await page.click('.ytp-large-play-button').catch(() => {});
-            await page.click('video').catch(() => {}); 
-        } catch (e) {}
+        // 5. AUTO-PLAY INTERACTION
+        await page.click('video').catch(() => {});
+        await page.keyboard.press('m'); // Mute toggle
 
         // 6. RANDOM RETENTION (70% - 95%)
         const baseTime = parseInt(requestedDuration);
-        const retentionFactor = (Math.random() * (0.95 - 0.70) + 0.70);
-        const finalWatchTime = Math.floor(baseTime * retentionFactor);
+        const retentionPercent = (Math.random() * (0.95 - 0.70) + 0.70); // 70% se 95%
+        const watchSeconds = Math.floor(baseTime * retentionPercent);
 
-        console.log(`[YT-NODE] Watching for ${finalWatchTime}s...`);
+        console.log(`[YT-BOOST] Target: ${Math.round(retentionPercent*100)}% | Watch Time: ${watchSeconds}s`);
 
-        // Natural Scroll (Human-like)
-        await page.evaluate(async () => {
-            window.scrollBy(0, 300);
-            await new Promise(r => setTimeout(r, 2000));
-            window.scrollBy(0, -100);
-        });
-
-        await new Promise(r => setTimeout(r, finalWatchTime * 1000));
-
-        // Random Like (10% Chance)
-        if (Math.random() > 0.9) {
-            await page.keyboard.press('l').catch(() => {});
-            console.log("[YT-NODE] Interaction: Liked!");
+        // 7. HUMAN BEHAVIOR (Random Scrolling)
+        for(let j=0; j<3; j++) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            await new Promise(r => setTimeout(r, 6000));
+            await page.evaluate(() => window.scrollBy(0, -100));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished ✅`);
+        // Total watch time wait
+        await new Promise(r => setTimeout(r, watchSeconds * 1000));
+
+        // Random Like (15% chance)
+        if (Math.random() > 0.85) {
+            await page.keyboard.press('l');
+            console.log(`[AI-BOOST] Interaction: Liked the video!`);
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} Done. Closing session.`);
 
     } catch (error) {
-        console.error(`[YT-FAIL] View #${viewNumber} Error: ${error.message}`);
+        console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             const pages = await browser.pages();
             for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
-            browser = null;
+            browser = null; // Memory Clear
         }
     }
 }
 
-// ENDPOINT
+// ENDPOINT for Frontend
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     const total = parseInt(views_count) || 1;
     const duration = parseInt(watch_time) || 60;
 
-    res.status(200).json({ success: true, message: "Cloud Engine Syncing..." });
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started. Running device rotation for ${total} views.` 
+    });
 
+    // background loop (1-by-1 Safety Mode)
     (async () => {
         for (let i = 1; i <= total; i++) {
+            console.log(`[QUEUE] Processing #${i} of ${total}`);
             await runYoutubeBrowserTask(video_url, duration, i);
-            // 15 sec cooling period for Render RAM
+            
+            // Render RAM Refreshing Time
             if (i < total) {
-                console.log(`[WAIT] Cooling 15s...`);
+                console.log(`[WAIT] Cooling 15s for new device session...`);
                 await new Promise(r => setTimeout(r, 15000));
             }
         }
