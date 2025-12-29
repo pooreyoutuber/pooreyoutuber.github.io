@@ -1290,103 +1290,107 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
-    // Unique session folder for fresh cookies/cache
-    const sessionDir = path.join(__dirname, `session_${Date.now()}`);
+    // Har view ke liye ek unique folder (taaki history/cache hamesha new rahe)
+    const sessionDir = path.join(__dirname, `temp_session_${Date.now()}`);
 
     try {
-        console.log(`[START] View #${viewNumber} | Quality: 144p | Audio-Sync Enabled`);
+        console.log(`\x1b[33m%s\x1b[0m`, `[BROWSER START] View #${viewNumber} | Session: Fresh`);
 
         browser = await puppeteer.launch({
             headless: "new",
-            userDataDir: sessionDir,
+            userDataDir: sessionDir, // Fresh Profile
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage', // Render crash fix
-                '--disable-accelerated-2d-canvas',
-                '--no-first-run',
-                '--no-zygote',
-                '--single-process', // RAM bachane ke liye
+                '--disable-dev-shm-usage',
                 '--window-size=1280,720',
-                '--mute-audio=false' // Audio detection ke liye on rakhein
+                '--mute-audio=false' // Audio on rakhna hai detection ke liye
             ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
-        // 1. Google Route (Referrer setup)
+        // 1. Google.com se Redirect (Organic look)
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        
-        // 2. Open Video
+        await new Promise(r => setTimeout(r, 1500));
+
+        // 2. Video Link par jana
+        console.log(`[TARGET] Navigating to Video: ${videoUrl}`);
         await page.goto(videoUrl, { waitUntil: 'domcontentloaded', referer: 'https://www.google.com/' });
 
-        // 3. FORCE 144p QUALITY (Sabse Zaroori)
+        // 3. LOW QUALITY (144p) SETTING
         try {
-            await page.waitForSelector('.ytp-settings-button', { timeout: 10000 });
+            await page.waitForSelector('.ytp-settings-button', { timeout: 8000 });
             await page.click('.ytp-settings-button');
-            await new Promise(r => setTimeout(r, 1000));
-            
+            await new Promise(r => setTimeout(r, 800));
             await page.evaluate(() => {
-                const settings = Array.from(document.querySelectorAll('.ytp-menuitem'));
-                const qBtn = settings.find(el => el.textContent.includes('Quality') || el.textContent.includes('गुणवत्ता'));
+                const items = Array.from(document.querySelectorAll('.ytp-menuitem'));
+                const qBtn = items.find(el => el.textContent.includes('Quality') || el.textContent.includes('गुणवत्ता'));
                 if (qBtn) qBtn.click();
             });
-
-            await new Promise(r => setTimeout(r, 1000));
-
+            await new Promise(r => setTimeout(r, 800));
             await page.evaluate(() => {
                 const levels = Array.from(document.querySelectorAll('.ytp-quality-menu .ytp-menuitem'));
-                if (levels.length > 0) {
-                    // Lowest quality (144p) select karein
-                    levels[levels.length - 1].click();
-                }
+                if (levels.length > 0) levels[levels.length - 1].click(); // Select 144p
             });
-            console.log(`[QUALITY] Locked to 144p successfully.`);
-        } catch (e) {
-            console.log("[INFO] Quality setting skipped, video might be auto-low.");
-        }
+            console.log(`[QUALITY] Locked to 144p.`);
+        } catch (e) { console.log("[INFO] Quality set automatically."); }
 
-        // 4. AUDIO-SYNC DETECTION (Video end hone tak rukna)
-        console.log(`[WATCHING] Video playing...`);
-        const watchResult = await page.evaluate(async () => {
+        // 4. AUDIO-SYNC: Jab tak Awaaz hai tab tak video dekhe
+        console.log(`[WATCHING] Playing until Audio ends...`);
+        await page.evaluate(async () => {
             const v = document.querySelector('video');
-            if (!v) return "not_found";
+            if (v) { v.play(); v.muted = false; v.volume = 0.5; }
             
-            v.play();
-            v.muted = false;
-            v.volume = 0.5;
-
             return new Promise((resolve) => {
-                const check = setInterval(() => {
-                    // Agar video ended hai ya play time khatam ho gaya
-                    if (v.ended || v.currentTime >= v.duration - 0.5) {
-                        clearInterval(check);
-                        resolve("finished");
+                const monitor = setInterval(() => {
+                    // Agar video end ho gaya ya audio stop ho gaya
+                    if (v && (v.ended || v.currentTime >= v.duration - 0.5)) {
+                        clearInterval(monitor);
+                        resolve();
                     }
                 }, 1000);
-                setTimeout(() => { clearInterval(check); resolve("timeout"); }, 600000);
             });
         });
 
-        // 5. HUMAN INTERACTION (Scroll description)
-        await page.evaluate(() => window.scrollBy({ top: 400, behavior: 'smooth' }));
+        // 5. POST-VIDEO: Description aur Comment check karein
+        console.log(`[HUMAN ACTION] Video finished. Checking Description & Comments...`);
+        await page.evaluate(() => {
+            // Scroll to description
+            window.scrollBy({ top: 500, behavior: 'smooth' });
+            const moreBtn = document.querySelector('#expand, .tp-yt-paper-button#more');
+            if (moreBtn) moreBtn.click();
+        });
+        await new Promise(r => setTimeout(r, 3000));
+        await page.evaluate(() => {
+            // Scroll to comments
+            window.scrollBy({ top: 800, behavior: 'smooth' });
+        });
         await new Promise(r => setTimeout(r, 2000));
 
-        console.log(`[SUCCESS] View #${viewNumber} completed (${watchResult}).`);
+        console.log(`\x1b[32m%s\x1b[0m`, `[SUCCESS] View #${viewNumber} Done.`);
 
     } catch (error) {
-        console.error(`[CRASH PREVENTED] View #${viewNumber}: ${error.message}`);
+        console.error(`[CRASH] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            await browser.close(); // Pura browser band
+        }
 
-        // CACHE & COOKIE CLEARING (Har view ke baad)
+        // --- CLEAR HISTORY & CACHE (Delete Folder) ---
         try {
             await fs.rm(sessionDir, { recursive: true, force: true });
-            console.log(`[CLEANUP] Cache cleared. 15s Gap starting...`);
+            console.log(`[CLEANUP] All Cookies/History Deleted.`);
         } catch (err) {}
 
-        // 15 SECONDS GAP (Hamesha chalega)
+        // --- 10-15s GAP BEFORE NEXT VIEW ---
+        console.log(`[GAP] Waiting 15s for next fresh browser...`);
+        await new Promise(r => setTimeout(r, 15000));
+    }
+}
+    
+    // 15 SECONDS GAP (Hamesha chalega)
         await new Promise(r => setTimeout(r, 15000));
     }
 }
