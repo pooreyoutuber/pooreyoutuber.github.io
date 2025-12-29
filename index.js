@@ -1168,79 +1168,107 @@ async function runGscTask(keyword, url, viewNumber) {
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
-                '--disable-blink-features=AutomationControlled'
+                '--disable-blink-features=AutomationControlled',
+                '--disable-web-security'
             ]
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        
+        // Random User Agent
+        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        await page.setUserAgent(ua);
 
-        // 1. STAGE: Google Search Simulation (Organic Signal)
+        // STAGE 1: Google Search Simulation
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, randomInt(2000, 4000))); 
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, randomInt(3000, 5000))); 
 
-        // 2. STAGE: Site Visit (30-35 Seconds Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | Target: 30-35s`);
-        await page.goto(url, { waitUntil: 'networkidle2', referer: googleUrl });
+        // STAGE 2: Visit Site (30-35 Seconds Stay)
+        console.log(`[REVENUE-TOOL] View #${viewNumber} | Staying 30-35s...`);
+        await page.goto(url, { waitUntil: 'networkidle2', referer: googleUrl, timeout: 60000 });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); // FIXED: 30-35 Seconds
+        const targetStayTime = randomInt(30000, 35000); // AAPKA MANGAA HUA TIME
 
-        // 3. STAGE: INTERNAL LINK CLICK (Bounce Rate Control)
-        // Ad click se pehle ek internal link par click karne ki koshish karega
-        try {
-            const internalLinks = await page.$$('a[href^="/"], a[href*="' + new URL(url).hostname + '"]');
-            if (internalLinks.length > 0) {
-                const randomLink = internalLinks[Math.floor(Math.random() * Math.min(internalLinks.length, 5))];
-                await randomLink.click();
-                await new Promise(r => setTimeout(r, 5000)); // Naye page par 5 sec wait
-            }
-        } catch (e) { console.log("[INFO] No internal link clicked."); }
-
-        // 4. STAGE: SCROLLING & AD-CLICKING
+        // STAGE 3: REALISTIC SCROLLING & AD CLICKING
         while (Date.now() - startTime < targetStayTime) {
-            // Realistic Scroll
-            const scrollAmt = randomInt(250, 450);
+            // Random Scroll Down
+            const scrollAmt = randomInt(200, 500);
             await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
             
-            // Mouse Jiggle (Bot Detection Bypass)
-            await page.mouse.move(randomInt(100, 700), randomInt(100, 500), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(2000, 4000)));
+            // Mouse Jiggle
+            await page.mouse.move(randomInt(100, 600), randomInt(100, 500), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-            // 5. 🔥 AUTO AD-CLICKER (Har 20-25 views mein 3-4 clicks)
-            if (Math.random() < 0.16) { 
+            // 🔥 AUTO AD-CLICKER (15-18% Chance = 3-4 clicks in 20-25 views)
+            if (Math.random() < 0.17) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`[AD-CLICK] Target Found. Moving Mouse...`);
-                        // Move mouse to Ad center
+                        console.log(`[AD-CLICK] Moving Mouse to Ad...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await new Promise(r => setTimeout(r, 1000));
-                        
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`[SUCCESS] Ad Clicked ✅`);
+                        console.log(`[SUCCESS] Ad Clicked! ✅`);
                         
-                        // Click ke baad advertiser site par thoda wait (CPC fix karne ke liye)
+                        // Click ke baad advertiser ki site par 15s rukna zaruri hai
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
         }
-
-        console.log(`[DONE] View #${viewNumber} Finished.`);
+        console.log(`[DONE] View #${viewNumber} Complete.`);
 
     } catch (error) {
-        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
+
+// ===================================================================
+// ENDPOINT FOR TOOL 6 (Frontend connection fix)
+// ===================================================================
+app.post('/api/gsc-boost', async (req, res) => {
+    try {
+        const { keyword, url, views_count } = req.body;
+        
+        if (!keyword || !url) {
+            return res.status(400).json({ success: false, message: "Keyword and URL are required!" });
+        }
+
+        const total = parseInt(views_count) || 1;
+        
+        // Response turant bhej rahe hain taaki frontend error na de
+        res.status(200).json({ 
+            success: true, 
+            message: `Task Started: ${total} Organic Views for ${keyword}` 
+        });
+
+        // Background Processing
+        (async () => {
+            for (let i = 1; i <= total; i++) {
+                await runGscTask(keyword, url, i);
+                if (i < total) {
+                    console.log(`[COOLDOWN] Waiting 10s for next view...`);
+                    await new Promise(r => setTimeout(r, 10000));
+                }
+            }
+            console.log("--- ALL GSC TASKS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, error: err.message });
+        }
+    }
+});
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
 // ===================================================================
