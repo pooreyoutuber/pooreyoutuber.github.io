@@ -1160,6 +1160,10 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+// ===================================================================
+// 6. GSC & ADSENSE REVENUE BOOSTER (FINAL CORRECTED VERSION)
+// ===================================================================
+
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1177,7 +1181,7 @@ async function runGscTask(keyword, url, viewNumber) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
         
-        // RAM bachane ke liye non-essential block
+        // RAM optimization
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             if (['font', 'media'].includes(req.resourceType())) {
@@ -1187,15 +1191,16 @@ async function runGscTask(keyword, url, viewNumber) {
             }
         });
 
+        // Random User Agent from existing list
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. STAGE: Google Search Simulation (Organic Signal)
+        // 1. Google Search Entry (Organic Signal)
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000)); 
 
-        // 2. STAGE: Main URL (30-35 Seconds Stay Time)
-        console.log(`[VIEWER] View #${viewNumber} | Staying for 30-35s...`);
+        // 2. Main Site Visit
+        console.log(`[EARNING-MODE] View #${viewNumber} | Target Stay: 30-35s`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
@@ -1203,42 +1208,41 @@ async function runGscTask(keyword, url, viewNumber) {
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); // AAPKA MANGAA HUA TIME
+        const targetStayTime = randomInt(30000, 35000); // 30 to 35 Seconds
 
-        // 3. STAGE: HUMAN-LIKE SCROLLING & AD CLICKING
+        // 3. Human Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
-            // Random Scroll
+            // Natural Scrolling
             const distance = randomInt(300, 500);
             await page.evaluate((d) => window.scrollBy(0, d), distance);
             
-            // Mouse Jiggle (Bot Detection Bypass)
+            // Mouse Jiggling (Anti-Bot)
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 4. STAGE: AUTO AD-CLICKER (20-25 views mein 3-4 clicks)
-            if (Math.random() < 0.16) { 
+            // 🔥 Ad Clicker (Probability: 15-20% for safe earning)
+            if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`[AD-CLICK] View #${viewNumber} | Targeting Ad...`);
-                        // Move mouse realistically to Ad
+                        console.log(`[AD-CLICK] Targeting High-Value Ad...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await new Promise(r => setTimeout(r, 800));
+                        await new Promise(r => setTimeout(r, 1000));
                         
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         console.log(`[SUCCESS] Ad Clicked! ✅`);
                         
-                        // Click ke baad advertiser site par 15s ruko revenue ke liye
+                        // Stay on advertiser site for valid revenue
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} finished. ✅`);
+        console.log(`[DONE] View #${viewNumber} completed. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
@@ -1253,7 +1257,7 @@ async function runGscTask(keyword, url, viewNumber) {
 }
 
 // ===================================================================
-// Tool 6 Endpoint (Wahi Purana /start-task Connection)
+// Tool 6 Endpoint (Connecting back to /start-task)
 // ===================================================================
 app.post('/start-task', async (req, res) => {
     const { keyword, url, views = 5 } = req.body;
@@ -1263,14 +1267,16 @@ app.post('/start-task', async (req, res) => {
         return res.status(400).json({ success: false, message: "Keyword and URL are required!" });
     }
 
+    // Immediate response to frontend to prevent timeout error
     res.status(200).json({ 
         success: true, 
-        message: `Revenue Task started for ${keyword}. Total views: ${totalViews}.` 
+        message: `Revenue Task started for ${keyword}. Processing ${totalViews} views.` 
     });
 
+    // Background Execution
     (async () => {
         for (let i = 1; i <= totalViews; i++) {
-            console.log(`[QUEUE] Starting View #${i} of ${totalViews}`);
+            console.log(`[QUEUE] Processing View #${i} of ${totalViews}`);
             await runGscTask(keyword, url, i); 
 
             if (i < totalViews) {
