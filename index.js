@@ -1289,102 +1289,116 @@ app.post('/start-task', async (req, res) => {
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
 
-const YT_API_KEY = "AIzaSyAm090uj3e7DZdOVJ_hzdFufohuHxL7wX0";
-
-// Device Viewports & User Agents
-const DEVICES = [
-    { name: 'Laptop', width: 1366, height: 768, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36' },
-    { name: 'Mobile', width: 375, height: 667, ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' },
-    { name: 'Tablet', width: 768, height: 1024, ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' },
-    { name: 'Android', width: 412, height: 915, ua: 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36' }
-];
+// ====// ===================================================================
+// 7. GEMINI POWERED MULTI-DEVICE BOOSTER (FINAL VERSION)
+// ===================================================================
 
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
+    let totalSeconds = 0;
+
     try {
-        // 1. YouTube API se Exact Duration nikalna (Pehle hi)
-        const videoId = videoUrl.split('v=')[1]?.split('&')[0] || videoUrl.split('/').pop()?.split('?')[0];
-        const apiRes = await axios.get(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${YT_API_KEY}`);
-        
-        let totalSeconds = 30; // Default
-        if (apiRes.data.items.length) {
-            const rawDur = apiRes.data.items[0].contentDetails.duration;
-            const match = rawDur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-            totalSeconds = (parseInt(match[1]) || 0) * 3600 + (parseInt(match[2]) || 0) * 60 + (parseInt(match[3]) || 0);
+        console.log(`[START] View #${viewNumber} | URL: ${videoUrl}`);
+
+        // --- 1. GEMINI AI SE VIDEO DETAILS PTA KARNA ---
+        if (ai) {
+            try {
+                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const prompt = `Analyze this YouTube URL: ${videoUrl}. 
+                Tell me the exact duration in total seconds. 
+                Reply ONLY with the number (seconds). If unknown, reply "0".`;
+                
+                const result = await model.generateContent(prompt);
+                const aiResponse = result.response.text().trim();
+                if (!isNaN(aiResponse) && parseInt(aiResponse) > 0) {
+                    totalSeconds = parseInt(aiResponse);
+                }
+            } catch (e) { console.log("[AI-SKIP] Gemini busy, using browser detection."); }
         }
 
-        // 2. Random Device Select Karein
-        const device = DEVICES[Math.floor(Math.random() * DEVICES.length)];
-        console.log(`[STEP 1] View #${viewNumber} | Device: ${device.name} | Length: ${totalSeconds}s`);
+        // --- 2. MULTI-DEVICE & REFERRER SELECTION ---
+        // Har baar device aur rasta badalna taaki YouTube bot na pakde
+        const devices = [
+            { name: 'Laptop', width: 1366, height: 768, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36' },
+            { name: 'iPhone', width: 390, height: 844, ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' },
+            { name: 'Android', width: 412, height: 915, ua: 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36' },
+            { name: 'Tablet', width: 768, height: 1024, ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' }
+        ];
+        
+        const referrers = ['https://www.google.com/', 'https://www.facebook.com/', 'https://t.co/', 'https://www.bing.com/', 'https://www.reddit.com/'];
+        const selectedDevice = devices[Math.floor(Math.random() * devices.length)];
+        const selectedRef = referrers[Math.floor(Math.random() * referrers.length)];
 
+        console.log(`[DEVICE] Using ${selectedDevice.name} | [SOURCE] Coming from ${selectedRef}`);
+
+        // --- 3. BROWSER LAUNCH (1-BY-1) ---
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: (totalSeconds + 60) * 1000,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio', '--autoplay-policy=no-user-gesture-required']
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(device.ua);
-        await page.setViewport({ width: device.width, height: device.height });
+        await page.setUserAgent(selectedDevice.ua);
+        await page.setViewport({ width: selectedDevice.width, height: selectedDevice.height });
+        await page.setExtraHTTPHeaders({ 'referer': selectedRef });
 
-        // 3. Load & Play
-        await page.goto(videoUrl, { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, 3000));
+        // Load Page
+        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+        // Browser-based Duration (Fallback)
+        if (totalSeconds <= 0) {
+            totalSeconds = await page.evaluate(async () => {
+                const v = document.querySelector('video');
+                for (let i = 0; i < 40; i++) {
+                    if (v && v.duration > 0 && v.duration !== Infinity) return v.duration;
+                    await new Promise(r => setTimeout(r, 500));
+                }
+                return 45; // Safety
+            });
+        }
+
+        console.log(`[WATCHING] Length: ${Math.round(totalSeconds)}s. Starting 100% Watch...`);
+
+        // --- 4. HUMAN INTERACTIONS ---
+        // Mouse Simulation
+        await page.mouse.move(Math.random() * 200, Math.random() * 200, { steps: 10 });
         await page.click('video').catch(() => {});
 
-        // 4. Randomized Scrolling Strategy
-        const interactionTask = (async () => {
-            // Video ke duration ke beech 2-3 baar scrolling
-            for (let s = 1; s <= 3; s++) {
-                await new Promise(r => setTimeout(r, (totalSeconds * 1000) / 4));
-                const scrollAmt = device.name === 'Laptop' ? 600 : 300;
-                await page.evaluate((amt) => {
-                    window.scrollBy(0, amt);
-                    // Description open logic
-                    const moreBtn = document.querySelector('#expand, button[aria-label*="More actions"], .tp-yt-paper-button#more');
-                    if (moreBtn && Math.random() > 0.5) moreBtn.click();
-                    setTimeout(() => window.scrollTo(0, 0), 2000);
-                }, scrollAmt);
-                console.log(`[INTERACT] ${device.name} Scroll #${s} Done`);
-            }
+        // Background Tasks: Scrolling, Description, Comments
+        const interactions = (async () => {
+            // A. Video ke 25% par Description aur Scroll
+            await new Promise(r => setTimeout(r, (totalSeconds * 1000) * 0.25));
+            await page.evaluate(() => {
+                window.scrollBy({ top: 400, behavior: 'smooth' });
+                const moreBtn = document.querySelector('#expand, button[aria-label*="Description"], .tp-yt-paper-button#more');
+                if (moreBtn) moreBtn.click();
+            });
+            console.log(`[HUMAN] Description opened & scrolled.`);
+
+            // B. Video ke 60% par Comments check
+            await new Promise(r => setTimeout(r, (totalSeconds * 1000) * 0.35));
+            await page.evaluate(() => {
+                window.scrollBy({ top: 900, behavior: 'smooth' }); // Deep scroll for comments
+                setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 3000);
+            });
+            console.log(`[HUMAN] Comment section checked.`);
         })();
 
-        // 5. 100% WATCH TIME (Exact API duration + 5s buffer)
+        // --- 5. 100% STRICT FINISH ---
+        // Video khatam hone tak wait + 5s buffer
         await new Promise(r => setTimeout(r, (totalSeconds * 1000) + 5000));
-        console.log(`[SUCCESS] View #${viewNumber} Finished 100% ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} 100% Watched ✅`);
 
     } catch (error) {
-        console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLEANUP] Browser Closed. Waiting 15s to prevent crash...`);
+            console.log(`[CLEANUP] 15s gap to clear RAM on Render...`);
         }
     }
 }
-
-// ENDPOINT
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count } = req.body;
-    const total = parseInt(views_count) || 1;
-
-    res.status(200).json({ 
-        success: true, 
-        message: `Task started for ${total} views. Each will be watched 100% on random devices (Mobile/Laptop/Tab).` 
-    });
-
-    // 1-by-1 Sequential Processing (Render safety)
-    (async () => {
-        for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, i);
-            if (i < total) {
-                await new Promise(r => setTimeout(r, 15000)); // 15 sec cool-down gap
-            }
-        }
-        console.log("--- ALL TASKS COMPLETED ---");
-    })();
-});
-// =================================================================
+=============================================================
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
