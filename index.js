@@ -1168,103 +1168,77 @@ async function runGscTask(keyword, url, viewNumber) {
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu'
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        
-        // RAM optimization
-        await page.setRequestInterception(true);
-        page.on('request', (req) => {
-            if (['font', 'media'].includes(req.resourceType())) {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
-
-        // Set Random User Agent
+        await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. Google Search Simulation
-        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, randomInt(2000, 5000))); // Wait like a human reading results
+        // 1. STAGE: Google Search Simulation (Organic Signal)
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, randomInt(2000, 4000))); 
 
-        // 2. Main URL (Referer set to Google)
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleSearchUrl 
-        });
+        // 2. STAGE: Site Visit (30-35 Seconds Total Stay)
+        console.log(`[EARNING-MODE] View #${viewNumber} | Target: 30-35s`);
+        await page.goto(url, { waitUntil: 'networkidle2', referer: googleUrl });
 
-        console.log(`[REVENUE-TOOL] View #${viewNumber} | URL Loaded. Starting Randomized Interaction...`);
+        const startTime = Date.now();
+        const targetStayTime = randomInt(30000, 35000); // FIXED: 30-35 Seconds
 
-        // 3. IMPROVED RANDOM SCROLLING LOGIC
-        await page.evaluate(async () => {
-            const getRandomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-            
-            // Total 5-8 random scrolls
-            const scrollSteps = Math.floor(Math.random() * 4) + 5; 
-            
-            for (let i = 0; i < scrollSteps; i++) {
-                const scrollAmount = Math.floor(Math.random() * 500) + 200; // Random distance
-                window.scrollBy(0, scrollAmount);
-                
-                // Randomly scroll up a bit (Micro-movements)
-                if (Math.random() > 0.7) {
-                    await new Promise(r => setTimeout(r, getRandomDelay(500, 1000)));
-                    window.scrollBy(0, -100);
-                }
-                
-                await new Promise(r => setTimeout(r, getRandomDelay(2000, 5000))); // Random wait
+        // 3. STAGE: INTERNAL LINK CLICK (Bounce Rate Control)
+        // Ad click se pehle ek internal link par click karne ki koshish karega
+        try {
+            const internalLinks = await page.$$('a[href^="/"], a[href*="' + new URL(url).hostname + '"]');
+            if (internalLinks.length > 0) {
+                const randomLink = internalLinks[Math.floor(Math.random() * Math.min(internalLinks.length, 5))];
+                await randomLink.click();
+                await new Promise(r => setTimeout(r, 5000)); // Naye page par 5 sec wait
             }
-        });
+        } catch (e) { console.log("[INFO] No internal link clicked."); }
 
-        // 4. 🔥 AUTO AD-CLICKER LOGIC (Probability: ~15% or 3-4 clicks in 20-25 views)
-        const clickChance = Math.random();
-        if (clickChance < 0.15) { 
-            console.log(`[AD-CLICK] Probability Matched! Attempting to find and click an Ad...`);
+        // 4. STAGE: SCROLLING & AD-CLICKING
+        while (Date.now() - startTime < targetStayTime) {
+            // Realistic Scroll
+            const scrollAmt = randomInt(250, 450);
+            await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
             
-            // AdSense common selectors (Iframes/Ins)
-            const adSelectors = [
-                'ins.adsbygoogle', 
-                'iframe[id^="aswift"]', 
-                'iframe[src*="googleads"]',
-                '.ad-unit'
-            ];
+            // Mouse Jiggle (Bot Detection Bypass)
+            await page.mouse.move(randomInt(100, 700), randomInt(100, 500), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(2000, 4000)));
 
-            let adClicked = false;
-            for (const selector of adSelectors) {
-                const adElement = await page.$(selector);
-                if (adElement) {
-                    const box = await adElement.boundingBox();
-                    if (box) {
-                        // Click in the middle of the ad
+            // 5. 🔥 AUTO AD-CLICKER (Har 20-25 views mein 3-4 clicks)
+            if (Math.random() < 0.16) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+
+                    if (box && box.width > 50 && box.height > 50) {
+                        console.log(`[AD-CLICK] Target Found. Moving Mouse...`);
+                        // Move mouse to Ad center
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        await new Promise(r => setTimeout(r, 1000));
+                        
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`[SUCCESS] Ad clicked via ${selector}! ✅`);
-                        adClicked = true;
-                        // Click ke baad 10-15 sec extra ruko taaki click valid count ho
+                        console.log(`[SUCCESS] Ad Clicked ✅`);
+                        
+                        // Click ke baad advertiser site par thoda wait (CPC fix karne ke liye)
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
-            if (!adClicked) console.log(`[SKIP] No clickable ad found on this page.`);
         }
 
-        // Final Wait to maintain session duration
-        await new Promise(r => setTimeout(r, 10000));
-        console.log(`[DONE] View #${viewNumber} finished. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
+        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
 // ===================================================================
