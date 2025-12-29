@@ -1393,7 +1393,25 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             await browser.close();
         }
     }
+// --- FINAL ENDPOINT CLOSURE & SERVER START ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count } = req.body;
+    const total = parseInt(views_count) || 1;
+    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
 
+    res.status(200).json({ success: true, message: `Task started: ${total} views (1-by-1) with 15s gap.` });
+
+    (async () => {
+        for (let i = 1; i <= total; i++) {
+            await runYoutubeBrowserTask(video_url, i);
+            if (i < total) {
+                console.log("[GAP] Waiting 15 seconds before next view...");
+                await new Promise(r => setTimeout(r, 15000)); 
+            }
+        }
+        console.log("--- ALL BROWSER SESSIONS FINISHED ---");
+    })();
+});
 // =============================================================
 // --- SERVER START ---
 // ===================================================================
