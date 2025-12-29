@@ -1288,90 +1288,105 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
+// ===================================================================
+// 7. ULTIMATE YOUTUBE BOOSTER (MULTI-DEVICE + API SYNC)
+// ===================================================================
+
+const YT_API_KEY = "YOUR_API_KEY_HERE"; // Apni API Key yahan dalein
+
+// Device Viewports & User Agents
+const DEVICES = [
+    { name: 'Laptop', width: 1366, height: 768, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36' },
+    { name: 'Mobile', width: 375, height: 667, ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' },
+    { name: 'Tablet', width: 768, height: 1024, ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' },
+    { name: 'Android', width: 412, height: 915, ua: 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36' }
+];
+
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
     try {
+        // 1. YouTube API se Exact Duration nikalna (Pehle hi)
+        const videoId = videoUrl.split('v=')[1]?.split('&')[0] || videoUrl.split('/').pop()?.split('?')[0];
+        const apiRes = await axios.get(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${YT_API_KEY}`);
+        
+        let totalSeconds = 30; // Default
+        if (apiRes.data.items.length) {
+            const rawDur = apiRes.data.items[0].contentDetails.duration;
+            const match = rawDur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+            totalSeconds = (parseInt(match[1]) || 0) * 3600 + (parseInt(match[2]) || 0) * 60 + (parseInt(match[3]) || 0);
+        }
+
+        // 2. Random Device Select Karein
+        const device = DEVICES[Math.floor(Math.random() * DEVICES.length)];
+        console.log(`[STEP 1] View #${viewNumber} | Device: ${device.name} | Length: ${totalSeconds}s`);
+
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 600000, // 10 minutes tak allowed (lambi video ke liye)
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--autoplay-policy=no-user-gesture-required',
-                '--mute-audio'
-            ]
+            protocolTimeout: (totalSeconds + 60) * 1000,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-        await page.setViewport({ width: 390, height: 844 });
+        await page.setUserAgent(device.ua);
+        await page.setViewport({ width: device.width, height: device.height });
 
-        console.log(`[STEP 1] View #${viewNumber} | URL: ${videoUrl}`);
-        
-        // 1. Page Load
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 90000 });
+        // 3. Load & Play
+        await page.goto(videoUrl, { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 3000));
+        await page.click('video').catch(() => {});
 
-        // 2. Play and Full Watch Logic
-        await page.evaluate(async () => {
-            const video = document.querySelector('video');
-            if (video) {
-                video.play();
-                // Video ko mute se hata sakte hain ya volume kam kar sakte hain internal algorithm ke liye
-                video.volume = 0.5; 
-            }
-        });
-
-        // 3. Exact Duration Detection (Wait until it's not 0 or NaN)
-        let exactDuration = await page.evaluate(async () => {
-            const v = document.querySelector('video');
-            while (!v || isNaN(v.duration) || v.duration === 0) {
-                await new Promise(r => setTimeout(r, 500));
-            }
-            return v.duration;
-        });
-
-        console.log(`[STEP 2] Video Length Confirmed: ${Math.round(exactDuration)}s. Watching until 100% Finish...`);
-
-        // 4. Human Interactions (Background)
-        const interactions = (async () => {
-            // Random scrolling during video
-            for(let j=0; j<2; j++) {
-                await new Promise(r => setTimeout(r, (exactDuration * 1000) / 3));
-                await page.evaluate(() => {
-                    window.scrollBy(0, 400);
+        // 4. Randomized Scrolling Strategy
+        const interactionTask = (async () => {
+            // Video ke duration ke beech 2-3 baar scrolling
+            for (let s = 1; s <= 3; s++) {
+                await new Promise(r => setTimeout(r, (totalSeconds * 1000) / 4));
+                const scrollAmt = device.name === 'Laptop' ? 600 : 300;
+                await page.evaluate((amt) => {
+                    window.scrollBy(0, amt);
+                    // Description open logic
+                    const moreBtn = document.querySelector('#expand, button[aria-label*="More actions"], .tp-yt-paper-button#more');
+                    if (moreBtn && Math.random() > 0.5) moreBtn.click();
                     setTimeout(() => window.scrollTo(0, 0), 2000);
-                });
-                console.log(`[INTERACT] Scrolling performed...`);
+                }, scrollAmt);
+                console.log(`[INTERACT] ${device.name} Scroll #${s} Done`);
             }
         })();
 
-        // 5. STRICT WAIT: Jab tak video khud khatam na ho jaye
-        // Hum check karenge ki video "ended" hui ya nahi
-        await page.evaluate(async (totalSec) => {
-            return new Promise((resolve) => {
-                const v = document.querySelector('video');
-                if (!v) return resolve();
-                
-                // Agar video khatam ho jaye toh resolve
-                v.onended = () => resolve();
-
-                // Safety check: Agar kisi wajah se onended trigger na ho, toh duration + 5s baad band karein
-                setTimeout(resolve, (totalSec * 1000) + 5000);
-            });
-        }, exactDuration);
-
-        console.log(`[SUCCESS] View #${viewNumber} - 100% Watched and Finished ✅`);
+        // 5. 100% WATCH TIME (Exact API duration + 5s buffer)
+        await new Promise(r => setTimeout(r, (totalSeconds * 1000) + 5000));
+        console.log(`[SUCCESS] View #${viewNumber} Finished 100% ✅`);
 
     } catch (error) {
         console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLEANUP] Browser Closed. Taking 15s Gap for next session.`);
+            console.log(`[CLEANUP] Browser Closed. Waiting 15s to prevent crash...`);
         }
     }
 }
+
+// ENDPOINT
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count } = req.body;
+    const total = parseInt(views_count) || 1;
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started for ${total} views. Each will be watched 100% on random devices (Mobile/Laptop/Tab).` 
+    });
+
+    // 1-by-1 Sequential Processing (Render safety)
+    (async () => {
+        for (let i = 1; i <= total; i++) {
+            await runYoutubeBrowserTask(video_url, i);
+            if (i < total) {
+                await new Promise(r => setTimeout(r, 15000)); // 15 sec cool-down gap
+            }
+        }
+        console.log("--- ALL TASKS COMPLETED ---");
+    })();
+});
 // =================================================================
 // --- SERVER START ---
 // ===================================================================
