@@ -1291,133 +1291,108 @@ app.post('/start-task', async (req, res) => {
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
     try {
-        console.log(`\n[VIEW #${viewNumber}] --- Starting Full Watch Session ---`);
+        console.log(`\x1b[36m%s\x1b[0m`, `[START] View #${viewNumber} | Initializing Google Search Route...`);
 
-        // --- STEP 1: GEMINI SE REALISTIC PERSONA LENA ---
-        let persona = { scrollAmount: 500, initialDelay: 4000, playbackRate: 1.0 };
-        if (ai) {
-            try {
-                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-                const prompt = `Act as a real human watching a YouTube video. Provide a JSON object with:
-                "scrollAmount" (random 200-800), "initialDelay" (random 2000-6000), "playbackRate" (always 1.0).
-                Return ONLY the JSON.`;
-                const result = await model.generateContent(prompt);
-                const aiText = result.response.text().trim();
-                persona = JSON.parse(aiText.replace(/```json|```/g, ""));
-            } catch (e) {
-                console.log("[AI-INFO] Gemini Persona skip: Using safe defaults.");
-            }
-        }
-
-        // --- STEP 2: LAUNCH STEALTH BROWSER ---
         browser = await puppeteer.launch({
-            headless: "new", // Render ke liye "new" headless mode best hai
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled',
+                '--window-size=1920,1080', // Desktop Resolution
                 '--mute-audio',
-                '--disable-infobars',
-                '--window-size=1280,720'
+                '--autoplay-policy=no-user-gesture-required'
             ]
         });
 
         const page = await browser.newPage();
         
-        // Advanced Anti-Bot: Webdriver override
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        // Force Desktop User Agent
+        const desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        await page.setUserAgent(desktopUA);
+        await page.setViewport({ width: 1920, height: 1080 });
+
+        // 1. STEP: Google Search se Entry (Organic Traffic)
+        console.log(`[ROUTE] Opening Google.com...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 2000));
+
+        // 2. STEP: Direct Video Par Jana (Referrer Google Set Hoga)
+        console.log(`[TARGET] Navigating to Video: ${videoUrl}`);
+        await page.goto(videoUrl, { 
+            waitUntil: 'domcontentloaded', 
+            timeout: 60000,
+            referer: 'https://www.google.com/' 
         });
 
-        const selectedUA = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        await page.setUserAgent(selectedUA);
-
-        console.log(`[PROCESS] Navigating to Video...`);
-        // Referrer set karna taaki YouTube ko lage Google se aaye hain
-        await page.setExtraHTTPHeaders({ 'referer': 'https://www.google.com/' });
-        
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 90000 });
-
-        // --- STEP 3: VIDEO INITIALIZATION ---
-        await new Promise(r => setTimeout(r, persona.initialDelay));
-        
-        const videoDuration = await page.evaluate(async () => {
+        // 3. STEP: Video Duration & Playback Check
+        const totalSeconds = await page.evaluate(async () => {
             const v = document.querySelector('video');
-            if (v) {
-                v.play();
-                v.currentTime = 0; // Ensure shuru se chale
-                return v.duration;
+            for (let i = 0; i < 20; i++) {
+                if (v && v.duration > 0) return v.duration;
+                await new Promise(r => setTimeout(r, 1000));
             }
-            return null;
+            return 60; // Default 1 min if fail
         });
 
-        if (!videoDuration) throw new Error("Video element not found or blocked.");
-
-        const totalTime = Math.floor(videoDuration);
-        console.log(`[WATCHING] Video Length: ${totalTime}s. Watching 100%...`);
-
-        // --- STEP 4: REAL-TIME WATCHING LOOP (STRICT) ---
-        let elapsed = 0;
-        const checkInterval = 10; // Har 10 second mein check karega
-
-        while (elapsed < totalTime) {
-            await new Promise(r => setTimeout(r, checkInterval * 1000));
-            elapsed += checkInterval;
-
-            // Random Human Interaction: Scrolling
-            if (elapsed % 30 === 0) {
-                await page.evaluate((amt) => {
-                    window.scrollBy({ top: (Math.random() > 0.5 ? amt : -amt), behavior: 'smooth' });
-                }, persona.scrollAmount);
+        // 4. STEP: Set Quality to 240p/144p (Data & RAM Saving)
+        try {
+            await page.click('.ytp-settings-button');
+            await new Promise(r => setTimeout(r, 1000));
+            const menuItems = await page.$$('.ytp-menuitem');
+            for (let item of menuItems) {
+                const text = await page.evaluate(el => el.innerText, item);
+                if (text.includes('Quality')) {
+                    await item.click();
+                    await new Promise(r => setTimeout(r, 800));
+                    const qualities = await page.$$('.ytp-quality-menu .ytp-menuitem');
+                    // Pick 240p or 144p
+                    if (qualities.length > 0) await qualities[qualities.length - 1].click();
+                    break;
+                }
             }
+            console.log(`[QUALITY] Locked to Low-Res (240p/144p).`);
+        } catch (e) { console.log("[SKIP] Could not force quality."); }
 
-            // Random Mouse Movement
-            await page.mouse.move(Math.random() * 800, Math.random() * 600);
+        // 5. STEP: Real Human Interaction (Description & Comments)
+        const startTime = Date.now();
+        const watchDurationMs = totalSeconds * 1000;
 
-            if (elapsed % 60 === 0 || elapsed >= totalTime) {
-                console.log(`[PROGRESS] View #${viewNumber}: ${Math.min(elapsed, totalTime)}/${totalTime}s completed.`);
-            }
-            
-            // Safety break agar page crash ho jaye
-            const isStillThere = await page.evaluate(() => !!document.querySelector('video'));
-            if (!isStillThere) break;
-        }
+        console.log(`[WATCH] Total Video Length: ${Math.round(totalSeconds)}s. Watching 100%...`);
 
-        console.log(`[SUCCESS] View #${viewNumber} completed 100% watch time. ✅`);
+        // Human Activity Logic
+        const activity = async () => {
+            // Activity 1: Description check at 30%
+            await new Promise(r => setTimeout(r, watchDurationMs * 0.3));
+            await page.evaluate(() => {
+                window.scrollBy({ top: 500, behavior: 'smooth' });
+                const btn = document.querySelector('#expand, .tp-yt-paper-button#more');
+                if (btn) btn.click();
+            });
+            console.log(`[HUMAN] Checked Description.`);
+
+            // Activity 2: Comment check at 60%
+            await new Promise(r => setTimeout(r, watchDurationMs * 0.3));
+            await page.evaluate(() => {
+                window.scrollBy({ top: 1200, behavior: 'smooth' });
+            });
+            await new Promise(r => setTimeout(r, 3000));
+            await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            console.log(`[HUMAN] Scrolled to Comments and back.`);
+        };
+
+        // Start Activity and Wait for Video End
+        activity(); 
+        await new Promise(r => setTimeout(r, watchDurationMs + 5000)); 
+
+        console.log(`\x1b[32m%s\x1b[0m`, `[SUCCESS] View #${viewNumber} Finished. 10s Gap starting...`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            // Render RAM Cleanup: Agla browser khulne se pehle 20 sec ka gap
-            console.log(`[CLEANUP] Resting 20s to reset Render environment...`);
-            await new Promise(r => setTimeout(r, 20000));
         }
     }
-}
-
-// --- UPDATED API ENDPOINT FOR TOOL 7 ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count } = req.body;
-    const count = parseInt(views_count) || 1;
-
-    if (!video_url) return res.status(400).json({ error: "Video URL is required." });
-
-    // Immediate response to frontend
-    res.json({ 
-        success: true, 
-        message: `Task Started: ${count} views will be processed one-by-one with 100% watch time.` 
-    });
-
-    // Background Processing: Ek-ek karke view aayega
-    (async () => {
-        for (let i = 1; i <= count; i++) {
-            await runYoutubeBrowserTask(video_url, i);
-        }
-        console.log(">>> ALL REQUESTED VIEWS COMPLETED <<<");
-    })();
-});
 
 // =============================================================
 // --- SERVER START ---
