@@ -1288,87 +1288,80 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
 // =============================
-// ===================================================================
-// 7. FINAL YOUTUBE BOOSTER (FULL WATCH + RANDOM SCROLLING)
-// =============================
-
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser = null;
     try {
-        const referrers = ['https://t.co/', 'https://wa.me/', 'https://lnkd.in/'];
+        const referrers = ['https://t.co/', 'https://wa.me/', 'https://lnkd.in/', 'https://l.facebook.com/'];
         const randomReferrer = referrers[Math.floor(Math.random() * referrers.length)];
 
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 0, 
+            protocolTimeout: 0, // Timeout protection for long videos
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage', 
-                '--disable-gpu',           
-                '--no-first-run',
-                '--no-zygote',
-                '--single-process'         
+                '--disable-gpu',
+                '--single-process', // RAM Optimization for Render
+                '--autoplay-policy=no-user-gesture-required'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(0); 
+        await page.setDefaultNavigationTimeout(0);
         await page.setDefaultTimeout(0);
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // RAM Saving
+        // Block unnecessary assets to save RAM
         await page.setRequestInterception(true);
         page.on('request', (req) => {
-            if (['image', 'font'].includes(req.resourceType())) {
+            if (['image', 'font', 'stylesheet'].includes(req.resourceType())) {
                 req.abort();
             } else {
                 req.continue();
             }
         });
 
-        console.log(`[START] View #${viewNumber} | Audio: ON | Scrolling: Active`);
+        console.log(`[WORKING] View #${viewNumber} | Audio: ON | Source: ${randomReferrer}`);
 
         await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
             referer: randomReferrer 
         });
 
-        // Main Logic: Quality, Play, and Random Scrolling
+        // Main Interaction: Play, Quality 144p, and Random Scroll
         await page.evaluate(async () => {
             const video = document.querySelector('video');
             if (video) {
-                video.muted = false; 
+                video.muted = false; // Audio ON as requested
+                video.volume = 0.5;
                 video.play();
 
-                // 1. Quality Control (360p/144p)
+                // 1. Force Low Quality (360p/144p)
                 const settings = document.querySelector('.ytp-settings-button');
                 if (settings) {
                     settings.click();
-                    await new Promise(r => setTimeout(r, 800));
+                    await new Promise(r => setTimeout(r, 1000));
                     const menu = Array.from(document.querySelectorAll('.ytp-menuitem'));
                     const quality = menu.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
                     if (quality) {
                         quality.click();
-                        await new Promise(r => setTimeout(r, 800));
+                        await new Promise(r => setTimeout(r, 1000));
                         const levels = document.querySelectorAll('.ytp-quality-menu .ytp-menuitem');
                         if (levels.length > 0) levels[levels.length - 1].click();
                     }
                 }
 
-                // 2. Random Scrolling Loop (Human Behavior)
+                // 2. Random Scrolling Behavior (Mimic User)
                 const scrollInterval = setInterval(() => {
-                    if (video.ended) {
-                        clearInterval(scrollInterval);
-                    } else {
-                        // Randomly scroll down or up
-                        const scrollAmount = Math.floor(Math.random() * 400) + 200;
-                        const direction = Math.random() > 0.3 ? 1 : -1; // 70% chance down, 30% up
-                        window.scrollBy(0, scrollAmount * direction);
+                    if (!video.ended) {
+                        const amount = Math.floor(Math.random() * 300) + 100;
+                        const dir = Math.random() > 0.3 ? 1 : -1;
+                        window.scrollBy(0, amount * dir);
                     }
-                }, 15000); // Har 15 second mein scroll karega
+                }, 12000); // Every 12 seconds
 
-                // 3. Wait for Video End
+                // 3. Wait for Video to Finish naturally
                 return new Promise((resolve) => {
                     const checkEnd = setInterval(() => {
                         if (video.ended || video.currentTime >= video.duration - 1) {
@@ -1381,7 +1374,7 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             }
         });
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished with Scrolling Activity. ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished. Closing Browser...`);
 
     } catch (error) {
         console.error(`[CRITICAL-ERROR] View #${viewNumber}: ${error.message}`);
@@ -1389,11 +1382,34 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
         if (browser) {
             await browser.close().catch(() => {});
             browser = null;
-            console.log(`[CLEANUP] Memory Released.`);
+            console.log(`[CLEANUP] Memory released. Ready for next view.`);
         }
     }
 }
 
+// API ENDPOINT
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count } = req.body;
+    const total = parseInt(views_count) || 1;
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Boost Engine Started: ${total} views will be processed 1-by-1.` 
+    });
+
+    // Sequential Loop (Strict 1-by-1)
+    (async () => {
+        for (let i = 1; i <= total; i++) {
+            await runYoutubeBrowserTask(video_url, i);
+
+            if (i < total) {
+                console.log(`[GAP] Resting 20 seconds for RAM Cleanup...`);
+                await new Promise(r => setTimeout(r, 20000));
+            }
+        }
+        console.log("--- ALL TASKS COMPLETED ---");
+    })();
+});
 // =================================================================
 // --- SERVER START ---
 // ===================================================================
