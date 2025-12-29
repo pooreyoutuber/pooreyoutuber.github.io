@@ -1288,11 +1288,16 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. GEMINI-POWERED FULL WATCH TOOL (FINAL & UNDETECTABLE)
 // ===================================================================
+ // ===================================================================
+// TOOL 7: ULTIMATE YOUTUBE VIEW BOOST (REALISTIC & HIGH RETENTION)
+// ===================================================================
+
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
     try {
-        console.log(`\x1b[36m%s\x1b[0m`, `[START] View #${viewNumber} | Initializing Google Search Route...`);
+        console.log(`\x1b[36m%s\x1b[0m`, `[START] View #${viewNumber} | Initializing Organic Route...`);
 
+        // 1. Browser Launch (Desktop Flags)
         browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -1311,107 +1316,120 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
         await page.setUserAgent(desktopUA);
         await page.setViewport({ width: 1920, height: 1080 });
 
-        // 1. STEP: Google Search se Entry (Organic Traffic)
-        console.log(`[ROUTE] Opening Google.com...`);
+        // STEP 1: Google.com se Entry lena (Organic Traffic Signal)
+        console.log(`[1/5] Navigating to Google.com...`);
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
         await new Promise(r => setTimeout(r, 2000));
 
-        // 2. STEP: Direct Video Par Jana (Referrer Google Set Hoga)
-        console.log(`[TARGET] Navigating to Video: ${videoUrl}`);
+        // STEP 2: Video Par Jana (Referer Header ke sath)
+        console.log(`[2/5] Navigating to Video: ${videoUrl}`);
         await page.goto(videoUrl, { 
             waitUntil: 'domcontentloaded', 
             timeout: 60000,
             referer: 'https://www.google.com/' 
         });
 
-        // 3. STEP: Video Duration & Playback Check
+        // STEP 3: Video ki total length detect karna
         const totalSeconds = await page.evaluate(async () => {
             const v = document.querySelector('video');
             for (let i = 0; i < 20; i++) {
                 if (v && v.duration > 0) return v.duration;
                 await new Promise(r => setTimeout(r, 1000));
             }
-            return 60; // Default 1 min if fail
+            return 60; // Default fallback 1 min
         });
 
-        // 4. STEP: Set Quality to 240p/144p (Data & RAM Saving)
+        // STEP 4: Video Quality ko 144p/240p par set karna (RAM & Data Saving)
         try {
+            await page.waitForSelector('.ytp-settings-button', { timeout: 5000 });
             await page.click('.ytp-settings-button');
             await new Promise(r => setTimeout(r, 1000));
-            const menuItems = await page.$$('.ytp-menuitem');
-            for (let item of menuItems) {
-                const text = await page.evaluate(el => el.innerText, item);
-                if (text.includes('Quality')) {
-                    await item.click();
-                    await new Promise(r => setTimeout(r, 800));
-                    const qualities = await page.$$('.ytp-quality-menu .ytp-menuitem');
-                    // Pick 240p or 144p
-                    if (qualities.length > 0) await qualities[qualities.length - 1].click();
-                    break;
-                }
-            }
-            console.log(`[QUALITY] Locked to Low-Res (240p/144p).`);
-        } catch (e) { console.log("[SKIP] Could not force quality."); }
-
-        // 5. STEP: Real Human Interaction (Description & Comments)
-        const startTime = Date.now();
-        const watchDurationMs = totalSeconds * 1000;
-
-        console.log(`[WATCH] Total Video Length: ${Math.round(totalSeconds)}s. Watching 100%...`);
-
-        // Human Activity Logic
-        const activity = async () => {
-            // Activity 1: Description check at 30%
-            await new Promise(r => setTimeout(r, watchDurationMs * 0.3));
+            
             await page.evaluate(() => {
-                window.scrollBy({ top: 500, behavior: 'smooth' });
-                const btn = document.querySelector('#expand, .tp-yt-paper-button#more');
-                if (btn) btn.click();
+                const items = Array.from(document.querySelectorAll('.ytp-menuitem'));
+                const qualityBtn = items.find(it => it.innerText.includes('Quality') || it.innerText.includes('गुणवत्ता'));
+                if (qualityBtn) qualityBtn.click();
             });
-            console.log(`[HUMAN] Checked Description.`);
+            
+            await new Promise(r => setTimeout(r, 1000));
+            
+            await page.evaluate(() => {
+                const levels = Array.from(document.querySelectorAll('.ytp-quality-menu .ytp-menuitem'));
+                if (levels.length > 0) {
+                    // Sabse niche wala option (144p/240p) select karein
+                    levels[levels.length - 1].click();
+                }
+            });
+            console.log(`[3/5] Quality set to Low (max 240p).`);
+        } catch (e) { console.log("[INFO] Quality adjustment skipped."); }
 
-            // Activity 2: Comment check at 60%
+        // STEP 5: Real Human Interaction (Description & Comments)
+        const watchDurationMs = totalSeconds * 1000;
+        console.log(`[4/5] Watching Video: ${Math.round(totalSeconds)}s (100% Retention)`);
+
+        // Background me description aur comment check karna
+        const humanActivity = (async () => {
+            // Video ke 30% hone par description check karein
             await new Promise(r => setTimeout(r, watchDurationMs * 0.3));
             await page.evaluate(() => {
-                window.scrollBy({ top: 1200, behavior: 'smooth' });
+                window.scrollBy({ top: 400, behavior: 'smooth' });
+                const moreBtn = document.querySelector('#expand, .tp-yt-paper-button#more');
+                if (moreBtn) moreBtn.click();
+            });
+            console.log(`[HUMAN] Description checked.`);
+
+            // Video ke 60% hone par comment section check karein
+            await new Promise(r => setTimeout(r, watchDurationMs * 0.3));
+            await page.evaluate(() => {
+                window.scrollBy({ top: 800, behavior: 'smooth' });
             });
             await new Promise(r => setTimeout(r, 3000));
             await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-            console.log(`[HUMAN] Scrolled to Comments and back.`);
-        };
+            console.log(`[HUMAN] Comment section scrolled.`);
+        })();
 
-        // Start Activity and Wait for Video End
-        activity(); 
-        await new Promise(r => setTimeout(r, watchDurationMs + 5000)); 
-
-        console.log(`\x1b[32m%s\x1b[0m`, `[SUCCESS] View #${viewNumber} Finished. 10s Gap starting...`);
+        // Video khatam hone tak wait karein
+        await new Promise(r => setTimeout(r, watchDurationMs + 2000)); 
+        console.log(`\x1b[32m%s\x1b[0m`, `[5/5] SUCCESS: View #${viewNumber} completed.`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
+            console.log(`[CLEANUP] Browser closed. Waiting 15s for RAM release...`);
         }
     }
-// --- FINAL ENDPOINT CLOSURE & SERVER START ---
+}
+
+// --- Tool 7 Endpoint ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
     const total = parseInt(views_count) || 1;
+
     if (!video_url) return res.status(400).json({ error: "Video URL missing" });
 
-    res.status(200).json({ success: true, message: `Task started: ${total} views (1-by-1) with 15s gap.` });
+    // Response turant bhej dein taaki timeout na ho
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started for ${total} views. Each view will have 100% retention and 15s gap.` 
+    });
 
+    // Background process shuru karein
     (async () => {
         for (let i = 1; i <= total; i++) {
             await runYoutubeBrowserTask(video_url, i);
             if (i < total) {
-                console.log("[GAP] Waiting 15 seconds before next view...");
+                // Aapki requirement ke mutabiq 10-15 sec ka gap
                 await new Promise(r => setTimeout(r, 15000)); 
             }
         }
-        console.log("--- ALL BROWSER SESSIONS FINISHED ---");
+        console.log(">>> ALL VIEWS COMPLETED SUCCESSFULLY <<<");
     })();
 });
+
+// Server Start
+
 // =============================================================
 // --- SERVER START ---
 // ===================================================================
