@@ -1292,74 +1292,79 @@ app.post('/api/gsc-revenue-boost', async (req, res) => {
 //===================================================================
 // 7. GEMINI-POWERED FULL WATCH TOOL (FINAL & UNDETECTABLE)
 // ===================================================================
-// ===================================================================
-// 7. FINAL YOUTUBE BOOSTER (AUDIO-BASED AUTO-CLOSE & LOW QUALITY)
-// ===================================================================
-async function runYoutubeAudioTask(videoUrl, viewNumber) {
+async function runYoutubeAudioTask(video_url, viewNumber) {
     let browser;
     try {
-        console.log(`[START] View #${viewNumber} | URL: ${videoUrl}`);
-
+        // 1. Browser ko sabse light mode mein start karna
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--mute-audio=false',
-                '--autoplay-policy=no-user-gesture-required'
-            ],
-            // Timeout error fix karne ke liye protocol timeout badhaya
-            protocolTimeout: 0 
+                '--disable-dev-shm-usage', // Memory crash se bachne ke liye
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu',
+                '--mute-audio', // RAM aur CPU bachaata hai
+                '--window-size=1280,720' 
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // Page load timeout ko bhi handle kiya
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 0 });
-
-        console.log(`[SETTING] Quality 144p & Starting Playback...`);
-
-        // Low Quality setting aur Play ensure karna
-        await page.evaluate(() => {
-            const player = document.querySelector('#movie_player');
-            if (player) {
-                // Quality set karna
-                if (player.setPlaybackQualityRange) {
-                    player.setPlaybackQualityRange('tiny', 'tiny');
-                }
-                // Play video
-                const video = document.querySelector('video');
-                if (video) video.play();
+        // 2. RESOURCE BLOCKING: Images aur Fonts load nahi honge (RAM Saver)
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            if (['image', 'font', 'stylesheet'].includes(req.resourceType())) {
+                req.abort();
+            } else {
+                req.continue();
             }
         });
 
-        console.log(`[MONITOR] Audio detect kiya ja raha hai (No Timeout Mode)...`);
+        // Forced Desktop User Agent
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/119.0.0.0 Safari/537.36");
 
-        // --- YAHAN ERROR FIX KIYA HAI ---
-        // page.evaluate ke andar loop ki jagah, hum page.waitForFunction use karenge 
-        // jo long-running tasks ke liye design kiya gaya hai.
-        await page.waitForFunction(() => {
+        console.log(`[LIGHT-MODE] View #${viewNumber} Started...`);
+
+        // 3. Low Quality Video force karna
+        await page.goto(video_url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+        // Video play karna aur quality low (144p) set karne ka try karna
+        await page.evaluate(() => {
             const video = document.querySelector('video');
-            // Agar video khatam ho jaye (ended) ya browser se gayab ho jaye
-            return !video || video.ended;
-        }, { 
-            polling: 5000, // Har 5 sec mein check karega
-            timeout: 0     // Infinity wait (jab tak video khatam na ho)
+            if (video) {
+                video.play();
+                // YouTube specific: Quality settings adjust karna (agar possible ho)
+                localStorage.setItem('yt-player-quality', JSON.stringify({data: 'tiny', expiration: Date.now() + 86400000}));
+            }
         });
 
-        console.log(`[SUCCESS] Video Ended. View #${viewNumber} complete. ✅`);
+        // 4. DYNAMIC WATCH TIME
+        const duration = await page.evaluate(() => {
+            const v = document.querySelector('video');
+            return v ? v.duration : 45; 
+        });
+
+        // Limit watch time to prevent long session crashes (max 3 minutes or full video)
+        const maxWatchTime = Math.min(duration, 180) * 1000;
+        console.log(`[WATCHING] Max Duration: ${maxWatchTime/1000}s`);
+        
+        await new Promise(r => setTimeout(r, maxWatchTime));
+        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} fail: ${error.message}`);
+        console.error(`[CRASH-PREVENTED] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
+            // Memory puri tarah free karna
+            const pages = await browser.pages();
+            for (const p of pages) await p.close();
             await browser.close();
-            console.log(`[CLEANUP] Browser closed & Session cleared.`);
+            console.log(`[CLEANUP] Memory Cleared for Next View.`);
         }
     }
 }
+
 
 // ENDPOINT
 app.post('/api/real-view-boost', async (req, res) => {
