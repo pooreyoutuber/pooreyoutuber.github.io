@@ -1397,8 +1397,9 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             console.log(`[CLEANUP] 15s gap to clear RAM on Render...`);
         }
     }
-}
-=============================================================
+}):
+
+  =============================================================
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
