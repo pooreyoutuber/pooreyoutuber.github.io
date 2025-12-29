@@ -1397,7 +1397,23 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             console.log(`[CLEANUP] 15s gap to clear RAM on Render...`);
         }
     }
-})
+}
+// --- NEW ENDPOINT TO START TOOL 7 ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count } = req.body;
+    const total = parseInt(views_count) || 1;
+
+    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
+
+    res.status(200).json({ success: true, message: `Task started: ${total} views (1-by-1).` });
+
+    (async () => {
+        for (let i = 1; i <= total; i++) {
+            await runYoutubeBrowserTask(video_url, i);
+            if (i < total) await new Promise(r => setTimeout(r, 15000));
+        }
+    })();
+});
 
 // =============================================================
 // --- SERVER START ---
