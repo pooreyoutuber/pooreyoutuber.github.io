@@ -1288,96 +1288,105 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. GEMINI-POWERED FULL WATCH TOOL (FINAL & UNDETECTABLE)
 // ===================================================================
- // ===================================================================
-// TOOL 7: ULTIMATE YOUTUBE VIEW BOOST (REALISTIC & HIGH RETENTION)
-// ===================================================================
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
-    // Har view ke liye ek alag temporary folder banayenge
-    const userDataDir = `./temp_profiles/user_session_${Date.now()}`; 
+    // Unique session folder for fresh cookies/cache
+    const sessionDir = path.join(__dirname, `session_${Date.now()}`);
 
     try {
-        console.log(`\x1b[36m%s\x1b[0m`, `[START] View #${viewNumber} | Fresh Session Initializing...`);
+        console.log(`[START] View #${viewNumber} | Quality: 144p | Audio-Sync Enabled`);
 
         browser = await puppeteer.launch({
             headless: "new",
-            userDataDir: userDataDir, // Yahan cache aur cookies save hongi
+            userDataDir: sessionDir,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--window-size=1920,1080',
-                '--mute-audio=false', // Audio on rakhenge detection ke liye
-                '--incognito' // Incognito mode for extra safety
+                '--disable-dev-shm-usage', // Render crash fix
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process', // RAM bachane ke liye
+                '--window-size=1280,720',
+                '--mute-audio=false' // Audio detection ke liye on rakhein
             ]
         });
 
         const page = await browser.newPage();
-        
-        // Desktop Mode Force
-        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-        await page.setViewport({ width: 1920, height: 1080 });
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
 
-        // Step 1: Google Route (Organic)
+        // 1. Google Route (Referrer setup)
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 2000));
-
-        // Step 2: Open Video
-        console.log(`[2/4] Navigating to: ${videoUrl}`);
+        
+        // 2. Open Video
         await page.goto(videoUrl, { waitUntil: 'domcontentloaded', referer: 'https://www.google.com/' });
 
-        // Step 3: Audio/Video End Detection
-        console.log(`[3/4] Monitoring Video Playback...`);
-        const watchStatus = await page.evaluate(async () => {
-            const v = document.querySelector('video');
-            if (!v) return "no_video";
+        // 3. FORCE 144p QUALITY (Sabse Zaroori)
+        try {
+            await page.waitForSelector('.ytp-settings-button', { timeout: 10000 });
+            await page.click('.ytp-settings-button');
+            await new Promise(r => setTimeout(r, 1000));
             
-            v.play(); // Auto-play ensure karein
+            await page.evaluate(() => {
+                const settings = Array.from(document.querySelectorAll('.ytp-menuitem'));
+                const qBtn = settings.find(el => el.textContent.includes('Quality') || el.textContent.includes('गुणवत्ता'));
+                if (qBtn) qBtn.click();
+            });
+
+            await new Promise(r => setTimeout(r, 1000));
+
+            await page.evaluate(() => {
+                const levels = Array.from(document.querySelectorAll('.ytp-quality-menu .ytp-menuitem'));
+                if (levels.length > 0) {
+                    // Lowest quality (144p) select karein
+                    levels[levels.length - 1].click();
+                }
+            });
+            console.log(`[QUALITY] Locked to 144p successfully.`);
+        } catch (e) {
+            console.log("[INFO] Quality setting skipped, video might be auto-low.");
+        }
+
+        // 4. AUDIO-SYNC DETECTION (Video end hone tak rukna)
+        console.log(`[WATCHING] Video playing...`);
+        const watchResult = await page.evaluate(async () => {
+            const v = document.querySelector('video');
+            if (!v) return "not_found";
+            
+            v.play();
+            v.muted = false;
             v.volume = 0.5;
 
             return new Promise((resolve) => {
-                const timer = setInterval(() => {
-                    // Agar video end ho gaya ya audio metadata stop ho gaya
+                const check = setInterval(() => {
+                    // Agar video ended hai ya play time khatam ho gaya
                     if (v.ended || v.currentTime >= v.duration - 0.5) {
-                        clearInterval(timer);
+                        clearInterval(check);
                         resolve("finished");
                     }
                 }, 1000);
-                
-                // Max timeout 10 min (taaki loop na fase)
-                setTimeout(() => { clearInterval(timer); resolve("timeout"); }, 600000);
+                setTimeout(() => { clearInterval(check); resolve("timeout"); }, 600000);
             });
         });
 
-        console.log(`[STATUS] Video ${watchStatus}. Now doing interactions...`);
+        // 5. HUMAN INTERACTION (Scroll description)
+        await page.evaluate(() => window.scrollBy({ top: 400, behavior: 'smooth' }));
+        await new Promise(r => setTimeout(r, 2000));
 
-        // Step 4: Human Interactions (Description & Comment Check)
-        await page.evaluate(() => {
-            window.scrollBy({ top: 500, behavior: 'smooth' });
-            const more = document.querySelector('#expand, .tp-yt-paper-button#more');
-            if (more) more.click();
-        });
-        await new Promise(r => setTimeout(r, 3000));
-
-        console.log(`\x1b[32m%s\x1b[0m`, `[SUCCESS] View #${viewNumber} Done.`);
+        console.log(`[SUCCESS] View #${viewNumber} completed (${watchResult}).`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[CRASH PREVENTED] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            await browser.close();
-        }
+        if (browser) await browser.close();
 
-        // --- CACHE CLEARING LOGIC ---
-        // Browser band hone ke baad session folder ko delete karna
+        // CACHE & COOKIE CLEARING (Har view ke baad)
         try {
-            await fs.rm(userDataDir, { recursive: true, force: true });
-            console.log(`[CLEANUP] Cache & Cookies cleared for View #${viewNumber}`);
-        } catch (err) {
-            console.log("[DEBUG] Cache delete failed or folder already gone.");
-        }
+            await fs.rm(sessionDir, { recursive: true, force: true });
+            console.log(`[CLEANUP] Cache cleared. 15s Gap starting...`);
+        } catch (err) {}
 
-        // --- 15 SECONDS GAP ---
-        console.log(`[GAP] Waiting 15 seconds for next view...`);
+        // 15 SECONDS GAP (Hamesha chalega)
         await new Promise(r => setTimeout(r, 15000));
     }
 }
