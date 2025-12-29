@@ -1291,114 +1291,96 @@ app.post('/start-task', async (req, res) => {
  // ===================================================================
 // TOOL 7: ULTIMATE YOUTUBE VIEW BOOST (REALISTIC & HIGH RETENTION)
 // ===================================================================
+ const fs = require('fs').promises; // File system module for deleting cache
 
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
-    try {
-        console.log(`\x1b[36m%s\x1b[0m`, `[START] View #${viewNumber} | Initializing Organic Route...`);
+    // Har view ke liye ek alag temporary folder banayenge
+    const userDataDir = `./temp_profiles/user_session_${Date.now()}`; 
 
-        // 1. Browser Launch (Desktop Flags)
+    try {
+        console.log(`\x1b[36m%s\x1b[0m`, `[START] View #${viewNumber} | Fresh Session Initializing...`);
+
         browser = await puppeteer.launch({
             headless: "new",
+            userDataDir: userDataDir, // Yahan cache aur cookies save hongi
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--window-size=1920,1080', // Desktop Resolution
-                '--mute-audio',
-                '--autoplay-policy=no-user-gesture-required'
+                '--window-size=1920,1080',
+                '--mute-audio=false', // Audio on rakhenge detection ke liye
+                '--incognito' // Incognito mode for extra safety
             ]
         });
 
         const page = await browser.newPage();
         
-        // Force Desktop User Agent
-        const desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-        await page.setUserAgent(desktopUA);
+        // Desktop Mode Force
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
         await page.setViewport({ width: 1920, height: 1080 });
 
-        // STEP 1: Google.com se Entry lena (Organic Traffic Signal)
-        console.log(`[1/5] Navigating to Google.com...`);
+        // Step 1: Google Route (Organic)
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
         await new Promise(r => setTimeout(r, 2000));
 
-        // STEP 2: Video Par Jana (Referer Header ke sath)
-        console.log(`[2/5] Navigating to Video: ${videoUrl}`);
-        await page.goto(videoUrl, { 
-            waitUntil: 'domcontentloaded', 
-            timeout: 60000,
-            referer: 'https://www.google.com/' 
-        });
+        // Step 2: Open Video
+        console.log(`[2/4] Navigating to: ${videoUrl}`);
+        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', referer: 'https://www.google.com/' });
 
-        // STEP 3: Video ki total length detect karna
-        const totalSeconds = await page.evaluate(async () => {
+        // Step 3: Audio/Video End Detection
+        console.log(`[3/4] Monitoring Video Playback...`);
+        const watchStatus = await page.evaluate(async () => {
             const v = document.querySelector('video');
-            for (let i = 0; i < 20; i++) {
-                if (v && v.duration > 0) return v.duration;
-                await new Promise(r => setTimeout(r, 1000));
-            }
-            return 60; // Default fallback 1 min
+            if (!v) return "no_video";
+            
+            v.play(); // Auto-play ensure karein
+            v.volume = 0.5;
+
+            return new Promise((resolve) => {
+                const timer = setInterval(() => {
+                    // Agar video end ho gaya ya audio metadata stop ho gaya
+                    if (v.ended || v.currentTime >= v.duration - 0.5) {
+                        clearInterval(timer);
+                        resolve("finished");
+                    }
+                }, 1000);
+                
+                // Max timeout 10 min (taaki loop na fase)
+                setTimeout(() => { clearInterval(timer); resolve("timeout"); }, 600000);
+            });
         });
 
-        // STEP 4: Video Quality ko 144p/240p par set karna (RAM & Data Saving)
-        try {
-            await page.waitForSelector('.ytp-settings-button', { timeout: 5000 });
-            await page.click('.ytp-settings-button');
-            await new Promise(r => setTimeout(r, 1000));
-            
-            await page.evaluate(() => {
-                const items = Array.from(document.querySelectorAll('.ytp-menuitem'));
-                const qualityBtn = items.find(it => it.innerText.includes('Quality') || it.innerText.includes('गुणवत्ता'));
-                if (qualityBtn) qualityBtn.click();
-            });
-            
-            await new Promise(r => setTimeout(r, 1000));
-            
-            await page.evaluate(() => {
-                const levels = Array.from(document.querySelectorAll('.ytp-quality-menu .ytp-menuitem'));
-                if (levels.length > 0) {
-                    // Sabse niche wala option (144p/240p) select karein
-                    levels[levels.length - 1].click();
-                }
-            });
-            console.log(`[3/5] Quality set to Low (max 240p).`);
-        } catch (e) { console.log("[INFO] Quality adjustment skipped."); }
+        console.log(`[STATUS] Video ${watchStatus}. Now doing interactions...`);
 
-        // STEP 5: Real Human Interaction (Description & Comments)
-        const watchDurationMs = totalSeconds * 1000;
-        console.log(`[4/5] Watching Video: ${Math.round(totalSeconds)}s (100% Retention)`);
+        // Step 4: Human Interactions (Description & Comment Check)
+        await page.evaluate(() => {
+            window.scrollBy({ top: 500, behavior: 'smooth' });
+            const more = document.querySelector('#expand, .tp-yt-paper-button#more');
+            if (more) more.click();
+        });
+        await new Promise(r => setTimeout(r, 3000));
 
-        // Background me description aur comment check karna
-        const humanActivity = (async () => {
-            // Video ke 30% hone par description check karein
-            await new Promise(r => setTimeout(r, watchDurationMs * 0.3));
-            await page.evaluate(() => {
-                window.scrollBy({ top: 400, behavior: 'smooth' });
-                const moreBtn = document.querySelector('#expand, .tp-yt-paper-button#more');
-                if (moreBtn) moreBtn.click();
-            });
-            console.log(`[HUMAN] Description checked.`);
-
-            // Video ke 60% hone par comment section check karein
-            await new Promise(r => setTimeout(r, watchDurationMs * 0.3));
-            await page.evaluate(() => {
-                window.scrollBy({ top: 800, behavior: 'smooth' });
-            });
-            await new Promise(r => setTimeout(r, 3000));
-            await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-            console.log(`[HUMAN] Comment section scrolled.`);
-        })();
-
-        // Video khatam hone tak wait karein
-        await new Promise(r => setTimeout(r, watchDurationMs + 2000)); 
-        console.log(`\x1b[32m%s\x1b[0m`, `[5/5] SUCCESS: View #${viewNumber} completed.`);
+        console.log(`\x1b[32m%s\x1b[0m`, `[SUCCESS] View #${viewNumber} Done.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLEANUP] Browser closed. Waiting 15s for RAM release...`);
         }
+
+        // --- CACHE CLEARING LOGIC ---
+        // Browser band hone ke baad session folder ko delete karna
+        try {
+            await fs.rm(userDataDir, { recursive: true, force: true });
+            console.log(`[CLEANUP] Cache & Cookies cleared for View #${viewNumber}`);
+        } catch (err) {
+            console.log("[DEBUG] Cache delete failed or folder already gone.");
+        }
+
+        // --- 15 SECONDS GAP ---
+        console.log(`[GAP] Waiting 15 seconds for next view...`);
+        await new Promise(r => setTimeout(r, 15000));
     }
 }
 
