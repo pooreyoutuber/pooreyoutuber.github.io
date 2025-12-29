@@ -1293,101 +1293,82 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 0, 
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--single-process']
+            protocolTimeout: 600000, // 10 minutes tak allowed (lambi video ke liye)
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--autoplay-policy=no-user-gesture-required',
+                '--mute-audio'
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(0);
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: 390, height: 844 });
 
-        // STEP 1: Google se Entry
-        console.log(`[VIEW #${viewNumber}] Entering via Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
+        console.log(`[STEP 1] View #${viewNumber} | URL: ${videoUrl}`);
+        
+        // 1. Page Load
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 90000 });
 
-        // STEP 2: Video Load karna aur Real Length pata karna
-        console.log(`[VIEW #${viewNumber}] Loading Video to Detect Length...`);
-        await page.goto(videoUrl, { waitUntil: 'domcontentloaded' });
+        // 2. Play and Full Watch Logic
+        await page.evaluate(async () => {
+            const video = document.querySelector('video');
+            if (video) {
+                video.play();
+                // Video ko mute se hata sakte hain ya volume kam kar sakte hain internal algorithm ke liye
+                video.volume = 0.5; 
+            }
+        });
 
-        const videoDuration = await page.evaluate(async () => {
-            const getV = () => document.querySelector('video');
-            for (let i = 0; i < 40; i++) { // Max 20 sec wait for metadata
-                let v = getV();
-                if (v && v.duration > 0) return v.duration;
+        // 3. Exact Duration Detection (Wait until it's not 0 or NaN)
+        let exactDuration = await page.evaluate(async () => {
+            const v = document.querySelector('video');
+            while (!v || isNaN(v.duration) || v.duration === 0) {
                 await new Promise(r => setTimeout(r, 500));
             }
-            return 0; 
+            return v.duration;
         });
 
-        if (videoDuration === 0) throw new Error("Could not detect video length");
+        console.log(`[STEP 2] Video Length Confirmed: ${Math.round(exactDuration)}s. Watching until 100% Finish...`);
 
-        console.log(`[STEP 3] Video Length: ${Math.round(videoDuration)}s. Watching now...`);
-
-        // STEP 4: Play with Audio & Quality 144p
-        await page.evaluate(async () => {
-            const v = document.querySelector('video');
-            if (v) {
-                v.muted = false;
-                v.play();
-                
-                // Settings for 144p (Save Data/RAM)
-                const settings = document.querySelector('.ytp-settings-button');
-                if (settings) {
-                    settings.click();
-                    await new Promise(r => setTimeout(r, 700));
-                    const menu = Array.from(document.querySelectorAll('.ytp-menuitem'));
-                    const qBtn = menu.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
-                    if (qBtn) {
-                        qBtn.click();
-                        await new Promise(r => setTimeout(r, 700));
-                        const lvls = document.querySelectorAll('.ytp-quality-menu .ytp-menuitem');
-                        if (lvls.length > 0) lvls[lvls.length - 1].click();
-                    }
-                }
+        // 4. Human Interactions (Background)
+        const interactions = (async () => {
+            // Random scrolling during video
+            for(let j=0; j<2; j++) {
+                await new Promise(r => setTimeout(r, (exactDuration * 1000) / 3));
+                await page.evaluate(() => {
+                    window.scrollBy(0, 400);
+                    setTimeout(() => window.scrollTo(0, 0), 2000);
+                });
+                console.log(`[INTERACT] Scrolling performed...`);
             }
-        });
-
-        // STEP 5: Parallel Interaction (Video chalte hue scrolling/comments)
-        const interactionTask = (async () => {
-            // 10% video khatam hone par Description dekho
-            await new Promise(r => setTimeout(r, (videoDuration * 100))); 
-            await page.evaluate(() => {
-                window.scrollBy(0, 400); // Scroll down
-                const more = document.querySelector('#expand, .more-button, #description');
-                if (more) more.click(); 
-            });
-            
-            // 40% video par Comments scroll karo
-            await new Promise(r => setTimeout(r, (videoDuration * 300)));
-            await page.evaluate(() => {
-                window.scrollTo(0, 1200); // Deep scroll for comments
-                setTimeout(() => window.scrollTo(0, 0), 4000); // Go back to video
-            });
         })();
 
-        // STEP 6: Strict Wait until Video Ends
-        await page.evaluate(async (duration) => {
+        // 5. STRICT WAIT: Jab tak video khud khatam na ho jaye
+        // Hum check karenge ki video "ended" hui ya nahi
+        await page.evaluate(async (totalSec) => {
             return new Promise((resolve) => {
                 const v = document.querySelector('video');
-                const check = setInterval(() => {
-                    if (v.ended || v.currentTime >= duration - 0.5) {
-                        clearInterval(check);
-                        resolve();
-                    }
-                }, 1000);
-            });
-        }, videoDuration);
+                if (!v) return resolve();
+                
+                // Agar video khatam ho jaye toh resolve
+                v.onended = () => resolve();
 
-        // STEP 7: Post-Watch Buffer (15 seconds stay)
-        console.log(`[SUCCESS] 100% Watched. Staying 15s before closing...`);
-        await new Promise(r => setTimeout(r, 15000));
+                // Safety check: Agar kisi wajah se onended trigger na ho, toh duration + 5s baad band karein
+                setTimeout(resolve, (totalSec * 1000) + 5000);
+            });
+        }, exactDuration);
+
+        console.log(`[SUCCESS] View #${viewNumber} - 100% Watched and Finished ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLEANUP] Browser closed. Moving to next after 15s gap.`);
+            console.log(`[CLEANUP] Browser Closed. Taking 15s Gap for next session.`);
         }
     }
 }
