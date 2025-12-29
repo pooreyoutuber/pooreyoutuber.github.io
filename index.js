@@ -7,6 +7,7 @@ const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
+const path = require('path');
 const fs = require('fs'); 
 const crypto = require('crypto');
 const axios = require('axios');
