@@ -1288,16 +1288,19 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
 // =============================
+// ===================================================================
+// 7. FINAL YOUTUBE BOOSTER (FULL WATCH + RANDOM SCROLLING)
+// =============================
 
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser = null;
     try {
-        // Random Sources
         const referrers = ['https://t.co/', 'https://wa.me/', 'https://lnkd.in/'];
         const randomReferrer = referrers[Math.floor(Math.random() * referrers.length)];
 
         browser = await puppeteer.launch({
             headless: "new",
+            protocolTimeout: 0, 
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
@@ -1310,9 +1313,11 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
         });
 
         const page = await browser.newPage();
+        await page.setDefaultNavigationTimeout(0); 
+        await page.setDefaultTimeout(0);
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // RAM Bachane ke liye: Faltu images aur fonts block karna
+        // RAM Saving
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             if (['image', 'font'].includes(req.resourceType())) {
@@ -1322,80 +1327,72 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             }
         });
 
-        console.log(`[START] View #${viewNumber} | Audio: ON | Source: ${randomReferrer}`);
+        console.log(`[START] View #${viewNumber} | Audio: ON | Scrolling: Active`);
 
         await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
-            timeout: 60000, 
             referer: randomReferrer 
         });
 
-        // Full Watch Logic
+        // Main Logic: Quality, Play, and Random Scrolling
         await page.evaluate(async () => {
             const video = document.querySelector('video');
             if (video) {
-                video.muted = false; // Audio ON
+                video.muted = false; 
                 video.play();
 
-                // 360p or 144p force karna
+                // 1. Quality Control (360p/144p)
                 const settings = document.querySelector('.ytp-settings-button');
                 if (settings) {
                     settings.click();
-                    await new Promise(r => setTimeout(r, 500));
+                    await new Promise(r => setTimeout(r, 800));
                     const menu = Array.from(document.querySelectorAll('.ytp-menuitem'));
                     const quality = menu.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
                     if (quality) {
                         quality.click();
-                        await new Promise(r => setTimeout(r, 600));
+                        await new Promise(r => setTimeout(r, 800));
                         const levels = document.querySelectorAll('.ytp-quality-menu .ytp-menuitem');
                         if (levels.length > 0) levels[levels.length - 1].click();
                     }
                 }
 
-                // Video khatam hone ka wait
+                // 2. Random Scrolling Loop (Human Behavior)
+                const scrollInterval = setInterval(() => {
+                    if (video.ended) {
+                        clearInterval(scrollInterval);
+                    } else {
+                        // Randomly scroll down or up
+                        const scrollAmount = Math.floor(Math.random() * 400) + 200;
+                        const direction = Math.random() > 0.3 ? 1 : -1; // 70% chance down, 30% up
+                        window.scrollBy(0, scrollAmount * direction);
+                    }
+                }, 15000); // Har 15 second mein scroll karega
+
+                // 3. Wait for Video End
                 return new Promise((resolve) => {
-                    video.onended = resolve;
-                    setInterval(() => {
-                        if (video.currentTime >= video.duration - 1) resolve();
-                    }, 2000);
+                    const checkEnd = setInterval(() => {
+                        if (video.ended || video.currentTime >= video.duration - 1) {
+                            clearInterval(checkEnd);
+                            clearInterval(scrollInterval);
+                            resolve();
+                        }
+                    }, 5000);
                 });
             }
         });
 
-        console.log(`[SUCCESS] View #${viewNumber} Completed. Closing Browser...`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished with Scrolling Activity. ✅`);
 
     } catch (error) {
         console.error(`[CRITICAL-ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close(); // Force Close
+            await browser.close().catch(() => {});
             browser = null;
-            console.log(`[CLEANUP] Memory Released. Waiting for next session...`);
+            console.log(`[CLEANUP] Memory Released.`);
         }
     }
 }
-
-// Endpoint: Strict 1-by-1 Loop
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count } = req.body;
-    const total = parseInt(views_count) || 1;
-
-    res.status(200).json({ success: true, message: "Queue started. views will go 1-by-1." });
-
-    // Is loop ke andar 'await' hone ki wajah se 1-by-1 hi chalega
-    (async () => {
-        for (let i = 1; i <= total; i++) {
-            // Jab tak ye function khatam nahi hoga, loop aage nahi badhega
-            await runYoutubeBrowserTask(video_url, i);
-
-            if (i < total) {
-                console.log(`[GAP] Resting for 20s to prevent Render crash...`);
-                await new Promise(r => setTimeout(r, 20000)); // Har view ke baad 20s ka sannata
-            }
-        }
-        console.log("--- ALL TASKS DONE ---");
-    })();
-});
 
 // =================================================================
 // --- SERVER START ---
