@@ -1286,10 +1286,7 @@ app.post('/start-task', async (req, res) => {
     }
 });
 // ===================================================================
-// 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
-// =============================
-// ===================================================================
-// 7. FINAL YOUTUBE BOOSTER: FULL LENGTH WATCH + 15s POST-WAIT
+// 7. FINAL YOUTUBE BOOSTER: NO-TIMEOUT + FULL WATCH
 // ===================================================================
 
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
@@ -1297,7 +1294,7 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 0,
+            protocolTimeout: 0, // No internal timeout
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
@@ -1307,95 +1304,91 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
         });
 
         const page = await browser.newPage();
+        
+        // Timeout ko disable karna (Slow Internet ke liye)
+        await page.setDefaultNavigationTimeout(0); 
+        await page.setDefaultTimeout(0);
+        
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
         
-        // Step 1: Google par jana organic signal ke liye
+        // 1. Google par jana
         console.log(`[VIEW #${viewNumber}] Navigating to Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
 
-        // Step 2: Video par jana
-        console.log(`[VIEW #${viewNumber}] Opening Video URL...`);
-        await page.goto(videoUrl, { waitUntil: 'networkidle2' });
+        // 2. Video link par jana (Wait time unlimited)
+        console.log(`[VIEW #${viewNumber}] Opening Video URL (Waiting for load)...`);
+        await page.goto(videoUrl, { waitUntil: 'domcontentloaded' });
 
-        // Step 3: Video Watch and Interaction Logic
+        // 3. Interaction Logic
         const watchResult = await page.evaluate(async () => {
-            const video = document.querySelector('video');
+            // Video element dhoondne ke liye thoda wait
+            const waitForVideo = () => {
+                return new Promise(resolve => {
+                    const check = setInterval(() => {
+                        const v = document.querySelector('video');
+                        if (v) {
+                            clearInterval(check);
+                            resolve(v);
+                        }
+                    }, 1000);
+                });
+            };
+
+            const video = await waitForVideo();
             if (video) {
-                video.muted = false; // Audio ON
+                video.muted = false;
                 video.play();
 
-                // Force Low Quality (144p/240p)
+                // Quality Change to 144p
                 const settings = document.querySelector('.ytp-settings-button');
                 if (settings) {
                     settings.click();
-                    await new Promise(r => setTimeout(r, 600));
-                    const menuItems = Array.from(document.querySelectorAll('.ytp-menuitem'));
-                    const qualityBtn = menuItems.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
+                    await new Promise(r => setTimeout(r, 1000));
+                    const menu = Array.from(document.querySelectorAll('.ytp-menuitem'));
+                    const qualityBtn = menu.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
                     if (qualityBtn) {
                         qualityBtn.click();
-                        await new Promise(r => setTimeout(r, 600));
+                        await new Promise(r => setTimeout(r, 1000));
                         const levels = document.querySelectorAll('.ytp-quality-menu .ytp-menuitem');
                         if (levels.length > 0) levels[levels.length - 1].click();
                     }
                 }
 
-                // Random Scrolling Activity
-                const scrollTask = setInterval(() => {
+                // Scrolling activity
+                const scroller = setInterval(() => {
                     if (!video.ended) {
-                        window.scrollBy(0, Math.floor(Math.random() * 400) + 200);
-                        setTimeout(() => window.scrollBy(0, -150), 4000);
+                        window.scrollBy(0, Math.floor(Math.random() * 500) + 100);
                     }
-                }, 12000);
+                }, 15000);
 
-                // Wait for Video to END (Full Length)
+                // Wait for End
                 return new Promise((resolve) => {
                     const checkEnd = setInterval(() => {
-                        // Agar video khatam ho gayi ya end ke bilkul paas hai
-                        if (video.ended || video.currentTime >= video.duration - 0.2) {
+                        if (video.ended || video.currentTime >= video.duration - 0.5) {
                             clearInterval(checkEnd);
-                            clearInterval(scrollTask);
-                            resolve("FINISHED");
+                            clearInterval(scroller);
+                            resolve("DONE");
                         }
-                    }, 1000);
+                    }, 2000);
                 });
             }
-            return "NO_VIDEO";
+            return "ERROR";
         });
 
-        if (watchResult === "FINISHED") {
-            console.log(`[VIEW #${viewNumber}] Video completed. Waiting extra 15s before closing...`);
-            await new Promise(r => setTimeout(r, 15000)); // Aapka 10-15 sec ka extra gap
+        if (watchResult === "DONE") {
+            console.log(`[SUCCESS] Video finished. Waiting 15s post-watch...`);
+            await new Promise(r => setTimeout(r, 15000));
         }
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[CRITICAL-ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close();
-            console.log(`[CLEANUP] Browser #${viewNumber} closed.`);
+            await browser.close().catch(() => {});
+            console.log(`[CLEANUP] Browser closed. 10s gap till next.`);
         }
     }
 }
-
-// Endpoint Loop
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count } = req.body;
-    const total = parseInt(views_count) || 1;
-
-    res.status(200).json({ success: true, message: `Boost process started for ${total} views.` });
-
-    (async () => {
-        for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, i);
-            
-            if (i < total) {
-                console.log(`[GAP] Waiting 10s cooldown to clear RAM...`);
-                await new Promise(r => setTimeout(r, 10000)); // Buffer gap before next browser
-            }
-        }
-        console.log("--- MISSION ACCOMPLISHED ---");
-    })();
-});
 // =================================================================
 // --- SERVER START ---
 // ===================================================================
