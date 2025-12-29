@@ -1161,132 +1161,161 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-async function runGscTask(keyword, url, viewNumber) {
+
+//// ===================================================================
+// 6. GSC & ADSENSE REVENUE BOOSTER (MAX EARNING - MULTI-SITE & DESKTOP)
+// ===================================================================
+
+// Browser Profiles: Alag-alag laptop aur browser ki pehchaan ke liye
+const BROWSER_PROFILES = [
+    {
+        name: "Windows-Chrome-PC",
+        ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        vendor: "Google Inc.",
+        platform: "Win32"
+    },
+    {
+        name: "Mac-Firefox-Laptop",
+        ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0",
+        vendor: "",
+        platform: "MacIntel"
+    },
+    {
+        name: "Windows-Edge-PC",
+        ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0",
+        vendor: "Google Inc.",
+        platform: "Win32"
+    }
+];
+
+// Main Tool Function
+async function runGscTask(keyword, siteUrl, viewNumber) {
     let browser;
     try {
+        // Random profile select karein
+        const profile = BROWSER_PROFILES[Math.floor(Math.random() * BROWSER_PROFILES.length)];
+
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // "new" for latest puppeteer version
             args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
+                '--window-size=1920,1080', // Force Desktop Window Size
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
-        
-        // Anti-Bot: Set Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
+        // --- DESKTOP MODE & REAL HUMAN SETTINGS ---
+        await page.setViewport({ width: 1920, height: 1080 }); // Desktop resolution
+        await page.setUserAgent(profile.ua);
+        
+        // Hide Puppeteer: Bot detection bypass
+        await page.evaluateOnNewDocument((p) => {
+            Object.defineProperty(navigator, 'platform', { get: () => p.platform });
+            Object.defineProperty(navigator, 'vendor', { get: () => p.vendor });
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        }, profile);
+
+        // Stage 1: Google Search Simulation
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        await new Promise(r => setTimeout(r, randomInt(3000, 5000))); 
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
-        await page.goto(url, { 
+        // Stage 2: Target Site Visit (Referer is Google)
+        console.log(`[SESSION #${viewNumber}] Target: ${siteUrl} | Browser: ${profile.name}`);
+        await page.goto(siteUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: googleUrl 
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        const targetStayTime = randomInt(45000, 65000); // 45-65 seconds stay for quality
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        // Stage 3: High Revenue Interaction
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Mouse Movement (Bypass Bot Checks)
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            // Natural Desktop Scroll
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 600) + 200));
+            await page.mouse.move(randomInt(100, 1000), randomInt(100, 800), { steps: 10 });
+            await new Promise(r => setTimeout(r, 4000));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+            // 🔥 HIGH-VALUE CLICKER (45% PROBABILITY - 2.5x Increase)
+            if (Math.random() < 0.45) { 
+                // Enhanced selectors for AdSense
+                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], iframe[id^="aswift"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                    if (box && box.width > 20 && box.height > 20) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Potential Revenue Found! Clicking...`);
                         
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        // Scroll to ad location
+                        await page.evaluate((y) => window.scrollTo(0, y - 100), box.y);
+                        
+                        // Realistic Mouse Movement and Click
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 20 });
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! Stay active on Advertiser page.`);
+                        
+                        // Stay on Advertiser's site for 25s (High Conversion Quality)
+                        await new Promise(r => setTimeout(r, 25000));
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
 
-// ===================================================================
-// Tool 6 Endpoint (Updated for Multi-Site Rotation)
-// ===================================================================
-app.post('/start-task', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
+// =============================================================
+// --- ENDPOINT (MULTI-SITE SUPPORT) ---
+// =============================================================
 
-        // Frontend se 'urls' array aa raha hai, use validate karein
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
-        }
+app.post('/api/gsc-revenue-boost', async (req, res) => {
+    // frontend se 'sites' me array bhej sakte hain [url1, url2, url3, url4]
+    const { keyword, sites, views_count } = req.body; 
+    const totalViews = parseInt(views_count) || 1;
+    
+    // Ensure sites is an array
+    const siteList = Array.isArray(sites) ? sites : [sites];
 
-        const totalViews = parseInt(views);
-
-        // Immediate Success Response taaki frontend hang na ho
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
-        });
-
-        // Background Worker
-        (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTask(keyword, randomUrl, i); 
-
-                if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                console.log(`[REST] Waiting ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
-                }
-            }
-            console.log("--- ALL SESSIONS COMPLETED ---");
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    if (!keyword || siteList.length === 0) {
+        return res.status(400).json({ error: "Keyword ya Sites missing hain!" });
     }
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started: ${totalViews} views for ${siteList.length} sites.` 
+    });
+
+    // Background process start
+    (async () => {
+        for (let i = 1; i <= totalViews; i++) {
+            // Randomly ek site pick karo har view ke liye
+            const currentSite = siteList[Math.floor(Math.random() * siteList.length)];
+            
+            await runGscTask(keyword, currentSite, i);
+            
+            // Views ke bich me random delay (natural lagne ke liye)
+            if (i < totalViews) {
+                const gap = randomInt(5000, 15000);
+                await new Promise(r => setTimeout(r, gap));
+            }
+        }
+        console.log(`\x1b[35m%s\x1b[0m`, `--- ALL ${totalViews} SESSIONS FINISHED ---`);
+    })();
 });
-// ===================================================================
+//===================================================================
 // 7. GEMINI-POWERED FULL WATCH TOOL (FINAL & UNDETECTABLE)
 // ===================================================================
 // ===================================================================
