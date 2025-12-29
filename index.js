@@ -1161,92 +1161,95 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+// ===================================================================
+// 6. GSC & ADSENSE REVENUE BOOSTER (FIXED CONNECTION & DESKTOP)
+// ===================================================================
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // "new" mode is faster and more stable
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--window-size=1920,1080', // Desktop Resolution
-                '--disable-blink-features=AutomationControlled'
+                '--window-size=1920,1080' // FORCED DESKTOP
             ]
         });
 
         const page = await browser.newPage();
         
-        // --- FORCED DESKTOP MODE ---
-        await page.setViewport({ width: 1920, height: 1080, isMobile: false, hasTouch: false });
-        
-        // Desktop User Agent specifically for Windows/Mac
-        const desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-        await page.setUserAgent(desktopUA);
+        // --- DESKTOP MODE SETTINGS ---
+        await page.setViewport({ width: 1920, height: 1080, isMobile: false });
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
-        // 1. STAGE: Google Search Simulation
+        // 1. Google Search Entry (Natural Referrer)
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 4000)); 
+        await new Promise(r => setTimeout(r, 3000)); 
 
-        // 2. STAGE: Visit Target Site
-        console.log(`[EARNING-MODE] View #${viewNumber} | Desktop Mode | URL: ${url}`);
+        // 2. Visit Target Site
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: googleUrl 
         });
 
+        // --- HUMAN BEHAVIOR & 2.5X CLICK LOGIC ---
         const startTime = Date.now();
-        // Staying longer (45-60s) for better CPM/RPM
-        const targetStayTime = randomInt(45000, 60000); 
+        const stayTime = randomInt(40000, 60000); // 40-60 seconds stay
 
-        // 3. STAGE: Realistic Behavior & High-Value Clicker
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling & Random Pauses
-            const dist = randomInt(400, 800);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            await page.mouse.move(randomInt(200, 1000), randomInt(200, 800), { steps: 20 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+        while (Date.now() - startTime < stayTime) {
+            // Random Scroll & Mouse Move (Human Like)
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, 5000));
 
-            // 🔥 BOOSTED AD CLICKER (Increased to 45% for 2.5x effect)
-            // Note: 18% * 2.5 = 45% approx
+            // 🔥 HIGH EARNING CLICK (45% Chance = 2.5x increase)
             if (Math.random() < 0.45) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], #ad-iframe');
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 10 && box.height > 10) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] High CPC Target Found!`);
-                        
-                        // Realistic click: move to ad first
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 25 });
+                    const ad = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await ad.boundingBox();
+                    if (box) {
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] 2.5x Click Registered. ✅ Revenue Boosted.`);
-                        
-                        // Advertiser site par 25s wait (High Retention for AdSense)
-                        await new Promise(r => setTimeout(r, 25000));
-                        break; 
+                        console.log(`[SUCCESS] Ad Clicked - Revenue Generated!`);
+                        await new Promise(r => setTimeout(r, 20000)); // Wait on ad site
+                        break;
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
-
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } catch (e) {
+        console.log("Error in Task:", e.message);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
+
+// --- ENDPOINT (Frontend connection fix) ---
+app.post('/start-task', async (req, res) => {
+    const { keyword, urls, views } = req.body;
+
+    if (!keyword || !urls) {
+        return res.status(400).json({ success: false, message: "Missing Data" });
+    }
+
+    // PELE RESPONSE BHEJO (Connection safe karne ke liye)
+    res.status(200).json({ 
+        success: true, 
+        message: "Connection Successful! Task is running in background." 
+    });
+
+    // AB BACKGROUND MEIN KAAM KARO
+    (async () => {
+        for (let i = 1; i <= (views || 10); i++) {
+            const targetUrl = urls[Math.floor(Math.random() * urls.length)];
+            await runGscTask(keyword, targetUrl, i);
+            await new Promise(r => setTimeout(r, 10000)); // 10s gap
+        }
+    })();
+});
 
 // =============================================================
 // --- ENDPOINT (MULTI-SITE SUPPORT) ---
