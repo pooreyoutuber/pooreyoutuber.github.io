@@ -1289,130 +1289,104 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. GEMINI-POWERED FULL WATCH TOOL (FINAL & UNDETECTABLE)
 // ===================================================================
-// --- TOOL 7: REBUILT WITH AUDIO-SYNC & AUTO-CLEANUP ---
-async function runYoutubeBrowserTask(videoUrl, viewNumber) {
-    let browser;
-    const sessionDir = path.join(__dirname, `temp_session_${Date.now()}_${viewNumber}`);
+// ===================================================================
+// 7. FINAL YOUTUBE BOOSTER (AUDIO-BASED AUTO-CLOSE & LOW QUALITY)
+// ===================================================================
 
+async function runYoutubeAudioTask(videoUrl, viewNumber) {
+    let browser;
     try {
-        console.log(`[START] View #${viewNumber} | Optimized for Render Timeout`);
+        console.log(`[START] View #${viewNumber} | URL: ${videoUrl}`);
 
         browser = await puppeteer.launch({
-            headless: "new",
-            userDataDir: sessionDir,
-            // Timeout ko 0 (unlimited) ya 120000 (2 min) set karna zaroori hai
-            protocolTimeout: 240000, 
+            headless: "new", // "new" for better performance
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu', // GPU disable karne se RAM bachti hai
-                '--window-size=1280,720',
-                '--mute-audio=false'
+                '--mute-audio=false', // Audio detect karne ke liye unmute zaruri hai
+                '--autoplay-policy=no-user-gesture-required'
             ]
         });
 
         const page = await browser.newPage();
-        // Page level timeout ko bhi badha dein
-        await page.setDefaultNavigationTimeout(90000); 
-        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-
-        // 1. Organic Entry
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
         
-        // 2. Open Video
-        console.log(`[TARGET] Navigating to Video: ${videoUrl}`);
-        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', referer: 'https://www.google.com/' });
+        // Anti-Detection & Low Quality Headers
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 3. Force 144p Quality (Crash se bachne ke liye)
-        try {
-            await page.waitForSelector('.ytp-settings-button', { timeout: 10000 });
-            await page.click('.ytp-settings-button');
-            await new Promise(r => setTimeout(r, 1500));
-            
-            await page.evaluate(() => {
-                const items = Array.from(document.querySelectorAll('.ytp-menuitem'));
-                const qBtn = items.find(el => el.textContent.includes('Quality') || el.textContent.includes('गुणवत्ता'));
-                if (qBtn) qBtn.click();
-            });
-            await new Promise(r => setTimeout(r, 1500));
-            await page.evaluate(() => {
-                const levels = Array.from(document.querySelectorAll('.ytp-quality-menu .ytp-menuitem'));
-                if (levels.length > 0) levels[levels.length - 1].click();
-            });
-            console.log(`[QUALITY] 144p Locked.`);
-        } catch (e) { console.log("[INFO] Quality adjustment skipped."); }
+        // Video par jana
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 4. Audio-Sync: Non-Blocking Monitoring
-        console.log(`[WATCHING] Playing until Audio ends...`);
-        
-        // Is bar hum page.evaluate ke andar loop nahi chalayenge, 
-        // bahar se status check karenge taaki protocol timeout na ho.
-        let isEnded = false;
-        const maxCheckTime = 600; // 10 minutes max
-        let elapsed = 0;
-
-        while (!isEnded && elapsed < maxCheckTime) {
-            isEnded = await page.evaluate(() => {
-                const v = document.querySelector('video');
-                if (v) {
-                    if (v.paused && v.currentTime < 1) v.play(); // Auto-play if stuck
-                    return v.ended || v.currentTime >= v.duration - 0.5;
-                }
-                return false;
-            }).catch(() => false); // Catch evaluate errors
-
-            if (isEnded) break;
-            
-            await new Promise(r => setTimeout(r, 3000)); // Har 3 sec mein check karein (CPU friendly)
-            elapsed += 3;
-        }
-
-        // 5. Post-Video Interactions
-        console.log(`[ACTION] Video finished. Checking Details...`);
+        // 1. LOW QUALITY (144p) SET KARNA
         await page.evaluate(() => {
-            window.scrollBy({ top: 400, behavior: 'smooth' });
-        }).catch(() => {});
-        await new Promise(r => setTimeout(r, 3000));
+            const setLowQuality = () => {
+                const player = document.querySelector('#movie_player');
+                if (player && player.setPlaybackQualityRange) {
+                    player.setPlaybackQualityRange('tiny', 'tiny'); // 'tiny' = 144p
+                    console.log("Quality set to 144p");
+                }
+            };
+            setLowQuality();
+            // Video play ensure karna
+            const video = document.querySelector('video');
+            if (video) video.play();
+        });
 
-        console.log(`[SUCCESS] View #${viewNumber} Done.`);
+        console.log(`[MONITOR] Audio detect kiya ja raha hai...`);
+
+        // 2. AUDIO MONITORING LOOP
+        // Har 5 second mein check karega ki video chal rahi hai ya nahi
+        await page.evaluate(async () => {
+            return new Promise((resolve) => {
+                const checkInterval = setInterval(() => {
+                    const video = document.querySelector('video');
+                    // Agar video khatam (ended) ho gayi ya pause ho gayi to stop
+                    if (!video || video.ended || video.paused) {
+                        clearInterval(checkInterval);
+                        resolve(true);
+                    }
+                }, 5000); 
+            });
+        });
+
+        console.log(`[SUCCESS] Audio khatam. View #${viewNumber} complete. ✅`);
 
     } catch (error) {
-        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} fail: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
-        
-        // Cache Cleanup
-        try {
-            await fs.rm(sessionDir, { recursive: true, force: true });
-            console.log(`[CLEANUP] All History Wiped.`);
-        } catch (err) {}
+        if (browser) {
+            // Browser close karne par temporary history/cache delete ho jata hai
+            await browser.close();
+            console.log(`[CLEANUP] Browser closed & History cleared.`);
+        }
     }
+}
 
-// --- FINAL ENDPOINT (FIXED SYNTAX) ---
+// ENDPOINT
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
     const total = parseInt(views_count) || 1;
 
     if (!video_url) return res.status(400).json({ error: "Video URL missing" });
 
-    res.status(200).json({ 
-        success: true, 
-        message: `Task started for ${total} views. Fresh browser for each view.` 
-    });
+    res.status(200).json({ success: true, message: `Task started: ${total} sessions (One-by-One).` });
 
-    // Background loop (Async function ke andar)
+    // Background Worker (Sequential)
     (async () => {
         for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, i);
+            // Ek khatam hone ke baad hi dusra browser khulega
+            await runYoutubeAudioTask(video_url, i);
+            
+            // 10s gap taaki YouTube server ko natural lage
             if (i < total) {
-                console.log(`[GAP] Waiting 15s before next browser...`);
-                await new Promise(r => setTimeout(r, 15000));
+                console.log(`[WAIT] Next browser session in 10s...`);
+                await new Promise(r => setTimeout(r, 10000));
             }
         }
-        console.log(">>> ALL VIEWS COMPLETED <<<");
+        console.log(`--- ALL ${total} SESSIONS COMPLETED ---`);
     })();
 });
+
 
 
 // =============================================================
