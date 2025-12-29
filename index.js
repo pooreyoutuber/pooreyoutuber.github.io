@@ -1288,56 +1288,57 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. GEMINI-POWERED FULL WATCH TOOL (FINAL & UNDETECTABLE)
 // ===================================================================
+// --- TOOL 7: REBUILT WITH AUDIO-SYNC & AUTO-CLEANUP ---
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
-    // Har view ke liye ek unique folder (taaki history/cache hamesha new rahe)
-    const sessionDir = path.join(__dirname, `temp_session_${Date.now()}`);
+    // Har view ke liye unique folder taaki history/cache hamesha new rahe
+    const sessionDir = path.join(__dirname, `temp_session_${Date.now()}_${viewNumber}`);
 
     try {
-        console.log(`\x1b[33m%s\x1b[0m`, `[BROWSER START] View #${viewNumber} | Session: Fresh`);
+        console.log(`[BROWSER START] View #${viewNumber} | Session: Fresh`);
 
         browser = await puppeteer.launch({
             headless: "new",
-            userDataDir: sessionDir, // Fresh Profile
+            userDataDir: sessionDir,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--window-size=1280,720',
-                '--mute-audio=false' // Audio on rakhna hai detection ke liye
+                '--mute-audio=false'
             ]
         });
 
         const page = await browser.newPage();
         await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
-        // 1. Google.com se Redirect (Organic look)
+        // 1. Google.com se Redirect
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(r => setTimeout(r, 2000));
 
         // 2. Video Link par jana
-        console.log(`[TARGET] Navigating to Video: ${videoUrl}`);
+        console.log(`[TARGET] Opening Video: ${videoUrl}`);
         await page.goto(videoUrl, { waitUntil: 'domcontentloaded', referer: 'https://www.google.com/' });
 
         // 3. LOW QUALITY (144p) SETTING
         try {
             await page.waitForSelector('.ytp-settings-button', { timeout: 8000 });
             await page.click('.ytp-settings-button');
-            await new Promise(r => setTimeout(r, 800));
+            await new Promise(r => setTimeout(r, 1000));
             await page.evaluate(() => {
                 const items = Array.from(document.querySelectorAll('.ytp-menuitem'));
                 const qBtn = items.find(el => el.textContent.includes('Quality') || el.textContent.includes('गुणवत्ता'));
                 if (qBtn) qBtn.click();
             });
-            await new Promise(r => setTimeout(r, 800));
+            await new Promise(r => setTimeout(r, 1000));
             await page.evaluate(() => {
                 const levels = Array.from(document.querySelectorAll('.ytp-quality-menu .ytp-menuitem'));
-                if (levels.length > 0) levels[levels.length - 1].click(); // Select 144p
+                if (levels.length > 0) levels[levels.length - 1].click();
             });
-            console.log(`[QUALITY] Locked to 144p.`);
-        } catch (e) { console.log("[INFO] Quality set automatically."); }
+            console.log(`[QUALITY] 144p Locked.`);
+        } catch (e) { console.log("[INFO] Quality auto-set."); }
 
-        // 4. AUDIO-SYNC: Jab tak Awaaz hai tab tak video dekhe
+        // 4. AUDIO-SYNC: Jab tak awaaz hai tab tak dekhe
         console.log(`[WATCHING] Playing until Audio ends...`);
         await page.evaluate(async () => {
             const v = document.querySelector('video');
@@ -1345,7 +1346,6 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             
             return new Promise((resolve) => {
                 const monitor = setInterval(() => {
-                    // Agar video end ho gaya ya audio stop ho gaya
                     if (v && (v.ended || v.currentTime >= v.duration - 0.5)) {
                         clearInterval(monitor);
                         resolve();
@@ -1354,74 +1354,57 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             });
         });
 
-        // 5. POST-VIDEO: Description aur Comment check karein
-        console.log(`[HUMAN ACTION] Video finished. Checking Description & Comments...`);
+        // 5. POST-VIDEO: Interaction
+        console.log(`[HUMAN ACTION] Checking Description & Comments...`);
         await page.evaluate(() => {
-            // Scroll to description
             window.scrollBy({ top: 500, behavior: 'smooth' });
             const moreBtn = document.querySelector('#expand, .tp-yt-paper-button#more');
             if (moreBtn) moreBtn.click();
         });
         await new Promise(r => setTimeout(r, 3000));
-        await page.evaluate(() => {
-            // Scroll to comments
-            window.scrollBy({ top: 800, behavior: 'smooth' });
-        });
+        await page.evaluate(() => window.scrollBy({ top: 800, behavior: 'smooth' }));
         await new Promise(r => setTimeout(r, 2000));
 
-        console.log(`\x1b[32m%s\x1b[0m`, `[SUCCESS] View #${viewNumber} Done.`);
+        console.log(`[SUCCESS] View #${viewNumber} Done.`);
 
     } catch (error) {
-        console.error(`[CRASH] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            await browser.close(); // Pura browser band
-        }
-
-        // --- CLEAR HISTORY & CACHE (Delete Folder) ---
+        if (browser) await browser.close();
+        
+        // Cache Delete Logic
         try {
-            await fs.rm(sessionDir, { recursive: true, force: true });
-            console.log(`[CLEANUP] All Cookies/History Deleted.`);
+            await fs.promises.rm(sessionDir, { recursive: true, force: true });
+            console.log(`[CLEANUP] Cookies/History Deleted.`);
         } catch (err) {}
-
-        // --- 10-15s GAP BEFORE NEXT VIEW ---
-        console.log(`[GAP] Waiting 15s for next fresh browser...`);
-        await new Promise(r => setTimeout(r, 15000));
-    }
-}
-    
-    // 15 SECONDS GAP (Hamesha chalega)
-        await new Promise(r => setTimeout(r, 15000));
     }
 }
 
-// --- Tool 7 Endpoint ---
+// --- FINAL ENDPOINT (FIXED SYNTAX) ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
     const total = parseInt(views_count) || 1;
 
     if (!video_url) return res.status(400).json({ error: "Video URL missing" });
 
-    // Response turant bhej dein taaki timeout na ho
     res.status(200).json({ 
         success: true, 
-        message: `Task started for ${total} views. Each view will have 100% retention and 15s gap.` 
+        message: `Task started for ${total} views. Fresh browser for each view.` 
     });
 
-    // Background process shuru karein
+    // Background loop (Async function ke andar)
     (async () => {
         for (let i = 1; i <= total; i++) {
             await runYoutubeBrowserTask(video_url, i);
             if (i < total) {
-                // Aapki requirement ke mutabiq 10-15 sec ka gap
-                await new Promise(r => setTimeout(r, 15000)); 
+                console.log(`[GAP] Waiting 15s before next browser...`);
+                await new Promise(r => setTimeout(r, 15000));
             }
         }
-        console.log(">>> ALL VIEWS COMPLETED SUCCESSFULLY <<<");
+        console.log(">>> ALL VIEWS COMPLETED <<<");
     })();
 });
 
-// Server Start
 
 // =============================================================
 // --- SERVER START ---
