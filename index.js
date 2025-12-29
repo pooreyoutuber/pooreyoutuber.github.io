@@ -1160,10 +1160,6 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-// ===================================================================
-// 6. GSC & ADSENSE REVENUE BOOSTER (MULTI-SITE ROTATION & AD-CLICKER)
-// ===================================================================
-
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1291,132 +1287,114 @@ app.post('/start-task', async (req, res) => {
 });
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
+// =================================================================
+// ===================================================================
+// 7. YOUTUBE ULTIMATE BOOSTER (FULL WATCH + LOW DATA + AUDIO ON)
 // ===================================================================
 
-async function runYoutubeBrowserTask(videoUrl, requestedDuration, viewNumber) {
+async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
     try {
-        // 1. Browser Launch (Stealth Mode)
+        // Random External Sources
+        const referrers = ['https://t.co/', 'https://lnkd.in/', 'https://wa.me/', 'https://l.facebook.com/'];
+        const randomReferrer = referrers[Math.floor(Math.random() * referrers.length)];
+
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
                 '--autoplay-policy=no-user-gesture-required',
-                '--disable-blink-features=AutomationControlled',
-                '--mute-audio'
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
+        
+        // Random User-Agent (Laptop/Mobile mix)
+        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        await page.setUserAgent(ua);
 
-        // 2. DEVICE ROTATION (Mobile, Tablet, Desktop)
-        const devices = [
-            { name: 'Mobile', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 390, h: 844, isMob: true },
-            { name: 'Tablet', ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 820, h: 1180, isMob: true },
-            { name: 'Desktop', ua: USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)], w: 1366, h: 768, isMob: false }
-        ];
+        console.log(`[YT-START] View #${viewNumber} | Audio: ON | Source: ${randomReferrer}`);
 
-        const selectedDevice = devices[viewNumber % devices.length];
-        await page.setUserAgent(selectedDevice.ua);
-        await page.setViewport({ width: selectedDevice.w, height: selectedDevice.h, isMobile: selectedDevice.isMob, hasTouch: selectedDevice.isMob });
-
-        // Hide Bot Footprints
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-            window.chrome = { runtime: {} };
+        // Navigate with Referrer
+        await page.goto(videoUrl, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: randomReferrer 
         });
 
-        // 3. LOAD VIDEO (Shorts Fix Included)
-        let finalUrl = videoUrl;
-        if (videoUrl.includes('shorts/')) {
-            const videoId = videoUrl.split('shorts/')[1].split('?')[0];
-            finalUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        }
-
-        console.log(`[YT-BOOST] View #${viewNumber} | Device: ${selectedDevice.name} | URL: ${finalUrl}`);
-        await page.goto(finalUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // 4. PLAY & INITIAL INTERACTION
-        await page.click('video').catch(() => {});
-        await page.keyboard.press('m'); // Mute for safety
-
-        // 5. RANDOM RETENTION (70% - 95%)
-        const baseTime = parseInt(requestedDuration);
-        const watchSeconds = Math.floor(baseTime * (Math.random() * (0.95 - 0.70) + 0.70));
-        console.log(`[YT-BOOST] Watching for ${watchSeconds}s...`);
-
-        // Natural Human Behavior (Scrolling)
+        // Main Interaction Logic
         await page.evaluate(async () => {
-            for(let i=0; i<2; i++) {
-                window.scrollBy(0, 400);
-                await new Promise(r => setTimeout(r, 3000));
-                window.scrollBy(0, -150);
-                await new Promise(r => setTimeout(r, 2000));
+            const video = document.querySelector('video');
+            if (video) {
+                video.muted = false; // Audio ON
+                video.volume = 0.4;
+                video.play();
+
+                // 1. Force Low Quality (144p/240p) to save Render RAM
+                const settingsBtn = document.querySelector('.ytp-settings-button');
+                if (settingsBtn) {
+                    settingsBtn.click();
+                    await new Promise(r => setTimeout(r, 500));
+                    const menuItems = Array.from(document.querySelectorAll('.ytp-menuitem'));
+                    const qualityBtn = menuItems.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
+                    if (qualityBtn) {
+                        qualityBtn.click();
+                        await new Promise(r => setTimeout(r, 600));
+                        const levels = document.querySelectorAll('.ytp-quality-menu .ytp-menuitem');
+                        if (levels.length > 0) levels[levels.length - 1].click(); // Sabse low select karega
+                    }
+                }
+
+                // 2. Wait for Video to Finish naturally
+                await new Promise((resolve) => {
+                    video.onended = resolve;
+                    // Safety interval: agar ended event fire na ho
+                    const checkEnd = setInterval(() => {
+                        if (video.currentTime >= video.duration - 1) {
+                            clearInterval(checkEnd);
+                            resolve();
+                        }
+                    }, 2000);
+                });
             }
         });
 
-        // Watch Time Wait
-        await new Promise(r => setTimeout(r, watchSeconds * 1000));
-
-        // 6. AUTO-LIKE & SUBSCRIBE LOGIC
-        // Har view par nahi, balki 30% views par Like/Sub karega taaki organic lage
-        if (Math.random() > 0.7) {
-            console.log(`[YT-ENGAGE] Triggering Engagement...`);
-            
-            // Try Like Button
-            try {
-                const likeBtn = await page.$('button[aria-label*="like this video"]');
-                if (likeBtn) {
-                    await likeBtn.click();
-                    console.log(`[YT-ENGAGE] Video Liked!`);
-                } else {
-                    await page.keyboard.press('l'); // Fallback keyboard shortcut
-                }
-            } catch (e) {}
-
-            await new Promise(r => setTimeout(r, 2000));
-
-            // Try Subscribe Button (Desktop & Mobile selectors)
-            try {
-                const subBtn = await page.$('yt-button-renderer#subscribe-button button, .item-subscribe-button');
-                if (subBtn) {
-                    await subBtn.click();
-                    console.log(`[YT-ENGAGE] Channel Subscribed!`);
-                }
-            } catch (e) {}
-        }
-
-        console.log(`[SUCCESS] View #${viewNumber} Done ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Completed. High Retention Watch-time added! ✅`);
 
     } catch (error) {
-        console.error(`[YT-ERROR] #${viewNumber}: ${error.message}`);
+        console.error(`[YT-ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close();
-            browser = null;
+            await browser.close().catch(() => {});
+            browser = null; // Garbage collection
         }
     }
 }
 
-// ENDPOINT
+// API Endpoint: Har view ke baad 20 second ka gap
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
+    const { video_url, views_count } = req.body;
     const total = parseInt(views_count) || 1;
-    const duration = parseInt(watch_time) || 60;
 
-    res.status(200).json({ success: true, message: `Task started: ${total} sessions with Auto-Engage.` });
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started: ${total} views will be sent 1-by-1.` 
+    });
 
+    // Background loop for stability
     (async () => {
         for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, duration, i);
+            await runYoutubeBrowserTask(video_url, i);
+
             if (i < total) {
-                console.log(`[WAIT] Cooling 15s to clear RAM...`);
-                await new Promise(r => setTimeout(r, 15000));
+                console.log(`[RAM-CLEANUP] Cooling down for 20 seconds...`);
+                await new Promise(r => setTimeout(r, 20000)); // 20s gap as requested
             }
         }
-        console.log("--- ALL SESSIONS COMPLETED ---");
+        console.log("--- ALL VIEWS COMPLETED SUCCESSFULLY ---");
     })();
 });
 // =================================================================
