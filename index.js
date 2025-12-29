@@ -1288,11 +1288,8 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
-// ===================================================================
-// 7. ULTIMATE YOUTUBE BOOSTER (MULTI-DEVICE + API SYNC)
-// ===================================================================
 
-const YT_API_KEY = "YOUR_API_KEY_HERE"; // Apni API Key yahan dalein
+const YT_API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo";
 
 // Device Viewports & User Agents
 const DEVICES = [
