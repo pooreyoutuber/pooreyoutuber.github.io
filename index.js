@@ -1291,8 +1291,6 @@ app.post('/start-task', async (req, res) => {
  // ===================================================================
 // TOOL 7: ULTIMATE YOUTUBE VIEW BOOST (REALISTIC & HIGH RETENTION)
 // ===================================================================
- const fs = require('fs').promises; // File system module for deleting cache
-
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
     // Har view ke liye ek alag temporary folder banayenge
