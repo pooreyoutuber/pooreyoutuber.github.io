@@ -1274,7 +1274,7 @@ app.post('/start-task', async (req, res) => {
                 if (i < totalViews) {
                     // RAM management break
                     const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                console.log(`[REST] Waiting ${restTime/1000}s...`);
                     await new Promise(r => setTimeout(r, restTime));
                 }
             }
@@ -1292,72 +1292,68 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (AUDIO-BASED AUTO-CLOSE & LOW QUALITY)
 // ===================================================================
-
 async function runYoutubeAudioTask(videoUrl, viewNumber) {
     let browser;
     try {
         console.log(`[START] View #${viewNumber} | URL: ${videoUrl}`);
 
         browser = await puppeteer.launch({
-            headless: "new", // "new" for better performance
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--mute-audio=false', // Audio detect karne ke liye unmute zaruri hai
+                '--mute-audio=false',
                 '--autoplay-policy=no-user-gesture-required'
-            ]
+            ],
+            // Timeout error fix karne ke liye protocol timeout badhaya
+            protocolTimeout: 0 
         });
 
         const page = await browser.newPage();
-        
-        // Anti-Detection & Low Quality Headers
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // Video par jana
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+        // Page load timeout ko bhi handle kiya
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 0 });
 
-        // 1. LOW QUALITY (144p) SET KARNA
+        console.log(`[SETTING] Quality 144p & Starting Playback...`);
+
+        // Low Quality setting aur Play ensure karna
         await page.evaluate(() => {
-            const setLowQuality = () => {
-                const player = document.querySelector('#movie_player');
-                if (player && player.setPlaybackQualityRange) {
-                    player.setPlaybackQualityRange('tiny', 'tiny'); // 'tiny' = 144p
-                    console.log("Quality set to 144p");
+            const player = document.querySelector('#movie_player');
+            if (player) {
+                // Quality set karna
+                if (player.setPlaybackQualityRange) {
+                    player.setPlaybackQualityRange('tiny', 'tiny');
                 }
-            };
-            setLowQuality();
-            // Video play ensure karna
+                // Play video
+                const video = document.querySelector('video');
+                if (video) video.play();
+            }
+        });
+
+        console.log(`[MONITOR] Audio detect kiya ja raha hai (No Timeout Mode)...`);
+
+        // --- YAHAN ERROR FIX KIYA HAI ---
+        // page.evaluate ke andar loop ki jagah, hum page.waitForFunction use karenge 
+        // jo long-running tasks ke liye design kiya gaya hai.
+        await page.waitForFunction(() => {
             const video = document.querySelector('video');
-            if (video) video.play();
+            // Agar video khatam ho jaye (ended) ya browser se gayab ho jaye
+            return !video || video.ended;
+        }, { 
+            polling: 5000, // Har 5 sec mein check karega
+            timeout: 0     // Infinity wait (jab tak video khatam na ho)
         });
 
-        console.log(`[MONITOR] Audio detect kiya ja raha hai...`);
-
-        // 2. AUDIO MONITORING LOOP
-        // Har 5 second mein check karega ki video chal rahi hai ya nahi
-        await page.evaluate(async () => {
-            return new Promise((resolve) => {
-                const checkInterval = setInterval(() => {
-                    const video = document.querySelector('video');
-                    // Agar video khatam (ended) ho gayi ya pause ho gayi to stop
-                    if (!video || video.ended || video.paused) {
-                        clearInterval(checkInterval);
-                        resolve(true);
-                    }
-                }, 5000); 
-            });
-        });
-
-        console.log(`[SUCCESS] Audio khatam. View #${viewNumber} complete. ✅`);
+        console.log(`[SUCCESS] Video Ended. View #${viewNumber} complete. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} fail: ${error.message}`);
     } finally {
         if (browser) {
-            // Browser close karne par temporary history/cache delete ho jata hai
             await browser.close();
-            console.log(`[CLEANUP] Browser closed & History cleared.`);
+            console.log(`[CLEANUP] Browser closed & Session cleared.`);
         }
     }
 }
