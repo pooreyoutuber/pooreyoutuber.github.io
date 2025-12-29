@@ -1161,119 +1161,90 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-
-//// ===================================================================
-// 6. GSC & ADSENSE REVENUE BOOSTER (MAX EARNING - MULTI-SITE & DESKTOP)
-// ===================================================================
-
-// Browser Profiles: Alag-alag laptop aur browser ki pehchaan ke liye
-const BROWSER_PROFILES = [
-    {
-        name: "Windows-Chrome-PC",
-        ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-        vendor: "Google Inc.",
-        platform: "Win32"
-    },
-    {
-        name: "Mac-Firefox-Laptop",
-        ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0",
-        vendor: "",
-        platform: "MacIntel"
-    },
-    {
-        name: "Windows-Edge-PC",
-        ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0",
-        vendor: "Google Inc.",
-        platform: "Win32"
-    }
-];
-
-// Main Tool Function
-async function runGscTask(keyword, siteUrl, viewNumber) {
+async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
-        // Random profile select karein
-        const profile = BROWSER_PROFILES[Math.floor(Math.random() * BROWSER_PROFILES.length)];
-
         browser = await puppeteer.launch({
-            headless: "new", // "new" for latest puppeteer version
+            headless: "new",
             args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--window-size=1920,1080', // Force Desktop Window Size
+                '--disable-gpu',
+                '--window-size=1920,1080', // Desktop Resolution
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-
-        // --- DESKTOP MODE & REAL HUMAN SETTINGS ---
-        await page.setViewport({ width: 1920, height: 1080 }); // Desktop resolution
-        await page.setUserAgent(profile.ua);
         
-        // Hide Puppeteer: Bot detection bypass
-        await page.evaluateOnNewDocument((p) => {
-            Object.defineProperty(navigator, 'platform', { get: () => p.platform });
-            Object.defineProperty(navigator, 'vendor', { get: () => p.vendor });
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        }, profile);
+        // --- FORCED DESKTOP MODE ---
+        await page.setViewport({ width: 1920, height: 1080, isMobile: false, hasTouch: false });
+        
+        // Desktop User Agent specifically for Windows/Mac
+        const desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        await page.setUserAgent(desktopUA);
 
-        // Stage 1: Google Search Simulation
+        // 1. STAGE: Google Search Simulation
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, randomInt(3000, 5000))); 
+        await new Promise(r => setTimeout(r, 4000)); 
 
-        // Stage 2: Target Site Visit (Referer is Google)
-        console.log(`[SESSION #${viewNumber}] Target: ${siteUrl} | Browser: ${profile.name}`);
-        await page.goto(siteUrl, { 
+        // 2. STAGE: Visit Target Site
+        console.log(`[EARNING-MODE] View #${viewNumber} | Desktop Mode | URL: ${url}`);
+        await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: googleUrl 
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(45000, 65000); // 45-65 seconds stay for quality
+        // Staying longer (45-60s) for better CPM/RPM
+        const targetStayTime = randomInt(45000, 60000); 
 
-        // Stage 3: High Revenue Interaction
+        // 3. STAGE: Realistic Behavior & High-Value Clicker
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Desktop Scroll
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 600) + 200));
-            await page.mouse.move(randomInt(100, 1000), randomInt(100, 800), { steps: 10 });
-            await new Promise(r => setTimeout(r, 4000));
+            // Natural Scrolling & Random Pauses
+            const dist = randomInt(400, 800);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            
+            await page.mouse.move(randomInt(200, 1000), randomInt(200, 800), { steps: 20 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-            // 🔥 HIGH-VALUE CLICKER (45% PROBABILITY - 2.5x Increase)
+            // 🔥 BOOSTED AD CLICKER (Increased to 45% for 2.5x effect)
+            // Note: 18% * 2.5 = 45% approx
             if (Math.random() < 0.45) { 
-                // Enhanced selectors for AdSense
-                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], iframe[id^="aswift"]');
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], #ad-iframe');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
-                    if (box && box.width > 20 && box.height > 20) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Potential Revenue Found! Clicking...`);
+                    if (box && box.width > 10 && box.height > 10) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] High CPC Target Found!`);
                         
-                        // Scroll to ad location
-                        await page.evaluate((y) => window.scrollTo(0, y - 100), box.y);
-                        
-                        // Realistic Mouse Movement and Click
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 20 });
+                        // Realistic click: move to ad first
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 25 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! Stay active on Advertiser page.`);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] 2.5x Click Registered. ✅ Revenue Boosted.`);
                         
-                        // Stay on Advertiser's site for 25s (High Conversion Quality)
+                        // Advertiser site par 25s wait (High Retention for AdSense)
                         await new Promise(r => setTimeout(r, 25000));
                         break; 
                     }
                 }
             }
         }
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
-        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+        }
     }
 }
 
