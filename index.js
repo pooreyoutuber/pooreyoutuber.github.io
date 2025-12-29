@@ -1292,94 +1292,102 @@ app.post('/start-task', async (req, res) => {
 // --- TOOL 7: REBUILT WITH AUDIO-SYNC & AUTO-CLEANUP ---
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
-    // Har view ke liye unique folder taaki history/cache hamesha new rahe
     const sessionDir = path.join(__dirname, `temp_session_${Date.now()}_${viewNumber}`);
 
     try {
-        console.log(`[BROWSER START] View #${viewNumber} | Session: Fresh`);
+        console.log(`[START] View #${viewNumber} | Optimized for Render Timeout`);
 
         browser = await puppeteer.launch({
             headless: "new",
             userDataDir: sessionDir,
+            // Timeout ko 0 (unlimited) ya 120000 (2 min) set karna zaroori hai
+            protocolTimeout: 240000, 
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
+                '--disable-gpu', // GPU disable karne se RAM bachti hai
                 '--window-size=1280,720',
                 '--mute-audio=false'
             ]
         });
 
         const page = await browser.newPage();
+        // Page level timeout ko bhi badha dein
+        await page.setDefaultNavigationTimeout(90000); 
         await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
-        // 1. Google.com se Redirect
+        // 1. Organic Entry
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 2000));
-
-        // 2. Video Link par jana
-        console.log(`[TARGET] Opening Video: ${videoUrl}`);
+        
+        // 2. Open Video
+        console.log(`[TARGET] Navigating to Video: ${videoUrl}`);
         await page.goto(videoUrl, { waitUntil: 'domcontentloaded', referer: 'https://www.google.com/' });
 
-        // 3. LOW QUALITY (144p) SETTING
+        // 3. Force 144p Quality (Crash se bachne ke liye)
         try {
-            await page.waitForSelector('.ytp-settings-button', { timeout: 8000 });
+            await page.waitForSelector('.ytp-settings-button', { timeout: 10000 });
             await page.click('.ytp-settings-button');
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 1500));
+            
             await page.evaluate(() => {
                 const items = Array.from(document.querySelectorAll('.ytp-menuitem'));
                 const qBtn = items.find(el => el.textContent.includes('Quality') || el.textContent.includes('गुणवत्ता'));
                 if (qBtn) qBtn.click();
             });
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 1500));
             await page.evaluate(() => {
                 const levels = Array.from(document.querySelectorAll('.ytp-quality-menu .ytp-menuitem'));
                 if (levels.length > 0) levels[levels.length - 1].click();
             });
             console.log(`[QUALITY] 144p Locked.`);
-        } catch (e) { console.log("[INFO] Quality auto-set."); }
+        } catch (e) { console.log("[INFO] Quality adjustment skipped."); }
 
-        // 4. AUDIO-SYNC: Jab tak awaaz hai tab tak dekhe
+        // 4. Audio-Sync: Non-Blocking Monitoring
         console.log(`[WATCHING] Playing until Audio ends...`);
-        await page.evaluate(async () => {
-            const v = document.querySelector('video');
-            if (v) { v.play(); v.muted = false; v.volume = 0.5; }
-            
-            return new Promise((resolve) => {
-                const monitor = setInterval(() => {
-                    if (v && (v.ended || v.currentTime >= v.duration - 0.5)) {
-                        clearInterval(monitor);
-                        resolve();
-                    }
-                }, 1000);
-            });
-        });
+        
+        // Is bar hum page.evaluate ke andar loop nahi chalayenge, 
+        // bahar se status check karenge taaki protocol timeout na ho.
+        let isEnded = false;
+        const maxCheckTime = 600; // 10 minutes max
+        let elapsed = 0;
 
-        // 5. POST-VIDEO: Interaction
-        console.log(`[HUMAN ACTION] Checking Description & Comments...`);
+        while (!isEnded && elapsed < maxCheckTime) {
+            isEnded = await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (v) {
+                    if (v.paused && v.currentTime < 1) v.play(); // Auto-play if stuck
+                    return v.ended || v.currentTime >= v.duration - 0.5;
+                }
+                return false;
+            }).catch(() => false); // Catch evaluate errors
+
+            if (isEnded) break;
+            
+            await new Promise(r => setTimeout(r, 3000)); // Har 3 sec mein check karein (CPU friendly)
+            elapsed += 3;
+        }
+
+        // 5. Post-Video Interactions
+        console.log(`[ACTION] Video finished. Checking Details...`);
         await page.evaluate(() => {
-            window.scrollBy({ top: 500, behavior: 'smooth' });
-            const moreBtn = document.querySelector('#expand, .tp-yt-paper-button#more');
-            if (moreBtn) moreBtn.click();
-        });
+            window.scrollBy({ top: 400, behavior: 'smooth' });
+        }).catch(() => {});
         await new Promise(r => setTimeout(r, 3000));
-        await page.evaluate(() => window.scrollBy({ top: 800, behavior: 'smooth' }));
-        await new Promise(r => setTimeout(r, 2000));
 
         console.log(`[SUCCESS] View #${viewNumber} Done.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
         
-        // Cache Delete Logic
+        // Cache Cleanup
         try {
-            await fs.promises.rm(sessionDir, { recursive: true, force: true });
-            console.log(`[CLEANUP] Cookies/History Deleted.`);
+            await fs.rm(sessionDir, { recursive: true, force: true });
+            console.log(`[CLEANUP] All History Wiped.`);
         } catch (err) {}
     }
-}
 
 // --- FINAL ENDPOINT (FIXED SYNTAX) ---
 app.post('/api/real-view-boost', async (req, res) => {
