@@ -1288,11 +1288,6 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. GEMINI-POWERED FULL WATCH TOOL (FINAL & UNDETECTABLE)
 // ===================================================================
-
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
-
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
     try {
