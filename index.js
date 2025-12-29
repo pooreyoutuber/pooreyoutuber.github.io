@@ -1289,7 +1289,7 @@ app.post('/start-task', async (req, res) => {
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
 
-const YT_API_KEY = "AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo";
+const YT_API_KEY = "AIzaSyAm090uj3e7DZdOVJ_hzdFufohuHxL7wX0";
 
 // Device Viewports & User Agents
 const DEVICES = [
