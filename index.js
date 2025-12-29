@@ -1160,7 +1160,6 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1176,7 +1175,7 @@ async function runGscTask(keyword, url, viewNumber) {
 
         const page = await browser.newPage();
         
-        // RAM bachane ke liye non-essential cheezein block
+        // RAM optimization
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             if (['font', 'media'].includes(req.resourceType())) {
@@ -1186,82 +1185,88 @@ async function runGscTask(keyword, url, viewNumber) {
             }
         });
 
+        // Set Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
         // 1. Google Search Simulation
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, randomInt(2000, 5000))); // Wait like a human reading results
 
-        // 2. Main URL (Wait for Ads)
+        // 2. Main URL (Referer set to Google)
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: googleSearchUrl 
         });
 
-        console.log(`[VIEWER] View #${viewNumber} | Starting Human-like Scrolling...`);
+        console.log(`[REVENUE-TOOL] View #${viewNumber} | URL Loaded. Starting Randomized Interaction...`);
 
-        // 3. ADVANCED SCROLLING LOGIC (For AdSense Earning)
-        // Ye niche jayega, rukega, phir thoda upar aayega (Natural Behavior)
+        // 3. IMPROVED RANDOM SCROLLING LOGIC
         await page.evaluate(async () => {
-            const distance = 400; // Har baar kitna scroll karega
-            const delay = 3000;   // Har scroll ke baad kitne ms rukega
+            const getRandomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
             
-            for (let i = 0; i < 4; i++) {
-                window.scrollBy(0, distance);
-                await new Promise(r => setTimeout(r, delay));
+            // Total 5-8 random scrolls
+            const scrollSteps = Math.floor(Math.random() * 4) + 5; 
+            
+            for (let i = 0; i < scrollSteps; i++) {
+                const scrollAmount = Math.floor(Math.random() * 500) + 200; // Random distance
+                window.scrollBy(0, scrollAmount);
                 
-                // Beech mein thoda upar scroll karna (Real human behavior)
-                if (i === 2) {
-                    window.scrollBy(0, -150);
-                    await new Promise(r => setTimeout(r, 1000));
+                // Randomly scroll up a bit (Micro-movements)
+                if (Math.random() > 0.7) {
+                    await new Promise(r => setTimeout(r, getRandomDelay(500, 1000)));
+                    window.scrollBy(0, -100);
                 }
+                
+                await new Promise(r => setTimeout(r, getRandomDelay(2000, 5000))); // Random wait
             }
         });
 
-        // 25 sec ka total stay time
-        await new Promise(r => setTimeout(r, 25000));
-        console.log(`[DONE] View #${viewNumber} completed with scrolling. ✅`);
+        // 4. 🔥 AUTO AD-CLICKER LOGIC (Probability: ~15% or 3-4 clicks in 20-25 views)
+        const clickChance = Math.random();
+        if (clickChance < 0.15) { 
+            console.log(`[AD-CLICK] Probability Matched! Attempting to find and click an Ad...`);
+            
+            // AdSense common selectors (Iframes/Ins)
+            const adSelectors = [
+                'ins.adsbygoogle', 
+                'iframe[id^="aswift"]', 
+                'iframe[src*="googleads"]',
+                '.ad-unit'
+            ];
+
+            let adClicked = false;
+            for (const selector of adSelectors) {
+                const adElement = await page.$(selector);
+                if (adElement) {
+                    const box = await adElement.boundingBox();
+                    if (box) {
+                        // Click in the middle of the ad
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log(`[SUCCESS] Ad clicked via ${selector}! ✅`);
+                        adClicked = true;
+                        // Click ke baad 10-15 sec extra ruko taaki click valid count ho
+                        await new Promise(r => setTimeout(r, 15000));
+                        break; 
+                    }
+                }
+            }
+            if (!adClicked) console.log(`[SKIP] No clickable ad found on this page.`);
+        }
+
+        // Final Wait to maintain session duration
+        await new Promise(r => setTimeout(r, 10000));
+        console.log(`[DONE] View #${viewNumber} finished. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
     } finally {
         if (browser) {
-            // Browser ko clean tareeke se close karna taaki RAM khali ho
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
-            browser = null;
         }
     }
 }
-
-app.post('/start-task', async (req, res) => {
-    const { keyword, url, views = 5 } = req.body;
-    const totalViews = parseInt(views);
-
-    res.status(200).json({ 
-        success: true, 
-        message: `Revenue Task started. Processing ${totalViews} views one-by-one with scrolling.` 
-    });
-
-    // Background Process: 1 Browser at a time
-    (async () => {
-        for (let i = 1; i <= totalViews; i++) {
-            console.log(`[QUEUE] Starting View #${i} of ${totalViews}`);
-            
-            // Wait for this browser to FINISH and CLOSE before starting next
-            await runGscTask(keyword, url, i); 
-
-            if (i < totalViews) {
-                console.log(`Waiting 20 seconds to clear RAM...`);
-                await new Promise(r => setTimeout(r, 20000));
-            }
-        }
-        console.log("--- ALL VIEWS FINISHED ---");
-    })();
-});
-
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
 // ===================================================================
