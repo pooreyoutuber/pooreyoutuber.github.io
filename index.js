@@ -1287,16 +1287,13 @@ app.post('/start-task', async (req, res) => {
 });
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
-// =================================================================
-// ===================================================================
-// 7. YOUTUBE ULTIMATE BOOSTER (FULL WATCH + LOW DATA + AUDIO ON)
-// ===================================================================
+// =============================
 
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
-    let browser;
+    let browser = null;
     try {
-        // Random External Sources
-        const referrers = ['https://t.co/', 'https://lnkd.in/', 'https://wa.me/', 'https://l.facebook.com/'];
+        // Random Sources
+        const referrers = ['https://t.co/', 'https://wa.me/', 'https://lnkd.in/'];
         const randomReferrer = referrers[Math.floor(Math.random() * referrers.length)];
 
         browser = await puppeteer.launch({
@@ -1304,99 +1301,102 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--autoplay-policy=no-user-gesture-required',
-                '--disable-blink-features=AutomationControlled'
+                '--disable-dev-shm-usage', 
+                '--disable-gpu',           
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process'         
             ]
         });
 
         const page = await browser.newPage();
-        
-        // Random User-Agent (Laptop/Mobile mix)
-        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        await page.setUserAgent(ua);
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[YT-START] View #${viewNumber} | Audio: ON | Source: ${randomReferrer}`);
+        // RAM Bachane ke liye: Faltu images aur fonts block karna
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            if (['image', 'font'].includes(req.resourceType())) {
+                req.abort();
+            } else {
+                req.continue();
+            }
+        });
 
-        // Navigate with Referrer
+        console.log(`[START] View #${viewNumber} | Audio: ON | Source: ${randomReferrer}`);
+
         await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
-            timeout: 90000, 
+            timeout: 60000, 
             referer: randomReferrer 
         });
 
-        // Main Interaction Logic
+        // Full Watch Logic
         await page.evaluate(async () => {
             const video = document.querySelector('video');
             if (video) {
                 video.muted = false; // Audio ON
-                video.volume = 0.4;
                 video.play();
 
-                // 1. Force Low Quality (144p/240p) to save Render RAM
-                const settingsBtn = document.querySelector('.ytp-settings-button');
-                if (settingsBtn) {
-                    settingsBtn.click();
+                // 360p or 144p force karna
+                const settings = document.querySelector('.ytp-settings-button');
+                if (settings) {
+                    settings.click();
                     await new Promise(r => setTimeout(r, 500));
-                    const menuItems = Array.from(document.querySelectorAll('.ytp-menuitem'));
-                    const qualityBtn = menuItems.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
-                    if (qualityBtn) {
-                        qualityBtn.click();
+                    const menu = Array.from(document.querySelectorAll('.ytp-menuitem'));
+                    const quality = menu.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
+                    if (quality) {
+                        quality.click();
                         await new Promise(r => setTimeout(r, 600));
                         const levels = document.querySelectorAll('.ytp-quality-menu .ytp-menuitem');
-                        if (levels.length > 0) levels[levels.length - 1].click(); // Sabse low select karega
+                        if (levels.length > 0) levels[levels.length - 1].click();
                     }
                 }
 
-                // 2. Wait for Video to Finish naturally
-                await new Promise((resolve) => {
+                // Video khatam hone ka wait
+                return new Promise((resolve) => {
                     video.onended = resolve;
-                    // Safety interval: agar ended event fire na ho
-                    const checkEnd = setInterval(() => {
-                        if (video.currentTime >= video.duration - 1) {
-                            clearInterval(checkEnd);
-                            resolve();
-                        }
+                    setInterval(() => {
+                        if (video.currentTime >= video.duration - 1) resolve();
                     }, 2000);
                 });
             }
         });
 
-        console.log(`[SUCCESS] View #${viewNumber} Completed. High Retention Watch-time added! ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Completed. Closing Browser...`);
 
     } catch (error) {
-        console.error(`[YT-ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[CRITICAL-ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close().catch(() => {});
-            browser = null; // Garbage collection
+            await browser.close(); // Force Close
+            browser = null;
+            console.log(`[CLEANUP] Memory Released. Waiting for next session...`);
         }
     }
 }
 
-// API Endpoint: Har view ke baad 20 second ka gap
+// Endpoint: Strict 1-by-1 Loop
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
     const total = parseInt(views_count) || 1;
 
-    res.status(200).json({ 
-        success: true, 
-        message: `Task started: ${total} views will be sent 1-by-1.` 
-    });
+    res.status(200).json({ success: true, message: "Queue started. views will go 1-by-1." });
 
-    // Background loop for stability
+    // Is loop ke andar 'await' hone ki wajah se 1-by-1 hi chalega
     (async () => {
         for (let i = 1; i <= total; i++) {
+            // Jab tak ye function khatam nahi hoga, loop aage nahi badhega
             await runYoutubeBrowserTask(video_url, i);
 
             if (i < total) {
-                console.log(`[RAM-CLEANUP] Cooling down for 20 seconds...`);
-                await new Promise(r => setTimeout(r, 20000)); // 20s gap as requested
+                console.log(`[GAP] Resting for 20s to prevent Render crash...`);
+                await new Promise(r => setTimeout(r, 20000)); // Har view ke baad 20s ka sannata
             }
         }
-        console.log("--- ALL VIEWS COMPLETED SUCCESSFULLY ---");
+        console.log("--- ALL TASKS DONE ---");
     })();
 });
+
 // =================================================================
 // --- SERVER START ---
 // ===================================================================
