@@ -1155,14 +1155,11 @@ app.post('/youtube-boost-mp', async (req, res) => {
     })();
 });
 // ===================================================================
-// 6. GSC & ADSENSE REVENUE BOOSTER (ADVANCED SCROLLING & SERIAL MODE)
-// ==================================================================
+// 6. GSC & ADSENSE REVENUE BOOSTER (MULTI-URL & AUTO-CLICKER)
+// ===================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-// ===================================================================
-// 6. GSC & ADSENSE REVENUE BOOSTER (FINAL CORRECTED VERSION)
-// ===================================================================
 
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
@@ -1191,16 +1188,16 @@ async function runGscTask(keyword, url, viewNumber) {
             }
         });
 
-        // Random User Agent from existing list
+        // Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. Google Search Entry (Organic Signal)
+        // 1. Google Search Simulation
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleSearchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000)); 
 
         // 2. Main Site Visit
-        console.log(`[EARNING-MODE] View #${viewNumber} | Target Stay: 30-35s`);
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Target Stay: 30-35s`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
@@ -1208,19 +1205,17 @@ async function runGscTask(keyword, url, viewNumber) {
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); // 30 to 35 Seconds
+        const targetStayTime = randomInt(30000, 35000); 
 
         // 3. Human Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
             const distance = randomInt(300, 500);
             await page.evaluate((d) => window.scrollBy(0, d), distance);
             
-            // Mouse Jiggling (Anti-Bot)
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 Ad Clicker (Probability: 15-20% for safe earning)
+            // 🔥 Ad Clicker (Probability: 18% - Har 5-6 view mein ek click)
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
@@ -1228,14 +1223,13 @@ async function runGscTask(keyword, url, viewNumber) {
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`[AD-CLICK] Targeting High-Value Ad...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Targeting Ad for Revenue...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await new Promise(r => setTimeout(r, 1000));
                         
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`[SUCCESS] Ad Clicked! ✅`);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        // Stay on advertiser site for valid revenue
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
@@ -1248,43 +1242,45 @@ async function runGscTask(keyword, url, viewNumber) {
         console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
     } finally {
         if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
-            browser = null;
         }
     }
 }
 
 // ===================================================================
-// Tool 6 Endpoint (Connecting back to /start-task)
+// Tool 6 Endpoint (Updated for Multi-URL Rotation)
 // ===================================================================
 app.post('/start-task', async (req, res) => {
-    const { keyword, url, views = 5 } = req.body;
+    // Frontend ab 'urls' (Array) bhej raha hai
+    const { keyword, urls, views = 1000 } = req.body;
     const totalViews = parseInt(views);
 
-    if (!keyword || !url) {
-        return res.status(400).json({ success: false, message: "Keyword and URL are required!" });
+    if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).json({ success: false, message: "Keyword and at least one URL are required!" });
     }
 
-    // Immediate response to frontend to prevent timeout error
     res.status(200).json({ 
         success: true, 
-        message: `Revenue Task started for ${keyword}. Processing ${totalViews} views.` 
+        message: `Multi-Site Task Started. Keyword: ${keyword}. Distributing ${totalViews} views across ${urls.length} sites.` 
     });
 
     // Background Execution
     (async () => {
         for (let i = 1; i <= totalViews; i++) {
-            console.log(`[QUEUE] Processing View #${i} of ${totalViews}`);
-            await runGscTask(keyword, url, i); 
+            // Randomly ek URL select karna (Distribution Logic)
+            const currentUrl = urls[Math.floor(Math.random() * urls.length)];
+            
+            console.log(`[QUEUE] View #${i}/${totalViews} | Target Site: ${currentUrl}`);
+            await runGscTask(keyword, currentUrl, i); 
 
             if (i < totalViews) {
-                console.log(`Waiting 20 seconds to clear RAM...`);
-                await new Promise(r => setTimeout(r, 20000));
+                // Cooldown to prevent server/RAM crash
+                const cooldown = i % 10 === 0 ? 30000 : 15000; // Har 10 view baad 30s ka break
+                console.log(`Waiting ${cooldown/1000}s for next session...`);
+                await new Promise(r => setTimeout(r, cooldown));
             }
         }
-        console.log("--- ALL GSC REVENUE VIEWS FINISHED ---");
+        console.log("--- ALL MULTI-SITE VIEWS FINISHED ---");
     })();
 });
 // ===================================================================
