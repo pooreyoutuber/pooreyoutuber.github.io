@@ -1288,126 +1288,112 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (MULTI-DEVICE + LIKE + SUBSCRIBE)
 // =============================
+// ===================================================================
+// 7. FINAL YOUTUBE BOOSTER: FULL LENGTH WATCH + 15s POST-WAIT
+// ===================================================================
+
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser = null;
     try {
-        const referrers = ['https://t.co/', 'https://wa.me/', 'https://lnkd.in/', 'https://l.facebook.com/'];
-        const randomReferrer = referrers[Math.floor(Math.random() * referrers.length)];
-
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 0, // Timeout protection for long videos
+            protocolTimeout: 0,
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage', 
-                '--disable-gpu',
-                '--single-process', // RAM Optimization for Render
-                '--autoplay-policy=no-user-gesture-required'
+                '--single-process'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(0);
-        await page.setDefaultTimeout(0);
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        
+        // Step 1: Google par jana organic signal ke liye
+        console.log(`[VIEW #${viewNumber}] Navigating to Google...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
 
-        // Block unnecessary assets to save RAM
-        await page.setRequestInterception(true);
-        page.on('request', (req) => {
-            if (['image', 'font', 'stylesheet'].includes(req.resourceType())) {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
+        // Step 2: Video par jana
+        console.log(`[VIEW #${viewNumber}] Opening Video URL...`);
+        await page.goto(videoUrl, { waitUntil: 'networkidle2' });
 
-        console.log(`[WORKING] View #${viewNumber} | Audio: ON | Source: ${randomReferrer}`);
-
-        await page.goto(videoUrl, { 
-            waitUntil: 'networkidle2', 
-            referer: randomReferrer 
-        });
-
-        // Main Interaction: Play, Quality 144p, and Random Scroll
-        await page.evaluate(async () => {
+        // Step 3: Video Watch and Interaction Logic
+        const watchResult = await page.evaluate(async () => {
             const video = document.querySelector('video');
             if (video) {
-                video.muted = false; // Audio ON as requested
-                video.volume = 0.5;
+                video.muted = false; // Audio ON
                 video.play();
 
-                // 1. Force Low Quality (360p/144p)
+                // Force Low Quality (144p/240p)
                 const settings = document.querySelector('.ytp-settings-button');
                 if (settings) {
                     settings.click();
-                    await new Promise(r => setTimeout(r, 1000));
-                    const menu = Array.from(document.querySelectorAll('.ytp-menuitem'));
-                    const quality = menu.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
-                    if (quality) {
-                        quality.click();
-                        await new Promise(r => setTimeout(r, 1000));
+                    await new Promise(r => setTimeout(r, 600));
+                    const menuItems = Array.from(document.querySelectorAll('.ytp-menuitem'));
+                    const qualityBtn = menuItems.find(i => i.innerText.includes('Quality') || i.innerText.includes('गुणवत्ता'));
+                    if (qualityBtn) {
+                        qualityBtn.click();
+                        await new Promise(r => setTimeout(r, 600));
                         const levels = document.querySelectorAll('.ytp-quality-menu .ytp-menuitem');
                         if (levels.length > 0) levels[levels.length - 1].click();
                     }
                 }
 
-                // 2. Random Scrolling Behavior (Mimic User)
-                const scrollInterval = setInterval(() => {
+                // Random Scrolling Activity
+                const scrollTask = setInterval(() => {
                     if (!video.ended) {
-                        const amount = Math.floor(Math.random() * 300) + 100;
-                        const dir = Math.random() > 0.3 ? 1 : -1;
-                        window.scrollBy(0, amount * dir);
+                        window.scrollBy(0, Math.floor(Math.random() * 400) + 200);
+                        setTimeout(() => window.scrollBy(0, -150), 4000);
                     }
-                }, 12000); // Every 12 seconds
+                }, 12000);
 
-                // 3. Wait for Video to Finish naturally
+                // Wait for Video to END (Full Length)
                 return new Promise((resolve) => {
                     const checkEnd = setInterval(() => {
-                        if (video.ended || video.currentTime >= video.duration - 1) {
+                        // Agar video khatam ho gayi ya end ke bilkul paas hai
+                        if (video.ended || video.currentTime >= video.duration - 0.2) {
                             clearInterval(checkEnd);
-                            clearInterval(scrollInterval);
-                            resolve();
+                            clearInterval(scrollTask);
+                            resolve("FINISHED");
                         }
-                    }, 5000);
+                    }, 1000);
                 });
             }
+            return "NO_VIDEO";
         });
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished. Closing Browser...`);
+        if (watchResult === "FINISHED") {
+            console.log(`[VIEW #${viewNumber}] Video completed. Waiting extra 15s before closing...`);
+            await new Promise(r => setTimeout(r, 15000)); // Aapka 10-15 sec ka extra gap
+        }
 
     } catch (error) {
-        console.error(`[CRITICAL-ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close().catch(() => {});
-            browser = null;
-            console.log(`[CLEANUP] Memory released. Ready for next view.`);
+            await browser.close();
+            console.log(`[CLEANUP] Browser #${viewNumber} closed.`);
         }
     }
 }
 
-// API ENDPOINT
+// Endpoint Loop
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
     const total = parseInt(views_count) || 1;
 
-    res.status(200).json({ 
-        success: true, 
-        message: `Boost Engine Started: ${total} views will be processed 1-by-1.` 
-    });
+    res.status(200).json({ success: true, message: `Boost process started for ${total} views.` });
 
-    // Sequential Loop (Strict 1-by-1)
     (async () => {
         for (let i = 1; i <= total; i++) {
             await runYoutubeBrowserTask(video_url, i);
-
+            
             if (i < total) {
-                console.log(`[GAP] Resting 20 seconds for RAM Cleanup...`);
-                await new Promise(r => setTimeout(r, 20000));
+                console.log(`[GAP] Waiting 10s cooldown to clear RAM...`);
+                await new Promise(r => setTimeout(r, 10000)); // Buffer gap before next browser
             }
         }
-        console.log("--- ALL TASKS COMPLETED ---");
+        console.log("--- MISSION ACCOMPLISHED ---");
     })();
 });
 // =================================================================
