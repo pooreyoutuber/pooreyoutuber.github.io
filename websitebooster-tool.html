@@ -7,30 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-            min-height: 100vh;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .glow-button {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-            transition: all 0.3s ease;
-        }
-        .glow-button:hover {
-            box-shadow: 0 0 35px rgba(59, 130, 246, 0.8);
-            transform: translateY(-2px);
-        }
+        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); min-height: 100vh; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glow-button { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); transition: all 0.3s ease; }
+        .glow-button:hover { box-shadow: 0 0 35px rgba(59, 130, 246, 0.8); transform: translateY(-2px); }
     </style>
 </head>
 <body class="text-slate-200 antialiased">
-
-    <div id="organic-player-placeholder" style="position:absolute; top:-9999px; left:-9999px;">
-        <div id="yt-player"></div>
-    </div>
 
     <header class="p-6">
         <div class="container mx-auto flex justify-between items-center">
@@ -40,14 +23,8 @@
                 </div>
                 <span class="text-2xl font-black tracking-tighter text-white">BOOST<span class="text-blue-500">PRO</span></span>
             </div>
-            <div class="hidden md:flex items-center gap-6 text-sm font-medium">
-                <span class="flex items-center gap-2 text-green-400">
-                    <span class="relative flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                    </span>
-                    Cloud Nodes: Active
-                </span>
+            <div class="hidden md:flex items-center gap-6 text-sm font-medium text-green-400">
+                <i class="fa-solid fa-server"></i> Cloud Nodes: Online
             </div>
         </div>
     </header>
@@ -57,150 +34,90 @@
             
             <div>
                 <h1 class="text-5xl font-extrabold text-white leading-tight mb-6">
-                    Boost Your <span class="text-blue-500">YouTube</span> Views Instantly.
+                    Boost Your <span class="text-blue-500">YouTube</span> Channel.
                 </h1>
                 <p class="text-slate-400 text-lg mb-8">
-                    Our AI-driven cloud system delivers organic-quality views. Submit your link, and we take care of the rest 24/7.
+                    Ab timing ki chinta chhodo! Humara AI khud decide karega best watch-time taaki aapke views 100% safe rahein.
                 </p>
-                <ul class="space-y-4">
-                    <li class="flex items-center gap-3 text-sm">
-                        <i class="fa-solid fa-circle-check text-blue-500"></i> Hybrid IP (Local + Cloud) Delivery
-                    </li>
-                    <li class="flex items-center gap-3 text-sm">
-                        <i class="fa-solid fa-circle-check text-blue-500"></i> Remote Render Deployment
-                    </li>
-                    <li class="flex items-center gap-3 text-sm">
-                        <i class="fa-solid fa-circle-check text-blue-500"></i> YouTube Studio Verified
-                    </li>
-                </ul>
             </div>
 
             <div class="glass p-8 rounded-3xl shadow-2xl">
-                <form id="orderForm" class="space-y-5">
+                <form id="orderForm" class="space-y-6">
                     <div>
-                        <label class="block text-xs uppercase font-bold text-slate-500 mb-2 ml-1">Video Destination</label>
+                        <label class="block text-xs uppercase font-bold text-slate-500 mb-2 ml-1">Video Link</label>
                         <div class="relative">
                             <i class="fa-brands fa-youtube absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
                             <input type="url" id="videoUrl" required
                                 class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-4 pl-12 pr-4 focus:border-blue-500 outline-none transition" 
-                                placeholder="Paste YouTube Link Here">
+                                placeholder="Paste YouTube Link">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs uppercase font-bold text-slate-500 mb-2 ml-1">Quantity</label>
-                            <input type="number" id="qty" value="10" min="1" max="50"
-                                class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-4 px-4 focus:border-blue-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs uppercase font-bold text-slate-500 mb-2 ml-1">Watch Time (s)</label>
-                            <input type="number" id="duration" value="60" min="30"
-                                class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-4 px-4 focus:border-blue-500 outline-none transition">
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-slate-500 mb-2 ml-1">Total Views</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-eye absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                            <input type="number" id="qty" value="10" min="1" max="100"
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-4 pl-12 pr-4 focus:border-blue-500 outline-none transition">
                         </div>
                     </div>
 
                     <button type="submit" id="submitBtn"
                         class="w-full bg-blue-600 text-white font-black py-5 rounded-xl glow-button uppercase tracking-widest text-sm">
-                        Execute Cloud Boost
+                        Start Boost Engine 🚀
                     </button>
                 </form>
 
                 <div id="statusArea" class="hidden mt-6 space-y-4">
-                    <div class="flex justify-between text-xs font-bold uppercase">
-                        <span id="statusText">Connecting...</span>
+                    <div class="flex justify-between text-xs font-bold uppercase text-blue-400">
+                        <span id="statusText">Deploying Nodes...</span>
                         <span id="percent">0%</span>
                     </div>
                     <div class="w-full bg-slate-800 rounded-full h-2">
                         <div id="progressBar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
-                    <p class="text-[10px] text-center text-slate-500 italic">Connected to Cloud Engine + Local Node</p>
                 </div>
             </div>
-
         </div>
     </main>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        let ytPlayer;
-
-        // Extract Video ID Helper
-        function extractVideoId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            if (match && match[2].length === 11) return match[2];
-            if (url.includes('shorts/')) return url.split('shorts/')[1].split('?')[0];
-            return null;
-        }
-
         document.getElementById('orderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const btn = document.getElementById('submitBtn');
             const statusArea = document.getElementById('statusArea');
-            const bar = document.getElementById('progressBar');
-            const percent = document.getElementById('percent');
-            const statusText = document.getElementById('statusText');
-
             const videoUrl = document.getElementById('videoUrl').value;
             const qty = document.getElementById('qty').value;
-            const duration = document.getElementById('duration').value;
-            const videoId = extractVideoId(videoUrl);
 
-            // UI Initial state
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Syncing IP Nodes...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Processing...';
             statusArea.classList.remove('hidden');
-            bar.style.width = '0%';
-            percent.innerText = '0%';
 
             try {
-                // 1. ORGANIC BOOST (Using User's REAL IP in background)
-                if (videoId && window.YT) {
-                    ytPlayer = new YT.Player('yt-player', {
-                        height: '1', width: '1', videoId: videoId,
-                        playerVars: { 'autoplay': 1, 'mute': 1, 'loop': 1, 'playlist': videoId },
-                        events: { 'onReady': (event) => event.target.playVideo() }
-                    });
-                    console.log("Local Node Started: View triggered from current IP.");
-                }
-
-                // 2. BACKEND CLOUD BOOST (Traffic Source Simulation)
                 const response = await fetch('https://pooreyoutuber-github-io-v2fo.onrender.com/api/real-view-boost', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        video_url: videoUrl,
-                        views_count: qty,
-                        watch_time: duration
-                    })
+                    body: JSON.stringify({ video_url: videoUrl, views_count: qty })
                 });
 
                 if (response.ok) {
-                    statusText.innerText = "Cloud Engine Active!";
                     let width = 0;
                     const interval = setInterval(() => {
                         if (width >= 100) {
                             clearInterval(interval);
-                            btn.innerHTML = "Threads Running in Background";
-                            btn.style.backgroundColor = "#16a34a";
-                            statusText.innerText = "Views syncing to YouTube Studio...";
+                            btn.innerHTML = "Success! Task Active ✅";
+                            btn.className = "w-full bg-green-600 text-white font-black py-5 rounded-xl uppercase text-sm";
                         } else {
-                            width += 2;
-                            bar.style.width = width + '%';
-                            percent.innerHTML = width + '%';
+                            width += 1;
+                            document.getElementById('progressBar').style.width = width + '%';
+                            document.getElementById('percent').innerText = width + '%';
                         }
-                    }, 300);
-                } else {
-                    throw new Error("Server Error");
+                    }, 50);
                 }
-
             } catch (err) {
-                console.error(err);
-                alert("Error: " + err.message);
+                alert("Server Connection Failed!");
                 btn.disabled = false;
-                btn.innerHTML = "Execute Cloud Boost";
+                btn.innerHTML = "Start Boost Engine 🚀";
             }
         });
     </script>
