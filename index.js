@@ -1167,75 +1167,71 @@ async function runGscTask(keyword, url, viewNumber) {
             headless: "new",
             args: [
                 '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
+                '--disable-setuid-sandbox',
+                '--window-size=1920,1080', // Strict Desktop Size
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
         
-        // Anti-Bot: Set Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        // 1. FORCE DESKTOP MODE
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        await page.setViewport({ width: 1920, height: 1080, isMobile: false, hasTouch: false });
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
+        // 2. SEARCH & ENTRY
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        await page.goto(googleUrl, { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 4000)); 
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
+        console.log(`[DESKTOP-MODE] View #${viewNumber} | Loading: ${url}`);
+        await page.goto(url, { waitUntil: 'networkidle2', referer: googleUrl });
+
+        // 3. REAL MOUSE SIMULATION LOGIC (For High CPC)
+        // Hum mouse ko random corners se move karenge taaki bot detection bypass ho
+        const moveMouseHumanly = async () => {
+            for (let i = 0; i < 5; i++) {
+                const x = Math.floor(Math.random() * 800) + 100;
+                const y = Math.floor(Math.random() * 600) + 100;
+                await page.mouse.move(x, y, { steps: 25 }); // Smooth movement
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        };
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        const stayDuration = 60000; // 60 seconds stay for revenue count
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Mouse Movement (Bypass Bot Checks)
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+        while (Date.now() - startTime < stayDuration) {
+            await moveMouseHumanly();
+            await page.evaluate(() => window.scrollBy({ top: 300, behavior: 'smooth' }));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+            // 4. SMART AD-CLICK (Safe CTR: 5-10%)
+            if (Math.random() < 0.10) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                    if (box && box.width > 20) {
+                        console.log(`🎯 [MOUSE-CLICK] Moving to Ad & Clicking for Revenue...`);
+                        // Ad ke center par slow mouse move
+                        await page.mouse.move(box.x + box.width/2, box.y + box.height/2, { steps: 30 });
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
                         
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        // IMPORTANT: Click ke baad advertiser site par 25s activity
+                        console.log(`✅ [REVENUE-WAIT] Staying on advertiser page for CPC...`);
+                        await new Promise(r => setTimeout(r, 25000));
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Success.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
 
