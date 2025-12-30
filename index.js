@@ -1288,8 +1288,6 @@ app.post('/start-task', async (req, res) => {
 // 7. REAL HUMAN VIEW BOOSTER (CRASH-PROOF & GOOGLE SEARCH BYPASS)
 // ===================================================================
 
-const puppeteer = require('puppeteer');
-
 // Function jo actual browsing karega
 async function runYoutubeBrowserTask(videoUrl, viewNumber, watchTimeSeconds) {
     let browser;
