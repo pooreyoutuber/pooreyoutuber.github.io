@@ -1301,7 +1301,7 @@ app.post('/start-task', async (req, res) => {
 async function runYoutubeBrowserTask(video_url, viewNumber, watchTimeSec) {
     let browser;
     try {
-        // 1. FRESH BROWSER LAUNCH (Sequential Mode)
+        // 1. FRESH BROWSER (RAM Bachane ke liye har view ke baad band hoga)
         browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -1316,40 +1316,45 @@ async function runYoutubeBrowserTask(video_url, viewNumber, watchTimeSec) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1920, height: 1080 });
         
-        // Anti-Bot: Chrome Masking
+        // Stealth User Agent (Desktop Mode)
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
 
-        // 2. ENTRY VIA GOOGLE (Referrer Spoofing)
+        // 2. GOOGLE.COM REFERRER (Trust badhane ke liye)
         await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
 
-        console.log(`[Tool 7] View #${viewNumber} | Target: ${video_url} | Time: ${watchTimeSec}s`);
+        console.log(`[Tool 7] View #${viewNumber} Started | Mode: 1-by-1`);
 
-        // 3. NAVIGATE TO VIDEO
+        // 3. TARGET VIDEO PAR JANA
         await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 90000 });
 
-        // 4. SMART PLAY & UNMUTE (Real-time count ke liye)
+        // 4. 🔥 VIDEO PLAY & UNMUTE LOGIC (Real-time trigger)
         await page.evaluate(async () => {
             const video = document.querySelector('video');
             if (video) {
-                video.muted = false; // Real signal
+                video.muted = false; // Unmute zaroori he real view ke liye
                 video.volume = 0.5;
+                
+                // Play Button Click Simulation
                 const playBtn = document.querySelector('.ytp-play-button');
                 if (playBtn) playBtn.click();
+                
                 video.play();
             }
         });
 
-        // 5. HUMAN-LIKE INTERACTION (Style 1-9 & 8 Pattern)
+        // 5. HUMAN-LIKE INTERACTION (Style 8 & 1-9 Random)
         const startTime = Date.now();
         const endTime = startTime + (watchTimeSec * 1000);
 
         while (Date.now() < endTime) {
-            // Mouse Movement (Circular/8 Pattern)
-            const angle = (Date.now() / 1000) * 2;
-            await page.mouse.move(500 + Math.sin(angle) * 200, 300 + Math.cos(angle) * 200, { steps: 10 });
+            // "8" Pattern Mouse Movement
+            const t = Date.now() / 1000;
+            const x = 500 + Math.sin(t) * 250;
+            const y = 300 + Math.sin(2 * t) / 2 * 250; 
+            await page.mouse.move(x, y, { steps: 10 });
 
-            // Random Human Scroll (Comments/Description check)
-            if (Math.random() < 0.3) {
+            // Random Human Scroll (Shorts ho ya Long, niche-upar check karega)
+            if (Math.random() < 0.35) {
                 await page.evaluate(() => window.scrollBy({ top: 400, behavior: 'smooth' }));
                 await new Promise(r => setTimeout(r, 3000));
                 await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
@@ -1357,23 +1362,45 @@ async function runYoutubeBrowserTask(video_url, viewNumber, watchTimeSec) {
             await new Promise(r => setTimeout(r, 5000));
         }
 
-        // 6. DEEP SESSION CLEANUP (History/Cookies Wipe)
+        // 6. DEEP CLEANUP (History aur Cookies Wipe)
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
         
-        console.log(`[SUCCESS] View #${viewNumber} Finished. Cookies Cleared.`);
+        console.log(`[SUCCESS] View #${viewNumber} Watch Time Complete. Data Cleared.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[CRITICAL ERROR] Tool 7 View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close();
-            // Render RAM Release Gap (V. Important)
-            await new Promise(r => setTimeout(r, 10000)); 
+            await browser.close(); 
+            // 15 Second ka wait taaki Render RAM puri tarah free kar de
+            await new Promise(r => setTimeout(r, 15000)); 
         }
     }
 }
+
+// --- UPDATED ENDPOINT FOR TOOL 7 ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    const total = parseInt(views_count) || 1;
+    const timing = parseInt(watch_time) || 45; // Default 45 seconds
+
+    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Task Started: ${total} views, 1-by-1 processing.` 
+    });
+
+    // Sequential Execution Loop (Zaroori he crashing rokne ke liye)
+    (async () => {
+        for (let i = 1; i <= total; i++) {
+            await runYoutubeBrowserTask(video_url, i, timing);
+        }
+        console.log("=== ALL YOUTUBE TASKS COMPLETED ===");
+    })();
+});
 
 // --- UPDATED ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
