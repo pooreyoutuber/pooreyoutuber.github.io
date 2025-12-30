@@ -1284,10 +1284,17 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
+// ===================================================================
+// 7. REAL HUMAN VIEW BOOSTER (CRASH-PROOF & GOOGLE SEARCH BYPASS)
+// ===================================================================
+
+const puppeteer = require('puppeteer');
+
+// Function jo actual browsing karega
 async function runYoutubeBrowserTask(videoUrl, viewNumber, watchTimeSeconds) {
     let browser;
     try {
-        console.log(`[STARTING] View #${viewNumber} | Strategy: Google Referral`);
+        console.log(`\n[VIEWER #${viewNumber}] Starting Mission...`);
 
         browser = await puppeteer.launch({
             headless: "new",
@@ -1296,128 +1303,116 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, watchTimeSeconds) {
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
-                '--mute-audio'
+                '--mute-audio',
+                '--disable-blink-features=AutomationControlled', // Bypass Bot Detection
             ]
         });
 
         const page = await browser.newPage();
         
-        // Human-like screen size
-        await page.setViewport({ width: 1280, height: 720 });
+        // --- STEP 1: FINGERPRINT BYPASS ---
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
 
-        // RAM Saver: Block heavy ads and images
+        // User Agent set karein
+        const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
+        await page.setUserAgent(ua);
+
+        // RAM Saver: फालतू images aur fonts block karein
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             if (['image', 'font'].includes(req.resourceType())) req.abort();
             else req.continue();
         });
 
-        // 1. PELE GOOGLE.COM KHULEGA
+        // --- STEP 2: GOOGLE SE ENTRY ---
+        console.log(`[View #${viewNumber}] Step 1: Visiting Google...`);
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        console.log(`[STEP 1] Google.com opened.`);
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 2000));
 
-        // 2. GOOGLE SE YOUTUBE VIDEO PAR JAANA (Referrer Bypass)
+        // --- STEP 3: VIDEO LOAD (Referrer Google Rakha Hai) ---
+        console.log(`[View #${viewNumber}] Step 2: Opening Video via Referrer...`);
         await page.goto(videoUrl, { 
             waitUntil: 'domcontentloaded', 
             referer: 'https://www.google.com/' 
         });
-        console.log(`[STEP 2] Video opened via Google Referrer.`);
 
-        // 3. VIDEO PLAY & INTERACTION
+        // --- STEP 4: VIDEO PLAY ---
         await page.evaluate(() => {
             const v = document.querySelector('video');
             if (v) { v.muted = true; v.play(); }
         });
 
-        // 4. WATCHING + RANDOM SCROLLING (Human Like)
+        // --- STEP 5: WATCHING & HUMAN INTERACTION ---
         let elapsed = 0;
-        while (elapsed < watchTimeSeconds) {
-            const gap = 15; 
-            await new Promise(r => setTimeout(r, gap * 1000));
-            elapsed += gap;
+        const interval = 20; // 20-20 seconds ke gap mein scrolling hogi
 
-            // Random Scroll Down/Up
+        while (elapsed < watchTimeSeconds) {
+            await new Promise(r => setTimeout(r, interval * 1000));
+            elapsed += interval;
+
+            // Random Interaction (Scrolling)
             await page.evaluate(() => {
                 const scrollAmt = Math.floor(Math.random() * 300) + 100;
                 window.scrollBy(0, scrollAmt);
-                setTimeout(() => window.scrollBy(0, -50), 2000); 
+                // 2 second baad thoda upar scroll (Natural behavior)
+                setTimeout(() => window.scrollBy(0, -50), 2000);
             });
-            
+
             console.log(`[View #${viewNumber}] Watching: ${elapsed}/${watchTimeSeconds}s`);
         }
 
-        // 5. POST-WATCH ACTIONS (Description & Comments Check)
-        console.log(`[STEP 3] Checking Description & Comments...`);
-        await page.evaluate(async () => {
-            // Scroll to bottom for comments
-            window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' });
-            await new Promise(r => setTimeout(r, 3000));
-            // Scroll back to description
-            window.scrollTo({ top: 100, behavior: 'smooth' });
+        // --- STEP 6: DESCRIPTION & COMMENTS CHECK ---
+        console.log(`[View #${viewNumber}] Step 3: Checking Engagement...`);
+        await page.evaluate(() => {
+            window.scrollTo({ top: 800, behavior: 'smooth' }); // Scroll to comments
         });
-        await new Promise(r => setTimeout(r, 4000));
-
-        console.log(`[SUCCESS] View #${viewNumber} Completed Task.`);
+        await new Promise(r => setTimeout(r, 5000));
+        
+        console.log(`[SUCCESS] View #${viewNumber} Job Done!`);
 
     } catch (error) {
         console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // 6. PURA CLOSE & MEMORY CLEAR
+            // Puri tarah clean up
             const pages = await browser.pages();
             for (const p of pages) await p.close();
             await browser.close();
             
-            console.log(`[CLEANUP] Browser closed. 15s RAM Flush...`);
-            await new Promise(r => setTimeout(r, 15000));
+            console.log(`[CLEANUP] Memory Cleared. 15s Gap for Render RAM...`);
+            await new Promise(r => setTimeout(r, 15000)); 
         }
     }
 }
 
-// --- TOOL 7 API ENDPOINT ---
+// --- API ENDPOINT (Frontend Connection) ---
 app.post('/api/real-view-boost', async (req, res) => {
-    // Frontend se teenon parameters le rahe hain
     const { video_url, views_count, watch_time } = req.body;
     
+    // Inputs validate karein
     const totalViews = parseInt(views_count) || 1;
-    const timeToWatch = parseInt(watch_time) || 60; // Seconds mein
+    const timePerView = parseInt(watch_time) || 60; // default 60 sec
 
     if (!video_url) {
-        return res.status(400).json({ error: "Video URL is mandatory!" });
+        return res.status(400).json({ error: "Video URL jaruri hai!" });
     }
 
-    // Pehle hi response bhej do taaki frontend hang na ho
+    // Frontend ko turant success bhej dein
     res.status(200).json({ 
         success: true, 
-        message: `Engine Started: ${totalViews} views, ${timeToWatch}s each. Sequential Mode Active.` 
+        message: `Engine Started: ${totalViews} Views, ${timePerView}s each. 1-by-1 mode.` 
     });
 
-    // Background Queue (Self-Executing Loop)
+    // Background Worker (Sequential)
     (async () => {
-        console.log(`--- QUEUE STARTED: TOTAL ${totalViews} VIEWS ---`);
+        console.log(`\n=== NEW BOOST TASK INITIATED ===`);
         for (let i = 1; i <= totalViews; i++) {
-            // Ye await zaroori hai, taaki ek khatam hone par hi agla shuru ho
-            await runYoutubeBrowserTask(video_url, i, timeToWatch);
+            // Wait karega jab tak ek view complete na ho jaye
+            await runYoutubeBrowserTask(video_url, i, timePerView);
         }
-        console.log("--- ALL TASKS COMPLETED SUCCESSFULLY ---");
-    })();
-});
-
-// --- NEW ENDPOINT TO START TOOL 7 ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count } = req.body;
-    const total = parseInt(views_count) || 1;
-
-    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
-
-    res.status(200).json({ success: true, message: `Task started: ${total} views (1-by-1).` });
-
-    (async () => {
-        for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, i);
-            if (i < total) await new Promise(r => setTimeout(r, 15000));
-        }
+        console.log(`=== ALL ${totalViews} VIEWS FINISHED ===`);
     })();
 });
 
