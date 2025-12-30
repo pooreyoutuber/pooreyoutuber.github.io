@@ -1170,72 +1170,73 @@ async function runGscTask(keyword, url, viewNumber) {
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
+                '--window-size=1920,1080',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
         
-        // Anti-Bot: Set Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        // 1. FORCE DESKTOP MODE (Premium CPC ke liye)
+        await page.setViewport({ width: 1920, height: 1080 });
+        
+        const desktopUAs = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+        ];
+        await page.setUserAgent(desktopUAs[Math.floor(Math.random() * desktopUAs.length)]);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        // 2. HIGH CPC REFERRER (LinkedIn ya Google Organic)
+        const premiumReferrers = [
+            `https://www.google.com/search?q=${encodeURIComponent(keyword)}`,
+            `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(keyword)}`,
+            'https://www.google.com/'
+        ];
+        const selectedReferrer = premiumReferrers[Math.floor(Math.random() * premiumReferrers.length)];
+        await page.setExtraHTTPHeaders({ 'Referer': selectedReferrer });
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
+        console.log(`[Tool 6] View #${viewNumber} | Desktop Mode | Source: ${selectedReferrer}`);
+
+        // 3. PAGE VIEW DURATION (30-60 Seconds Random)
+        const stayDuration = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000 });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
+        // 4. HUMAN-LIKE SCROLLING & CLICKING
+        while (Date.now() - startTime < stayDuration) {
+            // Smooth Scroll
+            const dist = Math.floor(Math.random() * 400) + 200;
+            await page.evaluate((d) => window.scrollBy({ top: d, behavior: 'smooth' }), dist);
             
-            // Mouse Movement (Bypass Bot Checks)
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            // Random Mouse Movement
+            await page.mouse.move(Math.floor(Math.random() * 800), Math.floor(Math.random() * 600), { steps: 20 });
+            await new Promise(r => setTimeout(r, Math.floor(Math.random() * 5000) + 3000));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+            // 🔥 HIGH-VALUE AD CLICKER (Smart Detection)
+            if (Math.random() < 0.35) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], [id^="google_ads_iframe"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        console.log(`[AD-CLICK] High CPC Ad Clicked! ✅`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        // Advertiser site par wait (Zaroori he valid earning ke liye)
+                        await new Promise(r => setTimeout(r, 25000));
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[SUCCESS] Tool 6: View #${viewNumber} completed.`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
 
