@@ -1160,85 +1160,105 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-async function runGscTask(keyword, url, viewNumber) {
+async function runHighCpcTool6(keyword, url, viewNumber) {
     let browser;
     try {
+        // 1. Launch with Clean Session & Stealth
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
                 '--window-size=1920,1080',
-                '--disable-blink-features=AutomationControlled'
+                '--disable-blink-features=AutomationControlled',
+                '--incognito' // Har baar naya session
             ]
         });
 
-        const page = await browser.newPage();
+        const context = await browser.createIncognitoBrowserContext();
+        const page = await context.newPage();
         
-        // 1. FORCE DESKTOP MODE (Premium CPC ke liye)
+        // Browser fingerprints clear karna
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
+
         await page.setViewport({ width: 1920, height: 1080 });
-        
-        const desktopUAs = [
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-        ];
-        await page.setUserAgent(desktopUAs[Math.floor(Math.random() * desktopUAs.length)]);
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
 
-        // 2. HIGH CPC REFERRER (LinkedIn ya Google Organic)
-        const premiumReferrers = [
-            `https://www.google.com/search?q=${encodeURIComponent(keyword)}`,
-            `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(keyword)}`,
-            'https://www.google.com/'
-        ];
-        const selectedReferrer = premiumReferrers[Math.floor(Math.random() * premiumReferrers.length)];
-        await page.setExtraHTTPHeaders({ 'Referer': selectedReferrer });
+        // 2. High CPC Referrer (Google/LinkedIn)
+        await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
 
-        console.log(`[Tool 6] View #${viewNumber} | Desktop Mode | Source: ${selectedReferrer}`);
+        console.log(`[START] View #${viewNumber} | Target: ${url}`);
 
-        // 3. PAGE VIEW DURATION (30-60 Seconds Random)
-        const stayDuration = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
+        // 3. Visit Site
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000 });
 
+        // 4. SEARCH BAR INTERACTION (CPC Boost karne ke liye)
+        try {
+            const searchInput = await page.$('input[type="text"], input[type="search"]');
+            if (searchInput) {
+                await searchInput.click();
+                await page.keyboard.type(keyword, { delay: 150 });
+                await new Promise(r => setTimeout(r, 2000));
+                console.log(`[HUMAN] Search bar interaction done.`);
+            }
+        } catch (e) { console.log("Search bar not found, moving to ads..."); }
+
+        // 5. MOUSE MOVEMENT & AD CLICKING (Top/Bottom Ads)
         const startTime = Date.now();
+        const stayDuration = Math.floor(Math.random() * (60000 - 35000 + 1)) + 35000; // 35-60s
 
-        // 4. HUMAN-LIKE SCROLLING & CLICKING
         while (Date.now() - startTime < stayDuration) {
-            // Smooth Scroll
-            const dist = Math.floor(Math.random() * 400) + 200;
-            await page.evaluate((d) => window.scrollBy({ top: d, behavior: 'smooth' }), dist);
+            // Random Human Scrolling
+            await page.evaluate(() => window.scrollBy({ top: Math.random() * 500, behavior: 'smooth' }));
             
-            // Random Mouse Movement
-            await page.mouse.move(Math.floor(Math.random() * 800), Math.floor(Math.random() * 600), { steps: 20 });
-            await new Promise(r => setTimeout(r, Math.floor(Math.random() * 5000) + 3000));
+            // Mouse ko randomly move karna (Anti-Bot)
+            await page.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 30 });
 
-            // 🔥 HIGH-VALUE AD CLICKER (Smart Detection)
-            if (Math.random() < 0.35) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], [id^="google_ads_iframe"]');
+            // 🔥 TARGET ADS (Search bar ke upar/niche ya sidebar)
+            if (Math.random() < 0.45) { // 45% chance to click
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`[AD-CLICK] High CPC Ad Clicked! ✅`);
+                    if (box && box.width > 10) {
+                        console.log(`\x1b[32m[CLICK] High CPC Ad Targeted! Clicking...\x1b[0m`);
+                        
+                        // Scroll to Ad smoothly
+                        await page.evaluate((b) => window.scrollTo({ top: b.y - 100, behavior: 'smooth' }), box);
+                        await new Promise(r => setTimeout(r, 1500));
+
+                        // Precision Click with Mouse
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 25 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         
-                        // Advertiser site par wait (Zaroori he valid earning ke liye)
-                        await new Promise(r => setTimeout(r, 25000));
+                        // Advertiser page par 25-40s rukna (High RPM ke liye zaroori he)
+                        console.log(`[INFO] Waiting on Advertiser site for RPM Boost...`);
+                        await new Promise(r => setTimeout(r, 35000));
                         break; 
                     }
                 }
             }
+            await new Promise(r => setTimeout(r, 4000));
         }
-        console.log(`[SUCCESS] Tool 6: View #${viewNumber} completed.`);
+
+        // 6. CLEANUP (History/Cookies Delete Simulation)
+        const client = await page.target().createCDPSession();
+        await client.send('Network.clearBrowserCookies');
+        await client.send('Network.clearBrowserCache');
+        
+        console.log(`[SUCCESS] View #${viewNumber} Finished & Session Cleared.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] Tool 6: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
+
+        
 
 // ===================================================================
 // Tool 6 Endpoint (Updated for Multi-Site Rotation)
