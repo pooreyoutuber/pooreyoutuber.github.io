@@ -1284,114 +1284,131 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
-const { chromium } = require('playwright');
-
-// --- TOOL 7: HUMAN-BEHAVIOR YOUTUBE BOOSTER ---
-
 async function runYoutubeBrowserTask(videoUrl, viewNumber, watchTimeSeconds) {
     let browser;
     try {
-        console.log(`\n[VIEWER #${viewNumber}] Strategy: Incognito + Google Entry`);
+        console.log(`\n[TASK] View #${viewNumber} | Time: ${watchTimeSeconds}s`);
 
-        // 1. Browser Launch
-        browser = await chromium.launch({ 
-            headless: true, // Render ke liye true hi rakhein
-            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        // 1. Browser Launch (Incognito & Stealth Flags)
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled', // Bot detection bypass
+                '--incognito' // Har baar fresh session
+            ]
         });
 
-        // 2. Fresh Incognito Context (Har view ke liye naya insaan)
-        const context = await browser.newContext({
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            viewport: { width: 1280, height: 720 }
+        const page = await browser.newPage();
+
+        // 2. RAM Saver: Faltu cheezein block karein
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            if (['image', 'font', 'stylesheet'].includes(req.resourceType())) {
+                req.abort();
+            } else {
+                req.continue();
+            }
         });
 
-        const page = await context.newPage();
+        // Random User Agent (List se select karein ya default use karein)
+        const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
+        await page.setUserAgent(ua);
 
-        // 3. RAM Saver: फालतu files block karein
-        await page.route('**/*.{png,jpg,jpeg,font,css}', route => route.abort());
+        // --- STEP 1: GOOGLE ENTRY ---
+        console.log(`[View #${viewNumber}] Step 1: Navigating to Google...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 3000));
 
-        // 4. STEP 1: GOOGLE.COM PAR JAANA
-        console.log(`[View #${viewNumber}] Step 1: Visiting Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle' });
-        await page.waitForTimeout(2000);
+        // --- STEP 2: OPEN VIDEO VIA REFERRER ---
+        console.log(`[View #${viewNumber}] Step 2: Opening Video (Referrer: Google)...`);
+        await page.goto(videoUrl, { 
+            waitUntil: 'domcontentloaded', 
+            referer: 'https://www.google.com/' 
+        });
 
-        // 5. STEP 2: VIDEO OPEN (Referer Google dikhega)
-        console.log(`[View #${viewNumber}] Step 2: Navigating to Video...`);
-        await page.goto(videoUrl, { referer: 'https://www.google.com/' });
+        // --- STEP 3: PLAY VIDEO ---
+        await page.evaluate(() => {
+            const v = document.querySelector('video');
+            if (v) { v.muted = true; v.play(); }
+        });
 
-        // 6. VIDEO PLAY
-        try {
-            const video = await page.locator('video');
-            await video.evaluate((v) => { v.muted = true; v.play(); });
-        } catch (e) { console.log("Auto-play started"); }
-
-        // 7. STEP 3: WATCHING + RANDOM SCROLLING
+        // --- STEP 4: WATCHING + RANDOM SCROLLING (Human Like) ---
         let elapsed = 0;
-        const scrollInterval = 20; // Har 20 second mein scroll
+        const interval = 20; // 20-20 seconds ke increments
 
         while (elapsed < watchTimeSeconds) {
-            await page.waitForTimeout(scrollInterval * 1000);
-            elapsed += scrollInterval;
+            await new Promise(r => setTimeout(r, interval * 1000));
+            elapsed += interval;
 
-            // Random scrolling jese insaan karte hain
-            await page.mouse.wheel(0, Math.floor(Math.random() * 500) + 100);
-            console.log(`[View #${viewNumber}] Progress: ${elapsed}/${watchTimeSeconds}s`);
+            // Random Scroll Down
+            await page.evaluate(() => {
+                const scrollAmt = Math.floor(Math.random() * 400) + 100;
+                window.scrollBy(0, scrollAmt);
+            });
             
-            // Beech mein thoda upar scroll (Natural behavior)
+            console.log(`[View #${viewNumber}] Watching: ${elapsed}/${watchTimeSeconds}s`);
+            
+            // Beech mein thoda upar scroll (Natural movement)
             if (elapsed % 60 === 0) {
-                await page.mouse.wheel(0, -200);
+                await page.evaluate(() => window.scrollBy(0, -150));
             }
         }
 
-        // 8. STEP 4: END ACTIONS (Description & Comments)
-        console.log(`[View #${viewNumber}] Step 3: Checking Description & Comments...`);
-        // Scroll to bottom (Comments area)
+        // --- STEP 5: ENGAGEMENT CHECK (Comments & Description) ---
+        console.log(`[View #${viewNumber}] Step 3: Checking Comments & Description...`);
+        // Scroll to comments area
         await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'smooth' }));
-        await page.waitForTimeout(4000);
+        await new Promise(r => setTimeout(r, 5000));
         
-        // Scroll back up (Description area)
-        await page.evaluate(() => window.scrollTo({ top: 200, behavior: 'smooth' }));
-        await page.waitForTimeout(3000);
+        // Scroll back to top
+        await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        await new Promise(r => setTimeout(r, 3000));
 
-        console.log(`[SUCCESS] View #${viewNumber} Completed ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
 
     } catch (error) {
         console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // 9. PURA CLOSE & MEMORY CLEAR
-            await browser.close(); 
-            console.log(`[CLEANUP] Memory released. 15s Gap...`);
-            // Render ki RAM flush hone ke liye gap
+            // 6. PURA CLOSE & 15s WAIT FOR RAM
+            await browser.close();
+            console.log(`[CLEANUP] Memory Cleared. 15s Gap for Render...`);
             await new Promise(r => setTimeout(r, 15000));
         }
     }
 }
 
-// --- API ENDPOINT ---
+// --- API ENDPOINT (Tool 7) ---
 app.post('/api/real-view-boost', async (req, res) => {
+    // Frontend se inputs le rahe hain
     const { video_url, views_count, watch_time } = req.body;
     
     const total = parseInt(views_count) || 1;
-    const timePerView = parseInt(watch_time) || 60;
+    const timePerView = parseInt(watch_time) || 60; // Seconds mein
 
-    if (!video_url) return res.status(400).json({ error: "URL missing" });
+    if (!video_url) {
+        return res.status(400).json({ error: "URL is required" });
+    }
 
-    // Pehle response bhej do
+    // Response turant bhej do taaki Frontend load na hota rahe
     res.status(200).json({ 
         success: true, 
-        message: `Task Started: ${total} views, ${timePerView}s each. 1-by-1 Processing.` 
+        message: `Task started: ${total} views, ${timePerView}s each. Sequential mode.` 
     });
 
-    // Background Process (Sequential)
+    // Background Queue (Ek waqt mein ek browser)
     (async () => {
+        console.log(`--- QUEUE STARTED ---`);
         for (let i = 1; i <= total; i++) {
             await runYoutubeBrowserTask(video_url, i, timePerView);
         }
-        console.log("=== ALL TASKS COMPLETED SUCCESSFULLY ===");
+        console.log(`--- ALL TASKS COMPLETED SUCCESSFULLY ---`);
     })();
 });
-                                        
+
 // =============================================================
 // --- SERVER START ---
 // ===================================================================
