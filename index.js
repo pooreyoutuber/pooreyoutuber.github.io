@@ -1284,86 +1284,92 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
- // --- TOOL 7: STABLE SEQUENTIAL YOUTUBE BOOSTER ---
-
-// Function jo ek single browser task handle karega
 async function runYoutubeBrowserTask(videoUrl, viewNumber, watchTimeSeconds) {
     let browser;
     try {
-        console.log(`\n[TASK START] View #${viewNumber} | URL: ${videoUrl} | Time: ${watchTimeSeconds}s`);
+        console.log(`[STARTING] View #${viewNumber} | Strategy: Google Referral`);
 
-        // 1. Browser Launch (Minimalistic Settings)
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage', // Render Memory Fix
+                '--disable-dev-shm-usage',
                 '--disable-gpu',
                 '--mute-audio'
             ]
         });
 
         const page = await browser.newPage();
+        
+        // Human-like screen size
+        await page.setViewport({ width: 1280, height: 720 });
 
-        // 2. RAM Saver: Stop images/fonts/css
+        // RAM Saver: Block heavy ads and images
         await page.setRequestInterception(true);
         page.on('request', (req) => {
-            const type = req.resourceType();
-            if (['image', 'font', 'stylesheet'].includes(type)) {
-                req.abort();
-            } else {
-                req.continue();
-            }
+            if (['image', 'font'].includes(req.resourceType())) req.abort();
+            else req.continue();
         });
 
-        // Random User Agent
-        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        await page.setUserAgent(ua);
+        // 1. PELE GOOGLE.COM KHULEGA
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        console.log(`[STEP 1] Google.com opened.`);
+        await new Promise(r => setTimeout(r, 3000));
 
-        // 3. Navigate & Play
-        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        // 2. GOOGLE SE YOUTUBE VIDEO PAR JAANA (Referrer Bypass)
+        await page.goto(videoUrl, { 
+            waitUntil: 'domcontentloaded', 
+            referer: 'https://www.google.com/' 
+        });
+        console.log(`[STEP 2] Video opened via Google Referrer.`);
 
-        // Force Play Logic
+        // 3. VIDEO PLAY & INTERACTION
         await page.evaluate(() => {
             const v = document.querySelector('video');
-            if (v) {
-                v.muted = true;
-                v.play();
-            }
+            if (v) { v.muted = true; v.play(); }
         });
 
-        console.log(`[WATCHING] Target: ${watchTimeSeconds}s. Do not close server...`);
-
-        // 4. Smart Wait Loop (Heartbeat to keep server alive)
+        // 4. WATCHING + RANDOM SCROLLING (Human Like)
         let elapsed = 0;
-        const interval = 10; // Check every 10s
-
         while (elapsed < watchTimeSeconds) {
-            await new Promise(r => setTimeout(r, interval * 1000));
-            elapsed += interval;
+            const gap = 15; 
+            await new Promise(r => setTimeout(r, gap * 1000));
+            elapsed += gap;
 
-            // Simple Activity to prevent timeout
-            await page.evaluate(() => window.scrollBy(0, 5));
-
-            if (elapsed % 60 === 0 || elapsed >= watchTimeSeconds) {
-                console.log(`[View #${viewNumber}] Progress: ${elapsed}/${watchTimeSeconds}s`);
-            }
+            // Random Scroll Down/Up
+            await page.evaluate(() => {
+                const scrollAmt = Math.floor(Math.random() * 300) + 100;
+                window.scrollBy(0, scrollAmt);
+                setTimeout(() => window.scrollBy(0, -50), 2000); 
+            });
+            
+            console.log(`[View #${viewNumber}] Watching: ${elapsed}/${watchTimeSeconds}s`);
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        // 5. POST-WATCH ACTIONS (Description & Comments Check)
+        console.log(`[STEP 3] Checking Description & Comments...`);
+        await page.evaluate(async () => {
+            // Scroll to bottom for comments
+            window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' });
+            await new Promise(r => setTimeout(r, 3000));
+            // Scroll back to description
+            window.scrollTo({ top: 100, behavior: 'smooth' });
+        });
+        await new Promise(r => setTimeout(r, 4000));
+
+        console.log(`[SUCCESS] View #${viewNumber} Completed Task.`);
 
     } catch (error) {
         console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // 5. Hard Cleanup
+            // 6. PURA CLOSE & MEMORY CLEAR
             const pages = await browser.pages();
             for (const p of pages) await p.close();
             await browser.close();
             
-            console.log(`[CLEANUP] Browser closed. Waiting 15s for RAM flush...`);
-            // Aapka bataya hua 15-second gap
+            console.log(`[CLEANUP] Browser closed. 15s RAM Flush...`);
             await new Promise(r => setTimeout(r, 15000));
         }
     }
