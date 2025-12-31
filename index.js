@@ -1291,14 +1291,14 @@ app.post('/start-task', async (req, res) => {
 async function runYoutubeBrowserTask(video_url, viewNumber, watchTimeParam) {
     let browser;
     try {
-        // 1. HAR BAAR NAYA DEVICE & USER AGENT
+        // 1. FRESH DEVICE ROTATION
         const devices = [
-            { name: 'Desktop_Windows', width: 1920, height: 1080, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' },
-            { name: 'Mobile_iPhone', width: 390, height: 844, ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1' },
-            { name: 'Tablet_iPad', width: 820, height: 1180, ua: 'Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1' }
+            { name: 'Desktop', width: 1920, height: 1080, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36' },
+    
         ];
         const device = devices[Math.floor(Math.random() * devices.length)];
 
+        // Browser Launch
         browser = await puppeteer.launch({
             headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', `--window-size=${device.width},${device.height}`]
@@ -1308,90 +1308,91 @@ async function runYoutubeBrowserTask(video_url, viewNumber, watchTimeParam) {
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.width, height: device.height });
 
-        // 2. GOOGLE.COM ENTRY (Organic Source)
-        console.log(`[LOG] View #${viewNumber} | Step 1: Going to Google.com`);
+        // STEP 1: GOOGLE.COM ENTRY
+        console.log(`[RENDER LOG] View #${viewNumber} | Device: ${device.name} | Opening Google...`);
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 2000));
 
-        // 3. TARGET VIDEO LOAD
-        console.log(`[LOG] View #${viewNumber} | Step 2: Opening Video Link on ${device.name}`);
+        // STEP 2: OPEN VIDEO LINK
+        console.log(`[RENDER LOG] View #${viewNumber} | Opening Video: ${video_url}`);
         await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 90000 });
 
-        // 4. PLAYBACK & MONITORING LOGIC
+        // INITIAL PLAY TRIGGER
         await page.evaluate(() => {
             const v = document.querySelector('video');
-            if (v) {
-                v.muted = false; 
-                v.volume = 0.7;
-                const playBtn = document.querySelector('.ytp-play-button');
-                if (playBtn) playBtn.click();
-                v.play();
-            }
+            if (v) { v.muted = false; v.volume = 0.7; v.play(); }
+            const playBtn = document.querySelector('.ytp-play-button');
+            if (playBtn) playBtn.click();
         });
 
+        // STEP 3: WATCHING LOOP (With Anti-Pause & Logs)
         const totalSeconds = parseInt(watchTimeParam);
-        const endTime = Date.now() + (totalSeconds * 1000);
+        const stopAt = Date.now() + (totalSeconds * 1000);
 
-        // Render Logs Monitoring Loop
-        while (Date.now() < endTime) {
+        while (Date.now() < stopAt) {
+            // Check Video Status
             const status = await page.evaluate(() => {
-                const v = document.querySelector('video');
-                if (!v) return "Video Not Found";
-                if (v.paused) {
-                    v.play(); // Auto-fix if paused
-                    const confirmBtn = document.querySelector('.yt-confirm-dialog-confirm-button');
-                    if (confirmBtn) confirmBtn.click();
-                    return "Paused (Fixed Now)";
+                const video = document.querySelector('video');
+                if (!video) return "VIDEO_NOT_FOUND";
+                if (video.paused) {
+                    video.play(); // Auto-fix
+                    const confirm = document.querySelector('.yt-confirm-dialog-confirm-button');
+                    if (confirm) confirm.click();
+                    return "PAUSED_BUT_FIXED ❌🔄";
                 }
-                return "Playing ✅";
+                return "PLAYING_STEADY ✅";
             });
 
-            const timeLeft = Math.round((endTime - Date.now()) / 1000);
-            console.log(`[RENDER LOG] View #${viewNumber} | Status: ${status} | Time Left: ${timeLeft}s | Device: ${device.name}`);
+            const timeLeft = Math.round((stopAt - Date.now()) / 1000);
+            console.log(`[LIVE STATUS] View #${viewNumber} | ${status} | Time Left: ${timeLeft}s`);
 
-            // STYLE 0-9 MOUSE & SCROLLING
-            await page.mouse.move(Math.random() * device.width, Math.random() * device.height, { steps: 10 });
+            // 0-9 Style Mouse Move & Scrolling
+            await page.mouse.move(Math.random() * device.width, Math.random() * device.height, { steps: 20 });
             if (Math.random() < 0.3) {
                 await page.evaluate(() => window.scrollBy({ top: 200, behavior: 'smooth' }));
             }
 
-            await new Promise(r => setTimeout(r, 8000)); // Every 8s status update
+            await new Promise(r => setTimeout(r, 5000)); // Check status every 5 seconds
         }
 
-        // 5. DEEP CLEANUP (History & Cookies Wipe)
+        // STEP 4: FINAL SCROLLING BEFORE CLOSE
+        console.log(`[RENDER LOG] Timing Over. Final Scrolling...`);
+        await page.evaluate(() => window.scrollTo({ top: 500, behavior: 'smooth' }));
+        await new Promise(r => setTimeout(r, 3000));
+
+        // STEP 5: DEEP CLEANUP
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
-        console.log(`[LOG] View #${viewNumber} | Step 3: Session Wiped Successfully.`);
+        console.log(`[RENDER LOG] View #${viewNumber} SUCCESS. Session Cleared.`);
 
     } catch (error) {
-        console.error(`[CRITICAL ERR] View #${viewNumber}: ${error.message}`);
+        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[LOG] View #${viewNumber} | Step 4: Browser Closed. Waiting 15s for RAM release.`);
-            await new Promise(r => setTimeout(r, 15000)); // 1-by-1 Sequential Gap
+            // 15s Sequential Gap for RAM
+            console.log(`[RENDER LOG] Browser Closed. 15s Gap for next view...`);
+            await new Promise(r => setTimeout(r, 15000)); 
         }
     }
 }
 
-// --- UPDATED ENDPOINT ---
+// --- FINAL ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     
-    if (!video_url || !watch_time) return res.status(400).json({ error: "Data missing" });
+    if (!video_url || !watch_time) return res.status(400).json({ error: "Data incomplete" });
 
-    res.status(200).json({ success: true, message: "Task Started 1-by-1. Check Render Logs." });
+    res.status(200).json({ success: true, message: "1-by-1 Task Started. Monitor Render Logs." });
 
     (async () => {
         for (let i = 1; i <= parseInt(views_count); i++) {
             await runYoutubeBrowserTask(video_url, i, watch_time);
         }
-        console.log("=== ALL VIEWS FINISHED ===");
+        console.log("=== ALL TASKS COMPLETED SUCCESSFULLY ===");
     })();
 });
-                                                               
-        
 
 // --- UPDATED ENDPOINT TO RECEIVE TIMING ---
 app.post('/api/real-view-boost', async (req, res) => {
