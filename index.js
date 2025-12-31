@@ -1236,7 +1236,7 @@ async function runGscTask(keyword, url, viewNumber) {
             await new Promise(r => setTimeout(r, 10000)); // 1-by-1 gap
         }
   }
-
+}
 // ===================================================================
 // Tool 6 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
