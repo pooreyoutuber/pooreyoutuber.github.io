@@ -1291,57 +1291,68 @@ app.post('/start-task', async (req, res) => {
 async function runYoutubeBrowserTask(videoUrl, viewNumber, perViewTiming) {
     let browser;
     try {
-        console.log(`\n[VIEW #${viewNumber}] Starting New Session...`);
+        console.log(`\n[VIEW #${viewNumber}] Task Starting...`);
 
-        // 1. Browser Launch with Anti-Detection
+        // 1. Launch Browser with Audio & High Performance
         browser = await puppeteer.launch({
-            headless: "new", // "new" use karein ya false agar testing karni ho
+            headless: "new", 
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
                 '--disable-blink-features=AutomationControlled',
-                '--incognito', // Hamesha private mode mein khule
-                '--mute-audio'
+                '--autoplay-policy=no-user-gesture-required', // Playback ensure karne ke liye
+                '--start-maximized'
             ]
         });
 
-        const page = await browser.newPage();
-        
-        // Random User Agent for every new browser
+        const [page] = await browser.pages();
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 2. Open Video Link
-        console.log(`[PROCESS] Opening Link: ${videoUrl}`);
+        // 2. FIRST STEP: Go to Google.com (Referrer)
+        console.log(`[STEP 1] Going to Google.com...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 3000)); // 3 sec wait for realism
+
+        // 3. SECOND STEP: Open Video URL from Google context
+        console.log(`[STEP 2] Navigating to Video: ${videoUrl}`);
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 3. Play Video (YouTube par click karna zaroori hota hai autoplay ke liye)
+        // 4. THIRD STEP: Ensure Video is PLAYING
+        console.log(`[STEP 3] Ensuring Playback & Audio...`);
         try {
-            await page.click('.ytp-play-button'); 
-            console.log(`[PROCESS] Video Playback Started.`);
+            // Wait for play button and click
+            await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
+            
+            // Check if already playing, if not, click
+            await page.evaluate(() => {
+                const video = document.querySelector('video');
+                const playBtn = document.querySelector('.ytp-play-button');
+                if (video && video.paused) {
+                    playBtn.click();
+                }
+                video.muted = false; // Audio ON
+                video.volume = 1.0;
+            });
+            console.log(`[SUCCESS] Video is now Playing with Audio.`);
         } catch (e) {
-            console.log(`[INFO] Attempting backup play click...`);
-            await page.mouse.click(200, 200); // Screen ke center mein click
+            // Backup Play: Keyboard shortcut 'k'
+            await page.keyboard.press('k');
+            await page.keyboard.press('m'); // Unmute shortcut
+            console.log(`[INFO] Used backup keyboard shortcuts for Play/Unmute.`);
         }
 
-        // 4. Stay for User-Defined Timing (Front-end se aayi hui timing)
-        const stayTimeMs = parseInt(perViewTiming) * 1000;
-        console.log(`[WATCHING] Keeping browser open for ${perViewTiming} seconds...`);
+        // 5. FOURTH STEP: Wait for Frontend-defined Timing
+        const watchSeconds = parseInt(perViewTiming) || 60;
+        console.log(`[WATCHING] Playing for ${watchSeconds} seconds...`);
         
-        // Is beech random scroll karein taaki real user lage
-        const checkInterval = 5000; // Har 5 sec mein activity
-        let elapsed = 0;
-        while (elapsed < stayTimeMs) {
-            await new Promise(r => setTimeout(r, checkInterval));
-            await page.evaluate(() => window.scrollBy(0, Math.random() * 200));
-            elapsed += checkInterval;
-        }
+        // Progress tracker (Optional)
+        await new Promise(r => setTimeout(r, watchSeconds * 1000));
 
-        // 5. Clear History, Cookies & Cache before closing
+        // 6. FIFTH STEP: Deep Cleanup
+        console.log(`[CLEANUP] Clearing Cookies and History...`);
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
-        console.log(`[CLEAN] History and Cookies Cleared.`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
@@ -1351,12 +1362,36 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, perViewTiming) {
             console.log(`[SUCCESS] Browser Closed. RAM Cleaned.`);
         }
         
-        // 6. 10-15 Seconds Gap (As per your video instruction)
-        const gap = 15000; 
-        console.log(`[WAIT] Taking 15s gap before next browser...`);
-        await new Promise(r => setTimeout(r, gap));
+        // 7. SIXTH STEP: 15 Seconds Gap before NEXT Browser
+        console.log(`[WAIT] Taking 15s gap to reset everything...\n`);
+        await new Promise(r => setTimeout(r, 15000));
     }
 }
+
+// --- API ENDPOINT (1-BY-1 EXECUTION) ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, per_view_timing } = req.body;
+    
+    if (!video_url) return res.status(400).json({ error: "URL missing!" });
+
+    const total = parseInt(views_count) || 1;
+    const timing = parseInt(per_view_timing) || 60;
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Task Started: ${total} views, 1-by-1, Google Referral Mode.` 
+    });
+
+    // Is loop ki wajah se ek ke baad ek khulega
+    (async () => {
+        for (let i = 1; i <= total; i++) {
+            // Jab tak ye function pura finish nahi hota (gap ke sath), loop agla start nahi karega
+            await runYoutubeBrowserTask(video_url, i, timing);
+        }
+        console.log(`[DONE] All ${total} views completed.`);
+    })();
+});
+
 
 // --- UPDATED ENDPOINT TO RECEIVE TIMING ---
 app.post('/api/real-view-boost', async (req, res) => {
