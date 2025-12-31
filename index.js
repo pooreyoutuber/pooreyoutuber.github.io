@@ -1163,81 +1163,79 @@ puppeteer.use(StealthPlugin());
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
+        // 1. DEVICE ROTATION (Mobile, Tablet, Desktop)
+        const devices = [
+            { name: 'Desktop', width: 1920, height: 1080, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36' },
+            { name: 'Mobile', width: 375, height: 812, ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1' },
+            { name: 'Tablet', width: 768, height: 1024, ua: 'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1' }
+        ];
+        const device = devices[Math.floor(Math.random() * devices.length)];
+
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', `--window-size=${device.width},${device.height}`]
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
-        
-        // Anti-Bot: Set Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: device.width, height: device.height });
+        await page.setUserAgent(device.ua);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        // Google entry point
+        await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
+        console.log(`[Tool 6] View #${viewNumber} | Device: ${device.name} | URL: ${url}`);
 
-        const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        // 2. SITE OPEN
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Mouse Movement (Bypass Bot Checks)
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+        // 3. RANDOM TIME (30 to 50 Seconds)
+        const randomStay = Math.floor(Math.random() * (50000 - 30000 + 1)) + 30000;
+        const endTime = Date.now() + randomStay;
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+        // 4. HUMAN INTERACTION LOOP
+        while (Date.now() < endTime) {
+            // MOUSE MOVEMENT (0-9 Style Patterns)
+            // Hum random coordinates use karke 'curve' movement banate hain
+            const x = Math.floor(Math.random() * (device.width - 100)) + 50;
+            const y = Math.floor(Math.random() * (device.height - 100)) + 50;
+            await page.mouse.move(x, y, { steps: 20 });
+
+            // SMOOTH SCROLLING
+            await page.evaluate(() => {
+                window.scrollBy({ top: Math.floor(Math.random() * 400), behavior: 'smooth' });
+            });
+
+            // 5. CLICK LOGIC (4-5 clicks in 25 views)
+            if (Math.random() < 0.18) { // 18% chance approx 4-5 per 25
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], [id^="google_ads_iframe"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                    if (box && box.width > 30) {
+                        console.log(`[CLICK] Ad Clicked! Waiting 10s...`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
-                        
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        await new Promise(r => setTimeout(r, 10000)); // 10 sec stay after click
                         break; 
                     }
                 }
             }
+            await new Promise(r => setTimeout(r, 4000));
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+
+        // 6. CLEAR HISTORY & COOKIES
+        const client = await page.target().createCDPSession();
+        await client.send('Network.clearBrowserCookies');
+        await client.send('Network.clearBrowserCache');
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
+            await browser.close();
+            console.log(`[SUCCESS] View Finished. Waiting 10s to start next...`);
+            await new Promise(r => setTimeout(r, 10000)); // 1-by-1 gap
         }
-    }
-}
+  }
 
 // ===================================================================
 // Tool 6 Endpoint (Updated for Multi-Site Rotation)
