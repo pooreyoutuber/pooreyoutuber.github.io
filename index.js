@@ -1288,15 +1288,11 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
-// ===================================================================
-// 7. ULTIMATE YOUTUBE BOOSTER (1-BY-1 EXECUTION & ANTI-DETECTION)
-// ===================================================================
 async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
     try {
         console.log(`[PROCESS] View #${viewNumber} Start...`);
 
-        // Anti-Detection Devices
         const devices = [
             { ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', w: 1920, h: 1080 },
             { ua: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', w: 1366, h: 768 }
@@ -1309,31 +1305,32 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
-                '--incognito'
+                '--incognito' // Ye cookies/history ko save nahi hone dega
             ]
         });
 
-        const context = await browser.createIncognitoBrowserContext();
-        const page = await context.newPage();
+        // FIXED: createIncognitoBrowserContext ko hata kar seedha page banaya
+        const page = await browser.newPage();
+        
         await page.setUserAgent(config.ua);
         await page.setViewport({ width: config.w, height: config.h });
 
-        // Step 1: Video par jana
+        // Step 1: Video load karna
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Step 2: Play aur Duration nikalna
+        // Step 2: Play & Duration
         await page.click('video').catch(() => {});
         const totalSeconds = await page.evaluate(() => {
             const v = document.querySelector('video');
-            return v ? v.duration : 60; // Default 60s agar detect na ho
+            return v ? v.duration : 60; 
         });
 
         console.log(`[WATCHING] Playing for ${Math.round(totalSeconds)}s...`);
 
-        // Step 3: Watch Loop + Random Scrolling
+        // Step 3: Watch Loop & Scrolling
         const startTime = Date.now();
         while (Date.now() - startTime < (totalSeconds * 1000)) {
-            if (Math.random() > 0.8) {
+            if (Math.random() > 0.7) {
                 await page.evaluate(() => window.scrollBy(0, 400));
                 await new Promise(r => setTimeout(r, 2000));
                 await page.evaluate(() => window.scrollBy(0, -400));
@@ -1341,25 +1338,27 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber) {
             await new Promise(r => setTimeout(r, 10000));
         }
 
-        // Step 4: Engagement (Description & Comments)
+        // Step 4: Engagement (Description/Comments)
         await page.evaluate(() => {
-            window.scrollTo({ top: 700, behavior: 'smooth' });
+            window.scrollTo({ top: 600, behavior: 'smooth' });
             const btn = document.querySelector('#expand, .tp-yt-paper-button#more');
             if (btn) btn.click();
         });
-        await new Promise(r => setTimeout(r, 5000));
+        await new Promise(r => setTimeout(r, 4000));
+        await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'smooth' }));
 
-        console.log(`[SUCCESS] View #${viewNumber} Done.`);
+        console.log(`[SUCCESS] View #${viewNumber} Done ✅`);
 
     } catch (error) {
         console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close();
-            console.log(`[CLEANUP] Browser closed. History/Cookies wiped.`);
+            await browser.close(); // Close hote hi sab saaf
+            console.log(`[CLEANUP] Session wiped.`);
         }
     }
 }
+
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
     const total = parseInt(views_count) || 1;
