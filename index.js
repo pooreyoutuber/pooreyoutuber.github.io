@@ -1272,7 +1272,7 @@ app.post('/start-task', async (req, res) => {
 
                 if (i < totalViews) 
                     // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    const restTime = i % 5 === 0 ? 25000 : 12000; }
                     console.log(`[REST] Waiting ${restTime/1000}s...`);
                     await new Promise(r => setTimeout(r, restTime));
                 }
