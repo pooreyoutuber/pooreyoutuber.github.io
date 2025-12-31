@@ -1270,7 +1270,7 @@ app.post('/start-task', async (req, res) => {
                 console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
                 await runGscTask(keyword, randomUrl, i); 
 
-                if (i < totalViews) 
+                if (i < totalViews) {
                     // RAM management break
                     const restTime = i % 5 === 0 ? 25000 : 12000; 
                     console.log(`[REST] Waiting ${restTime/1000}s...`);
