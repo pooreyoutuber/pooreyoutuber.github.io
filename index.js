@@ -1288,116 +1288,108 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
-// ===================================================================
-// 7. ADVANCED REAL-TIME VIEW BOOSTER (ANTI-DETECTION)
-// ===================================================================
-
-async function runYoutubeBrowserTask(videoUrl, targetWatchTime, viewNumber) {
+async function runYoutubeBrowserTask(video_url, viewNumber, timingFromFrontend) {
     let browser;
     try {
-        console.log(`\n[VIEW #${viewNumber}] --- SESSION STARTING ---`);
+        // 1. DEVICE ROTATION (Mobile, Tablet, Desktop)
+        const devices = [
+            { name: 'Desktop', width: 1920, height: 1080, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36' },
+            { name: 'Mobile', width: 375, height: 812, ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) Mobile/15E148 Safari/604.1' },
+            { name: 'Tablet', width: 768, height: 1024, ua: 'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) Mobile/15E148 Safari/604.1' }
+        ];
+        const device = devices[Math.floor(Math.random() * devices.length)];
 
-        // Extra Stealth Plugin jaisa behaviour add karne ke liye args
+        // Launch Browser (1-by-1 Sequential Mode)
         browser = await puppeteer.launch({
-            headless: "new", 
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled', // Sabse imp: Automation hide karne ke liye
-                '--disable-infobars',
-                '--mute-audio',
-                '--window-size=1366,768'
-            ]
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', `--window-size=${device.width},${device.height}`]
         });
 
         const page = await browser.newPage();
-
-        // Webdriver ko hide karna taaki YouTube ko na pata chale
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
-
-        // 1. Google Search se Video par jaana (Direct link se bachne ke liye)
-        // Hum Google Referrer use karenge taaki view "YouTube Search" ya "External" dikhe
-        await page.setExtraHTTPHeaders({
-            'Referer': 'https://www.google.com/'
-        });
-
-        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        await page.setUserAgent(userAgent);
-
-        console.log(`[LOG] Navigating to Video...`);
+        await page.setViewport({ width: device.width, height: device.height });
+        await page.setUserAgent(device.ua);
         
-        // Timeout ko badhaya taaki slow network pe crash na ho
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 90000 });
+        // Referrer set karna (Organic signal)
+        await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
 
-        // 2. Play Button Click (Human Behavior)
-        try {
-            await page.waitForSelector('.ytp-large-play-button', { timeout: 10000 });
-            await page.click('.ytp-large-play-button');
-            console.log(`[PLAY] Clicked Large Play Button`);
-        } catch (e) {
-            // Agar auto-play ho gaya toh koi baat nahi
-        }
+        console.log(`[Tool 7] View #${viewNumber} | Device: ${device.name} | Timing: ${timingFromFrontend}s`);
 
-        // 3. Strict Watch Loop with "Anti-Pause" & "Random Mouse Movement"
-        let elapsed = 0;
-        while (elapsed < targetWatchTime) {
-            await new Promise(r => setTimeout(r, 10000)); // 10 sec wait
-            elapsed += 10;
+        // 2. VIDEO URL PAR JANA
+        await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 90000 });
 
-            // Check if Video is Paused
-            const isPaused = await page.evaluate(() => {
-                const v = document.querySelector('video');
-                if (v && v.paused && !v.ended) {
-                    v.play(); // Force play
-                    return true;
-                }
-                return false;
+        // 3. 🔥 100% VIDEO PLAYBACK & UNMUTE
+        await page.evaluate(async () => {
+            const v = document.querySelector('video');
+            if (v) {
+                v.muted = false; 
+                v.volume = 0.7;
+                const playBtn = document.querySelector('.ytp-play-button');
+                if (playBtn) playBtn.click();
+                v.play();
+            }
+        });
+
+        // 4. WATCH UNTIL FRONTEND TIMING (0-1000s)
+        const totalWatchTimeMs = parseInt(timingFromFrontend) * 1000;
+        const stopTime = Date.now() + totalWatchTimeMs;
+
+        while (Date.now() < stopTime) {
+            // MOUSE STYLE 0-9 (Natural Curve Movement)
+            const x = Math.floor(Math.random() * (device.width - 50));
+            const y = Math.floor(Math.random() * (device.height - 50));
+            await page.mouse.move(x, y, { steps: 25 });
+
+            // Smooth Scrolling (Up/Down)
+            await page.evaluate(() => {
+                window.scrollBy({ top: Math.floor(Math.random() * 350) - 150, behavior: 'smooth' });
             });
 
-            if (isPaused) console.log(`[FIX] Video was paused, clicked Play automatically.`);
+            // Every 7 seconds check if video is still playing
+            await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (v && v.paused) v.play();
+            });
 
-            // Random Mouse Move & Scroll (Insaani harkat)
-            if (elapsed % 30 === 0) {
-                await page.mouse.move(Math.random() * 500, Math.random() * 500);
-                await page.evaluate(() => {
-                    window.scrollBy(0, Math.floor(Math.random() * 200) + 100);
-                });
-                console.log(`[HUMAN] Scrolled and Moved Mouse at ${elapsed}s`);
-            }
-            
-            console.log(`[LOG] View #${viewNumber}: ${elapsed}/${targetWatchTime}s done.`);
+            await new Promise(r => setTimeout(r, 7000)); 
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Completed Successfully! ✅`);
+        // 5. DEEP CLEANING (Har View ke baad History/Cookies Clear)
+        const client = await page.target().createCDPSession();
+        await client.send('Network.clearBrowserCookies');
+        await client.send('Network.clearBrowserCache');
+        console.log(`[SUCCESS] View #${viewNumber} Watch Completed. Data Wiped.`);
 
     } catch (error) {
-        console.error(`[RENDER ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERR] View #${viewNumber} failed: ${error.message}`);
     } finally {
         if (browser) {
-            // Close se pehle 2 sec wait taaki last data send ho jaye
-            await new Promise(r => setTimeout(r, 2000));
             await browser.close();
-            console.log(`[CLEANUP] Browser closed. 15s Cooldown for RAM...`);
+            // Render RAM release gap (15 sec)
+            console.log(`[WAIT] Cleaning memory for 15s before next browser...`);
+            await new Promise(r => setTimeout(r, 15000));
         }
     }
 }
 
-// Endpoint same rahega, bas loop mein 1-by-1 chalega
+// --- UPDATED ENDPOINT FOR FRONTEND REQUESTS ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
-    const total = parseInt(views_count) || 1;
-    const time = parseInt(watch_time) || 60;
+    
+    if (!video_url || !views_count || !watch_time) {
+        return res.status(400).json({ error: "Details missing (URL, Count, or Time)" });
+    }
 
-    res.status(200).json({ success: true, message: `Task started for ${total} views.` });
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started: ${views_count} views with ${watch_time}s timing. Sequential mode active.` 
+    });
 
+    // 1-by-1 Execution Loop
     (async () => {
-        for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, time, i);
-            // Render ki RAM clear hone ka time dena zaroori hai
-            await new Promise(r => setTimeout(r, 15000)); 
+        for (let i = 1; i <= parseInt(views_count); i++) {
+            await runYoutubeBrowserTask(video_url, i, watch_time);
         }
+        console.log("=== ALL YOUTUBE TASKS FINISHED ===");
     })();
 });
     
