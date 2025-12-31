@@ -1293,105 +1293,114 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, perViewTiming) {
     try {
         console.log(`\n[VIEW #${viewNumber}] Task Starting...`);
 
-        // 1. Launch Browser with Audio & High Performance
         browser = await puppeteer.launch({
             headless: "new", 
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
-                '--autoplay-policy=no-user-gesture-required', // Playback ensure karne ke liye
+                '--autoplay-policy=no-user-gesture-required',
                 '--start-maximized'
             ]
         });
 
         const [page] = await browser.pages();
+        // Browser ko Real dikhane ke liye Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 2. FIRST STEP: Go to Google.com (Referrer)
-        console.log(`[STEP 1] Going to Google.com...`);
+        // --- STEP 1: GOOGLE REFERRAL ---
+        console.log(`[STEP 1] Opening Google.com first...`);
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 3000)); // 3 sec wait for realism
+        await new Promise(r => setTimeout(r, 3000)); 
 
-        // 3. SECOND STEP: Open Video URL from Google context
+        // --- STEP 2: OPEN VIDEO ---
         console.log(`[STEP 2] Navigating to Video: ${videoUrl}`);
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 4. THIRD STEP: Ensure Video is PLAYING
-        console.log(`[STEP 3] Ensuring Playback & Audio...`);
-        try {
-            // Wait for play button and click
-            await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
-            
-            // Check if already playing, if not, click
-            await page.evaluate(() => {
+        // --- STEP 3: MOUSE MOVEMENT & PLAY CHECK ---
+        console.log(`[STEP 3] Moving Mouse & Checking Playback...`);
+        
+        // Virtual Mouse Movement (Human-like)
+        await page.mouse.move(100, 100);
+        await page.mouse.move(400, 300, { steps: 10 });
+        await page.mouse.click(400, 300); // Screen par click taaki focus aaye
+
+        // Video Play Confirmation Code
+        await page.evaluate(async () => {
+            const playVideo = () => {
                 const video = document.querySelector('video');
                 const playBtn = document.querySelector('.ytp-play-button');
-                if (video && video.paused) {
-                    playBtn.click();
+                if (video) {
+                    video.muted = false; // Audio ON
+                    video.volume = 1.0;
+                    if (video.paused) {
+                        playBtn ? playBtn.click() : video.play();
+                    }
                 }
-                video.muted = false; // Audio ON
-                video.volume = 1.0;
-            });
-            console.log(`[SUCCESS] Video is now Playing with Audio.`);
-        } catch (e) {
-            // Backup Play: Keyboard shortcut 'k'
-            await page.keyboard.press('k');
-            await page.keyboard.press('m'); // Unmute shortcut
-            console.log(`[INFO] Used backup keyboard shortcuts for Play/Unmute.`);
+            };
+            playVideo();
+            // Har 5 second mein check karega ki video ruk toh nahi gayi
+            setInterval(playVideo, 5000);
+        });
+
+        // --- STEP 4: WATCHING TIME WITH MOUSE ACTIVITY ---
+        const watchSeconds = parseInt(perViewTiming) || 60;
+        console.log(`[WATCHING] Playing for ${watchSeconds} seconds with Audio ON...`);
+
+        let elapsed = 0;
+        while (elapsed < watchSeconds) {
+            await new Promise(r => setTimeout(r, 5000)); // Har 5 sec mein activity
+            
+            // Random Mouse Movement (Taaki Real-time mein count ho)
+            const randomX = Math.floor(Math.random() * 500);
+            const randomY = Math.floor(Math.random() * 500);
+            await page.mouse.move(randomX, randomY, { steps: 5 });
+            
+            elapsed += 5;
+            if(elapsed % 20 === 0) console.log(`[LIVE] View #${viewNumber}: Still Playing (${elapsed}s)...`);
         }
 
-        // 5. FOURTH STEP: Wait for Frontend-defined Timing
-        const watchSeconds = parseInt(perViewTiming) || 60;
-        console.log(`[WATCHING] Playing for ${watchSeconds} seconds...`);
-        
-        // Progress tracker (Optional)
-        await new Promise(r => setTimeout(r, watchSeconds * 1000));
-
-        // 6. FIFTH STEP: Deep Cleanup
-        console.log(`[CLEANUP] Clearing Cookies and History...`);
+        // --- STEP 5: CLEANUP HISTORY & COOKIES ---
+        console.log(`[CLEANUP] Clearing History and Cookies...`);
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Mein Dikkat Aayi: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[SUCCESS] Browser Closed. RAM Cleaned.`);
+            console.log(`[SUCCESS] Browser Band. RAM Freed.`);
         }
-        
-        // 7. SIXTH STEP: 15 Seconds Gap before NEXT Browser
-        console.log(`[WAIT] Taking 15s gap to reset everything...\n`);
+        // --- STEP 6: 15 SECONDS GAP (1-BY-1) ---
+        console.log(`[WAIT] 15 seconds ka gap le rahe hain agle view ke liye...\n`);
         await new Promise(r => setTimeout(r, 15000));
     }
 }
 
-// --- API ENDPOINT (1-BY-1 EXECUTION) ---
+// --- UPDATED ENDPOINT (STRICT 1-BY-1) ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, per_view_timing } = req.body;
     
-    if (!video_url) return res.status(400).json({ error: "URL missing!" });
+    if (!video_url) return res.status(400).json({ error: "Video URL jaruri hai!" });
 
     const total = parseInt(views_count) || 1;
     const timing = parseInt(per_view_timing) || 60;
 
     res.status(200).json({ 
         success: true, 
-        message: `Task Started: ${total} views, 1-by-1, Google Referral Mode.` 
+        message: `Task Shuru: ${total} views, 1-by-1 mode, Audio ON.` 
     });
 
-    // Is loop ki wajah se ek ke baad ek khulega
+    // Loop jo ek ke baad ek chalta hai
     (async () => {
         for (let i = 1; i <= total; i++) {
-            // Jab tak ye function pura finish nahi hota (gap ke sath), loop agla start nahi karega
             await runYoutubeBrowserTask(video_url, i, timing);
         }
-        console.log(`[DONE] All ${total} views completed.`);
+        console.log(`[FINISH] Saare ${total} views poore ho gaye!`);
     })();
 });
-
 
 // --- UPDATED ENDPOINT TO RECEIVE TIMING ---
 app.post('/api/real-view-boost', async (req, res) => {
