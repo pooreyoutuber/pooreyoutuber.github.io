@@ -1288,138 +1288,128 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
-async function runYoutubeBrowserTask(video_url, viewNumber, watchTimeParam) {
+// ===================================================================
+// 7. ULTIMATE YOUTUBE BROWSER BOOSTER (FIXED & OPTIMIZED)
+// ===================================================================
+
+async function runYoutubeBrowserTask(videoUrl, targetWatchTime, viewNumber) {
     let browser;
     try {
-        // 1. FRESH DEVICE ROTATION
-        const devices = [
-            { name: 'Desktop', width: 1920, height: 1080, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36' },
-    
-        ];
-        const device = devices[Math.floor(Math.random() * devices.length)];
+        console.log(`\n[VIEW #${viewNumber} STARTING] 🚀`);
+        console.log(`[TARGET] ${videoUrl} | [TIME] ${targetWatchTime} seconds`);
 
-        // Browser Launch
+        // Launch Browser with Stealth and Automation Bypass
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', `--window-size=${device.width},${device.height}`]
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--mute-audio',
+                '--autoplay-policy=no-user-gesture-required',
+                '--disable-infobars',
+                '--window-size=1280,720'
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(device.ua);
-        await page.setViewport({ width: device.width, height: device.height });
-
-        // STEP 1: GOOGLE.COM ENTRY
-        console.log(`[RENDER LOG] View #${viewNumber} | Device: ${device.name} | Opening Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 2000));
-
-        // STEP 2: OPEN VIDEO LINK
-        console.log(`[RENDER LOG] View #${viewNumber} | Opening Video: ${video_url}`);
-        await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 90000 });
-
-        // INITIAL PLAY TRIGGER
-        await page.evaluate(() => {
-            const v = document.querySelector('video');
-            if (v) { v.muted = false; v.volume = 0.7; v.play(); }
-            const playBtn = document.querySelector('.ytp-play-button');
-            if (playBtn) playBtn.click();
-        });
-
-        // STEP 3: WATCHING LOOP (With Anti-Pause & Logs)
-        const totalSeconds = parseInt(watchTimeParam);
-        const stopAt = Date.now() + (totalSeconds * 1000);
-
-        while (Date.now() < stopAt) {
-            // Check Video Status
-            const status = await page.evaluate(() => {
-                const video = document.querySelector('video');
-                if (!video) return "VIDEO_NOT_FOUND";
-                if (video.paused) {
-                    video.play(); // Auto-fix
-                    const confirm = document.querySelector('.yt-confirm-dialog-confirm-button');
-                    if (confirm) confirm.click();
-                    return "PAUSED_BUT_FIXED ❌🔄";
-                }
-                return "PLAYING_STEADY ✅";
-            });
-
-            const timeLeft = Math.round((stopAt - Date.now()) / 1000);
-            console.log(`[LIVE STATUS] View #${viewNumber} | ${status} | Time Left: ${timeLeft}s`);
-
-            // 0-9 Style Mouse Move & Scrolling
-            await page.mouse.move(Math.random() * device.width, Math.random() * device.height, { steps: 20 });
-            if (Math.random() < 0.3) {
-                await page.evaluate(() => window.scrollBy({ top: 200, behavior: 'smooth' }));
-            }
-
-            await new Promise(r => setTimeout(r, 5000)); // Check status every 5 seconds
-        }
-
-        // STEP 4: FINAL SCROLLING BEFORE CLOSE
-        console.log(`[RENDER LOG] Timing Over. Final Scrolling...`);
-        await page.evaluate(() => window.scrollTo({ top: 500, behavior: 'smooth' }));
-        await new Promise(r => setTimeout(r, 3000));
-
-        // STEP 5: DEEP CLEANUP
+        
+        // --- CLEAN START: Clear Cookies and Cache ---
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
-        console.log(`[RENDER LOG] View #${viewNumber} SUCCESS. Session Cleared.`);
+
+        // Set Random Device/UserAgent
+        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        await page.setUserAgent(userAgent);
+        await page.setViewport({ width: 1280, height: 720 });
+
+        // --- STEP 1: LOAD VIDEO ---
+        console.log(`[LOG] Loading Video...`);
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // --- STEP 2: ENSURE PLAYBACK (Auto-Click & Anti-Pause) ---
+        await new Promise(r => setTimeout(r, 5000)); // Initial Load Buffer
+        
+        const playVideo = async () => {
+            await page.evaluate(() => {
+                const video = document.querySelector('video');
+                const playBtn = document.querySelector('.ytp-play-button');
+                if (video && video.paused) {
+                    video.play();
+                    if (playBtn) playBtn.click();
+                    return "Video was paused, clicked Play.";
+                }
+                return "Video is playing.";
+            }).then(msg => console.log(`[PLAY-CHECK] ${msg}`));
+        };
+
+        await playVideo();
+
+        // --- STEP 3: WATCHING LOOP (With Anti-Stall & Scrolling) ---
+        let elapsed = 0;
+        const checkInterval = 10; // check every 10 seconds
+
+        while (elapsed < targetWatchTime) {
+            await new Promise(r => setTimeout(r, checkInterval * 1000));
+            elapsed += checkInterval;
+
+            // 1. Force Play if YouTube paused it
+            await playVideo();
+
+            // 2. Realistic Scrolling (Mid-way)
+            if (elapsed > targetWatchTime / 2 && elapsed < (targetWatchTime / 2) + 15) {
+                await page.evaluate(() => window.scrollBy({ top: 500, behavior: 'smooth' }));
+                console.log(`[HUMAN] Scrolled down to load comments/related.`);
+            }
+
+            console.log(`[PROGRESS] View #${viewNumber}: ${elapsed}/${targetWatchTime}s watched...`);
+        }
+
+        // --- STEP 4: FINISH & CLEANUP ---
+        console.log(`[SUCCESS] View #${viewNumber} finished target time. ✅`);
 
     } catch (error) {
         console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            // 15s Sequential Gap for RAM
-            console.log(`[RENDER LOG] Browser Closed. 15s Gap for next view...`);
-            await new Promise(r => setTimeout(r, 15000)); 
+            console.log(`[CLEANUP] Browser closed. History/Cookies cleared by session end.`);
         }
     }
 }
 
-// --- FINAL ENDPOINT ---
+// --- UPDATED ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     
-    if (!video_url || !watch_time) return res.status(400).json({ error: "Data incomplete" });
-
-    res.status(200).json({ success: true, message: "1-by-1 Task Started. Monitor Render Logs." });
-
-    (async () => {
-        for (let i = 1; i <= parseInt(views_count); i++) {
-            await runYoutubeBrowserTask(video_url, i, watch_time);
-        }
-        console.log("=== ALL TASKS COMPLETED SUCCESSFULLY ===");
-    })();
-});
-
-// --- UPDATED ENDPOINT TO RECEIVE TIMING ---
-app.post('/api/real-view-boost', async (req, res) => {
-    // Frontend se 'timing' bhi receive karenge
-    const { video_url, views_count, per_view_timing } = req.body;
-    
     const totalViews = parseInt(views_count) || 1;
-    const timingPerView = parseInt(per_view_timing) || 60; // Default 60s agar kuch na mile
+    const timePerView = parseInt(watch_time) || 60; // Default 60 seconds
 
     if (!video_url) return res.status(400).json({ error: "Video URL is missing!" });
 
-    // Response turant bhej de taaki frontend hang na ho
+    // Immediate response to prevent frontend timeout
     res.status(200).json({ 
         success: true, 
-        message: `Task Started: ${totalViews} views, 1-by-1 mode, ${timingPerView}s each.` 
+        message: `Task Started: ${totalViews} views for ${timePerView}s each (Strict Sequential).` 
     });
 
-    // Background Runner: 1-by-1 Execution (Await ensures next one waits)
+    // Background Worker (1-by-1 execution)
     (async () => {
-        console.log(`--- YOUTUBE 1-BY-1 TASK STARTED ---`);
+        console.log(`\n--- STARTING YOUTUBE BROWSER SESSIONS ---`);
         for (let i = 1; i <= totalViews; i++) {
-            // Await lagane se jab tak ye function khatam nahi hota (gap ke sath), dusra nahi chalega
-            await runYoutubeBrowserTask(video_url, i, timingPerView);
+            // Run the task and WAIT for it to finish (await is key here)
+            await runYoutubeBrowserTask(video_url, timePerView, i);
+            
+            if (i < totalViews) {
+                console.log(`[COOLDOWN] Waiting 15 seconds before next session...`);
+                await new Promise(r => setTimeout(r, 15000)); // 15s Gap for RAM safety
+            }
         }
-        console.log(`--- ALL ${totalViews} VIEWS COMPLETED ---`);
+        console.log(`\n--- ALL ${totalViews} SESSIONS COMPLETED ---`);
     })();
 });
+
 
 // --- NEW ENDPOINT TO START TOOL 7 ---
 app.post('/api/real-view-boost', async (req, res) => {
