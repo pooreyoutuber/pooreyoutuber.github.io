@@ -1418,111 +1418,106 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // 8. WEBSITE FAST BOOSTER (SEARCH-BASED TRAFFIC FLOW)
 // ===================================================================
-
-async function runWebsiteFastTask(site1, site2, viewNumber) {
+async function runTempleRunTask(keyword, urls, viewNumber) {
     let browser;
     try {
-        console.log(`[FAST-TOOL] View #${viewNumber} | Task Started`);
-
-        // Launch browser with anti-bot and memory cleaning
+        // Puppeteer launch with stealth and security arguments
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
-                '--disable-web-security',
-                '--incognito' // Cookies aur history reset karne ke liye
+                '--incognito', // Isse history/cookies auto-clean rehti hain
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
         
-        // Random User Agent from your existing array
+        // Random User Agent for every view
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: 1366, height: 768 });
 
-        // STEP 1: Pehle Google.com par jana (Organic footprint ke liye)
-        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, 1500));
-
-        // STEP 2: Frontend se aayi 1st Website (site1) open karna
-        console.log(`[STEP 1] Visiting Site 1: ${site1}`);
+        // STEP 1: Google.com par jaana
+        console.log(`[TEMPLE RUN] View #${viewNumber} | Opening Google...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        
+        // STEP 2: First site ko search/open karna
+        const site1 = urls[0];
+        console.log(`[TEMPLE RUN] Navigating to Site 1: ${site1}`);
         await page.goto(site1, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // STEP 3: Site ke andar Search Bar dundna aur Site 2 enter karna
-        console.log(`[STEP 2] Searching for Site 2: ${site2}`);
-        
-        // Common search selectors (Input fields aur Search classes)
-        const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search, [name="s"]';
+        // STEP 3: Site 1 par Search Bar dhundna aur Site 2 enter karna
+        const site2 = urls[1] || site1; // Agar 2nd site nahi hai toh same use karega
         
         try {
-            await page.waitForSelector(searchSelector, { timeout: 8000 });
-            await page.click(searchSelector);
-            await page.type(searchSelector, site2, { delay: 100 });
-            
-            // Enter press karke submit karna
-            await page.keyboard.press('Enter');
-            console.log(`[STEP 3] Search Submitted! Redirecting to Site 2...`);
+            // Common search selectors (input[type="text"], input[type="search"], etc.)
+            const searchSelectors = ['input[name="s"]', 'input[type="search"]', 'input[type="text"]', '.search-field', '#search-input'];
+            let searchInput = null;
+
+            for (const selector of searchSelectors) {
+                searchInput = await page.$(selector);
+                if (searchInput) break;
+            }
+
+            if (searchInput) {
+                console.log(`[TEMPLE RUN] Search bar found. Typing Site 2...`);
+                await searchInput.type(site2, { delay: 100 });
+                await page.keyboard.press('Enter');
+            } else {
+                console.log(`[TEMPLE RUN] Search bar not found. Directly jumping to Site 2.`);
+                await page.goto(site2, { waitUntil: 'networkidle2' });
+            }
         } catch (e) {
-            console.log(`[WARN] Search bar nahi mila ya delay hua. Site 2 ko direct simulate kar rahe hain.`);
-            // Agar search bar na mile toh direct site 2 par navigation simulate karna (fallback)
-            await page.goto(site2, { waitUntil: 'networkidle2', referer: site1 });
+            console.log(`[TEMPLE RUN] Search interaction failed, jumping to Site 2.`);
+            await page.goto(site2, { waitUntil: 'networkidle2' });
         }
 
-        // STEP 4: 30-50 Second Stay Time (Random)
+        // STEP 4: 30-50 Seconds Wait (Stay Time)
         const stayTime = randomInt(30000, 50000);
-        console.log(`[WAIT] Simulating activity for ${stayTime/1000}s...`);
+        console.log(`[TEMPLE RUN] Staying for ${stayTime/1000}s...`);
         
-        // Human scrolling simulation
+        // Natural Scrolling during wait
         await page.evaluate(async () => {
-            for (let i = 0; i < 5; i++) {
-                window.scrollBy(0, 300);
-                await new Promise(r => setTimeout(r, 4000));
-            }
+            window.scrollBy(0, 400);
         });
-
-        await new Promise(r => setTimeout(r, 5000)); // Final buffer
-        console.log(`[SUCCESS] View #${viewNumber} Completed ✅`);
+        
+        await new Promise(r => setTimeout(r, stayTime));
+        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
+        console.error(`[ERROR] Temple Run View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close(); // Pura browser band (Auto cleaning)
-            console.log(`[CLEANUP] History/Cookies Cleared. Waiting 10s for next session...`);
-            // Aapki requirement ke mutabik 10 sec ka gap
-            await new Promise(r => setTimeout(r, 10000));
+            // browser.close() se session, cookies aur history automatic clear ho jaati hai
+            await browser.close();
         }
     }
 }
 
-// --- ENDPOINT FOR TOOL 8 ---
-app.post('/start-views', async (req, res) => {
-    const { url1, url2, views = 1000 } = req.body; // Frontend IDs: url1, url2
+// Endpoint for Temple Run Oz
+app.post('/temple-runoz', async (req, res) => {
+    const { keyword, urls, views = 10 } = req.body;
 
-    if (!url1 || !url2) {
-        return res.status(400).json({ success: false, message: "Dono URLs (site1 aur site2) zaroori hain!" });
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).json({ success: false, message: "URLs required!" });
     }
 
-    // Success response to frontend immediately
     res.status(200).json({ 
         success: true, 
-        message: `Fast Tool Started: ${views} views queue mein hain.` 
+        message: `Temple Run Oz Started: ${views} views queueing...` 
     });
 
-    // Background Loop
+    // Background process to prevent crash (1-by-1 execution)
     (async () => {
-        for (let i = 1; i <= parseInt(views); i++) {
-            // Site 1 se Site 2 par jane ka process shuru
-            await runWebsiteFastTask(url1, url2, i);
-            
-            // Render limit protection: Har 10 view ke baad 20s ka extra break
-            if (i % 10 === 0) {
-                console.log("[SYSTEM] Cooldown period to prevent RAM crash...");
-                await new Promise(r => setTimeout(r, 20000));
-            }
+        for (let i = 1; i <= views; i++) {
+            await runTempleRunTask(keyword, urls, i);
+            // RAM Management Break
+            await new Promise(r => setTimeout(r, 10000));
         }
     })();
 });
+
 
 // =============================================================
 // --- SERVER START ---
