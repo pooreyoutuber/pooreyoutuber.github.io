@@ -1,138 +1,188 @@
-<!DOCTYPE html>
-<html lang="hi">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghost-Engine v10.5 - Stealth Mode</title>
-    <style>
-        :root { --primary: #00f2ff; --bg: #05070a; --card: #11141d; --text: #e2e8f0; --accent: #ff0055; --success: #22c55e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; margin: 0; }
-        .main-panel { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 500px; border: 1px solid #1e293b; box-shadow: 0 0 40px rgba(0, 242, 255, 0.1); }
-        h1 { color: var(--primary); text-align: center; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #020617; color: #fff; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
-        .btn-launch { width: 100%; padding: 15px; background: linear-gradient(45deg, #00f2ff, #0066ff); color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; margin-top: 15px; box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3); }
-        .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .unit-box { background: #0a0f1a; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #1e293b; }
-        .unit-box b { font-size: 9px; color: #64748b; display: block; margin-bottom: 5px; }
-        .engine-status { font-size: 11px; font-weight: bold; color: #334155; }
-        .log-container { height: 130px; background: #000; border-radius: 10px; margin-top: 15px; padding: 12px; font-family: 'Courier New', monospace; font-size: 10px; overflow-y: auto; border: 1px solid #1e293b; color: #00ff41; line-height: 1.4; }
-        .warning-footer { color: var(--accent); font-size: 10px; text-align: center; margin-top: 15px; font-weight: bold; letter-spacing: 1px; }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Website Booster Prime (Auto-Human Mode)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
+    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
+    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
+    --primary-blue: #0ea5e9;--danger: #dc2626;
+    --warning: #f59e0b; 
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
+  .wrap { max-width: 1400px; margin: 24px auto; padding: 12px; } 
+  header { margin-bottom: 20px; text-align: center; }
+  h1 { font-size: 30px; margin: 0; color: var(--accent); letter-spacing: -1px; } 
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 6px; }
+  .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .input-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  @media (min-width: 600px) { .input-group { flex-direction: row; } }
+  .url-input-wrap { flex: 1; display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 10px; }
+  .slot-selector { display: flex; align-items: center; border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; padding: 0 12px; background: #f0f4f8; font-weight: 600; color: var(--accent); font-size: 14px; white-space: nowrap; }
+  .slot-selector input[type="number"] { width: 50px; padding: 8px 0; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: var(--accent); outline: none; }
+  input[type="url"] { flex: 1; padding: 12px 14px; border-radius: 0; border: 1px solid var(--border); border-left: none; background: white; font-size: 16px; outline: none; }
+  .btn { background: var(--primary-blue); color: white; padding: 12px 18px; border-radius: 0 10px 10px 0; border: 0; cursor: pointer; font-weight: 600; transition: background-color 0.2s; white-space: nowrap; }
+  .btn:hover:not(:disabled) { background: #0c8cd8; }
+  .btn.stop { background: var(--danger); border-radius: 10px; display: none; width: 100%; margin-top: 10px;}
+
+  .repeat-control { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--card); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; }
+  .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
+  @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 420px; }
+  .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
+  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; background: #eee; }
+  iframe { 
+    width: 250%; height: 250%; border: 0; 
+    transform: scale(0.4); transform-origin: 0 0;
+  }
+  .status { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 8px; }
+</style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <h1>Website Booster Prime</h1>
+      <div class="tagline">Human-Like Traffic Simulation (Auto-Enabled)</div>
+    </header>
 
-<div class="main-panel">
-    <h1>Ghost Engine v10.5</h1>
-    
-    <div class="input-group">
-        <input type="text" id="urlInput" placeholder="https://yourwebsite.com" autocomplete="off">
-    </div>
-
-    <button class="btn-launch" id="startBtn">Initialize Stealth Engines</button>
-
-    <div class="status-grid">
-        <div class="unit-box"><b>ENG-1</b><span id="s1" class="engine-status">OFFLINE</span></div>
-        <div class="unit-box"><b>ENG-2</b><span id="s2" class="engine-status">OFFLINE</span></div>
-        <div class="unit-box"><b>ENG-3</b><span id="s3" class="engine-status">OFFLINE</span></div>
-        <div class="unit-box"><b>ENG-4</b><span id="s4" class="engine-status">OFFLINE</span></div>
-        <div class="unit-box"><b>ENG-5</b><span id="s5" class="engine-status">OFFLINE</span></div>
-        <div class="unit-box"><b>ENG-6</b><span id="s6" class="engine-status">OFFLINE</span></div>
-    </div>
-
-    <div class="log-container" id="logBox">> Ghost-Protocol Ready...</div>
-    <div class="warning-footer">ENABLE POP-UPS & USE VPN (AUTO-PURGE ACTIVE)</div>
-</div>
-
-<script>
-    let activeTabs = new Array(6).fill(null);
-    let intervals = new Array(6).fill(null);
-
-    function addLog(msg) {
-        const box = document.getElementById('logBox');
-        box.innerHTML += `<div>[${new Date().toLocaleTimeString()}] > ${msg}</div>`;
-        box.scrollTop = box.scrollHeight;
-        if(box.childNodes.length > 50) box.removeChild(box.firstChild); // मेमरी बचाने के लिए
-    }
-
-    document.getElementById('startBtn').addEventListener('click', function() {
-        const url = document.getElementById('urlInput').value;
-        if(!url.startsWith('http')) return alert("कृपया सही URL डालें!");
-
-        this.disabled = true;
-        this.style.opacity = "0.5";
-        this.innerText = "Engines Running...";
-
-        for(let i=0; i<6; i++) {
-            // हर इंजन अलग टाइम पर शुरू होगा ताकि सर्वर को शक न हो
-            setTimeout(() => launchEngine(i, url), i * (Math.random() * 4000 + 2000));
-        }
-    });
-
-    function launchEngine(id, url) {
-        // --- 1. DATA PURGE & RESET ---
-        if(activeTabs[id]) {
-            try { 
-                activeTabs[id].localStorage.clear(); 
-                activeTabs[id].sessionStorage.clear();
-                activeTabs[id].close(); 
-            } catch (e) { console.log("Cleaning cache..."); }
-        }
-        if(intervals[id]) clearInterval(intervals[id]);
-
-        const status = document.getElementById(`s${id+1}`);
-        const noise = Math.random().toString(36).substring(5);
+    <div class="controls">
+        <div class="input-group">
+            <div class="slot-selector">Slots: <input id="numSlots" type="number" value="10" min="1" max="20" /></div>
+            <div class="url-input-wrap">
+                <input id="globalUrl" type="url" placeholder="Paste Target URL here..." />
+            </div>
+            <button id="globalGo" class="btn">Start All (Auto-Repeat)</button>
+        </div>
         
-        // --- 2. IDENTITY SPOOFING ---
-        const refs = ["https://www.google.com/", "https://t.co/", "https://www.bing.com/"];
-        const ref = refs[Math.floor(Math.random() * refs.length)];
-        // URL में रैंडम पैरामीटर ताकि हर विजिट नई लगे
-        const finalUrl = `${url}${url.includes('?') ? '&' : '?'}utm_source=ghost&s_id=${noise}&ref=${btoa(ref).substring(0,8)}`;
+        <div class="repeat-control">
+            <label><input type="checkbox" id="repeatMode" checked> Active User Mode (Always On)</label>
+            <label><input type="checkbox" id="autoScrollMode" checked> Human-Like Scroll (Always On)</label>
+            <span>Cycle: <input id="minTime" type="number" value="30" style="width:40px"> to <input id="maxTime" type="number" value="60" style="width:40px"> sec</span>
+        </div>
+        <button id="globalStop" class="btn stop">STOP ALL SESSIONS</button>
+    </div>
 
-        // --- 3. RANDOM FINGERPRINT (Size/Pos) ---
-        const w = 320 + Math.floor(Math.random() * 50); 
-        const h = 500 + Math.floor(Math.random() * 100); 
-        const x = (id % 3) * 350; 
-        const y = (id < 3) ? 20 : 550;
+    <div class="grid-container" id="gridContainer"></div>
+  </div>
 
-        status.innerText = "CLEANING";
-        status.style.color = "#fbbf24";
+<script> 
+const COMMON_AUTH = "bqctypvz:399xb3kxqv6i";
+const DUMMY_PROXIES = [
+  { ip: "142.111.48.253", port: "7030", country: "US" }, { ip: "31.59.20.176", port: "6754", country: "DE" },
+  { ip: "38.170.176.177", port: "5572", country: "CA" }, { ip: "198.23.239.134", port: "6540", country: "US" },
+  { ip: "45.38.107.97", port: "6014", country: "US" }, { ip: "107.172.163.27", port: "6543", country: "CA" },
+  { ip: "64.137.96.74", port: "6641", country: "US" }, { ip: "216.10.27.159", port: "6837", country: "AU" },
+  { ip: "142.111.67.146", port: "5611", country: "US" }, { ip: "142.147.128.93", port: "6593", country: "CA" },
+  { ip: "142.111.48.254", port: "7031", country: "US" }, { ip: "31.59.20.177", port: "6755", country: "DE" },  
+  { ip: "38.170.176.178", port: "5573", country: "CA" }, { ip: "198.23.239.135", port: "6541", country: "US" }, 
+  { ip: "45.38.107.98", port: "6015", country: "US" }, { ip: "107.172.163.28", port: "6544", country: "CA" }, 
+  { ip: "64.137.96.75", port: "6642", country: "US" }, { ip: "216.10.27.160", port: "6838", country: "AU" }, 
+  { ip: "142.111.67.147", port: "5612", country: "US" }, { ip: "142.147.128.94", port: "6594", country: "CA" }
+];
 
-        // --- 4. DEPLOY ---
-        activeTabs[id] = window.open(finalUrl, `ghost_unit_${id}_${noise}`, 
-            `width=${w},height=${h},left=${x},top=${y},resizable=yes,scrollbars=yes`);
+let currentSlots = [];
+let activeIntervals = [];
 
-        if(!activeTabs[id]) {
-            status.innerText = "BLOCKED";
-            status.style.color = "#ef4444";
-            return;
+function createSlot(index, proxy) {
+    const el = document.createElement('div');
+    el.className = 'slot';
+    el.innerHTML = `
+        <div class="slot-top"><div class="slot-title">SLOT ${index+1} (${proxy.country})</div></div>
+        <div class="iframe-wrap"><iframe id="ifr-${index}" src="about:blank"></iframe></div>
+        <div class="status" id="stat-${index}">Ready</div>
+    `;
+    document.getElementById('gridContainer').appendChild(el);
+    return { 
+        iframe: el.querySelector('iframe'), 
+        status: el.querySelector('.status'),
+        proxy: proxy,
+        scrollInterval: null
+    };
+}
+
+// --- Real Human-Like Scrolling Logic ---
+function startHumanScroll(iframe) {
+    if(iframe.dataset.scrolling === "true") return;
+    iframe.dataset.scrolling = "true";
+    
+    let scrollPos = 0;
+    const runScroll = () => {
+        if(iframe.dataset.scrolling !== "true") return;
+        
+        // Random scroll amount (Human behavior)
+        const move = Math.floor(Math.random() * 50) + 10; 
+        scrollPos += move;
+        
+        // Iframe content scroll simulation
+        iframe.contentWindow.postMessage({ type: 'scroll', top: scrollPos }, '*');
+        
+        // Random delay between scrolls (0.5s to 2s)
+        const nextMove = Math.random() * 1500 + 500;
+        setTimeout(runScroll, nextMove);
+    };
+    runScroll();
+}
+
+async function runSession(slot, url) {
+    const uid = Math.floor(Math.random() * 90000000) + 10000000;
+    slot.status.textContent = "Loading Proxy...";
+    slot.iframe.src = url;
+
+    try {
+        const proxyUrl = `${PROXY_ENDPOINT}?target=${encodeURIComponent(url)}&ip=${slot.proxy.ip}&port=${slot.proxy.port}&auth=${COMMON_AUTH}&uid=${uid}`;
+        const res = await fetch(proxyUrl);
+        if(res.ok) {
+            slot.status.textContent = "Active (Simulating Human...)";
+            if(document.getElementById('autoScrollMode').checked) startHumanScroll(slot.iframe);
         }
+    } catch (e) { slot.status.textContent = "Error Connection"; }
+}
 
-        status.innerText = "STEALTH";
-        status.style.color = "#00f2ff";
-        addLog(`Eng-${id+1}: Identity Reset & Deployed.`);
+function startAll() {
+    const url = document.getElementById('globalUrl').value;
+    if(!url) return alert("Please enter a URL");
+    
+    document.getElementById('globalGo').style.display = 'none';
+    document.getElementById('globalStop').style.display = 'block';
 
-        // --- 5. HUMAN BEHAVIOR SIMULATION ---
-        intervals[id] = setInterval(() => {
-            if (activeTabs[id] && !activeTabs[id].closed) {
-                // रैंडम स्क्रॉलिंग (असली यूजर की तरह)
-                const scrollDown = Math.floor(Math.random() * 250);
-                activeTabs[id].scrollBy(0, scrollDown);
-                
-                // रैंडमली फोकस करना
-                if(Math.random() > 0.6) activeTabs[id].focus();
-            }
-        }, 7000);
+    currentSlots.forEach(slot => {
+        const cycle = () => {
+            runSession(slot, url);
+            const delay = (Math.random() * (document.getElementById('maxTime').value - document.getElementById('minTime').value) + parseInt(document.getElementById('minTime').value)) * 1000;
+            const timer = setTimeout(cycle, delay);
+            activeIntervals.push(timer);
+        };
+        cycle();
+    });
+}
 
-        // --- 6. LONG STAY CYCLE (For Earning) ---
-        // एड्स के लिए कम से कम 2-3 मिनट रुकना जरूरी है
-        const cycleTime = 120000 + (Math.random() * 90000); 
-        setTimeout(() => {
-            addLog(`Eng-${id+1}: Cycling Session...`);
-            launchEngine(id, url);
-        }, cycleTime);
-    }
+function stopAll() {
+    activeIntervals.forEach(clearTimeout);
+    activeIntervals = [];
+    currentSlots.forEach(s => {
+        s.iframe.dataset.scrolling = "false";
+        s.iframe.src = "about:blank";
+        s.status.textContent = "Stopped";
+    });
+    document.getElementById('globalGo').style.display = 'block';
+    document.getElementById('globalStop').style.display = 'none';
+}
+
+document.getElementById('globalGo').onclick = startAll;
+document.getElementById('globalStop').onclick = stopAll;
+
+// Initial Grid Render
+const count = document.getElementById('numSlots').value;
+for(let i=0; i<count; i++) currentSlots.push(createSlot(i, DUMMY_PROXIES[i]));
+
 </script>
-
 </body>
 </html>
+
