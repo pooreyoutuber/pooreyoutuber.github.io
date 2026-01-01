@@ -6,12 +6,11 @@
 <title>Website Booster Prime (Auto-Human Mode)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg: #f6f8fb;--card: #ffffff;--muted: #6b7280; 
-    --accent: #0f4f7f;--success: #059669; --border: #e5e7eb;
-    --shadow: 0 8px 20px rgba(0,0,0,0.08);--radius: 12px;--gap: 16px; 
-    --primary-blue: #0ea5e9;--danger: #dc2626;
-    --warning: #f59e0b; 
+  :root {
+    --bg: #f6f8fb; --card: #ffffff; --muted: #6b7280; 
+    --accent: #0f4f7f; --success: #059669; --border: #e5e7eb;
+    --shadow: 0 8px 20px rgba(0,0,0,0.08); --radius: 12px; --gap: 16px; 
+    --primary-blue: #0ea5e9; --danger: #dc2626; --warning: #f59e0b; 
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Inter', system-ui; background: var(--bg); color: #111827; line-height: 1.5; }
@@ -34,13 +33,30 @@
   .grid-container { display: grid; gap: var(--gap); grid-template-columns: repeat(1, 1fr); }
   @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
-  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 420px; }
+  .slot { background: var(--card); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 420px; position: relative; overflow: hidden; }
   .slot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .slot-title { font-weight: 700; font-size: 13px; color: var(--accent); }
-  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; background: #eee; }
+  .iframe-wrap { flex: 1; border-radius: 6px; border: 1px solid var(--border); position: relative; overflow: hidden; background: #fff; }
+  
+  /* --- Human-Like Auto-Scrolling Animation --- */
+  @keyframes humanScrollAction {
+    0% { transform: translateY(0) scale(0.4); }
+    20% { transform: translateY(-10%) scale(0.4); }
+    40% { transform: translateY(-30%) scale(0.4); }
+    50% { transform: translateY(-25%) scale(0.4); } /* Tiny bounce back up */
+    70% { transform: translateY(-60%) scale(0.4); }
+    90% { transform: translateY(-85%) scale(0.4); }
+    100% { transform: translateY(0) scale(0.4); }
+  }
+
+  .scrolling-active iframe {
+    animation: humanScrollAction 25s ease-in-out infinite;
+  }
+
   iframe { 
-    width: 250%; height: 250%; border: 0; 
+    width: 250%; height: 500%; border: 0; 
     transform: scale(0.4); transform-origin: 0 0;
+    transition: transform 0.3s ease;
   }
   .status { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 8px; }
 </style>
@@ -49,22 +65,22 @@
   <div class="wrap">
     <header>
       <h1>Website Booster Prime</h1>
-      <div class="tagline">Human-Like Traffic Simulation (Auto-Enabled)</div>
+      <div class="tagline">Automatic Global Traffic & Human Scrolling System</div>
     </header>
 
     <div class="controls">
         <div class="input-group">
             <div class="slot-selector">Slots: <input id="numSlots" type="number" value="10" min="1" max="20" /></div>
             <div class="url-input-wrap">
-                <input id="globalUrl" type="url" placeholder="Paste Target URL here..." />
+                <input id="globalUrl" type="url" placeholder="Paste Target URL here..." required />
             </div>
-            <button id="globalGo" class="btn">Start All (Auto-Repeat)</button>
+            <button id="globalGo" class="btn">Start All (Auto-Repeat ON)</button>
         </div>
         
         <div class="repeat-control">
-            <label><input type="checkbox" id="repeatMode" checked> Active User Mode (Always On)</label>
-            <label><input type="checkbox" id="autoScrollMode" checked> Human-Like Scroll (Always On)</label>
-            <span>Cycle: <input id="minTime" type="number" value="30" style="width:40px"> to <input id="maxTime" type="number" value="60" style="width:40px"> sec</span>
+            <label><input type="checkbox" id="repeatMode" checked disabled> Active User Mode (Always Enabled)</label>
+            <label><input type="checkbox" id="autoScrollMode" checked disabled> Human-Like Scroll (Always Enabled)</label>
+            <span>Cycle: <input id="minTime" type="number" value="30" readonly style="width:35px; border:none; background:transparent"> to <input id="maxTime" type="number" value="60" readonly style="width:35px; border:none; background:transparent"> sec</span>
         </div>
         <button id="globalStop" class="btn stop">STOP ALL SESSIONS</button>
     </div>
@@ -72,7 +88,7 @@
     <div class="grid-container" id="gridContainer"></div>
   </div>
 
-<script> 
+<script>; 
 const COMMON_AUTH = "bqctypvz:399xb3kxqv6i";
 const DUMMY_PROXIES = [
   { ip: "142.111.48.253", port: "7030", country: "US" }, { ip: "31.59.20.176", port: "6754", country: "DE" },
@@ -100,54 +116,33 @@ function createSlot(index, proxy) {
     `;
     document.getElementById('gridContainer').appendChild(el);
     return { 
+        container: el,
         iframe: el.querySelector('iframe'), 
         status: el.querySelector('.status'),
-        proxy: proxy,
-        scrollInterval: null
+        proxy: proxy
     };
-}
-
-// --- Real Human-Like Scrolling Logic ---
-function startHumanScroll(iframe) {
-    if(iframe.dataset.scrolling === "true") return;
-    iframe.dataset.scrolling = "true";
-    
-    let scrollPos = 0;
-    const runScroll = () => {
-        if(iframe.dataset.scrolling !== "true") return;
-        
-        // Random scroll amount (Human behavior)
-        const move = Math.floor(Math.random() * 50) + 10; 
-        scrollPos += move;
-        
-        // Iframe content scroll simulation
-        iframe.contentWindow.postMessage({ type: 'scroll', top: scrollPos }, '*');
-        
-        // Random delay between scrolls (0.5s to 2s)
-        const nextMove = Math.random() * 1500 + 500;
-        setTimeout(runScroll, nextMove);
-    };
-    runScroll();
 }
 
 async function runSession(slot, url) {
     const uid = Math.floor(Math.random() * 90000000) + 10000000;
     slot.status.textContent = "Loading Proxy...";
     slot.iframe.src = url;
+    
+    // Auto-scroll start immediately with load
+    slot.container.classList.add('scrolling-active');
 
     try {
         const proxyUrl = `${PROXY_ENDPOINT}?target=${encodeURIComponent(url)}&ip=${slot.proxy.ip}&port=${slot.proxy.port}&auth=${COMMON_AUTH}&uid=${uid}`;
         const res = await fetch(proxyUrl);
         if(res.ok) {
-            slot.status.textContent = "Active (Simulating Human...)";
-            if(document.getElementById('autoScrollMode').checked) startHumanScroll(slot.iframe);
+            slot.status.textContent = "Active (Cycle 30-60s Running)";
         }
-    } catch (e) { slot.status.textContent = "Error Connection"; }
+    } catch (e) { slot.status.textContent = "Network Pending..."; }
 }
 
 function startAll() {
     const url = document.getElementById('globalUrl').value;
-    if(!url) return alert("Please enter a URL");
+    if(!url) return alert("Please enter a URL first");
     
     document.getElementById('globalGo').style.display = 'none';
     document.getElementById('globalStop').style.display = 'block';
@@ -155,7 +150,8 @@ function startAll() {
     currentSlots.forEach(slot => {
         const cycle = () => {
             runSession(slot, url);
-            const delay = (Math.random() * (document.getElementById('maxTime').value - document.getElementById('minTime').value) + parseInt(document.getElementById('minTime').value)) * 1000;
+            // Auto Repeat between 30-60 seconds
+            const delay = (Math.floor(Math.random() * 31) + 30) * 1000; 
             const timer = setTimeout(cycle, delay);
             activeIntervals.push(timer);
         };
@@ -167,7 +163,7 @@ function stopAll() {
     activeIntervals.forEach(clearTimeout);
     activeIntervals = [];
     currentSlots.forEach(s => {
-        s.iframe.dataset.scrolling = "false";
+        s.container.classList.remove('scrolling-active');
         s.iframe.src = "about:blank";
         s.status.textContent = "Stopped";
     });
@@ -179,9 +175,14 @@ document.getElementById('globalGo').onclick = startAll;
 document.getElementById('globalStop').onclick = stopAll;
 
 // Initial Grid Render
-const count = document.getElementById('numSlots').value;
-for(let i=0; i<count; i++) currentSlots.push(createSlot(i, DUMMY_PROXIES[i]));
+const initialCount = 10;
+for(let i=0; i<initialCount; i++) currentSlots.push(createSlot(i, DUMMY_PROXIES[i]));
 
+document.getElementById('numSlots').onchange = (e) => {
+    document.getElementById('gridContainer').innerHTML = "";
+    currentSlots = [];
+    for(let i=0; i<e.target.value; i++) currentSlots.push(createSlot(i, DUMMY_PROXIES[i]));
+};
 </script>
 </body>
 </html>
