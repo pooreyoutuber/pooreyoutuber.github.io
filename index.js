@@ -1288,145 +1288,136 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
-async function runYoutubeBrowserTask(videoUrl, viewNumber, watchTimeSeconds) {
+
+
+async function runYoutubeStickyView(videoUrl, viewNumber, watchTimeSeconds) {
     let browser;
     try {
-        console.log(`\n[VIEW #${viewNumber}] Starting session for ${watchTimeSeconds}s...`);
+        console.log(`\n[VIEW #${viewNumber}] Initializing Deep-Masking...`);
 
-        // --- BROWSER CONFIGURATION ---
-        // Incognito off rakha hai taki cookies/history manually clean ho sake
         browser = await puppeteer.launch({
-            headless: "new", 
+            headless: "new", // 'new' mode is better for detection bypass
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled', // Anti-bot hide
-                '--autoplay-policy=no-user-gesture-required',    // Auto play allow
-                '--start-maximized'
+                '--disable-blink-features=AutomationControlled',
+                '--window-size=1280,720',
+                '--no-first-run',
+                '--no-service-autorun',
+                '--password-store=basic',
+                // Audio enable karne ke liye (YouTube checks for hardware interaction)
+                '--autoplay-policy=no-user-gesture-required',
             ]
         });
 
         const page = await browser.newPage();
-        
-        // Random User Agent from your USER_AGENTS array
+
+        // --- 1. DEEP FINGERPRINT SPOOFING ---
         const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         await page.setUserAgent(ua);
-        await page.setViewport({ width: 1366, height: 768 });
-
-        // --- STEP 1: GOOGLE REFERRAL ---
-        console.log(`[STEP 1] Navigating to Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 3000)); 
-
-        // --- STEP 2: VIDEO OPENING ---
-        console.log(`[STEP 2] Pasting Link & Opening Video...`);
-        // Referer header manually set kiya hai organic source dikhane ke liye
-        await page.goto(videoUrl, { 
-            waitUntil: 'domcontentloaded', 
-            timeout: 60000, 
-            referer: 'https://www.google.com/' 
+        
+        // Masking WebDriver and Hardware info
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+            window.chrome = { runtime: {} };
+            Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+            Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
         });
+
+        // --- 2. GOOGLE REFERRAL ENTRY ---
+        console.log(`[STEP 1] Entering via Google...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 2000));
+
+        // --- 3. VIDEO NAVIGATION ---
+        console.log(`[STEP 2] Loading Video: ${videoUrl}`);
+        // Google se link paste karne ka dikhava (Referrer)
+        await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
+        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
         const startTime = Date.now();
         const durationMs = watchTimeSeconds * 1000;
 
-        // --- STEP 3: MONITORING LOOP (PLAY, POPUPS, SCROLL) ---
-        // Audio ON rakha hai taaki playback detection active rahe
+        // --- 4. INTERACTION & MONITORING LOOP ---
+        console.log(`[WATCHING] Playing with Audio ON...`);
+        
         while (Date.now() - startTime < durationMs) {
             
             await page.evaluate(async () => {
-                // 1. Video Playback Check
                 const video = document.querySelector('video');
                 if (video) {
-                    if (video.paused || video.ended) {
-                        video.play().catch(() => {});
-                    }
+                    // Force Play if paused
+                    if (video.paused || video.ended) video.play().catch(() => {});
+                    
+                    // Interaction: Mute/Unmute to simulate user
+                    video.muted = false; 
+                    video.volume = 0.6;
                 }
 
-                // 2. Popup & Ad Remover
-                const popups = [
-                    '.ytp-ad-overlay-close-button', 
-                    '.ytp-ad-skip-button', 
-                    'tp-yt-paper-button#button', // Cookie consent
-                    '#dismiss-button',
-                    'yt-formatted-string.style-scope.ytd-button-renderer.style-suggestive' // Sign-in prompt
-                ];
-                popups.forEach(selector => {
-                    const btn = document.querySelector(selector);
+                // Close any YouTube popups (Sign-in, Cookies)
+                const popupSelectors = ['#dismiss-button', 'tp-yt-paper-button#button', '.ytp-ad-overlay-close-button'];
+                popupSelectors.forEach(sel => {
+                    const btn = document.querySelector(sel);
                     if (btn) btn.click();
                 });
 
-                // 3. Human-like Micro Scrolling
-                window.scrollBy(0, Math.random() < 0.5 ? 10 : -5);
+                // Micro-scrolling (Human-like)
+                window.scrollBy(0, Math.random() < 0.5 ? 5 : -2);
             });
 
-            // Har 10 sec me bot status check karega
-            await new Promise(r => setTimeout(r, 10000));
+            // Random delay to break bot pattern
+            await new Promise(r => setTimeout(r, 4000 + Math.random() * 3000));
         }
 
-        // --- STEP 4: POST-WATCH ACTIONS (DESC & COMMENTS) ---
-        console.log(`[STEP 4] Checking Description and Comments...`);
+        // --- 5. POST-WATCH ENGAGEMENT ---
+        console.log(`[STEP 3] Scrolling to Description & Comments...`);
         await page.evaluate(() => {
-            window.scrollTo({ top: 500, behavior: 'smooth' }); // Description area
-            const moreBtn = document.querySelector('#expand, .more-button');
-            if (moreBtn) moreBtn.click();
+            window.scrollTo({ top: 600, behavior: 'smooth' }); // Scroll to desc
         });
-        await new Promise(r => setTimeout(r, 5000));
-        
-        await page.evaluate(() => {
-            window.scrollTo({ top: 1200, behavior: 'smooth' }); // Comment section
-        });
-        await new Promise(r => setTimeout(r, 5000));
+        await new Promise(r => setTimeout(r, 4000));
 
-        // --- STEP 5: CLEANUP & CLOSE ---
-        console.log(`[STEP 5] Cleaning History & Cookies...`);
+        // --- 6. AGGRESSIVE CLEANUP (Essential for Same IP) ---
+        console.log(`[CLEANUP] Wiping Browser Data...`);
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
-        // Storage clean
-        await page.evaluate(() => localStorage.clear());
-        await page.evaluate(() => sessionStorage.clear());
+        await page.evaluate(() => {
+            localStorage.clear();
+            sessionStorage.clear();
+            indexedDB.deleteDatabase('_pouch_check_1'); // Clear internal DBs
+        });
 
-    } catch (error) {
-        console.error(`[CRITICAL ERROR] View #${viewNumber} Failed: ${error.message}`);
+    } catch (err) {
+        console.log(`[ERROR] Session #${viewNumber}: ${err.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLEANUP] Browser Closed. System RAM Freed.`);
+            console.log(`[SYSTEM] Browser Terminated. Waiting for Next...`);
         }
     }
 }
 
-// --- FINAL ENDPOINT ---
+// --- UPDATED ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
-    
     const total = parseInt(views_count) || 1;
-    const stayTime = parseInt(watch_time) || 60; // Default 60s agar front se na aaye
+    const stay = parseInt(watch_time) || 32; // Aapke 32s video ke liye
 
-    if (!video_url) return res.status(400).json({ error: "Video URL is required" });
-
-    // Response turant bhej rahe hain taaki frontend hang na ho
     res.status(200).json({ 
         success: true, 
-        message: `Bot Activated: ${total} views (1-by-1) | Watch Time: ${stayTime}s per view.` 
+        message: `Tool 7 (Sticky Mode) Started for ${total} views.` 
     });
 
-    // Background Worker (Sequential execution)
+    // Sequential Execution
     (async () => {
         for (let i = 1; i <= total; i++) {
-            // Await se ye confirm hota hai ki jab tak 1st browser band nahi hota, 2nd start nahi hoga
-            await runYoutubeBrowserTask(video_url, i, stayTime);
+            await runYoutubeStickyView(video_url, i, stay);
             
-            if (i < total) {
-                // Render Server ki RAM reset hone ke liye 15s ka rest
-                const rest = 15000;
-                console.log(`[REST] Waiting ${rest/1000}s before next view...`);
-                await new Promise(r => setTimeout(r, rest));
-            }
+            // Critical: Same IP par gap dena zaroori hai
+            const gap = 15000 + (Math.random() * 10000); 
+            console.log(`[WAIT] Cooling down for ${Math.round(gap/1000)}s...`);
+            await new Promise(r => setTimeout(r, gap));
         }
-        console.log(`\n--- ALL TASKS COMPLETED SUCCESSFULLY ---`);
     })();
 });
 
