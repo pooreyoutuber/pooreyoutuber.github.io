@@ -1418,82 +1418,114 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // 8. WEBSITE FAST BOOSTER (SEARCH-BASED TRAFFIC FLOW)
 // ===================================================================
-async function runTempleRunTask(keyword, urls, viewNumber) {
+async function runTempleRunOzTask(keyword, urls, viewNumber) {
     let browser;
     try {
-        // Puppeteer launch with stealth and security arguments
+        // Puppeteer launch with stealth and incognito to auto-clean cookies/history
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
-                '--incognito', // Isse history/cookies auto-clean rehti hain
+                '--incognito', // Isse history aur cookies save nahi hoti
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
         
-        // Random User Agent for every view
+        // Random User Agent selection from your existing list
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
         await page.setViewport({ width: 1366, height: 768 });
 
-        // STEP 1: Google.com par jaana
-        console.log(`[TEMPLE RUN] View #${viewNumber} | Opening Google...`);
+        // Phase 1: Google Search Simulation
+        console.log(`[OZ] View #${viewNumber} | Starting via Google...`);
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
         
-        // STEP 2: First site ko search/open karna
+        // Phase 2: Load Site 1 (Target URL from your screenshot)
         const site1 = urls[0];
-        console.log(`[TEMPLE RUN] Navigating to Site 1: ${site1}`);
+        const site2 = urls[1] || site1; // Agar dusri site nahi di toh same use karega
+        
+        console.log(`[OZ] Navigating to Site 1: ${site1}`);
         await page.goto(site1, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // STEP 3: Site 1 par Search Bar dhundna aur Site 2 enter karna
-        const site2 = urls[1] || site1; // Agar 2nd site nahi hai toh same use karega
-        
-        try {
-            // Common search selectors (input[type="text"], input[type="search"], etc.)
-            const searchSelectors = ['input[name="s"]', 'input[type="search"]', 'input[type="text"]', '.search-field', '#search-input'];
-            let searchInput = null;
-
-            for (const selector of searchSelectors) {
-                searchInput = await page.$(selector);
-                if (searchInput) break;
+        // Phase 3: Smart Search Bar Detection & Navigation to Site 2
+        const searchHandled = await page.evaluate(async (targetUrl) => {
+            // Har tarah ke input fields ko dundhna (search, text, textarea)
+            const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="search"], textarea, .search-field'));
+            
+            if (inputs.length > 0) {
+                const searchInput = inputs[0]; 
+                searchInput.value = ''; // Purana saaf karein
+                
+                // Typing Site 2 URL in Search Bar
+                for (let char of targetUrl) {
+                    searchInput.value += char;
+                    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                
+                // Form submit dhundna ya Enter key press karna
+                const form = searchInput.closest('form');
+                if (form) {
+                    form.submit();
+                    return true;
+                } else {
+                    searchInput.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Enter'}));
+                    return true;
+                }
             }
+            return false;
+        }, site2);
 
-            if (searchInput) {
-                console.log(`[TEMPLE RUN] Search bar found. Typing Site 2...`);
-                await searchInput.type(site2, { delay: 100 });
-                await page.keyboard.press('Enter');
-            } else {
-                console.log(`[TEMPLE RUN] Search bar not found. Directly jumping to Site 2.`);
-                await page.goto(site2, { waitUntil: 'networkidle2' });
-            }
-        } catch (e) {
-            console.log(`[TEMPLE RUN] Search interaction failed, jumping to Site 2.`);
+        if (searchHandled) {
+            console.log(`[OZ] Injected Site 2 via Search Bar. Moving to Site 2...`);
+            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 }).catch(() => {});
+        } else {
+            console.log(`[OZ] Search bar not found. Jumping to Site 2 directly.`);
             await page.goto(site2, { waitUntil: 'networkidle2' });
         }
 
-        // STEP 4: 30-50 Seconds Wait (Stay Time)
-        const stayTime = randomInt(30000, 50000);
-        console.log(`[TEMPLE RUN] Staying for ${stayTime/1000}s...`);
+        // Phase 4: Random Stay (30-50 Seconds) & Human Interaction
+        const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
+        console.log(`[OZ] Interacting for ${stayTime/1000}s...`);
         
-        // Natural Scrolling during wait
-        await page.evaluate(async () => {
-            window.scrollBy(0, 400);
+        // Smooth scrolling simulate karna
+        await page.evaluate(() => {
+            window.scrollBy({ top: 500, behavior: 'smooth' });
         });
         
         await new Promise(r => setTimeout(r, stayTime));
-        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Complete. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] Temple Run View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] Temple Run Oz View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // browser.close() se session, cookies aur history automatic clear ho jaati hai
+            // Browser close karne par sari history, sessions aur cookies delete ho jati hain
             await browser.close();
         }
     }
 }
+
+// --- NEW ENDPOINT FOR TOOL 8 ---
+app.post('/api/temple-runoz', async (req, res) => {
+    const { keyword, urls, views = 10 } = req.body;
+
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).json({ error: "URLs are required!" });
+    }
+
+    res.status(200).json({ success: true, message: `Temple Run Oz Started: ${views} views processing 1-by-1.` });
+
+    // Background process to prevent server crash
+    (async () => {
+        for (let i = 1; i <= views; i++) {
+            await runTempleRunOzTask(keyword, urls, i);
+            // 10 second gap between views to keep RAM healthy on Render/Replit
+            await new Promise(r => setTimeout(r, 10000));
+        }
+    })();
+});
 
 // Endpoint for Temple Run Oz
 app.post('/temple-runoz', async (req, res) => {
