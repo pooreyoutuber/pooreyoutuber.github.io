@@ -1414,6 +1414,114 @@ app.post('/api/real-view-boost', async (req, res) => {
         }
     })();
 });
+// ===================================================================
+// 8. TEMPLE RUN OZ - DUAL SITE SEQUENTIAL FLOW (OFFICIAL)
+// ===================================================================
+
+async function runTempleRunOzFlow(keyword, urls, viewNumber) {
+    let browser;
+    try {
+        // Ek time mein ek hi browser khulega (Render safety)
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--incognito' // Har baar fresh session
+            ]
+        });
+
+        const page = await browser.newPage();
+        
+        // Anti-Detection: Random User Agent
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: 1366, height: 768 });
+
+        const site1 = urls[0];
+        const site2 = urls[1] || site1; // Agar 2nd site nahi di toh 1st ko hi repeat karega
+
+        console.log(`\n[RUNNING] View #${viewNumber} Started...`);
+
+        // STEP 1: Pehle google.com par jana
+        console.log(`[FLOW 1] Opening Google...`);
+        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000));
+
+        // STEP 2: Google se 1st Site par jana (Referer: Google)
+        console.log(`[FLOW 2] Navigating to Site 1: ${site1}`);
+        await page.goto(site1, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000, 
+            referer: 'https://www.google.com/' 
+        });
+
+        // STEP 3: Site 1 ke andar rehkar 2nd site open karna
+        // Jaisa aapne kaha: "1st ke andar 2site daalna"
+        console.log(`[FLOW 3] Navigating to Site 2 from Site 1: ${site2}`);
+        await page.goto(site2, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000, 
+            referer: site1 
+        });
+
+        // STEP 4: 30-50 seconds wait (Realistic Human behavior)
+        const waitTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000); 
+        console.log(`[FLOW 4] Human Activity: Scrolling & Waiting for ${waitTime/1000}s...`);
+        
+        await page.evaluate(() => window.scrollBy({ top: 400, behavior: 'smooth' }));
+        await new Promise(r => setTimeout(r, waitTime));
+
+        // STEP 5: Browser band karna (History/Cookies automatic clear ho jayengi Incognito ki wajah se)
+        console.log(`[SUCCESS] View #${viewNumber} Done. Browser Closed & Data Cleared. ✅`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
+    }
+}
+
+// ENDPOINT FOR TEMPLE RUN OZ
+app.post('/temple-runoz', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            return res.status(400).json({ success: false, message: "Keyword aur URLs jaruri hain!" });
+        }
+
+        const totalViews = parseInt(views);
+
+        // Frontend ko turant response dena taaki loading screen chale
+        res.status(200).json({ 
+            success: true, 
+            message: `Temple Run Oz Activated: ${totalViews} views sequential mode mein shuru ho gaye hain.` 
+        });
+
+        // BACKGROUND LOOP (1-by-1 execution)
+        (async () => {
+            console.log(`--- [TEMPLE RUN OZ PROCESS STARTED] ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                // Ek session khatam hone ka wait karega
+                await runTempleRunOzFlow(keyword, urls, i);
+                
+                if (i < totalViews) {
+                    // RAM clear karne ke liye 15s ka gap
+                    console.log(`[REST] 15s gap before next browser...`);
+                    await new Promise(r => setTimeout(r, 15000));
+                }
+            }
+            console.log(`--- [ALL TASKS FINISHED] ---`);
+        })();
+
+    } catch (err) {
+        console.error("Temple Run Oz Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 // =============================================================
 // --- SERVER START ---
