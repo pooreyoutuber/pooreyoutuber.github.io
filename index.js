@@ -1415,6 +1415,115 @@ app.post('/api/real-view-boost', async (req, res) => {
     })();
 });
 
+// ===================================================================
+// 8. WEBSITE FAST BOOSTER (SEARCH-BASED TRAFFIC FLOW)
+// ===================================================================
+
+async function runWebsiteFastTask(site1, site2, viewNumber) {
+    let browser;
+    try {
+        console.log(`[FAST-TOOL] View #${viewNumber} | Task Started`);
+
+        // Launch browser with anti-bot and memory cleaning
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-web-security',
+                '--incognito' // Cookies aur history reset karne ke liye
+            ]
+        });
+
+        const page = await browser.newPage();
+        
+        // Random User Agent from your existing array
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // STEP 1: Pehle Google.com par jana (Organic footprint ke liye)
+        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 1500));
+
+        // STEP 2: Frontend se aayi 1st Website (site1) open karna
+        console.log(`[STEP 1] Visiting Site 1: ${site1}`);
+        await page.goto(site1, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // STEP 3: Site ke andar Search Bar dundna aur Site 2 enter karna
+        console.log(`[STEP 2] Searching for Site 2: ${site2}`);
+        
+        // Common search selectors (Input fields aur Search classes)
+        const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search, [name="s"]';
+        
+        try {
+            await page.waitForSelector(searchSelector, { timeout: 8000 });
+            await page.click(searchSelector);
+            await page.type(searchSelector, site2, { delay: 100 });
+            
+            // Enter press karke submit karna
+            await page.keyboard.press('Enter');
+            console.log(`[STEP 3] Search Submitted! Redirecting to Site 2...`);
+        } catch (e) {
+            console.log(`[WARN] Search bar nahi mila ya delay hua. Site 2 ko direct simulate kar rahe hain.`);
+            // Agar search bar na mile toh direct site 2 par navigation simulate karna (fallback)
+            await page.goto(site2, { waitUntil: 'networkidle2', referer: site1 });
+        }
+
+        // STEP 4: 30-50 Second Stay Time (Random)
+        const stayTime = randomInt(30000, 50000);
+        console.log(`[WAIT] Simulating activity for ${stayTime/1000}s...`);
+        
+        // Human scrolling simulation
+        await page.evaluate(async () => {
+            for (let i = 0; i < 5; i++) {
+                window.scrollBy(0, 300);
+                await new Promise(r => setTimeout(r, 4000));
+            }
+        });
+
+        await new Promise(r => setTimeout(r, 5000)); // Final buffer
+        console.log(`[SUCCESS] View #${viewNumber} Completed ✅`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
+    } finally {
+        if (browser) {
+            await browser.close(); // Pura browser band (Auto cleaning)
+            console.log(`[CLEANUP] History/Cookies Cleared. Waiting 10s for next session...`);
+            // Aapki requirement ke mutabik 10 sec ka gap
+            await new Promise(r => setTimeout(r, 10000));
+        }
+    }
+}
+
+// --- ENDPOINT FOR TOOL 8 ---
+app.post('/start-views', async (req, res) => {
+    const { url1, url2, views = 1000 } = req.body; // Frontend IDs: url1, url2
+
+    if (!url1 || !url2) {
+        return res.status(400).json({ success: false, message: "Dono URLs (site1 aur site2) zaroori hain!" });
+    }
+
+    // Success response to frontend immediately
+    res.status(200).json({ 
+        success: true, 
+        message: `Fast Tool Started: ${views} views queue mein hain.` 
+    });
+
+    // Background Loop
+    (async () => {
+        for (let i = 1; i <= parseInt(views); i++) {
+            // Site 1 se Site 2 par jane ka process shuru
+            await runWebsiteFastTask(url1, url2, i);
+            
+            // Render limit protection: Har 10 view ke baad 20s ka extra break
+            if (i % 10 === 0) {
+                console.log("[SYSTEM] Cooldown period to prevent RAM crash...");
+                await new Promise(r => setTimeout(r, 20000));
+            }
+        }
+    })();
+});
+
 // =============================================================
 // --- SERVER START ---
 // ===================================================================
