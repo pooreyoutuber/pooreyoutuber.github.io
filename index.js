@@ -1417,72 +1417,108 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // 8. TEMPLE RUN OZ - DUAL SITE SEQUENTIAL FLOW (OFFICIAL)
 // ===================================================================
+// ===================================================================
+// 8. TEMPLE RUN OZ - MULTI-VIEW INJECTION FLOW (FIXED)
+// ===================================================================
 
 async function runTempleRunOzFlow(keyword, urls, viewNumber) {
     let browser;
     try {
-        // Ek time mein ek hi browser khulega (Render safety)
+        // Render/Heroku ki limited RAM ke liye settings
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--incognito' // Har baar fresh session
+                '--incognito' // Isse cookies/history automatically clear ho jayegi close par
             ]
         });
 
         const page = await browser.newPage();
-        
-        // Anti-Detection: Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-        await page.setViewport({ width: 1366, height: 768 });
+        await page.setViewport({ width: 1280, height: 800 });
 
-        const site1 = urls[0];
-        const site2 = urls[1] || site1; // Agar 2nd site nahi di toh 1st ko hi repeat karega
+        // Randomly choose one URL from the array
+        const targetUrl = urls[Math.floor(Math.random() * urls.length)];
+        const multiViewTool = "https://pooreyoutuber.github.io/multi-view.html";
 
-        console.log(`\n[RUNNING] View #${viewNumber} Started...`);
+        console.log(`\n[SESSION START] View #${viewNumber} | Targeting: ${targetUrl}`);
 
-        // STEP 1: Pehle google.com par jana
-        console.log(`[FLOW 1] Opening Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000));
+        // STEP 1: Google par jana
+        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 2000));
 
-        // STEP 2: Google se 1st Site par jana (Referer: Google)
-        console.log(`[FLOW 2] Navigating to Site 1: ${site1}`);
-        await page.goto(site1, { 
+        // STEP 2: Google se Multi-View Tool par jana
+        console.log(`[STEP 2] Navigating to Multi-View Tool...`);
+        await page.goto(multiViewTool, { 
             waitUntil: 'networkidle2', 
-            timeout: 60000, 
             referer: 'https://www.google.com/' 
         });
 
-        // STEP 3: Site 1 ke andar rehkar 2nd site open karna
-        // Jaisa aapne kaha: "1st ke andar 2site daalna"
-        console.log(`[FLOW 3] Navigating to Site 2 from Site 1: ${site2}`);
-        await page.goto(site2, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000, 
-            referer: site1 
-        });
-
-        // STEP 4: 30-50 seconds wait (Realistic Human behavior)
-        const waitTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000); 
-        console.log(`[FLOW 4] Human Activity: Scrolling & Waiting for ${waitTime/1000}s...`);
+        // STEP 3: Target URL input karna aur button click karna
+        console.log(`[STEP 3] Injecting Target URL...`);
+        // Input selector ka wait karein (apne HTML ke hisaab se check karein, yahan general selector hai)
+        await page.waitForSelector('input[type="text"], #target-url-input', { timeout: 10000 });
+        await page.type('input[type="text"]', targetUrl, { delay: 100 });
         
-        await page.evaluate(() => window.scrollBy({ top: 400, behavior: 'smooth' }));
-        await new Promise(r => setTimeout(r, waitTime));
+        await new Promise(r => setTimeout(r, 1000));
+        
+        // Button click (Start All)
+        await page.click('button, #start-btn');
+        console.log(`[STEP 4] Booster Started. Waiting 40 seconds...`);
 
-        // STEP 5: Browser band karna (History/Cookies automatic clear ho jayengi Incognito ki wajah se)
-        console.log(`[SUCCESS] View #${viewNumber} Done. Browser Closed & Data Cleared. ✅`);
+        // STEP 4: 40 Seconds ka Wait (Human Behavior)
+        await page.evaluate(() => {
+            window.scrollBy({ top: 500, behavior: 'smooth' });
+        });
+        await new Promise(r => setTimeout(r, 40000));
+
+        console.log(`[SUCCESS] View #${viewNumber} Complete. Clearing Data...`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
+            // Incognito browser close hote hi history aur cookies automatically delete ho jati hain
             await browser.close();
+            console.log(`[CLEANUP] Browser closed. 10s gap before next session.`);
         }
     }
 }
+
+// ENDPOINT
+app.post('/temple-runoz', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+        if (!urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "URLs are required!" });
+        }
+
+        const totalViews = parseInt(views);
+        res.status(200).json({ 
+            success: true, 
+            message: `Temple Run Oz: ${totalViews} views sequential mode mein shuru.` 
+        });
+
+        // BACKGROUND WORKER (1-by-1)
+        (async () => {
+            for (let i = 1; i <= totalViews; i++) {
+                // Ek session khatam hone ka intezar karega (await)
+                await runTempleRunOzFlow(keyword, urls, i);
+                
+                if (i < totalViews) {
+                    // 10 Second ka gap next browser shuru hone se pehle
+                    await new Promise(r => setTimeout(r, 10000));
+                }
+            }
+            console.log("--- ALL SESSIONS FINISHED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+    }
+});
 
 // ENDPOINT FOR TEMPLE RUN OZ
 app.post('/temple-runoz', async (req, res) => {
