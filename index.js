@@ -1288,39 +1288,40 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
-async function runYoutubeBrowserTask(videoUrl, viewNumber, targetStayTimeSeconds) {
+async function runYoutubeBrowserTask(videoUrl, viewNumber, watchTimeSeconds) {
     let browser;
     try {
-        console.log(`\n[START] View #${viewNumber} | URL: ${videoUrl}`);
+        console.log(`\n[VIEW #${viewNumber}] Starting session for ${watchTimeSeconds}s...`);
 
-        // 1. Browser Launch (Incognito: false as requested)
+        // --- BROWSER CONFIGURATION ---
+        // Incognito off rakha hai taki cookies/history manually clean ho sake
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", 
             args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--mute-audio',
-                '--disable-blink-features=AutomationControlled' 
-            ],
-            extraPrefsFirefox: { 'privacy.cpd.history': true }, // Cleanup helper
-            devtools: false
+                '--disable-blink-features=AutomationControlled', // Anti-bot hide
+                '--autoplay-policy=no-user-gesture-required',    // Auto play allow
+                '--start-maximized'
+            ]
         });
 
         const page = await browser.newPage();
         
-        // Random Device & User Agent
+        // Random User Agent from your USER_AGENTS array
         const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         await page.setUserAgent(ua);
         await page.setViewport({ width: 1366, height: 768 });
 
-        // STEP 1: Pehle Google.com par jana
-        console.log(`[STEP 1] Opening Google...`);
+        // --- STEP 1: GOOGLE REFERRAL ---
+        console.log(`[STEP 1] Navigating to Google...`);
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 3000)); 
 
-        // STEP 2: Video URL par jana (Google Referer ke saath)
-        console.log(`[STEP 2] Navigating to Video...`);
+        // --- STEP 2: VIDEO OPENING ---
+        console.log(`[STEP 2] Pasting Link & Opening Video...`);
+        // Referer header manually set kiya hai organic source dikhane ke liye
         await page.goto(videoUrl, { 
             waitUntil: 'domcontentloaded', 
             timeout: 60000, 
@@ -1328,86 +1329,107 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, targetStayTimeSeconds
         });
 
         const startTime = Date.now();
-        const durationMs = targetStayTimeSeconds * 1000;
+        const durationMs = watchTimeSeconds * 1000;
 
-        console.log(`[WATCHING] Target Time: ${targetStayTimeSeconds}s. Monitoring Playback...`);
-
-        // STEP 3: Playback Monitoring & Interaction Loop
+        // --- STEP 3: MONITORING LOOP (PLAY, POPUPS, SCROLL) ---
+        // Audio ON rakha hai taaki playback detection active rahe
         while (Date.now() - startTime < durationMs) {
             
             await page.evaluate(async () => {
-                // A. Video Play Check (Agar ruk jaye toh play kare)
+                // 1. Video Playback Check
                 const video = document.querySelector('video');
-                if (video && (video.paused || video.ended)) {
-                    video.play().catch(() => {});
+                if (video) {
+                    if (video.paused || video.ended) {
+                        video.play().catch(() => {});
+                    }
                 }
 
-                // B. Popup/Ad-Overlay Remover
-                const selectors = [
+                // 2. Popup & Ad Remover
+                const popups = [
                     '.ytp-ad-overlay-close-button', 
                     '.ytp-ad-skip-button', 
-                    'tp-yt-paper-button#button', // Consent popups
-                    '#dismiss-button'
+                    'tp-yt-paper-button#button', // Cookie consent
+                    '#dismiss-button',
+                    'yt-formatted-string.style-scope.ytd-button-renderer.style-suggestive' // Sign-in prompt
                 ];
-                selectors.forEach(s => {
-                    const btn = document.querySelector(s);
+                popups.forEach(selector => {
+                    const btn = document.querySelector(selector);
                     if (btn) btn.click();
                 });
 
-                // C. Slow Scrolling (Human behavior)
-                window.scrollBy(0, Math.random() < 0.5 ? 2 : -1);
+                // 3. Human-like Micro Scrolling
+                window.scrollBy(0, Math.random() < 0.5 ? 10 : -5);
             });
 
-            // Har 5 second mein check karega
-            await new Promise(r => setTimeout(r, 5000));
+            // Har 10 sec me bot status check karega
+            await new Promise(r => setTimeout(r, 10000));
         }
 
-        // STEP 4: Data Clear & Cleanup
-        console.log(`[CLEANUP] Clearing History and Cookies...`);
+        // --- STEP 4: POST-WATCH ACTIONS (DESC & COMMENTS) ---
+        console.log(`[STEP 4] Checking Description and Comments...`);
+        await page.evaluate(() => {
+            window.scrollTo({ top: 500, behavior: 'smooth' }); // Description area
+            const moreBtn = document.querySelector('#expand, .more-button');
+            if (moreBtn) moreBtn.click();
+        });
+        await new Promise(r => setTimeout(r, 5000));
+        
+        await page.evaluate(() => {
+            window.scrollTo({ top: 1200, behavior: 'smooth' }); // Comment section
+        });
+        await new Promise(r => setTimeout(r, 5000));
+
+        // --- STEP 5: CLEANUP & CLOSE ---
+        console.log(`[STEP 5] Cleaning History & Cookies...`);
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
-
-        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
+        // Storage clean
+        await page.evaluate(() => localStorage.clear());
+        await page.evaluate(() => sessionStorage.clear());
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[CRITICAL ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            // Render crash se bachne ke liye browser band hone ke baad hi agla start hoga
-            console.log(`[SYSTEM] Browser Closed. Waiting for next session...`);
+            console.log(`[CLEANUP] Browser Closed. System RAM Freed.`);
         }
     }
 }
 
-// --- Tool 7 Endpoint ---
+// --- FINAL ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
-    const totalViews = parseInt(views_count) || 1;
-    const stayTime = parseInt(watch_time) || 60; // Default 60 seconds
+    
+    const total = parseInt(views_count) || 1;
+    const stayTime = parseInt(watch_time) || 60; // Default 60s agar front se na aaye
 
-    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
+    if (!video_url) return res.status(400).json({ error: "Video URL is required" });
 
+    // Response turant bhej rahe hain taaki frontend hang na ho
     res.status(200).json({ 
         success: true, 
-        message: `Tool 7 Started: ${totalViews} views (${stayTime}s watch-time) sequential mode mein.` 
+        message: `Bot Activated: ${total} views (1-by-1) | Watch Time: ${stayTime}s per view.` 
     });
 
-    // Background Execution (1-by-1)
+    // Background Worker (Sequential execution)
     (async () => {
-        for (let i = 1; i <= totalViews; i++) {
-            // "await" ensures one browser finishes before next starts
+        for (let i = 1; i <= total; i++) {
+            // Await se ye confirm hota hai ki jab tak 1st browser band nahi hota, 2nd start nahi hoga
             await runYoutubeBrowserTask(video_url, i, stayTime);
             
-            if (i < totalViews) {
-                // RAM management break
-                await new Promise(r => setTimeout(r, 10000)); 
+            if (i < total) {
+                // Render Server ki RAM reset hone ke liye 15s ka rest
+                const rest = 15000;
+                console.log(`[REST] Waiting ${rest/1000}s before next view...`);
+                await new Promise(r => setTimeout(r, rest));
             }
         }
-        console.log("--- ALL TOOL 7 SESSIONS COMPLETED ---");
+        console.log(`\n--- ALL TASKS COMPLETED SUCCESSFULLY ---`);
     })();
 });
+
 // --- NEW ENDPOINT TO START TOOL 7 ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
