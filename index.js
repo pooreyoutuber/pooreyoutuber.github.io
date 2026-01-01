@@ -1288,138 +1288,121 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
+// ===================================================================
+// 7. ULTRA STEALTH YOUTUBE BOT (BYPASS DETECTION)
+// ===================================================================
 
-
-async function runYoutubeStickyView(videoUrl, viewNumber, watchTimeSeconds) {
+async function runYoutubeStealthTask(videoUrl, viewNumber, watchTimeSeconds) {
     let browser;
     try {
-        console.log(`\n[VIEW #${viewNumber}] Initializing Deep-Masking...`);
+        console.log(`\n[VIEW #${viewNumber}] Launching Stealth Browser...`);
 
         browser = await puppeteer.launch({
-            headless: "new", // 'new' mode is better for detection bypass
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled',
-                '--window-size=1280,720',
-                '--no-first-run',
-                '--no-service-autorun',
-                '--password-store=basic',
-                // Audio enable karne ke liye (YouTube checks for hardware interaction)
-                '--autoplay-policy=no-user-gesture-required',
+                '--disable-blink-features=AutomationControlled', // Sabse important line
+                '--use-fake-ui-for-media-stream',
+                '--mute-audio=false', // Audio on rakhna hai
+                '--window-size=1920,1080'
             ]
         });
 
         const page = await browser.newPage();
 
-        // --- 1. DEEP FINGERPRINT SPOOFING ---
-        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        await page.setUserAgent(ua);
-        
-        // Masking WebDriver and Hardware info
+        // --- STEALTH PLUGINS MANUALLY ---
         await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+            // Webdriver property ko delete karna
+            delete navigator.__proto__.webdriver;
+            // Chrome settings spoofing
             window.chrome = { runtime: {} };
-            Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
-            Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+            // Permissions spoofing
+            const originalQuery = window.navigator.permissions.query;
+            window.navigator.permissions.query = (parameters) => (
+                parameters.name === 'notifications' ?
+                Promise.resolve({ state: Notification.permission }) :
+                originalQuery(parameters)
+            );
         });
 
-        // --- 2. GOOGLE REFERRAL ENTRY ---
-        console.log(`[STEP 1] Entering via Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 2000));
+        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        await page.setUserAgent(ua);
 
-        // --- 3. VIDEO NAVIGATION ---
-        console.log(`[STEP 2] Loading Video: ${videoUrl}`);
-        // Google se link paste karne ka dikhava (Referrer)
-        await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
+        // 1. Google Referrer (Organic Start)
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 3000));
+
+        // 2. Open Video with Delay
+        console.log(`[PROCESS] Navigating to Video...`);
         await page.goto(videoUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
+        // 3. Wait for Video and Start Interaction
+        await page.waitForSelector('video', { timeout: 20000 }).catch(() => {});
+        
         const startTime = Date.now();
         const durationMs = watchTimeSeconds * 1000;
 
-        // --- 4. INTERACTION & MONITORING LOOP ---
-        console.log(`[WATCHING] Playing with Audio ON...`);
-        
         while (Date.now() - startTime < durationMs) {
-            
-            await page.evaluate(async () => {
-                const video = document.querySelector('video');
-                if (video) {
-                    // Force Play if paused
-                    if (video.paused || video.ended) video.play().catch(() => {});
-                    
-                    // Interaction: Mute/Unmute to simulate user
-                    video.muted = false; 
-                    video.volume = 0.6;
+            await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (v) {
+                    if (v.paused) v.play();
+                    v.muted = false;
+                    v.volume = 0.7;
                 }
+                
+                // Skip Ads / Popups
+                const skip = document.querySelector('.ytp-ad-skip-button, .ytp-ad-overlay-close-button');
+                if (skip) skip.click();
 
-                // Close any YouTube popups (Sign-in, Cookies)
-                const popupSelectors = ['#dismiss-button', 'tp-yt-paper-button#button', '.ytp-ad-overlay-close-button'];
-                popupSelectors.forEach(sel => {
-                    const btn = document.querySelector(sel);
-                    if (btn) btn.click();
-                });
-
-                // Micro-scrolling (Human-like)
-                window.scrollBy(0, Math.random() < 0.5 ? 5 : -2);
+                // Random Scrolling
+                window.scrollBy(0, Math.random() * 300);
             });
 
-            // Random delay to break bot pattern
-            await new Promise(r => setTimeout(r, 4000 + Math.random() * 3000));
+            // Random delay between 5 to 10 seconds
+            await new Promise(r => setTimeout(r, 5000 + Math.random() * 5000));
         }
 
-        // --- 5. POST-WATCH ENGAGEMENT ---
-        console.log(`[STEP 3] Scrolling to Description & Comments...`);
-        await page.evaluate(() => {
-            window.scrollTo({ top: 600, behavior: 'smooth' }); // Scroll to desc
-        });
+        // 4. Checking Description & Comments (For Engagement)
+        console.log(`[ENGAGE] Reading Comments...`);
+        await page.evaluate(() => window.scrollTo({ top: 1000, behavior: 'smooth' }));
         await new Promise(r => setTimeout(r, 4000));
 
-        // --- 6. AGGRESSIVE CLEANUP (Essential for Same IP) ---
-        console.log(`[CLEANUP] Wiping Browser Data...`);
+        // 5. CLEAR DATA (Aggressive Cleanup)
+        console.log(`[CLEANUP] Clearing all traces...`);
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
-        await page.evaluate(() => {
-            localStorage.clear();
-            sessionStorage.clear();
-            indexedDB.deleteDatabase('_pouch_check_1'); // Clear internal DBs
-        });
 
-    } catch (err) {
-        console.log(`[ERROR] Session #${viewNumber}: ${err.message}`);
+    } catch (error) {
+        console.error(`[ERR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[SYSTEM] Browser Terminated. Waiting for Next...`);
+            console.log(`[DONE] Browser closed.`);
         }
     }
 }
 
-// --- UPDATED ENDPOINT ---
+// --- Tool 7 Endpoint ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     const total = parseInt(views_count) || 1;
-    const stay = parseInt(watch_time) || 32; // Aapke 32s video ke liye
+    const stay = parseInt(watch_time) || 30;
 
-    res.status(200).json({ 
-        success: true, 
-        message: `Tool 7 (Sticky Mode) Started for ${total} views.` 
-    });
+    res.status(200).json({ success: true, message: "Stealth Bot Started 1-by-1" });
 
-    // Sequential Execution
     (async () => {
         for (let i = 1; i <= total; i++) {
-            await runYoutubeStickyView(video_url, i, stay);
-            
-            // Critical: Same IP par gap dena zaroori hai
-            const gap = 15000 + (Math.random() * 10000); 
-            console.log(`[WAIT] Cooling down for ${Math.round(gap/1000)}s...`);
-            await new Promise(r => setTimeout(r, gap));
+            await runYoutubeStealthTask(video_url, i, stay);
+            // Har view ke baad 20 second ka gap taki YouTube ko pattern na mile
+            console.log(`[WAIT] Resting for 20s...`);
+            await new Promise(r => setTimeout(r, 20000));
         }
     })();
 });
+
 
 // --- NEW ENDPOINT TO START TOOL 7 ---
 app.post('/api/real-view-boost', async (req, res) => {
