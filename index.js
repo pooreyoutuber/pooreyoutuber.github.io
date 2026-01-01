@@ -1417,60 +1417,57 @@ app.post('/api/real-view-boost', async (req, res) => {
 
 // ===================================================================
 // 8. WEBSITE FAST BOOSTER (SEARCH-BASED TRAFFIC FLOW)
+// ==================================================================
 // ===================================================================
+// 8. TEMPLE RUN OZ - ORGANIC CROSS-SITE NAVIGATOR (STABLE)
+// ===================================================================
+
 async function runTempleRunOzTask(keyword, urls, viewNumber) {
     let browser;
     try {
-        // Puppeteer launch with stealth and incognito to auto-clean cookies/history
+        // Anti-Crash: Incognito mode use karein taaki history/cache save na ho
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
-                '--incognito', // Isse history aur cookies save nahi hoti
+                '--incognito', 
+                '--disable-dev-shm-usage',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        
-        // Random User Agent selection from your existing list
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
         await page.setViewport({ width: 1366, height: 768 });
 
-        // Phase 1: Google Search Simulation
-        console.log(`[OZ] View #${viewNumber} | Starting via Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        
-        // Phase 2: Load Site 1 (Target URL from your screenshot)
+        // STEP 1: Pehle Google open karein (Organic Entry)
+        console.log(`[OZ] View #${viewNumber} | Shuruat Google se...`);
+        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 2000));
+
+        // STEP 2: 1st Site kholna
         const site1 = urls[0];
-        const site2 = urls[1] || site1; // Agar dusri site nahi di toh same use karega
-        
-        console.log(`[OZ] Navigating to Site 1: ${site1}`);
+        const site2 = urls[1] || site1;
+        console.log(`[OZ] Loading Site 1: ${site1}`);
         await page.goto(site1, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Phase 3: Smart Search Bar Detection & Navigation to Site 2
+        // STEP 3: Site 1 ke andar 2nd Site paste karna aur Submit dabana
         const searchHandled = await page.evaluate(async (targetUrl) => {
-            // Har tarah ke input fields ko dundhna (search, text, textarea)
-            const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="search"], textarea, .search-field'));
+            // Saare input fields dhundna (Search bar dundne ke liye)
+            const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="search"], textarea'));
             
             if (inputs.length > 0) {
-                const searchInput = inputs[0]; 
-                searchInput.value = ''; // Purana saaf karein
+                const searchInput = inputs[0];
+                searchInput.value = targetUrl; // 2nd site paste ki
                 
-                // Typing Site 2 URL in Search Bar
-                for (let char of targetUrl) {
-                    searchInput.value += char;
-                    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-                
-                // Form submit dhundna ya Enter key press karna
+                // Submit button ya Enter press karna
                 const form = searchInput.closest('form');
                 if (form) {
                     form.submit();
                     return true;
                 } else {
-                    searchInput.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Enter'}));
+                    searchInput.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Enter', bubbles: true}));
                     return true;
                 }
             }
@@ -1478,51 +1475,47 @@ async function runTempleRunOzTask(keyword, urls, viewNumber) {
         }, site2);
 
         if (searchHandled) {
-            console.log(`[OZ] Injected Site 2 via Search Bar. Moving to Site 2...`);
+            console.log(`[OZ] Site 2 injected into search. Moving...`);
             await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 }).catch(() => {});
         } else {
-            console.log(`[OZ] Search bar not found. Jumping to Site 2 directly.`);
+            console.log(`[OZ] Search bar nahi mila, Direct Site 2 par ja rahe hain.`);
             await page.goto(site2, { waitUntil: 'networkidle2' });
         }
 
-        // Phase 4: Random Stay (30-50 Seconds) & Human Interaction
+        // STEP 4: 30-50 Seconds Stay + Random Scroll (Tool 6 ki tarah)
         const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
-        console.log(`[OZ] Interacting for ${stayTime/1000}s...`);
+        console.log(`[OZ] Staying for ${stayTime/1000}s...`);
         
-        // Smooth scrolling simulate karna
-        await page.evaluate(() => {
-            window.scrollBy({ top: 500, behavior: 'smooth' });
-        });
-        
+        await page.evaluate(() => window.scrollBy({ top: 400, behavior: 'smooth' }));
         await new Promise(r => setTimeout(r, stayTime));
-        console.log(`[SUCCESS] View #${viewNumber} Complete. ✅`);
+
+        console.log(`[SUCCESS] View #${viewNumber} Done. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] Temple Run Oz View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // Browser close karne par sari history, sessions aur cookies delete ho jati hain
-            await browser.close();
+            await browser.close(); // Memory saaf karne ke liye band karna zaroori hai
         }
     }
 }
 
-// --- NEW ENDPOINT FOR TOOL 8 ---
+// Endpoint for Tool 8
 app.post('/api/temple-runoz', async (req, res) => {
     const { keyword, urls, views = 10 } = req.body;
 
-    if (!urls || !Array.isArray(urls) || urls.length === 0) {
-        return res.status(400).json({ error: "URLs are required!" });
+    if (!urls || !Array.isArray(urls)) {
+        return res.status(400).json({ error: "URLs required" });
     }
 
-    res.status(200).json({ success: true, message: `Temple Run Oz Started: ${views} views processing 1-by-1.` });
+    res.status(200).json({ success: true, message: "Temple Run Oz process started (1-by-1)." });
 
-    // Background process to prevent server crash
+    // Background Execution (Queue system taaki crash na ho)
     (async () => {
         for (let i = 1; i <= views; i++) {
             await runTempleRunOzTask(keyword, urls, i);
-            // 10 second gap between views to keep RAM healthy on Render/Replit
-            await new Promise(r => setTimeout(r, 10000));
+            // Har view ke baad 10-15s ka rest taaki RAM khali ho jaye
+            await new Promise(r => setTimeout(r, 12000));
         }
     })();
 });
