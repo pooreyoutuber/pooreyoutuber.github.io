@@ -1160,6 +1160,7 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1180,29 +1181,47 @@ async function runGscTask(keyword, url, viewNumber) {
         // Anti-Bot: Set Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        // --- NEW: REFERRER ROTATION LOGIC ---
+        const referrers = [
+            `https://www.google.com/search?q=${encodeURIComponent(keyword)}`,
+            'https://www.facebook.com/',
+            'https://www.linkedin.com/',
+            'https://www.instagram.com/',
+            'https://t.co/', // Twitter (X)
+            'https://www.bing.com/'
+        ];
+        
+        // Randomly ek referrer choose karein
+        const selectedReferrer = referrers[Math.floor(Math.random() * referrers.length)];
+        console.log(`[SOURCE] View #${viewNumber} coming from: ${selectedReferrer}`);
+
+        // Browser Headers mein referrer set karein
+        await page.setExtraHTTPHeaders({ 'referer': selectedReferrer });
+
+        // 1. STAGE: Agar Google search hai toh pehle Google par jayein, warna direct target par headers ke saath
+        if (selectedReferrer.includes('google.com')) {
+            await page.goto(selectedReferrer, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await new Promise(r => setTimeout(r, 3000)); 
+        }
 
         // 2. STAGE: Visit Target Site (30-35s Total Stay)
         console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
-            referer: googleUrl 
+            referer: selectedReferrer 
         });
 
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 35000); 
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop (Original Logic)
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // Mouse Movement (Bypass Bot Checks)
+            // Mouse Movement
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
@@ -1219,7 +1238,7 @@ async function runGscTask(keyword, url, viewNumber) {
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
+                        // Advertiser site par stay for valid CTR
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
