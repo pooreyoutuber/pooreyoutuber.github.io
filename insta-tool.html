@@ -20,7 +20,7 @@
             background-color: #f4f7f9;
         }
         .primary-button {
-            background-color: #ec4899; /* Pink color for Generate button */
+            background-color: #ec4899;
             transition: background-color 0.2s ease, transform 0.1s ease;
         }
         .primary-button:hover {
@@ -33,9 +33,11 @@
             border-color: #ec4899;
             box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.4);
         }
+        .article-content h2 { color: #ec4899; font-weight: 700; font-size: 1.5rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .article-content p { color: #4b5563; line-height: 1.7; margin-bottom: 1rem; }
     </style>
 </head>
-<body class="p-4 sm:p-8 flex justify-center items-start min-h-screen">
+<body class="p-4 sm:p-8 flex flex-col items-center min-h-screen">
 
     <div class="w-full max-w-2xl">
         <header class="text-center mb-8">
@@ -45,23 +47,14 @@
             <p class="text-gray-600">Generate 10 viral captions powered by Gemini AI.</p>
         </header>
 
-        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100">
-            
-            <div class="mb-6 p-4 bg-pink-50 border-l-4 border-pink-400 rounded-r-lg">
-                <h3 class="font-bold text-pink-800 mb-1">How to get the best results?</h3>
-                <p class="text-sm text-pink-700 leading-relaxed">
-                    To generate high-engagement viral captions, provide a detailed description of your video. Mention the <strong>main hook</strong>, any <strong>specific tips</strong> you shared, the <strong>target audience</strong>, and the <strong>overall vibe</strong> (e.g., high-energy, aesthetic, or serious). The more context you provide (up to 600 words), the more tailored and effective your captions will be!
-                </p>
-            </div>
-
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100 mb-12">
             <form id="caption-form" onsubmit="event.preventDefault(); generateCaptions()">
-                
                 <div class="mb-4">
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Reel Content Description (Be specific for viral results)</label>
-                    <textarea id="description" rows="6" placeholder="Example: In this reel, I show a step-by-step tutorial on how to edit cinematic travel videos using CapCut. I focus on speed ramping and color grading. The goal is to help beginner creators make their footage look professional in under 5 minutes..." class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150"></textarea>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Reel Topic/Description</label>
+                    <textarea id="description" rows="5" placeholder="Describe your reel content in detail (e.g., 'A travel vlog about Bali featuring hidden waterfalls and local food tips...')" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none transition duration-150"></textarea>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div class="grid grid-cols-2 gap-4 mb-6">
                     <div>
                         <label for="style" class="block text-sm font-medium text-gray-700 mb-2">Caption Style</label>
                         <select id="style" class="input-field w-full p-3 border border-gray-300 rounded-lg focus:outline-none appearance-none bg-white">
@@ -73,8 +66,8 @@
                         </select>
                     </div>
                     <div>
-                        <label for="count" class="block text-sm font-medium text-gray-700 mb-2">Number of Captions</label>
-                         <input type="number" id="count" value="10" min="10" max="10" readonly class="input-field w-full p-3 border border-gray-300 bg-gray-100 rounded-lg focus:outline-none">
+                        <label for="count" class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                         <input type="number" id="count" value="10" readonly class="input-field w-full p-3 border border-gray-300 bg-gray-100 rounded-lg focus:outline-none">
                     </div>
                 </div>
 
@@ -83,15 +76,38 @@
                 </button>
             </form>
 
-            <div id="status-message" class="mt-4 p-3 rounded-lg text-center hidden font-medium" role="alert"></div>
-
+            <div id="status-message" class="mt-4 p-3 rounded-lg text-center hidden font-medium"></div>
             <div id="captions-output" class="mt-8"></div>
         </div>
+
+        <section class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 article-content">
+            <h2>The Ultimate Guide to Viral Reels: Why Captions Matter</h2>
+            <p>In the fast-paced world of Instagram and TikTok, your video's hook might stop the scroll, but your <strong>caption is what drives the engagement</strong>. Whether you are a content creator, a small business owner, or an influencer, writing the perfect caption can be the difference between a video that gets 100 views and one that goes viral. That’s where our AI Reels Caption Generator comes in.</p>
+
+            <h2>How Our AI Captions Help You Grow</h2>
+            <p>Our tool uses advanced <strong>Gemini AI technology</strong> to analyze your video topic and generate captions that are specifically designed for the Instagram algorithm. Unlike generic generators, we provide a mix of 6 high-converting English captions and 4 foreign-language variants to help you reach a global audience. This multi-language approach increases your chances of landing on the Explore page in different regions.</p>
+
+            <h2>5 Tips for Writing Viral Reel Captions</h2>
+            <p>1. <strong>Start with a Hook:</strong> The first line of your caption must grab attention. Use curiosity, a bold statement, or a relatable problem.<br>
+            2. <strong>Keep it Readable:</strong> Use line breaks. No one likes reading a giant wall of text. Our tool automatically formats captions for better readability.<br>
+            3. <strong>Use Strategic Keywords:</strong> Instagram's SEO relies heavily on the text in your caption. Ensure your main topic is mentioned naturally.<br>
+            4. <strong>The Call to Action (CTA):</strong> Don't just post and ghost! Tell your viewers exactly what to do—"Follow for more," "Check the link in bio," or "Tag a friend who needs this."<br>
+            5. <strong>Hashtag Smartly:</strong> Mix broad hashtags with niche ones to maximize your reach.</p>
+
+            <h2>Why Choose This AI Tool?</h2>
+            <p>Time is the most valuable asset for any creator. Spending hours staring at a blinking cursor trying to think of something "witty" is a thing of the past. With our generator, you get 10 diverse options in seconds. From <strong>motivational quotes</strong> to <strong>funny punchlines</strong> and <strong>educational summaries</strong>, you can pick the style that matches your brand voice perfectly. It’s like having a professional social media manager in your pocket, available 24/7.</p>
+
+            <h2>Maximize Your Engagement Today</h2>
+            <p>Stop settling for boring "New Reel!" captions. Use our AI Reels Caption Generator to provide value, spark conversations, and build a community. Simply describe your video, select your preferred style, and let the AI do the heavy lifting. Your next viral moment is just one perfect caption away!</p>
+        </section>
+        
+        <footer class="mt-8 mb-12 text-center text-gray-500 text-sm">
+            &copy; 2024 AI Caption Tool | Powered by Gemini
+        </footer>
     </div>
 
     <script>
         const API_BASE_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com'; 
-
         const statusMessage = document.getElementById('status-message');
         const generateButton = document.getElementById('generate-button');
         const captionsOutput = document.getElementById('captions-output'); 
@@ -99,82 +115,49 @@
         function displayStatus(message, type = 'info') {
             statusMessage.textContent = message;
             statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
-            
-            if (type === 'error') {
-                statusMessage.classList.add('bg-red-100', 'text-red-700');
-            } else if (type === 'success') {
-                statusMessage.classList.add('bg-green-100', 'text-green-700');
-            } else {
-                statusMessage.classList.add('bg-blue-100', 'text-blue-700');
-            }
+            if (type === 'error') statusMessage.classList.add('bg-red-100', 'text-red-700');
+            else if (type === 'success') statusMessage.classList.add('bg-green-100', 'text-green-700');
+            else statusMessage.classList.add('bg-blue-100', 'text-blue-700');
             statusMessage.classList.remove('hidden');
         }
 
         async function generateCaptions() {
             const description = document.getElementById('description').value.trim();
             const style = document.getElementById('style').value;
-            
-            if (!description) {
-                displayStatus('Error: Please enter a reel topic/title.', 'error');
-                return;
-            }
+            if (!description) { displayStatus('Error: Please enter a reel topic.', 'error'); return; }
 
             generateButton.disabled = true;
             generateButton.textContent = 'Generating...';
             captionsOutput.innerHTML = ''; 
-            displayStatus('Requesting captions from AI Backend. Please wait...', 'info');
+            displayStatus('AI is crafting your viral captions...', 'info');
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/caption-generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        description: description, 
-                        style: style             
-                    })
+                    body: JSON.stringify({ description, style })
                 });
 
-                if (!response.ok) {
-                    let errorMessage = `Server Status ${response.status}`;
-                    try {
-                        const errorBody = await response.json();
-                        errorMessage = errorBody.error || errorMessage;
-                    } catch (e) {
-                        errorMessage = await response.text();
-                        errorMessage = `HTTP Error: Unexpected response (starts with: ${errorMessage.substring(0, 50)})`;
-                    }
-                    throw new Error(errorMessage);
-                }
+                if (!response.ok) throw new Error(`Server Error: ${response.status}`);
                 
                 const result = await response.json(); 
-
-                displayStatus('Captions generated successfully! (6 English + 4 Foreign Captions)', 'success');
+                displayStatus('Success! 10 captions generated.', 'success');
                 
-                if (result && result.captions && Array.isArray(result.captions)) {
-                    let htmlContent = '<h3 class="text-lg font-bold text-gray-800 mb-3">Generated Captions (Copy & Use)</h3>';
-                    
+                if (result?.captions) {
+                    let htmlContent = '<h3 class="text-lg font-bold text-gray-800 mb-3">Your Viral Captions</h3>';
                     result.captions.forEach((item, index) => {
-                        const captionText = item.caption || `Error: No caption text found for item ${index + 1}`;
                         const isForeign = index >= 6;
-                        const captionLabel = isForeign ? `Caption ${index + 1} (Foreign)` : `Caption ${index + 1}`;
-
                         htmlContent += `
                             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-3 ${isForeign ? 'border-pink-300 bg-pink-50' : ''}">
-                                <p class="text-sm font-semibold text-pink-600 mb-1">${captionLabel}:</p>
-                                <textarea rows="4" class="w-full text-gray-700 p-2 border border-gray-300 rounded-md focus:outline-none" readonly>${captionText}</textarea>
-                                <button onclick="navigator.clipboard.writeText(this.previousElementSibling.value)" class="mt-2 text-xs font-medium text-white bg-pink-500 hover:bg-pink-600 px-3 py-1 rounded-full transition">Copy Caption</button>
-                            </div>
-                        `;
+                                <p class="text-sm font-semibold text-pink-600 mb-1">Option ${index + 1}${isForeign ? ' (International)' : ''}:</p>
+                                <textarea rows="3" class="w-full text-gray-700 p-2 border border-gray-300 rounded-md focus:outline-none" readonly>${item.caption}</textarea>
+                                <button onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.innerText='Copied!'" class="mt-2 text-xs font-medium text-white bg-pink-500 px-3 py-1 rounded-full transition">Copy</button>
+                            </div>`;
                     });
-                    
                     captionsOutput.innerHTML = htmlContent;
-                } else {
-                    displayStatus('Warning: Backend returned success, but the data format was unexpected. Try again.', 'error');
                 }
-
             } catch (error) {
-                console.error("Caption Generation Error:", error);
-                displayStatus(`❌ Generation Failed. Error: ${error.message}. **Server might be sleeping (Render Free Tier). Please try again in 30 seconds.**`, 'error');
+                displayStatus(`❌ Error: ${error.message}. Please try again in 30 seconds.`, 'error');
             } finally {
                 generateButton.disabled = false;
                 generateButton.textContent = 'Generate 10 Viral Captions';
