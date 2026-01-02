@@ -1160,6 +1160,10 @@ app.post('/youtube-boost-mp', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+// ===================================================================
+// UPDATED Tool 6: Realistic Search Entry & Referrer (Fixes "Not Set")
+// ===================================================================
+
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1189,42 +1193,44 @@ async function runGscTask(keyword, url, viewNumber) {
         ];
         const selectedEngine = searchEngines[Math.floor(Math.random() * searchEngines.length)];
         
-        console.log(`[View #${viewNumber}] Step 1: Opening ${selectedEngine.name} for Keyword: ${keyword}`);
+        console.log(`[View #${viewNumber}] Entry: ${selectedEngine.name} | Keyword: ${keyword}`);
 
         // Search Engine page par jana
         await page.goto(selectedEngine.url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-        // 🔥 SEARCH PAGE PAR 4-5 SEC SCROLLING (Taaki GA4 ko real user lage)
+        // 🔥 SEARCH PAGE PAR 4-5 SEC SCROLLING (GA4 ko real session dikhane ke liye)
         const searchScrollTime = Date.now();
         while (Date.now() - searchScrollTime < 5000) { 
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 200) + 100));
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 150) + 50));
             await new Promise(r => setTimeout(r, 1000));
         }
 
-        // 3. TARGET SITE VISIT (Sahi Referral ke saath)
-        console.log(`[View #${viewNumber}] Step 2: Navigating to Site with Referrer: ${selectedEngine.name}`);
+        // 3. TARGET SITE VISIT (Headers ke saath Referral inject karna)
+        console.log(`[View #${viewNumber}] Moving to Site with Referrer...`);
         
-        // Headers mein Referrer force karna
-        await page.setExtraHTTPHeaders({ 'referer': selectedEngine.ref });
+        // Hard-set Referrer in Headers
+        await page.setExtraHTTPHeaders({ 
+            'referer': selectedEngine.ref,
+            'accept-language': 'en-US,en;q=0.9'
+        });
 
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
-            referer: selectedEngine.url // Search results page as referrer
+            referer: selectedEngine.url // Search results page as referer
         });
 
-        // 4. MAIN SITE INTERACTION & AD-CLICKER
+        // 4. MAIN SITE INTERACTION (Retention & Ad-Click)
         const startTime = Date.now();
         const targetStayTime = randomInt(35000, 45000); 
 
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling on your site
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) + 100));
             
-            // Mouse Movement
+            // Random Mouse Movement
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            await new Promise(r => setTimeout(r, randomInt(4000, 6000)));
 
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
@@ -1234,23 +1240,25 @@ async function runGscTask(keyword, url, viewNumber) {
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] View #${viewNumber} | Ad Clicked!`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         
-                        // Advertiser site par wait
+                        // Advertiser site par wait karna zaroori hai
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Completed Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
