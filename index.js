@@ -1385,31 +1385,23 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, timingInSeconds) {
     }
 }
 
-// --- UPDATED API ENDPOINT ---
+
+// --- NEW ENDPOINT TO START TOOL 7 ---
 app.post('/api/real-view-boost', async (req, res) => {
-    // Frontend se 'video_url', 'views_count', aur 'video_duration' aayega
-    const { video_url, views_count, video_duration } = req.body;
-    
-    if (!video_url || !video_duration) {
-        return res.status(400).json({ error: "Missing URL or Duration" });
-    }
+    const { video_url, views_count } = req.body;
+    const total = parseInt(views_count) || 1;
 
-    const count = parseInt(views_count) || 1;
-    const timing = parseInt(video_duration);
+    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
 
-    // Frontend ko response turant de do
-    res.status(200).json({ success: true, message: `Starting ${count} views 1-by-1.` });
+    res.status(200).json({ success: true, message: `Task started: ${total} views (1-by-1).` });
 
-    // Background loop (1-by-1 processing)
     (async () => {
-        for (let i = 1; i <= count; i++) {
-            // Wait for each task to finish before starting next (1-by-1)
-            await runYoutubeBrowserTask(video_url, i, timing);
+        for (let i = 1; i <= total; i++) {
+            await runYoutubeBrowserTask(video_url, i);
+            if (i < total) await new Promise(r => setTimeout(r, 15000));
         }
-        console.log("--- JOB FINISHED: ALL VIEWS DONE ---");
     })();
 });
-        
 // =============================================================
 // --- SERVER START ---
 // ===================================================================
