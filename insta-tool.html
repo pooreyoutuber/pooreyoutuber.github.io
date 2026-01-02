@@ -78,14 +78,41 @@
 
             <div id="status-message" class="mt-4 p-3 rounded-lg text-center hidden font-medium" role="alert"></div>
 
-            <div id="captions-output" class="mt-8">
-                </div>
+            <div id="captions-output" class="mt-8"></div>
 
-        </div>
+            <hr class="my-10 border-gray-200">
+            
+            <article class="prose prose-sm max-w-none text-gray-600">
+                <h2 class="text-2xl font-bold text-pink-600 mb-4">Mastering Social Media with AI: The Ultimate Reels Caption Generator</h2>
+                
+                <p class="mb-4">In the modern digital landscape, short-form video content has become the heartbeat of social media platforms. Whether you are an aspiring influencer, a small business owner, or a professional content creator, platforms like Instagram Reels, TikTok, and YouTube Shorts offer an unparalleled opportunity to reach a global audience. However, creating a visually stunning video is only half the battle. To truly go viral, you need a caption that stops the scroll, captures interest, and forces the user to engage. Our <strong>AI Reels Caption Generator</strong> is specifically designed to bridge that gap using the advanced power of Gemini AI.</p>
+
+                <h3 class="text-xl font-semibold text-gray-800 mt-6 mb-2">Why Your Caption is the Key to Growth</h3>
+                <p class="mb-4">Many creators make the mistake of focusing solely on the video and leaving the caption as an afterthought. This is a missed opportunity. Algorithms analyze how long a user spends on your post. A compelling caption keeps the viewer on your reel longer, increasing the "watch time" and signaling to the algorithm that your content is high-quality. Moreover, captions are where your Call-to-Action (CTA) lives. Without a clear prompt like "Save this for later" or "Tag a friend who needs this," your engagement rates will likely remain stagnant.</p>
+
+                <h3 class="text-xl font-semibold text-gray-800 mt-6 mb-2">How Our AI Tool Works</h3>
+                <p class="mb-4">This tool isn't just a random sentence generator. It uses sophisticated Natural Language Processing (NLP) to understand the context of your video. By entering your reel topic, you provide the "seed" of information. You can then select from five distinct psychological profiles:</p>
+                <ul class="list-disc pl-5 mb-4">
+                    <li><strong>Catchy and Funny:</strong> Uses humor and relatability to build a personal connection with your audience.</li>
+                    <li><strong>Motivational and Inspiring:</strong> Perfect for lifestyle and fitness creators looking to uplift their followers.</li>
+                    <li><strong>Short and Punchy:</strong> Designed for high-impact visuals where the message needs to be brief but powerful.</li>
+                    <li><strong>Educational and Informative:</strong> Establishes you as an authority in your niche by providing quick value.</li>
+                    <li><strong>Question-based:</strong> Specifically engineered to blow up your comment section by asking your audience for their opinion.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-gray-800 mt-6 mb-2">The Global Advantage: Multi-Language Support</h3>
+                <p class="mb-4">The internet has no borders, and neither should your content. One of the unique features of our generator is that it doesn't just provide 10 English captions. It produces 6 high-quality English captions and 4 foreign language captions. This strategy allows creators to tap into international markets, expanding their reach beyond their local region and making their content truly global. This diversity helps in reaching viewers who might prefer content in their native tongue, giving you a competitive edge over creators sticking only to one language.</p>
+
+                <h3 class="text-xl font-semibold text-gray-800 mt-6 mb-2">SEO and Branding Benefits</h3>
+                <p class="mb-4">Beyond just engagement, captions serve an SEO (Search Engine Optimization) purpose. Platforms like Instagram and TikTok now use keywords in captions to categorize content and show it to relevant users in search results. By using our AI generator, you ensure that your captions are filled with relevant context that helps search algorithms find your videos. Consistency in your caption style also helps in building a recognizable brand voice. Whether you choose to be the "funny guy" or the "helpful teacher," our tool helps you maintain that persona across every post.</p>
+
+                <h3 class="text-xl font-semibold text-gray-800 mt-6 mb-2">Conclusion</h3>
+                <p class="mb-4">The AI Reels Caption Generator is more than just a convenience; it’s a strategic partner for your social media growth. By automating the creative writing process, it saves you hours of brainstorming, allowing you to focus on what you do best: creating amazing videos. Stop struggling with "writer's block" and let AI give your reels the viral spark they deserve. Simply enter your topic, hit generate, and watch your engagement soar.</p>
+            </article>
+            </div>
     </div>
 
     <script>
-        // *** CRITICAL: YOUR RENDER BACKEND URL IS SET HERE ***
         const API_BASE_URL = 'https://pooreyoutuber-github-io-v2fo.onrender.com'; 
 
         const statusMessage = document.getElementById('status-message');
@@ -121,7 +148,6 @@
             displayStatus('Requesting captions from AI Backend. Please wait...', 'info');
 
             try {
-                // FIX 1: Corrected API endpoint to match index.js
                 const response = await fetch(`${API_BASE_URL}/api/caption-generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -145,17 +171,13 @@
                 
                 const result = await response.json(); 
 
-                // Success and Display Logic
                 displayStatus('Captions generated successfully! (6 English + 4 Foreign Captions)', 'success');
                 
                 if (result && result.captions && Array.isArray(result.captions)) {
                     let htmlContent = '<h3 class="text-lg font-bold text-gray-800 mb-3">Generated Captions (Copy & Use)</h3>';
                     
                     result.captions.forEach((item, index) => {
-                        // FIX 2: Using item.caption to display the actual text (Fixes [object Object] error)
                         const captionText = item.caption || `Error: No caption text found for item ${index + 1}`;
-                        
-                        // Highlight foreign captions for user clarity
                         const isForeign = index >= 6;
                         const captionLabel = isForeign ? `Caption ${index + 1} (Foreign)` : `Caption ${index + 1}`;
 
@@ -175,7 +197,6 @@
 
             } catch (error) {
                 console.error("Caption Generation Error:", error);
-                // Updated Error Message for Render Free Tier Issue
                 displayStatus(`❌ Generation Failed. Error: ${error.message}. **Server might be sleeping (Render Free Tier). Please try again in 30 seconds after opening the server URL directly.**`, 'error');
             } finally {
                 generateButton.disabled = false;
@@ -185,3 +206,4 @@
     </script>
 </body>
 </html>
+
