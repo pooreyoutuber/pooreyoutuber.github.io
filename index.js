@@ -1287,80 +1287,89 @@ app.post('/start-task', async (req, res) => {
 });
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
-// ===================================================================
- // --- TOOL 7: REAL VIEW BOOST (FINAL FIXED VERSION) ---
-
+// =================================================================
 async function runYoutubeBrowserTask(videoUrl, viewNumber, timingInSeconds) {
     let browser;
     try {
         console.log(`[START] View #${viewNumber} Starting...`);
 
-        // 1. Browser Launch with Anti-Detection
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // "new" is better for detection bypass
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled', // Bypass detection
-                '--window-size=1366,768'
+                '--disable-blink-features=AutomationControlled',
+                '--window-size=1366,768',
+                '--mute-audio' // Server pe sound ki zarurat nahi
             ]
         });
 
         const page = await browser.newPage();
         
-        // Webdriver hidden setting
+        // Anti-Detection: Webdriver property hatana
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
         });
 
-        // 2. Google.com se Video search bypass (Direct link ki jagah Google se jana)
+        // Timeout badhana taaki error na aaye (60 seconds)
+        await page.setDefaultNavigationTimeout(60000);
+
+        // --- STEP 1: GOOGLE SE ENTRY ---
+        console.log("Entering via Google.com...");
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        
         const searchBox = await page.$('textarea[name="q"]') || await page.$('input[name="q"]');
         if (searchBox) {
-            await searchBox.type(videoUrl, { delay: 100 }); // Typing like human
+            await searchBox.type(videoUrl, { delay: 150 }); 
             await page.keyboard.press('Enter');
+            // Wait for search results
             await page.waitForNavigation({ waitUntil: 'networkidle2' });
         }
 
-        // Link par click karke YouTube par jana
+        // --- STEP 2: YOUTUBE VIDEO LOAD ---
+        console.log(`Opening Video: ${videoUrl}`);
         await page.goto(videoUrl, { waitUntil: 'networkidle2' });
 
-        // 3. Play Video & Interaction
+        // Play Button Check
         try {
-            await page.waitForSelector('.ytp-large-play-button', { timeout: 10000 });
-            await page.click('.ytp-large-play-button');
+            const playBtn = await page.$('.ytp-large-play-button');
+            if (playBtn) await playBtn.click();
         } catch (e) { console.log("Auto-playing..."); }
 
-        // 4. MOUSE MOVEMENT & WATCH TIME LOOP
+        // --- STEP 3: DURATION & MOUSE MOVEMENT LOOP ---
         let startTime = Date.now();
         let endTime = startTime + (timingInSeconds * 1000);
 
-        console.log(`Watching for ${timingInSeconds} seconds...`);
+        console.log(`Watching for exactly ${timingInSeconds} seconds...`);
 
         while (Date.now() < endTime) {
-            // Random Mouse Movement (Human-like)
-            const x = Math.floor(Math.random() * 500) + 100;
-            const y = Math.floor(Math.random() * 500) + 100;
-            await page.mouse.move(x, y, { steps: 10 });
-            
-            // Thoda wait har move ke baad
-            await new Promise(r => setTimeout(r, 5000 + Math.random() * 5000));
-            
-            // Random Scroll
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 200)));
+            // Human-like Mouse Movement
+            const x = Math.floor(Math.random() * 800) + 100;
+            const y = Math.floor(Math.random() * 600) + 100;
+            await page.mouse.move(x, y, { steps: 15 });
+
+            // Random short waits
+            await new Promise(r => setTimeout(r, 3000 + Math.random() * 4000));
+
+            // Random Slight Scrolling
+            await page.evaluate(() => {
+                window.scrollBy(0, Math.floor(Math.random() * 150) - 50);
+            });
         }
 
-        // 5. CHECK DESCRIPTION & COMMENTS
+        // --- STEP 4: DESCRIPTION & COMMENT CHECK ---
         console.log("Checking Description and Comments...");
-        // Description Expand click
+        
+        // Expand description
         try {
-            await page.click('#expand'); 
+            const expandBtn = await page.$('#expand');
+            if(expandBtn) await expandBtn.click();
             await new Promise(r => setTimeout(r, 2000));
-        } catch (e) {}
+        } catch(e){}
 
         // Scroll to comments
-        await page.evaluate(() => window.scrollTo({ top: 1000, behavior: 'smooth' }));
-        await new Promise(r => setTimeout(r, 3000));
+        await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'smooth' }));
+        await new Promise(r => setTimeout(r, 4000));
 
         console.log(`[SUCCESS] View #${viewNumber} Completed ✅`);
 
@@ -1369,28 +1378,38 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, timingInSeconds) {
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLEANUP] Browser closed. 5s gap before next view...`);
-            await new Promise(r => setTimeout(r, 5000)); // Gap to clear RAM
+            // 1-by-1 ka matlab: ek band hoga tabhi dusra start hoga (Iske liye API mein await use karein)
+            console.log(`[CLEANUP] Browser closed. Waiting 10s for RAM safety...`);
+            await new Promise(r => setTimeout(r, 10000)); 
         }
     }
 }
 
-// --- NEW ENDPOINT TO START TOOL 7 ---
+// --- UPDATED API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count } = req.body;
-    const total = parseInt(views_count) || 1;
+    // Frontend se 'video_url', 'views_count', aur 'video_duration' aayega
+    const { video_url, views_count, video_duration } = req.body;
+    
+    if (!video_url || !video_duration) {
+        return res.status(400).json({ error: "Missing URL or Duration" });
+    }
 
-    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
+    const count = parseInt(views_count) || 1;
+    const timing = parseInt(video_duration);
 
-    res.status(200).json({ success: true, message: `Task started: ${total} views (1-by-1).` });
+    // Frontend ko response turant de do
+    res.status(200).json({ success: true, message: `Starting ${count} views 1-by-1.` });
 
+    // Background loop (1-by-1 processing)
     (async () => {
-        for (let i = 1; i <= total; i++) {
-            await runYoutubeBrowserTask(video_url, i);
-            if (i < total) await new Promise(r => setTimeout(r, 15000));
+        for (let i = 1; i <= count; i++) {
+            // Wait for each task to finish before starting next (1-by-1)
+            await runYoutubeBrowserTask(video_url, i, timing);
         }
+        console.log("--- JOB FINISHED: ALL VIEWS DONE ---");
     })();
 });
+        
 // =============================================================
 // --- SERVER START ---
 // ===================================================================
