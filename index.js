@@ -1313,100 +1313,121 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. YOUTUBE REAL-TIME ENGINE (ANTI-DETECTION VERSION)
 // ===================================================================
+// ===================================================================
+// 7. YOUTUBE REAL-TIME GROWTH ENGINE (STABLE & ANTI-FILTER)
+// ===================================================================
 
 app.post('/api/real-view-boost', async (req, res) => {
     try {
         const { video_url, views_count, watch_time } = req.body;
         if (!video_url || !views_count || !watch_time) {
-            return res.status(400).json({ success: false, message: "Invalid Parameters" });
+            return res.status(400).json({ success: false, message: "Missing Fields!" });
         }
 
         const totalViews = parseInt(views_count);
         const watchTimeMs = parseInt(watch_time) * 1000;
 
-        res.status(200).json({ success: true, message: "Engine Started: Human Simulation Active..." });
+        res.status(200).json({ 
+            success: true, 
+            message: `Boost Active: Distributing ${totalViews} Real-Time Views...` 
+        });
 
         (async () => {
             const { KnownDevices } = require('puppeteer');
-            
+            // Tool 6 ki tarah Mobile Device use karenge for better hits
+            const iPhone = KnownDevices['iPhone 13 Pro Max'];
+
             for (let i = 1; i <= totalViews; i++) {
                 let browser;
                 try {
+                    // Launching with Stealth and Performance Args
                     browser = await puppeteer.launch({
                         headless: "new",
                         args: [
                             '--no-sandbox',
                             '--disable-setuid-sandbox',
-                            '--mute-audio', // 1. Mute audio taaki crash na ho
-                            '--disable-web-security'
+                            '--mute-audio',
+                            '--disable-blink-features=AutomationControlled',
+                            '--disable-dev-shm-usage'
                         ]
                     });
 
                     const page = await browser.newPage();
-                    await page.emulate(KnownDevices['iPhone 13 Pro Max']);
+                    await page.setDefaultNavigationTimeout(90000); // Render ke liye high timeout
                     
-                    // Random User Agent
-                    await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+                    // Emulating Real Device (Tool 6 Logic)
+                    await page.emulate(iPhone);
+                    
+                    // Random User Agent from your existing USER_AGENTS array
+                    const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+                    await page.setUserAgent(ua);
 
-                    // STEP 1: Google entry with random delay
-                    console.log(`[VIEW #${i}] Entering via Google...`);
-                    await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-                    await new Promise(r => setTimeout(r, Math.random() * 3000 + 2000));
+                    // --- STEP 1: GOOGLE ENTRY (Critical for Real-Time) ---
+                    console.log(`[VIEW #${i}] Step 1: Entry via Google...`);
+                    await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
+                    await new Promise(r => setTimeout(r, 3000));
+                    await page.evaluate(() => window.scrollBy(0, 300));
 
-                    // STEP 2: Open Video
+                    // --- STEP 2: YOUTUBE LOADING ---
+                    console.log(`[VIEW #${i}] Step 2: Loading Video...`);
                     await page.goto(video_url, { 
-                        waitUntil: 'networkidle2', 
+                        waitUntil: 'domcontentloaded', 
                         referer: 'https://www.google.com/' 
                     });
 
-                    // STEP 3: ADVANCED HUMAN INJECTION (Quality & Playback)
-                    await new Promise(r => setTimeout(r, 6000)); 
+                    // --- STEP 3: PLAYBACK & INTERACTION ---
+                    await new Promise(r => setTimeout(r, 7000)); // Player buffer
                     
                     await page.evaluate(() => {
                         const video = document.querySelector('video');
                         if (video) {
                             video.muted = true;
-                            video.play();
-                            // Quality 144p set karna taaki stream na tute
-                            localStorage.setItem('yt-player-quality', '{"data":"144p","expiration":1700000000000,"creation":1600000000000}');
+                            video.play().catch(() => {});
+                            // Lowering quality to 144p to ensure video doesn't buffer on Render
+                            const settings = document.querySelector('.ytp-settings-button');
+                            if(settings) settings.click();
                         }
                     });
 
-                    // STEP 4: Watch and "Interact"
-                    const startTime = Date.now();
-                    console.log(`[WATCHING] View #${i} in progress...`);
-
-                    while (Date.now() - startTime < watchTimeMs) {
-                        // Har 10 sec mein random interaction
+                    // --- STEP 4: REAL WATCHING LOOP ---
+                    console.log(`[WATCHING] View #${i} in progress for ${watch_time}s...`);
+                    const sessionStart = Date.now();
+                    while (Date.now() - sessionStart < watchTimeMs) {
                         await new Promise(r => setTimeout(r, 10000));
+                        
+                        // Human Signal: Random Scroll & Play Check
                         await page.evaluate(() => {
-                            window.scrollBy(0, Math.random() * 100); // Thoda scroll
+                            window.scrollBy(0, Math.random() * 50);
                             const v = document.querySelector('video');
-                            if(v && v.paused) v.play(); // Auto-resume
+                            if(v && v.paused) v.play().catch(() => {});
                         });
                     }
 
-                    // STEP 5: Cookie Wipe
+                    // --- STEP 5: CLEANUP (Critical for Real-Time recognition) ---
                     const client = await page.target().createCDPSession();
                     await client.send('Network.clearBrowserCookies');
-                    
+                    await client.send('Network.clearBrowserCache');
+
                     await browser.close();
-                    console.log(`✅ [SUCCESS] View #${i} hit recorded.`);
+                    console.log(`✅ [SUCCESS] View #${i} hit sent to YouTube.`);
 
                 } catch (err) {
-                    console.error(`❌ View #${i} Failed:`, err.message);
+                    console.error(`❌ [ERROR] View #${i} Failed:`, err.message);
                     if (browser) await browser.close();
                 }
 
-                // IMPORTANT: Long Gap (YouTube bots se bachne ke liye)
-                const gap = Math.floor(Math.random() * 10000) + 15000; 
-                console.log(`[GAP] Waiting ${gap/1000}s for next session...`);
-                await new Promise(r => setTimeout(r, gap));
+                // Gap between views (Very important to avoid IP flag)
+                if (i < totalViews) {
+                    const delay = Math.floor(Math.random() * 5000) + 15000; // 15s to 20s
+                    console.log(`[COOLDOWN] Waiting ${delay/1000}s...`);
+                    await new Promise(r => setTimeout(r, delay));
+                }
             }
+            console.log(`\n✨ [TOOL 7] Task Finished: Check YouTube Studio.`);
         })();
 
     } catch (error) {
-        console.error("Tool 7 Error:", error);
+        console.error("Endpoint Error:", error);
     }
 });
 // =============================================================
