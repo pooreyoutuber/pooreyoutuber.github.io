@@ -1177,66 +1177,75 @@ async function runGscTask(keyword, url, viewNumber) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
         
-        // 1. RANDOM USER AGENT
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        // 1. Random User Agent set karna
+        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        await page.setUserAgent(userAgent);
 
-        // 2. RANDOM SEARCH ENGINE SELECTION
+        // 2. RANDOM SEARCH ENGINE SELECTION (Google, Yahoo, ya Bing)
         const searchEngines = [
-            { name: "Google", url: `https://www.google.com/search?q=${encodeURIComponent(keyword)}` },
-            { name: "Yahoo", url: `https://search.yahoo.com/search?p=${encodeURIComponent(keyword)}` },
-            { name: "Bing", url: `https://www.bing.com/search?q=${encodeURIComponent(keyword)}` }
+            { name: "Google", url: `https://www.google.com/search?q=${encodeURIComponent(keyword)}`, ref: "https://www.google.com/" },
+            { name: "Yahoo", url: `https://search.yahoo.com/search?p=${encodeURIComponent(keyword)}`, ref: "https://search.yahoo.com/" },
+            { name: "Bing", url: `https://www.bing.com/search?q=${encodeURIComponent(keyword)}`, ref: "https://www.bing.com/" }
         ];
         const selectedEngine = searchEngines[Math.floor(Math.random() * searchEngines.length)];
         
         console.log(`[View #${viewNumber}] Step 1: Opening ${selectedEngine.name} for Keyword: ${keyword}`);
 
-        // Search Engine Page Load karna
+        // Search Engine page par jana
         await page.goto(selectedEngine.url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-        // 🔥 NEW: Search Engine Page par 4-5 sec Scrolling & Activity
+        // 🔥 SEARCH PAGE PAR 4-5 SEC SCROLLING (Taaki GA4 ko real user lage)
         const searchScrollTime = Date.now();
-        while (Date.now() - searchScrollTime < 5000) { // 5 seconds activity
+        while (Date.now() - searchScrollTime < 5000) { 
             await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 200) + 100));
-            await page.mouse.move(Math.random() * 500, Math.random() * 500, { steps: 5 });
             await new Promise(r => setTimeout(r, 1000));
         }
 
-        // 3. TARGET SITE VISIT (With Referrer)
-        console.log(`[View #${viewNumber}] Step 2: Navigating to Site with Referrer...`);
+        // 3. TARGET SITE VISIT (Sahi Referral ke saath)
+        console.log(`[View #${viewNumber}] Step 2: Navigating to Site with Referrer: ${selectedEngine.name}`);
         
+        // Headers mein Referrer force karna
+        await page.setExtraHTTPHeaders({ 'referer': selectedEngine.ref });
+
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
-            referer: selectedEngine.url // Search Engine ka referral jayega
+            referer: selectedEngine.url // Search results page as referrer
         });
 
-        // 4. MAIN SITE STAY & AD CLICKER
+        // 4. MAIN SITE INTERACTION & AD-CLICKER
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 40000); 
+        const targetStayTime = randomInt(35000, 45000); 
 
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling on your site
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) + 200));
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            
+            // Mouse Movement
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Chance)
+            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
+
                     if (box && box.width > 50 && box.height > 50) {
                         console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); // Ad site par stay
+                        
+                        // Advertiser site par wait
+                        await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+        console.log(`[DONE] View #${viewNumber} Completed Successfully. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
@@ -1246,7 +1255,6 @@ async function runGscTask(keyword, url, viewNumber) {
         }
     }
 }
-
 // ===================================================================
 // Tool 6 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
