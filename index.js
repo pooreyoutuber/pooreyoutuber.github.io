@@ -1312,123 +1312,117 @@ app.post('/start-task', async (req, res) => {
 //=================================================================
 // ===================================================================
 // 7. YOUTUBE REAL-TIME ENGINE (ANTI-DETECTION VERSION)
+// ============================================================
 // ===================================================================
-// ===================================================================
-// 7. YOUTUBE REAL-TIME GROWTH ENGINE (STABLE & ANTI-FILTER)
+// 7. YOUTUBE REAL-TIME GROWTH ENGINE (MAX ANTI-DETECTION)
 // ===================================================================
 
 app.post('/api/real-view-boost', async (req, res) => {
     try {
         const { video_url, views_count, watch_time } = req.body;
         if (!video_url || !views_count || !watch_time) {
-            return res.status(400).json({ success: false, message: "Missing Fields!" });
+            return res.status(400).json({ success: false, message: "Missing Parameters" });
         }
 
         const totalViews = parseInt(views_count);
         const watchTimeMs = parseInt(watch_time) * 1000;
 
-        res.status(200).json({ 
-            success: true, 
-            message: `Boost Active: Distributing ${totalViews} Real-Time Views...` 
-        });
+        res.status(200).json({ success: true, message: "Engine Started: Human Simulation 2.0 Active" });
 
         (async () => {
             const { KnownDevices } = require('puppeteer');
-            // Tool 6 ki tarah Mobile Device use karenge for better hits
-            const iPhone = KnownDevices['iPhone 13 Pro Max'];
-
+            
             for (let i = 1; i <= totalViews; i++) {
                 let browser;
                 try {
-                    // Launching with Stealth and Performance Args
                     browser = await puppeteer.launch({
-                        headless: "new",
+                        headless: "new", // Render ke liye headless hi chalega
                         args: [
                             '--no-sandbox',
                             '--disable-setuid-sandbox',
+                            '--disable-blink-features=AutomationControlled', // Robot detection band karne ke liye
                             '--mute-audio',
-                            '--disable-blink-features=AutomationControlled',
-                            '--disable-dev-shm-usage'
+                            '--disable-web-security',
+                            '--disable-features=IsolateOrigins,site-per-process'
                         ]
                     });
 
                     const page = await browser.newPage();
-                    await page.setDefaultNavigationTimeout(90000); // Render ke liye high timeout
                     
-                    // Emulating Real Device (Tool 6 Logic)
-                    await page.emulate(iPhone);
-                    
-                    // Random User Agent from your existing USER_AGENTS array
-                    const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-                    await page.setUserAgent(ua);
+                    // 1. IMPORTANT: Human-like Identity
+                    await page.emulate(KnownDevices['iPhone 13 Pro Max']);
+                    await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
 
-                    // --- STEP 1: GOOGLE ENTRY (Critical for Real-Time) ---
-                    console.log(`[VIEW #${i}] Step 1: Entry via Google...`);
-                    await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
+                    // 2. STEP 1: GOOGLE "DUMMY" SEARCH (Asli source dikhane ke liye)
+                    console.log(`[VIEW #${i}] Step 1: Simulating Organic Search...`);
+                    await page.goto('https://www.google.com/search?q=youtube+trending', { waitUntil: 'domcontentloaded', timeout: 60000 });
                     await new Promise(r => setTimeout(r, 3000));
-                    await page.evaluate(() => window.scrollBy(0, 300));
 
-                    // --- STEP 2: YOUTUBE LOADING ---
-                    console.log(`[VIEW #${i}] Step 2: Loading Video...`);
+                    // 3. STEP 2: NAVIGATE TO VIDEO (With High Timeout)
+                    console.log(`[VIEW #${i}] Step 2: Opening Video...`);
                     await page.goto(video_url, { 
                         waitUntil: 'domcontentloaded', 
-                        referer: 'https://www.google.com/' 
+                        referer: 'https://www.google.com/',
+                        timeout: 90000 
                     });
 
-                    // --- STEP 3: PLAYBACK & INTERACTION ---
-                    await new Promise(r => setTimeout(r, 7000)); // Player buffer
-                    
-                    await page.evaluate(() => {
-                        const video = document.querySelector('video');
-                        if (video) {
-                            video.muted = true;
-                            video.play().catch(() => {});
-                            // Lowering quality to 144p to ensure video doesn't buffer on Render
+                    // 4. STEP 3: "REAL-TIME" PLAYER ACTIVATION
+                    // YouTube check karta hai ki tab active hai ya nahi
+                    await page.bringToFront();
+                    await new Promise(r => setTimeout(r, 10000)); // Buffer for Render
+
+                    await page.evaluate(async () => {
+                        const v = document.querySelector('video');
+                        if (v) {
+                            v.muted = true;
+                            // Playback speed thodi change karte hain (Human signal)
+                            v.playbackRate = 1.0; 
+                            await v.play();
+                            
+                            // Quality 144p force karein taaki data block na ho
                             const settings = document.querySelector('.ytp-settings-button');
                             if(settings) settings.click();
                         }
                     });
 
-                    // --- STEP 4: REAL WATCHING LOOP ---
-                    console.log(`[WATCHING] View #${i} in progress for ${watch_time}s...`);
-                    const sessionStart = Date.now();
-                    while (Date.now() - sessionStart < watchTimeMs) {
-                        await new Promise(r => setTimeout(r, 10000));
+                    // 5. STEP 4: WATCHING LOOP WITH INTERACTION
+                    console.log(`[WATCHING] View #${i} for ${watch_time}s...`);
+                    const start = Date.now();
+                    while (Date.now() - start < watchTimeMs) {
+                        await new Promise(r => setTimeout(r, 12000));
                         
-                        // Human Signal: Random Scroll & Play Check
+                        // Fake Human interaction (Scrolling & Mouse Move)
                         await page.evaluate(() => {
-                            window.scrollBy(0, Math.random() * 50);
+                            window.scrollBy(0, Math.random() * 200);
                             const v = document.querySelector('video');
-                            if(v && v.paused) v.play().catch(() => {});
+                            if(v && v.paused) v.play();
                         });
+                        // Mouse movement simulation
+                        await page.mouse.move(Math.random()*100, Math.random()*100);
                     }
 
-                    // --- STEP 5: CLEANUP (Critical for Real-Time recognition) ---
+                    // 6. STEP 5: CLEAR TRACES (Wipe Cookies & Storage)
                     const client = await page.target().createCDPSession();
                     await client.send('Network.clearBrowserCookies');
-                    await client.send('Network.clearBrowserCache');
+                    await client.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' });
 
                     await browser.close();
-                    console.log(`✅ [SUCCESS] View #${i} hit sent to YouTube.`);
+                    console.log(`✅ [SUCCESS] View #${i} Finished.`);
 
                 } catch (err) {
-                    console.error(`❌ [ERROR] View #${i} Failed:`, err.message);
+                    console.error(`❌ [FAIL] View #${i}:`, err.message);
                     if (browser) await browser.close();
                 }
 
-                // Gap between views (Very important to avoid IP flag)
+                // Gap between browsers (YouTube needs fresh air)
                 if (i < totalViews) {
-                    const delay = Math.floor(Math.random() * 5000) + 15000; // 15s to 20s
-                    console.log(`[COOLDOWN] Waiting ${delay/1000}s...`);
+                    const delay = Math.floor(Math.random() * 10000) + 20000; // 20-30s gap
+                    console.log(`[REST] Waiting ${delay/1000}s...`);
                     await new Promise(r => setTimeout(r, delay));
                 }
             }
-            console.log(`\n✨ [TOOL 7] Task Finished: Check YouTube Studio.`);
         })();
-
-    } catch (error) {
-        console.error("Endpoint Error:", error);
-    }
+    } catch (e) { console.error(e); }
 });
 // =============================================================
 // --- SERVER START ---
