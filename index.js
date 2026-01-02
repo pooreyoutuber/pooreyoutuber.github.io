@@ -1191,20 +1191,20 @@ async function runGscTask(keyword, url, viewNumber) {
             'https://www.bing.com/'
         ];
         
-        // Randomly ek referrer choose karein
+        // Randomly ek referrer select karein
         const selectedReferrer = referrers[Math.floor(Math.random() * referrers.length)];
-        console.log(`[SOURCE] View #${viewNumber} coming from: ${selectedReferrer}`);
+        console.log(`[SOURCE] View #${viewNumber} | Source: ${selectedReferrer}`);
 
-        // Browser Headers mein referrer set karein
+        // Browser Headers mein referrer force karein (Analytics detection ke liye)
         await page.setExtraHTTPHeaders({ 'referer': selectedReferrer });
 
-        // 1. STAGE: Agar Google search hai toh pehle Google par jayein, warna direct target par headers ke saath
+        // 1. STAGE: Agar Google search hai toh pehle Google par jayein
         if (selectedReferrer.includes('google.com')) {
             await page.goto(selectedReferrer, { waitUntil: 'domcontentloaded', timeout: 60000 });
             await new Promise(r => setTimeout(r, 3000)); 
         }
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
+        // 2. STAGE: Visit Target Site (Original Stay Time 30-35s)
         console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
@@ -1215,13 +1215,13 @@ async function runGscTask(keyword, url, viewNumber) {
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 35000); 
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop (Original Logic)
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop (NO CHANGES HERE)
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // Mouse Movement
+            // Mouse Movement (Bypass Bot Checks)
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
@@ -1238,7 +1238,7 @@ async function runGscTask(keyword, url, viewNumber) {
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        // Advertiser site par stay for valid CTR
+                        // Advertiser site par 15s wait
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
@@ -1256,7 +1256,8 @@ async function runGscTask(keyword, url, viewNumber) {
             await browser.close().catch(() => {});
         }
     }
-}
+                }
+
 
 // ===================================================================
 // Tool 6 Endpoint (Updated for Multi-Site Rotation)
