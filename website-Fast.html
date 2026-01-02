@@ -3,143 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temple Run Oz | Booster Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Pro PDF to Image Converter | Fast & Secure</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 2rem; }
-        .loader { border-top-color: #fdbb2d; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .input-focus { transition: all 0.3s ease; }
-        .input-focus:focus { transform: scale(1.01); }
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        h1 { color: var(--primary-color); margin-bottom: 10px; }
+        p.subtitle { color: var(--text-muted); margin-bottom: 30px; }
+
+        .upload-section {
+            border: 2px dashed #cbd5e1;
+            padding: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+
+        #fileInput { display: none; }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background-color: var(--secondary-color); }
+        .btn:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+
+        #preview-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .description-box {
+            max-width: 800px;
+            width: 90%;
+            text-align: left;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 50px;
+        }
+        
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div class="max-w-md w-full glass-card shadow-2xl p-6 md:p-10">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">🏃 Temple Run Oz</h1>
-            <p class="text-gray-500 font-medium">Dual-Site Revenue Booster</p>
+    <div class="container">
+        <h1>✨ Online PDF to Image Converter</h1>
+        <p class="subtitle">Transform your PDF documents into high-quality PNG images instantly.</p>
+
+        <div class="upload-section" onclick="document.getElementById('fileInput').click()">
+            <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" width="50" alt="PDF Icon"><br><br>
+            <strong>Click to upload</strong> or drag and drop<br>
+            <span style="font-size: 12px; color: var(--text-muted);">Supports PDF files</span>
+            <input type="file" id="fileInput" accept="application/pdf">
         </div>
 
-        <div id="mainForm" class="space-y-4">
-            <div class="relative">
-                <label class="text-xs font-bold text-gray-600 ml-1 uppercase">Target Keyword</label>
-                <div class="mt-1 relative">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-orange-500">
-                        <i class="fas fa-search"></i>
-                    </span>
-                    <input type="text" id="keyword" 
-                        class="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all input-focus" 
-                        placeholder="e.g. Best Gaming Tips">
-                </div>
-            </div>
+        <button id="convertBtn" class="btn" disabled>Convert First Page to Image</button>
+        
+        <div class="loader" id="loader"></div>
 
-            <hr class="border-gray-100">
-
-            <div class="space-y-4">
-                <div class="relative">
-                    <label class="text-xs font-bold text-red-500 ml-1 uppercase">Main Website URL</label>
-                    <input type="url" id="siteUrl1" 
-                        class="mt-1 block w-full px-4 py-3 bg-white border-2 border-orange-100 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all input-focus" 
-                        placeholder="https://mysite1.com">
-                </div>
-                <div class="relative">
-                    <label class="text-xs font-bold text-gray-400 ml-1 uppercase">Optional Site 2</label>
-                    <input type="url" id="siteUrl2" 
-                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all input-focus" 
-                        placeholder="https://mysite2.com">
-                </div>
-            </div>
-
-            <button onclick="submitTask()" id="btnSubmit"
-                class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 mt-4">
-                <span id="btnText">Start Temple Run Oz</span>
-                <i class="fas fa-running"></i>
-            </button>
-
-            <div class="bg-orange-50 p-4 rounded-xl flex gap-3 items-start border border-orange-100">
-                <i class="fas fa-info-circle text-orange-600 mt-1"></i>
-                <p class="text-[10px] text-orange-800 leading-tight">
-                    <strong>Smart Rotation:</strong> Script dono sites ke beech views rotate karega taaki CTR balance rahe aur account safe rahe.
-                </p>
-            </div>
-        </div>
-
-        <div id="progressScreen" class="hidden text-center py-10 space-y-6">
-            <div class="w-20 h-20 border-8 border-gray-100 border-t-orange-600 rounded-full loader mx-auto"></div>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Process Running!</h2>
-                <p class="text-gray-500 mt-2">Dono sites par traffic bheja ja raha hai.</p>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4 mt-8">
-                <div class="p-4 bg-green-50 rounded-2xl border border-green-100 text-center">
-                    <p class="text-2xl font-bold text-green-600">1000</p>
-                    <p class="text-[10px] text-green-700 uppercase font-bold">Planned Views</p>
-                </div>
-                <div class="p-4 bg-orange-50 rounded-2xl border border-orange-100 text-center">
-                    <p class="text-2xl font-bold text-orange-600">Dual</p>
-                    <p class="text-[10px] text-orange-700 uppercase font-bold">Mode Active</p>
-                </div>
-            </div>
-
-            <button onclick="location.reload()" class="text-orange-600 font-semibold text-sm hover:underline">
-                Stop & Refresh +
-            </button>
+        <div id="preview-container">
+            <h3>Preview:</h3>
+            <canvas id="pdfCanvas"></canvas><br>
+            <a id="downloadLink" class="btn" style="text-decoration: none; display: inline-block; background-color: #10b981;">Download PNG Image</a>
         </div>
     </div>
 
+    <div class="description-box">
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 40px 0;">
+        <h2>About Online PDF to Image Converter</h2>
+        <p>In today's digital landscape, the ability to share information quickly and effectively is paramount. While PDF (Portable Document Format) is the gold standard for preserving document layout and professional formatting, it isn't always the most versatile format for every platform. This is where our <strong>Online PDF to Image Converter</strong> steps in, providing a seamless bridge between static documents and dynamic visual content.</p>
+        
+        <h3>Why Convert PDF to Image?</h3>
+        <p>There are several scenarios where an image is superior to a PDF. For instance, most social media platforms like Instagram or Pinterest do not allow direct PDF uploads. By converting a document page into a high-resolution PNG or JPG, you can easily share snippets of your work, infographics, or certificates with your followers. Additionally, images are easier to embed in emails, blog posts, and PowerPoint presentations without requiring the viewer to have a specific PDF reader installed.</p>
+
+        <h3>Fast, Local, and Secure Processing</h3>
+        <p>Unlike many other online tools that upload your sensitive documents to remote servers, our converter prioritizes your privacy. Using the powerful <strong>PDF.js</strong> library, all processing happens directly within your web browser. This means your file never leaves your computer, ensuring 100% data security. It is not only safer but also significantly faster, as there is no waiting time for uploads or downloads from a server.</p>
+
+        <h3>Key Features:</h3>
+        <ul>
+            <li><strong>High Fidelity:</strong> We ensure that the output image maintains the crispness and clarity of the original document.</li>
+            <li><strong>No Registration Required:</strong> Use the tool instantly without signing up or providing an email address.</li>
+            <li><strong>Browser-Based:</strong> Works on Windows, Mac, Linux, and Mobile devices through any modern browser.</li>
+            <li><strong>One-Click Download:</strong> Once the rendering is finished, a single click saves the image directly to your device.</li>
+        </ul>
+
+        <h3>How to Use the Tool:</h3>
+        <p>1. <strong>Select Your File:</strong> Click the upload area or drag your PDF file into the box.<br>
+        2. <strong>Convert:</strong> Click the "Convert First Page to Image" button. Our system will render the page onto a hidden canvas.<br>
+        3. <strong>Save:</strong> View the preview and click "Download PNG Image" to save your high-quality file.</p>
+        
+        <p>Our goal is to make document management as simple as possible. Whether you are a student, a professional, or a creative, this tool is designed to save you time and hassle. Start converting today and unlock the visual potential of your PDF documents!</p>
+    </div>
+
     <script>
-        async function submitTask() {
-            const keyword = document.getElementById('keyword').value;
-            const btn = document.getElementById('btnSubmit');
-            const btnText = document.getElementById('btnText');
-            
-            const urls = [
-                document.getElementById('siteUrl1').value,
-                document.getElementById('siteUrl2').value
-            ].filter(u => u.trim() !== "");
+        const fileInput = document.getElementById('fileInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const previewContainer = document.getElementById('preview-container');
+        const canvas = document.getElementById('pdfCanvas');
+        const downloadLink = document.getElementById('downloadLink');
+        const loader = document.getElementById('loader');
 
-            if (!keyword || urls.length === 0) {
-                alert("Keyword aur kam se kam ek Website URL dena zaroori hai!");
-                return;
+        let pdfDoc = null;
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                convertBtn.disabled = false;
+                previewContainer.style.display = 'none';
             }
+        });
 
-            btnText.innerText = 'Connecting to Server...';
-            btn.disabled = true;
-            btn.classList.add('opacity-70');
+        convertBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
 
-            try {
-                const response = await fetch('https://pooreyoutuber-github-io-1-ads.onrender.com/temple-runoz', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        keyword: keyword,
-                        urls: urls,
-                        views: 1000
-                    })
-                });
+            loader.style.display = 'block';
+            convertBtn.disabled = true;
 
-                if (response.ok) {
-                    document.getElementById('mainForm').classList.add('hidden');
-                    document.getElementById('progressScreen').classList.remove('hidden');
-                } else {
-                    alert("Server Error! Check your backend.");
-                    btnText.innerText = 'Start Temple Run Oz';
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-70');
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Server se connection nahi ho pa raha.");
-                btnText.innerText = 'Start Temple Run Oz';
-                btn.disabled = false;
-                btn.classList.remove('opacity-70');
-            }
-        }
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                
+                // Load PDF
+                const loadingTask = pdfjsLib.getDocument(typedarray);
+                pdfDoc = await loadingTask.promise;
+
+                // Get first page
+                const page = await pdfDoc.getPage(1);
+                const viewport = page.getViewport({ scale: 2 }); // High quality scale
+
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+
+                await page.render(renderContext).promise;
+
+                // Prepare Download
+                const imgData = canvas.toDataURL('image/png');
+                downloadLink.href = imgData;
+                downloadLink.download = 'converted-page.png';
+
+                // UI Updates
+                loader.style.display = 'none';
+                previewContainer.style.display = 'block';
+                convertBtn.disabled = false;
+            };
+            reader.readAsArrayBuffer(file);
+        });
     </script>
 </body>
 </html>
