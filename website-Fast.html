@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pro PDF to Image Converter | Fast & Secure</title>
+    
+    <script src="https://pl28016337.effectivegatecpm.com/3e/1e/7e/3e1e7ef62929169a7193b406e04bc5f8.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    
     <style>
         :root {
             --primary-color: #2563eb;
@@ -37,6 +41,17 @@
             text-align: center;
         }
 
+        .ad-slot {
+            margin: 20px 0;
+            min-height: 90px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
         h1 { color: var(--primary-color); margin-bottom: 10px; }
         p.subtitle { color: var(--text-muted); margin-bottom: 30px; }
 
@@ -66,9 +81,14 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
+            margin: 5px;
+            display: inline-block;
+            text-decoration: none;
         }
 
-        .btn:hover { background-color: var(--secondary-color); }
+        .btn-ad { background-color: #f59e0b; } /* Amber color for Ad Link */
+
+        .btn:hover { opacity: 0.9; }
         .btn:disabled { background-color: #cbd5e1; cursor: not-allowed; }
 
         #preview-container {
@@ -110,6 +130,10 @@
 <body>
 
     <div class="container">
+        <div class="ad-slot">
+            <script src="https://pl28016337.effectivegatecpm.com/3e/1e/7e/3e1e7ef62929169a7193b406e04bc5f8.js"></script>
+        </div>
+
         <h1>✨ Online PDF to Image Converter</h1>
         <p class="subtitle">Transform your PDF documents into high-quality PNG images instantly.</p>
 
@@ -122,12 +146,19 @@
 
         <button id="convertBtn" class="btn" disabled>Convert First Page to Image</button>
         
+        <a href="https://www.effectivegatecpm.com/hsqszhyw?key=08e40ce32be44c156eaf9cf289ed4675" target="_blank" class="btn btn-ad">Premium Features (Ads)</a>
+
         <div class="loader" id="loader"></div>
 
         <div id="preview-container">
             <h3>Preview:</h3>
             <canvas id="pdfCanvas"></canvas><br>
-            <a id="downloadLink" class="btn" style="text-decoration: none; display: inline-block; background-color: #10b981;">Download PNG Image</a>
+            
+            <a id="downloadLink" class="btn" style="background-color: #10b981;">Download PNG Image</a>
+        </div>
+
+        <div class="ad-slot">
+            <script src="https://pl28016337.effectivegatecpm.com/3e/1e/7e/3e1e7ef62929169a7193b406e04bc5f8.js"></script>
         </div>
     </div>
 
@@ -166,8 +197,6 @@
         const downloadLink = document.getElementById('downloadLink');
         const loader = document.getElementById('loader');
 
-        let pdfDoc = null;
-
         fileInput.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 convertBtn.disabled = false;
@@ -185,35 +214,28 @@
             const reader = new FileReader();
             reader.onload = async function() {
                 const typedarray = new Uint8Array(this.result);
-                
-                // Load PDF
                 const loadingTask = pdfjsLib.getDocument(typedarray);
-                pdfDoc = await loadingTask.promise;
-
-                // Get first page
+                const pdfDoc = await loadingTask.promise;
                 const page = await pdfDoc.getPage(1);
-                const viewport = page.getViewport({ scale: 2 }); // High quality scale
+                const viewport = page.getViewport({ scale: 2 });
 
                 const context = canvas.getContext('2d');
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-
+                const renderContext = { canvasContext: context, viewport: viewport };
                 await page.render(renderContext).promise;
 
-                // Prepare Download
                 const imgData = canvas.toDataURL('image/png');
                 downloadLink.href = imgData;
                 downloadLink.download = 'converted-page.png';
 
-                // UI Updates
                 loader.style.display = 'none';
                 previewContainer.style.display = 'block';
                 convertBtn.disabled = false;
+                
+                // Optional: Open Adsterra Direct Link on Conversion
+                // window.open('https://www.effectivegatecpm.com/hsqszhyw?key=08e40ce32be44c156eaf9cf289ed4675', '_blank');
             };
             reader.readAsArrayBuffer(file);
         });
