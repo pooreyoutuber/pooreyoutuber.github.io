@@ -1309,18 +1309,14 @@ app.post('/start-task', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
-
+//=================================================================
 // ===================================================================
-// 7. YOUTUBE REAL-TIME GROWTH ENGINE (ULTIMATE HUMAN SIMULATION)
-// ===================================================================
-// ===================================================================
-// 7. YOUTUBE REAL-TIME GROWTH ENGINE (FIXED & FULL CODE)
+// 7. YOUTUBE REAL-TIME ENGINE (ANTI-DETECTION VERSION)
 // ===================================================================
 
 app.post('/api/real-view-boost', async (req, res) => {
     try {
         const { video_url, views_count, watch_time } = req.body;
-
         if (!video_url || !views_count || !watch_time) {
             return res.status(400).json({ success: false, message: "Invalid Parameters" });
         }
@@ -1328,115 +1324,89 @@ app.post('/api/real-view-boost', async (req, res) => {
         const totalViews = parseInt(views_count);
         const watchTimeMs = parseInt(watch_time) * 1000;
 
-        // Frontend ko response bhej rahe hain
-        res.status(200).json({ 
-            success: true, 
-            message: `Engine Started: ${totalViews} Real-Time views queueing...` 
-        });
+        res.status(200).json({ success: true, message: "Engine Started: Human Simulation Active..." });
 
-        // Background Worker (1 by 1 Execution)
         (async () => {
-            console.log(`\n🚀 [TOOL 7] Starting Real-Time YouTube Session...`);
-            
-            // Devices import karne ka sahi tarika (Error Fix)
             const { KnownDevices } = require('puppeteer');
-            const mobileDevice = KnownDevices['iPhone 13 Pro Max'];
-
+            
             for (let i = 1; i <= totalViews; i++) {
                 let browser;
                 try {
-                    // 1. Browser Launch (Stealth & Mobile optimized)
                     browser = await puppeteer.launch({
                         headless: "new",
                         args: [
                             '--no-sandbox',
                             '--disable-setuid-sandbox',
-                            '--disable-blink-features=AutomationControlled',
-                            '--window-size=375,812',
+                            '--mute-audio', // 1. Mute audio taaki crash na ho
+                            '--disable-web-security'
                         ]
                     });
 
                     const page = await browser.newPage();
+                    await page.emulate(KnownDevices['iPhone 13 Pro Max']);
                     
-                    // Emulate Mobile Device
-                    await page.emulate(mobileDevice);
-                    
-                    // User Agent setting
-                    const randomUA = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-                    await page.setUserAgent(randomUA);
+                    // Random User Agent
+                    await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-                    // 2. STAGE 1: Visit Google (Organic Source Simulation)
-                    console.log(`[VIEW #${i}] Step 1: Visiting Google...`);
+                    // STEP 1: Google entry with random delay
+                    console.log(`[VIEW #${i}] Entering via Google...`);
                     await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-                    await new Promise(r => setTimeout(r, 3000));
-                    
-                    // Human-like scrolling on Google
-                    await page.evaluate(() => window.scrollBy(0, 400));
-                    console.log(`[VIEW #${i}] Step 2: Scrolling Google...`);
-                    await new Promise(r => setTimeout(r, 2000));
+                    await new Promise(r => setTimeout(r, Math.random() * 3000 + 2000));
 
-                    // 3. STAGE 2: Navigate to Video with Referrer
-                    console.log(`[VIEW #${i}] Step 3: Navigating to Video (Ref: Google)...`);
+                    // STEP 2: Open Video
                     await page.goto(video_url, { 
                         waitUntil: 'networkidle2', 
                         referer: 'https://www.google.com/' 
                     });
 
-                    // 4. STAGE 3: Auto-Play Logic
-                    await new Promise(r => setTimeout(r, 5000)); // Load time
+                    // STEP 3: ADVANCED HUMAN INJECTION (Quality & Playback)
+                    await new Promise(r => setTimeout(r, 6000)); 
                     
-                    const playVideo = async () => {
-                        try {
-                            await page.evaluate(() => {
-                                const v = document.querySelector('video');
-                                if (v && (v.paused || v.ended)) {
-                                    v.play();
-                                    const btn = document.querySelector('.ytp-play-button') || document.querySelector('.video-stream');
-                                    if (btn) btn.click();
-                                }
-                            });
-                        } catch (e) {}
-                    };
+                    await page.evaluate(() => {
+                        const video = document.querySelector('video');
+                        if (video) {
+                            video.muted = true;
+                            video.play();
+                            // Quality 144p set karna taaki stream na tute
+                            localStorage.setItem('yt-player-quality', '{"data":"144p","expiration":1700000000000,"creation":1600000000000}');
+                        }
+                    });
 
-                    await playVideo(); 
-
-                    // 5. STAGE 4: Watch Loop (Lenth as per frontend request)
+                    // STEP 4: Watch and "Interact"
                     const startTime = Date.now();
-                    console.log(`[VIEW #${i}] Step 4: Watching for ${watch_time}s...`);
+                    console.log(`[WATCHING] View #${i} in progress...`);
 
                     while (Date.now() - startTime < watchTimeMs) {
-                        await new Promise(r => setTimeout(r, 10000)); // 10s check
-                        await playVideo(); // Auto-resume if stopped
-                        
-                        // Small mouse movement to keep session alive
-                        await page.mouse.move(Math.floor(Math.random()*100), Math.floor(Math.random()*100));
+                        // Har 10 sec mein random interaction
+                        await new Promise(r => setTimeout(r, 10000));
+                        await page.evaluate(() => {
+                            window.scrollBy(0, Math.random() * 100); // Thoda scroll
+                            const v = document.querySelector('video');
+                            if(v && v.paused) v.play(); // Auto-resume
+                        });
                     }
 
-                    // 6. STAGE 5: Cleanup History & Cookies
-                    console.log(`[VIEW #${i}] Step 5: Clearing Data & Closing Browser...`);
+                    // STEP 5: Cookie Wipe
                     const client = await page.target().createCDPSession();
                     await client.send('Network.clearBrowserCookies');
-                    await client.send('Network.clearBrowserCache');
-
+                    
                     await browser.close();
-                    console.log(`✅ [VIEW #${i}] Successfully completed.`);
+                    console.log(`✅ [SUCCESS] View #${i} hit recorded.`);
 
                 } catch (err) {
-                    console.error(`❌ [ERROR] View #${i} Failed:`, err.message);
+                    console.error(`❌ View #${i} Failed:`, err.message);
                     if (browser) await browser.close();
                 }
 
-                // 7. Safety Delay (15 seconds)
-                if (i < totalViews) {
-                    console.log(`[WAIT] Cooling down for 15s...`);
-                    await new Promise(r => setTimeout(r, 15000));
-                }
+                // IMPORTANT: Long Gap (YouTube bots se bachne ke liye)
+                const gap = Math.floor(Math.random() * 10000) + 15000; 
+                console.log(`[GAP] Waiting ${gap/1000}s for next session...`);
+                await new Promise(r => setTimeout(r, gap));
             }
-            console.log(`\n✨ [TOOL 7] All ${totalViews} sessions finished.`);
         })();
 
     } catch (error) {
-        console.error("Critical Error in Tool 7:", error);
+        console.error("Tool 7 Error:", error);
     }
 });
 // =============================================================
