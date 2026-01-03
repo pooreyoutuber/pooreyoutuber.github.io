@@ -949,56 +949,100 @@ app.post('/start-task', async (req, res) => {
     }
 });
 // ===================================================================
-// 6. ADVANCED YOUTUBE BOOSTER (PLAY + AUDIO + SCROLL)
-// ===================================================================
-// ===================================================================
-// 6. ULTIMATE YOUTUBE BOOSTER (HUMAN INTERACTION + PROXY)
-// ===================================================================
- // ===================================================================
-// 6. HIGH-SPEED YOUTUBE BOOSTER (SMM PANEL LOGIC - NO BROWSER)
+// 6. ADVANCED YOUTUBE HUMAN SIMULATOR (REAL-TIME VIEWS)
 // ===================================================================
 
+async function runYoutubeTask(videoUrl, watchTimeSeconds, viewNumber) {
+    let browser;
+    try {
+        // Anti-Detection Settings ke saath browser launch
+        browser = await puppeteer.launch({
+            headless: "new", // 'false' kar sakte hain agar debug karna ho
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled',
+                '--window-size=1366,768'
+            ]
+        });
+
+        const page = await browser.newPage();
+        
+        // Random User Agent apply karna
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // STEP 1: Pehle Google par jana (Organic Source ke liye)
+        console.log(`[View #${viewNumber}] Google.com par ja rahe hain...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 2000));
+
+        // STEP 2: YouTube open karna
+        console.log(`[View #${viewNumber}] YouTube open kar rahe hain...`);
+        await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 3000));
+
+        // STEP 3: Direct User ki Video Link par jana
+        console.log(`[View #${viewNumber}] Video play kar rahe hain: ${videoUrl}`);
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // Auto-play ensure karne ke liye click
+        try { await page.click('.ytp-play-button'); } catch(e) {}
+
+        const startTime = Date.now();
+        const totalDurationMs = watchTimeSeconds * 1000;
+
+        // STEP 4: Video ke saath Human Interaction (Scrolling)
+        while (Date.now() - startTime < totalDurationMs) {
+            // Random Scrolling taaki real lage
+            const scrollDist = Math.floor(Math.random() * 400) + 200;
+            await page.evaluate((dist) => window.scrollBy(0, dist), scrollDist);
+            
+            await new Promise(r => setTimeout(r, Math.random() * 5000 + 3000));
+            
+            // Wapas upar scroll karna
+            await page.evaluate(() => window.scrollBy(0, -100));
+            
+            console.log(`[Watching] ${Math.round((Date.now() - startTime)/1000)}s / ${watchTimeSeconds}s`);
+        }
+
+        console.log(`[View #${viewNumber}] Video khatam. Browser band ho raha hai.`);
+
+    } catch (error) {
+        console.error(`[CRITICAL ERROR] View #${viewNumber} failed:`, error.message);
+    } finally {
+        if (browser) await browser.close();
+    }
+}
+
+// Endpoint for Frontend
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url) return res.status(400).json({ success: false });
+    if (!video_url || !views_count || !watch_time) {
+        return res.status(400).json({ error: "Details missing hain!" });
+    }
 
-    // Frontend ko turant response dena
-    res.status(200).json({ success: true, message: "SMM Engine Started! Views syncing..." });
+    // Response turant dena taaki frontend hang na ho
+    res.status(200).json({ status: "STARTED", message: `${views_count} Views process shuru ho gaye hain.` });
 
-    const videoId = video_url.split('v=')[1]?.split('&')[0] || video_url.split('/').pop();
-
-    // Background Loop
+    // Background Loop: Ek ke baad ek view shuru karna
     (async () => {
-        for (let i = 0; i < parseInt(views_count); i++) {
-            try {
-                // SMM panels yehi 3 headers spoof karte hain:
-                const headers = {
-                    'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
-                    'X-YouTube-Client-Name': '1', // Web client ID
-                    'X-YouTube-Client-Version': '2.20210624.00.00',
-                    'Referer': `https://www.youtube.com/watch?v=${videoId}`
-                };
-
-                // Step 1: Video Page ko "Touch" karna (Initial request)
-                await axios.get(`https://www.youtube.com/watch?v=${videoId}`, { headers });
-
-                // Step 2: YouTube Watch-Time API ko signal bhejna (Simulation)
-                // Yehi wo request hai jo SMM panels use karte hain views count karwane ke liye
-                await axios.get(`https://www.youtube.com/api/stats/watchtime?v=${videoId}&ns=yt&el=detailpage&cpn=${crypto.randomBytes(8).toString('hex')}&ver=2&cmt=0&fmt=243&fs=0&rt=10&la=0&pa=0&ps=0&idfg=1`, { headers });
-
-                console.log(`[SMM-BOT] Request #${i+1} sent successfully.`);
-
-            } catch (err) {
-                console.log(`[SMM-ERROR] Request failed`);
+        for (let i = 1; i <= views_count; i++) {
+            console.log(`--- Starting View Session #${i} ---`);
+            await runYoutubeTask(video_url, parseInt(watch_time), i);
+            
+            // Har view ke baad 15 second ka gap (Safety)
+            if (i < views_count) {
+                console.log("Waiting 15s for next session...");
+                await new Promise(r => setTimeout(r, 15000));
             }
-
-            // Speed Control (Bot jaisi speed ke liye 2-5 seconds ka gap)
-            await new Promise(r => setTimeout(r, 3000));
         }
-        console.log("--- ALL SMM TASKS FINISHED ---");
+        console.log("--- All View Tasks Completed! ---");
     })();
 });
+
+
+
 
 // =============================================================
 // --- SERVER START ---
