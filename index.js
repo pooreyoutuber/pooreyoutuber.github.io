@@ -1288,11 +1288,14 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // =================================================================
-
+// --- TOOL 7: FIXED YOUTUBE REAL-TIME BOOSTER (WITH DYNAMIC TIMING) ---
 async function runYoutubeBrowserTask(videoUrl, viewNumber, timingInSeconds) {
     let browser;
     try {
-        console.log(`[START] View #${viewNumber} - Targeting ${timingInSeconds} seconds...`);
+        // Agar timing nahi mili toh random 60-120s rakhein (Safety ke liye)
+        const finalTiming = timingInSeconds || Math.floor(Math.random() * 60) + 60;
+        
+        console.log(`[START] View #${viewNumber} | URL: ${videoUrl} | Watch Time: ${finalTiming}s`);
 
         browser = await puppeteer.launch({
             headless: "new",
@@ -1300,72 +1303,56 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, timingInSeconds) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
+                '--disable-infobars',
                 '--window-size=1280,720',
-                '--mute-audio' 
+                '--mute-audio'
             ]
         });
 
         const page = await browser.newPage();
         
-        // Anti-Detection logic
+        // Anti-Detection: Webdriver check ko false set karna
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
         });
 
-        // 60 seconds tak ka loading time allow karein
-        await page.setDefaultNavigationTimeout(60000);
+        // User Agent Rotation
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- STEP 1: GOOGLE SE ENTRY (Referrer bypass) ---
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        const searchBox = await page.$('textarea[name="q"]') || await page.$('input[name="q"]');
-        if (searchBox) {
-            await searchBox.type(videoUrl, { delay: 100 });
-            await page.keyboard.press('Enter');
-            await page.waitForNavigation({ waitUntil: 'networkidle2' });
-        }
+        // STEP 1: External Referrer (YouTube ko lagega traffic bahar se aa raha hai)
+        const referrers = ['https://t.co/', 'https://www.google.com/', 'https://m.facebook.com/'];
+        const selectedReferrer = referrers[Math.floor(Math.random() * referrers.length)];
+        
+        await page.setExtraHTTPHeaders({ 'Referer': selectedReferrer });
 
-        // --- STEP 2: OPEN VIDEO ---
-        await page.goto(videoUrl, { waitUntil: 'networkidle2' });
-        console.log(`Video loaded. Playing for ${timingInSeconds}s...`);
+        // STEP 2: Video Load
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Play button click karne ki koshish
+        // STEP 3: Play Button Click (Most important for Real-time)
         try {
             await page.waitForSelector('.ytp-large-play-button', { timeout: 10000 });
             await page.click('.ytp-large-play-button');
+            console.log(`[View #${viewNumber}] Play button clicked.`);
         } catch (e) {
-            // Agar pehle se play ho raha ho
+            // Video might have auto-played
         }
 
-        // --- STEP 3: EXACT TIMING WAIT + MOUSE + SCROLL ---
-        // Yeh loop tab tak chalega jab tak timingInSeconds poore nahi hote
+        // STEP 4: Watch Loop (Exact timing as per frontend)
         let elapsed = 0;
-        const interval = 5; // Har 5 second mein activity check karega
-
-        while (elapsed < timingInSeconds) {
-            // Mouse ko random move karein
-            const x = Math.floor(Math.random() * 500) + 200;
-            const y = Math.floor(Math.random() * 400) + 200;
-            await page.mouse.move(x, y, { steps: 10 });
-
-            // Random scrolling
-            if (elapsed % 15 === 0) {
+        while (elapsed < finalTiming) {
+            // Random Mouse Movement & Scrolling (Human Touch)
+            if (elapsed % 20 === 0) {
                 await page.evaluate(() => window.scrollBy(0, 100));
-                await new Promise(r => setTimeout(r, 1000));
-                await page.evaluate(() => window.scrollBy(0, -50));
+                await page.mouse.move(Math.random()*500, Math.random()*500);
             }
-
-            await new Promise(r => setTimeout(r, interval * 1000));
-            elapsed += interval;
-            console.log(`View #${viewNumber}: Watched ${elapsed}/${timingInSeconds}s...`);
+            
+            await new Promise(r => setTimeout(r, 1000));
+            elapsed++;
+            
+            if (elapsed % 30 === 0) {
+                console.log(`[View #${viewNumber}] Progress: ${elapsed}/${finalTiming}s`);
+            }
         }
-
-        // --- STEP 4: LAST ME DESCRIPTION & COMMENT CHECK ---
-        console.log("Checking Description and Comments before closing...");
-        try {
-            await page.evaluate(() => window.scrollTo({ top: 800, behavior: 'smooth' }));
-            await new Promise(r => setTimeout(r, 3000));
-            await page.click('#expand'); // Description expand
-        } catch (e) {}
 
         console.log(`[SUCCESS] View #${viewNumber} Finished ✅`);
 
@@ -1374,11 +1361,12 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, timingInSeconds) {
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLEANUP] Browser closed. Waiting 10s for next view...`);
-            await new Promise(r => setTimeout(r, 10000)); // 10s gap to clear RAM
+            // RAM Management: Render par thoda rest zaruri hai
+            await new Promise(r => setTimeout(r, 5000));
         }
     }
 }
+
 // --- NEW ENDPOINT TO START TOOL 7 ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
