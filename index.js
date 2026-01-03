@@ -954,90 +954,49 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 6. ULTIMATE YOUTUBE BOOSTER (HUMAN INTERACTION + PROXY)
 // ===================================================================
+ // ===================================================================
+// 6. HIGH-SPEED YOUTUBE BOOSTER (SMM PANEL LOGIC - NO BROWSER)
+// ===================================================================
 
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time, proxies } = req.body; 
+    const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url || !views_count) {
-        return res.status(400).json({ success: false, message: "Details missing!" });
-    }
+    if (!video_url) return res.status(400).json({ success: false });
 
-    res.status(200).json({ success: true, message: "High-Quality Engine Started. Monitoring Studio..." });
+    // Frontend ko turant response dena
+    res.status(200).json({ success: true, message: "SMM Engine Started! Views syncing..." });
 
+    const videoId = video_url.split('v=')[1]?.split('&')[0] || video_url.split('/').pop();
+
+    // Background Loop
     (async () => {
-        const totalViews = parseInt(views_count);
-        const watchMs = (parseInt(watch_time) || 60) * 1000;
-
-        for (let i = 1; i <= totalViews; i++) {
-            let browser;
+        for (let i = 0; i < parseInt(views_count); i++) {
             try {
-                // Proxy selection (Optional: Agar body mein bheji ho)
-                let launchArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--autoplay-policy=no-user-gesture-required'];
-                if (proxies && proxies.length > 0) {
-                    const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
-                    launchArgs.push(`--proxy-server=${randomProxy}`);
-                }
+                // SMM panels yehi 3 headers spoof karte hain:
+                const headers = {
+                    'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
+                    'X-YouTube-Client-Name': '1', // Web client ID
+                    'X-YouTube-Client-Version': '2.20210624.00.00',
+                    'Referer': `https://www.youtube.com/watch?v=${videoId}`
+                };
 
-                browser = await puppeteer.launch({ headless: "new", args: launchArgs });
-                const page = await browser.newPage();
-                
-                // Human Touch: Random Resolution
-                const resolutions = [{w: 1920, h: 1080}, {w: 1366, h: 768}, {w: 414, h: 896}];
-                const res = resolutions[Math.floor(Math.random() * resolutions.length)];
-                await page.setViewport({ width: res.w, height: res.h });
+                // Step 1: Video Page ko "Touch" karna (Initial request)
+                await axios.get(`https://www.youtube.com/watch?v=${videoId}`, { headers });
 
-                await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+                // Step 2: YouTube Watch-Time API ko signal bhejna (Simulation)
+                // Yehi wo request hai jo SMM panels use karte hain views count karwane ke liye
+                await axios.get(`https://www.youtube.com/api/stats/watchtime?v=${videoId}&ns=yt&el=detailpage&cpn=${crypto.randomBytes(8).toString('hex')}&ver=2&cmt=0&fmt=243&fs=0&rt=10&la=0&pa=0&ps=0&idfg=1`, { headers });
 
-                // Step 1: Pehle Google par jana (Referrer disguise)
-                await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-                await new Promise(r => setTimeout(r, 2000));
-
-                // Step 2: Video par jana
-                console.log(`[YT-ULTIMATE] View #${i} Loading...`);
-                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-                // Step 3: Unmute & Start
-                await new Promise(r => setTimeout(r, 3000));
-                await page.keyboard.press('m'); // Unmute
-                await page.keyboard.press('k'); // Play
-
-                // Step 4: Random Interactions (Simulation)
-                const startTime = Date.now();
-                while (Date.now() - startTime < watchMs) {
-                    // 15% chance to pause/unpause
-                    if (Math.random() < 0.15) {
-                        await page.keyboard.press('k');
-                        await new Promise(r => setTimeout(r, 2000));
-                        await page.keyboard.press('k');
-                    }
-
-                    // Random Scrolling
-                    const scroll = Math.floor(Math.random() * 500);
-                    await page.evaluate((s) => window.scrollBy(0, s), scroll);
-                    
-                    // Random Playback Speed change (Shift + >)
-                    if (Math.random() < 0.1) {
-                        await page.keyboard.down('Shift');
-                        await page.keyboard.press('.');
-                        await page.keyboard.up('Shift');
-                    }
-
-                    await new Promise(r => setTimeout(r, 8000));
-                }
-
-                console.log(`[YT-ULTIMATE] View #${i} Success ✅`);
+                console.log(`[SMM-BOT] Request #${i+1} sent successfully.`);
 
             } catch (err) {
-                console.log(`[YT-ERROR] #${i}: ${err.message}`);
-            } finally {
-                if (browser) await browser.close();
+                console.log(`[SMM-ERROR] Request failed`);
             }
 
-            // Long Gap: Kam se kam 30-60s wait karein next view se pehle
-            const nextGap = Math.floor(Math.random() * 30000) + 30000;
-            console.log(`[WAIT] Stopping for ${nextGap/1000}s to avoid detection.`);
-            await new Promise(r => setTimeout(r, nextGap));
+            // Speed Control (Bot jaisi speed ke liye 2-5 seconds ka gap)
+            await new Promise(r => setTimeout(r, 3000));
         }
+        console.log("--- ALL SMM TASKS FINISHED ---");
     })();
 });
 
