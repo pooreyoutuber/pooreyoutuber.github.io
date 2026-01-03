@@ -1288,84 +1288,107 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // =================================================================
-// --- TOOL 7: FIXED YOUTUBE REAL-TIME BOOSTER (WITH DYNAMIC TIMING) ---
-async function runYoutubeBrowserTask(videoUrl, viewNumber, timingInSeconds) {
+// ===================================================================
+// 7. FINAL YOUTUBE BOOSTER (FIXED FOR REALTIME DETECTION)
+// ===================================================================
+
+async function runYoutubeBrowserTask(videoUrl, viewNumber, videoLength) {
     let browser;
     try {
-        // Agar timing nahi mili toh random 60-120s rakhein (Safety ke liye)
-        const finalTiming = timingInSeconds || Math.floor(Math.random() * 60) + 60;
-        
-        console.log(`[START] View #${viewNumber} | URL: ${videoUrl} | Watch Time: ${finalTiming}s`);
+        console.log(`[START] View #${viewNumber} | Target: ${videoUrl}`);
 
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // "new" is better for detection bypass
             args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--mute-audio',
                 '--disable-blink-features=AutomationControlled',
-                '--disable-infobars',
-                '--window-size=1280,720',
-                '--mute-audio'
+                '--window-size=1280,720'
             ]
         });
 
         const page = await browser.newPage();
         
-        // Anti-Detection: Webdriver check ko false set karna
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
-
-        // User Agent Rotation
+        // Random User Agent from your existing list
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: 1280, height: 720 });
 
-        // STEP 1: External Referrer (YouTube ko lagega traffic bahar se aa raha hai)
-        const referrers = ['https://t.co/', 'https://www.google.com/', 'https://m.facebook.com/'];
-        const selectedReferrer = referrers[Math.floor(Math.random() * referrers.length)];
-        
-        await page.setExtraHTTPHeaders({ 'Referer': selectedReferrer });
-
-        // STEP 2: Video Load
+        // Step 1: Visit Video
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // STEP 3: Play Button Click (Most important for Real-time)
+        // Step 2: Realistic "Play" interaction
+        // Kai baar autoplay block ho jata hai, isliye manually click zaroori hai
         try {
-            await page.waitForSelector('.ytp-large-play-button', { timeout: 10000 });
-            await page.click('.ytp-large-play-button');
-            console.log(`[View #${viewNumber}] Play button clicked.`);
+            await page.click('.ytp-play-button'); 
+            console.log(`[ACTION] Play button clicked.`);
         } catch (e) {
-            // Video might have auto-played
+            await page.keyboard.press('k'); // YouTube shortcut for Play
+            console.log(`[ACTION] Keyboard Play trigger.`);
         }
 
-        // STEP 4: Watch Loop (Exact timing as per frontend)
-        let elapsed = 0;
-        while (elapsed < finalTiming) {
-            // Random Mouse Movement & Scrolling (Human Touch)
-            if (elapsed % 20 === 0) {
-                await page.evaluate(() => window.scrollBy(0, 100));
-                await page.mouse.move(Math.random()*500, Math.random()*500);
+        // Step 3: Watch Loop (Frontend ki length tak)
+        console.log(`[WATCHING] Keeping session alive for ${videoLength} seconds...`);
+        
+        const startTime = Date.now();
+        const watchDurationMs = videoLength * 1000;
+
+        while (Date.now() - startTime < watchDurationMs) {
+            // Random Human-like behavior during watch
+            if (Math.random() < 0.3) {
+                await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 200)));
             }
+            // Wait in small chunks to keep process active
+            await new Promise(r => setTimeout(r, 5000)); 
             
-            await new Promise(r => setTimeout(r, 1000));
-            elapsed++;
-            
-            if (elapsed % 30 === 0) {
-                console.log(`[View #${viewNumber}] Progress: ${elapsed}/${finalTiming}s`);
-            }
+            // Check if 100% time reached
+            if (Date.now() - startTime >= watchDurationMs) break;
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Completed 100% Watch Time ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERROR] View #${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            // RAM Management: Render par thoda rest zaruri hai
-            await new Promise(r => setTimeout(r, 5000));
+            // RAM clean karne ke liye thoda gap
+            await new Promise(r => setTimeout(r, 2000));
         }
     }
 }
+
+// --- UPDATED ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
+    // Frontend se request: { video_url, views_count, video_length }
+    const { video_url, views_count, video_length } = req.body;
+    
+    const total = parseInt(views_count) || 1;
+    const length = parseInt(video_length) || 60; // Default 60s agar frontend na bheje
+
+    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Task Started: ${total} views. Each watching for ${length} seconds.` 
+    });
+
+    // Background Process
+    (async () => {
+        for (let i = 1; i <= total; i++) {
+            await runYoutubeBrowserTask(video_url, i, length);
+            
+            // Views ke beech mein gap (Safety delay)
+            if (i < total) {
+                const gap = randomInt(10000, 20000); 
+                console.log(`[WAIT] Next view in ${gap/1000}s...`);
+                await new Promise(r => setTimeout(r, gap));
+            }
+        }
+        console.log("--- ALL BROWSER VIEWS COMPLETED ---");
+    })();
+});
+
 
 // --- NEW ENDPOINT TO START TOOL 7 ---
 app.post('/api/real-view-boost', async (req, res) => {
