@@ -951,87 +951,92 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 6. ADVANCED YOUTUBE BOOSTER (PLAY + AUDIO + SCROLL)
 // ===================================================================
+// ===================================================================
+// 6. ULTIMATE YOUTUBE BOOSTER (HUMAN INTERACTION + PROXY)
+// ===================================================================
 
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
+    const { video_url, views_count, watch_time, proxies } = req.body; 
 
     if (!video_url || !views_count) {
-        return res.status(400).json({ success: false, message: "URL and Views required!" });
+        return res.status(400).json({ success: false, message: "Details missing!" });
     }
 
-    const totalViews = parseInt(views_count);
-    const timeToWatch = (parseInt(watch_time) || 60) * 1000; 
-
-    res.status(200).json({ success: true, message: "Engine Started with Audio & Scroll logic." });
+    res.status(200).json({ success: true, message: "High-Quality Engine Started. Monitoring Studio..." });
 
     (async () => {
+        const totalViews = parseInt(views_count);
+        const watchMs = (parseInt(watch_time) || 60) * 1000;
+
         for (let i = 1; i <= totalViews; i++) {
             let browser;
             try {
-                browser = await puppeteer.launch({
-                    headless: "new", // "new" support audio features better
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--use-fake-ui-for-media-stream',
-                        '--autoplay-policy=no-user-gesture-required' // Auto-play audio allow karne ke liye
-                    ]
-                });
+                // Proxy selection (Optional: Agar body mein bheji ho)
+                let launchArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--autoplay-policy=no-user-gesture-required'];
+                if (proxies && proxies.length > 0) {
+                    const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
+                    launchArgs.push(`--proxy-server=${randomProxy}`);
+                }
 
+                browser = await puppeteer.launch({ headless: "new", args: launchArgs });
                 const page = await browser.newPage();
-                await page.setViewport({ width: 1280, height: 720 });
+                
+                // Human Touch: Random Resolution
+                const resolutions = [{w: 1920, h: 1080}, {w: 1366, h: 768}, {w: 414, h: 896}];
+                const res = resolutions[Math.floor(Math.random() * resolutions.length)];
+                await page.setViewport({ width: res.w, height: res.h });
+
                 await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-                console.log(`[YT-BOOST] View #${i} | Loading Video...`);
-                
-                // YouTube ko lage ki traffic Google se aaya hai
-                await page.setExtraHTTPHeaders({ 'Referer': 'https://www.google.com/' });
+                // Step 1: Pehle Google par jana (Referrer disguise)
+                await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+                await new Promise(r => setTimeout(r, 2000));
 
+                // Step 2: Video par jana
+                console.log(`[YT-ULTIMATE] View #${i} Loading...`);
                 await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-                // 1. VIDEO PLAY & UNMUTE LOGIC
-                try {
-                    // Thoda wait karein taaki player load ho jaye
-                    await new Promise(r => setTimeout(r, 5000));
-                    
-                    // Keyboard 'k' press karna (YouTube shortcut to Play/Pause)
-                    await page.keyboard.press('k');
-                    // 'm' press karna (Unmute karne ke liye)
-                    await page.keyboard.press('m');
-                    
-                    console.log(`[ACTION] Video Playing with Audio 🔊`);
-                } catch (e) {
-                    console.log("[ERROR] Play/Unmute failed, but continuing...");
-                }
+                // Step 3: Unmute & Start
+                await new Promise(r => setTimeout(r, 3000));
+                await page.keyboard.press('m'); // Unmute
+                await page.keyboard.press('k'); // Play
 
-                // 2. HUMAN SCROLLING LOGIC
+                // Step 4: Random Interactions (Simulation)
                 const startTime = Date.now();
-                while (Date.now() - startTime < timeToWatch) {
-                    // Random scroll down
-                    const scrollAmt = Math.floor(Math.random() * 400) + 200;
-                    await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
-                    
-                    // Wait for a few seconds
-                    await new Promise(r => setTimeout(r, Math.floor(Math.random() * 5000) + 3000));
-                    
-                    // Random scroll up (Human-like behavior)
-                    if (Math.random() > 0.7) {
-                        await page.evaluate(() => window.scrollBy(0, -200));
+                while (Date.now() - startTime < watchMs) {
+                    // 15% chance to pause/unpause
+                    if (Math.random() < 0.15) {
+                        await page.keyboard.press('k');
+                        await new Promise(r => setTimeout(r, 2000));
+                        await page.keyboard.press('k');
                     }
+
+                    // Random Scrolling
+                    const scroll = Math.floor(Math.random() * 500);
+                    await page.evaluate((s) => window.scrollBy(0, s), scroll);
+                    
+                    // Random Playback Speed change (Shift + >)
+                    if (Math.random() < 0.1) {
+                        await page.keyboard.down('Shift');
+                        await page.keyboard.press('.');
+                        await page.keyboard.up('Shift');
+                    }
+
+                    await new Promise(r => setTimeout(r, 8000));
                 }
 
-                console.log(`[YT-BOOST] View #${i} Completed ✅`);
+                console.log(`[YT-ULTIMATE] View #${i} Success ✅`);
 
             } catch (err) {
-                console.error(`[YT-ERROR] View #${i}: ${err.message}`);
+                console.log(`[YT-ERROR] #${i}: ${err.message}`);
             } finally {
                 if (browser) await browser.close();
             }
 
-            // Random Gap between views (Very Important)
-            const gap = Math.floor(Math.random() * 15000) + 10000; 
-            console.log(`[REST] Sleeping for ${gap/1000}s...`);
-            await new Promise(r => setTimeout(r, gap));
+            // Long Gap: Kam se kam 30-60s wait karein next view se pehle
+            const nextGap = Math.floor(Math.random() * 30000) + 30000;
+            console.log(`[WAIT] Stopping for ${nextGap/1000}s to avoid detection.`);
+            await new Promise(r => setTimeout(r, nextGap));
         }
     })();
 });
