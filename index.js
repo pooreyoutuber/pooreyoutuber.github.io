@@ -1379,34 +1379,6 @@ async function runYoutubeBrowserTask(videoUrl, viewNumber, timingInSeconds) {
         }
     }
 }
-
-// --- UPDATED API ENDPOINT ---
-app.post('/api/real-view-boost', async (req, res) => {
-    // Frontend se 'video_url', 'views_count' aur 'video_duration' (timing) aayega
-    const { video_url, views_count, video_duration } = req.body;
-
-    if (!video_url || !video_duration) {
-        return res.status(400).json({ error: "URL aur Timing dono bhejien" });
-    }
-
-    const totalViews = parseInt(views_count) || 1;
-    const timing = parseInt(video_duration); // 400 sec set kiya hai to 400 aayega
-
-    res.status(200).json({ 
-        success: true, 
-        message: `Total ${totalViews} views started. Each view will be ${timing} seconds.` 
-    });
-
-    // 1-by-1 loop: Await lagaya hai taaki ek khatam ho tabhi agla start ho
-    (async () => {
-        for (let i = 1; i <= totalViews; i++) {
-            await runYoutubeBrowserTask(video_url, i, timing);
-        }
-        console.log("--- ALL VIEWS COMPLETED ---");
-    })();
-});
-
-
 // --- NEW ENDPOINT TO START TOOL 7 ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count } = req.body;
