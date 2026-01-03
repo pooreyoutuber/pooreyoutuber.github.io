@@ -948,6 +948,75 @@ app.post('/start-task', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// 6. REAL YOUTUBE VIEW BOOSTER (NEW TOOL)
+// ===================================================================
+
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+
+    if (!video_url || !views_count) {
+        return res.status(400).json({ success: false, message: "Video URL and Views are required!" });
+    }
+
+    const totalViews = parseInt(views_count);
+    const timeToWatch = parseInt(watch_time) || 60; // Default 60 seconds
+
+    // Frontend ko turant response bhejna taaki wo hang na ho
+    res.status(200).json({ 
+        success: true, 
+        message: `Engine Started: ${totalViews} views task is running in background.` 
+    });
+
+    // Background process start
+    (async () => {
+        console.log(`[YT-BOOSTER] Starting ${totalViews} views for: ${video_url}`);
+        
+        for (let i = 1; i <= totalViews; i++) {
+            let browser;
+            try {
+                browser = await puppeteer.launch({
+                    headless: "new",
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                });
+                const page = await browser.newPage();
+                
+                // Random User Agent for safety
+                await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+                console.log(`[YT-VIEW] Session #${i} started. Watching for ${timeToWatch}s...`);
+                
+                // Video page par jana
+                await page.goto(video_url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+                // Play button click karne ki koshish (Optional but good)
+                try {
+                    await page.click('.ytp-large-play-button');
+                } catch (e) {
+                    // Agar auto-play ho gaya toh error ignore karein
+                }
+
+                // Watch time tak wait karna
+                await new Promise(r => setTimeout(r, timeToWatch * 1000));
+                
+                console.log(`[YT-VIEW] Session #${i} completed ✅`);
+
+            } catch (err) {
+                console.error(`[YT-ERROR] View #${i} failed: ${err.message}`);
+            } finally {
+                if (browser) await browser.close();
+            }
+
+            // Har view ke baad 15 second ka gap (Server safety ke liye)
+            if (i < totalViews) {
+                console.log(`[YT-REST] Cooling down for 15s...`);
+                await new Promise(r => setTimeout(r, 15000));
+            }
+        }
+        console.log(`--- ALL YOUTUBE VIEWS COMPLETED ---`);
+    })();
+});
+
 // =============================================================
 // --- SERVER START ---
 // ===================================================================
