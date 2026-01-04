@@ -951,95 +951,113 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 6. ADVANCED YOUTUBE HUMAN SIMULATOR (REAL-TIME VIEWS)
 // ===================================================================
+// ===================================================================
+// 6. YOUTUBE SEQUENTIAL AUTOMATION BOOSTER (PUPPETEER) - TOOL 6
+// ===================================================================
 
-async function runYoutubeTask(videoUrl, watchTimeSeconds, viewNumber) {
+/**
+ * Ye function ek single browser instance kholta hai, 
+ * automation site par jata hai aur video play karta hai.
+ */
+async function runSequentialYoutubeTask(videoUrl, watchTime, viewNumber) {
     let browser;
     try {
-        // Anti-Detection Settings ke saath browser launch
+        // Browser launch with anti-bot args
         browser = await puppeteer.launch({
-            headless: "new", // 'false' kar sakte hain agar debug karna ho
+            headless: "new",
             args: [
-                '--no-sandbox',
+                '--no-sandbox', 
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled',
-                '--window-size=1366,768'
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
         
-        // Random User Agent apply karna
+        // Random User Agent selection from your existing USER_AGENTS array
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // STEP 1: Pehle Google par jana (Organic Source ke liye)
-        console.log(`[View #${viewNumber}] Google.com par ja rahe hain...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 2000));
+        console.log(`[VIEW #${viewNumber}] Site par ja raha hoon: https://pooreyoutuber.github.io/YoutubeHelper/multi-browser.html`);
 
-        // STEP 2: YouTube open karna
-        console.log(`[View #${viewNumber}] YouTube open kar rahe hain...`);
-        await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 3000));
+        // 1. Target Automation Site par jana
+        await page.goto('https://pooreyoutuber.github.io/YoutubeHelper/multi-browser.html', { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
+        });
 
-        // STEP 3: Direct User ki Video Link par jana
-        console.log(`[View #${viewNumber}] Video play kar rahe hain: ${videoUrl}`);
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+        // 2. Input field mein video URL paste karna
+        // Selector: Aapki site par pehla input field search bar hai
+        await page.waitForSelector('input[type="text"], input[type="url"]');
+        await page.type('input', videoUrl);
+        console.log(`[VIEW #${viewNumber}] Video URL paste kar diya.`);
 
-        // Auto-play ensure karne ke liye click
-        try { await page.click('.ytp-play-button'); } catch(e) {}
+        // 3. "Add Video" button click karna
+        // Evaluate ka use karke button text ke base par click kar rahe hain
+        await page.evaluate(() => {
+            const buttons = Array.from(document.querySelectorAll('button'));
+            const addBtn = buttons.find(b => b.innerText.includes('Add Video'));
+            if (addBtn) addBtn.click();
+        });
+        console.log(`[VIEW #${viewNumber}] 'Add Video' button clicked. Playback shuru.`);
 
-        const startTime = Date.now();
-        const totalDurationMs = watchTimeSeconds * 1000;
+        // 4. Watch Time: Jitne seconds frontend se aaye hain utni der rukna
+        console.log(`[VIEW #${viewNumber}] Video dekh raha hoon: ${watchTime}s tak...`);
+        await new Promise(r => setTimeout(r, watchTime * 1000));
 
-        // STEP 4: Video ke saath Human Interaction (Scrolling)
-        while (Date.now() - startTime < totalDurationMs) {
-            // Random Scrolling taaki real lage
-            const scrollDist = Math.floor(Math.random() * 400) + 200;
-            await page.evaluate((dist) => window.scrollBy(0, dist), scrollDist);
-            
-            await new Promise(r => setTimeout(r, Math.random() * 5000 + 3000));
-            
-            // Wapas upar scroll karna
-            await page.evaluate(() => window.scrollBy(0, -100));
-            
-            console.log(`[Watching] ${Math.round((Date.now() - startTime)/1000)}s / ${watchTimeSeconds}s`);
-        }
-
-        console.log(`[View #${viewNumber}] Video khatam. Browser band ho raha hai.`);
+        console.log(`[VIEW #${viewNumber}] Completed! Browser closing.`);
 
     } catch (error) {
-        console.error(`[CRITICAL ERROR] View #${viewNumber} failed:`, error.message);
+        console.error(`[VIEW #${viewNumber} ERROR]: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            await browser.close().catch(() => {});
+        }
     }
 }
 
-// Endpoint for Frontend
+// Endpoint jo frontend HTML form se connect hoga
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
+    try {
+        const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url || !views_count || !watch_time) {
-        return res.status(400).json({ error: "Details missing hain!" });
-    }
-
-    // Response turant dena taaki frontend hang na ho
-    res.status(200).json({ status: "STARTED", message: `${views_count} Views process shuru ho gaye hain.` });
-
-    // Background Loop: Ek ke baad ek view shuru karna
-    (async () => {
-        for (let i = 1; i <= views_count; i++) {
-            console.log(`--- Starting View Session #${i} ---`);
-            await runYoutubeTask(video_url, parseInt(watch_time), i);
-            
-            // Har view ke baad 15 second ka gap (Safety)
-            if (i < views_count) {
-                console.log("Waiting 15s for next session...");
-                await new Promise(r => setTimeout(r, 15000));
-            }
+        if (!video_url || !views_count) {
+            return res.status(400).json({ success: false, message: "Video URL aur Quantity zaroori hai!" });
         }
-        console.log("--- All View Tasks Completed! ---");
-    })();
+
+        const totalViews = parseInt(views_count);
+        const watchSeconds = parseInt(watch_time) || 60; // Default 60s agar frontend se na aaye
+
+        // Frontend ko response turant dena taaki woh hang na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Tool 6 Active: ${totalViews} Views (1-by-1 mode) with ${watchSeconds}s watch time.` 
+        });
+
+        // Background worker: Ek khatam hone ke baad hi doosra shuru hoga
+        (async () => {
+            console.log(`\n--- STARTING SEQUENTIAL YOUTUBE BOOST ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                console.log(`\n[QUEUE] Processing View ${i} of ${totalViews}`);
+                
+                // Yahan sequential execution ho raha hai (await)
+                await runSequentialYoutubeTask(video_url, watchSeconds, i);
+
+                // View ke beech mein 5s ka gap taaki Render/Server crash na ho
+                if (i < totalViews) {
+                    console.log(`[REST] 5s gap before next browser opens...`);
+                    await new Promise(r => setTimeout(r, 5000));
+                }
+            }
+            console.log(`\n--- ALL ${totalViews} VIEWS COMPLETED ---`);
+        })();
+
+    } catch (err) {
+        console.error("Tool 6 API Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
 });
+                
 
 
 
