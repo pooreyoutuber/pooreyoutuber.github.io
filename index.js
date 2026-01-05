@@ -948,6 +948,118 @@ app.post('/start-task', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// NEW TOOL: Proxyium Web Proxy Automation Logic
+// ===================================================================
+async function runProxyiumTask(keyword, url, viewNumber) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled'
+            ]
+        });
+
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 800 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // 1. Proxyium Website par jana
+        console.log(`[PROXYIUM] View #${viewNumber} | Opening Proxyium...`);
+        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // 2. Search bar mein URL daalna
+        const searchInputSelector = 'input[placeholder*="Put a URL"]';
+        await page.waitForSelector(searchInputSelector);
+        await page.type(searchInputSelector, url, { delay: 100 });
+        await page.keyboard.press('Enter');
+
+        // 3. Wait for navigation to the proxied site
+        console.log(`[PROXYIUM] Loading Target Site: ${url}`);
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => console.log("Timeout waiting for navigation, continuing..."));
+
+        // 4. Pop-up ya Ads ko hatane ki koshish (Basic Logic)
+        await page.evaluate(() => {
+            const commonPopups = ['button[aria-label="Close"]', '.close-button', '#close-icon', '.modal-close'];
+            commonPopups.forEach(selector => {
+                const el = document.querySelector(selector);
+                if (el) el.click();
+            });
+        });
+
+        // 5. Realistic Behavior: Scrolling aur Mouse Movement
+        const stayTime = randomInt(30000, 60000); // 30-60 seconds random time
+        const startTime = Date.now();
+        console.log(`[PROXYIUM] Staying for ${stayTime/1000}s and simulating behavior...`);
+
+        while (Date.now() - startTime < stayTime) {
+            // Natural Scrolling
+            const scrollDist = randomInt(200, 500);
+            await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
+            
+            // Random Mouse Movement
+            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 5 });
+            
+            await new Promise(r => setTimeout(r, randomInt(4000, 7000)));
+        }
+
+        console.log(`[DONE] Proxyium View #${viewNumber} completed. ✅`);
+
+    } catch (error) {
+        console.error(`[PROXYIUM ERROR] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) {
+            await browser.close().catch(() => {});
+        }
+    }
+}
+// ===================================================================
+// Tool: Proxyium Revenue Booster Endpoint
+// ===================================================================
+app.post('/start-Proxyium', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        if (!urls || !Array.isArray(urls) || urls.length === 0) {
+            return res.status(400).json({ success: false, message: "URLs are required!" });
+        }
+
+        const totalViews = parseInt(views);
+
+        // Success response turant bhej rahe hain taaki Render timeout na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Proxyium Task Started: ${totalViews} views for ${urls.length} sites.` 
+        });
+
+        // Background worker loop - 1 by 1 views processing
+        (async () => {
+            console.log(`--- PROXYIUM MULTI-SITE START ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
+                
+                // 1 by 1 execution to prevent Render crash
+                await runProxyiumTask(keyword, targetUrl, i);
+
+                if (i < totalViews) {
+                    // RAM clear karne ke liye bada break har session ke baad
+                    const restTime = 15000; // 15 seconds gap
+                    console.log(`[WAIT] Sleeping ${restTime/1000}s before next view...`);
+                    await new Promise(r => setTimeout(r, restTime));
+                }
+            }
+            console.log("--- PROXYIUM ALL SESSIONS FINISHED ---");
+        })();
+
+    } catch (err) {
+        console.error("Proxyium Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
