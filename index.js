@@ -948,119 +948,85 @@ app.post('/start-task', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================Target Automation Site par jana
 // ===================================================================
-// 6. ADVANCED YOUTUBE HUMAN SIMULATOR (REAL-TIME VIEWS)
+// 6. PROXYIUM WEB ENGINE (TOOL 6) - BROWSER BASED PROXY ROTATION
 // ===================================================================
-// ===================================================================
-// 6. YOUTUBE SEQUENTIAL AUTOMATION BOOSTER (PUPPETEER) - TOOL 6
-// ===================================================================
-
-/**
- * Ye function ek single browser instance kholta hai, 
- * automation site par jata hai aur video play karta hai.
- */
-async function runSequentialYoutubeTask(videoUrl, watchTime, viewNumber) {
+async function runProxyiumTask(url, viewNumber) {
     let browser;
     try {
-        // Browser launch with anti-bot args
+        // Render/Reelix par crash se bachne ke liye low-resource settings
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
         });
 
         const page = await browser.newPage();
-        
-        // Random User Agent selection from your existing USER_AGENTS array
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        
+        console.log(`[Tool 6] View #${viewNumber} | Opening Proxyium...`);
+        
+        // 1. Proxyium Website kholna
+        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        console.log(`[VIEW #${viewNumber}] Site par ja raha hoon: https://pooreyoutuber.github.io/YoutubeHelper/multi-browser.html`);
+        // 2. Input box mein URL daalna (Proxyium ka input selector: #url)
+        await page.waitForSelector('#url', { visible: true });
+        await page.type('#url', url, { delay: 100 });
+        
+        // 3. 'Go' button click karna
+        await page.keyboard.press('Enter');
 
-        // 1. Target Automation Site par jana
-        await page.goto('https://pooreyoutuber.github.io/YoutubeHelper/multi-browser.html', { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000 
-        });
+        // 4. Site load hone ka intezar aur Human behavior simulation
+        console.log(`[Tool 6] Site Loaded via Proxyium. Performing interactions...`);
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {});
 
-        // 2. Input field mein video URL paste karna
-        // Selector: Aapki site par pehla input field search bar hai
-        await page.waitForSelector('input[type="text"], input[type="url"]');
-        await page.type('input', videoUrl);
-        console.log(`[VIEW #${viewNumber}] Video URL paste kar diya.`);
+        const stayTime = randomInt(30000, 60000); // 30-60 Seconds random stay
+        const startTime = Date.now();
 
-        // 3. "Add Video" button click karna
-        // Evaluate ka use karke button text ke base par click kar rahe hain
-        await page.evaluate(() => {
-            const buttons = Array.from(document.querySelectorAll('button'));
-            const addBtn = buttons.find(b => b.innerText.includes('Add Video'));
-            if (addBtn) addBtn.click();
-        });
-        console.log(`[VIEW #${viewNumber}] 'Add Video' button clicked. Playback shuru.`);
-
-        // 4. Watch Time: Jitne seconds frontend se aaye hain utni der rukna
-        console.log(`[VIEW #${viewNumber}] Video dekh raha hoon: ${watchTime}s tak...`);
-        await new Promise(r => setTimeout(r, watchTime * 1000));
-
-        console.log(`[VIEW #${viewNumber}] Completed! Browser closing.`);
-
-    } catch (error) {
-        console.error(`[VIEW #${viewNumber} ERROR]: ${error.message}`);
-    } finally {
-        if (browser) {
-            await browser.close().catch(() => {});
+        while (Date.now() - startTime < stayTime) {
+            // Random Scrolling
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) + 200));
+            // Random Mouse Movement
+            await page.mouse.move(randomInt(100, 700), randomInt(100, 500), { steps: 5 });
+            await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
         }
+
+        console.log(`[Tool 6] View #${viewNumber} Completed. Closing browser.`);
+    } catch (error) {
+        console.error(`[Tool 6 Error] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) await browser.close();
     }
 }
 
-// Endpoint jo frontend HTML form se connect hoga
-app.post('/api/real-view-boost', async (req, res) => {
+// Endpoint for Tool 6
+app.post('/start-Proxyium', async (req, res) => {
     try {
-        const { video_url, views_count, watch_time } = req.body;
+        const { keyword, urls, views = 1000 } = req.body;
 
-        if (!video_url || !views_count) {
-            return res.status(400).json({ success: false, message: "Video URL aur Quantity zaroori hai!" });
+        if (!urls || !Array.isArray(urls) || urls.length === 0) {
+            return res.status(400).json({ success: false, message: "URLs are required!" });
         }
 
-        const totalViews = parseInt(views_count);
-        const watchSeconds = parseInt(watch_time) || 60; // Default 60s agar frontend se na aaye
+        res.status(200).json({ success: true, message: "Proxyium Task Started 🚀" });
 
-        // Frontend ko response turant dena taaki woh hang na ho
-        res.status(200).json({ 
-            success: true, 
-            message: `Tool 6 Active: ${totalViews} Views (1-by-1 mode) with ${watchSeconds}s watch time.` 
-        });
-
-        // Background worker: Ek khatam hone ke baad hi doosra shuru hoga
+        // Background Processing: 1 by 1 view taaki server crash na ho
         (async () => {
-            console.log(`\n--- STARTING SEQUENTIAL YOUTUBE BOOST ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                console.log(`\n[QUEUE] Processing View ${i} of ${totalViews}`);
+            for (let i = 1; i <= parseInt(views); i++) {
+                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
+                console.log(`--- Starting View ${i}/${views} ---`);
                 
-                // Yahan sequential execution ho raha hai (await)
-                await runSequentialYoutubeTask(video_url, watchSeconds, i);
+                // Ek time par ek hi browser khulega (Sequential execution)
+                await runProxyiumTask(targetUrl, i); 
 
-                // View ke beech mein 5s ka gap taaki Render/Server crash na ho
-                if (i < totalViews) {
-                    console.log(`[REST] 5s gap before next browser opens...`);
-                    await new Promise(r => setTimeout(r, 5000));
-                }
+                // Wait between views to let system breathe
+                await new Promise(r => setTimeout(r, 5000));
             }
-            console.log(`\n--- ALL ${totalViews} VIEWS COMPLETED ---`);
         })();
-
     } catch (err) {
-        console.error("Tool 6 API Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+        console.error("Tool 6 Global Error:", err);
     }
 });
-                
-
-
-
 
 // =============================================================
 // --- SERVER START ---
