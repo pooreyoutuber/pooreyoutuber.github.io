@@ -1208,84 +1208,113 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 5. AI-POWERED ORGANIC YOUTUBE VIEW BOOSTER
 // ===================================================================
+// ===================================================================
+// 5. ORGANIC YOUTUBE VIEW BOOSTER (FIXED TIMEOUT & DETECTION)
+// ===================================================================
 
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
+        const puppeteer = require('puppeteer-extra');
+        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+        puppeteer.use(StealthPlugin());
+
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage', // Memory error se bachne ke liye
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
         
-        // Random User Agent aur Screen Size taaki har view alag device se lage
+        // 1. Set High Timeout (30s se badha kar 90s)
+        await page.setDefaultNavigationTimeout(90000); 
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-        await page.setViewport({ width: 1280 + Math.floor(Math.random() * 100), height: 720 + Math.floor(Math.random() * 100) });
 
-        // --- PHASE 1: GOOGLE SEARCH SE AANA (Traffic Source: Google Search) ---
+        // 2. Traffic Source: Simulating Google Search
         console.log(`[VIEW #${viewNumber}] Simulating Organic Search...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        
-        // Consent handle karein agar Google pooche
-        try { await page.click('button[aria-label="Accept all"]'); } catch (e) {}
+        try {
+            await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
+            await new Promise(r => setTimeout(r, 2000));
+        } catch (e) { console.log("Google Landing Timeout, but continuing..."); }
 
-        // --- PHASE 2: DIRECT VIDEO PAR JANA AUR POP-UP HANDLE KARNA ---
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', referer: 'https://www.google.com/' });
+        // 3. Main Video Navigation
+        console.log(`[NAVIGATING] Opening Video: ${videoUrl}`);
+        await page.goto(videoUrl, { 
+            waitUntil: 'networkidle2', // Wait for full loading
+            referer: 'https://www.google.com/' 
+        });
 
-        // --- 🔥 NEW: CONSENT POP-UP LOGIC (As per 20-15-5 Rule) ---
+        // --- 🔥 POP-UP LOGIC (20-15-5 CYCLE) ---
         const cycleIndex = viewNumber % 40;
         try {
-            await new Promise(r => setTimeout(r, 4000)); // Pop-up ka wait karein
-            if (cycleIndex < 20) {
-                // Kate/Reject
-                await page.evaluate(() => {
-                    const btns = Array.from(document.querySelectorAll('button, yt-formatted-string'));
-                    const target = btns.find(b => b.innerText.toLowerCase().includes('reject') || b.innerText.includes('X'));
-                    if (target) target.click();
-                });
-            } else if (cycleIndex < 35) {
-                // Consent/Accept
-                await page.evaluate(() => {
-                    const btns = Array.from(document.querySelectorAll('button, yt-formatted-string'));
-                    const target = btns.find(b => b.innerText.toLowerCase().includes('agree') || b.innerText.toLowerCase().includes('accept'));
-                    if (target) target.click();
-                });
-            } else {
-                // Manage Options
-                await page.evaluate(() => {
-                    const btns = Array.from(document.querySelectorAll('button'));
-                    const target = btns.find(b => b.innerText.toLowerCase().includes('manage') || b.innerText.toLowerCase().includes('options'));
-                    if (target) target.click();
-                });
-            }
-        } catch (e) { console.log("No Pop-up appeared."); }
+            await new Promise(r => setTimeout(r, 5000)); // Pop-up wait
+            await page.evaluate((cycleIndex) => {
+                const btns = Array.from(document.querySelectorAll('button, yt-formatted-string, span'));
+                if (cycleIndex < 20) {
+                    // KATE (Reject)
+                    const b = btns.find(el => el.innerText.match(/reject|x|close|dismiss/i));
+                    if (b) b.click();
+                } else if (cycleIndex < 35) {
+                    // CONSENT (Accept)
+                    const b = btns.find(el => el.innerText.match(/accept|agree|allow|consent/i));
+                    if (b) b.click();
+                } else {
+                    // MANAGE (Options)
+                    const b = btns.find(el => el.innerText.match(/manage|options|customize/i));
+                    if (b) b.click();
+                }
+            }, cycleIndex);
+        } catch (e) { console.log("Pop-up skip/not found."); }
 
-        // --- PHASE 3: REAL WATCHING (YouTube Studio me count hone ke liye) ---
-        console.log(`[WATCHING] Playing video for ${watchTime}s...`);
+        // --- 4. REAL WATCHING BEHAVIOR ---
+        console.log(`[WATCHING] Playing for ${watchTime}s...`);
         
-        // Play button click karna agar video auto-play na ho
-        try { await page.click('.ytp-play-button'); } catch (e) {}
+        // Unmute and Play if needed
+        try {
+            await page.evaluate(() => {
+                const video = document.querySelector('video');
+                if(video) { video.muted = false; video.play(); }
+            });
+        } catch (e) {}
 
-        const startWatch = Date.now();
-        while (Date.now() - startWatch < (watchTime * 1000)) {
-            // Random Mouse Movement & Scrolling (Human Behavior)
-            await page.mouse.move(Math.random() * 500, Math.random() * 500);
-            if (Math.random() < 0.3) {
-                await page.evaluate(() => window.scrollBy(0, 100));
-                await new Promise(r => setTimeout(r, 2000));
-                await page.evaluate(() => window.scrollBy(0, -100));
+        const start = Date.now();
+        while (Date.now() - start < (watchTime * 1000)) {
+            // Mouse move & scroll to simulate human
+            await page.mouse.move(Math.random()*400, Math.random()*400);
+            if (Math.random() > 0.7) {
+                await page.evaluate(() => window.scrollBy(0, 200));
+                await new Promise(r => setTimeout(r, 1000));
+                await page.evaluate(() => window.scrollBy(0, -200));
             }
             await new Promise(r => setTimeout(r, 5000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} completed organics.`);
+        console.log(`[SUCCESS] View #${viewNumber} Done.`);
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
+
+// --- API ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    res.status(200).json({ success: true, message: "Engine Running" });
+
+    (async () => {
+        for (let i = 1; i <= views_count; i++) {
+            await runOrganicYoutubeTask(video_url, i, parseInt(watch_time));
+            console.log(`[GAP] Waiting 15s...`);
+            await new Promise(r => setTimeout(r, 15000));
+        }
+    })();
+});
 
 // --- ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
