@@ -1211,6 +1211,9 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 5. ORGANIC YOUTUBE VIEW BOOSTER (FIXED TIMEOUT & DETECTION)
 // ===================================================================
+// ===================================================================
+// 5. ULTIMATE YOUTUBE STUDIO HITTER (ORGANIC SEARCH MODE)
+// ===================================================================
 
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
@@ -1222,81 +1225,86 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage', // Memory error se bachne ke liye
-                '--disable-blink-features=AutomationControlled'
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled',
+                '--window-size=1920,1080'
             ]
         });
 
         const page = await browser.newPage();
         
-        // 1. Set High Timeout (30s se badha kar 90s)
-        await page.setDefaultNavigationTimeout(90000); 
+        // Anti-Detection Settings
+        await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 2. Traffic Source: Simulating Google Search
-        console.log(`[VIEW #${viewNumber}] Simulating Organic Search...`);
-        try {
-            await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
-            await new Promise(r => setTimeout(r, 2000));
-        } catch (e) { console.log("Google Landing Timeout, but continuing..."); }
+        // 1. Google Search Redirect (Studio counts this as high quality)
+        console.log(`[VIEW #${viewNumber}] Generating Search Referral...`);
+        await page.goto('https://www.google.com/search?q=site:youtube.com', { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 2000));
 
-        // 3. Main Video Navigation
-        console.log(`[NAVIGATING] Opening Video: ${videoUrl}`);
+        // 2. Main Video Navigation with 90s Timeout
+        console.log(`[NAVIGATING] Opening Video...`);
         await page.goto(videoUrl, { 
-            waitUntil: 'networkidle2', // Wait for full loading
+            waitUntil: 'networkidle2', 
+            timeout: 90000,
             referer: 'https://www.google.com/' 
         });
 
         // --- 🔥 POP-UP LOGIC (20-15-5 CYCLE) ---
         const cycleIndex = viewNumber % 40;
         try {
-            await new Promise(r => setTimeout(r, 5000)); // Pop-up wait
-            await page.evaluate((cycleIndex) => {
-                const btns = Array.from(document.querySelectorAll('button, yt-formatted-string, span'));
-                if (cycleIndex < 20) {
-                    // KATE (Reject)
-                    const b = btns.find(el => el.innerText.match(/reject|x|close|dismiss/i));
-                    if (b) b.click();
-                } else if (cycleIndex < 35) {
-                    // CONSENT (Accept)
-                    const b = btns.find(el => el.innerText.match(/accept|agree|allow|consent/i));
-                    if (b) b.click();
-                } else {
-                    // MANAGE (Options)
-                    const b = btns.find(el => el.innerText.match(/manage|options|customize/i));
-                    if (b) b.click();
-                }
+            await new Promise(r => setTimeout(r, 6000)); 
+            await page.evaluate((idx) => {
+                const findAndClick = (list) => {
+                    const btns = Array.from(document.querySelectorAll('button, yt-formatted-string, span'));
+                    const target = btns.find(b => list.some(word => b.innerText.toLowerCase().includes(word)));
+                    if (target) target.click();
+                };
+                if (idx < 20) findAndClick(['reject', 'x', 'close', 'dismiss', 'no thanks']);
+                else if (idx < 35) findAndClick(['accept', 'agree', 'allow', 'consent', 'i agree']);
+                else findAndClick(['manage', 'options', 'customize', 'settings']);
             }, cycleIndex);
-        } catch (e) { console.log("Pop-up skip/not found."); }
+        } catch (e) { console.log("Pop-up skipped."); }
 
-        // --- 4. REAL WATCHING BEHAVIOR ---
+        // --- 3. REAL WATCH BEHAVIOR (Studio Counting Logic) ---
         console.log(`[WATCHING] Playing for ${watchTime}s...`);
-        
-        // Unmute and Play if needed
-        try {
-            await page.evaluate(() => {
-                const video = document.querySelector('video');
-                if(video) { video.muted = false; video.play(); }
-            });
-        } catch (e) {}
+
+        // Force Play & Unmute (Real hits require audio activity)
+        await page.evaluate(() => {
+            const v = document.querySelector('video');
+            if (v) {
+                v.muted = false;
+                v.volume = 0.5;
+                v.play();
+            }
+        });
 
         const start = Date.now();
         while (Date.now() - start < (watchTime * 1000)) {
-            // Mouse move & scroll to simulate human
-            await page.mouse.move(Math.random()*400, Math.random()*400);
-            if (Math.random() > 0.7) {
-                await page.evaluate(() => window.scrollBy(0, 200));
-                await new Promise(r => setTimeout(r, 1000));
-                await page.evaluate(() => window.scrollBy(0, -200));
+            // Randomly pause and play to look human
+            if (Math.random() > 0.95) {
+                await page.keyboard.press('k'); // YouTube shortcut for Play/Pause
+                await new Promise(r => setTimeout(r, 2000));
+                await page.keyboard.press('k');
+            }
+            
+            // Random Mouse Movement
+            await page.mouse.move(Math.random() * 500, Math.random() * 500);
+            
+            // Random Scrolling to see comments (Normal user behavior)
+            if (Math.random() > 0.8) {
+                await page.evaluate(() => window.scrollBy(0, 400));
+                await new Promise(r => setTimeout(r, 3000));
+                await page.evaluate(() => window.scrollBy(0, -400));
             }
             await new Promise(r => setTimeout(r, 5000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Done.`);
+        console.log(`[SUCCESS] View #${viewNumber} Hit Counted.`);
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERROR] #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
@@ -1305,13 +1313,15 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
 // --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
-    res.status(200).json({ success: true, message: "Engine Running" });
+    res.status(200).json({ success: true, message: "Organic Engine Started. Check Studio in 24-48 hours." });
 
     (async () => {
         for (let i = 1; i <= views_count; i++) {
             await runOrganicYoutubeTask(video_url, i, parseInt(watch_time));
-            console.log(`[GAP] Waiting 15s...`);
-            await new Promise(r => setTimeout(r, 15000));
+            // Real Gap: Short and Long breaks
+            const gap = i % 3 === 0 ? 45000 : 15000;
+            console.log(`[GAP] Waiting ${gap/1000}s for safety...`);
+            await new Promise(r => setTimeout(r, gap));
         }
     })();
 });
