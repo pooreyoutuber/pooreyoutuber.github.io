@@ -1205,6 +1205,103 @@ app.post('/popup', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// 5. AI-POWERED ORGANIC YOUTUBE VIEW BOOSTER
+// ===================================================================
+
+async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+        });
+
+        const page = await browser.newPage();
+        
+        // Random User Agent aur Screen Size taaki har view alag device se lage
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: 1280 + Math.floor(Math.random() * 100), height: 720 + Math.floor(Math.random() * 100) });
+
+        // --- PHASE 1: GOOGLE SEARCH SE AANA (Traffic Source: Google Search) ---
+        console.log(`[VIEW #${viewNumber}] Simulating Organic Search...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        
+        // Consent handle karein agar Google pooche
+        try { await page.click('button[aria-label="Accept all"]'); } catch (e) {}
+
+        // --- PHASE 2: DIRECT VIDEO PAR JANA AUR POP-UP HANDLE KARNA ---
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', referer: 'https://www.google.com/' });
+
+        // --- 🔥 NEW: CONSENT POP-UP LOGIC (As per 20-15-5 Rule) ---
+        const cycleIndex = viewNumber % 40;
+        try {
+            await new Promise(r => setTimeout(r, 4000)); // Pop-up ka wait karein
+            if (cycleIndex < 20) {
+                // Kate/Reject
+                await page.evaluate(() => {
+                    const btns = Array.from(document.querySelectorAll('button, yt-formatted-string'));
+                    const target = btns.find(b => b.innerText.toLowerCase().includes('reject') || b.innerText.includes('X'));
+                    if (target) target.click();
+                });
+            } else if (cycleIndex < 35) {
+                // Consent/Accept
+                await page.evaluate(() => {
+                    const btns = Array.from(document.querySelectorAll('button, yt-formatted-string'));
+                    const target = btns.find(b => b.innerText.toLowerCase().includes('agree') || b.innerText.toLowerCase().includes('accept'));
+                    if (target) target.click();
+                });
+            } else {
+                // Manage Options
+                await page.evaluate(() => {
+                    const btns = Array.from(document.querySelectorAll('button'));
+                    const target = btns.find(b => b.innerText.toLowerCase().includes('manage') || b.innerText.toLowerCase().includes('options'));
+                    if (target) target.click();
+                });
+            }
+        } catch (e) { console.log("No Pop-up appeared."); }
+
+        // --- PHASE 3: REAL WATCHING (YouTube Studio me count hone ke liye) ---
+        console.log(`[WATCHING] Playing video for ${watchTime}s...`);
+        
+        // Play button click karna agar video auto-play na ho
+        try { await page.click('.ytp-play-button'); } catch (e) {}
+
+        const startWatch = Date.now();
+        while (Date.now() - startWatch < (watchTime * 1000)) {
+            // Random Mouse Movement & Scrolling (Human Behavior)
+            await page.mouse.move(Math.random() * 500, Math.random() * 500);
+            if (Math.random() < 0.3) {
+                await page.evaluate(() => window.scrollBy(0, 100));
+                await new Promise(r => setTimeout(r, 2000));
+                await page.evaluate(() => window.scrollBy(0, -100));
+            }
+            await new Promise(r => setTimeout(r, 5000));
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} completed organics.`);
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
+    } finally {
+        if (browser) await browser.close();
+    }
+}
+
+// --- ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    res.status(200).json({ success: true, message: "AI Engine Started. Real views incoming." });
+
+    (async () => {
+        for (let i = 1; i <= views_count; i++) {
+            await runOrganicYoutubeTask(video_url, i, parseInt(watch_time));
+            // 15 sec ka gap taaki algorithm ko shak na ho
+            console.log(`[GAP] Waiting 15s for next session...`);
+            await new Promise(r => setTimeout(r, 15000));
+        }
+    })();
+});
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
