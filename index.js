@@ -952,93 +952,113 @@ app.post('/start-task', async (req, res) => {
 // ===================================================================
 // 6. PROXYIUM WEB ENGINE (TOOL 6) - FIXED SELECTORS & STABILITY
 // ===================================================================
+// 6. PROXYIUM WEB ENGINE (TOOL 6) - STABLE VERSION FOR RENDER
+// ===================================================================
+
 async function runProxyiumTask(url, viewNumber) {
     let browser;
     try {
+        // Render ke liye optimized launch settings
         browser = await puppeteer.launch({
-            headless: "new", // Render ke liye 'new' headless mode zaroori hai
+            headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
+                '--disable-gpu', // Memory bachane ke liye
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        // Realistic User Agent taaki block na ho
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
         
-        console.log(`[Tool 6] View #${viewNumber} | Navigating to Proxyium...`);
+        // Browser ko real dikhane ke liye User Agent
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
         
-        // Proxyium kholna
-        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+        console.log(`[Tool 6] View #${viewNumber} | Opening Proxyium...`);
+        
+        // 1. Proxyium par jana
+        await page.goto('https://proxyium.com/', { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
+        });
 
-        // FIXED: Proxyium ka naya input selector check karna
-        // Hum wait karenge jab tak page fully load na ho jaye
-        await page.waitForSelector('input[name="url"]', { visible: true, timeout: 40000 });
-        
-        // URL type karna
-        await page.type('input[name="url"]', url, { delay: 150 });
-        
-        // Click Go Button (Input ke baad enter dabana sabse safe hai)
-        await page.keyboard.press('Enter');
+        // 2. Search bar ka intezar aur URL input
+        // Proxyium ka main input ID 'url' hota hai
+        await page.waitForSelector('#url', { visible: true, timeout: 30000 });
+        await page.type('#url', url, { delay: 100 }); // Slow typing for human feel
 
-        console.log(`[Tool 6] Proxy Tunnel Initiated... Staying 45-60s`);
-        
-        // Proxyium loading mein time leta hai, isliye navigation ka wait karenge
-        await new Promise(r => setTimeout(r, 10000)); 
+        // 3. Enter press karke site load karna
+        console.log(`[Tool 6] View #${viewNumber} | Loading Target through Proxy...`);
+        await Promise.all([
+            page.keyboard.press('Enter'),
+            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => console.log("Navigation timeout, continuing...")),
+        ]);
 
-        const stayTime = randomInt(45000, 60000); // Thoda zyada time taaki IP register ho
+        // 4. Random Scrolling & Mouse Movement (30-60 Seconds)
+        const stayTime = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
         const startTime = Date.now();
+        
+        console.log(`[Tool 6] View #${viewNumber} | Interaction Start (${stayTime/1000}s)`);
 
-        // Interaction Loop
         while (Date.now() - startTime < stayTime) {
-            // Random scrolling
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500) + 100));
-            // Mouse movement simulation
-            await page.mouse.move(randomInt(50, 800), randomInt(50, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(5000, 9000)));
+            // Random Scroll
+            const scrollAmt = Math.floor(Math.random() * 400) + 100;
+            await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
+            
+            // Random Mouse Movement
+            await page.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 5 });
+            
+            // Random Wait
+            await new Promise(r => setTimeout(r, Math.random() * 5000 + 2000));
         }
 
-        console.log(`[Tool 6] View #${viewNumber} Done ✅`);
+        console.log(`[Tool 6] View #${viewNumber} | View Completed! ✅`);
 
     } catch (error) {
-        console.error(`[Tool 6 Error] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[Tool 6 ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // Browser band karne se pehle page close karein (Memory safety)
+            // Memory leak rokne ke liye clean closure
             const pages = await browser.pages();
             for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
+            console.log(`[Tool 6] Browser Closed for View #${viewNumber}`);
         }
     }
 }
 
+// Endpoint for Tool 6
 app.post('/start-Proxyium', async (req, res) => {
     try {
-        const { urls, views = 1000 } = req.body;
+        const { urls, views = 1 } = req.body;
 
-        if (!urls || !Array.isArray(urls)) {
-            return res.status(400).json({ success: false, message: "URLs array required" });
+        if (!urls || !Array.isArray(urls) || urls.length === 0) {
+            return res.status(400).json({ success: false, message: "URLs array is required!" });
         }
 
-        res.status(200).json({ success: true, message: "Proxyium Engine Started 🚀 (Sequential Mode)" });
+        // Response turant bhej rahe hain taaki connection timeout na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Proxyium Task Started for ${views} views. Running 1-by-1 to save RAM.` 
+        });
 
-        // Important: 1 by 1 loop (Await ke sath)
-        // Isse Render crash nahi hoga kyunki ek waqt par ek hi browser chalega
+        // Background Execution (Sequential 1-by-1)
         (async () => {
-            console.log("--- PROXYIUM SEQUENTIAL QUEUE START ---");
+            console.log(`--- PROXYIUM ENGINE QUEUE STARTED ---`);
             for (let i = 1; i <= parseInt(views); i++) {
-                const target = urls[Math.floor(Math.random() * urls.length)];
+                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
                 
-                // Hum wait karenge jab tak runProxyiumTask khatam na ho jaye
-                await runProxyiumTask(target, i);
+                // Ek view khatam hone tak intezar karega (1-by-1)
+                await runProxyiumTask(targetUrl, i);
 
-                // Small break between views for RAM cleaning
-                await new Promise(r => setTimeout(r, 8000));
+                // Browser band hone ke baad thoda rest taaki Render ki RAM clear ho sake
+                if (i < views) {
+                    console.log(`[REST] 10s wait before next browser instance...`);
+                    await new Promise(r => setTimeout(r, 10000));
+                }
             }
-            console.log("--- ALL PROXYIUM VIEWS FINISHED ---");
+            console.log(`--- ALL PROXYIUM VIEWS FINISHED ---`);
         })();
 
     } catch (err) {
