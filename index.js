@@ -949,7 +949,7 @@ app.post('/start-task', async (req, res) => {
     }
 });
 // ===================================================================
-// NEW TOOL: Proxyium Web Proxy Automation Logic
+// NEW TOOL 6: Proxyium Web Proxy Automation Logic
 // ===================================================================
 async function runProxyiumTask(keyword, url, viewNumber) {
     let browser;
@@ -1018,7 +1018,7 @@ async function runProxyiumTask(keyword, url, viewNumber) {
     }
 }
 // ===================================================================
-// Tool: Proxyium Revenue Booster Endpoint
+// Tool 6: Proxyium Revenue Booster Endpoint
 // ===================================================================
 app.post('/start-Proxyium', async (req, res) => {
     try {
@@ -1057,6 +1057,151 @@ app.post('/start-Proxyium', async (req, res) => {
 
     } catch (err) {
         console.error("Proxyium Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
+// ===================================================================
+// 7. tool popup (WITH DYNAMIC POP-UP HANDLING)
+// ===================================================================
+
+async function runGscTask(keyword, url, viewNumber) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
+        });
+
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1366, height: 768 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // 1. Google Search Simulation
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000)); 
+
+        // 2. Visit Target Site
+        console.log(`\n[VIEW #${viewNumber}] Target: ${url}`);
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
+        });
+
+        // --- 🔥 CONSENT POP-UP HANDLING LOGIC ---
+        try {
+            const consentButtons = await page.$$('button, span, a, div');
+            const cycleIndex = viewNumber % 40; // 40 ke cycle mein rotate karega
+
+            if (cycleIndex < 20) {
+                // PHASE 1: KATE (Reject/Close) - 20 Times
+                console.log(`[ACTION] Pop-up Mode: REJECT/CLOSE (20/40 Cycle)`);
+                for (let btn of consentButtons) {
+                    const text = await page.evaluate(el => el.innerText.toLowerCase(), btn);
+                    if (text.includes('x') || text.includes('close') || text.includes('reject') || text.includes('deny')) {
+                        await btn.click();
+                        break;
+                    }
+                }
+            } else if (cycleIndex >= 20 && cycleIndex < 35) {
+                // PHASE 2: CONSENT (Accept All) - 15 Times
+                console.log(`[ACTION] Pop-up Mode: CONSENT/ACCEPT (15/40 Cycle)`);
+                for (let btn of consentButtons) {
+                    const text = await page.evaluate(el => el.innerText.toLowerCase(), btn);
+                    if (text.includes('accept') || text.includes('agree') || text.includes('consent') || text.includes('allow')) {
+                        await btn.click();
+                        break;
+                    }
+                }
+            } else {
+                // PHASE 3: MANAGE OPTIONS (All Set) - 5 Times
+                console.log(`[ACTION] Pop-up Mode: MANAGE/ALL-SET (5/40 Cycle)`);
+                for (let btn of consentButtons) {
+                    const text = await page.evaluate(el => el.innerText.toLowerCase(), btn);
+                    if (text.includes('manage') || text.includes('options') || text.includes('settings')) {
+                        await btn.click();
+                        await new Promise(r => setTimeout(r, 2000));
+                        // Save behavior simulate karein
+                        const saveBtn = await page.$('button[id*="save"], .save-settings, button.primary');
+                        if (saveBtn) await saveBtn.click();
+                        break;
+                    }
+                }
+            }
+        } catch (e) {
+            console.log("[INFO] No matching pop-up found or handled.");
+        }
+
+        // 3. Staying & Ad Clicker Loop
+        const stayTime = randomInt(30000, 35000);
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < stayTime) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 5 });
+            await new Promise(r => setTimeout(r, 5000));
+
+            // HIGH-VALUE AD CLICKER (18% Probability)
+            if (Math.random() < 0.18) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+                    if (box && box.width > 50) {
+                        console.log(`[AD-CLICK] Clicking Ad for Revenue...`);
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        await new Promise(r => setTimeout(r, 15000)); // Stay on advertiser site
+                        break; 
+                    }
+                }
+            }
+        }
+        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) await browser.close();
+    }
+}
+
+// --- ENDPOINT FOR TOOL 5 (/popup) ---
+app.post('/popup', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        if (!keyword || !urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "Keyword and URLs (Array) are required." });
+        }
+
+        // Response immediately to frontend
+        res.status(200).json({ 
+            success: true, 
+            message: `Task started for ${urls.length} sites with pop-up rotation logic.` 
+        });
+
+        // Background Processing
+        (async () => {
+            console.log(`\n--- STARTING POP-UP REVENUE TASK ---`);
+            for (let i = 1; i <= views; i++) {
+                const currentUrl = urls[(i - 1) % urls.length]; // Rotation between sites
+                await runGscTask(keyword, currentUrl, i);
+
+                // RAM Management & Anti-Spam break
+                const breakTime = i % 5 === 0 ? 30000 : 10000;
+                await new Promise(r => setTimeout(r, breakTime));
+            }
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
