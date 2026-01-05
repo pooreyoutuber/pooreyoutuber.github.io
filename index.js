@@ -1033,7 +1033,7 @@ app.post('/start-Proxyium', async (req, res) => {
         const { urls, views = 1 } = req.body;
 
         if (!urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: \"URLs array required\" });
+            return res.status(400).json({ success: false, message });
         }
 
         // Response turant bhej rahe hain taaki front-end hang na ho
