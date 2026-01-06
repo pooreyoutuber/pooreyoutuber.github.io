@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSC Booster Pro | Multi-Site Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 2rem; }
+        .loader { border-top-color: #4F46E5; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .input-focus { transition: all 0.3s ease; }
+        .input-focus:focus { transform: scale(1.01); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-2xl w-full glass-card shadow-2xl p-6 md:p-10">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">🚀 Multi-Site Revenue Booster</h1>
+            <p class="text-gray-500 font-medium">Earn from 4 Sites at Once</p>
+        </div>
+
+        <div id="mainForm" class="space-y-4">
+            <div class="relative">
+                <label class="text-xs font-bold text-gray-600 ml-1 uppercase">Target Keyword</label>
+                <div class="mt-1 relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-indigo-500">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="keyword" 
+                        class="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all input-focus" 
+                        placeholder="e.g. Best Physics Notes 2025">
+                </div>
+            </div>
+
+            <hr class="border-gray-100">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="relative">
+                    <label class="text-xs font-bold text-red-500 ml-1 uppercase">Main Website (Compulsory)</label>
+                    <input type="url" id="siteUrl1" 
+                        class="mt-1 block w-full px-4 py-3 bg-white border-2 border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all input-focus" 
+                        placeholder="https://site1.com">
+                </div>
+                <div class="relative">
+                    <label class="text-xs font-bold text-gray-400 ml-1 uppercase">Optional Site 2</label>
+                    <input type="url" id="siteUrl2" 
+                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all input-focus" 
+                        placeholder="https://site2.com">
+                </div>
+                <div class="relative">
+                    <label class="text-xs font-bold text-gray-400 ml-1 uppercase">Optional Site 3</label>
+                    <input type="url" id="siteUrl3" 
+                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all input-focus" 
+                        placeholder="https://site3.com">
+                </div>
+                <div class="relative">
+                    <label class="text-xs font-bold text-gray-400 ml-1 uppercase">Optional Site 4</label>
+                    <input type="url" id="siteUrl4" 
+                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all input-focus" 
+                        placeholder="https://site4.com">
+                </div>
+            </div>
+
+            <button onclick="submitTask()" id="btnSubmit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 mt-4">
+                <span id="btnText">Start Multi-Site Process</span>
+                <i class="fas fa-rocket"></i>
+            </button>
+
+            <div class="bg-blue-50 p-4 rounded-xl flex gap-3 items-start border border-blue-100">
+                <i class="fas fa-random text-blue-600 mt-1"></i>
+                <p class="text-[10px] text-blue-800 leading-tight">
+                    <strong>Smart Rotation:</strong> Script randomly visits one of your 4 sites per view. This increases ad variety and keeps your account safe from high bounce rates.
+                </p>
+            </div>
+        </div>
+
+        <div id="progressScreen" class="hidden text-center py-10 space-y-6">
+            <div class="w-20 h-20 border-8 border-gray-100 border-t-indigo-600 rounded-full loader mx-auto"></div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Multi-Task Active!</h2>
+                <p class="text-gray-500 mt-2">Views are being rotated between your sites.</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mt-8">
+                <div class="p-4 bg-green-50 rounded-2xl border border-green-100 text-center">
+                    <p class="text-2xl font-bold text-green-600">1000</p>
+                    <p class="text-[10px] text-green-700 uppercase font-bold">Total Rotation</p>
+                </div>
+                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100 text-center">
+                    <p class="text-2xl font-bold text-purple-600">Active</p>
+                    <p class="text-[10px] text-purple-700 uppercase font-bold">Safe Mode</p>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="text-indigo-600 font-semibold text-sm hover:underline">
+                Stop & New Request +
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function submitTask() {
+            const keyword = document.getElementById('keyword').value;
+            const btn = document.getElementById('btnSubmit');
+            const btnText = document.getElementById('btnText');
+            
+            // Collect all URLs
+            const urls = [
+                document.getElementById('siteUrl1').value,
+                document.getElementById('siteUrl2').value,
+                document.getElementById('siteUrl3').value,
+                document.getElementById('siteUrl4').value
+            ].filter(u => u.trim() !== ""); // Khali fields ko hata dega
+
+            if (!keyword || urls.length === 0) {
+                alert("Please enter keyword and at least the Main Website URL!");
+                return;
+            }
+
+            btnText.innerText = 'Connecting to Cloud...';
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+
+            try {
+                // Note: Backend endpoint should now handle 'urls' array
+                const response = await fetch('https://pooreyoutuber-github-io-v2fo.onrender.com/start-task', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        keyword: keyword,
+                        urls: urls, // Bhej raha hai array of URLs
+                        views: 1000
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('mainForm').classList.add('hidden');
+                    document.getElementById('progressScreen').classList.remove('hidden');
+                } else {
+                    alert("Server error! Please check logs.");
+                    btnText.innerText = 'Start Multi-Site Process';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Could not connect to server.");
+                btnText.innerText = 'Start Multi-Site Process';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
