@@ -1064,7 +1064,7 @@ app.post('/start-Proxyium', async (req, res) => {
 // 7. tool popup (WITH DYNAMIC POP-UP HANDLING)
 // ===================================================================
 
-async function runGscTask(keyword, url, viewNumber) {
+async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
