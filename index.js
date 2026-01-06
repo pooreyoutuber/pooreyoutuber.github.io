@@ -1172,7 +1172,7 @@ async function runGscTask(keyword, url, viewNumber) {
     }
 }
 
-// --- ENDPOINT FOR TOOL 5 (/popup) ---
+// --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
         const { keyword, urls, views = 1000 } = req.body;
@@ -1206,10 +1206,7 @@ app.post('/popup', async (req, res) => {
     }
 });
 // ===================================================================
-// 5. AI-POWERED ORGANIC YOUTUBE VIEW BOOSTER
-// ===================================================================
-// ===================================================================
-// 5. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
+// 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===================================================================
 
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
