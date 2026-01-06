@@ -1208,92 +1208,39 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===================================================================
+async function runChannelShortsTask(channelSearchQuery, totalViews, watchTimePerVideo) {
+    let browser = await puppeteer.launch({
+        headless: "new",
+        args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] //
+    });
+    const page = await browser.newPage();
+    await page.setUserAgent(USER_AGENTS[randomInt(0, 4)]); // Diversity
 
-async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
-    let browser;
-    try {
-        const puppeteer = require('puppeteer-extra');
-        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-        puppeteer.use(StealthPlugin());
+    // Step 1: YouTube Search par jana
+    await page.goto(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, { waitUntil: 'networkidle2' });
 
-        browser = await puppeteer.launch({
-            headless: "new", // Render par "new" headless mode best hai
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--autoplay-policy=no-user-gesture-required', // Bina click video chalne ke liye
-                '--disable-blink-features=AutomationControlled'
-            ]
-        });
+    // Step 2: Channel par click karna (First Result)
+    await page.click('#main-link'); 
+    await new Promise(r => setTimeout(r, 3000));
 
-        const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(120000); // 2 minute timeout
+    // Step 3: Shorts Tab par jana
+    await page.goto(page.url() + '/shorts', { waitUntil: 'networkidle2' });
+
+    // Step 4: 1-by-1 Shorts Loop
+    for (let i = 0; i < totalViews; i++) {
+        console.log(`[VIEW #${i+1}] Watching Short...`);
         
-        // Random User Agent har baar alag device dikhane ke liye
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        // Pehli video par click karein, phir 'Arrow Down' se scroll karein
+        if (i === 0) await page.click('ytd-rich-item-renderer'); 
+        else await page.keyboard.press('ArrowDown'); // Next Short par jane ke liye
 
-        console.log(`[VIEW #${viewNumber}] Loading Video...`);
+        // Watch time tak rukna
+        await new Promise(r => setTimeout(r, watchTimePerVideo * 1000));
         
-        // Google Search se aane ka dikhawa (Referer)
-        await page.goto(videoUrl, { 
-            waitUntil: 'networkidle2', 
-            referer: 'https://www.google.com/' 
-        });
-
-        // --- 🔥 POP-UP HANDLING (20-15-5 Logic) ---
-        const cycleIndex = viewNumber % 40;
-        try {
-            await new Promise(r => setTimeout(r, 7000)); // Wait for popup
-            await page.evaluate((idx) => {
-                const btns = Array.from(document.querySelectorAll('button, yt-formatted-string, span'));
-                const clickTarget = (list) => {
-                    const target = btns.find(b => list.some(w => b.innerText.toLowerCase().includes(w)));
-                    if (target) target.click();
-                };
-                if (idx < 20) clickTarget(['reject', 'x', 'close', 'no thanks', 'dismiss']);
-                else if (idx < 35) clickTarget(['accept', 'agree', 'allow', 'consent', 'i agree']);
-                else clickTarget(['manage', 'options', 'customize']);
-            }, cycleIndex);
-        } catch (e) { console.log("Popup skip."); }
-
-        // --- ⚡ HIT COUNT TRIGGER (Essential) ---
-        console.log(`[ACTION] Triggering Playback...`);
-        await page.evaluate(async () => {
-            const video = document.querySelector('video');
-            if (video) {
-                video.muted = false; // Muted view count nahi hote aksar
-                video.volume = 0.5;
-                await video.play();
-                // Randomly seek 2-3 seconds aage taaki activity detect ho
-                video.currentTime += Math.floor(Math.random() * 5);
-            }
-        });
-
-        // --- ⌚ WATCH TIME & HUMAN BEHAVIOR ---
-        const startTime = Date.now();
-        const targetSeconds = parseInt(watchTime);
-
-        while (Date.now() - startTime < (targetSeconds * 1000)) {
-            // Random Mouse Movement (Har 5-8 sec mein)
-            await page.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 5 });
-            
-            // Randomly scroll thoda sa upar niche
-            if (Math.random() > 0.8) {
-                await page.evaluate(() => window.scrollBy(0, 200));
-                await new Promise(r => setTimeout(r, 2000));
-                await page.evaluate(() => window.scrollBy(0, -200));
-            }
-            
-            await new Promise(r => setTimeout(r, 6000));
-        }
-
-        console.log(`[SUCCESS] View #${viewNumber} Hit Sent!`);
-    } catch (error) {
-        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
-    } finally {
-        if (browser) await browser.close();
+        // Random Interaction (Like simulate karna)
+        if (Math.random() < 0.3) await page.keyboard.press('l'); 
     }
+    await browser.close();
 }
 
 // --- API ENDPOINT ---
