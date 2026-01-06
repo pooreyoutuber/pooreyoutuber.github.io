@@ -1192,7 +1192,7 @@ app.post('/popup', async (req, res) => {
             console.log(`\n--- STARTING POP-UP REVENUE TASK ---`);
             for (let i = 1; i <= views; i++) {
                 const currentUrl = urls[(i - 1) % urls.length]; // Rotation between sites
-                await runGscTask(keyword, currentUrl, i);
+                await runGscTaskpop(keyword, currentUrl, i);
 
                 // RAM Management & Anti-Spam break
                 const breakTime = i % 5 === 0 ? 30000 : 10000;
