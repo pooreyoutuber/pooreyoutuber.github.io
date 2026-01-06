@@ -1208,60 +1208,124 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===================================================================
-async function runChannelShortsTask(channelSearchQuery, totalViews, watchTimePerVideo) {
-    let browser = await puppeteer.launch({
-        headless: "new",
-        args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] //
-    });
-    const page = await browser.newPage();
-    await page.setUserAgent(USER_AGENTS[randomInt(0, 4)]); // Diversity
+// ===================================================================
+// 8. YOUTUBE SEARCH & SHORTS SWIPER (ULTIMATE HUMAN FLOW)
+// ===================================================================
 
-    // Step 1: YouTube Search par jana
-    await page.goto(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, { waitUntil: 'networkidle2' });
+async function runSearchAndSwipeTask(channelName, viewNumber, watchTimePerShort = 20) {
+    let browser;
+    try {
+        const puppeteer = require('puppeteer-extra');
+        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+        puppeteer.use(StealthPlugin());
 
-    // Step 2: Channel par click karna (First Result)
-    await page.click('#main-link'); 
-    await new Promise(r => setTimeout(r, 3000));
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--window-size=400,900',
+                '--disable-blink-features=AutomationControlled'
+            ]
+        });
 
-    // Step 3: Shorts Tab par jana
-    await page.goto(page.url() + '/shorts', { waitUntil: 'networkidle2' });
+        const page = await browser.newPage();
+        // Mobile View Simulation
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: 400, height: 850, isMobile: true });
 
-    // Step 4: 1-by-1 Shorts Loop
-    for (let i = 0; i < totalViews; i++) {
-        console.log(`[VIEW #${i+1}] Watching Short...`);
-        
-        // Pehli video par click karein, phir 'Arrow Down' se scroll karein
-        if (i === 0) await page.click('ytd-rich-item-renderer'); 
-        else await page.keyboard.press('ArrowDown'); // Next Short par jane ke liye
+        // STEP 1: YouTube par jana aur Channel Search karna
+        console.log(`\n[VIEW #${viewNumber}] Browser Open: Searching for "${channelName}"`);
+        await page.goto('https://www.youtube.com/results?search_query=' + encodeURIComponent(channelName), { 
+            waitUntil: 'networkidle2' 
+        });
+        await new Promise(r => setTimeout(r, 3000));
 
-        // Watch time tak rukna
-        await new Promise(r => setTimeout(r, watchTimePerVideo * 1000));
-        
-        // Random Interaction (Like simulate karna)
-        if (Math.random() < 0.3) await page.keyboard.press('l'); 
+        // STEP 2: Channel link dhoond kar click karna
+        const channelSelector = 'a[href*="/@"]'; 
+        await page.waitForSelector(channelSelector);
+        await page.click(channelSelector);
+        console.log(`[ACTION] Channel opened. Navigating to Shorts section...`);
+        await new Promise(r => setTimeout(r, 3000));
+
+        // STEP 3: Shorts Section par click karna
+        // YouTube mobile par 'Shorts' text ya icon dhoondna
+        await page.evaluate(() => {
+            const tabs = Array.from(document.querySelectorAll('yt-formatted-string, span'));
+            const shortsTab = tabs.find(t => t.innerText.toLowerCase().includes('shorts'));
+            if (shortsTab) shortsTab.click();
+        });
+        await new Promise(r => setTimeout(r, 4000));
+
+        // STEP 4: Pehla Short play karna
+        const firstShort = 'a[href*="/shorts/"]';
+        await page.waitForSelector(firstShort);
+        await page.click(firstShort);
+        console.log(`[ACTION] First Short started. Swiping loop begins...`);
+
+        // STEP 5: Swipe Up Loop (10 Shorts)
+        for (let i = 1; i <= 10; i++) {
+            console.log(`[WATCHING] Short ${i}/10 - Watching for 20s...`);
+            
+            // Playback ensure karein
+            await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (v) { v.play(); v.muted = false; v.volume = 1; }
+            });
+
+            // Har video 20 second dekhega
+            await new Promise(r => setTimeout(r, 20000)); 
+
+            // Swipe Up (Last video ke baad swipe nahi karega)
+            if (i < 10) {
+                console.log(`[SWIPE] Swiping up to Short #${i + 1}`);
+                await page.mouse.move(200, 700);
+                await page.mouse.down();
+                await page.mouse.move(200, 150, { steps: 25 });
+                await page.mouse.up();
+                await new Promise(r => setTimeout(r, 3000)); // Loading gap
+            }
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} cycle completed (10 Shorts watched).`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+    } finally {
+        if (browser) {
+            await browser.close();
+            console.log(`[CLEANUP] Browser closed. Memory cleared.`);
+        }
     }
-    await browser.close();
 }
 
 // --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    // Immediate Response
-    res.status(200).json({ success: true, message: "Engine Started! Hits will appear soon." });
+    const { channel_name, views_count } = req.body;
 
-    // Worker Loop
+    if (!channel_name) {
+        return res.status(400).json({ success: false, message: "Channel Name is required for search!" });
+    }
+
+    res.status(200).json({ 
+        success: true, 
+        message: "Search-Play-Swipe Engine Started. Process runs 1-by-1 to prevent crash." 
+    });
+
+    // Worker Loop (1-by-1 Processing)
     (async () => {
-        for (let i = 1; i <= views_count; i++) {
-            await runOrganicYoutubeTask(video_url, i, watch_time);
+        const total = parseInt(views_count) || 1;
+        for (let i = 1; i <= total; i++) {
+            await runSearchAndSwipeTask(channel_name, i);
             
-            // Render par 15s ka gap zaroori hai crash se bachne ke liye
-            console.log(`[REST] 15s cooling...`);
+            // RAM Management Gap (15 sec)
+            console.log(`[WAIT] Next browser instance in 15s...`);
             await new Promise(r => setTimeout(r, 15000));
         }
+        console.log("--- ALL SESSIONS FINISHED ---");
     })();
 });
-
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
