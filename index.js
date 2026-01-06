@@ -931,7 +931,7 @@ app.post('/start-task', async (req, res) => {
                 const randomUrl = urls[Math.floor(Math.random() * urls.length)];
                 
                 console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runsGscTask(keyword, randomUrl, i); 
+                await runGscTask(keyword, randomUrl, i); 
 
                 if (i < totalViews) {
                     // RAM management break
