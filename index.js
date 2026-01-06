@@ -1209,7 +1209,11 @@ app.post('/popup', async (req, res) => {
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===================================================================
 
-async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
+// ===================================================================
+// 8. YOUTUBE SEARCH & SHORTS SWIPER (ULTIMATE HUMAN FLOW)
+// ===================================================================
+
+async function runSearchAndSwipeTask(channelName, viewNumber, watchTimePerShort = 20) {
     let browser;
     try {
         const puppeteer = require('puppeteer-extra');
@@ -1217,82 +1221,83 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         puppeteer.use(StealthPlugin());
 
         browser = await puppeteer.launch({
-            headless: "new", // Render par "new" headless mode best hai
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--autoplay-policy=no-user-gesture-required', // Bina click video chalne ke liye
+                '--window-size=400,900',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(120000); // 2 minute timeout
-        
-        // Random User Agent har baar alag device dikhane ke liye
+        // Mobile View Simulation
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: 400, height: 850, isMobile: true });
 
-        console.log(`[VIEW #${viewNumber}] Loading Video...`);
-        
-        // Google Search se aane ka dikhawa (Referer)
-        await page.goto(videoUrl, { 
-            waitUntil: 'networkidle2', 
-            referer: 'https://www.google.com/' 
+        // STEP 1: YouTube par jana aur Channel Search karna
+        console.log(`\n[VIEW #${viewNumber}] Browser Open: Searching for "${channelName}"`);
+        await page.goto('https://www.youtube.com/results?search_query=' + encodeURIComponent(channelName), { 
+            waitUntil: 'networkidle2' 
         });
+        await new Promise(r => setTimeout(r, 3000));
 
-        // --- 🔥 POP-UP HANDLING (20-15-5 Logic) ---
-        const cycleIndex = viewNumber % 40;
-        try {
-            await new Promise(r => setTimeout(r, 7000)); // Wait for popup
-            await page.evaluate((idx) => {
-                const btns = Array.from(document.querySelectorAll('button, yt-formatted-string, span'));
-                const clickTarget = (list) => {
-                    const target = btns.find(b => list.some(w => b.innerText.toLowerCase().includes(w)));
-                    if (target) target.click();
-                };
-                if (idx < 20) clickTarget(['reject', 'x', 'close', 'no thanks', 'dismiss']);
-                else if (idx < 35) clickTarget(['accept', 'agree', 'allow', 'consent', 'i agree']);
-                else clickTarget(['manage', 'options', 'customize']);
-            }, cycleIndex);
-        } catch (e) { console.log("Popup skip."); }
+        // STEP 2: Channel link dhoond kar click karna
+        const channelSelector = 'a[href*="/@"]'; 
+        await page.waitForSelector(channelSelector);
+        await page.click(channelSelector);
+        console.log(`[ACTION] Channel opened. Navigating to Shorts section...`);
+        await new Promise(r => setTimeout(r, 3000));
 
-        // --- ⚡ HIT COUNT TRIGGER (Essential) ---
-        console.log(`[ACTION] Triggering Playback...`);
-        await page.evaluate(async () => {
-            const video = document.querySelector('video');
-            if (video) {
-                video.muted = false; // Muted view count nahi hote aksar
-                video.volume = 0.5;
-                await video.play();
-                // Randomly seek 2-3 seconds aage taaki activity detect ho
-                video.currentTime += Math.floor(Math.random() * 5);
-            }
+        // STEP 3: Shorts Section par click karna
+        // YouTube mobile par 'Shorts' text ya icon dhoondna
+        await page.evaluate(() => {
+            const tabs = Array.from(document.querySelectorAll('yt-formatted-string, span'));
+            const shortsTab = tabs.find(t => t.innerText.toLowerCase().includes('shorts'));
+            if (shortsTab) shortsTab.click();
         });
+        await new Promise(r => setTimeout(r, 4000));
 
-        // --- ⌚ WATCH TIME & HUMAN BEHAVIOR ---
-        const startTime = Date.now();
-        const targetSeconds = parseInt(watchTime);
+        // STEP 4: Pehla Short play karna
+        const firstShort = 'a[href*="/shorts/"]';
+        await page.waitForSelector(firstShort);
+        await page.click(firstShort);
+        console.log(`[ACTION] First Short started. Swiping loop begins...`);
 
-        while (Date.now() - startTime < (targetSeconds * 1000)) {
-            // Random Mouse Movement (Har 5-8 sec mein)
-            await page.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 5 });
+        // STEP 5: Swipe Up Loop (10 Shorts)
+        for (let i = 1; i <= 10; i++) {
+            console.log(`[WATCHING] Short ${i}/10 - Watching for 20s...`);
             
-            // Randomly scroll thoda sa upar niche
-            if (Math.random() > 0.8) {
-                await page.evaluate(() => window.scrollBy(0, 200));
-                await new Promise(r => setTimeout(r, 2000));
-                await page.evaluate(() => window.scrollBy(0, -200));
+            // Playback ensure karein
+            await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (v) { v.play(); v.muted = false; v.volume = 1; }
+            });
+
+            // Har video 20 second dekhega
+            await new Promise(r => setTimeout(r, 20000)); 
+
+            // Swipe Up (Last video ke baad swipe nahi karega)
+            if (i < 10) {
+                console.log(`[SWIPE] Swiping up to Short #${i + 1}`);
+                await page.mouse.move(200, 700);
+                await page.mouse.down();
+                await page.mouse.move(200, 150, { steps: 25 });
+                await page.mouse.up();
+                await new Promise(r => setTimeout(r, 3000)); // Loading gap
             }
-            
-            await new Promise(r => setTimeout(r, 6000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Hit Sent!`);
+        console.log(`[SUCCESS] View #${viewNumber} cycle completed (10 Shorts watched).`);
+
     } catch (error) {
-        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            await browser.close();
+            console.log(`[CLEANUP] Browser closed. Memory cleared.`);
+        }
     }
 }
 
