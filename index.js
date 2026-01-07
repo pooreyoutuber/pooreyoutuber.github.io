@@ -1209,9 +1209,6 @@ app.post('/popup', async (req, res) => {
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
 // ===================================================================
-// 8. YOUTUBE STUDIO HITTER (EXACT VIDEO FLOW)
-// ===================================================================
-
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
@@ -1220,7 +1217,9 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         puppeteer.use(StealthPlugin());
 
         browser = await puppeteer.launch({
-            headless: "new", 
+            headless: "new",
+            // protocolTimeout ko 180 seconds kar diya taaki timeout na ho
+            protocolTimeout: 180000, 
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -1231,96 +1230,88 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
+        // index (2).js ke USER_AGENTS array se random UA
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
         console.log(`[VIEW #${viewNumber}] Browser Open: Pasting Link...`);
         
-        // 1. Link Paste aur Load karna
+        // Timeout ko 120s rakha hai taaki heavy load handle ho sake
         await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 120000,
             referer: 'https://www.google.com/' 
         });
 
-        // 2. YouTube Terms/Consent Popup Handling (Jaisa video me tha)
+        // --- 🔥 YOUTUBE TERMS POP-UP (READ ALL & ACCEPT) ---
         try {
-            await new Promise(r => setTimeout(r, 5000)); // Popup aane ka wait
-            
+            console.log(`[ACTION] Waiting for YouTube Terms...`);
+            await new Promise(r => setTimeout(r, 8000)); // Thoda extra wait
+
             await page.evaluate(async () => {
                 const buttons = Array.from(document.querySelectorAll('button, span, yt-formatted-string'));
                 
-                // Pehle "Read more" ya "More options" par click karna zaroori hota hai poora button dikhne ke liye
-                const readMore = buttons.find(b => b.innerText.toLowerCase().includes('read more') || b.innerText.toLowerCase().includes('more options'));
+                // 1. "Read more" ya "More options" dhundna aur click karna
+                const readMore = buttons.find(b => 
+                    b.innerText.toLowerCase().includes('read more') || 
+                    b.innerText.toLowerCase().includes('more options') ||
+                    b.innerText.toLowerCase().includes('read all')
+                );
+                
                 if (readMore) {
                     readMore.click();
-                    await new Promise(r => setTimeout(r, 2000));
+                    // Button click hone ke baad options load hone ka intezar
+                    await new Promise(r => setTimeout(r, 3000));
                 }
 
-                // Fir "Accept all" ya "I agree" par click
-                const acceptBtn = buttons.find(b => 
+                // 2. Dubara buttons list update karke "Accept all" click karna
+                const freshButtons = Array.from(document.querySelectorAll('button, span, yt-formatted-string'));
+                const acceptBtn = freshButtons.find(b => 
                     ['accept all', 'i agree', 'agree', 'allow'].some(txt => b.innerText.toLowerCase().includes(txt))
                 );
-                if (acceptBtn) acceptBtn.click();
+                
+                if (acceptBtn) {
+                    acceptBtn.click();
+                    return "ACCEPTED";
+                }
+                return "NOT_FOUND";
             });
             console.log(`[ACTION] YouTube Terms Accepted.`);
         } catch (e) {
-            console.log("No Popup detected, moving to playback.");
+            console.log("[INFO] Popup logic skipped or already accepted.");
         }
 
-        // 3. Audio On aur Playback Trigger
+        // --- ⚡ AUDIO ON & PLAYBACK ---
         console.log(`[ACTION] Playing Video with Audio ON...`);
         await page.evaluate(async () => {
             const video = document.querySelector('video');
             if (video) {
                 video.muted = false; // Audio ON
-                video.volume = 0.8;
+                video.volume = 0.7;
                 await video.play();
             }
         });
 
-        // 4. Frontend Se Aaya Hua Watch Time (Stay)
+        // Watch time simulation
         const targetMs = parseInt(watchTime) * 1000;
-        console.log(`[WATCHING] Staying for ${watchTime} seconds...`);
-        
         const startTime = Date.now();
         while (Date.now() - startTime < targetMs) {
-            // Realistic Human Behavior: Thoda mouse hilana
-            await page.mouse.move(Math.random() * 500, Math.random() * 500, { steps: 5 });
-            await new Promise(r => setTimeout(r, 5000));
+            await page.mouse.move(Math.random() * 600, Math.random() * 400, { steps: 3 });
+            await new Promise(r => setTimeout(r, 10000));
         }
 
-        console.log(`[DONE] View #${viewNumber} Completed Successfully! ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Done ✅`);
 
     } catch (error) {
+        // Agar fir bhi timeout aata hai, toh error log karein
         console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            console.log(`[BROWSER] Closing for next view...`);
+            console.log(`[BROWSER] Closing...`);
             await browser.close().catch(() => {});
         }
     }
 }
 
-// --- API ENDPOINT (1-by-1 Processing) ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    if (!video_url) return res.status(400).json({ success: false, message: "URL Missing" });
-
-    res.status(200).json({ success: true, message: "YouTube Task Started! 1-by-1 views processing..." });
-
-    // Background Worker: Ak time par ak hi browse khulega
-    (async () => {
-        for (let i = 1; i <= parseInt(views_count); i++) {
-            await runOrganicYoutubeTask(video_url, i, watch_time);
-            
-            // Next view se pehle cooling gap
-            console.log(`[GAP] Waiting 10s before next session...`);
-            await new Promise(r => setTimeout(r, 10000));
-        }
-        console.log("--- ALL YOUTUBE VIEWS COMPLETED ---");
-    })();
-});
 
 // --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
