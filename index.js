@@ -1209,20 +1209,19 @@ app.post('/popup', async (req, res) => {
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
 // ===================================================================
-// ===================================================================
-// 8. YOUTUBE STUDIO HITTER (EXACT VIDEO FLOW)
-// ===================================================================
- // ===================================================================
-// 8. YOUTUBE STUDIO HITTER (EXACT VIDEO FLOW - FIXED)
+// 8. INSTAGRAM REEL HITTER (EXACT 1-BY-1 FLOW)
 // ===================================================================
 
-async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
+async function runInstagramTask(reelUrl, viewNumber, watchTime) {
     let browser;
     try {
-        // Puppeteer launch with stealth and specific args for stability
+        const puppeteer = require('puppeteer-extra');
+        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+        puppeteer.use(StealthPlugin());
+
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 240000, // Timeout badha diya taaki heavy loading handle ho sake
+            protocolTimeout: 180000, // Timeout protection
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -1232,68 +1231,56 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 720 });
+        
+        // Browser Window Size
+        await page.setViewport({ width: 400, height: 800 }); // Mobile view size better for Reels
         
         // Random User Agent
-        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        await page.setUserAgent(ua);
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[VIEW #${viewNumber}] Browser Open: Pasting Link...`);
+        console.log(`[INSTA #${viewNumber}] Browser Open: Loading Reel...`);
         
-        // 1. Link Paste & Go
-        await page.goto(videoUrl, { 
+        // 1. Reel Link Load Karna
+        await page.goto(reelUrl, { 
             waitUntil: 'networkidle2', 
-            timeout: 120000 
+            timeout: 90000 
         });
 
-        // 2. YouTube Terms Popup Handling (As shown in video)
+        // 2. Login/Cookie Popup Handle Karna
         try {
-            await new Promise(r => setTimeout(r, 6000)); // Popup ka wait
-            
-            console.log(`[ACTION] Handling YouTube Terms Popup...`);
-            await page.evaluate(async () => {
-                // Pehle "Read more" ya "More options" buttons ko dhoond kar scroll simulate karna
-                const buttons = Array.from(document.querySelectorAll('button, span, yt-formatted-string'));
-                
-                // Video ke hisaab se scroll down simulation logic
-                window.scrollBy(0, 500); 
-                await new Promise(r => setTimeout(r, 1000));
-
-                const readMore = buttons.find(b => 
-                    ['read more', 'more options', 'read all'].some(t => b.innerText.toLowerCase().includes(t))
-                );
-                if (readMore) {
-                    readMore.click();
-                    await new Promise(r => setTimeout(r, 2000));
-                }
-
-                // "Accept all" button par click karna
-                const finalButtons = Array.from(document.querySelectorAll('button, span, yt-formatted-string'));
-                const acceptBtn = finalButtons.find(b => 
-                    ['accept all', 'i agree', 'agree'].some(t => b.innerText.toLowerCase().includes(t))
-                );
-                
-                if (acceptBtn) acceptBtn.click();
+            await new Promise(r => setTimeout(r, 4000));
+            await page.evaluate(() => {
+                const selectors = [
+                    'button._a9--._a9_1', // "Not Now" button for login popup
+                    'button[tabindex="0"]', // General buttons
+                    'div[role="dialog"] button' // Dialog buttons
+                ];
+                selectors.forEach(s => {
+                    const btn = document.querySelector(s);
+                    if (btn && (btn.innerText.includes('Not Now') || btn.innerText.includes('Decline'))) {
+                        btn.click();
+                    }
+                });
             });
-            console.log(`[ACTION] Terms Accepted ✅`);
-        } catch (e) {
-            console.log("[INFO] Terms popup didn't appear or already handled.");
-        }
+        } catch (e) { console.log("Popup skip."); }
 
-        // 3. Audio ON & Video Play (Using Frontend Time)
-        console.log(`[ACTION] Video Playing (Audio ON) for ${watchTime}s...`);
+        // 3. Play Video & Unmute
         await page.evaluate(async () => {
-            const v = document.querySelector('video');
-            if (v) {
-                v.muted = false; // Audio ON
-                v.volume = 1.0;
-                await v.play();
+            const video = document.querySelector('video');
+            if (video) {
+                video.muted = false;
+                video.volume = 1.0;
+                video.play();
             }
         });
 
-        // Frontend se aaye hue watch_time tak rukna
-        const waitMs = parseInt(watchTime) * 1000;
-        await new Promise(r => setTimeout(r, waitMs));
+        // 4. Stay Duration (Frontend Time)
+        const staySeconds = parseInt(watchTime) || 15;
+        console.log(`[WATCHING] Reel playing for ${staySeconds}s...`);
+        
+        // Human-like scroll thoda sa upar niche
+        await page.mouse.wheel({ deltaY: 100 });
+        await new Promise(r => setTimeout(r, staySeconds * 1000));
 
         console.log(`[SUCCESS] View #${viewNumber} Completed!`);
 
@@ -1301,37 +1288,38 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            console.log(`[BROWSER] Closing to save RAM...`);
+            console.log(`[BROWSER] Closing...`);
             await browser.close().catch(() => {});
         }
     }
 }
 
-// Updated API Endpoint for Tool 8
+// --- INSTAGRAM API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
+    const { video_url, views_count, watch_time } = req.body; // Yahan frontend se reel link aayega
     
-    if (!video_url) return res.status(400).json({ success: false, message: "URL missing" });
+    if (!video_url) return res.status(400).json({ success: false, message: "Reel URL is missing!" });
 
-    // Instant Response for Frontend
+    // Response turant bhej do taaki frontend hang na ho
     res.status(200).json({ 
         success: true, 
-        message: `YouTube Task Started! 1-by-1 Processing: ${views_count} views.` 
+        message: `Instagram Engine Started! Target: ${views_count} views.` 
     });
 
-    // Background Worker (Ak time par ak hi browser khulega)
+    // 1-by-1 Worker: Ek khatam hoga tabhi dusra khulega
     (async () => {
         for (let i = 1; i <= parseInt(views_count); i++) {
-            // Processing single view
-            await runOrganicYoutubeTask(video_url, i, watch_time);
+            await runInstagramTask(video_url, i, watch_time);
             
-            // 15 seconds cooling gap to prevent Render Cloud crash
-            console.log(`[REST] 15s gap before next browser session...`);
-            await new Promise(r => setTimeout(r, 15000));
+            // 5 second ka break browser sessions ke beech mein
+            console.log(`[NEXT] Waiting 5s for next session...`);
+            await new Promise(r => setTimeout(r, 5000));
         }
-        console.log("--- ALL SESSIONS FINISHED ---");
+        console.log("--- ALL INSTA VIEWS FINISHED ---");
     })();
 });
+                
+
 
 
 // --- API ENDPOINT ---
