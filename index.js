@@ -1209,7 +1209,7 @@ app.post('/popup', async (req, res) => {
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
 // ===================================================================
-// 8. YOUTUBE DESKTOP ENGINE (GOOGLE REFERRAL + PLAY CHECK)
+// 8. YOUTUBE DESKTOP ENGINE (HEAVY-DUTY & AUTO-PLAY)
 // ===================================================================
 
 async function runYouTubeDesktopTask(videoUrl, viewNumber, watchTime) {
@@ -1224,6 +1224,7 @@ async function runYouTubeDesktopTask(videoUrl, viewNumber, watchTime) {
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
                 '--window-size=1920,1080',
                 '--autoplay-policy=no-user-gesture-required'
             ]
@@ -1231,99 +1232,85 @@ async function runYouTubeDesktopTask(videoUrl, viewNumber, watchTime) {
 
         const page = await browser.newPage();
         
-        // 1. Desktop Mode Settings
+        // Timeout ko 120s kar diya taaki slow internet pe fail na ho
+        page.setDefaultNavigationTimeout(120000); 
+
         await page.setViewport({ width: 1920, height: 1080 });
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
         console.log(`\n[VIEW #${viewNumber}] Starting session...`);
 
-        // 2. Pehle Google.com par jana (Organic look ke liye)
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 2000));
+        // 1. Google Referral (Organic Traffic)
+        try {
+            await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
+            await new Promise(r => setTimeout(r, 2000));
+        } catch (e) { console.log("[INFO] Google load skipped, moving to video."); }
 
-        // 3. Video Link par jana
+        // 2. Video Link par jana (With Retry Logic)
         console.log(`[NAVIGATING] Opening Video: ${videoUrl}`);
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+        await page.goto(videoUrl, { waitUntil: 'networkidle2' });
 
-        // 4. Playback Confirmation Logic
-        await new Promise(r => setTimeout(r, 5000)); // Load hone ka wait
-        
-        const isActuallyPlaying = await page.evaluate(async () => {
-            const video = document.querySelector('video');
-            const playBtn = document.querySelector('.ytp-play-button');
-            
-            if (video) {
-                video.muted = false; // Unmute for real signal
-                video.volume = 0.5;
-                
-                // Agar paused hai to play button click karo
-                if (video.paused && playBtn) {
-                    playBtn.click();
+        // 3. Cookie/Consent Popup Hatana
+        try {
+            await page.evaluate(() => {
+                const buttons = document.querySelectorAll('button');
+                for (const btn of buttons) {
+                    if (btn.innerText.includes('Accept all') || btn.innerText.includes('I agree')) {
+                        btn.click();
+                    }
                 }
-                
-                // JS se force play
-                try { await video.play(); } catch(e) {}
-                
-                return !video.paused; 
-            }
-            return false;
+            });
+        } catch (e) {}
+
+        await new Promise(r => setTimeout(r, 8000)); // Load hone ka buffer
+
+        // 4. 🔥 MULTI-METHOD PLAYBACK (Confirming Play)
+        const isPlaying = await page.evaluate(async () => {
+            const video = document.querySelector('video');
+            if (!video) return false;
+
+            video.muted = false;
+            video.volume = 0.5;
+
+            // Method A: Play Button Click
+            const playBtn = document.querySelector('.ytp-play-button');
+            if (video.paused && playBtn) playBtn.click();
+
+            // Method B: Direct JS Play
+            try { await video.play(); } catch(e) {}
+
+            return !video.paused;
         });
 
-        if (isActuallyPlaying) {
-            console.log(`[CONFIRMED] Video chal raha hai. ✅`);
+        if (!isPlaying) {
+            console.log(`[RETRY] Keyboard Shortcut 'K' use kar rha hu...`);
+            await page.keyboard.press('k'); // YouTube shortcut to play
+            await new Promise(r => setTimeout(r, 2000));
+            // Center click backup
+            await page.mouse.click(960, 540);
         } else {
-            console.log(`[RETRY] Playback fix attempt...`);
-            await page.mouse.click(640, 360); // Screen ke beech mein click
+            console.log(`[CONFIRMED] Video successfully sal rha he! ✅`);
         }
 
-        // 5. Watch Time (Jitna frontend se aaya hai)
+        // 5. Watch Time
         const duration = parseInt(watchTime) || 30;
-        console.log(`[WATCHING] Playing for ${duration}s in Desktop Mode...`);
+        console.log(`[WATCHING] Staying for ${duration}s...`);
         
-        // Random mouse movement taaki bot detection na ho
-        await page.mouse.move(100, 100);
-        await new Promise(r => setTimeout(r, (duration * 1000)));
+        // Random Activity (Mouse move)
+        await page.mouse.move(500, 500);
+        await new Promise(r => setTimeout(r, duration * 1000));
 
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} failed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLEANUP] Browser closed. Next view can start.`);
+            console.log(`[SYSTEM] Browser Closed. Memory Cleared.`);
         }
     }
 }
-
-// --- API ENDPOINT ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    if (!video_url) return res.status(400).json({ success: false, message: "URL missing!" });
-
-    res.status(200).json({ 
-        success: true, 
-        message: `Desktop Engine Started: ${views_count} views (1-by-1).` 
-    });
-
-    // Main Worker Loop (Ek-ek karke chalayega)
-    (async () => {
-        const total = parseInt(views_count) || 1;
-        for (let i = 1; i <= total; i++) {
-            // "await" ensure karega ki pehle wala band ho tabhi naya khule
-            await runYouTubeDesktopTask(video_url, i, watch_time);
-            
-            // 10 second ka rest Render ko thanda karne ke liye
-            if (i < total) {
-                console.log(`[WAIT] 10s gap before next browser...`);
-                await new Promise(r => setTimeout(r, 10000));
-            }
-        }
-        console.log("--- TASK FINISHED ---");
-    })();
-});
-
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
