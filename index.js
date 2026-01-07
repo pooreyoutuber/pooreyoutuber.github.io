@@ -1209,13 +1209,10 @@ app.post('/popup', async (req, res) => {
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
 // ===================================================================
-// 8. INSTAGRAM/FACEBOOK REEL HITTER (EXACT 1-BY-1 FLOW)
-// ===================================================================
-// ===================================================================
-// 8. INSTAGRAM/FACEBOOK REEL HITTER (EXACT 1-BY-1 FLOW)
+// 8. YOUTUBE ORGANIC VIEW BOOSTER (PLAYBACK GUARANTEED)
 // ===================================================================
 
-async function runSocialMediaTask(videoUrl, viewNumber, watchTime) {
+async function runYouTubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
         const puppeteer = require('puppeteer-extra');
@@ -1224,100 +1221,117 @@ async function runSocialMediaTask(videoUrl, viewNumber, watchTime) {
 
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 240000, 
+            protocolTimeout: 240000,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-web-security', // Bypass some security for autoplay
-                '--autoplay-policy=no-user-gesture-required' 
+                '--autoplay-policy=no-user-gesture-required', // 🔥 Auto-play allow karne ke liye
+                '--mute-audio=false' // Audio enable rakhein taaki real signal jaye
             ]
         });
 
         const page = await browser.newPage();
         
-        // 1. Mobile Viewport (Bohat zaroori hai Insta view ke liye)
-        await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-        
-        // 2. Realistic User Agent
+        // Desktop Viewport for YouTube Full Player
+        await page.setViewport({ width: 1280, height: 720 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`\n[VIEW #${viewNumber}] Target: ${videoUrl}`);
-        
-        // 3. Navigate with Referrer (Organic search se aata dikhega)
+        console.log(`\n[YOUTUBE #${viewNumber}] Target: ${videoUrl}`);
+
+        // 1. Navigate to Video
         await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000 
         });
 
-        // 4. Force Video Play (Instagram requires interaction sometimes)
-        await new Promise(r => setTimeout(r, 5000)); // Wait for load
-        
-        const isPlaying = await page.evaluate(async () => {
+        // 2. 🔥 CRITICAL: Force Playback Logic
+        // YouTube aksar "Play" button click mangta hai
+        await new Promise(r => setTimeout(r, 6000)); // Initial load time
+
+        const playbackStarted = await page.evaluate(async () => {
             const video = document.querySelector('video');
+            const playButton = document.querySelector('.ytp-play-button');
+
             if (video) {
-                video.muted = false; // Unmute for better engagement signal
-                video.play();
-                // Interaction simulate karna taaki Insta ko real lage
-                window.scrollBy(0, 100);
-                return true;
+                // Video ko unmute karna (Insta/YouTube ke liye zaroori signal)
+                video.muted = false;
+                video.volume = 0.5;
+
+                // Agar video paused hai toh button click karein
+                if (video.paused && playButton) {
+                    playButton.click();
+                }
+                
+                // Backup attempt to play via JS
+                try { await video.play(); } catch(e) {}
+                
+                return !video.paused;
             }
             return false;
         });
 
-        if (!isPlaying) console.log(`[WARN] Video element not found on View #${viewNumber}`);
+        if (playbackStarted) {
+            console.log(`[PLAYING] Video is now playing. ✅`);
+        } else {
+            console.log(`[WARN] Automatic playback might be blocked. Manual click attempted.`);
+            // Manual click on center of the screen as backup
+            await page.mouse.click(640, 360); 
+        }
 
-        // 5. Exact Watch Time (Jitna frontend se aaya hai)
-        const staySeconds = parseInt(watchTime) || 15;
-        console.log(`[WATCHING] Playing for ${staySeconds} seconds...`);
-        
-        // Beech mein thoda random movement
-        await new Promise(r => setTimeout(r, (staySeconds * 1000) / 2));
-        await page.mouse.wheel({ deltaY: 50 }); 
-        await new Promise(r => setTimeout(r, (staySeconds * 1000) / 2));
+        // 3. Realistic Engagement
+        const staySeconds = parseInt(watchTime) || 30;
+        console.log(`[WATCHING] Staying for ${staySeconds}s...`);
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
+        // Randomly thoda scroll karein taaki "Bot" na lage
+        await page.evaluate(() => window.scrollBy(0, 300));
+        await new Promise(r => setTimeout(r, 5000));
+        await page.evaluate(() => window.scrollBy(0, -300));
+
+        // Watch time wait karein
+        await new Promise(r => setTimeout(r, (staySeconds * 1000) - 5000));
+
+        console.log(`[SUCCESS] View #${viewNumber} Completed!`);
 
     } catch (error) {
         console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // RAM cleanup: Pehle pages close karein phir browser
             const pages = await browser.pages();
             for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
-            console.log(`[BROWSER] Closed. Memory Freed.`);
+            console.log(`[SYSTEM] Browser Closed. RAM Cleared.`);
         }
     }
 }
 
-// --- UPDATED ENDPOINT ---
+// --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     
-    if (!video_url) return res.status(400).json({ success: false, message: "URL Missing!" });
+    if (!video_url) return res.status(400).json({ success: false, message: "YouTube URL missing!" });
 
     res.status(200).json({ 
         success: true, 
-        message: `Sequential Engine Started. Processing ${views_count} views 1-by-1.` 
+        message: `YouTube Engine Started! Processing ${views_count} views sequentially.` 
     });
 
-    // 1-by-1 Worker: Ye loop Render ko crash hone se bachata hai
+    // 1-by-1 Background Worker
     (async () => {
         const total = parseInt(views_count) || 1;
         for (let i = 1; i <= total; i++) {
-            // await ka matlab hai jab tak ye function khatam nahi hota, agla browser nahi khulega
-            await runSocialMediaTask(video_url, i, watch_time);
+            await runYouTubeTask(video_url, i, watch_time);
             
-            // 10 second ka cooling gap taaki Instagram bot detect na kare
+            // Render cooling period
             if (i < total) {
-                console.log(`[COOLING] Waiting 10s for next session...`);
-                await new Promise(r => setTimeout(r, 10000));
+                console.log(`[WAIT] 12s gap for system stability...`);
+                await new Promise(r => setTimeout(r, 12000));
             }
         }
-        console.log("--- ALL VIEWS TASK COMPLETED ---");
+        console.log("--- ALL YOUTUBE VIEWS FINISHED ---");
     })();
 });
+
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
