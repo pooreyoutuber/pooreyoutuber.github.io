@@ -1209,10 +1209,10 @@ app.post('/popup', async (req, res) => {
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
 // ===================================================================
-// 8. INSTAGRAM REEL HITTER (EXACT 1-BY-1 FLOW)
+// 8. INSTAGRAM/FACEBOOK REEL HITTER (EXACT 1-BY-1 FLOW)
 // ===================================================================
 
-async function runInstagramTask(reelUrl, viewNumber, watchTime) {
+async function runSocialMediaTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
         const puppeteer = require('puppeteer-extra');
@@ -1221,126 +1221,120 @@ async function runInstagramTask(reelUrl, viewNumber, watchTime) {
 
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 180000, // Timeout protection
+            protocolTimeout: 240000, // Long timeout for slow proxies/videos
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--autoplay-policy=no-user-gesture-required'
+                '--disable-gpu',
+                '--autoplay-policy=no-user-gesture-required' // Auto-play video
             ]
         });
 
         const page = await browser.newPage();
         
-        // Browser Window Size
-        await page.setViewport({ width: 400, height: 800 }); // Mobile view size better for Reels
+        // Mobile Viewport for better Reels compatibility
+        await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
         
-        // Random User Agent
+        // Randomized User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[INSTA #${viewNumber}] Browser Open: Loading Reel...`);
+        console.log(`\n[VIEW #${viewNumber}] Target: ${videoUrl}`);
         
-        // 1. Reel Link Load Karna
-        await page.goto(reelUrl, { 
+        // 1. Load Video Link (Referrer Google se dikhayenge for organic look)
+        await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000 
         });
 
-        // 2. Login/Cookie Popup Handle Karna
+        // 2. Handle Login/Cookie Overlays (Bypass Popups)
         try {
-            await new Promise(r => setTimeout(r, 4000));
+            await new Promise(r => setTimeout(r, 5000)); // Wait for overlays
             await page.evaluate(() => {
-                const selectors = [
-                    'button._a9--._a9_1', // "Not Now" button for login popup
-                    'button[tabindex="0"]', // General buttons
-                    'div[role="dialog"] button' // Dialog buttons
+                const closeSelectors = [
+                    'button._a9--._a9_1', 'button[tabindex="0"]', 
+                    '[role="dialog"] button', 'svg[aria-label="Close"]',
+                    '.x9f619 .x1n2onr6' 
                 ];
-                selectors.forEach(s => {
-                    const btn = document.querySelector(s);
-                    if (btn && (btn.innerText.includes('Not Now') || btn.innerText.includes('Decline'))) {
-                        btn.click();
+                closeSelectors.forEach(s => {
+                    const el = document.querySelector(s);
+                    if (el && (el.innerText.includes('Not Now') || el.innerText.includes('Close'))) {
+                        el.click();
                     }
                 });
             });
-        } catch (e) { console.log("Popup skip."); }
+        } catch (e) { console.log("[INFO] No popup found."); }
 
-        // 3. Play Video & Unmute
+        // 3. Play & Unmute Video
         await page.evaluate(async () => {
             const video = document.querySelector('video');
             if (video) {
                 video.muted = false;
-                video.volume = 1.0;
                 video.play();
+                video.currentTime = 0;
             }
         });
 
-        // 4. Stay Duration (Frontend Time)
+        // 4. Stay Duration (Watch Time)
         const staySeconds = parseInt(watchTime) || 15;
-        console.log(`[WATCHING] Reel playing for ${staySeconds}s...`);
-        
-        // Human-like scroll thoda sa upar niche
-        await page.mouse.wheel({ deltaY: 100 });
+        console.log(`[WATCHING] Playing for ${staySeconds}s...`);
+
+        // Natural Interaction: Thoda scroll aur mouse move
+        await page.mouse.wheel({ deltaY: 200 });
+        await new Promise(r => setTimeout(r, 2000));
+        await page.mouse.wheel({ deltaY: -100 });
+
+        // Actual Watch Time Wait
         await new Promise(r => setTimeout(r, staySeconds * 1000));
 
-        console.log(`[SUCCESS] View #${viewNumber} Completed!`);
+        console.log(`[SUCCESS] View #${viewNumber} Completed. ✅`);
 
     } catch (error) {
         console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            console.log(`[BROWSER] Closing...`);
+            // Close all pages before closing browser to save RAM
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
+            console.log(`[BROWSER] Closed. RAM Cleared.`);
         }
     }
 }
 
-// --- INSTAGRAM API ENDPOINT ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body; // Yahan frontend se reel link aayega
-    
-    if (!video_url) return res.status(400).json({ success: false, message: "Reel URL is missing!" });
-
-    // Response turant bhej do taaki frontend hang na ho
-    res.status(200).json({ 
-        success: true, 
-        message: `Instagram Engine Started! Target: ${views_count} views.` 
-    });
-
-    // 1-by-1 Worker: Ek khatam hoga tabhi dusra khulega
-    (async () => {
-        for (let i = 1; i <= parseInt(views_count); i++) {
-            await runInstagramTask(video_url, i, watch_time);
-            
-            // 5 second ka break browser sessions ke beech mein
-            console.log(`[NEXT] Waiting 5s for next session...`);
-            await new Promise(r => setTimeout(r, 5000));
-        }
-        console.log("--- ALL INSTA VIEWS FINISHED ---");
-    })();
-});
-                
-
-
-
-// --- API ENDPOINT ---
+// --- UPDATED API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     
-    // Immediate Response
-    res.status(200).json({ success: true, message: "Engine Started! Hits will appear soon." });
+    if (!video_url || !views_count) {
+        return res.status(400).json({ success: false, message: "URL and Views Count required!" });
+    }
 
-    // Worker Loop
+    // Immediate Response to Frontend
+    res.status(200).json({ 
+        success: true, 
+        message: `Engine Started! 1-by-1 processing for ${views_count} views.` 
+    });
+
+    // Background Worker (Sequential execution to prevent Render crash)
     (async () => {
-        for (let i = 1; i <= views_count; i++) {
-            await runOrganicYoutubeTask(video_url, i, watch_time);
+        const total = parseInt(views_count);
+        console.log(`--- SOCIAL MEDIA ENGINE STARTING (Total: ${total}) ---`);
+        
+        for (let i = 1; i <= total; i++) {
+            // "await" ensure karega ki jab tak ek browser close na ho, dusra na khule
+            await runSocialMediaTask(video_url, i, watch_time);
             
-            // Render par 15s ka gap zaroori hai crash se bachne ke liye
-            console.log(`[REST] 15s cooling...`);
-            await new Promise(r => setTimeout(r, 15000));
+            // Render cooling period (Anti-detect gap)
+            if (i < total) {
+                const gap = 10000; // 10 seconds gap
+                console.log(`[COOLING] Waiting ${gap/1000}s for system stability...`);
+                await new Promise(r => setTimeout(r, gap));
+            }
         }
+        console.log("--- ALL SESSIONS COMPLETED SUCCESSFULLY ---");
     })();
 });
-
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
