@@ -1208,7 +1208,6 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
