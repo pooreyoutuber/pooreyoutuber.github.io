@@ -1220,62 +1220,70 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
-                '--use-gl=swiftshader', // Rendering fix for Cloud
-                '--disable-features=IsolateOrigins,site-per-process'
+                '--disable-web-security',
+                '--autoplay-policy=no-user-gesture-required',
+                '--disable-features=IsolateOrigins,site-per-process',
+                '--use-gl=swiftshader' // Render/Cloud par rendering ke liye zaroori
             ]
         });
 
         const page = await browser.newPage();
+        
+        // Desktop UserAgent use karein taaki player stable rahe
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36');
+        await page.setViewport({ width: 1280, height: 720 });
 
-        // --- MOBILE EMULATION (Isse YouTube ka light version load hoga) ---
-        // Ye signals YouTube Studio ko turant hit bhejte hain
-        await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
-        await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+        console.log(`[VIEW #${viewNumber}] Loading: ${videoUrl}`);
 
-        console.log(`[VIEW #${viewNumber}] Target: ${videoUrl}`);
-
-        // Referer ko Google Mobile banayein
-        await page.setExtraHTTPHeaders({
-            'referer': 'https://m.youtube.com/',
-            'accept-language': 'en-US,en;q=0.9'
-        });
-
-        // 1. Direct Video Page par jana
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. Mobile Play Button Bypass
-        // Mobile par autoplay aksar block hota hai, isliye click zaroori hai
-        try {
-            await page.waitForSelector('button.ytp-large-play-button', { timeout: 10000 });
-            await page.click('button.ytp-large-play-button');
-            console.log("Mobile Play Button Clicked.");
-        } catch (e) {
-            // Agar button nahi mila toh screen ke beech mein click karein
-            await page.mouse.click(200, 400);
-        }
-
-        // 3. Studio Signal Trigger (Force Start)
-        await page.evaluate(() => {
-            const video = document.querySelector('video');
-            if (video) {
-                video.muted = false;
-                video.volume = 1;
-                video.play();
+        // --- HARD CORE PLAY LOGIC ---
+        await page.evaluate(async () => {
+            const v = document.querySelector('video');
+            if (v) {
+                v.muted = true; // Chrome cloud par sirf muted video auto-play hone deta hai
+                v.play();
+                
+                // Ad bypass logic (agar ad ho toh)
+                const skipBtn = document.querySelector('.ytp-ad-skip-button');
+                if(skipBtn) skipBtn.click();
             }
         });
 
-        // 4. Watch Loop
+        // Thoda wait karein taaki buffer ho sake
+        await new Promise(r => setTimeout(r, 5000));
+
         const staySeconds = parseInt(watchTime) || 60;
         const endTime = Date.now() + (staySeconds * 1000);
 
         while (Date.now() < endTime) {
-            // Mobile Swipe Action (Human behavior)
-            await page.touchscreen.tap(200, 400); 
-            await new Promise(r => setTimeout(r, 10000));
+            // 1. Force Play & Speed Check
+            const stats = await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (v) {
+                    if (v.paused) v.play(); // Agar paused hai toh play karo
+                    return { 
+                        time: v.currentTime, 
+                        duration: v.duration,
+                        paused: v.paused 
+                    };
+                }
+                return { time: 0, paused: true };
+            });
+
+            console.log(`[VIEW #${viewNumber}] Current Watch: ${Math.floor(stats.time)}s | Playing: ${!stats.paused}`);
+
+            // 2. Agar 0s par stuck hai, toh 'K' key press karo (YouTube Play/Pause shortcut)
+            if (stats.time === 0) {
+                await page.keyboard.press('k');
+                // Random click on video player
+                await page.mouse.click(640, 360);
+            }
+
+            // 3. Human activity
+            await page.evaluate(() => window.scrollBy(0, 50));
             
-            // Random check if video is playing
-            const currentTime = await page.evaluate(() => document.querySelector('video').currentTime);
-            console.log(`[VIEW #${viewNumber}] Current Watch: ${Math.floor(currentTime)}s`);
+            await new Promise(r => setTimeout(r, 10000)); // 10s ka gap
         }
 
         console.log(`[SUCCESS] View #${viewNumber} Signal Sent.`);
