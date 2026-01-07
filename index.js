@@ -1311,6 +1311,33 @@ async function runYouTubeDesktopTask(videoUrl, viewNumber, watchTime) {
         }
     }
 }
+// --- API ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    if (!video_url) return res.status(400).json({ success: false, message: "URL missing!" });
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Desktop Engine Started: ${views_count} views (1-by-1).` 
+    });
+
+    // Main Worker Loop (Ek-ek karke chalayega)
+    (async () => {
+        const total = parseInt(views_count) || 1;
+        for (let i = 1; i <= total; i++) {
+            // "await" ensure karega ki pehle wala band ho tabhi naya khule
+            await runYouTubeDesktopTask(video_url, i, watch_time);
+            
+            // 10 second ka rest Render ko thanda karne ke liye
+            if (i < total) {
+                console.log(`[WAIT] 10s gap before next browser...`);
+                await new Promise(r => setTimeout(r, 10000));
+            }
+        }
+        console.log("--- TASK FINISHED ---");
+    })();
+});
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
