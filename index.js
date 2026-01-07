@@ -1208,6 +1208,7 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
+
 puppeteer.use(StealthPlugin());
 
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
@@ -1219,70 +1220,65 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
-                '--disable-dev-shm-usage',
-                '--window-size=1280,720',
-                '--mute-audio' // Cloud environment ke liye zaroori hai
+                '--use-gl=swiftshader', // Rendering fix for Cloud
+                '--disable-features=IsolateOrigins,site-per-process'
             ]
         });
 
         const page = await browser.newPage();
 
-        // 1. Emulate Real Browser
-        await page.setViewport({ width: 1280, height: 720 });
-        const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
-        await page.setUserAgent(userAgent);
+        // --- MOBILE EMULATION (Isse YouTube ka light version load hoga) ---
+        // Ye signals YouTube Studio ko turant hit bhejte hain
+        await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
+        await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
 
-        console.log(`[VIEW #${viewNumber}] Navigating to Video...`);
+        console.log(`[VIEW #${viewNumber}] Target: ${videoUrl}`);
 
-        // 2. Go to Video with Referer
-        await page.goto(videoUrl, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000 
+        // Referer ko Google Mobile banayein
+        await page.setExtraHTTPHeaders({
+            'referer': 'https://m.youtube.com/',
+            'accept-language': 'en-US,en;q=0.9'
         });
 
-        // 3. Force Play & Unmute (The Most Important Part)
-        // YouTube studio hit tabhi count karta hai jab video state 'PLAYING' ho
-        await page.evaluate(async () => {
-            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+        // 1. Direct Video Page par jana
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // 2. Mobile Play Button Bypass
+        // Mobile par autoplay aksar block hota hai, isliye click zaroori hai
+        try {
+            await page.waitForSelector('button.ytp-large-play-button', { timeout: 10000 });
+            await page.click('button.ytp-large-play-button');
+            console.log("Mobile Play Button Clicked.");
+        } catch (e) {
+            // Agar button nahi mila toh screen ke beech mein click karein
+            await page.mouse.click(200, 400);
+        }
+
+        // 3. Studio Signal Trigger (Force Start)
+        await page.evaluate(() => {
             const video = document.querySelector('video');
             if (video) {
-                video.muted = true; // Autoplay bypass ke liye
-                video.play();
-                
-                // Randomly volume 0.1 tak badhana (Signal trigger karne ke liye)
-                await sleep(2000);
-                video.volume = 0.5;
                 video.muted = false;
+                video.volume = 1;
+                video.play();
             }
         });
 
-        // 4. Human-Like Activity Loop
+        // 4. Watch Loop
         const staySeconds = parseInt(watchTime) || 60;
         const endTime = Date.now() + (staySeconds * 1000);
 
-        console.log(`[RUNNING] Watching for ${staySeconds} seconds...`);
-
         while (Date.now() < endTime) {
-            // Check if video is actually playing
-            const isPlaying = await page.evaluate(() => {
-                const v = document.querySelector('video');
-                return v && !v.paused && !v.ended;
-            });
-
-            if (!isPlaying) {
-                await page.keyboard.press('k'); // Force play shortcut
-            }
-
-            // Random scrolling for engagement
-            await page.evaluate(() => {
-                window.scrollBy(0, Math.floor(Math.random() * 200));
-            });
-
-            // 10 second wait before next check
+            // Mobile Swipe Action (Human behavior)
+            await page.touchscreen.tap(200, 400); 
             await new Promise(r => setTimeout(r, 10000));
+            
+            // Random check if video is playing
+            const currentTime = await page.evaluate(() => document.querySelector('video').currentTime);
+            console.log(`[VIEW #${viewNumber}] Current Watch: ${Math.floor(currentTime)}s`);
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        console.log(`[SUCCESS] View #${viewNumber} Signal Sent.`);
 
     } catch (error) {
         console.error(`[ERROR] #${viewNumber}: ${error.message}`);
@@ -1290,33 +1286,6 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         if (browser) await browser.close();
     }
 }
-
-// --- API ENDPOINT ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    if (!video_url) return res.status(400).json({ success: false, message: "URL missing!" });
-
-    // Response turant bhej rahe hain taaki frontend timeout na ho
-    res.status(200).json({ 
-        success: true, 
-        message: `Processing ${views_count} views one-by-one on Render.` 
-    });
-
-    // Worker Loop: 1 by 1 execution to prevent crash
-    (async () => {
-        for (let i = 1; i <= parseInt(views_count); i++) {
-            console.log(`--- Starting Session ${i} ---`);
-            await runOrganicYoutubeTask(video_url, i, watch_time);
-            
-            // Random Gap between views (Very important for Studio)
-            const gap = Math.floor(Math.random() * 20000) + 10000; // 10-30s gap
-            console.log(`Gap for ${gap/1000}s...`);
-            await new Promise(r => setTimeout(r, gap));
-        }
-    })();
-});
-
 
 
 // --- API ENDPOINT ---
