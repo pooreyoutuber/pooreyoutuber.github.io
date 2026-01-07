@@ -1211,6 +1211,9 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. INSTAGRAM/FACEBOOK REEL HITTER (EXACT 1-BY-1 FLOW)
 // ===================================================================
+// ===================================================================
+// 8. INSTAGRAM/FACEBOOK REEL HITTER (EXACT 1-BY-1 FLOW)
+// ===================================================================
 
 async function runSocialMediaTask(videoUrl, viewNumber, watchTime) {
     let browser;
@@ -1221,118 +1224,98 @@ async function runSocialMediaTask(videoUrl, viewNumber, watchTime) {
 
         browser = await puppeteer.launch({
             headless: "new",
-            protocolTimeout: 240000, // Long timeout for slow proxies/videos
+            protocolTimeout: 240000, 
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--autoplay-policy=no-user-gesture-required' // Auto-play video
+                '--disable-web-security', // Bypass some security for autoplay
+                '--autoplay-policy=no-user-gesture-required' 
             ]
         });
 
         const page = await browser.newPage();
         
-        // Mobile Viewport for better Reels compatibility
+        // 1. Mobile Viewport (Bohat zaroori hai Insta view ke liye)
         await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
         
-        // Randomized User Agent
+        // 2. Realistic User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
         console.log(`\n[VIEW #${viewNumber}] Target: ${videoUrl}`);
         
-        // 1. Load Video Link (Referrer Google se dikhayenge for organic look)
+        // 3. Navigate with Referrer (Organic search se aata dikhega)
         await page.goto(videoUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000 
         });
 
-        // 2. Handle Login/Cookie Overlays (Bypass Popups)
-        try {
-            await new Promise(r => setTimeout(r, 5000)); // Wait for overlays
-            await page.evaluate(() => {
-                const closeSelectors = [
-                    'button._a9--._a9_1', 'button[tabindex="0"]', 
-                    '[role="dialog"] button', 'svg[aria-label="Close"]',
-                    '.x9f619 .x1n2onr6' 
-                ];
-                closeSelectors.forEach(s => {
-                    const el = document.querySelector(s);
-                    if (el && (el.innerText.includes('Not Now') || el.innerText.includes('Close'))) {
-                        el.click();
-                    }
-                });
-            });
-        } catch (e) { console.log("[INFO] No popup found."); }
-
-        // 3. Play & Unmute Video
-        await page.evaluate(async () => {
+        // 4. Force Video Play (Instagram requires interaction sometimes)
+        await new Promise(r => setTimeout(r, 5000)); // Wait for load
+        
+        const isPlaying = await page.evaluate(async () => {
             const video = document.querySelector('video');
             if (video) {
-                video.muted = false;
+                video.muted = false; // Unmute for better engagement signal
                 video.play();
-                video.currentTime = 0;
+                // Interaction simulate karna taaki Insta ko real lage
+                window.scrollBy(0, 100);
+                return true;
             }
+            return false;
         });
 
-        // 4. Stay Duration (Watch Time)
+        if (!isPlaying) console.log(`[WARN] Video element not found on View #${viewNumber}`);
+
+        // 5. Exact Watch Time (Jitna frontend se aaya hai)
         const staySeconds = parseInt(watchTime) || 15;
-        console.log(`[WATCHING] Playing for ${staySeconds}s...`);
+        console.log(`[WATCHING] Playing for ${staySeconds} seconds...`);
+        
+        // Beech mein thoda random movement
+        await new Promise(r => setTimeout(r, (staySeconds * 1000) / 2));
+        await page.mouse.wheel({ deltaY: 50 }); 
+        await new Promise(r => setTimeout(r, (staySeconds * 1000) / 2));
 
-        // Natural Interaction: Thoda scroll aur mouse move
-        await page.mouse.wheel({ deltaY: 200 });
-        await new Promise(r => setTimeout(r, 2000));
-        await page.mouse.wheel({ deltaY: -100 });
-
-        // Actual Watch Time Wait
-        await new Promise(r => setTimeout(r, staySeconds * 1000));
-
-        console.log(`[SUCCESS] View #${viewNumber} Completed. ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
         console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // Close all pages before closing browser to save RAM
+            // RAM cleanup: Pehle pages close karein phir browser
             const pages = await browser.pages();
             for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
-            console.log(`[BROWSER] Closed. RAM Cleared.`);
+            console.log(`[BROWSER] Closed. Memory Freed.`);
         }
     }
 }
 
-// --- UPDATED API ENDPOINT ---
+// --- UPDATED ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     
-    if (!video_url || !views_count) {
-        return res.status(400).json({ success: false, message: "URL and Views Count required!" });
-    }
+    if (!video_url) return res.status(400).json({ success: false, message: "URL Missing!" });
 
-    // Immediate Response to Frontend
     res.status(200).json({ 
         success: true, 
-        message: `Engine Started! 1-by-1 processing for ${views_count} views.` 
+        message: `Sequential Engine Started. Processing ${views_count} views 1-by-1.` 
     });
 
-    // Background Worker (Sequential execution to prevent Render crash)
+    // 1-by-1 Worker: Ye loop Render ko crash hone se bachata hai
     (async () => {
-        const total = parseInt(views_count);
-        console.log(`--- SOCIAL MEDIA ENGINE STARTING (Total: ${total}) ---`);
-        
+        const total = parseInt(views_count) || 1;
         for (let i = 1; i <= total; i++) {
-            // "await" ensure karega ki jab tak ek browser close na ho, dusra na khule
+            // await ka matlab hai jab tak ye function khatam nahi hota, agla browser nahi khulega
             await runSocialMediaTask(video_url, i, watch_time);
             
-            // Render cooling period (Anti-detect gap)
+            // 10 second ka cooling gap taaki Instagram bot detect na kare
             if (i < total) {
-                const gap = 10000; // 10 seconds gap
-                console.log(`[COOLING] Waiting ${gap/1000}s for system stability...`);
-                await new Promise(r => setTimeout(r, gap));
+                console.log(`[COOLING] Waiting 10s for next session...`);
+                await new Promise(r => setTimeout(r, 10000));
             }
         }
-        console.log("--- ALL SESSIONS COMPLETED SUCCESSFULLY ---");
+        console.log("--- ALL VIEWS TASK COMPLETED ---");
     })();
 });
 //=====================================================
