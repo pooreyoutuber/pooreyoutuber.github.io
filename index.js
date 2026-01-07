@@ -1273,27 +1273,22 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     }
 }
 
-// --- YOUTUBE API ENDPOINT ---
-app.post('/api/youtube-boost', async (req, res) => {
+// --- API ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     
-    if (!video_url) return res.status(400).json({ success: false, message: "YouTube Link nahi mila!" });
+    // Immediate Response
+    res.status(200).json({ success: true, message: "Engine Started! Hits will appear soon." });
 
-    res.status(200).json({ 
-        success: true, 
-        message: `YouTube Engine Start! ${views_count} views queue mein hain.` 
-    });
-
-    // Worker Loop (One by One execution)
+    // Worker Loop
     (async () => {
-        for (let i = 1; i <= parseInt(views_count); i++) {
+        for (let i = 1; i <= views_count; i++) {
             await runOrganicYoutubeTask(video_url, i, watch_time);
             
-            // Render/Server crash se bachne ke liye 10s ka gap
-            console.log(`[WAIT] 10 seconds break...`);
-            await new Promise(r => setTimeout(r, 10000));
+            // Render par 15s ka gap zaroori hai crash se bachne ke liye
+            console.log(`[REST] 15s cooling...`);
+            await new Promise(r => setTimeout(r, 15000));
         }
-        console.log("--- ALL YOUTUBE SESSIONS COMPLETED ---");
     })();
 });
 
