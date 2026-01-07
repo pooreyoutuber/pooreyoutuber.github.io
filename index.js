@@ -1208,76 +1208,83 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
-// ===================================================================
-// 8. YOUTUBE ORGANIC HITTER (FIXED FOR STUDIO COUNT)
-// ===================================================================
-// ===================================================================
-// 8. YOUTUBE STUDIO HITTER (MAX COUNT VERSION)
-// ===================================================================
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
-        const puppeteer = require('puppeteer-extra');
-        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-        puppeteer.use(StealthPlugin());
-
         browser = await puppeteer.launch({
-            // Agar aap desktop pe chala rahe hain toh 'false' karein view dekhne ke liye
-            headless: "new", 
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled',
                 '--disable-dev-shm-usage',
                 '--window-size=1280,720',
-                '--autoplay-policy=no-user-gesture-required'
+                '--mute-audio' // Cloud environment ke liye zaroori hai
             ]
         });
 
         const page = await browser.newPage();
-        
-        // --- 1. HUMAN IDENTITY ---
-        // Random User Agent har baar naya view dikhane ke liye
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-        
-        // YouTube ko ye dikhana ki hum Google Search se aaye hain
-        await page.setExtraHTTPHeaders({
-            'Referer': 'https://www.google.com/'
+
+        // 1. Emulate Real Browser
+        await page.setViewport({ width: 1280, height: 720 });
+        const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
+        await page.setUserAgent(userAgent);
+
+        console.log(`[VIEW #${viewNumber}] Navigating to Video...`);
+
+        // 2. Go to Video with Referer
+        await page.goto(videoUrl, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
         });
 
-        console.log(`[VIEW #${viewNumber}] Loading YouTube...`);
+        // 3. Force Play & Unmute (The Most Important Part)
+        // YouTube studio hit tabhi count karta hai jab video state 'PLAYING' ho
+        await page.evaluate(async () => {
+            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+            const video = document.querySelector('video');
+            if (video) {
+                video.muted = true; // Autoplay bypass ke liye
+                video.play();
+                
+                // Randomly volume 0.1 tak badhana (Signal trigger karne ke liye)
+                await sleep(2000);
+                video.volume = 0.5;
+                video.muted = false;
+            }
+        });
 
-        // --- 2. THE VISIT ---
-        // 'networkidle0' se ensure hota hai ki video poori tarah load ho jaye
-        await page.goto(videoUrl, { waitUntil: 'networkidle0', timeout: 90000 });
-
-        // --- 3. THE PLAY (Crucial for Studio) ---
-        // Kabhi kabhi YouTube auto-play block karta hai, isliye manual click
-        try {
-            await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
-            await page.click('.ytp-play-button');
-            console.log("Video Play Button Clicked.");
-        } catch (e) {
-            // Agar pehle se chal raha ho toh skip
-        }
-
-        // --- 4. HUMAN ACTIVITY LOOP ---
-        const staySeconds = parseInt(watchTime) || 60; // Kam se kam 60s rakhein count ke liye
+        // 4. Human-Like Activity Loop
+        const staySeconds = parseInt(watchTime) || 60;
         const endTime = Date.now() + (staySeconds * 1000);
 
+        console.log(`[RUNNING] Watching for ${staySeconds} seconds...`);
+
         while (Date.now() < endTime) {
-            // Random Scroll: Screen ko upar niche karna
-            const scrollAmt = Math.floor(Math.random() * 300);
-            await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
-            
-            // Mouse Movement: Screen par mouse hilana
-            await page.mouse.move(Math.random() * 800, Math.random() * 600);
-            
-            // 5-10 second ka wait har action ke beech
-            await new Promise(r => setTimeout(r, Math.floor(Math.random() * 5000) + 5000));
+            // Check if video is actually playing
+            const isPlaying = await page.evaluate(() => {
+                const v = document.querySelector('video');
+                return v && !v.paused && !v.ended;
+            });
+
+            if (!isPlaying) {
+                await page.keyboard.press('k'); // Force play shortcut
+            }
+
+            // Random scrolling for engagement
+            await page.evaluate(() => {
+                window.scrollBy(0, Math.floor(Math.random() * 200));
+            });
+
+            // 10 second wait before next check
+            await new Promise(r => setTimeout(r, 10000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} registered in browser session.`);
+        console.log(`[SUCCESS] View #${viewNumber} completed.`);
 
     } catch (error) {
         console.error(`[ERROR] #${viewNumber}: ${error.message}`);
@@ -1286,26 +1293,28 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     }
 }
 
-// --- YOUTUBE API ENDPOINT ---
+// --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     const { video_url, views_count, watch_time } = req.body;
     
-    if (!video_url) return res.status(400).json({ success: false, message: "Link missing!" });
+    if (!video_url) return res.status(400).json({ success: false, message: "URL missing!" });
 
+    // Response turant bhej rahe hain taaki frontend timeout na ho
     res.status(200).json({ 
         success: true, 
-        message: "Studio Hitter Mode Active! Views processing one-by-one." 
+        message: `Processing ${views_count} views one-by-one on Render.` 
     });
 
-    // Background process
+    // Worker Loop: 1 by 1 execution to prevent crash
     (async () => {
         for (let i = 1; i <= parseInt(views_count); i++) {
+            console.log(`--- Starting Session ${i} ---`);
             await runOrganicYoutubeTask(video_url, i, watch_time);
             
-            // Crash se bachne aur IP stability ke liye break
-            const pause = Math.floor(Math.random() * 10000) + 15000; // 15-25 seconds
-            console.log(`Waiting ${pause/1000}s for next human session...`);
-            await new Promise(r => setTimeout(r, pause));
+            // Random Gap between views (Very important for Studio)
+            const gap = Math.floor(Math.random() * 20000) + 10000; // 10-30s gap
+            console.log(`Gap for ${gap/1000}s...`);
+            await new Promise(r => setTimeout(r, gap));
         }
     })();
 });
