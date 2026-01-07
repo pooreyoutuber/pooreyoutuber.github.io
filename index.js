@@ -1209,13 +1209,10 @@ app.post('/popup', async (req, res) => {
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
 // ===================================================================
-// 8. YOUTUBE DESKTOP ENGINE (HEAVY-DUTY & AUTO-PLAY)
-// ===================================================================
-// ===================================================================
-// 8. YOUTUBE DESKTOP ENGINE (HEAVY-DUTY & AUTO-PLAY)
+// 8. YOUTUBE ORGANIC HITTER (FIXED FOR STUDIO COUNT)
 // ===================================================================
 
-async function runYouTubeDesktopTask(videoUrl, viewNumber, watchTime) {
+async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
         const puppeteer = require('puppeteer-extra');
@@ -1228,89 +1225,79 @@ async function runYouTubeDesktopTask(videoUrl, viewNumber, watchTime) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--window-size=1920,1080',
-                '--autoplay-policy=no-user-gesture-required' // Bypass play block
+                '--autoplay-policy=no-user-gesture-required',
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
+        // Screen size set karein taaki real browser lage
+        await page.setViewport({ width: 1280, height: 720 });
+        await page.setUserAgent(USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)]);
+
+        console.log(`[YT-BOOST #${viewNumber}] Link Load Ho Raha Hai: ${videoUrl}`);
         
-        // Timeout ko 120s (2 min) kar diya taaki slow load par error na aaye
-        page.setDefaultNavigationTimeout(120000); 
+        // 1. YouTube Video Page Open Karna
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 90000 });
 
-        await page.setViewport({ width: 1920, height: 1080 });
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
-        console.log(`\n[VIEW #${viewNumber}] Starting session...`);
-
-        // 1. Google Referral (Traffic source organic banane ke liye)
+        // 2. Play Button Click (Zaroori logic)
         try {
-            await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
-            await new Promise(r => setTimeout(r, 2000));
-        } catch (e) { console.log("[INFO] Google load failed, direct jumping to video."); }
-
-        // 2. Video Link par jana
-        console.log(`[NAVIGATING] Opening Video: ${videoUrl}`);
-        await page.goto(videoUrl, { waitUntil: 'networkidle2' });
-
-        // 3. Cookie/Consent Popup hatana (Agar aaye to)
-        try {
-            await page.evaluate(() => {
-                const buttons = Array.from(document.querySelectorAll('button'));
-                const consentBtn = buttons.find(b => b.innerText.includes('Accept all') || b.innerText.includes('I agree'));
-                if (consentBtn) consentBtn.click();
-            });
-        } catch (e) {}
-
-        await new Promise(r => setTimeout(r, 10000)); // Page stability ke liye wait
-
-        // 4. 🔥 TRIPLE-PLAYBACK CHECK (Guaranteed Play)
-        const isPlaying = await page.evaluate(async () => {
-            const video = document.querySelector('video');
-            if (!video) return false;
-
-            video.muted = false; // Unmute for engagement
-            video.volume = 0.5;
-
-            // Method A: Click play button
-            const playBtn = document.querySelector('.ytp-play-button');
-            if (video.paused && playBtn) playBtn.click();
-
-            // Method B: Force JS Play
-            try { await video.play(); } catch(e) {}
-
-            return !video.paused;
-        });
-
-        if (!isPlaying) {
-            console.log(`[RETRY] Manual trigger: Keyboard shortcut 'K' and Center Click...`);
-            await page.keyboard.press('k'); // YouTube Play/Pause shortcut
-            await new Promise(r => setTimeout(r, 2000));
-            await page.mouse.click(960, 540); // Screen ke center mein click
-        } else {
-            console.log(`[CONFIRMED] Video play ho rahi hai! ✅`);
+            const playBtn = await page.$('.ytp-play-button');
+            if (playBtn) await playBtn.click();
+        } catch (e) {
+            console.log("Auto-play already active.");
         }
 
-        // 5. Watch Time (Jitna front se aaya he)
-        const duration = parseInt(watch_time) || 30;
-        console.log(`[WATCHING] Staying for ${duration}s...`);
-        
-        // Random activity taaki bot detect na ho
-        await page.mouse.move(100, 100);
-        await new Promise(r => setTimeout(r, duration * 1000));
+        // 3. REALISTIC BEHAVIOR (Studio mein view count hone ke liye zaroori)
+        const staySeconds = parseInt(watchTime) || 30; 
+        const startTime = Date.now();
 
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        console.log(`[WATCHING] Video play ho raha hai ${staySeconds} seconds ke liye...`);
+
+        while ((Date.now() - startTime) < (staySeconds * 1000)) {
+            // Mouse move karna
+            await page.mouse.move(randomInt(100, 600), randomInt(100, 600));
+            // Thoda scroll up-down karna
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 150)));
+            await new Promise(r => setTimeout(r, 5000));
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} Khatam Hua. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[YT-ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close();
-            console.log(`[SYSTEM] Browser Closed. Ready for next.`);
+            await browser.close().catch(() => {});
         }
     }
 }
-// --- API ENDPOINT ---
+
+// --- YOUTUBE API ENDPOINT ---
+app.post('/api/youtube-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    if (!video_url) return res.status(400).json({ success: false, message: "YouTube Link nahi mila!" });
+
+    res.status(200).json({ 
+        success: true, 
+        message: `YouTube Engine Start! ${views_count} views queue mein hain.` 
+    });
+
+    // Worker Loop (One by One execution)
+    (async () => {
+        for (let i = 1; i <= parseInt(views_count); i++) {
+            await runOrganicYoutubeTask(video_url, i, watch_time);
+            
+            // Render/Server crash se bachne ke liye 10s ka gap
+            console.log(`[WAIT] 10 seconds break...`);
+            await new Promise(r => setTimeout(r, 10000));
+        }
+        console.log("--- ALL YOUTUBE SESSIONS COMPLETED ---");
+    })();
+});
+
+ 
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
