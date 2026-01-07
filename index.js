@@ -1208,55 +1208,111 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
-// --- YOUTUBE CONSENT POPUP HANDLER ---
-async function handleYouTubeConsent(page) {
+puppeteer.use(StealthPlugin());
+
+async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
+    let browser;
     try {
-        // Wait for the popup to appear (00:00:16 in your video)
-        await page.waitForSelector('form[action*="consent.youtube.com"] button, button[aria-label*="Accept"]', { timeout: 10000 });
-        
-        console.log("YouTube Consent Popup detected. Clicking 'Accept All'...");
-        
-        // Isme hum 'Accept all' button ko dhund kar click karenge (00:00:22 in your video)
-        await page.evaluate(() => {
-            const buttons = Array.from(document.querySelectorAll('button'));
-            const acceptBtn = buttons.find(btn => 
-                btn.innerText.includes('Accept all') || 
-                btn.innerText.includes('I agree') ||
-                btn.innerText.includes('Sweekar karein')
-            );
-            if (acceptBtn) acceptBtn.click();
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled',
+                '--disable-dev-shm-usage',
+                '--accent-color=#ff0000',
+                '--use-gl=swiftshader',
+                '--disable-gpu'
+            ]
         });
+
+        const page = await browser.newPage();
         
-        // Wait for the page to redirect to the actual video (00:00:24 in your video)
-        await page.waitForNavigation({ waitUntil: 'networkidle2' });
-        console.log("Consent accepted. Video loading...");
-    } catch (e) {
-        // Agar popup nahi aaya toh ignore karein
-        console.log("No consent popup found, proceeding directly.");
+        // 1. MOBILE EMULATION (Render par fast chalta hai aur popup handle karna asaan hota hai)
+        await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
+        await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+
+        console.log(`[VIEW #${viewNumber}] Navigating to Video...`);
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // 2. HANDLE POPUP (Jo aapke video mein 00:16 par hai)
+        try {
+            // Popup ke load hone ka thoda wait karein
+            await new Promise(r => setTimeout(r, 3000)); 
+            
+            const popupHandled = await page.evaluate(() => {
+                const buttons = Array.from(document.querySelectorAll('button'));
+                // 'Accept all', 'I agree', ya 'Sweekar karein' dhundna
+                const acceptBtn = buttons.find(btn => 
+                    btn.innerText.includes('Accept all') || 
+                    btn.innerText.includes('I agree') || 
+                    btn.innerText.includes('Accept')
+                );
+
+                if (acceptBtn) {
+                    acceptBtn.scrollIntoView();
+                    acceptBtn.click();
+                    return true;
+                }
+                return false;
+            });
+
+            if (popupHandled) {
+                console.log("[POPUP] Consent Accepted Successfully.");
+                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 }).catch(() => {});
+            }
+        } catch (e) {
+            console.log("[POPUP] No popup found or already passed.");
+        }
+
+        // 3. PLAY VIDEO (Aapke video mein 00:30 par jo play button hai)
+        await page.evaluate(async () => {
+            const v = document.querySelector('video');
+            const playBtn = document.querySelector('.ytp-large-play-button') || document.querySelector('button[aria-label="Play"]');
+            
+            if (playBtn) playBtn.click();
+            if (v) {
+                v.muted = true;
+                // Render fix: Video ko 0.1s aage badhana taaki freeze khatam ho
+                v.currentTime = 0.5; 
+                await v.play();
+            }
+        });
+
+        // 4. WATCH TIME LOOP (Monitoring)
+        const staySeconds = parseInt(watchTime) || 60;
+        const endTime = Date.now() + (staySeconds * 1000);
+
+        while (Date.now() < endTime) {
+            const stats = await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (v) {
+                    if (v.paused) v.play();
+                    return { time: v.currentTime, paused: v.paused };
+                }
+                return { time: 0, paused: true };
+            });
+
+            console.log(`[VIEW #${viewNumber}] Time: ${Math.floor(stats.time)}s | Playing: ${!stats.paused}`);
+
+            // Agar 0s par stuck hai toh nudge karein
+            if (stats.time <= 0.5) {
+                await page.keyboard.press('k'); 
+                await page.mouse.click(200, 300);
+            }
+
+            await new Promise(r => setTimeout(r, 10000)); // 10s check gap
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} Signal Sent to Studio.`);
+
+    } catch (error) {
+        console.error(`[ERROR] #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) await browser.close();
     }
 }
 
-// --- MAIN TASK FUNCTION MEIN USE KAREIN ---
-async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
-    // ... (Your existing browser launch code)
-    
-    const page = await browser.newPage();
-    await page.goto(videoUrl, { waitUntil: 'networkidle2' });
-
-    // Yahan popup handler ko call karein
-    await handleYouTubeConsent(page);
-
-    // Consent ke baad video play logic (00:00:30 in your video)
-    await page.evaluate(() => {
-        const v = document.querySelector('video');
-        if (v) {
-            v.muted = true;
-            v.play();
-        }
-    });
-
-    // ... (Remaining watch time loop)
-}
 
 
 // --- API ENDPOINT ---
