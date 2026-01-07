@@ -1208,78 +1208,87 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
-puppeteer.use(StealthPlugin());
-
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
+        const puppeteer = require('puppeteer-extra');
+        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+        puppeteer.use(StealthPlugin());
+
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", 
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
                 '--disable-dev-shm-usage',
-                '--accent-color=#ff0000',
-                '--use-gl=swiftshader',
-                '--disable-gpu'
+                '--window-size=1280,720',
             ]
         });
 
         const page = await browser.newPage();
-        
-        // 1. MOBILE EMULATION (Render par fast chalta hai aur popup handle karna asaan hota hai)
-        await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
-        await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[VIEW #${viewNumber}] Navigating to Video...`);
+        // --- STEP 1: GOOGLE REFERRER ---
+        // Pehle Google par jana taaki referral link ban sake
+        console.log(`[VIEW #${viewNumber}] Starting via Google...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+
+        // --- STEP 2: PASTE LINK & NAVIGATE ---
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. HANDLE POPUP (Jo aapke video mein 00:16 par hai)
+        // --- STEP 3: HANDLE CONSENT POPUP (Scrolling logic) ---
         try {
-            // Popup ke load hone ka thoda wait karein
-            await new Promise(r => setTimeout(r, 3000)); 
-            
-            const popupHandled = await page.evaluate(() => {
+            await page.waitForSelector('form[action*="consent.youtube.com"]', { timeout: 8000 });
+            console.log("[POPUP] Terms detected. Handling...");
+
+            await page.evaluate(async () => {
+                const scrollDown = () => {
+                    return new Promise((resolve) => {
+                        let totalHeight = 0;
+                        let distance = 100;
+                        let timer = setInterval(() => {
+                            // Popup ke andar scroll karna
+                            const modal = document.querySelector('div[role="dialog"]') || window;
+                            modal.scrollBy(0, distance);
+                            totalHeight += distance;
+                            if(totalHeight >= 1000) { clearInterval(timer); resolve(); }
+                        }, 100);
+                    });
+                };
+                await scrollDown();
+
+                // Accept All button dhundna (Aapke video ke mutabiq)
                 const buttons = Array.from(document.querySelectorAll('button'));
-                // 'Accept all', 'I agree', ya 'Sweekar karein' dhundna
-                const acceptBtn = buttons.find(btn => 
-                    btn.innerText.includes('Accept all') || 
-                    btn.innerText.includes('I agree') || 
-                    btn.innerText.includes('Accept')
+                const acceptBtn = buttons.find(b => 
+                    b.innerText.includes('Accept all') || 
+                    b.innerText.includes('I agree') || 
+                    b.innerText.includes('Sweekar karein')
                 );
-
-                if (acceptBtn) {
-                    acceptBtn.scrollIntoView();
-                    acceptBtn.click();
-                    return true;
-                }
-                return false;
+                if (acceptBtn) acceptBtn.click();
             });
-
-            if (popupHandled) {
-                console.log("[POPUP] Consent Accepted Successfully.");
-                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 }).catch(() => {});
-            }
+            
+            // Redirect hone ka wait karein
+            await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {});
+            console.log("[POPUP] Accepted successfully.");
         } catch (e) {
-            console.log("[POPUP] No popup found or already passed.");
+            console.log("[POPUP] No popup found, moving to video.");
         }
 
-        // 3. PLAY VIDEO (Aapke video mein 00:30 par jo play button hai)
+        // --- STEP 4: PLAY VIDEO & QUALITY SET ---
         await page.evaluate(async () => {
             const v = document.querySelector('video');
-            const playBtn = document.querySelector('.ytp-large-play-button') || document.querySelector('button[aria-label="Play"]');
-            
-            if (playBtn) playBtn.click();
             if (v) {
                 v.muted = true;
-                // Render fix: Video ko 0.1s aage badhana taaki freeze khatam ho
-                v.currentTime = 0.5; 
-                await v.play();
+                v.play();
+                v.currentTime = 0.5; // Nudge to start
             }
+            // Play button click if needed
+            const bigBtn = document.querySelector('.ytp-large-play-button');
+            if (bigBtn) bigBtn.click();
         });
 
-        // 4. WATCH TIME LOOP (Monitoring)
+        // --- STEP 5: WATCH LOOP (Real-time tracking) ---
         const staySeconds = parseInt(watchTime) || 60;
         const endTime = Date.now() + (staySeconds * 1000);
 
@@ -1293,18 +1302,21 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
                 return { time: 0, paused: true };
             });
 
-            console.log(`[VIEW #${viewNumber}] Time: ${Math.floor(stats.time)}s | Playing: ${!stats.paused}`);
+            console.log(`[VIEW #${viewNumber}] Watch: ${Math.floor(stats.time)}s | Running: ${!stats.paused}`);
 
-            // Agar 0s par stuck hai toh nudge karein
-            if (stats.time <= 0.5) {
-                await page.keyboard.press('k'); 
-                await page.mouse.click(200, 300);
+            // Agar 0s par stuck hai toh button try karein
+            if (stats.time === 0) {
+                await page.keyboard.press('k');
+                await page.mouse.click(640, 360);
             }
 
-            await new Promise(r => setTimeout(r, 10000)); // 10s check gap
+            // Human behavior: thoda scroll up/down
+            await page.evaluate(() => window.scrollBy(0, Math.random() * 100));
+            
+            await new Promise(r => setTimeout(r, 10000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Signal Sent to Studio.`);
+        console.log(`[SUCCESS] View #${viewNumber} session complete.`);
 
     } catch (error) {
         console.error(`[ERROR] #${viewNumber}: ${error.message}`);
@@ -1312,7 +1324,6 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         if (browser) await browser.close();
     }
 }
-
 
 
 // --- API ENDPOINT ---
