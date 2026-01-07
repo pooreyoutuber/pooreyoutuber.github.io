@@ -1208,7 +1208,6 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
-
 puppeteer.use(StealthPlugin());
 
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
@@ -1221,72 +1220,75 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
                 '--disable-web-security',
-                '--autoplay-policy=no-user-gesture-required',
                 '--disable-features=IsolateOrigins,site-per-process',
-                '--use-gl=swiftshader' // Render/Cloud par rendering ke liye zaroori
+                // --- RENDER CLOUD SPECIAL FLAGS ---
+                '--disable-gpu', // GPU band karke software rendering force karein
+                '--use-gl=swiftshader',
+                '--autoplay-policy=no-user-gesture-required',
+                '--disable-software-rasterizer',
+                '--disable-dev-shm-usage'
             ]
         });
 
         const page = await browser.newPage();
+
+        // 1. Mobile Device Emulation (YouTube ka light player load hoga jo Render par fast chalta hai)
+        await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1');
+        await page.setViewport({ width: 375, height: 667, isMobile: true, hasTouch: true });
+
+        console.log(`[VIEW #${viewNumber}] Loading Mobile Player...`);
+
+        // 2. Load Video
+        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+        // 3. Force Interaction (Play button click)
+        await new Promise(r => setTimeout(r, 5000)); // Load hone ka wait
         
-        // Desktop UserAgent use karein taaki player stable rahe
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36');
-        await page.setViewport({ width: 1280, height: 720 });
-
-        console.log(`[VIEW #${viewNumber}] Loading: ${videoUrl}`);
-
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // --- HARD CORE PLAY LOGIC ---
-        await page.evaluate(async () => {
+        await page.evaluate(() => {
+            const playBtn = document.querySelector('button.ytp-large-play-button') || document.querySelector('.ytp-play-button');
+            if (playBtn) playBtn.click();
+            
             const v = document.querySelector('video');
             if (v) {
-                v.muted = true; // Chrome cloud par sirf muted video auto-play hone deta hai
+                v.muted = true;
                 v.play();
-                
-                // Ad bypass logic (agar ad ho toh)
-                const skipBtn = document.querySelector('.ytp-ad-skip-button');
-                if(skipBtn) skipBtn.click();
+                // Sabse low quality set karein taaki Render par buffer na ho
+                v.playbackRate = 1.0; 
             }
         });
-
-        // Thoda wait karein taaki buffer ho sake
-        await new Promise(r => setTimeout(r, 5000));
 
         const staySeconds = parseInt(watchTime) || 60;
         const endTime = Date.now() + (staySeconds * 1000);
 
         while (Date.now() < endTime) {
-            // 1. Force Play & Speed Check
+            // Stats check karein aur Video ko "Nudge" (hilayein) karein
             const stats = await page.evaluate(() => {
                 const v = document.querySelector('video');
                 if (v) {
-                    if (v.paused) v.play(); // Agar paused hai toh play karo
-                    return { 
-                        time: v.currentTime, 
-                        duration: v.duration,
-                        paused: v.paused 
-                    };
+                    // Agar 0s par hai toh force seek karein 1s par (Video start karne ke liye trick)
+                    if (v.currentTime === 0) v.currentTime = 0.1;
+                    if (v.paused) v.play();
+                    
+                    return { time: v.currentTime, paused: v.paused };
                 }
-                return { time: 0, paused: true };
+                return { time: -1 };
             });
 
-            console.log(`[VIEW #${viewNumber}] Current Watch: ${Math.floor(stats.time)}s | Playing: ${!stats.paused}`);
+            console.log(`[VIEW #${viewNumber}] Watch: ${Math.floor(stats.time)}s | State: ${stats.paused ? 'Paused' : 'Playing'}`);
 
-            // 2. Agar 0s par stuck hai, toh 'K' key press karo (YouTube Play/Pause shortcut)
-            if (stats.time === 0) {
-                await page.keyboard.press('k');
-                // Random click on video player
-                await page.mouse.click(640, 360);
-            }
+            // Touch screen tap to keep session alive
+            await page.touchscreen.tap(100, 100);
 
-            // 3. Human activity
-            await page.evaluate(() => window.scrollBy(0, 50));
+            await new Promise(r => setTimeout(r, 10000));
             
-            await new Promise(r => setTimeout(r, 10000)); // 10s ka gap
+            // Agar 30 second tak 0s hi raha toh refresh/stop logic
+            if (stats.time <= 0.2 && (Date.now() - (endTime - staySeconds*1000)) > 30000) {
+                console.log("Video stuck at 0s even after nudge. Trying one more click...");
+                await page.mouse.click(180, 300);
+            }
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Signal Sent.`);
+        console.log(`[SUCCESS] View #${viewNumber} session finished.`);
 
     } catch (error) {
         console.error(`[ERROR] #${viewNumber}: ${error.message}`);
@@ -1294,6 +1296,7 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         if (browser) await browser.close();
     }
 }
+
 
 
 // --- API ENDPOINT ---
