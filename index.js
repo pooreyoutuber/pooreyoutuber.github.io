@@ -1211,6 +1211,9 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE ORGANIC HITTER (FIXED FOR STUDIO COUNT)
 // ===================================================================
+// ===================================================================
+// 8. YOUTUBE STUDIO HITTER (MAX COUNT VERSION)
+// ===================================================================
 
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
@@ -1220,58 +1223,94 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         puppeteer.use(StealthPlugin());
 
         browser = await puppeteer.launch({
-            headless: "new",
+            // Agar aap desktop pe chala rahe hain toh 'false' karein view dekhne ke liye
+            headless: "new", 
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--autoplay-policy=no-user-gesture-required',
-                '--disable-blink-features=AutomationControlled'
+                '--window-size=1280,720',
+                '--autoplay-policy=no-user-gesture-required'
             ]
         });
 
         const page = await browser.newPage();
-        // Screen size set karein taaki real browser lage
-        await page.setViewport({ width: 1280, height: 720 });
-        await page.setUserAgent(USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)]);
-
-        console.log(`[YT-BOOST #${viewNumber}] Link Load Ho Raha Hai: ${videoUrl}`);
         
-        // 1. YouTube Video Page Open Karna
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 90000 });
+        // --- 1. HUMAN IDENTITY ---
+        // Random User Agent har baar naya view dikhane ke liye
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        
+        // YouTube ko ye dikhana ki hum Google Search se aaye hain
+        await page.setExtraHTTPHeaders({
+            'Referer': 'https://www.google.com/'
+        });
 
-        // 2. Play Button Click (Zaroori logic)
+        console.log(`[VIEW #${viewNumber}] Loading YouTube...`);
+
+        // --- 2. THE VISIT ---
+        // 'networkidle0' se ensure hota hai ki video poori tarah load ho jaye
+        await page.goto(videoUrl, { waitUntil: 'networkidle0', timeout: 90000 });
+
+        // --- 3. THE PLAY (Crucial for Studio) ---
+        // Kabhi kabhi YouTube auto-play block karta hai, isliye manual click
         try {
-            const playBtn = await page.$('.ytp-play-button');
-            if (playBtn) await playBtn.click();
+            await page.waitForSelector('.ytp-play-button', { timeout: 10000 });
+            await page.click('.ytp-play-button');
+            console.log("Video Play Button Clicked.");
         } catch (e) {
-            console.log("Auto-play already active.");
+            // Agar pehle se chal raha ho toh skip
         }
 
-        // 3. REALISTIC BEHAVIOR (Studio mein view count hone ke liye zaroori)
-        const staySeconds = parseInt(watchTime) || 30; 
-        const startTime = Date.now();
+        // --- 4. HUMAN ACTIVITY LOOP ---
+        const staySeconds = parseInt(watchTime) || 60; // Kam se kam 60s rakhein count ke liye
+        const endTime = Date.now() + (staySeconds * 1000);
 
-        console.log(`[WATCHING] Video play ho raha hai ${staySeconds} seconds ke liye...`);
-
-        while ((Date.now() - startTime) < (staySeconds * 1000)) {
-            // Mouse move karna
-            await page.mouse.move(randomInt(100, 600), randomInt(100, 600));
-            // Thoda scroll up-down karna
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 150)));
-            await new Promise(r => setTimeout(r, 5000));
+        while (Date.now() < endTime) {
+            // Random Scroll: Screen ko upar niche karna
+            const scrollAmt = Math.floor(Math.random() * 300);
+            await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
+            
+            // Mouse Movement: Screen par mouse hilana
+            await page.mouse.move(Math.random() * 800, Math.random() * 600);
+            
+            // 5-10 second ka wait har action ke beech
+            await new Promise(r => setTimeout(r, Math.floor(Math.random() * 5000) + 5000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Khatam Hua. ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} registered in browser session.`);
 
     } catch (error) {
-        console.error(`[YT-ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERROR] #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
+
+// --- YOUTUBE API ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    if (!video_url) return res.status(400).json({ success: false, message: "Link missing!" });
+
+    res.status(200).json({ 
+        success: true, 
+        message: "Studio Hitter Mode Active! Views processing one-by-one." 
+    });
+
+    // Background process
+    (async () => {
+        for (let i = 1; i <= parseInt(views_count); i++) {
+            await runOrganicYoutubeTask(video_url, i, watch_time);
+            
+            // Crash se bachne aur IP stability ke liye break
+            const pause = Math.floor(Math.random() * 10000) + 15000; // 15-25 seconds
+            console.log(`Waiting ${pause/1000}s for next human session...`);
+            await new Promise(r => setTimeout(r, pause));
+        }
+    })();
+});
+
+
 
 // --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
