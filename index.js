@@ -1221,69 +1221,64 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
-                '--use-gl=swiftshader',
-                '--disable-gpu'
+                '--window-size=1280,720',
+                '--use-gl=swiftshader'
             ]
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
         
-        // 1. Multi-Browser Site kholna
+        // 1. Tool Site kholna
         console.log(`[VIEW #${viewNumber}] Opening Multi-Browser Tool...`);
         await page.goto('https://macora225.github.io/multi-browser.html', { waitUntil: 'networkidle2' });
 
-        // 2. Search bar mein link paste karke "Add Browser" ya "Search" karna
-        // Aapke video ke mutabiq input field ko target karna
-        await page.waitForSelector('input[type="text"]');
-        await page.type('input[type="text"]', videoUrl);
-        await page.keyboard.press('Enter');
+        // 2. Link paste karna (Input field)
+        await page.waitForSelector('input[id="urlInput"]', { timeout: 10000 });
+        await page.type('input[id="urlInput"]', videoUrl);
+        console.log("[STEP] URL Pasted.");
+
+        // 3. "Launch Instance" button par click karna (Aapke video ke mutabiq)
+        // Agar id 'launchBtn' hai ya text se dhundna hai:
+        await page.evaluate(() => {
+            const btns = Array.from(document.querySelectorAll('button'));
+            const launchBtn = btns.find(b => b.innerText.toLowerCase().includes('launch'));
+            if (launchBtn) launchBtn.click();
+        });
         
-        console.log("[STEP] Link pasted, waiting for iframe to load...");
-        await new Promise(r => setTimeout(r, 5000));
+        console.log("[STEP] Launch Instance Clicked. Waiting for Video...");
+        await new Promise(r => setTimeout(r, 8000)); // Instance load hone ka wait
 
-        // 3. Iframe ke andar jana (Kyunki video iframe mein load hoti hai)
-        // Ye logic check karega ki video frame ke andar play ho rahi hai ya nahi
-        const frames = page.frames();
-        const youtubeFrame = frames.find(f => f.url().includes('youtube.com'));
+        // 4. Video par Tap karke Play karna (Coordinate-based)
+        // Multi-browser tool mein video center mein hoti hai
+        console.log("[STEP] Tapping on video area to start playback...");
+        await page.mouse.click(640, 450); // Video screen ke center area par click
+        await new Promise(r => setTimeout(r, 2000));
+        await page.keyboard.press('k'); // Play shortcut
 
-        if (youtubeFrame) {
-            console.log("[IFRAME] YouTube Frame detected inside tool.");
-            
-            // Video Play Logic inside Iframe
-            await youtubeFrame.evaluate(() => {
-                const v = document.querySelector('video');
-                const playBtn = document.querySelector('.ytp-large-play-button');
-                if (playBtn) playBtn.click();
-                if (v) {
-                    v.muted = true;
-                    v.play();
-                }
-            });
-        } else {
-            // Agar iframe nahi mila toh direct screen par click karke try karna
-            await page.mouse.click(400, 400); 
-        }
-
-        // --- DEBUG SCREENSHOT ---
-        // Isse aapko pata chalega ki multi-browser site par video dikh rahi hai ya nahi
-        const screenshot = await page.screenshot({ encoding: 'base64' });
-        console.log(`[DEBUG] Screenshot View #${viewNumber} Captured.`);
-
-        // 4. Watch Loop
+        // 5. Watch Loop with Constant Tapping (Anti-Freeze)
         const staySeconds = parseInt(watchTime) || 60;
         const endTime = Date.now() + (staySeconds * 1000);
 
         while (Date.now() < endTime) {
-            // Multi-browser sites par watch time nikalne ke liye hum frame context use karte hain
-            console.log(`[VIEW #${viewNumber}] Watching... Remaining: ${Math.round((endTime - Date.now())/1000)}s`);
+            // Bich-bich mein video par tap karna taaki YouTube ko 'Active User' mile
+            // Aur Render par video freeze na ho
+            await page.mouse.click(640, 450); 
             
-            // Anti-freeze: thoda scroll aur click
-            await page.mouse.wheel({ deltaY: 100 });
-            await new Promise(r => setTimeout(r, 10000));
+            // Log for monitoring
+            const remaining = Math.round((endTime - Date.now()) / 1000);
+            console.log(`[VIEW #${viewNumber}] Playing... ${remaining}s left. (Tapped)`);
+
+            // Screenshot check (Optional - debugging ke liye logs mein check karne ke liye)
+            if (remaining % 30 === 0) {
+                console.log(`[DEBUG] Screenshot Captured at ${remaining}s`);
+                await page.screenshot({ path: `debug_view_${viewNumber}.png` });
+            }
+
+            await new Promise(r => setTimeout(r, 15000)); // Har 15 sec mein tap
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} session finished.`);
+        console.log(`[SUCCESS] View #${viewNumber} Session Completed.`);
 
     } catch (error) {
         console.error(`[ERROR] #${viewNumber}: ${error.message}`);
