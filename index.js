@@ -1215,7 +1215,7 @@ app.post('/popup', async (req, res) => {
 // 10. MULTI-BROWSER AUTOMATION BOT (STEP-BY-STEP SIMULATION)
 // ===================================================================
 
-async function runMultiBrowserAutomation(videoUrl, viewNumber, watchTime) {
+async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
         const puppeteer = require('puppeteer-extra');
@@ -1296,38 +1296,7 @@ async function runMultiBrowserAutomation(videoUrl, viewNumber, watchTime) {
     }
 }
 
-// --- Tool 10 Endpoint ---
-app.post('/api/multi-browser-bot', async (req, res) => {
-    try {
-        const { video_url, views_count, watch_time } = req.body;
 
-        if (!video_url || !views_count) {
-            return res.status(400).json({ success: false, message: "Details missing!" });
-        }
-
-        res.status(200).json({ 
-            success: true, 
-            message: `Bot started: ${views_count} views queued (1-by-1 processing).` 
-        });
-
-        // Background Loop: Ek view khatam hone ke baad hi doosra start hoga
-        (async () => {
-            for (let i = 1; i <= views_count; i++) {
-                await runMultiBrowserAutomation(video_url, i, watch_time || 30);
-                
-                // Anti-crash safety gap
-                const coolDown = 10000; // 10 seconds gap
-                console.log(`[COOLDOWN] Waiting ${coolDown/1000}s before next instance...`);
-                await new Promise(r => setTimeout(r, coolDown));
-            }
-            console.log("--- ALL AUTOMATION TASKS COMPLETED ---");
-        })();
-
-    } catch (err) {
-        console.error("Bot Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
 
 // --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
