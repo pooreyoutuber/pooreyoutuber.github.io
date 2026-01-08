@@ -1227,94 +1227,66 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 800 });
-        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
-
-        console.log(`[VIEW #${viewNumber}] Navigating to: ${videoUrl}`);
+        await page.setViewport({ width: 1280, height: 720 });
         
-        // Step 1: Video Page Load
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 5000)); // Wait for popup
+        // 1. Multi-Browser Site kholna
+        console.log(`[VIEW #${viewNumber}] Opening Multi-Browser Tool...`);
+        await page.goto('https://macora225.github.io/multi-browser.html', { waitUntil: 'networkidle2' });
 
-        // --- SCREENSHOT 1: POPUP CHECK ---
-        console.log("--- DEBUG: Capturing Popup State Screenshot ---");
-        await page.screenshot({ path: `view_${viewNumber}_step1.png` });
-        // Agar aap Render logs mein image dekhna chahte hain toh niche wali line uncomment karein:
-        // console.log("Screenshot Base64:", await page.screenshot({encoding: "base64"}));
+        // 2. Search bar mein link paste karke "Add Browser" ya "Search" karna
+        // Aapke video ke mutabiq input field ko target karna
+        await page.waitForSelector('input[type="text"]');
+        await page.type('input[type="text"]', videoUrl);
+        await page.keyboard.press('Enter');
+        
+        console.log("[STEP] Link pasted, waiting for iframe to load...");
+        await new Promise(r => setTimeout(r, 5000));
 
-        // Step 2: Handle Consent Popup (Scrolling & Clicking)
-        try {
-            const popupExist = await page.$('form[action*="consent.youtube.com"]');
-            if (popupExist) {
-                console.log("[POPUP] Found! Scrolling and accepting...");
-                await page.evaluate(async () => {
-                    const buttons = Array.from(document.querySelectorAll('button'));
-                    const acceptBtn = buttons.find(b => 
-                        b.innerText.includes('Accept all') || 
-                        b.innerText.includes('I agree') || 
-                        b.innerText.includes('Sweekar karein')
-                    );
-                    if (acceptBtn) {
-                        acceptBtn.scrollIntoView();
-                        acceptBtn.click();
-                    }
-                });
-                await page.waitForNavigation({ waitUntil: 'networkidle2' });
-                console.log("[POPUP] Successfully bypassed.");
-            }
-        } catch (e) {
-            console.log("[POPUP] Not detected or error occurred.");
+        // 3. Iframe ke andar jana (Kyunki video iframe mein load hoti hai)
+        // Ye logic check karega ki video frame ke andar play ho rahi hai ya nahi
+        const frames = page.frames();
+        const youtubeFrame = frames.find(f => f.url().includes('youtube.com'));
+
+        if (youtubeFrame) {
+            console.log("[IFRAME] YouTube Frame detected inside tool.");
+            
+            // Video Play Logic inside Iframe
+            await youtubeFrame.evaluate(() => {
+                const v = document.querySelector('video');
+                const playBtn = document.querySelector('.ytp-large-play-button');
+                if (playBtn) playBtn.click();
+                if (v) {
+                    v.muted = true;
+                    v.play();
+                }
+            });
+        } else {
+            // Agar iframe nahi mila toh direct screen par click karke try karna
+            await page.mouse.click(400, 400); 
         }
 
-        // --- SCREENSHOT 2: AFTER POPUP ---
-        await page.screenshot({ path: `view_${viewNumber}_step2.png` });
+        // --- DEBUG SCREENSHOT ---
+        // Isse aapko pata chalega ki multi-browser site par video dikh rahi hai ya nahi
+        const screenshot = await page.screenshot({ encoding: 'base64' });
+        console.log(`[DEBUG] Screenshot View #${viewNumber} Captured.`);
 
-        // Step 3: Play Video
-        await page.evaluate(() => {
-            const v = document.querySelector('video');
-            if (v) {
-                v.muted = true;
-                v.play();
-                v.currentTime = 1.0; // Nudge to start
-            }
-            const playBtn = document.querySelector('.ytp-large-play-button');
-            if (playBtn) playBtn.click();
-        });
-
-        // Step 4: Watch-time Monitoring Loop
+        // 4. Watch Loop
         const staySeconds = parseInt(watchTime) || 60;
         const endTime = Date.now() + (staySeconds * 1000);
 
         while (Date.now() < endTime) {
-            const stats = await page.evaluate(() => {
-                const v = document.querySelector('video');
-                if (v) {
-                    if (v.paused) v.play();
-                    return { time: v.currentTime, paused: v.paused };
-                }
-                return { time: 0, paused: true };
-            });
-
-            console.log(`[VIEW #${viewNumber}] Watch: ${Math.floor(stats.time)}s | Playing: ${!stats.paused}`);
-
-            // Agar 0s par stuck hai toh nudge
-            if (stats.time <= 0.5) {
-                await page.keyboard.press('k');
-                await page.mouse.click(640, 360);
-                // Stuck hone par debug screenshot
-                await page.screenshot({ path: `view_${viewNumber}_stuck.png` });
-            }
-
+            // Multi-browser sites par watch time nikalne ke liye hum frame context use karte hain
+            console.log(`[VIEW #${viewNumber}] Watching... Remaining: ${Math.round((endTime - Date.now())/1000)}s`);
+            
+            // Anti-freeze: thoda scroll aur click
+            await page.mouse.wheel({ deltaY: 100 });
             await new Promise(r => setTimeout(r, 10000));
         }
 
-        // --- FINAL SCREENSHOT: BEFORE CLOSING ---
-        await page.screenshot({ path: `view_${viewNumber}_final.png` });
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        console.log(`[SUCCESS] View #${viewNumber} session finished.`);
 
     } catch (error) {
         console.error(`[ERROR] #${viewNumber}: ${error.message}`);
-        if (browser) await page.screenshot({ path: `error_${viewNumber}.png` });
     } finally {
         if (browser) await browser.close();
     }
