@@ -1208,35 +1208,92 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
-// ===================================================================
-// 8. YOUTUBE STUDIO HITTER (AUTOMATED FRONTEND FLOW - FIXED)
-// ===================================================================
-// ===================================================================
-// 10. MULTI-BROWSER AUTOMATION BOT (STEP-BY-STEP SIMULATION)
-// ===================================================================
+// --- UPDATED ORGANIC YOUTUBE TASK (VIDEO LOGIC) ---
+async function runOrganicYoutubeTask(video_url, viewNumber, watch_time) {
+    let browser;
+    try {
+        console.log(`[START] View #${viewNumber} process shuru ho raha hai...`);
 
-async function runOrganicYoutubeTask(videoLink) {
-    const browser = await puppeteer.launch({ headless: false }); // Launch Chrome in non-headless mode
-    const page = await browser.newPage();
-    await page.goto('https://macora225.github.io/multi-browser.html'); // Open the URL
+        // Puppeteer launch karein (Muted mode taaki server par load na pade)
+        browser = await puppeteer.launch({
+            headless: "new", // "new" headless mode for better performance
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
+        });
 
-    // Type the video link in the search bar
-    await page.type('#search-bar', videoLink); // Replace with actual selector for search bar
+        const page = await browser.newPage();
+        
+        // Step 1: Pehle us site par jaye jo aapne batai
+        await page.goto('https://macora225.github.io/multi-browser.html', { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
+        });
+        console.log(`[STEP] Site loaded: multi-browser.html`);
 
-    // Click on Launch Instance button
-    await page.click('#launch-instance'); // Replace with actual selector for launch button
+        // Step 2: Video Link Paste karein
+        // Note: Yahan 'input' selector use kiya hai, agar site par ID hai toh use change karein
+        await page.waitForSelector('input'); 
+        await page.type('input', video_url, { delay: 100 });
+        await page.keyboard.press('Enter');
+        console.log(`[STEP] URL paste kar di gayi hai.`);
 
-    // Wait for the video to load
-    await page.waitForTimeout(5000); // Adjust time as needed
+        // Step 3: Thoda wait karein taaki video load ho jaye
+        await new Promise(r => setTimeout(r, 5000));
 
-    // Play the video
-    await page.click('.video-player'); // Replace with actual selector for video element
+        // Step 4: Video par 2-3 baar tap/click karna (Human Behavior)
+        // Hum coordinates ya selector use karke click karenge
+        console.log(`[STEP] Video play karne ke liye tap kar raha hoon...`);
+        for (let i = 0; i < 3; i++) {
+            await page.mouse.click(400, 300); // Screen ke center ke aas-pass click
+            await new Promise(r => setTimeout(r, 1000));
+        }
 
-    // Wait for the video to engage
-    await page.waitForTimeout(10000); // Adjust time as needed
+        // Step 5: Jitna time frontend se aaya hai utni der tak dekhe (Watch Time)
+        const durationMs = parseInt(watch_time) * 1000;
+        console.log(`[WATCHING] Video chal rahi hai: ${watch_time} seconds ke liye...`);
+        
+        // Watch time ke beech mein random scrolling (Real user feel)
+        const startTime = Date.now();
+        while (Date.now() - startTime < durationMs) {
+            await page.evaluate(() => window.scrollBy(0, 100));
+            await new Promise(r => setTimeout(r, 5000));
+            await page.evaluate(() => window.scrollBy(0, -100));
+            await new Promise(r => setTimeout(r, 5000));
+        }
 
-    await browser.close(); // Close the browser instance
+        console.log(`[SUCCESS] View #${viewNumber} complete. Browser band ho raha hai.`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber} fail: ${error.message}`);
+    } finally {
+        if (browser) {
+            await browser.close(); // Task khatam hone par browser band
+        }
+    }
 }
+
+// --- API ENDPOINT (NEW VIEW START HAR BAAR) ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    res.status(200).json({ 
+        success: true, 
+        message: `Processing ${views_count} views with ${watch_time}s duration.` 
+    });
+
+    // Loop jo har naye view ke liye naya browser kholega
+    (async () => {
+        for (let i = 1; i <= views_count; i++) {
+            // Await use kiya hai taaki ek khatam ho tabhi dusra khule (Sequence)
+            // Agar parallel chahiye toh await hata sakte hain par RAM crash ho jayegi
+            await runOrganicYoutubeTask(video_url, i, watch_time);
+            
+            // Har view ke baad thoda gap (Cooling Period)
+            console.log(`[GAP] Next view ke liye 10s wait...`);
+            await new Promise(r => setTimeout(r, 10000));
+        }
+    })();
+});
+
 
 
 // --- API ENDPOINT ---
