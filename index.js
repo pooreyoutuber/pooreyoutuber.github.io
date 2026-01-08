@@ -1208,92 +1208,78 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
-// --- UPDATED ORGANIC YOUTUBE TASK (VIDEO LOGIC) ---
 async function runOrganicYoutubeTask(video_url, viewNumber, watch_time) {
     let browser;
     try {
-        console.log(`[START] View #${viewNumber} process shuru ho raha hai...`);
+        console.log(`[START] View #${viewNumber} - Real Simulation Started`);
 
-        // Puppeteer launch karein (Muted mode taaki server par load na pade)
+        const puppeteer = require('puppeteer-extra');
+        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+        puppeteer.use(StealthPlugin());
+
         browser = await puppeteer.launch({
-            headless: "new", // "new" headless mode for better performance
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
+            headless: "new",
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled', // Detection rokne ke liye
+                '--mute-audio'
+            ]
         });
 
         const page = await browser.newPage();
+
+        // Real User-Agent set karein taaki YouTube ko lage Chrome use ho raha hai
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
         
-        // Step 1: Pehle us site par jaye jo aapne batai
+        // Window size fix karein
+        await page.setViewport({ width: 1280, height: 720 });
+
+        // Step 1: macora site par jana
         await page.goto('https://macora225.github.io/multi-browser.html', { 
             waitUntil: 'networkidle2', 
             timeout: 60000 
         });
-        console.log(`[STEP] Site loaded: multi-browser.html`);
 
-        // Step 2: Video Link Paste karein
-        // Note: Yahan 'input' selector use kiya hai, agar site par ID hai toh use change karein
-        await page.waitForSelector('input'); 
-        await page.type('input', video_url, { delay: 100 });
+        // Step 2: Link Paste karna (Human Speed se)
+        await page.waitForSelector('input');
+        await page.focus('input');
+        await page.type('input', video_url, { delay: 150 }); // Slow typing
         await page.keyboard.press('Enter');
-        console.log(`[STEP] URL paste kar di gayi hai.`);
-
-        // Step 3: Thoda wait karein taaki video load ho jaye
-        await new Promise(r => setTimeout(r, 5000));
-
-        // Step 4: Video par 2-3 baar tap/click karna (Human Behavior)
-        // Hum coordinates ya selector use karke click karenge
-        console.log(`[STEP] Video play karne ke liye tap kar raha hoon...`);
-        for (let i = 0; i < 3; i++) {
-            await page.mouse.click(400, 300); // Screen ke center ke aas-pass click
-            await new Promise(r => setTimeout(r, 1000));
-        }
-
-        // Step 5: Jitna time frontend se aaya hai utni der tak dekhe (Watch Time)
-        const durationMs = parseInt(watch_time) * 1000;
-        console.log(`[WATCHING] Video chal rahi hai: ${watch_time} seconds ke liye...`);
         
-        // Watch time ke beech mein random scrolling (Real user feel)
-        const startTime = Date.now();
-        while (Date.now() - startTime < durationMs) {
-            await page.evaluate(() => window.scrollBy(0, 100));
-            await new Promise(r => setTimeout(r, 5000));
-            await page.evaluate(() => window.scrollBy(0, -100));
-            await new Promise(r => setTimeout(r, 5000));
+        console.log(`[STEP] URL Submitted. Waiting for Video...`);
+        await new Promise(r => setTimeout(r, 8000)); // Video load hone ka wait
+
+        // Step 3: Video par 2-3 clicks (Play karne ke liye)
+        // Video mein dikhaye gaye interface ke hisaab se coordinates par click
+        for (let i = 0; i < 3; i++) {
+            await page.mouse.click(500, 400); 
+            await new Promise(r => setTimeout(r, 1500));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} complete. Browser band ho raha hai.`);
+        // Step 4: Watch Time (Await loop)
+        const duration = parseInt(watch_time);
+        console.log(`[WATCHING] Keeping browser open for ${duration} seconds...`);
+        
+        let elapsed = 0;
+        while (elapsed < duration) {
+            // Random Mouse Movement (Taaki YouTube ko lage real user hai)
+            await page.mouse.move(Math.random() * 100, Math.random() * 100);
+            await new Promise(r => setTimeout(r, 5000));
+            elapsed += 5;
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} Complete!`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} fail: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close(); // Task khatam hone par browser band
+            await browser.close();
+            console.log(`[CLOSED] Browser closed for next session.`);
         }
     }
 }
-
-// --- API ENDPOINT (NEW VIEW START HAR BAAR) ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    res.status(200).json({ 
-        success: true, 
-        message: `Processing ${views_count} views with ${watch_time}s duration.` 
-    });
-
-    // Loop jo har naye view ke liye naya browser kholega
-    (async () => {
-        for (let i = 1; i <= views_count; i++) {
-            // Await use kiya hai taaki ek khatam ho tabhi dusra khule (Sequence)
-            // Agar parallel chahiye toh await hata sakte hain par RAM crash ho jayegi
-            await runOrganicYoutubeTask(video_url, i, watch_time);
-            
-            // Har view ke baad thoda gap (Cooling Period)
-            console.log(`[GAP] Next view ke liye 10s wait...`);
-            await new Promise(r => setTimeout(r, 10000));
-        }
-    })();
-});
-
 
 
 // --- API ENDPOINT ---
