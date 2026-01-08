@@ -1221,67 +1221,81 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
-                '--window-size=1280,720',
+                '--window-size=1366,768', // Standard Desktop size
                 '--use-gl=swiftshader'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 720 });
         
-        // 1. Tool Site kholna
-        console.log(`[VIEW #${viewNumber}] Opening Multi-Browser Tool...`);
-        await page.goto('https://macora225.github.io/multi-browser.html', { waitUntil: 'networkidle2' });
+        // 1. Google se Referer set karna (Social Signals)
+        await page.setExtraHTTPHeaders({
+            'Referer': 'https://www.google.com/'
+        });
+        await page.setViewport({ width: 1366, height: 768 });
 
-        // 2. Link paste karna (Input field)
-        await page.waitForSelector('input[id="urlInput"]', { timeout: 10000 });
-        await page.type('input[id="urlInput"]', videoUrl);
+        console.log(`[VIEW #${viewNumber}] Navigating to Tool via Google...`);
+        
+        // Direct tool par jaane se pehle session fresh rakhein
+        await page.goto('https://macora225.github.io/multi-browser.html', { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000 
+        });
+
+        // 2. Wait for Input & Paste Link
+        // ID ki jagah hum safer selector use karenge
+        const inputSelector = 'input[type="text"], #urlInput';
+        await page.waitForSelector(inputSelector, { timeout: 30000 });
+        await page.type(inputSelector, videoUrl);
         console.log("[STEP] URL Pasted.");
 
-        // 3. "Launch Instance" button par click karna (Aapke video ke mutabiq)
-        // Agar id 'launchBtn' hai ya text se dhundna hai:
+        // 3. Click Launch Button
         await page.evaluate(() => {
             const btns = Array.from(document.querySelectorAll('button'));
-            const launchBtn = btns.find(b => b.innerText.toLowerCase().includes('launch'));
+            const launchBtn = btns.find(b => b.innerText.toLowerCase().includes('launch') || b.id === 'launchBtn');
             if (launchBtn) launchBtn.click();
         });
-        
-        console.log("[STEP] Launch Instance Clicked. Waiting for Video...");
-        await new Promise(r => setTimeout(r, 8000)); // Instance load hone ka wait
 
-        // 4. Video par Tap karke Play karna (Coordinate-based)
-        // Multi-browser tool mein video center mein hoti hai
-        console.log("[STEP] Tapping on video area to start playback...");
-        await page.mouse.click(640, 450); // Video screen ke center area par click
-        await new Promise(r => setTimeout(r, 2000));
-        await page.keyboard.press('k'); // Play shortcut
+        console.log("[STEP] Instance Launched. Waiting for Video Player...");
+        await new Promise(r => setTimeout(r, 10000)); // 10s wait for load
 
-        // 5. Watch Loop with Constant Tapping (Anti-Freeze)
+        // 4. Video Play Logic (2-3 baar Tap/Click)
+        // Multi-browser sites par video frames ke coordinates par click karna best hai
+        for(let i = 0; i < 3; i++) {
+            console.log(`[STEP] Play Tap #${i+1}...`);
+            await page.mouse.click(680, 450); // Video center area
+            await new Promise(r => setTimeout(r, 2000));
+        }
+
+        // 5. Watch-time Loop
         const staySeconds = parseInt(watchTime) || 60;
         const endTime = Date.now() + (staySeconds * 1000);
 
         while (Date.now() < endTime) {
-            // Bich-bich mein video par tap karna taaki YouTube ko 'Active User' mile
-            // Aur Render par video freeze na ho
-            await page.mouse.click(640, 450); 
-            
-            // Log for monitoring
-            const remaining = Math.round((endTime - Date.now()) / 1000);
-            console.log(`[VIEW #${viewNumber}] Playing... ${remaining}s left. (Tapped)`);
-
-            // Screenshot check (Optional - debugging ke liye logs mein check karne ke liye)
-            if (remaining % 30 === 0) {
-                console.log(`[DEBUG] Screenshot Captured at ${remaining}s`);
-                await page.screenshot({ path: `debug_view_${viewNumber}.png` });
+            // Randomly tap to keep video playing
+            if (Math.random() > 0.5) {
+                await page.mouse.click(680, 450);
             }
-
-            await new Promise(r => setTimeout(r, 15000)); // Har 15 sec mein tap
+            
+            const remaining = Math.round((endTime - Date.now()) / 1000);
+            console.log(`[VIEW #${viewNumber}] Watching... ${remaining}s left.`);
+            
+            await new Promise(r => setTimeout(r, 15000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Session Completed.`);
+        // 6. CLEAR COOKIES & SESSION (Taki agla view fresh ho)
+        const client = await page.target().createCDPSession();
+        await client.send('Network.clearBrowserCookies');
+        await client.send('Network.clearBrowserCache');
+        console.log(`[SUCCESS] View #${viewNumber} Session Cleared & Closed.`);
 
     } catch (error) {
         console.error(`[ERROR] #${viewNumber}: ${error.message}`);
+        // Error par screenshot lein logs ke liye
+        try {
+            const screen = await page.screenshot({ encoding: 'base64' });
+            console.log(`[DEBUG] Error State Base64: ${screen.substring(0, 100)}...`);
+        } catch(e) {}
     } finally {
         if (browser) await browser.close();
     }
