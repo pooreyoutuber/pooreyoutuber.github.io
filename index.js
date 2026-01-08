@@ -1215,87 +1215,28 @@ app.post('/popup', async (req, res) => {
 // 10. MULTI-BROWSER AUTOMATION BOT (STEP-BY-STEP SIMULATION)
 // ===================================================================
 
-async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
-    let browser;
-    try {
-        const puppeteer = require('puppeteer-extra');
-        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-        puppeteer.use(StealthPlugin());
+async function runOrganicYoutubeTask(videoLink) {
+    const browser = await puppeteer.launch({ headless: false }); // Launch Chrome in non-headless mode
+    const page = await browser.newPage();
+    await page.goto('https://macora225.github.io/multi-browser.html'); // Open the URL
 
-        browser = await puppeteer.launch({
-            headless: "new", 
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--window-size=1280,800'
-            ]
-        });
+    // Type the video link in the search bar
+    await page.type('#search-bar', videoLink); // Replace with actual selector for search bar
 
-        const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 800 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+    // Click on Launch Instance button
+    await page.click('#launch-instance'); // Replace with actual selector for launch button
 
-        // 1. Website link ko kholna
-        console.log(`[BOT-VIEW #${viewNumber}] Opening Automation Tool...`);
-        await page.goto('https://macora225.github.io/multi-browser.html', { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000 
-        });
+    // Wait for the video to load
+    await page.waitForTimeout(5000); // Adjust time as needed
 
-        // 2. Search bar mein URL paste karna
-        const inputSelector = 'input[type="text"]'; // Video ke according input field
-        await page.waitForSelector(inputSelector);
-        await page.type(inputSelector, videoUrl, { delay: 100 });
-        console.log(`[BOT-VIEW #${viewNumber}] URL Pasted.`);
+    // Play the video
+    await page.click('.video-player'); // Replace with actual selector for video element
 
-        // 3. Launch Instance button par click karna
-        const launchBtnSelector = 'button.launch-btn, #launch-button'; // Aapke button ka selector
-        // Note: Agar selector alag hai toh use change karein (e.g., text search se click karna)
-        await page.evaluate(() => {
-            const buttons = Array.from(document.querySelectorAll('button'));
-            const launchBtn = buttons.find(b => b.innerText.toLowerCase().includes('launch'));
-            if (launchBtn) launchBtn.click();
-        });
-        console.log(`[BOT-VIEW #${viewNumber}] Instance Launched.`);
+    // Wait for the video to engage
+    await page.waitForTimeout(10000); // Adjust time as needed
 
-        // 4. Video load hone ka intezar aur 2-3 baar tap/click play karne ke liye
-        await new Promise(r => setTimeout(r, 5000)); // Instance load hone ka wait
-        
-        console.log(`[BOT-VIEW #${viewNumber}] Simulating Play Clicks...`);
-        const iframeSelector = 'iframe'; 
-        const iframes = await page.$$(iframeSelector);
-        
-        if (iframes.length > 0) {
-            // Video instance par 2-3 baar click simulate karna
-            const lastIframe = iframes[iframes.length - 1];
-            const box = await lastIframe.boundingBox();
-            if (box) {
-                for (let i = 0; i < 3; i++) {
-                    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                    await new Promise(r => setTimeout(r, 1000));
-                }
-            }
-        }
-
-        // 5. Watch time tak rukna
-        const stayTime = parseInt(watchTime) * 1000;
-        console.log(`[BOT-VIEW #${viewNumber}] Watching for ${watchTime}s...`);
-        await new Promise(r => setTimeout(r, stayTime));
-
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
-
-    } catch (error) {
-        console.error(`[BOT-ERROR] View #${viewNumber}: ${error.message}`);
-    } finally {
-        if (browser) {
-            // 6. Browser ko puri tarah band karna (Render crash se bachne ke liye)
-            console.log(`[CLEANUP] Closing browser for View #${viewNumber}...`);
-            await browser.close().catch(() => {});
-        }
-    }
+    await browser.close(); // Close the browser instance
 }
-
 
 
 // --- API ENDPOINT ---
