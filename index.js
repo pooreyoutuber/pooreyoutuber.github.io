@@ -1208,98 +1208,114 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
+// ===================================================================
+// 8. YOUTUBE STUDIO HITTER (AUTOMATED FRONTEND FLOW - FIXED)
+// ===================================================================
+
 async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
-        const puppeteer = require('puppeteer-extra');
-        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-        puppeteer.use(StealthPlugin());
-
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled',
-                '--window-size=1366,768', // Standard Desktop size
-                '--use-gl=swiftshader'
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        
-        // 1. Google se Referer set karna (Social Signals)
-        await page.setExtraHTTPHeaders({
-            'Referer': 'https://www.google.com/'
-        });
-        await page.setViewport({ width: 1366, height: 768 });
+        await page.setViewport({ width: 1280, height: 800 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[VIEW #${viewNumber}] Navigating to Tool via Google...`);
-        
-        // Direct tool par jaane se pehle session fresh rakhein
+        // 1. STEP: Website kholna
+        console.log(`[YT-VIEW #${viewNumber}] Opening Multi-Browser Site...`);
         await page.goto('https://macora225.github.io/multi-browser.html', { 
             waitUntil: 'networkidle2', 
-            timeout: 90000 
+            timeout: 60000 
         });
 
-        // 2. Wait for Input & Paste Link
-        // ID ki jagah hum safer selector use karenge
-        const inputSelector = 'input[type="text"], #urlInput';
-        await page.waitForSelector(inputSelector, { timeout: 30000 });
-        await page.type(inputSelector, videoUrl);
-        console.log("[STEP] URL Pasted.");
+        // 2. STEP: Link Paste karna
+        const inputSelector = 'input[placeholder*="YouTube Video URL"]';
+        await page.waitForSelector(inputSelector);
+        await page.type(inputSelector, videoUrl, { delay: 50 });
 
-        // 3. Click Launch Button
+        // 3. STEP: Launch Instance button par click
+        const launchBtn = 'button:contains("LAUNCH"), .launch-btn, button'; // Selector as per your UI
         await page.evaluate(() => {
             const btns = Array.from(document.querySelectorAll('button'));
-            const launchBtn = btns.find(b => b.innerText.toLowerCase().includes('launch') || b.id === 'launchBtn');
-            if (launchBtn) launchBtn.click();
+            const target = btns.find(b => b.innerText.includes('LAUNCH'));
+            if (target) target.click();
         });
 
-        console.log("[STEP] Instance Launched. Waiting for Video Player...");
-        await new Promise(r => setTimeout(r, 10000)); // 10s wait for load
+        console.log(`[YT-VIEW #${viewNumber}] Instance Launched. Waiting for video...`);
+        await new Promise(r => setTimeout(r, 5000)); // Video load hone ka wait
 
-        // 4. Video Play Logic (2-3 baar Tap/Click)
-        // Multi-browser sites par video frames ke coordinates par click karna best hai
-        for(let i = 0; i < 3; i++) {
-            console.log(`[STEP] Play Tap #${i+1}...`);
-            await page.mouse.click(680, 450); // Video center area
-            await new Promise(r => setTimeout(r, 2000));
-        }
-
-        // 5. Watch-time Loop
-        const staySeconds = parseInt(watchTime) || 60;
-        const endTime = Date.now() + (staySeconds * 1000);
-
-        while (Date.now() < endTime) {
-            // Randomly tap to keep video playing
-            if (Math.random() > 0.5) {
-                await page.mouse.click(680, 450);
+        // 4. STEP: Video par 2-3 baar tap/click karna (Play trigger)
+        try {
+            // Video element ya iframe ke center par click simulate karna
+            const videoElement = await page.$('video, iframe, .video-slot'); 
+            if (videoElement) {
+                const box = await videoElement.boundingBox();
+                for (let i = 0; i < 3; i++) {
+                    await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                console.log(`[YT-VIEW #${viewNumber}] Video tapped for playback.`);
             }
-            
-            const remaining = Math.round((endTime - Date.now()) / 1000);
-            console.log(`[VIEW #${viewNumber}] Watching... ${remaining}s left.`);
-            
-            await new Promise(r => setTimeout(r, 15000));
+        } catch (e) {
+            console.log("Tap failed, attempting auto-play via JS...");
+            await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (v) v.play();
+            });
         }
 
-        // 6. CLEAR COOKIES & SESSION (Taki agla view fresh ho)
-        const client = await page.target().createCDPSession();
-        await client.send('Network.clearBrowserCookies');
-        await client.send('Network.clearBrowserCache');
-        console.log(`[SUCCESS] View #${viewNumber} Session Cleared & Closed.`);
+        // 5. STEP: Watch Time simulation
+        const targetMs = parseInt(watchTime) * 1000;
+        console.log(`[WATCHING] Staying for ${watchTime} seconds...`);
+        await new Promise(r => setTimeout(r, targetMs));
+
+        console.log(`[DONE] View #${viewNumber} completed successfully. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] #${viewNumber}: ${error.message}`);
-        // Error par screenshot lein logs ke liye
-        try {
-            const screen = await page.screenshot({ encoding: 'base64' });
-            console.log(`[DEBUG] Error State Base64: ${screen.substring(0, 100)}...`);
-        } catch(e) {}
+        console.error(`[YT-ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            // Browser band karna taaki RAM free rahe
+            await browser.close().catch(() => {});
+        }
     }
 }
+
+// --- API ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+
+    if (!video_url || !views_count) {
+        return res.status(400).json({ success: false, message: "Details missing!" });
+    }
+
+    // Success response turant bhej rahe hain
+    res.status(200).json({ 
+        success: true, 
+        message: `Task started for ${views_count} views. 1 by 1 processing to prevent crash.` 
+    });
+
+    // Background process (Sequential execution to avoid RAM crash)
+    (async () => {
+        for (let i = 1; i <= parseInt(views_count); i++) {
+            await runOrganicYoutubeTask(video_url, i, watch_time);
+            
+            // View ke beech mein gap (Anti-detection)
+            const gap = 10000; // 10 seconds break
+            console.log(`[WAIT] Sleeping ${gap/1000}s before next view...`);
+            await new Promise(r => setTimeout(r, gap));
+        }
+        console.log("--- ALL YOUTUBE SESSIONS FINISHED ---");
+    })();
+});
 
 // --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
