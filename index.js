@@ -1208,72 +1208,92 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
-async function runOrganicYoutubeTask(video_url, viewNumber, watch_time) {
+const { chromium } = require('playwright-extra');
+const stealth = require('stealth-js')();
+
+// Video jaisa logic: Macora site -> Paste -> Play -> Watch
+async function runAdvancedViewTask(video_url, viewNumber, watch_time) {
     let browser;
     try {
-        console.log(`[START] View #${viewNumber} - Real Simulation Started`);
+        console.log(`[START] View #${viewNumber} Launching...`);
 
-        const puppeteer = require('puppeteer-extra');
-        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-        puppeteer.use(StealthPlugin());
-
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled', // Detection rokne ke liye
-                '--mute-audio'
-            ]
+        // Playwright use karein kyunki ye detection kam karta hai
+        browser = await chromium.launch({ 
+            headless: true, // Server par true hi rahega
+            args: ['--disable-blink-features=AutomationControlled'] 
         });
 
-        const page = await browser.newPage();
-
-        // Real User-Agent set karein taaki YouTube ko lage Chrome use ho raha hai
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
-        
-        // Window size fix karein
-        await page.setViewport({ width: 1280, height: 720 });
-
-        // Step 1: macora site par jana
-        await page.goto('https://macora225.github.io/multi-browser.html', { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000 
+        const context = await browser.newContext({
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+            viewport: { width: 1280, height: 720 }
         });
 
-        // Step 2: Link Paste karna (Human Speed se)
-        await page.waitForSelector('input');
-        await page.focus('input');
-        await page.type('input', video_url, { delay: 150 }); // Slow typing
+        const page = await context.newPage();
+
+        // Step 1: Macora ki site par jana
+        await page.goto('https://macora225.github.io/multi-browser.html', { waitUntil: 'networkidle' });
+        console.log(`[STEP] Site Loaded.`);
+
+        // Step 2: Input box dhoond kar link paste karna
+        const inputSelector = 'input[type="text"]'; // Check karein agar ID 'url' hai toh '#url' likhein
+        await page.waitForSelector(inputSelector);
+        await page.fill(inputSelector, video_url);
         await page.keyboard.press('Enter');
-        
-        console.log(`[STEP] URL Submitted. Waiting for Video...`);
-        await new Promise(r => setTimeout(r, 8000)); // Video load hone ka wait
+        console.log(`[STEP] Link Pasted.`);
 
-        // Step 3: Watch Time (Await loop)
-        const duration = parseInt(watch_time);
-        console.log(`[WATCHING] Keeping browser open for ${duration} seconds...`);
-        
-        let elapsed = 0;
-        while (elapsed < duration) {
-            // Random Mouse Movement (Taaki YouTube ko lage real user hai)
-            await page.mouse.move(Math.random() * 100, Math.random() * 100);
-            await new Promise(r => setTimeout(r, 5000));
-            elapsed += 5;
+        // Step 3: Video load hone ka wait (8-10 seconds)
+        await page.waitForTimeout(10000);
+
+        // Step 4: 2-3 Baar Tap/Click (Real Human Behavior)
+        // Hum screen ke center mein click karenge jahan video hoti hai
+        for (let i = 0; i < 3; i++) {
+            await page.mouse.click(640, 360); 
+            console.log(`[TAP] Click #${i+1} done.`);
+            await page.waitForTimeout(1500);
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Complete!`);
+        // Step 5: Watch Time loop (Await logic)
+        const durationSec = parseInt(watch_time);
+        console.log(`[WATCHING] Waiting for ${durationSec} seconds...`);
+        
+        let timeLeft = durationSec;
+        while (timeLeft > 0) {
+            // Random Mouse movement taaki session active rahe
+            await page.mouse.move(Math.random() * 500, Math.random() * 500);
+            await page.waitForTimeout(5000); // Har 5 sec mein check
+            timeLeft -= 5;
+        }
+
+        console.log(`[SUCCESS] View #${viewNumber} Completed.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Failed:`, error.message);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[CLOSED] Browser closed for next session.`);
+            console.log(`[CLOSED] Browser closed.`);
         }
     }
 }
 
+// --- API Implementation ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    res.status(200).json({ success: true, message: "Playwright Engine Started!" });
+
+    // Serial Loop (Ek ke baad ek)
+    (async () => {
+        for (let i = 1; i <= views_count; i++) {
+            await runAdvancedViewTask(video_url, i, watch_time);
+            
+            // Random gap taaki YouTube ko pattern na mile
+            const gap = Math.floor(Math.random() * (20000 - 10000 + 1) + 10000); 
+            console.log(`[GAP] Waiting ${gap/1000}s before next view...`);
+            await new Promise(r => setTimeout(r, gap));
+        }
+    })();
+});
 
 // --- API ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
