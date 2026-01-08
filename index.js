@@ -1211,17 +1211,24 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (AUTOMATED FRONTEND FLOW - FIXED)
 // ===================================================================
+// ===================================================================
+// 10. MULTI-BROWSER AUTOMATION BOT (STEP-BY-STEP SIMULATION)
+// ===================================================================
 
-async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
+async function runMultiBrowserAutomation(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
+        const puppeteer = require('puppeteer-extra');
+        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+        puppeteer.use(StealthPlugin());
+
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", 
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
+                '--window-size=1280,800'
             ]
         });
 
@@ -1229,92 +1236,97 @@ async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. STEP: Website kholna
-        console.log(`[YT-VIEW #${viewNumber}] Opening Multi-Browser Site...`);
+        // 1. Website link ko kholna
+        console.log(`[BOT-VIEW #${viewNumber}] Opening Automation Tool...`);
         await page.goto('https://macora225.github.io/multi-browser.html', { 
             waitUntil: 'networkidle2', 
             timeout: 60000 
         });
 
-        // 2. STEP: Link Paste karna
-        const inputSelector = 'input[placeholder*="YouTube Video URL"]';
+        // 2. Search bar mein URL paste karna
+        const inputSelector = 'input[type="text"]'; // Video ke according input field
         await page.waitForSelector(inputSelector);
-        await page.type(inputSelector, videoUrl, { delay: 50 });
+        await page.type(inputSelector, videoUrl, { delay: 100 });
+        console.log(`[BOT-VIEW #${viewNumber}] URL Pasted.`);
 
-        // 3. STEP: Launch Instance button par click
-        const launchBtn = 'button:contains("LAUNCH"), .launch-btn, button'; // Selector as per your UI
+        // 3. Launch Instance button par click karna
+        const launchBtnSelector = 'button.launch-btn, #launch-button'; // Aapke button ka selector
+        // Note: Agar selector alag hai toh use change karein (e.g., text search se click karna)
         await page.evaluate(() => {
-            const btns = Array.from(document.querySelectorAll('button'));
-            const target = btns.find(b => b.innerText.includes('LAUNCH'));
-            if (target) target.click();
+            const buttons = Array.from(document.querySelectorAll('button'));
+            const launchBtn = buttons.find(b => b.innerText.toLowerCase().includes('launch'));
+            if (launchBtn) launchBtn.click();
         });
+        console.log(`[BOT-VIEW #${viewNumber}] Instance Launched.`);
 
-        console.log(`[YT-VIEW #${viewNumber}] Instance Launched. Waiting for video...`);
-        await new Promise(r => setTimeout(r, 5000)); // Video load hone ka wait
-
-        // 4. STEP: Video par 2-3 baar tap/click karna (Play trigger)
-        try {
-            // Video element ya iframe ke center par click simulate karna
-            const videoElement = await page.$('video, iframe, .video-slot'); 
-            if (videoElement) {
-                const box = await videoElement.boundingBox();
+        // 4. Video load hone ka intezar aur 2-3 baar tap/click play karne ke liye
+        await new Promise(r => setTimeout(r, 5000)); // Instance load hone ka wait
+        
+        console.log(`[BOT-VIEW #${viewNumber}] Simulating Play Clicks...`);
+        const iframeSelector = 'iframe'; 
+        const iframes = await page.$$(iframeSelector);
+        
+        if (iframes.length > 0) {
+            // Video instance par 2-3 baar click simulate karna
+            const lastIframe = iframes[iframes.length - 1];
+            const box = await lastIframe.boundingBox();
+            if (box) {
                 for (let i = 0; i < 3; i++) {
-                    await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                     await new Promise(r => setTimeout(r, 1000));
                 }
-                console.log(`[YT-VIEW #${viewNumber}] Video tapped for playback.`);
             }
-        } catch (e) {
-            console.log("Tap failed, attempting auto-play via JS...");
-            await page.evaluate(() => {
-                const v = document.querySelector('video');
-                if (v) v.play();
-            });
         }
 
-        // 5. STEP: Watch Time simulation
-        const targetMs = parseInt(watchTime) * 1000;
-        console.log(`[WATCHING] Staying for ${watchTime} seconds...`);
-        await new Promise(r => setTimeout(r, targetMs));
+        // 5. Watch time tak rukna
+        const stayTime = parseInt(watchTime) * 1000;
+        console.log(`[BOT-VIEW #${viewNumber}] Watching for ${watchTime}s...`);
+        await new Promise(r => setTimeout(r, stayTime));
 
-        console.log(`[DONE] View #${viewNumber} completed successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
-        console.error(`[YT-ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[BOT-ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // Browser band karna taaki RAM free rahe
+            // 6. Browser ko puri tarah band karna (Render crash se bachne ke liye)
+            console.log(`[CLEANUP] Closing browser for View #${viewNumber}...`);
             await browser.close().catch(() => {});
         }
     }
 }
 
-// --- API ENDPOINT ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
+// --- Tool 10 Endpoint ---
+app.post('/api/multi-browser-bot', async (req, res) => {
+    try {
+        const { video_url, views_count, watch_time } = req.body;
 
-    if (!video_url || !views_count) {
-        return res.status(400).json({ success: false, message: "Details missing!" });
-    }
-
-    // Success response turant bhej rahe hain
-    res.status(200).json({ 
-        success: true, 
-        message: `Task started for ${views_count} views. 1 by 1 processing to prevent crash.` 
-    });
-
-    // Background process (Sequential execution to avoid RAM crash)
-    (async () => {
-        for (let i = 1; i <= parseInt(views_count); i++) {
-            await runOrganicYoutubeTask(video_url, i, watch_time);
-            
-            // View ke beech mein gap (Anti-detection)
-            const gap = 10000; // 10 seconds break
-            console.log(`[WAIT] Sleeping ${gap/1000}s before next view...`);
-            await new Promise(r => setTimeout(r, gap));
+        if (!video_url || !views_count) {
+            return res.status(400).json({ success: false, message: "Details missing!" });
         }
-        console.log("--- ALL YOUTUBE SESSIONS FINISHED ---");
-    })();
+
+        res.status(200).json({ 
+            success: true, 
+            message: `Bot started: ${views_count} views queued (1-by-1 processing).` 
+        });
+
+        // Background Loop: Ek view khatam hone ke baad hi doosra start hoga
+        (async () => {
+            for (let i = 1; i <= views_count; i++) {
+                await runMultiBrowserAutomation(video_url, i, watch_time || 30);
+                
+                // Anti-crash safety gap
+                const coolDown = 10000; // 10 seconds gap
+                console.log(`[COOLDOWN] Waiting ${coolDown/1000}s before next instance...`);
+                await new Promise(r => setTimeout(r, coolDown));
+            }
+            console.log("--- ALL AUTOMATION TASKS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Bot Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
 });
 
 // --- API ENDPOINT ---
