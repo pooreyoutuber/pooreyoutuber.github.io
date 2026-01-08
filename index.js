@@ -1250,14 +1250,7 @@ async function runOrganicYoutubeTask(video_url, viewNumber, watch_time) {
         console.log(`[STEP] URL Submitted. Waiting for Video...`);
         await new Promise(r => setTimeout(r, 8000)); // Video load hone ka wait
 
-        // Step 3: Video par 2-3 clicks (Play karne ke liye)
-        // Video mein dikhaye gaye interface ke hisaab se coordinates par click
-        for (let i = 0; i < 3; i++) {
-            await page.mouse.click(500, 400); 
-            await new Promise(r => setTimeout(r, 1500));
-        }
-
-        // Step 4: Watch Time (Await loop)
+        // Step 3: Watch Time (Await loop)
         const duration = parseInt(watch_time);
         console.log(`[WATCHING] Keeping browser open for ${duration} seconds...`);
         
