@@ -1208,23 +1208,122 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===============================================================
+// ===================================================================
+// 9. YOUTUBE AUTO-SUBSCRIBER (DUAL-BROWSER TEMP-MAIL LOGIC)
+// ===================================================================
 
+async function runYoutubeSubsTool(videoUrl, watchTime) {
+    const puppeteer = require('puppeteer-extra');
+    const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+    if (puppeteer.getPlugins().length === 0) puppeteer.use(StealthPlugin());
+
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: false, // Signup process dekhne ke liye false rakha hai
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1280,720']
+        });
+
+        // --- BROWSER 1: TEMP MAIL SE EMAIL LENA ---
+        const contextMail = await browser.createIncognitoBrowserContext();
+        const pageMail = await contextMail.newPage();
+        await pageMail.goto('https://www.guerrillamail.com/', { waitUntil: 'networkidle2' });
+        
+        // Email address copy karna
+        await pageMail.waitForSelector('#email-widget');
+        const tempEmail = await pageMail.$eval('#email-widget', el => el.innerText);
+        console.log(`[STEP 1] Email Generated: ${tempEmail}`);
+
+        // --- BROWSER 2: GOOGLE SIGNUP & YOUTUBE ---
+        const contextYT = await browser.createIncognitoBrowserContext();
+        const pageYT = await contextYT.newPage();
+        
+        console.log(`[STEP 2] Starting Google Signup...`);
+        await pageYT.goto('https://accounts.google.com/signup/v2/webcreateaccount?flowName=GlifWebSignIn&flowEntry=SignUp', { waitUntil: 'networkidle2' });
+
+        // Basic Details Bharna
+        await pageYT.type('input[name="firstName"]', 'Rahul');
+        await pageYT.type('input[name="lastName"]', 'Vloger');
+        await pageYT.click('#collectNameNext');
+        await new Promise(r => setTimeout(r, 2000));
+
+        // Date of Birth (Random)
+        await pageYT.type('#day', '15');
+        await pageYT.select('#month', '5');
+        await pageYT.type('#year', '1998');
+        await pageYT.select('#gender', '1');
+        await pageYT.click('#birthdaygenderNext');
+        await new Promise(r => setTimeout(r, 2000));
+
+        // Temp Email Use Karna
+        await pageYT.waitForSelector('div[role="link"]');
+        // "Use your existing email" option select karna
+        await pageYT.evaluate(() => {
+            const buttons = Array.from(document.querySelectorAll('button'));
+            const target = buttons.find(b => b.innerText.includes('Use your existing email') || b.innerText.includes('Use your current email'));
+            if (target) target.click();
+        });
+        
+        await pageYT.type('input[type="email"]', tempEmail);
+        await pageYT.click('#next');
+
+        // Password Set Karna
+        const pass = "BotPass@123" + Math.floor(Math.random() * 99);
+        await pageYT.waitForSelector('input[name="Passwd"]');
+        await pageYT.type('input[name="Passwd"]', pass);
+        await pageYT.type('input[name="ConfirmPasswd"]', pass);
+        await pageYT.click('#createpasswordNext');
+
+        /* ALERT: Yahan Google OTP maangega jo Guerrilla Mail ke niche inbox mein aayega.
+           Bina SMS API ke "Phone Verification" bypass nahi hota, 
+           isliye ye tool wahan ruk jayega agar Google ne number maanga.
+        */
+
+        // --- STEP 3: YOUTUBE ACTIONS (LIKE & SUB) ---
+        console.log(`[STEP 3] Opening Video: ${videoUrl}`);
+        await pageYT.goto(videoUrl, { waitUntil: 'networkidle2' });
+
+        // Watch Time Timing
+        const waitMs = (parseInt(watchTime) || 30) * 1000;
+        await new Promise(r => setTimeout(r, waitMs));
+
+        // Like & Subscribe Hit
+        await pageYT.evaluate(() => {
+            const subBtn = document.querySelector('ytd-subscribe-button-renderer button');
+            const likeBtn = document.querySelector('button[aria-label^="like this video"]');
+            if (subBtn) subBtn.click();
+            if (likeBtn) likeBtn.click();
+        });
+
+        console.log(`[DONE] Subscribed and Liked!`);
+
+    } catch (error) {
+        console.error(`[ERROR] Bot Stopped: ${error.message}`);
+    } finally {
+        if (browser) await browser.close();
+    }
+}
 
 // --- API ENDPOINT ---
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    // Immediate Response
-    res.status(200).json({ success: true, message: "Engine Started! Hits will appear soon." });
+app.post('/api/youtube-bot-ultra', async (req, res) => {
+    const { link, views, timing } = req.body;
 
-    // Worker Loop
+    if (!link || !views) {
+        return res.status(400).json({ success: false, message: "Link and Views are required!" });
+    }
+
+    res.status(200).json({ 
+        success: true, 
+        message: `Bot Started! Targets: ${views} Accounts/Views.` 
+    });
+
+    // Background Loop
     (async () => {
-        for (let i = 1; i <= views_count; i++) {
-            await runOrganicYoutubeTask(video_url, i, watch_time);
-            
-            // Render par 15s ka gap zaroori hai crash se bachne ke liye
-            console.log(`[REST] 15s cooling...`);
-            await new Promise(r => setTimeout(r, 15000));
+        for (let i = 1; i <= views; i++) {
+            console.log(`--- Starting Cycle #${i} ---`);
+            await runYoutubeSubsTool(link, timing);
+            // 20 sec gap taaki Google IP ban na kare
+            await new Promise(r => setTimeout(r, 20000));
         }
     })();
 });
