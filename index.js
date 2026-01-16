@@ -1212,7 +1212,7 @@ app.post('/popup', async (req, res) => {
 // 9. YOUTUBE AUTO-SUBSCRIBER (DUAL-BROWSER TEMP-MAIL LOGIC)
 // ===================================================================
 
-async function runYoutubeSubsTool(videoUrl, watchTime) {
+async function runOrganicYoutubeTask(videoUrl, watchTime) {
     const puppeteer = require('puppeteer-extra');
     const StealthPlugin = require('puppeteer-extra-plugin-stealth');
     if (puppeteer.getPlugins().length === 0) puppeteer.use(StealthPlugin());
@@ -1305,29 +1305,23 @@ async function runYoutubeSubsTool(videoUrl, watchTime) {
 }
 
 // --- API ENDPOINT ---
-app.post('/api/youtube-bot-ultra', async (req, res) => {
-    const { link, views, timing } = req.body;
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    // Immediate Response
+    res.status(200).json({ success: true, message: "Engine Started! Hits will appear soon." });
 
-    if (!link || !views) {
-        return res.status(400).json({ success: false, message: "Link and Views are required!" });
-    }
-
-    res.status(200).json({ 
-        success: true, 
-        message: `Bot Started! Targets: ${views} Accounts/Views.` 
-    });
-
-    // Background Loop
+    // Worker Loop
     (async () => {
-        for (let i = 1; i <= views; i++) {
-            console.log(`--- Starting Cycle #${i} ---`);
-            await runYoutubeSubsTool(link, timing);
-            // 20 sec gap taaki Google IP ban na kare
-            await new Promise(r => setTimeout(r, 20000));
+        for (let i = 1; i <= views_count; i++) {
+            await runOrganicYoutubeTask(video_url, i, watch_time);
+            
+            // Render par 15s ka gap zaroori hai crash se bachne ke liye
+            console.log(`[REST] 15s cooling...`);
+            await new Promise(r => setTimeout(r, 15000));
         }
     })();
 });
-
  
 //=====================================================
 // --- SERVER START ---
