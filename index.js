@@ -1212,7 +1212,6 @@ app.post('/popup', async (req, res) => {
 // 9. FIXED YOUTUBE & SITE VISITOR (ONE-BY-ONE BROWSER)
 // ===================================================================
 const puppeteerExtra = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 // Plugin ko globally ek hi baar initialize karein
 if (puppeteerExtra.plugins.length === 0) {
