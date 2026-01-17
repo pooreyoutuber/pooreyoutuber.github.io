@@ -1211,9 +1211,13 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 9. FIXED YOUTUBE & SITE VISITOR (ONE-BY-ONE BROWSER)
 // ===================================================================
+// ===================================================================
+// 9. FIXED YOUTUBE HITTER (ONE-BY-ONE WITH TAP-TO-PLAY)
+// ===================================================================
 const puppeteerExtra = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
-// Plugin ko globally ek hi baar initialize karein
+// Stealth plugin initialize
 if (puppeteerExtra.plugins.length === 0) {
     puppeteerExtra.use(StealthPlugin());
 }
@@ -1221,89 +1225,100 @@ if (puppeteerExtra.plugins.length === 0) {
 async function runOrganicYoutubeTask(viewNumber, watchTimeSec) {
     let browser;
     try {
-        // 1. Device and Browser Simulation Logic
-        const devices = [
-            { name: 'Chrome-Windows', ua: USER_AGENTS[0], viewport: { width: 1920, height: 1080 } },
-            { name: 'Safari-Mac', ua: USER_AGENTS[1], viewport: { width: 1440, height: 900 } },
-            { name: 'Android-Chrome', ua: USER_AGENTS[2], viewport: { width: 360, height: 740 } },
-            { name: 'iPhone-Safari', ua: USER_AGENTS[3], viewport: { width: 390, height: 844 } }
-        ];
-        const selectedDevice = devices[viewNumber % devices.length];
+        // Mobile device simulation taaki YouTube player "Tap" accept kare
+        const device = { 
+            ua: "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", 
+            viewport: { width: 360, height: 740 } 
+        };
 
-        // 2. Social Media Referral Rotation
-        const referrers = [
-            'https://www.facebook.com/',
-            'https://www.instagram.com/',
-            'https://t.co/', // Twitter
-            'https://www.pinterest.com/'
-        ];
-        const selectedReferrer = referrers[randomInt(0, referrers.length - 1)];
-
-        // Browser Launch
         browser = await puppeteerExtra.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(selectedDevice.ua);
-        await page.setViewport(selectedDevice.viewport);
+        await page.setUserAgent(device.ua);
+        await page.setViewport(device.viewport);
 
-        console.log(`\n[VIEW #${viewNumber}] Browser: ${selectedDevice.name} | Ref: ${selectedReferrer}`);
+        console.log(`\n[VIEW #${viewNumber}] Target: YouTube Preview Site`);
 
-        // 3. Website par jana
+        // 1. Site par jaana
         const previewSite = "https://macora225.github.io/youtube-short-preview.html";
-        await page.goto(previewSite, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000, 
-            referer: selectedReferrer 
-        });
+        await page.goto(previewSite, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 4. Scroll Down Logic
+        // 2. Sabse niche scroll karna jahan video hai
+        console.log("[ACTION] Scrolling to bottom for video...");
         await page.evaluate(async () => {
-            window.scrollBy(0, 800); // Niche scroll karein jahan video hai
+            window.scrollTo(0, document.body.scrollHeight);
             await new Promise(r => setTimeout(r, 2000));
         });
 
-        // 5. Video Play & Tap Logic
-        console.log("[ACTION] Finding video and Tapping...");
-        
-        // Sabse pehle screen ke beech mein ek "Human Tap" karein
-        await page.mouse.click(selectedDevice.viewport.width / 2, selectedDevice.viewport.height / 2);
-        
-        // Iframe ke andar play button dhoondhein
-        const frames = page.frames();
-        const ytFrame = frames.find(f => f.url().includes('youtube.com/embed'));
-        
-        if (ytFrame) {
-            await ytFrame.click('body'); // Video area par tap
-            await new Promise(r => setTimeout(r, 1500));
-            await ytFrame.click('.ytp-large-play-button').catch(() => {});
-            console.log("[SUCCESS] Play Clicked.");
+        // 3. YouTube Video par Tap/Click karna
+        // Hum iframe ka bounding box nikal kar uske center par click karenge
+        const videoFrame = await page.$('iframe[src*="youtube.com"]');
+        if (videoFrame) {
+            const rect = await videoFrame.boundingBox();
+            if (rect) {
+                console.log("[ACTION] Video found! Tapping to play...");
+                // Video ke exact center par tap karna
+                await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
+                console.log("[SUCCESS] Play initiated.");
+            }
         } else {
-            // Agar iframe nahi mila toh seedha page par click
-            await page.click('body');
+            // Fallback: Agar iframe detect na ho toh screen ke niche wale hisse mein tap karein
+            await page.mouse.click(180, 600);
+            console.log("[INFO] Manual tap performed at bottom.");
         }
 
-        // 6. Watch Time (Timing from Front-end)
+        // 4. Watch Time (Frontend se aaya hua samay)
         const stayTimeMs = (parseInt(watchTimeSec) || 30) * 1000;
+        console.log(`[WAIT] Watching for ${watchTimeSec} seconds...`);
         await new Promise(r => setTimeout(r, stayTimeMs));
 
-        console.log(`[DONE] View #${viewNumber} Finished.`);
+        console.log(`[DONE] View #${viewNumber} finished.`);
 
     } catch (error) {
-        console.error(`[CRASH PREVENTED] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close(); // Har session ke baad memory free karein
+            await browser.close(); // Browser band karna zaroori hai memory ke liye
         }
     }
 }
+
+// Updated Endpoint with Strict Await Loop
+app.post('/api/real-view-boost', async (req, res) => {
+    try {
+        const { views_count, watch_time } = req.body;
+        const totalViews = parseInt(views_count) || 1;
+
+        // Immediate response taaki request timeout na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Hitter Task Started: ${totalViews} views sequential execution.` 
+        });
+
+        // Background Worker: Ek khatam hone ke baad hi dusra shuru hoga
+        (async () => {
+            for (let i = 1; i <= totalViews; i++) {
+                console.log(`--- Starting View ${i} of ${totalViews} ---`);
+                // 'await' yahan ensure karta hai ki browser 1-by-1 khule
+                await runOrganicYoutubeTask(i, watch_time);
+                
+                if (i < totalViews) {
+                    console.log("[SYSTEM] Cooling down 5s before next browser...");
+                    await new Promise(r => setTimeout(r, 5000));
+                }
+            }
+            console.log("--- ALL SESSIONS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false });
+    }
+});
+
 
 // ===================================================================
 // Tool 9 Endpoint (Updated)
