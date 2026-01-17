@@ -3,206 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF to Image Converter | YouTubeHelper Tools</title>
+    <title>Instagram Multi-Reel Booster | YouTubeHelper</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 
-    <script>(function(s){s.dataset.zone='10440032',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-80JNYYX5KK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-ZPMC525FGT');
-    </script>
-    
+  gtag('config', 'G-80JNYYX5KK');
+</script>
     
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.08);
             --glass-border: rgba(255, 255, 255, 0.15);
-            --primary: #FFD700;
-            --accent: #FF3D3D;
+            --insta-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
             --text-main: #ffffff;
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            background: #0f172a;
+            background: #000; /* Darker background for Insta feel */
             color: var(--text-main);
             min-height: 100vh;
         }
 
         .glass-header {
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(20px);
             padding: 15px 20px;
             border-bottom: 1px solid var(--glass-border);
             text-align: center;
         }
 
-        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
 
-        .upload-card {
-            background: var(--glass-bg);
-            border: 2px dashed var(--glass-border);
-            border-radius: 30px;
-            padding: 50px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-bottom: 40px;
-        }
-        .upload-card:hover { border-color: var(--primary); background: rgba(255,255,255,0.12); }
-
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .page-card {
+        /* --- Input Section --- */
+        .control-panel {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 15px;
+            padding: 35px;
+            border-radius: 25px;
             text-align: center;
-            animation: fadeIn 0.5s ease;
+            margin-bottom: 40px;
         }
 
-        .page-card canvas {
-            width: 100%;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        .input-group {
+            display: flex;
+            gap: 12px;
+            max-width: 750px;
+            margin: 20px auto;
         }
 
-        .btn-download {
-            background: var(--primary);
-            color: #000;
+        input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 15px;
+            border-radius: 12px;
+            color: white;
+            outline: none;
+        }
+
+        .btn-add {
+            background: var(--insta-gradient);
+            color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 0 30px;
+            border-radius: 12px;
             font-weight: 800;
             cursor: pointer;
-            width: 100%;
+            transition: 0.3s;
+        }
+        .btn-add:hover { transform: scale(1.03); opacity: 0.9; }
+
+        /* --- Multi Grid --- */
+        .insta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
         }
 
-        .loader { display: none; text-align: center; margin: 20px; font-weight: bold; color: var(--primary); }
+        .insta-slot {
+            background: #111;
+            border-radius: 20px;
+            overflow: hidden;
+            aspect-ratio: 9/16;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+        .slot-header {
+            background: #1a1a1a;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #888;
+        }
 
-        .seo-box { margin-top: 80px; line-height: 1.8; color: #94a3b8; }
-        .seo-box h2 { color: var(--primary); }
-        
-        /* Ad spaces */
-        .ad-container { margin: 20px 0; text-align: center; }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ff3d3d;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        .seo-box {
+            margin-top: 100px;
+            padding: 45px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 35px;
+            line-height: 1.8;
+            color: #94a3b8;
+        }
+        .seo-box h2 { color: #cc2366; }
+
+        @media (max-width: 600px) {
+            .insta-grid { grid-template-columns: repeat(1, 1fr); }
+            .input-group { flex-direction: column; }
+            .btn-add { padding: 15px; }
+        }
     </style>
 </head>
 <body>
 
-    <script src="https://3nbf4.com/act/files/tag.min.js?z=10440033" data-cfasync="false" async></script>
-
     <header class="glass-header">
-        <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:800; font-size:24px;">🖼️ PDF2Image</a>
+        <a href="index.html" style="color:#e6683c; text-decoration:none; font-weight:800; font-size:24px;">📸 InstaHelper</a>
     </header>
 
     <div class="container">
-        
-        <div class="ad-container">
-            <a href="https://otieu.com/4/10439760" target="_blank" style="color:var(--primary); text-decoration:none; font-size:14px;">[ Premium Server Access ]</a>
+        <div class="control-panel">
+            <h1>Instagram Multi-Reel Booster</h1>
+            <p>Paste Reel link and watch multiple instances side-by-side to boost engagement.</p>
+            <div class="input-group">
+                <input type="text" id="instaLink" placeholder="https://www.instagram.com/reels/XXXXXX/">
+                <button class="btn-add" onclick="addReel()">Add Reel</button>
+            </div>
+            <p style="font-size: 13px; opacity: 0.6; margin-top: 10px;">Max Slots: 20 | Active: <span id="activeCount">0</span></p>
         </div>
 
-        <div class="upload-card" onclick="document.getElementById('pdfInput').click()">
-            <h2 style="margin:0;">📄 Select PDF File</h2>
-            <p style="opacity: 0.6; margin-top: 10px;">Upload PDF to extract pages as high-quality images</p>
-            <input type="file" id="pdfInput" hidden accept="application/pdf">
-        </div>
-
-        <div class="ad-container">
-            <script>(function(s){s.dataset.zone='10440034',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-        </div>
-
-        <div class="loader" id="loader">Processing PDF Pages... Please wait.</div>
-
-        <div class="image-grid" id="imageGrid"></div>
-
-        <div class="ad-container">
-            <script src="https://quge5.com/88/tag.min.js" data-zone="200420" async data-cfasync="false"></script>
-        </div>
+        <div class="insta-grid" id="instaGrid">
+            </div>
 
         <div class="seo-box">
-            <h2>High-Quality PDF to Image Conversion Engine</h2>
-            <p>In the digital ecosystem of 2026, the ability to quickly extract content from rigid formats is essential. <strong>YouTubeHelper's PDF to Image Converter</strong> is a sophisticated web utility that allows you to transform static PDF documents into versatile PNG or JPEG images. Whether you need to share a specific page from an eBook on social media, extract a chart for a presentation, or simply view documents more easily on mobile devices, our tool provides a seamless, high-fidelity experience.</p>
+            <h2>Ultimate Guide to Boosting Instagram Engagement with Multi-Viewer</h2>
+            <p>Welcome to the first-of-its-kind <strong>Instagram Multi-Reel Booster</strong> tool. In the competitive era of social media, engagement signals are crucial for the Instagram algorithm to push your content to the "Explore" page. Our tool is specifically designed for creators, digital marketers, and social media managers who need to monitor, review, or boost the visibility of their Instagram Reels through a centralized, multi-stream dashboard. By allowing up to 20 simultaneous Reel instances, YouTubeHelper (InstaHelper) saves you the trouble of switching between multiple devices or browser tabs.</p>
 
-            <p><strong>Professional Rendering Technology:</strong> We utilize the <em>PDF.js</em> library, the same technology used by top-tier browsers, to ensure that every font, vector, and image within your PDF is rendered perfectly. Unlike many online converters that produce blurry results, our engine maintains the original resolution of the document. Each page is processed as an individual canvas element, allowing you to preview the content before downloading, ensuring you get the exact visual output you need.</p>
+            <p><strong>Optimize Your Content Strategy:</strong> A Reel's success often depends on its initial playback frequency and retention. With our multi-viewer, you can analyze your content side-by-side, check for playback glitches across multiple sessions, and ensure that your visuals and audio are perfectly synced. This tool mimics a multi-browser environment, providing each Reel its own slot within a responsive 9:16 portrait grid. This vertical-first design ensures that you see the content exactly as it appears on a mobile screen, providing a high-fidelity auditing experience.</p>
 
-            <p><strong>Client-Side Security & Privacy:</strong> Your data security is our hallmark. Most PDF converters require you to upload your sensitive files to their cloud servers, which can be a significant privacy risk. YouTubeHelper works differently. The entire conversion process happens locally on your computer. Your PDF file never leaves your browser, and no data is ever transmitted to our servers. This ensures 100% privacy for legal documents, personal records, and private creative works.</p>
+            <p><strong>Seamless Integration & Privacy:</strong> Using the Instagram Multi-Reel Booster is incredibly simple. You only need to copy the link of your Reel from the Instagram app or website and paste it into our secure search bar. Our system automatically converts the URL into an embeddable format. We value your privacy above all else—this tool operates locally on your browser. We do not store your Instagram credentials, session cookies, or the links you process. It is a 100% safe, web-based utility designed for performance-minded users.</p>
 
-            <p><strong>Efficiency for Modern Creators:</strong> We have designed the interface to be as intuitive as possible. With a simple "One-Click Extract" system, you can process multi-page documents in seconds. Once the pages are rendered, you can choose to download individual images, making it a perfect tool for batch processing. Our ad-free, clutter-free environment is built for professional productivity. Elevate your document workflow today with the most secure PDF to image solution on the web.</p>
+            <p><strong>System Efficiency:</strong> Running multiple instances of Instagram can typically drain your device's RAM and CPU. However, our tool uses optimized iFrame embedding, which consumes significantly less power than opening 20 separate browser tabs. Whether you are on a high-end PC or a modern smartphone, the grid will automatically adjust to give you the smoothest possible experience. Experience the future of Instagram content management and take your Reel engagement to the next level with our professional Multi-Booster engine today.</p>
         </div>
     </div>
 
     <script>
-        const pdfInput = document.getElementById('pdfInput');
-        const imageGrid = document.getElementById('imageGrid');
-        const loader = document.getElementById('loader');
+        let count = 0;
+        const maxSlots = 20;
 
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        function addReel() {
+            const input = document.getElementById('instaLink');
+            let url = input.value.trim();
+            const grid = document.getElementById('instaGrid');
 
-        pdfInput.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            if (!url.includes("instagram.com")) {
+                alert("Please enter a valid Instagram Reel link!");
+                return;
+            }
 
-            imageGrid.innerHTML = '';
-            loader.style.display = 'block';
+            if (count >= maxSlots) {
+                alert("Maximum 20 slots reached!");
+                return;
+            }
 
-            const reader = new FileReader();
-            reader.onload = async function() {
-                const typedarray = new Uint8Array(this.result);
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
+            // Standardize URL for embedding
+            if (!url.endsWith("/")) url += "/";
+            const embedUrl = url + "embed/";
 
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+            count++;
+            document.getElementById('activeCount').innerText = count;
 
-                    // Create UI Card
-                    const card = document.createElement('div');
-                    card.className = 'page-card';
-                    
-                    const downloadBtn = document.createElement('button');
-                    downloadBtn.className = 'btn-download';
-                    downloadBtn.innerText = `Download Page ${i}`;
-                    downloadBtn.onclick = () => {
-                        // Redirect/Open direct link on download
-                        window.open('https://otieu.com/4/10439760', '_blank');
-                        
-                        const link = document.createElement('a');
-                        link.download = `Page-${i}.png`;
-                        link.href = canvas.toDataURL('image/png');
-                        link.click();
-                    };
+            const slot = document.createElement('div');
+            slot.className = 'insta-slot';
+            slot.innerHTML = `
+                <div class="slot-header">
+                    <span>Instance #${count}</span>
+                    <button class="remove-btn" onclick="removeSlot(this)">REMOVE</button>
+                </div>
+                <iframe src="${embedUrl}" scrolling="no" allowtransparency="true"></iframe>
+            `;
+            grid.appendChild(slot);
+            input.value = "";
+        }
 
-                    card.appendChild(canvas);
-                    card.appendChild(downloadBtn);
-                    imageGrid.appendChild(card);
-                }
-                loader.style.display = 'none';
-            };
-            reader.readAsArrayBuffer(file);
-        });
+        function removeSlot(btn) {
+            btn.closest('.insta-slot').remove();
+            count--;
+            document.getElementById('activeCount').innerText = count;
+        }
     </script>
 </body>
 </html>
