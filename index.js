@@ -1215,7 +1215,6 @@ app.post('/popup', async (req, res) => {
 // 9. FIXED YOUTUBE HITTER (ONE-BY-ONE WITH TAP-TO-PLAY)
 // ===================================================================
 const puppeteerExtra = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 // Stealth plugin initialize
 if (puppeteerExtra.plugins.length === 0) {
