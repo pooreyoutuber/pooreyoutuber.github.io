@@ -1046,7 +1046,7 @@ app.post('/start-Proxyium', async (req, res) => {
                 await runProxyiumTask(keyword, targetUrl, i);
 
                 if (i < totalViews) {
-                    // RAM clear karne ke liye bada break har session ke baad
+                    // RAM clear karne ke liye bada ak har session ke baad
                     const restTime = 15000; // 15 seconds gap
                     console.log(`[WAIT] Sleeping ${restTime/1000}s before next view...`);
                     await new Promise(r => setTimeout(r, restTime));
@@ -1064,153 +1064,152 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. TOOL POPUP (ADVANCED HUMAN SIMULATION & AD CLICKER)
 // ===================================================================
+ // ===================================================================
+// 7. TOOL POPUP (ADVANCED HUMAN SIMULATION & AD CLICKER)
+// ===================================================================
 
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // 1. Random Device & Browser Simulation
+        // 1. Random Device & Browser Simulation (Mozilla, Chrome, Safari)
         const devices = [
-            { name: 'Desktop-Chrome', ua: USER_AGENTS[0], viewport: { width: 1920, height: 1080 } },
-            { name: 'Desktop-Safari', ua: USER_AGENTS[1], viewport: { width: 1440, height: 900 } },
-            { name: 'Mobile-Android', ua: USER_AGENTS[2], viewport: { width: 360, height: 740 } },
-            { name: 'Mobile-iPhone', ua: USER_AGENTS[3], viewport: { width: 390, height: 844 } },
-            { name: 'Tablet-iPad', ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", viewport: { width: 810, height: 1080 } }
+            { name: 'Chrome-Desktop', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", viewport: { width: 1920, height: 1080 } },
+            { name: 'Safari-Mac', ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15", viewport: { width: 1440, height: 900 } },
+            { name: 'Mozilla-Firefox', ua: "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0", viewport: { width: 1366, height: 768 } },
+            { name: 'Mobile-Android', ua: "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", viewport: { width: 360, height: 800 } },
+            { name: 'Tablet-iPad', ua: "Mozilla/5.0 (iPad; CPU OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", viewport: { width: 820, height: 1180 } }
         ];
         const device = devices[Math.floor(Math.random() * devices.length)];
 
-        // 2. Random Referrer Rotation (LinkedIn, Reddit, etc.)
-        const referrers = [
-            'https://www.linkedin.com/',
-            'https://www.reddit.com/',
-            'https://t.co/', 
-            'https://www.google.com/',
-            'https://www.facebook.com/'
-        ];
+        // 2. Random Referrer (LinkedIn, Reddit, etc.)
+        const referrers = ['https://www.linkedin.com/', 'https://www.reddit.com/', 'https://www.google.com/', 'https://t.co/'];
         const selectedReferrer = referrers[Math.floor(Math.random() * referrers.length)];
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
+        
+        // Clear Cache & History before starting
+        const client = await page.target().createCDPSession();
+        await client.send('Network.clearBrowserCache');
+        await client.send('Network.clearBrowserCookies');
+
         await page.setUserAgent(device.ua);
         await page.setViewport(device.viewport);
 
-        console.log(`\n[VIEW #${viewNumber}] Device: ${device.name} | Ref: ${selectedReferrer}`);
+        console.log(`\n[VIEW #${viewNumber}] Browser: ${device.name} | Ref: ${selectedReferrer}`);
 
         // 3. Visit Target Site
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000, 
-            referer: selectedReferrer 
-        });
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000, referer: selectedReferrer });
 
-        // --- 🔥 SMART POP-UP HANDLING (AdSense/Cookie Consent) ---
+        // --- 🔥 SMART POP-UP HANDLING (Ratio 20:15:15) ---
         try {
-            await new Promise(r => setTimeout(r, 4000)); // Pop-up load hone ka wait
-            const buttons = await page.$$('button, [role="button"], a, ins, div');
+            await new Promise(r => setTimeout(r, 5000)); // Wait for AdSense Popup
             const cycle = viewNumber % 50; 
+            const buttons = await page.$$('button, [role="button"], a, ins, div');
 
             let actionTaken = false;
             for (let btn of buttons) {
                 const text = await page.evaluate(el => el.innerText ? el.innerText.toLowerCase() : "", btn);
-                
-                if (cycle < 20) { // 20 times: CLOSE/REJECT
+
+                if (cycle < 20) { // 20/50: CLOSE/REJECT
                     if (/close|reject|deny|decline|x|✖/.test(text)) {
                         await btn.click();
-                        console.log(`[ACTION] Pop-up Closed (REJECT)`);
+                        console.log(`[POPUP] Action: REJECT/CLOSE`);
                         actionTaken = true; break;
                     }
-                } else if (cycle >= 20 && cycle < 35) { // 15 times: CONSENT
+                } else if (cycle >= 20 && cycle < 35) { // 15/50: CONSENT
                     if (/accept|agree|allow|consent|ok/.test(text)) {
                         await btn.click();
-                        console.log(`[ACTION] Pop-up Accepted (CONSENT)`);
+                        console.log(`[POPUP] Action: CONSENT/ACCEPT`);
                         actionTaken = true; break;
                     }
-                } else { // 15 times: MANAGE
+                } else { // 15/50: MANAGE
                     if (/manage|options|settings|customize/.test(text)) {
                         await btn.click();
-                        console.log(`[ACTION] Pop-up Managed (OPTIONS)`);
+                        console.log(`[POPUP] Action: MANAGE OPTIONS`);
                         await new Promise(r => setTimeout(r, 2000));
-                        const allSelect = await page.$('input[type="checkbox"], .select-all');
-                        if (allSelect) await allSelect.click();
-                        const save = await page.$('button[id*="save"], .save-settings');
-                        if (save) await save.click();
+                        // Select all and Save logic
+                        await page.evaluate(() => {
+                            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                            checkboxes.forEach(c => c.checked = true);
+                        });
+                        const saveBtn = await page.$('button[id*="save"], .save-settings');
+                        if (saveBtn) await saveBtn.click();
                         actionTaken = true; break;
                     }
                 }
             }
-        } catch (e) { console.log("[INFO] No Pop-up detected."); }
+        } catch (e) { console.log("[INFO] No popup found."); }
 
-        // 4. Realistic Behavior (Scroll & Mouse Move)
-        const stayTime = randomInt(30000, 40000);
+        // 4. Stay 30-45s with Random Scrolling and Mouse Movement
+        const stayTime = randomInt(30000, 45000);
         const startTime = Date.now();
 
         while (Date.now() - startTime < stayTime) {
-            await page.evaluate(() => window.scrollBy({ top: Math.floor(Math.random() * 500), behavior: 'smooth' }));
-            await page.mouse.move(randomInt(50, 800), randomInt(50, 600), { steps: 10 });
+            await page.evaluate(() => window.scrollBy({ top: Math.floor(Math.random() * 400), behavior: 'smooth' }));
+            await page.mouse.move(randomInt(50, 800), randomInt(50, 600), { steps: 5 });
             await new Promise(r => setTimeout(r, 5000));
 
-            // 🔥 AD CLICKER (Clicking 5-6 times per 20 views)
-            if (viewNumber % 4 === 0) { // Approx 25% chance (5 clicks in 20 views)
+            // 🔥 AD CLICKER (5-6 clicks per 20 views ratio)
+            if (viewNumber % 4 === 0) { // ~25% chance
                 const adSelectors = [
                     'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
-                    'a[href*="click"]', '.monetag-ad', 'iframe[src*="monetag"]'
+                    '.monetag-ad', 'a[href*="click"]', 'iframe[src*="monetag"]'
                 ];
                 for (let selector of adSelectors) {
                     const ad = await page.$(selector);
                     if (ad) {
                         const box = await ad.boundingBox();
-                        if (box && box.width > 10) {
-                            console.log(`\x1b[32m[AD-CLICK]\x1b[0m Clicking Ad at (${box.x}, ${box.y})`);
+                        if (box && box.width > 20) {
+                            console.log(`\x1b[32m[AD-CLICK]\x1b[0m Clicking Ad for Revenue...`);
                             await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                            await new Promise(r => setTimeout(r, 6000)); // Click ke baad 6 sec wait
-                            break;
+                            await new Promise(r => setTimeout(r, 6000)); // Wait 6 sec after click
+                            break; 
                         }
                     }
                 }
             }
         }
-        console.log(`[SUCCESS] View #${viewNumber} session finished.`);
+        console.log(`[SUCCESS] View #${viewNumber} completed.`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close(); // Browser close and clean memory
     }
 }
-
-// ===================================================================
-// Endpoint for Tool 7 (/popup) - SEQUENTIAL EXECUTION
-// ===================================================================
-app.post('/popup', async (req, res) => {
+     app.post('/popup', async (req, res) => {
     try {
         const { keyword, urls, views = 1000 } = req.body;
         if (!urls || !Array.isArray(urls)) return res.status(400).json({ success: false });
 
-        res.status(200).json({ success: true, message: "Task started: Sequential processing for RAM safety." });
+        res.status(200).json({ 
+            success: true, 
+            message: "Sequential Task Started: One browser at a time to prevent crash." 
+        });
 
-        // Background Worker (AWAIT used for one-by-one execution)
+        // Background Sequential Worker
         (async () => {
             for (let i = 1; i <= views; i++) {
                 const currentUrl = urls[(i - 1) % urls.length];
+                // Ek browser band hone tak doosra nahi khulega (await)
                 await runGscTaskpop(keyword, currentUrl, i);
                 
-                // Cooling break between browsers
-                await new Promise(r => setTimeout(r, 8000));
+                if (i < views) {
+                    console.log(`[SYSTEM] Cooling down 8s...`);
+                    await new Promise(r => setTimeout(r, 8000));
+                }
             }
-            console.log("--- ALL POPUP TASKS FINISHED ---");
         })();
     } catch (err) {
         console.error("Endpoint Error:", err);
     }
 });
-                
+
 // ===================================================================
 // 9. FIXED YOUTUBE HITTER (ONE-BY-ONE WITH TAP-TO-PLAY)
 // ===================================================================
