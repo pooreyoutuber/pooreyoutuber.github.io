@@ -1352,6 +1352,124 @@ app.post('/api/real-view-boost', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false });
     }
 });
+// ===================================================================
+// 10. ULTIMATE PROXY ENGINE (GOLOGIN + TIER ROTATION)
+// ===================================================================
+
+async function runUltimateProxyTask(keyword, url, viewNumber) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        });
+
+        const page = await browser.newPage();
+        
+        // Random Viewport (Mobile/PC/Tablet) simulation
+        const viewports = [
+            { width: 1920, height: 1080 }, // PC
+            { width: 375, height: 812 },   // Mobile
+            { width: 1024, height: 1366 }  // Tablet
+        ];
+        await page.setViewport(viewports[randomInt(0, 2)]);
+        await page.setUserAgent(USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)]);
+
+        // 1. Gologin Proxy Site kholna
+        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // 2. Tier-1 & Tier-2 Country Selection (12/8 Ratio)
+        const tier1 = ['United States', 'United Kingdom', 'Canada', 'Germany', 'France'];
+        const tier2 = ['India', 'Brazil', 'Turkey', 'Vietnam', 'Thailand'];
+        
+        // 20 views ke cycle mein ratio maintain karne ke liye logic
+        const cycleIndex = viewNumber % 20;
+        const selectedCountry = (cycleIndex < 12) ? tier1[randomInt(0, 4)] : tier2[randomInt(0, 4)];
+        
+        console.log(`[ULTIMATE] View #${viewNumber} | Country: ${selectedCountry}`);
+
+        // Dropdown se country select karna
+        await page.click('.v-select'); // Gologin dropdown selector
+        await page.waitForTimeout(1000);
+        await page.evaluate((country) => {
+            const options = Array.from(document.querySelectorAll('.v-list-item__title'));
+            const target = options.find(el => el.innerText.includes(country));
+            if (target) target.click();
+        }, selectedCountry);
+
+        // 3. Target URL enter karke 'Go' click karna
+        await page.type('input[placeholder*="Put a URL"]', url, { delay: 100 });
+        await page.keyboard.press('Enter');
+
+        // 4. Proxied Site behavior (30-50s stay)
+        const stayTime = randomInt(30000, 50000);
+        const startTime = Date.now();
+        console.log(`[ACTION] Staying on site via Proxy for ${stayTime/1000}s...`);
+
+        while (Date.now() - startTime < stayTime) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 5 });
+            await new Promise(r => setTimeout(r, 5000));
+
+            // 🔥 SMART AD CLICKER (3-4 clicks out of 20)
+            if (cycleIndex < 4 && Math.random() < 0.2) { 
+                // Banner, Push, aur Hidden ads ko target karne ke liye selectors
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], .ad-unit, [class*="hidden-ad"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+                    if (box && box.width > 5) {
+                        console.log(`[AD-CLICK] High-Value Ad Found! Clicking...`);
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
+                        break; 
+                    }
+                }
+            }
+        }
+
+        // 5. Clear History/Cookies simulation (Browser close handles this)
+        console.log(`[SUCCESS] View #${viewNumber} completed and history cleared.`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) await browser.close();
+    }
+}
+      app.post('/ultimate', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        if (!urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "URLs array is required." });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: `Ultimate Proxy Task Started. Processing views one-by-one to prevent crash.` 
+        });
+
+        // Background Worker (Sequential execution using await)
+        (async () => {
+            for (let i = 1; i <= views; i++) {
+                const currentUrl = urls[(i - 1) % urls.length];
+                
+                // Ek time par ek hi browser chalega taaki Render crash na ho
+                await runUltimateProxyTask(keyword, currentUrl, i);
+
+                // Cooling break between sessions
+                const breakTime = 10000; // 10 seconds
+                await new Promise(r => setTimeout(r, breakTime));
+            }
+            console.log("--- ALL ULTIMATE PROXY VIEWS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false });
+    }
+});
 
 //=====================================================
 // --- SERVER START ---
