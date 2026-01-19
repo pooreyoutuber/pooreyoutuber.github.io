@@ -1353,10 +1353,10 @@ app.post('/api/real-view-boost', async (req, res) => {
     }
 });
 // ===================================================================
-// 10. ULTIMATE GOLOGIN PROXY BOOSTER (ADVANCED ADS & TIER-1/2)
+// 10. ULTIMATE GOLOGIN BOOSTER (FIXED SELECTORS & ADVANCED ADS)
 // ===================================================================
 
-async function runUltimateGoLogin(targetUrl, keyword, viewNumber) {
+async function runUltimateGoLogin(targetUrl, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1373,100 +1373,101 @@ async function runUltimateGoLogin(targetUrl, keyword, viewNumber) {
         await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. GoLogin Proxy Page Load Karna
+        // 1. GoLogin Proxy Page Load
         console.log(`\n[TOOL-10] View #${viewNumber} | Target: ${targetUrl}`);
         await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. TIER 1 & TIER 2 Country Selection
-        const premiumCountries = ['us', 'gb', 'ca', 'de', 'fr', 'nl']; // US, UK, Canada, Germany, France, Netherlands
-        const selectedCountry = premiumCountries[Math.floor(Math.random() * premiumCountries.length)];
+        // 2. Country Change (Tier 1 & Tier 2)
+        const tier1_2 = ['us', 'gb', 'ca', 'de', 'fr', 'nl']; 
+        const randomCountry = tier1_2[Math.floor(Math.random() * tier1_2.length)];
         
-        console.log(`[ACTION] Setting Location to: ${selectedCountry.toUpperCase()}`);
-        await page.select('select#proxy-country', selectedCountry).catch(() => {}); 
+        console.log(`[ACTION] Selecting Country: ${randomCountry.toUpperCase()}`);
+        // Gologin dropdown handle
+        await page.waitForSelector('#proxy-country', { visible: true });
+        await page.select('#proxy-country', randomCountry);
         await new Promise(r => setTimeout(r, 2000));
 
-        // 3. URL Input & Navigation
-        await page.type('input[placeholder*="Enter URL"]', targetUrl, { delay: 100 });
-        await page.keyboard.press('Enter');
+        // 3. URL Input & Click Go (Using exact ID/Class)
+        console.log(`[ACTION] Putting URL in GoLogin...`);
+        // Gologin use 'input[name="url"]' or 'input#url'
+        const urlInput = 'input[name="url"]';
+        await page.waitForSelector(urlInput, { visible: true });
+        await page.click(urlInput, { clickCount: 3 }); // Clear existing text
+        await page.keyboard.press('Backspace');
+        await page.type(urlInput, targetUrl, { delay: 60 });
         
-        // Wait for proxy to tunnel (Important: GoLogin takes time)
-        console.log(`[WAIT] Tunneling through ${selectedCountry}...`);
-        await new Promise(r => setTimeout(r, 15000)); 
+        // Click the 'Go' button (Usually the button next to input)
+        await page.keyboard.press('Enter');
 
-        // 4. Advanced Behavior & Multi-Type Ad Clicker
-        const stayTime = randomInt(40000, 55000); 
+        // 4. Wait for Proxy Tunneling
+        console.log(`[WAIT] Tunneling via ${randomCountry}...`);
+        await new Promise(r => setTimeout(r, 20000)); // Proxy loading takes time
+
+        // 5. Advanced Behavior (30-50 Seconds)
+        const stayTime = randomInt(35000, 50000);
         const startTime = Date.now();
 
         while (Date.now() - startTime < stayTime) {
-            // Human-like scrolling
-            const scrollDist = randomInt(300, 700);
-            await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
-            await page.mouse.move(randomInt(100, 1000), randomInt(100, 600), { steps: 10 });
+            // Human-like Random Movement
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 500), { steps: 8 });
             await new Promise(r => setTimeout(r, 5000));
 
-            // 🔥 ADVANCED ADS DETECTION (Banner, Iframe, Push-up)
-            // Isme hum har type ke common ad selectors ko target kar rahe hain
-            const adSelectors = [
-                'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
-                '.ad-slot', '[id^="div-gpt-ad"]', '.banner-ad', '.push-ad'
-            ];
+            // 6. 🔥 ADVANCED ADS CLICKER (Banner, Push-up, Iframe)
+            if (Math.random() < 0.25) { 
+                const adSelectors = [
+                    'ins.adsbygoogle', 'iframe[src*="googleads"]', 
+                    'a[href*="doubleclick"]', '.ad-slot', '#ad-container',
+                    'iframe[id^="aswift"]', '.push-up-ad', '.banner-ads'
+                ];
 
-            if (Math.random() < 0.25) { // 25% High Probability for Revenue
-                for (let selector of adSelectors) {
-                    const adElement = await page.$(selector);
-                    if (adElement) {
-                        const box = await adElement.boundingBox();
-                        if (box && box.width > 10 && box.height > 10) {
-                            console.log(`\x1b[32m[HIT]\x1b[0m Safe Ad Click Performed (${selector})`);
-                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                            await new Promise(r => setTimeout(r, 15000)); // Ad page par stay (CTR Safety)
+                for (const selector of adSelectors) {
+                    const ad = await page.$(selector);
+                    if (ad) {
+                        const box = await ad.boundingBox();
+                        if (box && box.width > 20 && box.height > 20) {
+                            console.log(`[HIT] Advanced Ad Found! Clicking: ${selector}`);
+                            // Move mouse to ad and click
+                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                            await new Promise(r => setTimeout(r, 12000)); // Stay on ad page
                             break; 
                         }
                     }
                 }
             }
         }
-        console.log(`[SUCCESS] Session #${viewNumber} Completed Successfully.`);
+        console.log(`[SUCCESS] Session #${viewNumber} Finished.`);
 
     } catch (error) {
-        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
-app.post('/ultimate', async (req, res) => {
+    app.post('/ultimate', async (req, res) => {
     try {
-        const { keyword, urls, views = 1000 } = req.body;
+        const { urls, views = 1000 } = req.body;
 
         if (!urls || !Array.isArray(urls)) {
-            return res.status(400).json({ success: false, message: "URLs Array is required!" });
+            return res.status(400).json({ success: false, message: "URLs required" });
         }
 
-        // Response for Render Stability
-        res.status(200).json({ 
-            success: true, 
-            message: `GoLogin Ultimate Task Started for ${urls.length} sites.` 
-        });
+        res.status(200).json({ success: true, message: "GoLogin Task Started (Sequential Mode)" });
 
-        // Background Loop (1-by-1 execution to prevent crash)
+        // Background Queue
         (async () => {
-            console.log(`\n--- STARTING TIER-1 PROXY REVENUE TASK ---`);
             for (let i = 1; i <= views; i++) {
-                // Multi-site rotation logic
-                const activeUrl = urls[(i - 1) % urls.length];
+                const target = urls[(i - 1) % urls.length];
+                await runUltimateGoLogin(target, i);
                 
-                await runUltimateGoLogin(activeUrl, keyword, i);
-
-                // Gap between browsers to clear RAM
-                const cooldown = 12000; 
-                console.log(`[COOLDOWN] Waiting ${cooldown/1000}s...`);
+                // Render RAM Protection
+                const cooldown = 10000;
+                console.log(`[SYSTEM] Cooling down ${cooldown/1000}s...`);
                 await new Promise(r => setTimeout(r, cooldown));
             }
         })();
-
     } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
+        console.error(err);
     }
 });
 
