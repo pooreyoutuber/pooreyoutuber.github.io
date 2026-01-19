@@ -1457,8 +1457,9 @@ async function runUltimateProxyTask(keyword, url, viewNumber) {
             for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {}); // This clears session/cookies
         }
+    }
 }
-      app.post('/ultimate', async (req, res) => {
+    app.post('/ultimate', async (req, res) => {
     try {
         const { keyword, urls, views = 1000 } = req.body;
 
@@ -1493,9 +1494,6 @@ async function runUltimateProxyTask(keyword, url, viewNumber) {
         if (!res.headersSent) res.status(500).json({ success: false });
     }
 });
-
-
- 
 //=====================================================
 // --- SERVER START ---
 // ===================================================================
