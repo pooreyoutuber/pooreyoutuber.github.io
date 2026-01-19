@@ -1353,137 +1353,129 @@ app.post('/api/real-view-boost', async (req, res) => {
     }
 });
 // ===================================================================
-// Tool 10: Ultimate Proxy Booster (Gologin Web Proxy Automation)
+// 10. ULTIMATE PROXY ENGINE (GOLOGIN INTERFACE AUTOMATION)
 // ===================================================================
 
-const tier1Countries = ['us', 'gb', 'ca', 'de', 'fr', 'au']; // US, UK, Canada, Germany, France, Australia
-const tier2Countries = ['in', 'br', 'mx', 'es', 'it', 'nl']; // India, Brazil, Mexico, etc.
-
-async function runUltimateProxyTask(viewNumber, targetUrl) {
+async function runUltimateProxyTask(keyword, targetUrl, viewNumber) {
     let browser;
     try {
-        // Render par crash se bachne ke liye limited args
         browser = await puppeteer.launch({
             headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
 
         const page = await browser.newPage();
-
-        // 1. Random Device Selection (PC, Tablet, Mobile)
+        
+        // Random Device Selection (PC, Mobile, Tablet)
         const devices = [
             { name: 'PC', width: 1920, height: 1080 },
-            { name: 'Tablet', width: 768, height: 1024 },
-            { name: 'Mobile', width: 375, height: 667 }
+            { name: 'Mobile', width: 375, height: 812 },
+            { name: 'Tablet', width: 1024, height: 1366 }
         ];
         const device = devices[Math.floor(Math.random() * devices.length)];
         await page.setViewport({ width: device.width, height: device.height });
-        console.log(`[VIEW #${viewNumber}] Device: ${device.name}`);
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 2. Gologin Proxy Site par jana
+        console.log(`\n[VIEW #${viewNumber}] Device: ${device.name} | Opening Gologin Proxy...`);
+
+        // Step 1: Gologin Proxy Site kholna
         await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 3. Location Select karna (12 views Tier 1, 8 views Tier 2 logic)
-        // 20 views ke cycle mein view number ke hisab se logic:
-        const isTier1 = (viewNumber % 20) <= 12 && (viewNumber % 20) !== 0;
-        const selectedCountry = isTier1 
-            ? tier1Countries[Math.floor(Math.random() * tier1Countries.length)]
-            : tier2Countries[Math.floor(Math.random() * tier2Countries.length)];
+        // Step 2: Country Selection Logic (Tier 1 vs Tier 2)
+        const tier1 = ['United States', 'Canada', 'United Kingdom', 'Germany', 'France'];
+        const tier2 = ['India', 'Brazil', 'Turkey', 'Vietnam', 'Thailand'];
+        
+        const cycleIndex = (viewNumber - 1) % 20;
+        const selectedCountry = (cycleIndex < 12) ? tier1[Math.floor(Math.random() * tier1.length)] : tier2[Math.floor(Math.random() * tier2.length)];
 
-        console.log(`[LOCATION] Selecting ${isTier1 ? 'Tier 1' : 'Tier 2'}: ${selectedCountry}`);
+        // United States wale box par click karna dropdown kholne ke liye
+        await page.waitForSelector('.v-select__selection', { visible: true });
+        await page.click('.v-select__selection'); 
+        await new Promise(r => setTimeout(r, 2000)); // Dropdown khulne ka wait
 
-        // Gologin dropdown automation (Video ke mutabik)
-        try {
-            await page.waitForSelector('.select-input', { timeout: 5000 });
-            await page.click('.select-input'); // Dropdown khola
-            await page.waitForTimeout(1000);
-            // Country code select karna
-            await page.click(`li[data-value="${selectedCountry}"]`); 
-        } catch (e) {
-            console.log("Dropdown click failed, using default location.");
-        }
+        // Scrolling aur Country select karna
+        await page.evaluate((country) => {
+            const elements = Array.from(document.querySelectorAll('.v-list-item__title'));
+            const target = elements.find(el => el.innerText.trim().includes(country));
+            if (target) {
+                target.scrollIntoView();
+                target.click();
+            }
+        }, selectedCountry);
+        console.log(`[COUNTRY] Selected: ${selectedCountry}`);
 
-        // 4. Search Bar mein Site daalna
-        console.log(`[SEARCH] Typing URL: ${targetUrl}`);
-        await page.waitForSelector('input#url-input');
-        await page.type('input#url-input', targetUrl, { delay: 100 });
+        // Step 3: URL Daalna aur 'GO' Dabana
+        const inputSelector = 'input[placeholder*="Put a URL"]';
+        await page.waitForSelector(inputSelector);
+        await page.type(inputSelector, targetUrl, { delay: 100 });
+        
+        // Go Button (Proxy connect karne ke liye)
         await page.keyboard.press('Enter');
+        console.log(`[PROXY] Connecting to ${targetUrl}...`);
 
-        // 5. Proxy Site Load Hone ka wait
-        await page.waitForTimeout(15000); 
+        // Step 4: Page Load hone ka wait (Proxy loading slow hoti he)
+        await new Promise(r => setTimeout(r, 15000)); 
 
-        // 6. Random Movement & Scrolling (30-50 Seconds)
-        const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
-        const start = Date.now();
-        
-        console.log(`[ENGAGEMENT] Scrolling for ${stayTime/1000}s...`);
-        
-        let adClicked = false;
-        while (Date.now() - start < stayTime) {
-            // Random Scroll
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-            // Random Mouse Move
-            await page.mouse.move(Math.random() * 500, Math.random() * 500);
-            await page.waitForTimeout(3000);
+        // Step 5: Scrolling & Mouse Movement (30-50 Sec)
+        const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1)) + 30000;
+        const startTime = Date.now();
 
-            // 7. AD CLICKER (3-4 clicks out of 20 views)
-            if (!adClicked && Math.random() < 0.2) { // ~20% chance
-                const adSelectors = [
-                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
-                    'a[href*="doubleclick"]', '.ad-unit', '[class*="push-ad"]'
-                ];
-                
-                for (let selector of adSelectors) {
-                    const ad = await page.$(selector);
-                    if (ad) {
-                        const box = await ad.boundingBox();
-                        if (box && box.width > 5) {
-                            console.log("🚀 [AD CLICK] Target identified and clicked!");
-                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                            adClicked = true;
-                            await page.waitForTimeout(10000); // Ad khulne ke baad wait
-                            break;
-                        }
+        while (Date.now() - startTime < stayTime) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await page.mouse.move(Math.random()*500, Math.random()*500, { steps: 5 });
+            await new Promise(r => setTimeout(r, 5000));
+
+            // 🔥 SMART AD CLICKER (3-4 clicks in 20 views cycle)
+            if (cycleIndex < 4 && Math.random() < 0.3) {
+                // Banner, Push, aur Hidden ads dhundna
+                const ad = await page.$('ins.adsbygoogle, iframe[src*="googleads"], .ad-unit, [id^="aswift"]');
+                if (ad) {
+                    const rect = await ad.boundingBox();
+                    if (rect && rect.width > 20) {
+                        console.log(`[CLICK] Ad Clicked for Revenue!`);
+                        await page.mouse.click(rect.x + rect.width/2, rect.y + rect.height/2);
+                        await new Promise(r => setTimeout(r, 12000)); // Ad page stay
+                        break; 
                     }
                 }
             }
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        console.log(`[SUCCESS] View #${viewNumber} Complete.`);
 
-    } catch (err) {
-        console.log(`[ERROR] View #${viewNumber}: ${err.message}`);
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
-            // Cookies aur History automatically clear hoti hai naya browser instance band hone par
+            // Browser close karne se automatically history/cookies clear ho jati hain
             await browser.close();
-            console.log(`[CLEANUP] Browser closed and Session cleared.`);
         }
     }
 }
-
-// Tool 10 Endpoint
-app.post('/ultimate', async (req, res) => {
+   app.post('/ultimate', async (req, res) => {
     try {
-        const { keyword, urls, views = 20 } = req.body;
-        
+        const { keyword, urls, views = 1000 } = req.body;
+
+        if (!urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "URLs array required" });
+        }
+
         res.status(200).json({ 
             success: true, 
-            message: "Ultimate Proxy Task Started (Sequential Mode)" 
+            message: "Ultimate Proxy Booster Started. One-by-one browsers will open." 
         });
 
-        // Background Loop (One by one execution to save RAM)
+        // Background worker using AWAIT to prevent Render crash
         (async () => {
-            for (let i = 1; i <= parseInt(views); i++) {
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                // AWAIT ensures one browser at a time
-                await runUltimateProxyTask(i, randomUrl);
+            for (let i = 1; i <= views; i++) {
+                const currentSite = urls[(i - 1) % urls.length];
                 
-                // 10 second gap between browsers
-                console.log("[SYSTEM] Cooling down 10s...");
+                // Ek time par sirf ek hi browser chalega (Render RAM Safe)
+                await runUltimateProxyTask(keyword, currentSite, i);
+
+                // Cooling Break
                 await new Promise(r => setTimeout(r, 10000));
             }
-            console.log("--- ALL ULTIMATE VIEWS FINISHED ---");
         })();
 
     } catch (err) {
@@ -1491,9 +1483,9 @@ app.post('/ultimate', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false });
     }
 });
-            
 
-//=====================================================
+
+//==================================================
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
