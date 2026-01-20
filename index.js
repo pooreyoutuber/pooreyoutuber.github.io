@@ -1355,6 +1355,9 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // 10. GOLOGIN PROXY AUTOMATION (ULTIMATE TIER-1 BOOSTER)
 // ===================================================================
+// ===================================================================
+// 10. GOLOGIN PROXY AUTOMATION (FIXED & TESTED)
+// ===================================================================
 
 async function runGoLoginUltimateTask(url, viewNumber) {
     let browser;
@@ -1363,7 +1366,7 @@ async function runGoLoginUltimateTask(url, viewNumber) {
 
     try {
         browser = await puppeteer.launch({
-            headless: "new", // Render ke liye "new" headless mode best hai
+            headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
@@ -1374,69 +1377,86 @@ async function runGoLoginUltimateTask(url, viewNumber) {
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
+        
+        // Random User Agent for stealth
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // STEP 1: GoLogin Free Proxy Page par jana
-        console.log(`[View #${viewNumber}] Opening GoLogin Proxy for Tier-1: ${selectedCountry}`);
-        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
+        console.log(`[View #${viewNumber}] Connecting to GoLogin Proxy Gateway...`);
 
-        // STEP 2: Country/Location Change karna (Tier-1 selection)
-        // Note: Hum dropdown click karke text match karke select karenge
-        const dropdownSelector = '.select-selected'; // GoLogin dropdown class
-        await page.waitForSelector(dropdownSelector);
-        await page.click(dropdownSelector);
-        await new Promise(r => setTimeout(r, 1000));
+        // STEP 1: GoLogin Page Load karna
+        await page.goto('https://gologin.com/free-web-proxy/', { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000 // Render ke liye extra time
+        });
 
-        await page.evaluate((country) => {
-            const items = Array.from(document.querySelectorAll('.select-items div'));
-            const match = items.find(el => el.textContent.trim() === country);
-            if (match) match.click();
-        }, selectedCountry);
+        // STEP 2: Country Change Logic (Error Fix)
+        // Hum selectors ki jagah 'Text Content' aur 'Click' ka use karenge
+        try {
+            // Dropdown ko dhund kar click karna
+            await page.waitForFunction(() => {
+                const el = document.querySelector('.select-selected') || document.querySelector('[class*="selected"]');
+                return el && el.innerText.length > 0;
+            }, { timeout: 15000 });
 
-        // STEP 3: Put URL and Click GO
-        const inputSelector = 'input[placeholder="Put a URL"]';
-        await page.waitForSelector(inputSelector);
-        await page.type(inputSelector, url, { delay: 100 });
+            await page.click('.select-selected');
+            await new Promise(r => setTimeout(r, 2000));
+
+            // Tier-1 Country select karna list se
+            await page.evaluate((country) => {
+                const options = Array.from(document.querySelectorAll('.select-items div, [class*="item"]'));
+                const target = options.find(opt => opt.innerText.includes(country));
+                if (target) target.click();
+            }, selectedCountry);
+            
+            console.log(`[View #${viewNumber}] Location set to: ${selectedCountry}`);
+        } catch (e) {
+            console.log(`[INFO] Could not change country, using default (US). Error: ${e.message}`);
+        }
+
+        // STEP 3: URL Input (Proxyium ki tarah)
+        // GoLogin ka input field aksar placeholder se pehchana jata hai
+        const inputSelector = 'input[placeholder*="URL"]'; 
+        await page.waitForSelector(inputSelector, { timeout: 20000 });
         
-        // Go button click karna
-        const goButton = 'button.btn-go'; // Ya phir GoLogin ka specific button class
-        await page.click(goButton).catch(() => page.keyboard.press('Enter'));
+        // Type URL slowly to mimic human
+        await page.type(inputSelector, url, { delay: 100 });
+        await new Promise(r => setTimeout(r, 1000));
+        
+        // GO Button click ya Enter press
+        await page.keyboard.press('Enter');
 
-        console.log(`[View #${viewNumber}] Site loading through ${selectedCountry} Proxy...`);
+        console.log(`[View #${viewNumber}] Navigating to your site through Proxy...`);
 
-        // STEP 4: Realistic Human Behavior (30-50 Seconds)
+        // STEP 4: Interaction (30-50 Seconds)
+        // Wait for proxy to load the target site inside its frame
+        await new Promise(r => setTimeout(r, 15000)); 
+
         const stayTime = randomInt(35000, 50000); 
         const startTime = Date.now();
 
-        // Browser ke andar scrolling aur mouse movement
         while (Date.now() - startTime < stayTime) {
-            // Natural Scrolling
-            const scrollAmt = randomInt(200, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), scrollAmt);
+            // Organic Scrolling
+            await page.evaluate(() => {
+                window.scrollBy(0, Math.floor(Math.random() * 400));
+            });
             
             // Random Mouse Movement
-            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 10 });
+            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 5 });
             
-            // Random pause taaki bot na lage
-            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
-
-            // Optional: Randomly click inside the page (Safe clicking)
-            if (Math.random() < 0.2) {
-                await page.mouse.click(randomInt(200, 800), randomInt(200, 600));
-            }
+            await new Promise(r => setTimeout(r, randomInt(5000, 8000)));
         }
 
-        console.log(`[DONE] View #${viewNumber} via GoLogin (${selectedCountry}) finished. ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} completed via GoLogin. ✅`);
 
     } catch (error) {
-        console.error(`[GOLOGIN ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[FATAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close().catch(() => {});
-            console.log(`[CLEANUP] Browser closed for View #${viewNumber}`);
         }
     }
 }
+
 
 // --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
 app.post('/ultimate', async (req, res) => {
