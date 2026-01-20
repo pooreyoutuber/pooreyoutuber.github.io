@@ -1356,12 +1356,11 @@ app.post('/api/real-view-boost', async (req, res) => {
 // 10. ULTIMATE GOLOGIN TIER-1 & TIER-2 ROTATOR + ADVANCED AD-CLICKER
 // ===================================================================
 // ===================================================================
-// 10. ULTIMATE GOLOGIN - VIDEO ACCURATE METHOD (FIXED)
+// 10. ULTIMATE GOLOGIN - MULTI-TAB & COUNTRY ROTATOR (FINAL)
 // ===================================================================
 
 async function runGoLoginUltimateTask(url, viewNumber) {
     let browser;
-    // Tier-1 aur Tier-2 ka ratio (12:8 logic)
     const tier1 = ['Japan', 'United Kingdom', 'Canada', 'France', 'Germany', 'Netherlands'];
     const tier2 = ['India', 'Brazil', 'Turkey', 'Spain', 'Italy'];
     const selectedCountry = Math.random() < 0.6 
@@ -1378,13 +1377,10 @@ async function runGoLoginUltimateTask(url, viewNumber) {
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[View #${viewNumber}] Target Country: ${selectedCountry}`);
+        // 1. GoLogin Proxy Gateway kholna
+        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2' });
 
-        // STEP 1: GoLogin Page Load
-        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // STEP 2: Location "United States" par Tap karna (Jaisa video mein hai)
-        // Hum text search kar rahe hain kyunki class fail ho sakti hai
+        // 2. Country Change (Video Step)
         const countryTrigger = await page.evaluateHandle(() => {
             const elements = Array.from(document.querySelectorAll('div, span, p'));
             return elements.find(el => el.textContent.trim() === 'United States');
@@ -1392,77 +1388,71 @@ async function runGoLoginUltimateTask(url, viewNumber) {
 
         if (countryTrigger) {
             await countryTrigger.click();
-            console.log("Clicked on 'United States' dropdown...");
-        } else {
-            // Fallback click agar text na mile
-            await page.click('.select-selected').catch(() => {});
+            await new Promise(r => setTimeout(r, 2000));
+            await page.evaluate((target) => {
+                const items = Array.from(document.querySelectorAll('.select-items div'));
+                const match = items.find(el => el.textContent.trim().includes(target));
+                if (match) { match.scrollIntoView(); match.click(); }
+            }, selectedCountry);
         }
-        
-        await new Promise(r => setTimeout(r, 2000));
 
-        // STEP 3: Scroll Down & Select New Country
-        await page.evaluate((target) => {
-            const items = Array.from(document.querySelectorAll('.select-items div'));
-            const match = items.find(el => el.textContent.trim().includes(target));
-            if (match) {
-                match.scrollIntoView();
-                match.click();
-            }
-        }, selectedCountry);
-
-        console.log(`[View #${viewNumber}] Country changed to ${selectedCountry}`);
-        await new Promise(r => setTimeout(r, 1500));
-
-        // STEP 4: Put URL in Input (Proxyium ki tarah)
+        // 3. URL daalna
         const inputSelector = 'input[placeholder*="Put a URL"]';
-        await page.waitForSelector(inputSelector, { timeout: 10000 });
+        await page.waitForSelector(inputSelector);
         await page.type(inputSelector, url, { delay: 100 });
 
-        // STEP 5: Go button par tap karna
+        // 4. GO Button Click & Wait for New Tab (Aapka point: 2nd Tab khulega)
         const goButton = await page.evaluateHandle(() => {
             return Array.from(document.querySelectorAll('button')).find(b => b.textContent.toLowerCase().includes('go'));
         });
-        
-        if (goButton) {
-            await goButton.click();
-        } else {
-            await page.keyboard.press('Enter');
-        }
 
-        console.log(`[View #${viewNumber}] Site Loading via ${selectedCountry} Proxy...`);
+        console.log(`[View #${viewNumber}] Clicking GO and waiting for New Tab...`);
         
-        // Proxy Tunnel wait
-        await new Promise(r => setTimeout(r, 20000));
+        // Naye tab ka intezar karna
+        const newTargetPromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
+        
+        if (goButton) await goButton.click(); else await page.keyboard.press('Enter');
 
-        // STEP 6: Interaction & Ads (30-50 Sec)
-        const stayTime = randomInt(35000, 50000);
+        const newPage = await newTargetPromise; // Ab hum 2nd tab par hain
+        await newPage.setViewport({ width: 1280, height: 800 });
+
+        console.log(`[View #${viewNumber}] 2nd Tab Detected. Loading Site via ${selectedCountry}...`);
+        
+        // 5. Interaction on 2nd Tab
+        await new Promise(r => setTimeout(r, 15000)); // Site loading time
+
+        const stayTime = randomInt(40000, 55000);
         const startTime = Date.now();
 
         while (Date.now() - startTime < stayTime) {
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await page.mouse.move(randomInt(100, 700), randomInt(100, 500), { steps: 5 });
+            await newPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
             
-            // Advanced Ads Clicker (Visible/Invisible Ads)
-            if (Math.random() < 0.15) { // 3-4 clicks in 20 views
-                await page.evaluate(() => {
-                    const ads = document.querySelectorAll('ins.adsbygoogle, iframe[src*="googleads"], a[href*="doubleclick"]');
+            // Advanced Ads Clicker on New Page
+            if (Math.random() < 0.2) { 
+                await newPage.evaluate(() => {
+                    const ads = document.querySelectorAll('ins.adsbygoogle, iframe[src*="googleads"], [id*="ad-"]');
                     if (ads.length > 0) {
                         const randomAd = ads[Math.floor(Math.random() * ads.length)];
                         randomAd.scrollIntoView();
                         randomAd.click();
                     }
                 });
-                console.log("Ad Click Simulated!");
+                console.log("Ad Interaction on 2nd Tab!");
+                await new Promise(r => setTimeout(r, 10000));
+                break;
             }
-            await new Promise(r => setTimeout(r, 8000));
+            await new Promise(r => setTimeout(r, 7000));
         }
 
+        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
+
     } catch (error) {
-        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
+
 
 // --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
 app.post('/ultimate', async (req, res) => {
