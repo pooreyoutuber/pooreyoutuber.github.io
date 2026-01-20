@@ -1355,10 +1355,10 @@ app.post('/api/real-view-boost', async (req, res) => {
 
 // ===================================================================
 // 10. ULTIMATE GOLOGIN - NEW TAB FIX (FINAL STABLE VERSION)
-// ===================================================================
-
+// ==================================================================
 async function runGoLoginUltimateTask(url, viewNumber) {
     let browser;
+    // Tier-1 (12/20) and Tier-2 (8/20) Logic
     const tier1 = ['Japan', 'United Kingdom', 'Canada', 'France', 'Germany', 'Netherlands'];
     const tier2 = ['India', 'Brazil', 'Turkey', 'Spain', 'Italy'];
     const selectedCountry = Math.random() < 0.6 
@@ -1368,18 +1368,19 @@ async function runGoLoginUltimateTask(url, viewNumber) {
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const pages = await browser.pages();
-        const page = pages[0]; // First Tab
+        const page = pages[0]; 
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. GoLogin Page Load
+        // 1. GoLogin Proxy Gateway
         await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. Select Country (Same as video)
+        // 2. Location Change (Crucial for GA4)
+        console.log(`[View #${viewNumber}] Changing Location to: ${selectedCountry}...`);
         const countryTrigger = await page.evaluateHandle(() => {
             const elements = Array.from(document.querySelectorAll('div, span, p'));
             return elements.find(el => el.textContent.trim() === 'United States');
@@ -1387,81 +1388,96 @@ async function runGoLoginUltimateTask(url, viewNumber) {
 
         if (countryTrigger) {
             await countryTrigger.click();
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 2500)); // Dropdown wait
+            
             await page.evaluate((target) => {
                 const items = Array.from(document.querySelectorAll('.select-items div'));
                 const match = items.find(el => el.textContent.trim().includes(target));
-                if (match) { match.scrollIntoView(); match.click(); }
+                if (match) { 
+                    match.scrollIntoView(); 
+                    match.click(); 
+                }
             }, selectedCountry);
+            
+            // Wait for proxy system to update the IP to selected country
+            await new Promise(r => setTimeout(r, 4000)); 
         }
 
-        // 3. Put URL
+        // 3. Put URL & GO
         const inputSelector = 'input[placeholder*="Put a URL"]';
         await page.waitForSelector(inputSelector);
         await page.type(inputSelector, url, { delay: 100 });
 
-        // 4. GO Click & Wait for New Tab logic
         const goButton = await page.evaluateHandle(() => {
             return Array.from(document.querySelectorAll('button')).find(b => b.textContent.toLowerCase().includes('go'));
         });
 
-        console.log(`[View #${viewNumber}] Clicking GO...`);
         if (goButton) await goButton.click(); else await page.keyboard.press('Enter');
 
-        // 🔥 CRITICAL FIX: Wait until 2nd tab is actually opened
+        // 4. Handle 2nd Tab
         let newPage = null;
         let retries = 0;
-        while (!newPage && retries < 10) {
+        while (!newPage && retries < 15) {
             const allPages = await browser.pages();
             if (allPages.length > 1) {
-                newPage = allPages[allPages.length - 1]; // Last tab is the new one
+                newPage = allPages[allPages.length - 1];
             } else {
                 await new Promise(r => setTimeout(r, 2000));
                 retries++;
             }
         }
 
-        if (!newPage) throw new Error("Target tab (2nd tab) did not open in time.");
-
-        // Switch to the new page
+        if (!newPage) throw new Error("2nd Tab not found!");
         await newPage.bringToFront();
-        console.log(`[View #${viewNumber}] Successfully switched to 2nd Tab (${selectedCountry})`);
+        await newPage.setViewport({ width: 1280, height: 800 });
 
-        // 5. Interaction on 2nd Tab
-        await new Promise(r => setTimeout(r, 20000)); // Wait for proxy site to load inside tab
-
-        const stayTime = randomInt(40000, 55000);
+        // 5. Interaction on 2nd Tab (30-50 Seconds Random)
+        console.log(`[View #${viewNumber}] Site active on 2nd Tab. Stay: 30-50s...`);
+        const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000); 
         const startTime = Date.now();
 
-        while (Date.now() - startTime < stayTime) {
-            await newPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await newPage.mouse.move(randomInt(100, 800), randomInt(200, 600), { steps: 5 });
+        // 18% chance to click ad (approx 3-4 clicks in 20 views)
+        const shouldClickAd = Math.random() < 0.18; 
+        let adClicked = false;
 
-            // Advanced Ads Clicker
-            if (Math.random() < 0.2) { 
-                await newPage.evaluate(() => {
-                    const ads = document.querySelectorAll('ins.adsbygoogle, iframe[src*="googleads"], [id*="ad-"]');
+        while (Date.now() - startTime < stayTime) {
+            // Realistic Scrolling
+            const scrollAmt = Math.floor(Math.random() * 400);
+            await newPage.evaluate((s) => window.scrollBy(0, s), scrollAmt);
+            
+            // Random Mouse Movement
+            await newPage.mouse.move(Math.random()*800, Math.random()*600, { steps: 5 });
+
+            // Advanced Ad-Click Logic
+            if (shouldClickAd && !adClicked && (Date.now() - startTime > 15000)) {
+                adClicked = await newPage.evaluate(() => {
+                    const ads = document.querySelectorAll('ins.adsbygoogle, iframe[src*="googleads"], [id*="ad-"], a[href*="googleadservices"]');
                     if (ads.length > 0) {
                         const randomAd = ads[Math.floor(Math.random() * ads.length)];
                         randomAd.scrollIntoView();
-                        randomAd.click();
+                        const rect = randomAd.getBoundingClientRect();
+                        return { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
                     }
+                    return null;
                 });
-                console.log("Ad Click on 2nd Tab!");
-                await new Promise(r => setTimeout(r, 10000));
-                break;
+
+                if (adClicked) {
+                    await newPage.mouse.click(adClicked.x, adClicked.y);
+                    console.log(`[🔥 AD CLICK] View #${viewNumber} - Clicked!`);
+                    await new Promise(r => setTimeout(r, 15000)); // Stay on ad site 15s
+                }
             }
-            await new Promise(r => setTimeout(r, 8000));
+            await new Promise(r => setTimeout(r, 5000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} via GoLogin finished. ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished via ${selectedCountry}.`);
 
     } catch (error) {
-        console.error(`[ULTIMATE ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
-            }
+}
 
 // --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
 app.post('/ultimate', async (req, res) => {
