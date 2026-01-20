@@ -1356,132 +1356,118 @@ app.post('/api/real-view-boost', async (req, res) => {
 // 10. ULTIMATE GOLOGIN BOOSTER (FIXED SELECTORS & ADVANCED ADS)
 // ===================================================================
 // ===================================================================
-// TOOL 11: GOLOGIN FREE PROXY AUTOMATION (AS PER VIDEO DEMO)
+// Tool 10: Ultimate Proxy (GoLogin Automation with Site Rotation)
 // ===================================================================
 
-async function runGologinProxyTask(keyword, url, viewNumber) {
+const TIER_1_LIST = ['us', 'gb', 'jp', 'fr', 'ca', 'de']; // United States, UK, Japan, France, Canada, Germany
+
+async function runUltimateProxyAutomation(siteUrl, viewIndex) {
     let browser;
     try {
+        const puppeteer = require('puppeteer');
         browser = await puppeteer.launch({
-            headless: "new", // Render par 'new' ya true hi chalta hai
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
 
         const page = await browser.newPage();
         
-        // Anti-Detection Settings
-        await page.setViewport({ width: 1280, height: 800 });
-        await page.setUserAgent(USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)]);
+        // Random device selection
+        const devices = [
+            { w: 1920, h: 1080 }, // PC
+            { w: 375, h: 812 },  // Mobile
+            { w: 1024, h: 1366 } // Tablet
+        ];
+        const device = devices[Math.floor(Math.random() * devices.length)];
+        await page.setViewport({ width: device.w, height: device.h });
 
-        console.log(`[GOLOGIN] View #${viewNumber} | Target: ${url}`);
+        console.log(`[VIEW ${viewIndex}] Step 1: Opening GoLogin Proxy Page...`);
+        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 1. STEP: Open Gologin Free Proxy Page
-        await page.goto('https://gologin.com/free-web-proxy/', { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000 
-        });
+        // Step 2: Select Tier 1 Country
+        const randomCountry = TIER_1_LIST[Math.floor(Math.random() * TIER_1_LIST.length)];
+        console.log(`[VIEW ${viewIndex}] Step 2: Selecting Tier-1 Location: ${randomCountry.toUpperCase()}`);
+        await page.select('select#proxy-country', randomCountry).catch(() => {});
+        await new Promise(r => setTimeout(r, 2000));
 
-        // 2. STEP: Change Location (Tier 1/2 Countries)
-        try {
-            const countrySelector = '.select__control'; // Selector may vary, based on Gologin UI
-            await page.waitForSelector(countrySelector, { timeout: 10000 });
-            await page.click(countrySelector);
-            
-            // Tier 1 Countries list for rotation
-            const tier1Countries = ['United Kingdom', 'Canada', 'Germany', 'France', 'Japan', 'Netherlands'];
-            const selectedCountry = tier1Countries[viewNumber % tier1Countries.length];
-            
-            console.log(`[GOLOGIN] Switching Location to: ${selectedCountry}`);
-            
-            // Type country name and select
-            await page.keyboard.type(selectedCountry);
-            await new Promise(r => setTimeout(r, 1000));
-            await page.keyboard.press('Enter');
-        } catch (e) {
-            console.log("[INFO] Location change skipped or selector not found.");
-        }
-
-        // 3. STEP: Input URL from Frontend
-        const urlInputSelector = 'input[placeholder*="Put a URL"]';
-        await page.waitForSelector(urlInputSelector);
-        await page.type(urlInputSelector, url, { delay: 100 });
-        
-        // 4. STEP: Click GO and Wait
+        // Step 3: Put URL and Click Go
+        console.log(`[VIEW ${viewIndex}] Step 3: Entering URL: ${siteUrl}`);
+        await page.type('input[placeholder*="Put a URL"]', siteUrl, { delay: 150 });
         await page.keyboard.press('Enter');
-        console.log(`[GOLOGIN] Proxy Loading...`);
-        
-        // Proxy page load hone ka intezar (navigation handle karna mushkil hota hai iframe mein, isliye fixed wait)
-        await new Promise(r => setTimeout(r, 15000)); 
 
-        // 5. STEP: Realistic Behavior (30-50 Seconds)
-        const stayTime = randomInt(30000, 50000);
-        const startTime = Date.now();
+        // Step 4: Wait for proxy to load the site (8-10 seconds)
+        console.log(`[VIEW ${viewIndex}] Step 4: Waiting for site to load via proxy...`);
+        await new Promise(r => setTimeout(r, 10000));
+
+        // Step 5: Random Scrolling and Mouse Movement
+        console.log(`[VIEW ${viewIndex}] Step 5: Starting Human Interaction...`);
+        const interactionTime = 40000; // 40 seconds interaction
+        const start = Date.now();
         
-        while (Date.now() - startTime < stayTime) {
-            // Random Scrolling
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            // Random Mouse Movement
-            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 5 });
+        while (Date.now() - start < interactionTime) {
+            // Random Scroll
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) - 100));
+            // Random Mouse Move
+            await page.mouse.move(Math.random() * device.w, Math.random() * device.h, { steps: 10 });
             
-            await new Promise(r => setTimeout(r, randomInt(5000, 8000)));
+            // Random Ad Detection & Click (20% chance)
+            if (Math.random() < 0.2) {
+                const ads = await page.$$('iframe, ins.adsbygoogle, a[href*="googlead"]');
+                if (ads.length > 0) {
+                    const ad = ads[Math.floor(Math.random() * ads.length)];
+                    await ad.click().catch(() => {});
+                    console.log(`[VIEW ${viewIndex}] Clicked on a potential Ad.`);
+                    await new Promise(r => setTimeout(r, 5000)); // Stay on ad
+                }
+            }
+            await new Promise(r => setTimeout(r, 4000));
         }
 
-        // 6. STEP: Clear Cookies/History (Done by closing browser in Puppeteer)
-        console.log(`[DONE] Gologin View #${viewNumber} Completed. ✅`);
-
-    } catch (error) {
-        console.error(`[GOLOGIN ERROR] View #${viewNumber}: ${error.message}`);
+        console.log(`[VIEW ${viewIndex}] Completed successfully.`);
+    } catch (err) {
+        console.error(`[VIEW ${viewIndex}] Error: ${err.message}`);
     } finally {
-        if (browser) {
-            await browser.close(); // Har session ke baad context aur history clear ho jati hai
-        }
+        if (browser) await browser.close();
     }
 }
 
-// --- ENDPOINT FOR GOLOGIN PROXY TOOL ---
-app.post('/ultimate-proxy', async (req, res) => {
+app.post('/api/ultimate-proxy', async (req, res) => {
     try {
-        const { keyword, urls, views = 1000 } = req.body;
-
-        if (!urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: "URLs are required!" });
-        }
-
-        const totalViews = parseInt(views);
+        const { target_urls, views_count = 20 } = req.body;
+        
+        // Handle multiple sites (site rotation)
+        // Frontend se comma separated string ya array aa sakta hai
+        const siteList = Array.isArray(target_urls) ? target_urls : target_urls.split(',').map(s => s.trim());
+        const totalViews = parseInt(views_count);
 
         res.status(200).json({ 
             success: true, 
-            message: `Gologin Proxy Task Started: ${totalViews} Views Rotating between ${urls.length} sites.` 
+            message: `Ultimate Proxy Task started for ${siteList.length} sites. Total ${totalViews} views sequential.` 
         });
 
-        // Background Worker (1 by 1 execution to prevent Render crash)
+        // Background Loop (Sequential to save Render RAM)
         (async () => {
-            console.log(`\n--- GOLOGIN AUTOMATION START ---`);
             for (let i = 1; i <= totalViews; i++) {
-                // Multi-site rotation logic
-                const activeUrl = urls[(i - 1) % urls.length];
+                // Site rotation: Har view par agli site uthayega
+                const currentSite = siteList[(i - 1) % siteList.length];
                 
-                await runGologinProxyTask(keyword, activeUrl, i);
+                await runUltimateProxyAutomation(currentSite, i);
 
-                // RAM Management Break
-                const cooldown = 10000; 
-                console.log(`[SYSTEM] Cooling down ${cooldown/1000}s...`);
-                await new Promise(r => setTimeout(r, cooldown));
+                // Short break between browsers
+                if (i < totalViews) {
+                    console.log(`[SYSTEM] Waiting 10s for RAM cleanup...`);
+                    await new Promise(r => setTimeout(r, 10000));
+                }
             }
-            console.log("--- GOLOGIN ALL SESSIONS FINISHED ---");
+            console.log("--- ALL ULTIMATE PROXY TASKS FINISHED ---");
         })();
 
     } catch (err) {
-        console.error("Gologin Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false });
     }
 });
-                
+
 //==================================================
 // --- SERVER START ---
 // ===================================================================
