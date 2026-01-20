@@ -1352,11 +1352,9 @@ app.post('/api/real-view-boost', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false });
     }
 });
+
 // ===================================================================
-// 10. ULTIMATE GOLOGIN TIER-1 & TIER-2 ROTATOR + ADVANCED AD-CLICKER
-// ===================================================================
-// ===================================================================
-// 10. ULTIMATE GOLOGIN - MULTI-TAB & COUNTRY ROTATOR (FINAL)
+// 10. ULTIMATE GOLOGIN - NEW TAB FIX (FINAL STABLE VERSION)
 // ===================================================================
 
 async function runGoLoginUltimateTask(url, viewNumber) {
@@ -1370,17 +1368,18 @@ async function runGoLoginUltimateTask(url, viewNumber) {
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
-        const page = await browser.newPage();
+        const pages = await browser.pages();
+        const page = pages[0]; // First Tab
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. GoLogin Proxy Gateway kholna
-        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2' });
+        // 1. GoLogin Page Load
+        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. Country Change (Video Step)
+        // 2. Select Country (Same as video)
         const countryTrigger = await page.evaluateHandle(() => {
             const elements = Array.from(document.querySelectorAll('div, span, p'));
             return elements.find(el => el.textContent.trim() === 'United States');
@@ -1396,38 +1395,49 @@ async function runGoLoginUltimateTask(url, viewNumber) {
             }, selectedCountry);
         }
 
-        // 3. URL daalna
+        // 3. Put URL
         const inputSelector = 'input[placeholder*="Put a URL"]';
         await page.waitForSelector(inputSelector);
         await page.type(inputSelector, url, { delay: 100 });
 
-        // 4. GO Button Click & Wait for New Tab (Aapka point: 2nd Tab khulega)
+        // 4. GO Click & Wait for New Tab logic
         const goButton = await page.evaluateHandle(() => {
             return Array.from(document.querySelectorAll('button')).find(b => b.textContent.toLowerCase().includes('go'));
         });
 
-        console.log(`[View #${viewNumber}] Clicking GO and waiting for New Tab...`);
-        
-        // Naye tab ka intezar karna
-        const newTargetPromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
-        
+        console.log(`[View #${viewNumber}] Clicking GO...`);
         if (goButton) await goButton.click(); else await page.keyboard.press('Enter');
 
-        const newPage = await newTargetPromise; // Ab hum 2nd tab par hain
-        await newPage.setViewport({ width: 1280, height: 800 });
+        // 🔥 CRITICAL FIX: Wait until 2nd tab is actually opened
+        let newPage = null;
+        let retries = 0;
+        while (!newPage && retries < 10) {
+            const allPages = await browser.pages();
+            if (allPages.length > 1) {
+                newPage = allPages[allPages.length - 1]; // Last tab is the new one
+            } else {
+                await new Promise(r => setTimeout(r, 2000));
+                retries++;
+            }
+        }
 
-        console.log(`[View #${viewNumber}] 2nd Tab Detected. Loading Site via ${selectedCountry}...`);
-        
+        if (!newPage) throw new Error("Target tab (2nd tab) did not open in time.");
+
+        // Switch to the new page
+        await newPage.bringToFront();
+        console.log(`[View #${viewNumber}] Successfully switched to 2nd Tab (${selectedCountry})`);
+
         // 5. Interaction on 2nd Tab
-        await new Promise(r => setTimeout(r, 15000)); // Site loading time
+        await new Promise(r => setTimeout(r, 20000)); // Wait for proxy site to load inside tab
 
         const stayTime = randomInt(40000, 55000);
         const startTime = Date.now();
 
         while (Date.now() - startTime < stayTime) {
             await newPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            
-            // Advanced Ads Clicker on New Page
+            await newPage.mouse.move(randomInt(100, 800), randomInt(200, 600), { steps: 5 });
+
+            // Advanced Ads Clicker
             if (Math.random() < 0.2) { 
                 await newPage.evaluate(() => {
                     const ads = document.querySelectorAll('ins.adsbygoogle, iframe[src*="googleads"], [id*="ad-"]');
@@ -1437,22 +1447,21 @@ async function runGoLoginUltimateTask(url, viewNumber) {
                         randomAd.click();
                     }
                 });
-                console.log("Ad Interaction on 2nd Tab!");
+                console.log("Ad Click on 2nd Tab!");
                 await new Promise(r => setTimeout(r, 10000));
                 break;
             }
-            await new Promise(r => setTimeout(r, 7000));
+            await new Promise(r => setTimeout(r, 8000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished. ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} via GoLogin finished. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ULTIMATE ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
-}
-
+            }
 
 // --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
 app.post('/ultimate', async (req, res) => {
