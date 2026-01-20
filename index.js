@@ -1356,38 +1356,41 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // 10. ULTIMATE GOLOGIN - NEW TAB FIX (FINAL STABLE VERSION)
 // ==================================================================
+ // ===================================================================
+// 10. ULTIMATE GOLOGIN - FIXED TAB & COUNTRY LOGIC
+// ==================================================================
 async function runGoLoginUltimateTask(url, viewNumber) {
     let browser;
-    // Ratio Logic: 12 Tier-1 (60%) & 8 Tier-2 (40%)
-    const tier1 = ['Japan', 'United Kingdom', 'Canada', 'France', 'Germany', 'Netherlands'];
-    const tier2 = ['India', 'Brazil', 'Turkey', 'Spain', 'Italy'];
-    const selectedCountry = Math.random() < 0.6 
-        ? tier1[Math.floor(Math.random() * tier1.length)] 
-        : tier2[Math.floor(Math.random() * tier2.length)];
+    // Tier-1 Country List for Random Selection
+    const tier1 = ['United States', 'United Kingdom', 'Canada', 'France', 'Germany', 'Japan', 'Netherlands'];
+    const selectedCountry = tier1[Math.floor(Math.random() * tier1.length)];
 
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
-        const pages = await browser.pages();
-        const page = pages[0];
+        const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. GoLogin Proxy Site
+        console.log(`\n[VIEW #${viewNumber}] Target Country: ${selectedCountry}`);
+
+        // 1. GoLogin Proxy Page Open Karein
         await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. Exact Country Selection (Video Steps)
-        console.log(`[View #${viewNumber}] Target: ${selectedCountry}`);
-        
-        // Wait for the dropdown and click it
+        // 2. Location Change Logic (Dropdown Click)
         await page.waitForSelector('.select-selected', { visible: true });
         await page.click('.select-selected');
         await new Promise(r => setTimeout(r, 2000));
 
-        // Search and click the target country
+        // Random Tier-1 Country Select Karein
         const selectionSuccess = await page.evaluate((target) => {
             const items = Array.from(document.querySelectorAll('.select-items div'));
             const match = items.find(el => el.textContent.trim().includes(target));
@@ -1399,76 +1402,70 @@ async function runGoLoginUltimateTask(url, viewNumber) {
             return false;
         }, selectedCountry);
 
-        if (!selectionSuccess) {
-            console.log(`[!] ${selectedCountry} not found, using default.`);
-        }
+        if (!selectionSuccess) console.log(`[!] ${selectedCountry} not found, using default.`);
+        
+        await new Promise(r => setTimeout(r, 3000)); // Proxy apply hone ka wait
 
-        // 🔥 IMPORTANT: Wait for proxy to apply (GA4 Fix)
-        // Proxy switch hone mein time leta hai, isliye 5s ka wait
-        await new Promise(r => setTimeout(r, 5000));
-
-        // 3. Put URL & Click GO
+        // 3. Put URL in Input
         const inputSelector = 'input[placeholder*="Put a URL"]';
         await page.waitForSelector(inputSelector);
-        await page.focus(inputSelector);
         await page.type(inputSelector, url, { delay: 100 });
-        
-        // Click GO button
+
+        // 4. GO Click & 2nd Tab Detection
+        // Hum promise set kar rahe hain jo naya tab (target) khulte hi trigger hoga
+        const newTargetPromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
+
         await page.evaluate(() => {
             const btns = Array.from(document.querySelectorAll('button'));
             const goBtn = btns.find(b => b.textContent.toLowerCase().includes('go'));
             if (goBtn) goBtn.click();
         });
 
-        // 4. Handle 2nd Tab (Your site)
-        let newPage = null;
-        for (let i = 0; i < 15; i++) {
-            const allPages = await browser.pages();
-            if (allPages.length > 1) {
-                newPage = allPages[allPages.length - 1];
-                break;
-            }
-            await new Promise(r => setTimeout(r, 2000));
-        }
+        // Naye tab ka wait karein
+        const newPage = await newTargetPromise;
 
         if (newPage) {
-            await newPage.bringToFront();
+            console.log(`[SUCCESS] 2nd Tab Detected. Starting Interaction...`);
             await newPage.setViewport({ width: 1280, height: 800 });
-            console.log(`[View #${viewNumber}] 2nd Tab active. Location: ${selectedCountry}`);
-
-            // 5. Interaction (30-50 Seconds)
-            const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
+            
+            // 5. Realistic Interaction (Scrolling & Mouse)
+            const stayTime = randomInt(40000, 60000); // 40-60 Seconds stay
             const startTime = Date.now();
             
-            // Ad Click Chance (18%)
-            const shouldClickAd = Math.random() < 0.18;
+            // Ads Click Logic (Approx 15-20% chance: 20 view me se 3-4 baar)
+            const shouldClickAd = Math.random() < 0.18; 
             let adDone = false;
 
             while (Date.now() - startTime < stayTime) {
-                // Random scrolling
-                await newPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-                await newPage.mouse.move(Math.random()*800, Math.random()*600, { steps: 5 });
+                // Smooth Scroll
+                await newPage.evaluate(() => {
+                    window.scrollBy({ top: Math.floor(Math.random() * 500), behavior: 'smooth' });
+                });
 
-                // Advanced Ad Clicker
+                // Random Mouse Movement
+                await newPage.mouse.move(randomInt(100, 1000), randomInt(100, 600), { steps: 5 });
+
+                // Smart Ad Clicker
                 if (shouldClickAd && !adDone && (Date.now() - startTime > 15000)) {
-                    const adClicked = await newPage.evaluate(() => {
-                        const ad = document.querySelector('ins.adsbygoogle, iframe[src*="googleads"], [id*="ad-"]');
+                    const adData = await newPage.evaluate(() => {
+                        const ad = document.querySelector('ins.adsbygoogle, iframe[src*="googleads"], [id*="ad-"], a[href*="googleadservices"]');
                         if (ad) {
-                            ad.scrollIntoView();
-                            const r = ad.getBoundingClientRect();
-                            return { x: r.left + r.width/2, y: r.top + r.height/2 };
+                            const rect = ad.getBoundingClientRect();
+                            if (rect.width > 20 && rect.height > 20) {
+                                return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                            }
                         }
                         return null;
                     });
 
-                    if (adClicked) {
-                        await newPage.mouse.click(adClicked.x, adClicked.y);
-                        console.log(`[🔥 AD CLICK] Success on View #${viewNumber}`);
+                    if (adData) {
+                        console.log(`\x1b[32m[AD-CLICK]\x1b[0m Clicking Ad for Revenue...`);
+                        await newPage.mouse.click(adData.x, adData.y);
                         adDone = true;
-                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
+                        await new Promise(r => setTimeout(r, 15000)); // Ad page par 15s wait
                     }
                 }
-                await new Promise(r => setTimeout(r, 6000));
+                await new Promise(r => setTimeout(r, 7000));
             }
         }
 
@@ -1478,6 +1475,37 @@ async function runGoLoginUltimateTask(url, viewNumber) {
         if (browser) await browser.close();
     }
 }
+
+// Updated Endpoint
+app.post('/ultimate', async (req, res) => {
+    try {
+        const { urls, views = 10 } = req.body;
+        if (!urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "URLs array required" });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: `GoLogin Ultimate Task Started for ${views} views. One-by-one execution active.` 
+        });
+
+        // Background worker
+        (async () => {
+            for (let i = 1; i <= parseInt(views); i++) {
+                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
+                await runGoLoginUltimateTask(targetUrl, i);
+                
+                // Server RAM safety gap
+                console.log(`[REST] Cooling down 10s...`);
+                await new Promise(r => setTimeout(r, 10000));
+            }
+            console.log("--- ALL GOLOGIN SESSIONS COMPLETE ---");
+        })();
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+    }
+});
+
 // --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
 app.post('/ultimate', async (req, res) => {
     try {
