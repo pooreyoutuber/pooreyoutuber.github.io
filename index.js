@@ -1355,132 +1355,115 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // 10. ULTIMATE GOLOGIN TIER-1 & TIER-2 ROTATOR + ADVANCED AD-CLICKER
 // ===================================================================
+// ===================================================================
+// 10. ULTIMATE GOLOGIN - VIDEO ACCURATE METHOD (FIXED)
+// ===================================================================
 
 async function runGoLoginUltimateTask(url, viewNumber) {
     let browser;
-    
-    // Country Logic: 20 views mein se 12 Tier-1 (60%) aur 8 Tier-2 (40%)
-    const tier1 = ['United States', 'United Kingdom', 'Canada', 'France', 'Germany', 'Japan', 'Netherlands'];
-    const tier2 = ['India', 'Brazil', 'Turkey', 'Mexico', 'Poland', 'Spain', 'Italy'];
-    
-    // Random selection based on ratio
-    const isTier1 = Math.random() < 0.6; // 60% chance for Tier 1
-    const selectedCountry = isTier1 
+    // Tier-1 aur Tier-2 ka ratio (12:8 logic)
+    const tier1 = ['Japan', 'United Kingdom', 'Canada', 'France', 'Germany', 'Netherlands'];
+    const tier2 = ['India', 'Brazil', 'Turkey', 'Spain', 'Italy'];
+    const selectedCountry = Math.random() < 0.6 
         ? tier1[Math.floor(Math.random() * tier1.length)] 
         : tier2[Math.floor(Math.random() * tier2.length)];
 
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
+        await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[View #${viewNumber}] Country: ${selectedCountry} (${isTier1 ? 'Tier-1' : 'Tier-2'})`);
+        console.log(`[View #${viewNumber}] Target Country: ${selectedCountry}`);
 
-        // STEP 1: GoLogin Proxy Page
+        // STEP 1: GoLogin Page Load
         await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // STEP 2: Country Selection (Video Steps)
-        await page.waitForSelector('.select-selected', { visible: true });
-        await page.click('.select-selected');
+        // STEP 2: Location "United States" par Tap karna (Jaisa video mein hai)
+        // Hum text search kar rahe hain kyunki class fail ho sakti hai
+        const countryTrigger = await page.evaluateHandle(() => {
+            const elements = Array.from(document.querySelectorAll('div, span, p'));
+            return elements.find(el => el.textContent.trim() === 'United States');
+        });
+
+        if (countryTrigger) {
+            await countryTrigger.click();
+            console.log("Clicked on 'United States' dropdown...");
+        } else {
+            // Fallback click agar text na mile
+            await page.click('.select-selected').catch(() => {});
+        }
+        
         await new Promise(r => setTimeout(r, 2000));
 
-        await page.evaluate((country) => {
-            const divs = Array.from(document.querySelectorAll('.select-items div'));
-            const match = divs.find(el => el.textContent.trim().includes(country));
-            if (match) match.click();
-        }, selectedCountry);
-        
-        await new Promise(r => setTimeout(r, 1000));
-
-        // STEP 3: URL Injection
-        const inputSelector = 'input[placeholder*="URL"]';
-        await page.waitForSelector(inputSelector);
-        await page.type(inputSelector, url, { delay: 70 });
-        await page.keyboard.press('Enter');
-
-        console.log(`[View #${viewNumber}] Proxy loading target site...`);
-        await new Promise(r => setTimeout(r, 20000)); // Proxy loading time
-
-        // STEP 4: ADVANCED AD-CLICKER (20 views mein 3-4 clicks = ~18% chance)
-        const shouldClickAd = Math.random() < 0.18; 
-        
-        const startTime = Date.now();
-        const stayTime = randomInt(40000, 60000); 
-
-        while (Date.now() - startTime < stayTime) {
-            // Random Scroll
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-            await page.mouse.move(randomInt(100, 900), randomInt(100, 600), { steps: 10 });
-
-            if (shouldClickAd) {
-                // Advanced detection for Banner, Popup, and Frames
-                const adClicked = await page.evaluate(() => {
-                    const adSelectors = [
-                        'ins.adsbygoogle', 'iframe[id^="google_ads"]', 
-                        'iframe[src*="doubleclick"]', '.ad-unit', 
-                        '[id*="taboola"]', '[class*="outbrain"]',
-                        'div[aria-label="Advertisement"]', 'iframe[title="3rd party ad content"]'
-                    ];
-                    
-                    for (let sel of adSelectors) {
-                        const ads = document.querySelectorAll(sel);
-                        for (let ad of ads) {
-                            const rect = ad.getBoundingClientRect();
-                            if (rect.width > 10 && rect.height > 10 && rect.top > 0) {
-                                ad.scrollIntoView();
-                                return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-                            }
-                        }
-                    }
-                    return null;
-                });
-
-                if (adClicked) {
-                    await page.mouse.click(adClicked.x, adClicked.y);
-                    console.log(`[🔥 AD CLICK] Clicked successfully on View #${viewNumber}`);
-                    await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
-                    break; 
-                }
+        // STEP 3: Scroll Down & Select New Country
+        await page.evaluate((target) => {
+            const items = Array.from(document.querySelectorAll('.select-items div'));
+            const match = items.find(el => el.textContent.trim().includes(target));
+            if (match) {
+                match.scrollIntoView();
+                match.click();
             }
-            await new Promise(r => setTimeout(r, 7000));
+        }, selectedCountry);
+
+        console.log(`[View #${viewNumber}] Country changed to ${selectedCountry}`);
+        await new Promise(r => setTimeout(r, 1500));
+
+        // STEP 4: Put URL in Input (Proxyium ki tarah)
+        const inputSelector = 'input[placeholder*="Put a URL"]';
+        await page.waitForSelector(inputSelector, { timeout: 10000 });
+        await page.type(inputSelector, url, { delay: 100 });
+
+        // STEP 5: Go button par tap karna
+        const goButton = await page.evaluateHandle(() => {
+            return Array.from(document.querySelectorAll('button')).find(b => b.textContent.toLowerCase().includes('go'));
+        });
+        
+        if (goButton) {
+            await goButton.click();
+        } else {
+            await page.keyboard.press('Enter');
         }
 
-        console.log(`[FINISH] View #${viewNumber} completed.`);
+        console.log(`[View #${viewNumber}] Site Loading via ${selectedCountry} Proxy...`);
+        
+        // Proxy Tunnel wait
+        await new Promise(r => setTimeout(r, 20000));
+
+        // STEP 6: Interaction & Ads (30-50 Sec)
+        const stayTime = randomInt(35000, 50000);
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < stayTime) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await page.mouse.move(randomInt(100, 700), randomInt(100, 500), { steps: 5 });
+            
+            // Advanced Ads Clicker (Visible/Invisible Ads)
+            if (Math.random() < 0.15) { // 3-4 clicks in 20 views
+                await page.evaluate(() => {
+                    const ads = document.querySelectorAll('ins.adsbygoogle, iframe[src*="googleads"], a[href*="doubleclick"]');
+                    if (ads.length > 0) {
+                        const randomAd = ads[Math.floor(Math.random() * ads.length)];
+                        randomAd.scrollIntoView();
+                        randomAd.click();
+                    }
+                });
+                console.log("Ad Click Simulated!");
+            }
+            await new Promise(r => setTimeout(r, 8000));
+        }
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// --- API ENDPOINT ---
-app.post('/ultimate', async (req, res) => {
-    const { keyword, urls, views = 1000 } = req.body;
-    res.status(200).json({ success: true, message: "Ultimate Proxy Bot Started (Tier 1 & 2 Rotation)" });
-
-    (async () => {
-        for (let i = 1; i <= views; i++) {
-            const currentUrl = urls[Math.floor(Math.random() * urls.length)];
-            await runGoLoginUltimateTask(currentUrl, i);
-            
-            // Render cooling period
-            console.log(`[REST] Cooling down 15s...`);
-            await new Promise(r => setTimeout(r, 15000));
-        }
-    })();
-});
-                                   
 // --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
 app.post('/ultimate', async (req, res) => {
     try {
