@@ -1353,121 +1353,131 @@ app.post('/api/real-view-boost', async (req, res) => {
     }
 });
 // ===================================================================
-// 10. ULTIMATE GOLOGIN BOOSTER (FIXED SELECTORS & ADVANCED ADS)
-// ===================================================================
-// ===================================================================
-// Tool 10: Ultimate Proxy (GoLogin Automation with Site Rotation)
+// 10. GOLOGIN PROXY AUTOMATION (ULTIMATE TIER-1 BOOSTER)
 // ===================================================================
 
-const TIER_1_LIST = ['us', 'gb', 'jp', 'fr', 'ca', 'de']; // United States, UK, Japan, France, Canada, Germany
-
-async function runUltimateProxyAutomation(siteUrl, viewIndex) {
+async function runGoLoginUltimateTask(url, viewNumber) {
     let browser;
+    const tier1Countries = ['United States', 'United Kingdom', 'Canada', 'France', 'Germany', 'Japan', 'Netherlands'];
+    const selectedCountry = tier1Countries[Math.floor(Math.random() * tier1Countries.length)];
+
     try {
-        const puppeteer = require('puppeteer');
         browser = await puppeteer.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            headless: "new", // Render ke liye "new" headless mode best hai
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
-        
-        // Random device selection
-        const devices = [
-            { w: 1920, h: 1080 }, // PC
-            { w: 375, h: 812 },  // Mobile
-            { w: 1024, h: 1366 } // Tablet
-        ];
-        const device = devices[Math.floor(Math.random() * devices.length)];
-        await page.setViewport({ width: device.w, height: device.h });
+        await page.setViewport({ width: 1280, height: 800 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[VIEW ${viewIndex}] Step 1: Opening GoLogin Proxy Page...`);
+        // STEP 1: GoLogin Free Proxy Page par jana
+        console.log(`[View #${viewNumber}] Opening GoLogin Proxy for Tier-1: ${selectedCountry}`);
         await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Step 2: Select Tier 1 Country
-        const randomCountry = TIER_1_LIST[Math.floor(Math.random() * TIER_1_LIST.length)];
-        console.log(`[VIEW ${viewIndex}] Step 2: Selecting Tier-1 Location: ${randomCountry.toUpperCase()}`);
-        await page.select('select#proxy-country', randomCountry).catch(() => {});
-        await new Promise(r => setTimeout(r, 2000));
+        // STEP 2: Country/Location Change karna (Tier-1 selection)
+        // Note: Hum dropdown click karke text match karke select karenge
+        const dropdownSelector = '.select-selected'; // GoLogin dropdown class
+        await page.waitForSelector(dropdownSelector);
+        await page.click(dropdownSelector);
+        await new Promise(r => setTimeout(r, 1000));
 
-        // Step 3: Put URL and Click Go
-        console.log(`[VIEW ${viewIndex}] Step 3: Entering URL: ${siteUrl}`);
-        await page.type('input[placeholder*="Put a URL"]', siteUrl, { delay: 150 });
-        await page.keyboard.press('Enter');
+        await page.evaluate((country) => {
+            const items = Array.from(document.querySelectorAll('.select-items div'));
+            const match = items.find(el => el.textContent.trim() === country);
+            if (match) match.click();
+        }, selectedCountry);
 
-        // Step 4: Wait for proxy to load the site (8-10 seconds)
-        console.log(`[VIEW ${viewIndex}] Step 4: Waiting for site to load via proxy...`);
-        await new Promise(r => setTimeout(r, 10000));
-
-        // Step 5: Random Scrolling and Mouse Movement
-        console.log(`[VIEW ${viewIndex}] Step 5: Starting Human Interaction...`);
-        const interactionTime = 40000; // 40 seconds interaction
-        const start = Date.now();
+        // STEP 3: Put URL and Click GO
+        const inputSelector = 'input[placeholder="Put a URL"]';
+        await page.waitForSelector(inputSelector);
+        await page.type(inputSelector, url, { delay: 100 });
         
-        while (Date.now() - start < interactionTime) {
-            // Random Scroll
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) - 100));
-            // Random Mouse Move
-            await page.mouse.move(Math.random() * device.w, Math.random() * device.h, { steps: 10 });
+        // Go button click karna
+        const goButton = 'button.btn-go'; // Ya phir GoLogin ka specific button class
+        await page.click(goButton).catch(() => page.keyboard.press('Enter'));
+
+        console.log(`[View #${viewNumber}] Site loading through ${selectedCountry} Proxy...`);
+
+        // STEP 4: Realistic Human Behavior (30-50 Seconds)
+        const stayTime = randomInt(35000, 50000); 
+        const startTime = Date.now();
+
+        // Browser ke andar scrolling aur mouse movement
+        while (Date.now() - startTime < stayTime) {
+            // Natural Scrolling
+            const scrollAmt = randomInt(200, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), scrollAmt);
             
-            // Random Ad Detection & Click (20% chance)
+            // Random Mouse Movement
+            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 10 });
+            
+            // Random pause taaki bot na lage
+            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
+
+            // Optional: Randomly click inside the page (Safe clicking)
             if (Math.random() < 0.2) {
-                const ads = await page.$$('iframe, ins.adsbygoogle, a[href*="googlead"]');
-                if (ads.length > 0) {
-                    const ad = ads[Math.floor(Math.random() * ads.length)];
-                    await ad.click().catch(() => {});
-                    console.log(`[VIEW ${viewIndex}] Clicked on a potential Ad.`);
-                    await new Promise(r => setTimeout(r, 5000)); // Stay on ad
-                }
+                await page.mouse.click(randomInt(200, 800), randomInt(200, 600));
             }
-            await new Promise(r => setTimeout(r, 4000));
         }
 
-        console.log(`[VIEW ${viewIndex}] Completed successfully.`);
-    } catch (err) {
-        console.error(`[VIEW ${viewIndex}] Error: ${err.message}`);
+        console.log(`[DONE] View #${viewNumber} via GoLogin (${selectedCountry}) finished. ✅`);
+
+    } catch (error) {
+        console.error(`[GOLOGIN ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            await browser.close().catch(() => {});
+            console.log(`[CLEANUP] Browser closed for View #${viewNumber}`);
+        }
     }
 }
 
-app.post('/api/ultimate-proxy', async (req, res) => {
+// --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
+app.post('/ultimate', async (req, res) => {
     try {
-        const { target_urls, views_count = 20 } = req.body;
-        
-        // Handle multiple sites (site rotation)
-        // Frontend se comma separated string ya array aa sakta hai
-        const siteList = Array.isArray(target_urls) ? target_urls : target_urls.split(',').map(s => s.trim());
-        const totalViews = parseInt(views_count);
+        const { keyword, urls, views = 1000 } = req.body;
 
+        if (!urls || !Array.isArray(urls) || urls.length === 0) {
+            return res.status(400).json({ success: false, message: "URLs list is required!" });
+        }
+
+        // Render timeout se bachne ke liye fast response
         res.status(200).json({ 
             success: true, 
-            message: `Ultimate Proxy Task started for ${siteList.length} sites. Total ${totalViews} views sequential.` 
+            message: "GoLogin Ultimate Process Started. Tier-1 Countries Rotation Active." 
         });
 
-        // Background Loop (Sequential to save Render RAM)
+        // Background Worker (Sequential execution to prevent RAM crash)
         (async () => {
-            for (let i = 1; i <= totalViews; i++) {
-                // Site rotation: Har view par agli site uthayega
-                const currentSite = siteList[(i - 1) % siteList.length];
+            console.log(`\n--- STARTING ULTIMATE GOLOGIN TASK (Sequential) ---`);
+            for (let i = 1; i <= views; i++) {
+                // Multi-site rotation logic
+                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
                 
-                await runUltimateProxyAutomation(currentSite, i);
+                // Ek time par ek hi browser chalega taaki Render crash na ho
+                await runGoLoginUltimateTask(targetUrl, i);
 
-                // Short break between browsers
-                if (i < totalViews) {
-                    console.log(`[SYSTEM] Waiting 10s for RAM cleanup...`);
-                    await new Promise(r => setTimeout(r, 10000));
-                }
+                // Heavy session ke baad rest taaki server normal rahe
+                const restTime = 12000; // 12 seconds gap
+                console.log(`[REST] Waiting ${restTime/1000}s before next session...`);
+                await new Promise(r => setTimeout(r, restTime));
             }
-            console.log("--- ALL ULTIMATE PROXY TASKS FINISHED ---");
+            console.log("--- ALL ULTIMATE SESSIONS FINISHED ---");
         })();
 
     } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
+        console.error("Ultimate Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
-
+                    
+ 
 //==================================================
 // --- SERVER START ---
 // ===================================================================
