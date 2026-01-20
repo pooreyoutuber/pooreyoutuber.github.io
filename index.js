@@ -1358,7 +1358,7 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ==================================================================
 async function runGoLoginUltimateTask(url, viewNumber) {
     let browser;
-    // Tier-1 (12/20) and Tier-2 (8/20) Logic
+    // Ratio Logic: 12 Tier-1 (60%) & 8 Tier-2 (40%)
     const tier1 = ['Japan', 'United Kingdom', 'Canada', 'France', 'Germany', 'Netherlands'];
     const tier2 = ['India', 'Brazil', 'Turkey', 'Spain', 'Italy'];
     const selectedCountry = Math.random() < 0.6 
@@ -1372,113 +1372,112 @@ async function runGoLoginUltimateTask(url, viewNumber) {
         });
 
         const pages = await browser.pages();
-        const page = pages[0]; 
+        const page = pages[0];
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. GoLogin Proxy Gateway
+        // 1. GoLogin Proxy Site
         await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. Location Change (Crucial for GA4)
-        console.log(`[View #${viewNumber}] Changing Location to: ${selectedCountry}...`);
-        const countryTrigger = await page.evaluateHandle(() => {
-            const elements = Array.from(document.querySelectorAll('div, span, p'));
-            return elements.find(el => el.textContent.trim() === 'United States');
-        });
+        // 2. Exact Country Selection (Video Steps)
+        console.log(`[View #${viewNumber}] Target: ${selectedCountry}`);
+        
+        // Wait for the dropdown and click it
+        await page.waitForSelector('.select-selected', { visible: true });
+        await page.click('.select-selected');
+        await new Promise(r => setTimeout(r, 2000));
 
-        if (countryTrigger) {
-            await countryTrigger.click();
-            await new Promise(r => setTimeout(r, 2500)); // Dropdown wait
-            
-            await page.evaluate((target) => {
-                const items = Array.from(document.querySelectorAll('.select-items div'));
-                const match = items.find(el => el.textContent.trim().includes(target));
-                if (match) { 
-                    match.scrollIntoView(); 
-                    match.click(); 
-                }
-            }, selectedCountry);
-            
-            // Wait for proxy system to update the IP to selected country
-            await new Promise(r => setTimeout(r, 4000)); 
+        // Search and click the target country
+        const selectionSuccess = await page.evaluate((target) => {
+            const items = Array.from(document.querySelectorAll('.select-items div'));
+            const match = items.find(el => el.textContent.trim().includes(target));
+            if (match) {
+                match.scrollIntoView();
+                match.click();
+                return true;
+            }
+            return false;
+        }, selectedCountry);
+
+        if (!selectionSuccess) {
+            console.log(`[!] ${selectedCountry} not found, using default.`);
         }
 
-        // 3. Put URL & GO
+        // 🔥 IMPORTANT: Wait for proxy to apply (GA4 Fix)
+        // Proxy switch hone mein time leta hai, isliye 5s ka wait
+        await new Promise(r => setTimeout(r, 5000));
+
+        // 3. Put URL & Click GO
         const inputSelector = 'input[placeholder*="Put a URL"]';
         await page.waitForSelector(inputSelector);
+        await page.focus(inputSelector);
         await page.type(inputSelector, url, { delay: 100 });
-
-        const goButton = await page.evaluateHandle(() => {
-            return Array.from(document.querySelectorAll('button')).find(b => b.textContent.toLowerCase().includes('go'));
+        
+        // Click GO button
+        await page.evaluate(() => {
+            const btns = Array.from(document.querySelectorAll('button'));
+            const goBtn = btns.find(b => b.textContent.toLowerCase().includes('go'));
+            if (goBtn) goBtn.click();
         });
 
-        if (goButton) await goButton.click(); else await page.keyboard.press('Enter');
-
-        // 4. Handle 2nd Tab
+        // 4. Handle 2nd Tab (Your site)
         let newPage = null;
-        let retries = 0;
-        while (!newPage && retries < 15) {
+        for (let i = 0; i < 15; i++) {
             const allPages = await browser.pages();
             if (allPages.length > 1) {
                 newPage = allPages[allPages.length - 1];
-            } else {
-                await new Promise(r => setTimeout(r, 2000));
-                retries++;
+                break;
             }
+            await new Promise(r => setTimeout(r, 2000));
         }
 
-        if (!newPage) throw new Error("2nd Tab not found!");
-        await newPage.bringToFront();
-        await newPage.setViewport({ width: 1280, height: 800 });
+        if (newPage) {
+            await newPage.bringToFront();
+            await newPage.setViewport({ width: 1280, height: 800 });
+            console.log(`[View #${viewNumber}] 2nd Tab active. Location: ${selectedCountry}`);
 
-        // 5. Interaction on 2nd Tab (30-50 Seconds Random)
-        console.log(`[View #${viewNumber}] Site active on 2nd Tab. Stay: 30-50s...`);
-        const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000); 
-        const startTime = Date.now();
-
-        // 18% chance to click ad (approx 3-4 clicks in 20 views)
-        const shouldClickAd = Math.random() < 0.18; 
-        let adClicked = false;
-
-        while (Date.now() - startTime < stayTime) {
-            // Realistic Scrolling
-            const scrollAmt = Math.floor(Math.random() * 400);
-            await newPage.evaluate((s) => window.scrollBy(0, s), scrollAmt);
+            // 5. Interaction (30-50 Seconds)
+            const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
+            const startTime = Date.now();
             
-            // Random Mouse Movement
-            await newPage.mouse.move(Math.random()*800, Math.random()*600, { steps: 5 });
+            // Ad Click Chance (18%)
+            const shouldClickAd = Math.random() < 0.18;
+            let adDone = false;
 
-            // Advanced Ad-Click Logic
-            if (shouldClickAd && !adClicked && (Date.now() - startTime > 15000)) {
-                adClicked = await newPage.evaluate(() => {
-                    const ads = document.querySelectorAll('ins.adsbygoogle, iframe[src*="googleads"], [id*="ad-"], a[href*="googleadservices"]');
-                    if (ads.length > 0) {
-                        const randomAd = ads[Math.floor(Math.random() * ads.length)];
-                        randomAd.scrollIntoView();
-                        const rect = randomAd.getBoundingClientRect();
-                        return { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+            while (Date.now() - startTime < stayTime) {
+                // Random scrolling
+                await newPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+                await newPage.mouse.move(Math.random()*800, Math.random()*600, { steps: 5 });
+
+                // Advanced Ad Clicker
+                if (shouldClickAd && !adDone && (Date.now() - startTime > 15000)) {
+                    const adClicked = await newPage.evaluate(() => {
+                        const ad = document.querySelector('ins.adsbygoogle, iframe[src*="googleads"], [id*="ad-"]');
+                        if (ad) {
+                            ad.scrollIntoView();
+                            const r = ad.getBoundingClientRect();
+                            return { x: r.left + r.width/2, y: r.top + r.height/2 };
+                        }
+                        return null;
+                    });
+
+                    if (adClicked) {
+                        await newPage.mouse.click(adClicked.x, adClicked.y);
+                        console.log(`[🔥 AD CLICK] Success on View #${viewNumber}`);
+                        adDone = true;
+                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
                     }
-                    return null;
-                });
-
-                if (adClicked) {
-                    await newPage.mouse.click(adClicked.x, adClicked.y);
-                    console.log(`[🔥 AD CLICK] View #${viewNumber} - Clicked!`);
-                    await new Promise(r => setTimeout(r, 15000)); // Stay on ad site 15s
                 }
+                await new Promise(r => setTimeout(r, 6000));
             }
-            await new Promise(r => setTimeout(r, 5000));
         }
-
-        console.log(`[SUCCESS] View #${viewNumber} Finished via ${selectedCountry}.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ULTIMATE ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
-                         
 // --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
 app.post('/ultimate', async (req, res) => {
     try {
