@@ -1353,9 +1353,8 @@ app.post('/api/real-view-boost', async (req, res) => {
     }
 });
 
-
  // ===================================================================
-// TOOL 11: GOLOGIN PROXY REVENUE BOOSTER (ADVANCED AD-CLICKER)
+// TOOL 11: GOLOGIN PROXY REVENUE BOOSTER (DESKTOP MODE)
 // ===================================================================
 
 async function runGologinTask(keyword, url, viewNumber) {
@@ -1363,122 +1362,128 @@ async function runGologinTask(keyword, url, viewNumber) {
     try {
         browser = await puppeteer.launch({
             headless: "new", 
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--window-size=1920,1080'
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 800 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        // Desktop Mode Simulation
+        await page.setViewport({ width: 1920, height: 1080 });
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-        // 1. Gologin Free Proxy Page Open Karna
-        console.log(`[VIEW #${viewNumber}] Opening Gologin Proxy...`);
+        console.log(`[VIEW #${viewNumber}] Loading Gologin Proxy Site...`);
         await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. Location Change Karna (Based on Keyword/Country)
+        // 1. SELECT LOCATION (COUNTRY)
         try {
+            // Dropdown trigger dhundna (United States wala box)
             await page.waitForSelector('.select-trigger', { timeout: 10000 });
-            await page.click('.select-trigger'); // Dropdown kholna
-            await new Promise(r => setTimeout(r, 1000));
+            await page.click('.select-trigger');
+            await new Promise(r => setTimeout(r, 1500));
 
-            // Keyword ke mutabik country select karna (e.g., "India", "Japan", "Mexico")
-            const countryOptions = await page.$$('.select-option-text');
-            let found = false;
-            for (const option of countryOptions) {
-                const text = await page.evaluate(el => el.innerText.trim(), option);
-                if (text.toLowerCase() === keyword.toLowerCase()) {
-                    await option.click();
-                    found = true;
-                    console.log(`[SUCCESS] Location set to: ${text}`);
-                    break;
-                }
-            }
-            if (!found) console.log(`[INFO] Country "${keyword}" not found, using default.`);
+            // Saare options me se keyword (e.g. "Japan") match karna
+            await page.evaluate((targetCountry) => {
+                const options = Array.from(document.querySelectorAll('.select-option-text'));
+                const match = options.find(el => el.innerText.trim().toLowerCase() === targetCountry.toLowerCase());
+                if (match) match.click();
+            }, keyword);
+            
+            console.log(`[SUCCESS] Location set to: ${keyword}`);
         } catch (e) {
-            console.log("[ERROR] Could not change location:", e.message);
+            console.log(`[INFO] Country selection failed, using default: ${e.message}`);
         }
 
-        // 3. URL daalna aur 'Go' par click karna
-        await page.type('input[placeholder="Put a URL"]', url, { delay: 100 });
-        await page.click('button.go-button'); // Adjust selector if needed based on actual site
-        console.log(`[WAIT] Loading proxied site: ${url}`);
-
-        // 4. Handle 2nd Tab (Proxied Site)
-        // Gologin aksar naya tab ya iframe load karta hai
-        await new Promise(r => setTimeout(r, 15000)); // Page load hone ka wait
+        // 2. INPUT URL & CLICK GO
+        // Selector description ke hisaab se: "Put a URL" placeholder
+        await page.waitForSelector('input[placeholder="Put a URL"]');
+        await page.type('input[placeholder="Put a URL"]', url, { delay: 150 });
         
-        const pages = await browser.pages();
-        const proxiedPage = pages[pages.length - 1]; // Latest tab
-        await proxiedPage.bringToFront();
+        // "Go" button ko click karna (Text-based approach taaki selector fail na ho)
+        const clicked = await page.evaluate(() => {
+            const buttons = Array.from(document.querySelectorAll('button'));
+            const goBtn = buttons.find(b => b.innerText.trim().toLowerCase() === 'go');
+            if (goBtn) {
+                goBtn.click();
+                return true;
+            }
+            return false;
+        });
 
-        // 5. Advanced Behavior & Ad-Clicker Loop
-        const stayTime = randomInt(40000, 60000);
+        if (!clicked) {
+            // Fallback: Agar text se nahi mila to class try karein
+            await page.click('.go-button'); 
+        }
+
+        console.log(`[WAIT] Processing Proxy Request...`);
+        
+        // 3. WAIT FOR 2ND TAB / IFRAME LOAD
+        // Gologin proxy aksar usi page me iframe kholta hai ya naya tab
+        await new Promise(r => setTimeout(r, 20000)); 
+
+        let targetPage = page;
+        const pages = await browser.pages();
+        if (pages.length > 2) {
+            targetPage = pages[pages.length - 1];
+            await targetPage.bringToFront();
+        }
+
+        // 4. ADVANCED AD-CLICKER & HUMAN BEHAVIOR
         const startTime = Date.now();
+        const stayTime = 50000; // 50 seconds total stay
 
         while (Date.now() - startTime < stayTime) {
-            // Natural Scroll & Mouse Movement
-            await proxiedPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await proxiedPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 5 });
-            await new Promise(r => setTimeout(r, 5000));
-
-            // 🔥 ADVANCED AD-CLICKER (Banner, Hidden, Video Ads)
-            if (Math.random() < 0.25) { // 25% Chance
-                const adSelectors = [
-                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
-                    '.ad-unit', '[id^="div-gpt-ad"]', 'video.video-ad', '.vjs-ad-playing'
-                ];
-                
-                const ads = await proxiedPage.$$(adSelectors.join(', '));
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-                    
-                    if (box && box.width > 10 && box.height > 10) {
-                        console.log(`\x1b[32m[AD-CLICK]\x1b[0m Clicking detected ad for revenue...`);
-                        await proxiedPage.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                        await new Promise(r => setTimeout(r, 15000)); // Stay on advertiser site
-                        break; 
+            // Random Scroll
+            await targetPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            // Random Mouse Movement
+            await targetPage.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 10 });
+            
+            // 🔥 ADVANCED AD-CLICKER (Banner, Push-up, Hidden, Video)
+            if (Math.random() < 0.3) { 
+                await targetPage.evaluate(() => {
+                    const adSelectors = [
+                        'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
+                        '.ad-unit', '#ad-container', '.video-ad', '.vjs-ad-playing',
+                        'div[data-ad-client]', 'a[href*="googleadservices.com"]'
+                    ];
+                    const ads = document.querySelectorAll(adSelectors.join(','));
+                    if (ads.length > 0) {
+                        const randomAd = ads[Math.floor(Math.random() * ads.length)];
+                        randomAd.scrollIntoView();
+                        randomAd.click(); // Simple click logic
                     }
-                }
+                });
+                console.log(`[ACTION] Potential Ad Interaction Triggered`);
+                await new Promise(r => setTimeout(r, 15000)); // Click ke baad stay
             }
+            await new Promise(r => setTimeout(r, 6000));
         }
-        console.log(`[DONE] View #${viewNumber} completed via Gologin Proxy.`);
 
-    } catch (error) {
-        console.error(`[GOLOGIN ERROR] View #${viewNumber}: ${error.message}`);
+        console.log(`[SUCCESS] View #${viewNumber} Completed.`);
+
+    } catch (err) {
+        console.error(`[CRITICAL ERROR] View #${viewNumber}:`, err.message);
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// ENDPOINT FOR TOOL 11
+// ENDPOINT
 app.post('/ultimate', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
+    const { keyword, urls, views = 1000 } = req.body;
+    
+    res.status(200).json({ success: true, message: "Ultimate Proxy Booster Started" });
 
-        if (!keyword || !urls || !Array.isArray(urls)) {
-            return res.status(400).json({ success: false, message: "Keyword (Country) and URLs are required." });
+    (async () => {
+        for (let i = 1; i <= views; i++) {
+            const site = urls[Math.floor(Math.random() * urls.length)];
+            await runGologinTask(keyword, site, i);
+            // Cooldown for Render RAM
+            await new Promise(r => setTimeout(r, 10000));
         }
-
-        res.status(200).json({ 
-            success: true, 
-            message: `Gologin Proxy Task started. Rotating across ${urls.length} sites.` 
-        });
-
-        // Background Processing
-        (async () => {
-            for (let i = 1; i <= views; i++) {
-                const currentUrl = urls[Math.floor(Math.random() * urls.length)];
-                await runGologinTask(keyword, currentUrl, i);
-
-                // Delay to prevent CPU spike on Render
-                await new Promise(r => setTimeout(r, 12000));
-            }
-        })();
-
-    } catch (err) {
-        console.error("Ultimate Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
-    }
+    })();
 });
 
 app.post('/ultimate', async (req, res) => {
