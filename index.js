@@ -1353,125 +1353,134 @@ app.post('/api/real-view-boost', async (req, res) => {
     }
 });
 
-// ===================================================================
-// 10. ULTIMATE GOLOGIN - JAPAN TARGET & RAM OPTIMIZER (FINAL)
+
+ // ===================================================================
+// TOOL 11: GOLOGIN PROXY REVENUE BOOSTER (ADVANCED AD-CLICKER)
 // ===================================================================
 
-async function runGoLoginJapanTask(url, viewNumber) {
+async function runGologinTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            headless: "new", 
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
 
-        const pages = await browser.pages();
-        const firstTab = pages[0]; 
-        await firstTab.setViewport({ width: 1280, height: 800 });
-        await firstTab.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 800 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[View #${viewNumber}] Target Location: JAPAN 🇯🇵`);
+        // 1. Gologin Free Proxy Page Open Karna
+        console.log(`[VIEW #${viewNumber}] Opening Gologin Proxy...`);
+        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 1. GoLogin Proxy Site kholna
-        await firstTab.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
+        // 2. Location Change Karna (Based on Keyword/Country)
+        try {
+            await page.waitForSelector('.select-trigger', { timeout: 10000 });
+            await page.click('.select-trigger'); // Dropdown kholna
+            await new Promise(r => setTimeout(r, 1000));
 
-        // 2. Location Change to JAPAN (Video Method)
-        // Default "United States" par click karna
-        const countryTrigger = await firstTab.waitForXPath("//div[contains(text(), 'United States')]", { timeout: 20000 });
-        if (countryTrigger) {
-            await countryTrigger.click();
-            await new Promise(r => setTimeout(r, 2000));
-        }
-
-        // Dropdown mein "Japan" dhoond kar click karna
-        const japanOption = await firstTab.waitForXPath("//div[contains(text(), 'Japan')]", { timeout: 10000 });
-        if (japanOption) {
-            await japanOption.click();
-            console.log("Japan Location Applied Successfully.");
-            await new Promise(r => setTimeout(r, 5000)); // IP switch wait
-        }
-
-        // 3. Put URL & Hit GO
-        const inputSelector = 'input[placeholder*="URL"]';
-        await firstTab.waitForSelector(inputSelector);
-        await firstTab.type(inputSelector, url, { delay: 100 });
-
-        // GO Button click
-        const goBtn = await firstTab.waitForXPath("//button[contains(translate(., 'GO', 'go'), 'go')]", { timeout: 10000 });
-        if (goBtn) {
-            await goBtn.click();
-        } else {
-            await firstTab.keyboard.press('Enter');
-        }
-
-        // 4. Handle 2nd Tab & Close 1st Tab (RAM Optimization)
-        let secondTab = null;
-        for (let i = 0; i < 15; i++) {
-            const allPages = await browser.pages();
-            if (allPages.length > 1) {
-                secondTab = allPages[allPages.length - 1];
-                break;
+            // Keyword ke mutabik country select karna (e.g., "India", "Japan", "Mexico")
+            const countryOptions = await page.$$('.select-option-text');
+            let found = false;
+            for (const option of countryOptions) {
+                const text = await page.evaluate(el => el.innerText.trim(), option);
+                if (text.toLowerCase() === keyword.toLowerCase()) {
+                    await option.click();
+                    found = true;
+                    console.log(`[SUCCESS] Location set to: ${text}`);
+                    break;
+                }
             }
-            await new Promise(r => setTimeout(r, 2000));
+            if (!found) console.log(`[INFO] Country "${keyword}" not found, using default.`);
+        } catch (e) {
+            console.log("[ERROR] Could not change location:", e.message);
         }
 
-        if (secondTab) {
-            // 🔥 First Tab ko close karna taaki RAM khali ho jaye
-            await firstTab.close().catch(() => {});
-            console.log(`[View #${viewNumber}] 1st Tab Closed. 2nd Tab active (Japan).`);
+        // 3. URL daalna aur 'Go' par click karna
+        await page.type('input[placeholder="Put a URL"]', url, { delay: 100 });
+        await page.click('button.go-button'); // Adjust selector if needed based on actual site
+        console.log(`[WAIT] Loading proxied site: ${url}`);
 
-            await secondTab.bringToFront();
-            await secondTab.setViewport({ width: 1280, height: 800 });
+        // 4. Handle 2nd Tab (Proxied Site)
+        // Gologin aksar naya tab ya iframe load karta hai
+        await new Promise(r => setTimeout(r, 15000)); // Page load hone ka wait
+        
+        const pages = await browser.pages();
+        const proxiedPage = pages[pages.length - 1]; // Latest tab
+        await proxiedPage.bringToFront();
 
-            // 5. Interaction (30-50 Seconds)
-            const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
-            const startTime = Date.now();
-            
-            // Ad Click Logic (18% probability - 3-4 clicks in 20)
-            const shouldClickAd = Math.random() < 0.18;
-            let adDone = false;
+        // 5. Advanced Behavior & Ad-Clicker Loop
+        const stayTime = randomInt(40000, 60000);
+        const startTime = Date.now();
 
-            while (Date.now() - startTime < stayTime) {
-                // Random scrolling & Mouse movement
-                await secondTab.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-                await secondTab.mouse.move(Math.random()*800, Math.random()*600, { steps: 10 });
+        while (Date.now() - startTime < stayTime) {
+            // Natural Scroll & Mouse Movement
+            await proxiedPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await proxiedPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 5 });
+            await new Promise(r => setTimeout(r, 5000));
 
-                // Advanced Ad Detection
-                if (shouldClickAd && !adDone && (Date.now() - startTime > 15000)) {
-                    const adData = await secondTab.evaluate(() => {
-                        const sel = ['ins.adsbygoogle', 'iframe[src*="googleads"]', '.ad-unit'];
-                        for (let s of sel) {
-                            const el = document.querySelector(s);
-                            if (el) {
-                                const r = el.getBoundingClientRect();
-                                return { x: r.left + r.width/2, y: r.top + r.height/2 };
-                            }
-                        }
-                        return null;
-                    });
-
-                    if (adData) {
-                        await secondTab.mouse.click(adData.x, adData.y);
-                        console.log(`[🔥 AD CLICK] Success on Japan View #${viewNumber}`);
-                        adDone = true;
-                        await new Promise(r => setTimeout(r, 15000)); // Ad site stay
+            // 🔥 ADVANCED AD-CLICKER (Banner, Hidden, Video Ads)
+            if (Math.random() < 0.25) { // 25% Chance
+                const adSelectors = [
+                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
+                    '.ad-unit', '[id^="div-gpt-ad"]', 'video.video-ad', '.vjs-ad-playing'
+                ];
+                
+                const ads = await proxiedPage.$$(adSelectors.join(', '));
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+                    
+                    if (box && box.width > 10 && box.height > 10) {
+                        console.log(`\x1b[32m[AD-CLICK]\x1b[0m Clicking detected ad for revenue...`);
+                        await proxiedPage.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        await new Promise(r => setTimeout(r, 15000)); // Stay on advertiser site
+                        break; 
                     }
                 }
-                await new Promise(r => setTimeout(r, 7000));
             }
-            console.log(`[SUCCESS] View #${viewNumber} via Japan Completed.`);
-        } else {
-            throw new Error("2nd Tab did not open.");
         }
+        console.log(`[DONE] View #${viewNumber} completed via Gologin Proxy.`);
 
     } catch (error) {
-        console.error(`[FATAL ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[GOLOGIN ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// --- ENDPOINT FOR THE NEW ULTIMATE TOOL ---
+// ENDPOINT FOR TOOL 11
+app.post('/ultimate', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        if (!keyword || !urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "Keyword (Country) and URLs are required." });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: `Gologin Proxy Task started. Rotating across ${urls.length} sites.` 
+        });
+
+        // Background Processing
+        (async () => {
+            for (let i = 1; i <= views; i++) {
+                const currentUrl = urls[Math.floor(Math.random() * urls.length)];
+                await runGologinTask(keyword, currentUrl, i);
+
+                // Delay to prevent CPU spike on Render
+                await new Promise(r => setTimeout(r, 12000));
+            }
+        })();
+
+    } catch (err) {
+        console.error("Ultimate Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false });
+    }
+});
+
 app.post('/ultimate', async (req, res) => {
     try {
         const { keyword, urls, views = 1000 } = req.body;
