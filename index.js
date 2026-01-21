@@ -1060,158 +1060,175 @@ app.post('/start-Proxyium', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+
 // ===================================================================
+// 7. ULTIMATE ADVANCED TOOL POPUP (DEVICE, LANG, PROXY, AD-SAFE)
 // ===================================================================
-// 7. TOOL POPUP (ADVANCED HUMAN SIMULATION & AD CLICKER)
-// ===================================================================
+
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // 1. Random Device & Browser Simulation
-        const devices = [
-            { name: 'Desktop-Chrome', ua: USER_AGENTS[0], viewport: { width: 1920, height: 1080 } },
-            { name: 'Desktop-Safari', ua: USER_AGENTS[1], viewport: { width: 1440, height: 900 } },
-            { name: 'Mobile-Android', ua: USER_AGENTS[2], viewport: { width: 360, height: 740 } },
-            { name: 'Mobile-iPhone', ua: USER_AGENTS[3], viewport: { width: 390, height: 844 } },
-            { name: 'Tablet-iPad', ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", viewport: { width: 810, height: 1080 } }
-        ];
-        const device = devices[Math.floor(Math.random() * devices.length)];
+        // 1. LANGUAGE & DEVICE SELECTION (20 View Cycle)
+        const cycleIndex = (viewNumber - 1) % 20;
+        let lang = 'en-US,en;q=0.9';
+        if (cycleIndex >= 10 && cycleIndex < 15) lang = 'fr-FR,fr;q=0.9';
+        else if (cycleIndex >= 15) lang = 'de-DE,de;q=0.9';
 
-        // 2. Random Referrer Rotation (LinkedIn, Reddit, etc.)
-        const referrers = [
-            'https://www.linkedin.com/',
-            'https://www.reddit.com/',
-            'https://t.co/', 
-            'https://www.google.com/',
-            'https://www.facebook.com/'
+        // Device Models & Referrers
+        const devices = [
+            { name: 'Samsung Galaxy S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.64 Mobile Safari/537.36', w: 384, h: 854 },
+            { name: 'iPad Pro 11', ua: 'Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', w: 834, h: 1194 },
+            { name: 'iPhone 15 Pro', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', w: 393, h: 852 },
+            { name: 'Windows PC (Edge)', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0', w: 1920, h: 1080 }
         ];
-        const selectedReferrer = referrers[Math.floor(Math.random() * referrers.length)];
+        const selectedDevice = devices[viewNumber % devices.length];
+        const referrers = ['https://www.reddit.com/', 'https://www.facebook.com/', 'https://t.co/', 'https://www.pinterest.com/'];
+        const selectedRef = referrers[viewNumber % referrers.length];
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+            args: [
+                '--no-sandbox', '--disable-setuid-sandbox',
+                `--lang=${lang.split(',')[0]}`,
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(device.ua);
-        await page.setViewport(device.viewport);
+        await page.setUserAgent(selectedDevice.ua);
+        await page.setViewport({ width: selectedDevice.w, height: selectedDevice.h });
+        await page.setExtraHTTPHeaders({ 'Accept-Language': lang });
 
-        console.log(`\n[VIEW #${viewNumber}] Device: ${device.name} | Ref: ${selectedReferrer}`);
+        // 2. CROXYPROXY LOGIC
+        console.log(`[VIEW #${viewNumber}] Loading CroxyProxy for: ${url}`);
+        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+        
+        // CroxyProxy input box and search
+        await page.waitForSelector('#url', { timeout: 10000 });
+        await page.type('#url', url, { delay: 100 });
+        await page.click('#requestSubmit');
+        
+        // Wait for target site to load through proxy
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {});
 
-        // 3. Visit Target Site
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000, 
-            referer: selectedReferrer 
-        });
+        // 3. SMART CONSENT/ADSENSE POPUP HANDLING (8-8-4 Logic)
+        await new Promise(r => setTimeout(r, 5000)); // Wait for popup
+        await page.evaluate(async (vNum) => {
+            const cycle = (vNum - 1) % 20;
+            const findBtn = (txts) => {
+                return Array.from(document.querySelectorAll('button, span, a, div[role="button"]'))
+                    .find(el => txts.some(t => el.innerText.toLowerCase().includes(t)));
+            };
 
-        // --- 🔥 SMART POP-UP HANDLING (AdSense/Cookie Consent) ---
-        try {
-            await new Promise(r => setTimeout(r, 4000)); // Pop-up load hone ka wait
-            const buttons = await page.$$('button, [role="button"], a, ins, div');
-            const cycle = viewNumber % 50; 
+            // Detect if AdSense/GDPR popup exists
+            const hasPopup = document.body.innerText.toLowerCase().includes('consent') || 
+                             document.body.innerText.toLowerCase().includes('cookie');
 
-            let actionTaken = false;
-            for (let btn of buttons) {
-                const text = await page.evaluate(el => el.innerText ? el.innerText.toLowerCase() : "", btn);
-                
-                if (cycle < 20) { // 20 times: CLOSE/REJECT
-                    if (/close|reject|deny|decline|x|✖/.test(text)) {
-                        await btn.click();
-                        console.log(`[ACTION] Pop-up Closed (REJECT)`);
-                        actionTaken = true; break;
-                    }
-                } else if (cycle >= 20 && cycle < 35) { // 15 times: CONSENT
-                    if (/accept|agree|allow|consent|ok/.test(text)) {
-                        await btn.click();
-                        console.log(`[ACTION] Pop-up Accepted (CONSENT)`);
-                        actionTaken = true; break;
-                    }
-                } else { // 15 times: MANAGE
-                    if (/manage|options|settings|customize/.test(text)) {
-                        await btn.click();
-                        console.log(`[ACTION] Pop-up Managed (OPTIONS)`);
+            if (hasPopup) {
+                if (cycle < 8) { // 8 VIEWS: CLOSE (X)
+                    const closeBtn = document.querySelector('button[aria-label*="Close"], .dismiss, .close-icon');
+                    if (closeBtn) closeBtn.click();
+                } 
+                else if (cycle < 16) { // 8 VIEWS: CONSENT
+                    const acceptBtn = findBtn(['accept', 'agree', 'allow', 'consent']);
+                    if (acceptBtn) acceptBtn.click();
+                } 
+                else { // 4 VIEWS: MANAGE & SELECT ALL
+                    const manageBtn = findBtn(['manage', 'options', 'settings']);
+                    if (manageBtn) {
+                        manageBtn.click();
                         await new Promise(r => setTimeout(r, 2000));
-                        const allSelect = await page.$('input[type="checkbox"], .select-all');
-                        if (allSelect) await allSelect.click();
-                        const save = await page.$('button[id*="save"], .save-settings');
-                        if (save) await save.click();
-                        actionTaken = true; break;
+                        const selectAll = findBtn(['select all', 'allow all', 'confirm']);
+                        if (selectAll) selectAll.click();
                     }
                 }
             }
-        } catch (e) { console.log("[INFO] No Pop-up detected."); }
+        }, viewNumber);
 
-        // 4. Realistic Behavior (Scroll & Mouse Move)
-        const stayTime = randomInt(30000, 40000);
+        // 4. HUMAN INTERACTION & AD CLICKING
+        const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
         const startTime = Date.now();
+        let adClicked = false;
 
         while (Date.now() - startTime < stayTime) {
-            await page.evaluate(() => window.scrollBy({ top: Math.floor(Math.random() * 500), behavior: 'smooth' }));
-            await page.mouse.move(randomInt(50, 800), randomInt(50, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, 5000));
+            // Random Scroll (Up/Down)
+            const scrollAmt = Math.floor(Math.random() * 400) * (Math.random() > 0.3 ? 1 : -1);
+            await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
+            
+            // Random Mouse Movement
+            await page.mouse.move(Math.random() * 500, Math.random() * 500, { steps: 5 });
 
-            // 🔥 AD CLICKER (Clicking 5-6 times per 20 views)
-            if (viewNumber % 4 === 0) { // Approx 25% chance (5 clicks in 20 views)
-                const adSelectors = [
-                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
-                    'a[href*="click"]', '.monetag-ad', 'iframe[src*="monetag"]'
-                ];
-                for (let selector of adSelectors) {
-                    const ad = await page.$(selector);
-                    if (ad) {
-                        const box = await ad.boundingBox();
-                        if (box && box.width > 10) {
-                            console.log(`\x1b[32m[AD-CLICK]\x1b[0m Clicking Ad at (${box.x}, ${box.y})`);
-                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                            await new Promise(r => setTimeout(r, 6000)); // Click ke baad 6 sec wait
-                            break;
-                        }
+            // ADVANCED AD CLICKER (3-5 views out of 20)
+            const clickCycle = (viewNumber - 1) % 20;
+            if (!adClicked && (clickCycle === 2 || clickCycle === 7 || clickCycle === 12 || clickCycle === 18)) {
+                // Pehchan: Google Ads, Banner Ads, or Hidden overlays
+                const adSelectors = 'ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], a[href*="adclick"], div[class*="banner-ad"]';
+                const ads = await page.$$(adSelectors);
+                
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+                    if (box && box.width > 10 && box.height > 10) {
+                        console.log(`[AD-CLICK] 💰 Clicking detected ad...`);
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        adClicked = true;
+                        await new Promise(r => setTimeout(r, 10000)); // Stay on ad page
                     }
                 }
             }
+            await new Promise(r => setTimeout(r, 4000));
         }
-        console.log(`[SUCCESS] View #${viewNumber} session finished.`);
+
+        // 5. CLEANUP (Clear History & Cookies)
+        const client = await page.target().createCDPSession();
+        await client.send('Network.clearBrowserCookies');
+        await client.send('Network.clearBrowserCache');
+        
+        console.log(`[SUCCESS] View #${viewNumber} finished (Lang: ${lang.split(',')[0]}).`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
-
-// ===================================================================
-// Endpoint for Tool 7 (/popup) - SEQUENTIAL EXECUTION
-// ===================================================================
+// --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
         const { keyword, urls, views = 1000 } = req.body;
-        if (!urls || !Array.isArray(urls)) return res.status(400).json({ success: false });
 
-        res.status(200).json({ success: true, message: "Task started: Sequential processing for RAM safety." });
+        if (!keyword || !urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "Keyword and URLs (Array) are required." });
+        }
 
-        // Background Worker (AWAIT used for one-by-one execution)
+        // Response immediately to frontend
+        res.status(200).json({ 
+            success: true, 
+            message: `Task started for ${urls.length} sites with pop-up rotation logic.` 
+        });
+
+        // Background Processing
         (async () => {
+            console.log(`\n--- STARTING POP-UP REVENUE TASK ---`);
             for (let i = 1; i <= views; i++) {
-                const currentUrl = urls[(i - 1) % urls.length];
+                const currentUrl = urls[(i - 1) % urls.length]; // Rotation between sites
                 await runGscTaskpop(keyword, currentUrl, i);
-                
-                // Cooling break between browsers
-                await new Promise(r => setTimeout(r, 8000));
+
+                // RAM Management & Anti-Spam break
+                const breakTime = i % 5 === 0 ? 30000 : 10000;
+                await new Promise(r => setTimeout(r, breakTime));
             }
-            console.log("--- ALL POPUP TASKS FINISHED ---");
         })();
+
     } catch (err) {
         console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
-
-
 // ===================================================================
 // 9. FIXED YOUTUBE HITTER (ONE-BY-ONE WITH TAP-TO-PLAY)
 // ===================================================================
