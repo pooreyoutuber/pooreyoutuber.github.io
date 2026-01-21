@@ -1065,9 +1065,6 @@ app.post('/start-Proxyium', async (req, res) => {
 // 7. ULTIMATE ADVANCED TOOL POPUP (DEVICE, LANG, PROXY, AD-SAFE)
 // ===================================================================
 
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
-
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
