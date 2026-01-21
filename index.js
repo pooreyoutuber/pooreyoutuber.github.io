@@ -1354,144 +1354,131 @@ app.post('/api/real-view-boost', async (req, res) => {
 });
 
 // ===================================================================
-// TOOL 11: GOLOGIN PROXY REVENUE BOOSTER (2nd TAB & COUNTRY FIX)
+// TOOL 11: GOLOGIN ULTIMATE PROXY (2ND TAB & ADVANCED AD-CLICKER)
 // ===================================================================
 
-async function runGologinTask(keyword, url, viewNumber) {
+async function runGologinVideoTask(country, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new", 
+            headless: "new",
             args: [
                 '--no-sandbox', 
-                '--disable-setuid-sandbox',
+                '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
+                '--window-size=1920,1080'
             ]
         });
 
-        const pages = await browser.pages();
-        const mainPage = pages[0];
-        await mainPage.setViewport({ width: 1366, height: 768 });
-        await mainPage.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1920, height: 1080 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[VIEW #${viewNumber}] Opening Gologin Gateway...`);
-        await mainPage.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
+        console.log(`[VIEW #${viewNumber}] Step 1: Opening Gologin Proxy...`);
+        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 1. SELECT LOCATION (COUNTRY FROM KEYWORD)
-        // Video steps ke mutabik "United States" par click karke dropdown kholna
+        // --- 1. COUNTRY CHANGE KARNA ---
         try {
-            const dropdown = await mainPage.waitForXPath("//div[contains(text(), 'United States')]", { timeout: 15000 });
-            if (dropdown) {
-                await dropdown.click();
-                await new Promise(r => setTimeout(r, 2000));
-                
-                // Keyword me aayi country (e.g. Japan) par click karna
-                const countryOption = await mainPage.waitForXPath(`//div[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '${keyword.toLowerCase()}')]`, { timeout: 10000 });
-                if (countryOption) {
-                    await countryOption.click();
-                    console.log(`[SUCCESS] Location set to: ${keyword}`);
-                    await new Promise(r => setTimeout(r, 5000)); // IP switch hone ka wait
+            await page.waitForSelector('.select-trigger', { timeout: 10000 });
+            await page.click('.select-trigger');
+            await new Promise(r => setTimeout(r, 2000));
+
+            const countrySet = await page.evaluate((target) => {
+                const options = Array.from(document.querySelectorAll('.select-option-text'));
+                const match = options.find(el => el.innerText.trim().toLowerCase().includes(target.toLowerCase()));
+                if (match) {
+                    match.click();
+                    return true;
                 }
-            }
-        } catch (e) {
-            console.log(`[!] Country selection skipped/failed: ${e.message}`);
-        }
+                return false;
+            }, country);
+            
+            if(countrySet) console.log(`[SUCCESS] Location set to: ${country}`);
+        } catch (e) { console.log("[INFO] Country skip/default used."); }
 
-        // 2. INPUT URL & CLICK GO
-        const inputSelector = 'input[placeholder*="URL"]';
-        await mainPage.waitForSelector(inputSelector);
-        await mainPage.type(inputSelector, url, { delay: 100 });
+        // --- 2. PUT A URL & CLICK GO ---
+        await page.waitForSelector('input[placeholder*="URL"]');
+        await page.type('input[placeholder*="URL"]', url, { delay: 100 });
+
+        console.log(`[ACTION] Clicking GO Button...`);
         
-        // Go button click (Ye hamesha naya tab kholta hai)
-        const goBtn = await mainPage.waitForXPath("//button[contains(translate(., 'GO', 'go'), 'go')]", { timeout: 10000 });
+        // Go click karte hi 2nd tab khulega, humein use track karna hai
+        const [target] = await Promise.all([
+            new Promise(resolve => browser.once('targetcreated', resolve)), // 2nd tab ka wait
+            page.evaluate(() => {
+                const btns = Array.from(document.querySelectorAll('button, span'));
+                const goBtn = btns.find(b => b.innerText.trim().toLowerCase() === 'go');
+                if (goBtn) goBtn.click();
+            })
+        ]);
+
+        // --- 3. SWITCH TO 2ND TAB ---
+        const proxiedPage = await target.page();
+        await proxiedPage.setViewport({ width: 1920, height: 1080 });
+        console.log(`[SWITCH] Moved to 2nd Tab. Loading site...`);
         
-        // Naye tab ka listener setup karein
-        const newTargetPromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
-        
-        if (goBtn) await goBtn.click();
-        else await mainPage.keyboard.press('Enter');
+        await new Promise(r => setTimeout(r, 15000)); // Page load hone ka wait
 
-        console.log(`[WAIT] Waiting for 2nd Tab to open...`);
-        
-        // 3. SWITCH TO 2nd TAB
-        const secondTab = await newTargetPromise;
-        if (!secondTab) throw new Error("2nd Tab did not open!");
-
-        await secondTab.bringToFront();
-        await secondTab.setViewport({ width: 1366, height: 768 });
-        console.log(`[ACTIVE] Site loading on 2nd Tab via ${keyword} Proxy.`);
-
-        // 1st Tab ko close karein (RAM bachaane ke liye)
-        await mainPage.close().catch(() => {});
-
-        // 4. ADVANCED BEHAVIOR & AD-CLICKER (30-50 SECONDS)
-        const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000); 
+        // --- 4. ADVANCED AD-CLICKER & HUMAN MOMENT ---
         const startTime = Date.now();
-        let adClicked = false;
+        const stayTime = 50000; // 50 seconds stay
 
         while (Date.now() - startTime < stayTime) {
-            // Random Scrolling
-            await secondTab.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            // Random Mouse Movement
-            await secondTab.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 5 });
-            
-            // 🔥 ADVANCED AD-CLICKER (Banner, Push-up, Hidden, Video)
-            // 20 views me se 3-4 baar click karne ki probability (approx 15-20%)
-            if (!adClicked && Math.random() < 0.18 && (Date.now() - startTime > 15000)) {
-                const clicked = await secondTab.evaluate(() => {
-                    const selectors = [
+            // Random Scroll & Mouse Movement
+            await proxiedPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await proxiedPage.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 5 });
+
+            // 🔥 ADVANCED AD CLICKER (Banner, Hidden, Video)
+            if (Math.random() < 0.35) { 
+                const clicked = await proxiedPage.evaluate(() => {
+                    const adSelectors = [
                         'ins.adsbygoogle', 'iframe[src*="googleads"]', 'iframe[id^="aswift"]',
-                        '#ad-container', '.ad-unit', 'div[class*="ad-video"]', '.push-up-ad',
-                        'iframe[title*="ad"]', 'a[href*="doubleclick.net"]'
+                        '.ad-unit', '.vjs-ad-playing', 'video.video-ad', 'div[class*="ad-"]',
+                        'div[id*="google_ads"]', 'a[href*="doubleclick.net"]'
                     ];
-                    const ads = document.querySelectorAll(selectors.join(','));
-                    for (let ad of ads) {
-                        const rect = ad.getBoundingClientRect();
-                        if (rect.width > 20 && rect.height > 20 && rect.top >= 0) {
-                            ad.scrollIntoView();
-                            // Dispatch a real click event
-                            const evt = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
-                            ad.dispatchEvent(evt);
-                            return true;
+                    
+                    for (let s of adSelectors) {
+                        const el = document.querySelector(s);
+                        if (el) {
+                            const rect = el.getBoundingClientRect();
+                            if (rect.width > 30 && rect.height > 30) {
+                                el.scrollIntoView();
+                                el.click(); // Standard click
+                                return true;
+                            }
                         }
                     }
                     return false;
                 });
 
                 if (clicked) {
-                    console.log(`[🔥 ACTION] Advanced Ad Clicked!`);
-                    adClicked = true;
-                    await new Promise(r => setTimeout(r, 15000)); // Ad site par 15s stay
+                    console.log(`\x1b[32m[REVENUE]\x1b[0m Ad Detected & Clicked! Staying on Ad page...`);
+                    await new Promise(r => setTimeout(r, 20000)); 
+                    break; 
                 }
             }
             await new Promise(r => setTimeout(r, 7000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} completed after ${stayTime/1000}s.`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
 
     } catch (err) {
-        console.error(`[CRITICAL ERROR] View #${viewNumber}:`, err.message);
+        console.error(`[ERROR] View #${viewNumber}:`, err.message);
     } finally {
-        if (browser) {
-            await browser.close();
-            console.log(`[CLEANUP] Browser closed for View #${viewNumber}`);
-        }
+        if (browser) await browser.close();
     }
 }
 
 // ENDPOINT
 app.post('/ultimate', async (req, res) => {
-    const { keyword, urls, views = 1000 } = req.body;
-    
-    res.status(200).json({ success: true, message: "Ultimate Proxy Booster Started" });
+    const { keyword, urls, views = 1000 } = req.body; // Keyword = Country
+    res.status(200).json({ success: true, message: "Gologin Multi-Tab Process Started" });
 
     (async () => {
         for (let i = 1; i <= views; i++) {
-            const site = urls[Math.floor(Math.random() * urls.length)];
-            await runGologinTask(keyword, site, i);
-            // Cooldown for Render RAM
-            await new Promise(r => setTimeout(r, 10000));
+            const currentSite = urls[Math.floor(Math.random() * urls.length)];
+            await runGologinVideoTask(keyword, currentSite, i);
+            await new Promise(r => setTimeout(r, 10000)); // Render Safety
         }
     })();
 });
