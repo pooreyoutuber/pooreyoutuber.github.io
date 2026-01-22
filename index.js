@@ -1064,16 +1064,14 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE ADVANCED TOOL POPUP (CROXYPROXY + MULTI-DEVICE + AD-SAFE)
 // ===================================================================
-
 // ===================================================================
-// 7. TOOL POPUP - CROXYPROXY AUTOMATION (FIXED & IMPROVED)
+// 7. TOOL: CROXYPROXY AUTOMATION (REPLACES PREVIOUS POPUP LOGIC)
 // ===================================================================
 
 async function runCroxyProxyTask(url, viewNumber) {
     let browser;
     try {
-        // Har baar naya browser instance (One-by-one)
-        browser = await puppeteerExtra.launch({
+        browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
@@ -1085,132 +1083,104 @@ async function runCroxyProxyTask(url, viewNumber) {
 
         const page = await browser.newPage();
         
-        // Random Viewport aur User Agent taaki har view alag dikhe
-        await page.setViewport({ width: randomInt(1280, 1440), height: randomInt(720, 900) });
+        // Random Screen Size for authenticity
+        const widths = [1280, 1366, 1536, 1920];
+        await page.setViewport({ 
+            width: widths[randomInt(0, widths.length - 1)], 
+            height: 800 
+        });
+        
         await page.setUserAgent(USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)]);
 
         // 1. CroxyProxy Website par jana
-        console.log(`\n[VIEW #${viewNumber}] Opening CroxyProxy for: ${url}`);
+        console.log(`[CROXY-TOOL] View #${viewNumber} | Opening CroxyProxy...`);
         await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 2. Proxy Input mein URL paste karna aur Enter dabana
-        const inputSelector = '#url'; // CroxyProxy ka input ID
-        await page.waitForSelector(inputSelector, { visible: true });
-        await page.type(inputSelector, url, { delay: 100 });
+        // 2. Search bar mein URL daalna aur Go click karna
+        // Selector for CroxyProxy input field
+        const inputSelector = '#url'; 
+        await page.waitForSelector(inputSelector);
+        
+        console.log(`[CROXY-TOOL] Entering URL: ${url}`);
+        await page.type(inputSelector, url, { delay: 150 });
+        
+        // 'Go' button click karna ya Enter press karna
         await page.keyboard.press('Enter');
 
-        // 3. Proxied Site load hone ka intezar
-        console.log(`[SYSTEM] Waiting for proxied site to load...`);
+        // 3. Wait for Proxy to load the target site
+        console.log(`[CROXY-TOOL] Waiting for Proxy to tunnel...`);
+        // Proxy loading mein time leta hai isliye 90s timeout
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {});
-        
-        // Wait for additional 5 seconds after navigation
-        await new Promise(r => setTimeout(r, 5000));
 
-        // 4. Staying & Realistic Behavior (30-50 Seconds)
+        // 4. Realistic Human Behavior (30-50 Seconds)
         const stayTime = randomInt(30000, 50000); 
         const startTime = Date.now();
-        let adClicked = false;
-
-        // Logic: 20 views mein se lagbhag 3-4 views par click (approx 18% chance)
-        const shouldClickAd = Math.random() < 0.18; 
-
-        console.log(`[ACTION] Staying for ${stayTime/1000}s. Ad Click Chance: ${shouldClickAd}`);
+        console.log(`[CROXY-TOOL] Simulation started for ${stayTime/1000}s...`);
 
         while (Date.now() - startTime < stayTime) {
             // Random Scrolling
-            const scrollDist = randomInt(200, 500);
+            const scrollDist = randomInt(200, 600);
             await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
             
             // Random Mouse Movement
-            await page.mouse.move(randomInt(100, 1000), randomInt(100, 600), { steps: 10 });
-
-            // ADS CLICKER LOGIC (AdSense, Video Ads, Hidden Ads)
-            if (shouldClickAd && !adClicked) {
-                // Har tarah ke ads ko detect karne ke liye selectors
-                const adSelectors = [
-                    'ins.adsbygoogle', 
-                    'iframe[id^="aswift"]', 
-                    'iframe[src*="googleads"]',
-                    '.ad-unit', 
-                    '[class*="ads-"]',
-                    'video', // Video ads
-                    'a[href*="googleadservices.com"]' // Direct links
-                ];
-
-                for (const selector of adSelectors) {
-                    const ads = await page.$$(selector);
-                    if (ads.length > 0) {
-                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                        const box = await targetAd.boundingBox();
-
-                        if (box && box.width > 20 && box.height > 20) {
-                            console.log(`[REVENUE] High-Value Ad Found! Clicking...`);
-                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                            adClicked = true;
-                            // Click ke baad 10s advertiser site par rukna zaruri hai
-                            await new Promise(r => setTimeout(r, 10000));
-                            break; 
-                        }
-                    }
-                }
-            }
-            await new Promise(r => setTimeout(r, 4000));
+            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 8 });
+            
+            // Random Wait between actions
+            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        console.log(`[DONE] CroxyProxy View #${viewNumber} completed successfully. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[CROXY ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // Memory clean-up
             await browser.close().catch(() => {});
         }
     }
 }
 
-// --- UPDATED ENDPOINT FOR TOOL 7 (/popup) ---
+// --- Tool 7 Endpoint (/popup update) ---
 app.post('/popup', async (req, res) => {
     try {
-        const { keyword, urls, views = 10 } = req.body;
+        const { urls, views = 10 } = req.body;
 
-        if (!urls || !Array.isArray(urls)) {
-            return res.status(400).json({ success: false, message: "URLs are required in an array." });
+        if (!urls || !Array.isArray(urls) || urls.length === 0) {
+            return res.status(400).json({ success: false, message: "URLs array required!" });
         }
 
-        // Backend response turant de dena taaki Render/Frontend timeout na ho
+        const totalViews = parseInt(views);
+
+        // Instant response to frontend
         res.status(200).json({ 
             success: true, 
-            message: `CroxyProxy Automation Started for ${views} views.` 
+            message: `CroxyProxy Task Started: ${totalViews} views across ${urls.length} sites.` 
         });
 
-        // Background Worker (Sequential Execution)
+        // Background Execution
         (async () => {
-            console.log(`\n--- STARTING CROXYPROXY REVENUE TASK ---`);
-            const totalViews = parseInt(views);
+            console.log(`--- CROXYPROXY REVENUE ENGINE START ---`);
             for (let i = 1; i <= totalViews; i++) {
-                const targetUrl = urls[(i - 1) % urls.length];
+                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
                 
-                // 1 by 1 browser execution
+                // One-by-one execution to save RAM
                 await runCroxyProxyTask(targetUrl, i);
 
                 if (i < totalViews) {
-                    // RAM cooling gap
-                    const restTime = 10000; 
-                    console.log(`[REST] Sleeping ${restTime/1000}s before next browser...`);
+                    const restTime = 10000; // 10s gap to let the server breathe
+                    console.log(`[REST] Sleeping ${restTime/1000}s...`);
                     await new Promise(r => setTimeout(r, restTime));
                 }
             }
-            console.log(`--- ALL CROXYPROXY SESSIONS FINISHED ---`);
+            console.log("--- CROXYPROXY ENGINE FINISHED ---");
         })();
 
     } catch (err) {
-        console.error("Popup Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+        console.error("CroxyProxy Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false });
     }
 });
-            
- 
+
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
