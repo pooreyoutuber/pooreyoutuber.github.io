@@ -1064,130 +1064,137 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE ADVANCED TOOL POPUP (CROXYPROXY + MULTI-DEVICE + AD-SAFE)
 // ===================================================================
- // ===================================================================
-// 7. ADVANCED CROXYPROXY TOOL (WITH MULTI-DEVICE & SMART ADSENSE POPUP)
-// ===================================================================
+// --- ADVANCED DEVICE & LANGUAGE DATABASE ---
+const DEVICE_DATABASE = {
+    mobile: [
+        { model: "Samsung Galaxy S24 Ultra", ua: "Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", width: 385, height: 854 },
+        { model: "iPhone 15 Pro Max", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1", width: 430, height: 932 },
+        { model: "Google Pixel 8", ua: "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", width: 412, height: 915 },
+        { model: "OnePlus 12", ua: "Mozilla/5.0 (Linux; Android 14; CPH2573) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36", width: 360, height: 800 }
+        // ... (Baaki 8 mobile models aapke data se list honge)
+    ],
+    tablet: [
+        { model: "iPad Mini 6", ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", width: 744, height: 1133 },
+        { model: "Samsung Galaxy Tab S9", ua: "Mozilla/5.0 (Linux; Android 13; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36", width: 800, height: 1280 }
+        // ... (Baaki 6 tablet models)
+    ],
+    pc: [
+        { model: "MacBook Pro M3", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15", width: 1440, height: 900 },
+        { model: "Lenovo Legion 5", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", width: 1536, height: 864 }
+        // ... (Baaki 10 PC models)
+    ]
+};
 
-async function runCroxyProxyAdvanced(targetUrl, viewNumber) {
+// Language & Referrer Ratio Configuration
+const LANGUAGES = ["en-US", "en-US", "en-GB", "en-US", "en-GB", "en-US", "fr-FR", "fr-FR", "it-IT", "de-DE", "da-DK"];
+const REFERRERS = ["https://www.facebook.com/", "https://www.reddit.com/", "https://twitter.com/", "https://www.pinterest.com/", "https://www.blogger.com/"];
+
+async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // 1. Device & OS Diversity (15+ Combinations)
-        const devices = [
-            { name: 'iPhone 13', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1', w: 390, h: 844 },
-            { name: 'Samsung Galaxy S21', ua: 'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36', w: 360, h: 800 },
-            { name: 'iPad Pro', ua: 'Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1', w: 1024, h: 1366 },
-            { name: 'Windows Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36', w: 1920, h: 1080 },
-            { name: 'Mac Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15', w: 1440, h: 900 },
-            { name: 'Linux Firefox', ua: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/110.0', w: 1366, h: 768 },
-            { name: 'Brave Windows', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36', w: 1536, h: 864 }
-        ];
-        const dev = devices[viewNumber % devices.length];
-
-        // 2. Language & Referral Rotation
-        const languages = viewNumber % 20 < 10 ? 'en-US,en;q=0.9' : (viewNumber % 20 < 15 ? 'de-DE,de;q=0.9' : 'fr-FR,fr;q=0.9');
-        const referrers = ['https://www.facebook.com/', 'https://www.instagram.com/', 'https://t.co/', 'https://www.pinterest.com/', 'https://www.google.com/search?q=trending+topics'];
-        const ref = referrers[randomInt(0, referrers.length - 1)];
+        // Device Type Rotation
+        const type = viewNumber % 3 === 0 ? 'pc' : (viewNumber % 3 === 1 ? 'mobile' : 'tablet');
+        const config = DEVICE_DATABASE[type][Math.floor(Math.random() * DEVICE_DATABASE[type].length)];
+        const lang = LANGUAGES[viewNumber % LANGUAGES.length];
+        const ref = REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', `--lang=${languages.split(',')[0]}`]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', `--lang=${lang}`]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(dev.ua);
-        await page.setViewport({ width: dev.w, height: dev.h });
-        await page.setExtraHTTPHeaders({ 'Accept-Language': languages });
+        await page.setUserAgent(config.ua);
+        await page.setViewport({ width: config.width, height: config.height });
 
-        console.log(`[VIEW #${viewNumber}] Device: ${dev.name} | Lang: ${languages.substring(0,2)} | Ref: ${ref}`);
+        // 1. Visit Site & Wait Initial 5 Seconds
+        console.log(`[VIEW #${viewNumber}] Device: ${config.model} | Lang: ${lang}`);
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: ref });
+        await new Promise(r => setTimeout(r, 5000)); // Initial wait
 
-        // 3. CroxyProxy Entry
-        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
-        await page.type('#url', targetUrl, { delay: 100 });
-        await page.keyboard.press('Enter');
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {});
-
-        // --- 4. SMART ADSENSE POP-UP HANDLING (13 Close, 8 Consent, 5 Manage) ---
-        await new Promise(r => setTimeout(r, 5000));
+        // 2. Advanced AdSense Consent Logic (Ratio: 8:7:5)
+        const cycle = viewNumber % 20;
         try {
-            const cycle = viewNumber % 26; // Handling 26 views distribution
-            const buttons = await page.$$('button, span, div');
-            
-            if (cycle < 13) { 
-                // CLOSE/REJECT (13 views)
-                for (let b of buttons) {
+            const btns = await page.$$('button, a, div[role="button"]');
+            let actionTaken = false;
+
+            if (cycle < 8) { // 8 Consent
+                for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
-                    if (txt.includes('x') || txt.includes('close') || txt.includes('reject')) {
-                        await b.click(); break;
+                    if (['consent', 'accept', 'agree', 'allow', 'ok'].some(t => txt.includes(t))) {
+                        await b.click(); actionTaken = true; break;
                     }
                 }
-            } else if (cycle >= 13 && cycle < 21) { 
-                // CONSENT/ACCEPT (8 views)
-                for (let b of buttons) {
+            } else if (cycle < 15) { // 7 Close
+                for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
-                    if (txt.includes('consent') || txt.includes('accept') || txt.includes('agree')) {
-                        await b.click(); break;
+                    if (['x', 'close', 'reject', 'deny', 'dismiss'].some(t => txt.includes(t))) {
+                        await b.click(); actionTaken = true; break;
                     }
                 }
-            } else { 
-                // MANAGE OPTIONS (5 views)
-                for (let b of buttons) {
+            } else { // 5 Manage Options & Select All
+                for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
                     if (txt.includes('manage') || txt.includes('options')) {
                         await b.click();
-                        await new Promise(r => setTimeout(r, 2000));
+                        await new Promise(r => setTimeout(r, 3000));
+                        // Select all/Confirm behavior
                         await page.evaluate(() => {
-                            const toggles = document.querySelectorAll('input[type="checkbox"]');
-                            toggles.forEach(t => { if(!t.checked) t.click(); });
-                            const confirm = Array.from(document.querySelectorAll('button')).find(b => b.innerText.toLowerCase().includes('confirm') || b.innerText.toLowerCase().includes('save'));
-                            if (confirm) confirm.click();
+                            const confirmBtn = Array.from(document.querySelectorAll('button')).find(el => el.innerText.toLowerCase().includes('confirm') || el.innerText.toLowerCase().includes('save'));
+                            if (confirmBtn) confirmBtn.click();
                         });
-                        break;
+                        actionTaken = true; break;
                     }
                 }
             }
-        } catch (e) { console.log("No AdSense Popup found."); }
+            if(actionTaken) console.log(`[ACTION] Popup handled in cycle mode: ${cycle}`);
+        } catch (e) { console.log("[INFO] No popup appeared."); }
 
-        // 5. ADVANCED ADS CLICKER & BEHAVIOR
-        const stayTime = randomInt(40000, 60000);
+        // 3. Realistic Behavior (Scroll & Mouse Jitter)
+        const stayTime = randomInt(30000, 50000);
         const startTime = Date.now();
-        while (Date.now() - startTime < stayTime) {
-            // Random Scrolling & Jiggling
-            await page.evaluate(() => window.scrollBy({ top: Math.random() * 400, behavior: 'smooth' }));
-            await page.mouse.move(randomInt(0, dev.w), randomInt(0, dev.h), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
 
-            // Advanced Ad-Clicker (15% chance)
-            if (Math.random() < 0.15) {
-                const adFrame = await page.$('iframe[id*="aswift"], iframe[src*="googleads"]');
-                if (adFrame) {
-                    const box = await adFrame.boundingBox();
-                    if (box) {
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log("🔥 [REVENUE] Advanced Ad Clicked!");
-                        await new Promise(r => setTimeout(r, 20000)); // Advertiser stay
-                        break;
+        while (Date.now() - startTime < stayTime) {
+            // Random Scroll
+            const scroll = randomInt(200, 600);
+            await page.evaluate((s) => window.scrollBy({ top: s, behavior: 'smooth' }), scroll);
+            
+            // Random Mouse Movement (Ghumna)
+            await page.mouse.move(randomInt(50, config.width - 50), randomInt(50, config.height - 50), { steps: 10 });
+            
+            await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
+
+            // 4. Advanced Ad Clicker (3-4 clicks per 20 views)
+            if (cycle < 4 && Math.random() < 0.20) { 
+                const adSelectors = [
+                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]', // AdSense Banner/Video
+                    'div[id^="dismissible"]', '.ad-slot', '.push-ad', // Generic Popups/Pushups
+                    'iframe[src*="amazon-adsystem"]', 'iframe[src*="doubleclick"]'
+                ];
+                
+                for (let selector of adSelectors) {
+                    const ads = await page.$$(selector);
+                    if (ads.length > 0) {
+                        const ad = ads[Math.floor(Math.random() * ads.length)];
+                        const box = await ad.boundingBox();
+                        if (box && box.width > 20 && box.height > 20) {
+                            console.log(`[REVENUE] Clicking Advanced Ad: ${selector}`);
+                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                            await new Promise(r => setTimeout(r, 15000)); // Advertiser site stay
+                            break;
+                        }
                     }
                 }
             }
         }
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
-    } catch (err) { console.error(`[ERR] View #${viewNumber}: ${err.message}`); }
-    finally { if (browser) await browser.close(); }
+        console.log(`[DONE] View #${viewNumber} Finished.`);
+    } catch (err) {
+        console.error(`[CRITICAL] View #${viewNumber} Error: ${err.message}`);
+    } finally {
+        if (browser) await browser.close();
+    }                        
 }
 
-// Endpoint update for /popup
-app.post('/popup', async (req, res) => {
-    const { urls, views = 20 } = req.body;
-    res.status(200).json({ success: true, message: "Advanced CroxyProxy Task Started." });
-
-    (async () => {
-        for (let i = 1; i <= views; i++) {
-            const url = urls[i % urls.length];
-            await runCroxyProxyAdvanced(url, i);
-            await new Promise(r => setTimeout(r, 12000)); // RAM cooling
-        }
-    })();
-});
 
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
