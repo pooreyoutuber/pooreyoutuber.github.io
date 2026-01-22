@@ -1062,137 +1062,167 @@ app.post('/start-Proxyium', async (req, res) => {
 });
 
 // ===================================================================
-// 7. ULTIMATE ADVANCED TOOL POPUP (CROXYPROXY + MULTI-DEVICE + AD-SAFE)
 // ===================================================================
-// --- ADVANCED DEVICE & LANGUAGE DATABASE ---
+// TOOL 7: ADVANCED POPUP & ENGAGEMENT BOOSTER (FINAL VERSION)
+// ===================================================================
+
 const DEVICE_DATABASE = {
     mobile: [
         { model: "Samsung Galaxy S24 Ultra", ua: "Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", width: 385, height: 854 },
         { model: "iPhone 15 Pro Max", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1", width: 430, height: 932 },
         { model: "Google Pixel 8", ua: "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", width: 412, height: 915 },
-        { model: "OnePlus 12", ua: "Mozilla/5.0 (Linux; Android 14; CPH2573) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36", width: 360, height: 800 }
-        // ... (Baaki 8 mobile models aapke data se list honge)
+        { model: "iPhone 12 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1", width: 390, height: 844 },
+        { model: "OnePlus 12", ua: "Mozilla/5.0 (Linux; Android 14; CPH2573) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36", width: 360, height: 800 },
+        { model: "Xiaomi 14 Pro", ua: "Mozilla/5.0 (Linux; Android 14; 23116PN5BC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.193 Mobile Safari/537.36", width: 393, height: 852 },
+        { model: "Nothing Phone (2)", ua: "Mozilla/5.0 (Linux; Android 13; A065) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.163 Mobile Safari/537.36", width: 412, height: 915 },
+        { model: "Samsung Galaxy Z Fold 5", ua: "Mozilla/5.0 (Linux; Android 13; SM-F946B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36", width: 373, height: 812 },
+        { model: "iPhone 13", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1", width: 390, height: 844 },
+        { model: "Oppo Find X6 Pro", ua: "Mozilla/5.0 (Linux; Android 13; PGEM10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36", width: 360, height: 800 },
+        { model: "Sony Xperia 1 V", ua: "Mozilla/5.0 (Linux; Android 13; XQ-DQ72) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36", width: 412, height: 960 },
+        { model: "Samsung Galaxy A54", ua: "Mozilla/5.0 (Linux; Android 13; SM-A546B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36", width: 412, height: 915 }
     ],
     tablet: [
         { model: "iPad Mini 6", ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", width: 744, height: 1133 },
-        { model: "Samsung Galaxy Tab S9", ua: "Mozilla/5.0 (Linux; Android 13; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36", width: 800, height: 1280 }
-        // ... (Baaki 6 tablet models)
+        { model: "iPad Pro 12.9", ua: "Mozilla/5.0 (iPad; CPU OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", width: 1024, height: 1366 },
+        { model: "Samsung Galaxy Tab S9", ua: "Mozilla/5.0 (Linux; Android 13; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36", width: 800, height: 1280 },
+        { model: "Surface Pro 9", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36", width: 912, height: 1368 },
+        { model: "Lenovo Tab P12", ua: "Mozilla/5.0 (Linux; Android 13; TB370FU) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36", width: 800, height: 1280 },
+        { model: "Google Pixel Tablet", ua: "Mozilla/5.0 (Linux; Android 13; Pixel Tablet) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36", width: 800, height: 1280 },
+        { model: "iPad Air 5", ua: "Mozilla/5.0 (iPad; CPU OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1", width: 820, height: 1180 },
+        { model: "Xiaomi Pad 6", ua: "Mozilla/5.0 (Linux; Android 13; 23043RP34G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36", width: 800, height: 1280 }
     ],
     pc: [
         { model: "MacBook Pro M3", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15", width: 1440, height: 900 },
-        { model: "Lenovo Legion 5", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", width: 1536, height: 864 }
-        // ... (Baaki 10 PC models)
+        { model: "iMac 24-inch", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", width: 1920, height: 1080 },
+        { model: "Lenovo Legion 5", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", width: 1536, height: 864 },
+        { model: "Dell XPS 15", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36", width: 1920, height: 1200 },
+        { model: "HP Spectre x360", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0", width: 1536, height: 960 },
+        { model: "MacBook Air M2", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15", width: 1280, height: 832 },
+        { model: "ASUS ROG Zephyrus", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36", width: 1920, height: 1080 },
+        { model: "Surface Laptop 5", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36", width: 1504, height: 1000 },
+        { model: "Alienware m16", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36", width: 1920, height: 1200 },
+        { model: "Razer Blade 15", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36", width: 1920, height: 1080 },
+        { model: "MSI Stealth 16", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36", width: 1920, height: 1200 },
+        { model: "Acer Predator Helios", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36", width: 1920, height: 1080 }
     ]
 };
 
-// Language & Referrer Ratio Configuration
 const LANGUAGES = ["en-US", "en-US", "en-GB", "en-US", "en-GB", "en-US", "fr-FR", "fr-FR", "it-IT", "de-DE", "da-DK"];
 const REFERRERS = ["https://www.facebook.com/", "https://www.reddit.com/", "https://twitter.com/", "https://www.pinterest.com/", "https://www.blogger.com/"];
 
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // Device Type Rotation
+        // 1. SELECT DEVICE & CONFIG (Rotating Logic)
         const type = viewNumber % 3 === 0 ? 'pc' : (viewNumber % 3 === 1 ? 'mobile' : 'tablet');
-        const config = DEVICE_DATABASE[type][Math.floor(Math.random() * DEVICE_DATABASE[type].length)];
+        const deviceList = DEVICE_DATABASE[type];
+        const config = deviceList[Math.floor(Math.random() * deviceList.length)];
         const lang = LANGUAGES[viewNumber % LANGUAGES.length];
         const ref = REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', `--lang=${lang}`]
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                `--lang=${lang}`,
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
         await page.setUserAgent(config.ua);
         await page.setViewport({ width: config.width, height: config.height });
+        await page.setExtraHTTPHeaders({ 'Accept-Language': lang });
 
-        // 1. Visit Site & Wait Initial 5 Seconds
-        console.log(`[VIEW #${viewNumber}] Device: ${config.model} | Lang: ${lang}`);
+        console.log(`\n[VIEW #${viewNumber}] ${config.model} | LANG: ${lang} | REF: ${ref}`);
+
+        // 2. TARGET SITE & INITIAL WAIT (5 SECONDS)
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: ref });
-        await new Promise(r => setTimeout(r, 5000)); // Initial wait
+        await new Promise(r => setTimeout(r, 5000)); 
 
-        // 2. Advanced AdSense Consent Logic (Ratio: 8:7:5)
+        // 3. ADSENSE CONSENT LOGIC (8:7:5 RATIO PER 20 VIEWS)
         const cycle = viewNumber % 20;
         try {
             const btns = await page.$$('button, a, div[role="button"]');
-            let actionTaken = false;
+            let handled = false;
 
-            if (cycle < 8) { // 8 Consent
+            if (cycle < 8) { // 8 VIEWS: CONSENT/ACCEPT
                 for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
                     if (['consent', 'accept', 'agree', 'allow', 'ok'].some(t => txt.includes(t))) {
-                        await b.click(); actionTaken = true; break;
+                        await b.click(); handled = true; break;
                     }
                 }
-            } else if (cycle < 15) { // 7 Close
+            } else if (cycle < 15) { // 7 VIEWS: CLOSE/REJECT
                 for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
                     if (['x', 'close', 'reject', 'deny', 'dismiss'].some(t => txt.includes(t))) {
-                        await b.click(); actionTaken = true; break;
+                        await b.click(); handled = true; break;
                     }
                 }
-            } else { // 5 Manage Options & Select All
+            } else { // 5 VIEWS: MANAGE OPTIONS & SAVE
                 for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
                     if (txt.includes('manage') || txt.includes('options')) {
                         await b.click();
                         await new Promise(r => setTimeout(r, 3000));
-                        // Select all/Confirm behavior
                         await page.evaluate(() => {
-                            const confirmBtn = Array.from(document.querySelectorAll('button')).find(el => el.innerText.toLowerCase().includes('confirm') || el.innerText.toLowerCase().includes('save'));
-                            if (confirmBtn) confirmBtn.click();
+                            const confirm = Array.from(document.querySelectorAll('button')).find(el => 
+                                ['confirm', 'save', 'accept all', 'allow all'].some(t => el.innerText.toLowerCase().includes(t))
+                            );
+                            if (confirm) confirm.click();
                         });
-                        actionTaken = true; break;
+                        handled = true; break;
                     }
                 }
             }
-            if(actionTaken) console.log(`[ACTION] Popup handled in cycle mode: ${cycle}`);
-        } catch (e) { console.log("[INFO] No popup appeared."); }
+            if(handled) console.log(`[ACTION] Popup cycle #${cycle} handled successfully.`);
+        } catch (e) { console.log("[INFO] No Consent Popup detected."); }
 
-        // 3. Realistic Behavior (Scroll & Mouse Jitter)
-        const stayTime = randomInt(30000, 50000);
+        // 4. ENGAGEMENT: RANDOM SCROLLING & MOUSE MOVEMENT
+        const stayTime = randomInt(35000, 55000); 
         const startTime = Date.now();
 
         while (Date.now() - startTime < stayTime) {
-            // Random Scroll
-            const scroll = randomInt(200, 600);
-            await page.evaluate((s) => window.scrollBy({ top: s, behavior: 'smooth' }), scroll);
+            // Smooth Ruk-ruk ke scrolling
+            const scrollStep = randomInt(150, 400);
+            await page.evaluate((step) => window.scrollBy({ top: step, behavior: 'smooth' }), scrollStep);
             
-            // Random Mouse Movement (Ghumna)
-            await page.mouse.move(randomInt(50, config.width - 50), randomInt(50, config.height - 50), { steps: 10 });
+            // Random Mouse Jitter (Engagement Booster)
+            await page.mouse.move(randomInt(0, config.width), randomInt(0, config.height), { steps: 5 });
             
-            await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
+            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
 
-            // 4. Advanced Ad Clicker (3-4 clicks per 20 views)
-            if (cycle < 4 && Math.random() < 0.20) { 
+            // 5. ADVANCED ADS CLICKER (3-4 CLICKS PER 20 VIEWS)
+            if (cycle < 4 && Math.random() < 0.25) { 
                 const adSelectors = [
-                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]', // AdSense Banner/Video
-                    'div[id^="dismissible"]', '.ad-slot', '.push-ad', // Generic Popups/Pushups
-                    'iframe[src*="amazon-adsystem"]', 'iframe[src*="doubleclick"]'
+                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]', // AdSense
+                    '.push-ad', '.ad-slot', 'div[id^="ad-"]', // Push/Banner
+                    'iframe[src*="doubleclick"]', 'video-ad-unit' // Video/Display
                 ];
-                
-                for (let selector of adSelectors) {
-                    const ads = await page.$$(selector);
+
+                for (let sel of adSelectors) {
+                    const ads = await page.$$(sel);
                     if (ads.length > 0) {
-                        const ad = ads[Math.floor(Math.random() * ads.length)];
-                        const box = await ad.boundingBox();
-                        if (box && box.width > 20 && box.height > 20) {
-                            console.log(`[REVENUE] Clicking Advanced Ad: ${selector}`);
+                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                        const box = await targetAd.boundingBox();
+                        if (box && box.width > 50) {
+                            console.log(`[REVENUE] Clicking ${sel}...`);
                             await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                            await new Promise(r => setTimeout(r, 15000)); // Advertiser site stay
-                            break;
+                            await new Promise(r => setTimeout(r, 20000)); // Advertiser Page Stay
+                            break; 
                         }
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished.`);
+        console.log(`[SUCCESS] View #${viewNumber} Engagement Completed.`);
     } catch (err) {
-        console.error(`[CRITICAL] View #${viewNumber} Error: ${err.message}`);
+        console.error(`[CRITICAL] View #${viewNumber} Failed: ${err.message}`);
     } finally {
         if (browser) await browser.close();
-    }                        
+    }
 }
 
 
