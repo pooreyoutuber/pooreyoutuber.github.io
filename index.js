@@ -1062,136 +1062,143 @@ app.post('/start-Proxyium', async (req, res) => {
 });
 
 // ===================================================================
-// 7. ULTIMATE ADVANCED TOOL POPUP (DEVICE, LANG, PROXY, AD-SAFE)
+// 7. ULTIMATE ADVANCED TOOL POPUP (CROXYPROXY + MULTI-DEVICE + AD-SAFE)
 // ===================================================================
 
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // 1. LANGUAGE & DEVICE SELECTION (20 View Cycle)
         const cycleIndex = (viewNumber - 1) % 20;
+
+        // 1. LANGUAGE ROTATION (10 English, 5 French, 5 German)
         let lang = 'en-US,en;q=0.9';
         if (cycleIndex >= 10 && cycleIndex < 15) lang = 'fr-FR,fr;q=0.9';
         else if (cycleIndex >= 15) lang = 'de-DE,de;q=0.9';
 
-        // Device Models & Referrers
+        // 2. ADVANCED DEVICE & BROWSER ROTATION (15+ Models)
         const devices = [
-            { name: 'Samsung Galaxy S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.64 Mobile Safari/537.36', w: 384, h: 854 },
-            { name: 'iPad Pro 11', ua: 'Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', w: 834, h: 1194 },
             { name: 'iPhone 15 Pro', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', w: 393, h: 852 },
-            { name: 'Windows PC (Edge)', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0', w: 1920, h: 1080 }
+            { name: 'Samsung S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.64 Mobile Safari/537.36', w: 384, h: 854 },
+            { name: 'iPad Pro 11', ua: 'Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', w: 834, h: 1194 },
+            { name: 'MacBook Pro (Safari)', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15', w: 1440, h: 900 },
+            { name: 'Windows PC (Edge)', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0', w: 1920, h: 1080 },
+            { name: 'Lenovo Tab P11', ua: 'Mozilla/5.0 (Linux; Android 12; TB-J606F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', w: 800, h: 1280 },
+            { name: 'Pixel 8 Pro', ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.164 Mobile Safari/537.36', w: 412, h: 915 },
+            { name: 'Firefox Desktop', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0', w: 1366, h: 768 },
+            { name: 'Xiaomi 14', ua: 'Mozilla/5.0 (Linux; Android 14; 23127PN0CC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.105 Mobile Safari/537.36', w: 393, h: 873 },
+            { name: 'Sony Xperia 5', ua: 'Mozilla/5.0 (Linux; Android 13; XQ-CQ72) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36', w: 360, h: 840 },
+            { name: 'iPad Air', ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', w: 820, h: 1180 },
+            { name: 'Surface Laptop', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 OPR/105.0.0.0', w: 1536, h: 1024 },
+            { name: 'iPhone 14 Plus', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1', w: 428, h: 926 },
+            { name: 'Asus ZenFone', ua: 'Mozilla/5.0 (Linux; Android 13; ASUS_AI2202) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36', w: 360, h: 800 },
+            { name: 'HP Chromebook', ua: 'Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36', w: 1366, h: 768 }
         ];
-        const selectedDevice = devices[viewNumber % devices.length];
-        const referrers = ['https://www.reddit.com/', 'https://www.facebook.com/', 'https://t.co/', 'https://www.pinterest.com/'];
+
+        const device = devices[viewNumber % devices.length];
+        const referrers = ['https://www.reddit.com/', 'https://www.facebook.com/', 'https://t.co/', 'https://www.pinterest.com/', 'https://www.google.com/'];
         const selectedRef = referrers[viewNumber % referrers.length];
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', '--disable-setuid-sandbox',
-                `--lang=${lang.split(',')[0]}`,
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', `--lang=${lang.split(',')[0]}`, '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(selectedDevice.ua);
-        await page.setViewport({ width: selectedDevice.w, height: selectedDevice.h });
-        await page.setExtraHTTPHeaders({ 'Accept-Language': lang });
+        await page.setUserAgent(device.ua);
+        await page.setViewport({ width: device.w, height: device.h });
+        
+        // Referral and Lang Headers
+        await page.setExtraHTTPHeaders({ 'Referer': selectedRef, 'Accept-Language': lang });
 
-        // 2. CROXYPROXY LOGIC
-        console.log(`[VIEW #${viewNumber}] Loading CroxyProxy for: ${url}`);
+        // 3. CROXYPROXY STEP
+        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Lang: ${lang.split(',')[0]} | Ref: ${selectedRef}`);
         await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
         
-        // CroxyProxy input box and search
-        await page.waitForSelector('#url', { timeout: 10000 });
+        await page.waitForSelector('#url', { timeout: 15000 });
         await page.type('#url', url, { delay: 100 });
-        await page.click('#requestSubmit');
         
-        // Wait for target site to load through proxy
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {});
+        // Click and Wait for Navigation through Proxy
+        await Promise.all([
+            page.click('#requestSubmit'),
+            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {})
+        ]);
 
-        // 3. SMART CONSENT/ADSENSE POPUP HANDLING (8-8-4 Logic)
-        await new Promise(r => setTimeout(r, 5000)); // Wait for popup
+        // 4. SMART ADSENSE POPUP HANDLING (8-8-6 RATIO as requested)
+        await new Promise(r => setTimeout(r, 10000)); // AdSense/Consent time
+        
         await page.evaluate(async (vNum) => {
             const cycle = (vNum - 1) % 20;
-            const findBtn = (txts) => {
-                return Array.from(document.querySelectorAll('button, span, a, div[role="button"]'))
-                    .find(el => txts.some(t => el.innerText.toLowerCase().includes(t)));
-            };
+            const findBtn = (txts) => Array.from(document.querySelectorAll('button, span, a, div[role="button"]'))
+                                           .find(el => txts.some(t => el.innerText.toLowerCase().includes(t)));
 
-            // Detect if AdSense/GDPR popup exists
-            const hasPopup = document.body.innerText.toLowerCase().includes('consent') || 
-                             document.body.innerText.toLowerCase().includes('cookie');
-
+            const hasPopup = document.body.innerText.toLowerCase().match(/(consent|cookie|agree|accept|manage|options)/);
+            
             if (hasPopup) {
-                if (cycle < 8) { // 8 VIEWS: CLOSE (X)
-                    const closeBtn = document.querySelector('button[aria-label*="Close"], .dismiss, .close-icon');
-                    if (closeBtn) closeBtn.click();
-                } 
-                else if (cycle < 16) { // 8 VIEWS: CONSENT
-                    const acceptBtn = findBtn(['accept', 'agree', 'allow', 'consent']);
-                    if (acceptBtn) acceptBtn.click();
-                } 
-                else { // 4 VIEWS: MANAGE & SELECT ALL
-                    const manageBtn = findBtn(['manage', 'options', 'settings']);
-                    if (manageBtn) {
-                        manageBtn.click();
+                if (cycle < 8) { // 8 Views: Close Icon (X)
+                    const close = document.querySelector('button[aria-label*="close"], .close-btn, .dismiss, [class*="close-icon"]');
+                    if (close) close.click();
+                } else if (cycle < 16) { // 8 Views: Consent/Accept
+                    const accept = findBtn(['accept', 'agree', 'allow', 'consent', 'zustimmen', 'accepter']);
+                    if (accept) accept.click();
+                } else { // 6 Views (Approx 4-6): Manage Options
+                    const manage = findBtn(['manage', 'options', 'settings', 'einstellungen']);
+                    if (manage) {
+                        manage.click();
                         await new Promise(r => setTimeout(r, 2000));
-                        const selectAll = findBtn(['select all', 'allow all', 'confirm']);
-                        if (selectAll) selectAll.click();
+                        // Select All / Save logic
+                        const save = findBtn(['confirm', 'save', 'allow all', 'alle erlauben', 'speichern', 'accept all']);
+                        if (save) save.click();
                     }
                 }
             }
         }, viewNumber);
 
-        // 4. HUMAN INTERACTION & AD CLICKING
-        const stayTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
+        // 5. HUMAN INTERACTION LOOP (30-50s)
+        const runTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
         const startTime = Date.now();
         let adClicked = false;
 
-        while (Date.now() - startTime < stayTime) {
-            // Random Scroll (Up/Down)
-            const scrollAmt = Math.floor(Math.random() * 400) * (Math.random() > 0.3 ? 1 : -1);
-            await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
+        while (Date.now() - startTime < runTime) {
+            // Random Scroll
+            const dir = Math.random() > 0.3 ? 1 : -1;
+            await page.evaluate((d) => window.scrollBy(0, d * Math.floor(Math.random() * 450)), dir);
             
-            // Random Mouse Movement
-            await page.mouse.move(Math.random() * 500, Math.random() * 500, { steps: 5 });
+            // Mouse Jitter
+            await page.mouse.move(Math.random() * 600, Math.random() * 600, { steps: 5 });
 
-            // ADVANCED AD CLICKER (3-5 views out of 20)
-            const clickCycle = (viewNumber - 1) % 20;
-            if (!adClicked && (clickCycle === 2 || clickCycle === 7 || clickCycle === 12 || clickCycle === 18)) {
-                // Pehchan: Google Ads, Banner Ads, or Hidden overlays
-                const adSelectors = 'ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], a[href*="adclick"], div[class*="banner-ad"]';
-                const ads = await page.$$(adSelectors);
-                
+            // ADVANCED UNIVERSAL AD CLICKER (3-5 Clicks per 20 Views)
+            const clickPoints = [2, 8, 13, 19]; 
+            if (!adClicked && clickPoints.includes(cycleIndex)) {
+                // Detecting Banner, Pushup, Hidden Ads, and IFrames
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], a[href*="adclick"], .ad-slot, [id*="banner-ad"]');
                 if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-                    if (box && box.width > 10 && box.height > 10) {
-                        console.log(`[AD-CLICK] 💰 Clicking detected ad...`);
+                    const target = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await target.boundingBox();
+                    if (box && box.width > 5) {
+                        console.log(`[AD-CLICK] 💰 Clicking Detected Ad...`);
                         await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
                         adClicked = true;
-                        await new Promise(r => setTimeout(r, 10000)); // Stay on ad page
+                        await new Promise(r => setTimeout(r, 15000)); // Ad page stay
                     }
                 }
             }
-            await new Promise(r => setTimeout(r, 4000));
+            await new Promise(r => setTimeout(r, 6000));
         }
 
-        // 5. CLEANUP (Clear History & Cookies)
+        // 6. CLEAR HISTORY & COOKIES
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCookies');
         await client.send('Network.clearBrowserCache');
-        
-        console.log(`[SUCCESS] View #${viewNumber} finished (Lang: ${lang.split(',')[0]}).`);
+        console.log(`[SUCCESS] View #${viewNumber} Complete. Proxy Used.`);
 
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } catch (err) {
+        console.error(`[ERROR] Tool 7:`, err.message);
     } finally {
         if (browser) await browser.close();
     }
 }
+
+ 
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
