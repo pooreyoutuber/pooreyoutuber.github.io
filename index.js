@@ -1064,121 +1064,129 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. ULTIMATE ADVANCED TOOL POPUP (CROXYPROXY + MULTI-DEVICE + AD-SAFE)
 // ===================================================================
-// ===================================================================
-// 7. TOOL: CROXYPROXY AUTOMATION (REPLACES PREVIOUS POPUP LOGIC)
+ // ===================================================================
+// 7. ADVANCED CROXYPROXY TOOL (WITH MULTI-DEVICE & SMART ADSENSE POPUP)
 // ===================================================================
 
-async function runCroxyProxyTask(url, viewNumber) {
+async function runCroxyProxyAdvanced(targetUrl, viewNumber) {
     let browser;
     try {
+        // 1. Device & OS Diversity (15+ Combinations)
+        const devices = [
+            { name: 'iPhone 13', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1', w: 390, h: 844 },
+            { name: 'Samsung Galaxy S21', ua: 'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36', w: 360, h: 800 },
+            { name: 'iPad Pro', ua: 'Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1', w: 1024, h: 1366 },
+            { name: 'Windows Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36', w: 1920, h: 1080 },
+            { name: 'Mac Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15', w: 1440, h: 900 },
+            { name: 'Linux Firefox', ua: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/110.0', w: 1366, h: 768 },
+            { name: 'Brave Windows', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36', w: 1536, h: 864 }
+        ];
+        const dev = devices[viewNumber % devices.length];
+
+        // 2. Language & Referral Rotation
+        const languages = viewNumber % 20 < 10 ? 'en-US,en;q=0.9' : (viewNumber % 20 < 15 ? 'de-DE,de;q=0.9' : 'fr-FR,fr;q=0.9');
+        const referrers = ['https://www.facebook.com/', 'https://www.instagram.com/', 'https://t.co/', 'https://www.pinterest.com/', 'https://www.google.com/search?q=trending+topics'];
+        const ref = referrers[randomInt(0, referrers.length - 1)];
+
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', `--lang=${languages.split(',')[0]}`]
         });
 
         const page = await browser.newPage();
-        
-        // Random Screen Size for authenticity
-        const widths = [1280, 1366, 1536, 1920];
-        await page.setViewport({ 
-            width: widths[randomInt(0, widths.length - 1)], 
-            height: 800 
-        });
-        
-        await page.setUserAgent(USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)]);
+        await page.setUserAgent(dev.ua);
+        await page.setViewport({ width: dev.w, height: dev.h });
+        await page.setExtraHTTPHeaders({ 'Accept-Language': languages });
 
-        // 1. CroxyProxy Website par jana
-        console.log(`[CROXY-TOOL] View #${viewNumber} | Opening CroxyProxy...`);
+        console.log(`[VIEW #${viewNumber}] Device: ${dev.name} | Lang: ${languages.substring(0,2)} | Ref: ${ref}`);
+
+        // 3. CroxyProxy Entry
         await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // 2. Search bar mein URL daalna aur Go click karna
-        // Selector for CroxyProxy input field
-        const inputSelector = '#url'; 
-        await page.waitForSelector(inputSelector);
-        
-        console.log(`[CROXY-TOOL] Entering URL: ${url}`);
-        await page.type(inputSelector, url, { delay: 150 });
-        
-        // 'Go' button click karna ya Enter press karna
+        await page.type('#url', targetUrl, { delay: 100 });
         await page.keyboard.press('Enter');
-
-        // 3. Wait for Proxy to load the target site
-        console.log(`[CROXY-TOOL] Waiting for Proxy to tunnel...`);
-        // Proxy loading mein time leta hai isliye 90s timeout
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {});
 
-        // 4. Realistic Human Behavior (30-50 Seconds)
-        const stayTime = randomInt(30000, 50000); 
-        const startTime = Date.now();
-        console.log(`[CROXY-TOOL] Simulation started for ${stayTime/1000}s...`);
-
-        while (Date.now() - startTime < stayTime) {
-            // Random Scrolling
-            const scrollDist = randomInt(200, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
+        // --- 4. SMART ADSENSE POP-UP HANDLING (13 Close, 8 Consent, 5 Manage) ---
+        await new Promise(r => setTimeout(r, 5000));
+        try {
+            const cycle = viewNumber % 26; // Handling 26 views distribution
+            const buttons = await page.$$('button, span, div');
             
-            // Random Mouse Movement
-            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 8 });
-            
-            // Random Wait between actions
-            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
-        }
-
-        console.log(`[DONE] CroxyProxy View #${viewNumber} completed successfully. ✅`);
-
-    } catch (error) {
-        console.error(`[CROXY ERROR] View #${viewNumber}: ${error.message}`);
-    } finally {
-        if (browser) {
-            await browser.close().catch(() => {});
-        }
-    }
-}
-
-// --- Tool 7 Endpoint (/popup update) ---
-app.post('/popup', async (req, res) => {
-    try {
-        const { urls, views = 10 } = req.body;
-
-        if (!urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: "URLs array required!" });
-        }
-
-        const totalViews = parseInt(views);
-
-        // Instant response to frontend
-        res.status(200).json({ 
-            success: true, 
-            message: `CroxyProxy Task Started: ${totalViews} views across ${urls.length} sites.` 
-        });
-
-        // Background Execution
-        (async () => {
-            console.log(`--- CROXYPROXY REVENUE ENGINE START ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                // One-by-one execution to save RAM
-                await runCroxyProxyTask(targetUrl, i);
-
-                if (i < totalViews) {
-                    const restTime = 10000; // 10s gap to let the server breathe
-                    console.log(`[REST] Sleeping ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
+            if (cycle < 13) { 
+                // CLOSE/REJECT (13 views)
+                for (let b of buttons) {
+                    const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
+                    if (txt.includes('x') || txt.includes('close') || txt.includes('reject')) {
+                        await b.click(); break;
+                    }
+                }
+            } else if (cycle >= 13 && cycle < 21) { 
+                // CONSENT/ACCEPT (8 views)
+                for (let b of buttons) {
+                    const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
+                    if (txt.includes('consent') || txt.includes('accept') || txt.includes('agree')) {
+                        await b.click(); break;
+                    }
+                }
+            } else { 
+                // MANAGE OPTIONS (5 views)
+                for (let b of buttons) {
+                    const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
+                    if (txt.includes('manage') || txt.includes('options')) {
+                        await b.click();
+                        await new Promise(r => setTimeout(r, 2000));
+                        await page.evaluate(() => {
+                            const toggles = document.querySelectorAll('input[type="checkbox"]');
+                            toggles.forEach(t => { if(!t.checked) t.click(); });
+                            const confirm = Array.from(document.querySelectorAll('button')).find(b => b.innerText.toLowerCase().includes('confirm') || b.innerText.toLowerCase().includes('save'));
+                            if (confirm) confirm.click();
+                        });
+                        break;
+                    }
                 }
             }
-            console.log("--- CROXYPROXY ENGINE FINISHED ---");
-        })();
+        } catch (e) { console.log("No AdSense Popup found."); }
 
-    } catch (err) {
-        console.error("CroxyProxy Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
-    }
+        // 5. ADVANCED ADS CLICKER & BEHAVIOR
+        const stayTime = randomInt(40000, 60000);
+        const startTime = Date.now();
+        while (Date.now() - startTime < stayTime) {
+            // Random Scrolling & Jiggling
+            await page.evaluate(() => window.scrollBy({ top: Math.random() * 400, behavior: 'smooth' }));
+            await page.mouse.move(randomInt(0, dev.w), randomInt(0, dev.h), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
+
+            // Advanced Ad-Clicker (15% chance)
+            if (Math.random() < 0.15) {
+                const adFrame = await page.$('iframe[id*="aswift"], iframe[src*="googleads"]');
+                if (adFrame) {
+                    const box = await adFrame.boundingBox();
+                    if (box) {
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log("🔥 [REVENUE] Advanced Ad Clicked!");
+                        await new Promise(r => setTimeout(r, 20000)); // Advertiser stay
+                        break;
+                    }
+                }
+            }
+        }
+        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+    } catch (err) { console.error(`[ERR] View #${viewNumber}: ${err.message}`); }
+    finally { if (browser) await browser.close(); }
+}
+
+// Endpoint update for /popup
+app.post('/popup', async (req, res) => {
+    const { urls, views = 20 } = req.body;
+    res.status(200).json({ success: true, message: "Advanced CroxyProxy Task Started." });
+
+    (async () => {
+        for (let i = 1; i <= views; i++) {
+            const url = urls[i % urls.length];
+            await runCroxyProxyAdvanced(url, i);
+            await new Promise(r => setTimeout(r, 12000)); // RAM cooling
+        }
+    })();
 });
 
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
