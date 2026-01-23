@@ -1216,7 +1216,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await sendData(ga_id, api_key, engagementPayload, viewNumber), 'user_engagement'
         console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
-    } catch (error) {
+      catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close().catch(() => {});
