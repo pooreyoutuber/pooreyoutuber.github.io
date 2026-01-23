@@ -1061,9 +1061,8 @@ app.post('/start-Proxyium', async (req, res) => {
     }
 });
 
-// ===================================================================
-// ===================================================================
-// TOOL 7: ADVANCED POPUP & ENGAGEMENT BOOSTER (FINAL VERSION)
+ // ===================================================================
+// TOOL 7: THE ULTIMATE ENGAGEMENT & POPUP MASTER (FINAL)
 // ===================================================================
 
 const DEVICE_DATABASE = {
@@ -1113,55 +1112,48 @@ const REFERRERS = ["https://www.facebook.com/", "https://www.reddit.com/", "http
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // 1. SELECT DEVICE & CONFIG (Rotating Logic)
+        // --- 1. CONFIGURATION SELECTION ---
         const type = viewNumber % 3 === 0 ? 'pc' : (viewNumber % 3 === 1 ? 'mobile' : 'tablet');
-        const deviceList = DEVICE_DATABASE[type];
-        const config = deviceList[Math.floor(Math.random() * deviceList.length)];
+        const config = DEVICE_DATABASE[type][Math.floor(Math.random() * DEVICE_DATABASE[type].length)];
         const lang = LANGUAGES[viewNumber % LANGUAGES.length];
         const ref = REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                `--lang=${lang}`,
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', `--lang=${lang}`, '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
         await page.setUserAgent(config.ua);
         await page.setViewport({ width: config.width, height: config.height });
-        await page.setExtraHTTPHeaders({ 'Accept-Language': lang });
 
-        console.log(`\n[VIEW #${viewNumber}] ${config.model} | LANG: ${lang} | REF: ${ref}`);
+        console.log(`[VIEW #${viewNumber}] DEVICE: ${config.model} | LANG: ${lang}`);
 
-        // 2. TARGET SITE & INITIAL WAIT (5 SECONDS)
+        // --- 2. TARGET ENTRY & 5s WAIT ---
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: ref });
         await new Promise(r => setTimeout(r, 5000)); 
 
-        // 3. ADSENSE CONSENT LOGIC (8:7:5 RATIO PER 20 VIEWS)
+        // --- 3. ADVANCED POPUP LOGIC (8:7:5 RATIO) ---
         const cycle = viewNumber % 20;
         try {
             const btns = await page.$$('button, a, div[role="button"]');
             let handled = false;
 
-            if (cycle < 8) { // 8 VIEWS: CONSENT/ACCEPT
+            if (cycle < 8) { // CONSENT
                 for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
-                    if (['consent', 'accept', 'agree', 'select all','allow', 'ok'].some(t => txt.includes(t))) {
+                    if (['consent', 'accept', 'agree', 'select all', 'allow', 'ok'].some(t => txt.includes(t))) {
                         await b.click(); handled = true; break;
                     }
                 }
-            } else if (cycle < 15) { // 7 VIEWS: CLOSE/REJECT
+            } else if (cycle < 15) { // CLOSE
                 for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
                     if (['x', 'close', 'reject', 'deny', 'dismiss'].some(t => txt.includes(t))) {
                         await b.click(); handled = true; break;
                     }
                 }
-            } else { // 5 VIEWS: MANAGE OPTIONS & SAVE
+            } else { // MANAGE & SELECT ALL
                 for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
                     if (txt.includes('manage') || txt.includes('options')) {
@@ -1177,57 +1169,48 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                     }
                 }
             }
-            if(handled) console.log(`[ACTION] Popup cycle #${cycle} handled successfully.`);
-        } catch (e) { console.log("[INFO] No Consent Popup detected."); }
+        } catch (e) {}
 
-        
-        // 4. Realistic Behavior: Scrolling aur Mouse Movement
-        const stayTime = randomInt(30000, 60000); // 30-60 seconds random time
+        // --- 4. ADVANCED ENGAGEMENT (FROM TOOL 6) ---
+        const stayTime = randomInt(35000, 55000); 
         const startTime = Date.now();
-        console.log(`[PROXYIUM] Staying for ${stayTime/1000}s and simulating behavior...`);
 
         while (Date.now() - startTime < stayTime) {
-            // Natural Scrolling
-            const scrollDist = randomInt(200, 500);
-            await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
-            
-            // Random Mouse Movement
-            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 5 });
-            
-            await new Promise(r => setTimeout(r, randomInt(4000, 7000)));
+            // A. TOOL 6 MOUSE JITTER: Random movement like a human
+            const targetX = Math.floor(Math.random() * config.width);
+            const targetY = Math.floor(Math.random() * config.height);
+            await page.mouse.move(targetX, targetY, { steps: randomInt(10, 25) });
 
-            // 5. ADVANCED ADS CLICKER (3-4 CLICKS PER 20 VIEWS)
-            if (cycle < 4 && Math.random() < 0.25) { 
-                const adSelectors = [
-                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]', // AdSense
-                    '.push-ad', '.ad-slot', 'div[id^="ad-"]', // Push/Banner
-                    'iframe[src*="doubleclick"]', 'video-ad-unit' // Video/Display
-                ];
+            // B. TOOL 6 SCROLLING: Ruk-ruk ke smooth scroll
+            const scrollStep = randomInt(100, 450);
+            await page.evaluate((s) => window.scrollBy({ top: s, behavior: 'smooth' }), scrollStep);
+            
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-                for (let sel of adSelectors) {
-                    const ads = await page.$$(sel);
-                    if (ads.length > 0) {
-                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                        const box = await targetAd.boundingBox();
-                        if (box && box.width > 50) {
-                            console.log(`[REVENUE] Clicking ${sel}...`);
-                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                            await new Promise(r => setTimeout(r, 20000)); // Advertiser Page Stay
-                            break; 
-                        }
+            // C. ADVANCED ADS CLICKER (15-20% Chance)
+            if (cycle < 4 && Math.random() < 0.20) {
+                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], .ad-slot, .push-ad');
+                if (ads.length > 0) {
+                    const ad = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await ad.boundingBox();
+                    if (box && box.width > 30) {
+                        console.log(`[REVENUE] Human-like Ad Click...`);
+                        await page.mouse.move(box.x + box.width/2, box.y + box.height/2, { steps: 15 });
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        await new Promise(r => setTimeout(r, 15000)); 
+                        break; 
                     }
                 }
             }
         }
-        console.log(`[SUCCESS] View #${viewNumber} Engagement Completed.`);
+        console.log(`[SUCCESS] View #${viewNumber} Done.`);
     } catch (err) {
-        console.error(`[CRITICAL] View #${viewNumber} Failed: ${err.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${err.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
-
-
+    
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
