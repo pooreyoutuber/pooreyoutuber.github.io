@@ -1196,9 +1196,24 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                         await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
                         break; 
                     }
-                }
-            }
-        }
+                        const finalEngagementTime = Date.now() - startTime; 
+        const cid = Math.random().toString(36).substring(2, 12);
+        const session_id = Date.now();
+
+        const engagementPayload = {
+            client_id: cid,
+            events: [{ 
+                name: "user_engagement", 
+                params: { 
+                    engagement_time_msec: finalEngagementTime, 
+                    session_id: session_id,
+                    debug_mode: true 
+                } 
+            }]
+        };
+
+        // Note: ga_id aur api_key aapko function arguments mein pass karne honge
+        await sendData(ga_id, api_key, engagementPayload, viewNumber, 'user_engagement'
         console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
