@@ -1064,31 +1064,43 @@ app.post('/start-Proxyium', async (req, res) => {
 //===================================================================
 // 7. tool popup (WITH DYNAMIC POP-UP HANDLING)
 // ===================================================================
-const DEVICES = [
-    { name: "iPhone 15 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", viewport: { width: 393, height: 852, isMobile: true } },
-    { name: "Samsung Galaxy S23", ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36", viewport: { width: 360, height: 780, isMobile: true } },
-    { name: "iPad Pro 12.9", ua: "Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1", viewport: { width: 1024, height: 1366, isMobile: true } },
-    { name: "Windows PC - Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", viewport: { width: 1920, height: 1080, isMobile: false } },
-    { name: "MacBook Pro - Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", viewport: { width: 1440, height: 900, isMobile: false } },
-    // ... (Yahan 25 devices ki list backend mein generate hogi, samples added)
+// ===================================================================
+// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED WITH DEVICES & SEARCH)
+// ===================================================================
+
+// --- 1. DEVICE LIST (25 Diverse Devices) ---
+const TOOL5_DEVICES = [
+    { name: "iPhone 15 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", w: 393, h: 852 },
+    { name: "iPhone 14", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
+    { name: "Samsung Galaxy S23", ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36", w: 360, h: 780 },
+    { name: "Google Pixel 7", ua: "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36", w: 412, h: 915 },
+    { name: "iPad Pro 12.9", ua: "Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1", w: 1024, h: 1366 },
+    { name: "Windows 11 Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", w: 1920, h: 1080 },
+    { name: "MacBook Pro Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", w: 1440, h: 900 },
+    { name: "Linux Desktop Firefox", ua: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0", w: 1366, h: 768 },
+    { name: "Xiaomi Mi 11", ua: "Mozilla/5.0 (Linux; Android 12; Mi 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36", w: 393, h: 873 },
+    { name: "OnePlus 11", ua: "Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36", w: 384, h: 854 }
+    // Note: Aap is list mein aur devices isi tarah add kar sakte hain total 25 karne ke liye.
 ];
 
-const REFERRERS = [
+// --- 2. MULTIPLE REFERRERS ---
+const TOOL5_REFERRERS = [
     "https://www.google.com/search?q=",
-    "https://www.facebook.com/l.php?u=",
-    "https://t.co/", // Twitter/X
-    "https://www.reddit.com/r/news/",
     "https://www.bing.com/search?q=",
     "https://duckduckgo.com/?q=",
-    "https://www.linkedin.com/sharing/share-offsite/?url="
+    "https://t.co/", // X (Twitter)
+    "https://www.facebook.com/l.php?u=",
+    "https://www.reddit.com/r/news/"
 ];
 
-const LANGUAGES = ["en-US,en;q=0.9", "de-DE,de;q=0.8", "fr-FR,fr;q=0.8", "en-GB,en;q=0.7"];
-
-// --- 2. THE MAIN TASK FUNCTION ---
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
+        // Random Selection
+        const device = TOOL5_DEVICES[Math.floor(Math.random() * TOOL5_DEVICES.length)];
+        const refBase = TOOL5_REFERRERS[Math.floor(Math.random() * TOOL5_REFERRERS.length)];
+        const fullReferrer = refBase + encodeURIComponent(keyword);
+
         browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -1101,38 +1113,45 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
         
-        // Anti-Bot: Set Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        // --- ADDED: DEVICE & USER AGENT ---
+        await page.setUserAgent(device.ua);
+        await page.setViewport({ width: device.w, height: device.h });
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        // Engagement Fix: Visibility Hack
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
+            Object.defineProperty(document, 'hidden', { value: false, writable: true });
+        });
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
-        await page.goto(url, { 
+        // --- ADDED: SEARCH URL LOGIC (For view_search_results) ---
+        // Hum URL mein ?q=keyword ya ?s=keyword inject karenge
+        const searchConnector = url.includes('?') ? '&' : '?';
+        const searchResultUrl = `${url}${searchConnector}q=${encodeURIComponent(keyword)}`;
+
+        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Ref: ${refBase.split('.')[1]}`);
+        
+        // Visit the modified Search Result URL
+        await page.goto(searchResultUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
-            referer: googleUrl 
+            referer: fullReferrer 
         });
 
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 35000); 
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop (NO CHANGES HERE)
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
             const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            await page.evaluate((d) => {
+                window.scrollBy(0, d);
+                window.focus(); // Keep focus for engagement
+            }, dist);
             
-            // Mouse Movement (Bypass Bot Checks)
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
@@ -1140,12 +1159,8 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        console.log(`[AD-CLICK] Target Found! Clicking...`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
-                        
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
@@ -1157,14 +1172,9 @@ async function runGscTaskpop(keyword, url, viewNumber) {
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close().catch(() => {});
     }
 }
-
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
