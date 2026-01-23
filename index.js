@@ -1083,23 +1083,20 @@ const PRO_REFS = [
     'https://www.facebook.com/', 'https://www.reddit.com/', 'https://t.co/', 
     'https://www.pinterest.com/', 'https://www.bing.com/', 'https://www.google.com/'
 ];
-
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // --- 1. RANDOMIZATION ENGINE ---
+        // --- CONFIGURATION ---
         const device = PRO_DEVICES[viewNumber % PRO_DEVICES.length];
         const lang = PRO_LANGS[randomInt(0, PRO_LANGS.length - 1)];
         const ref = PRO_REFS[randomInt(0, PRO_REFS.length - 1)];
-        const isClickBatch = (viewNumber % 20 >= 1 && viewNumber % 20 <= 5); // 5 clicks per 20 views
+        
+        // 20 mein se 4 views par click logic (Natural CTR)
+        const isClickSession = (viewNumber % 20 >= 1 && viewNumber % 20 <= 4);
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', '--disable-setuid-sandbox',
-                `--lang=${lang.split(',')[0]}`,
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', `--lang=${lang.split(',')[0]}`, '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
@@ -1107,75 +1104,90 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.setViewport({ width: device.w, height: device.h });
         await page.setExtraHTTPHeaders({ 'Accept-Language': lang, 'Referer': ref });
 
-        console.log(`\n[VIEW #${viewNumber}] Mode: ${isClickBatch ? '💰 CLICKER' : '👀 ORGANIC'}`);
-        console.log(`[SYS] ${device.name} | Lang: ${lang.split('-')[0]} | Ref: ${new URL(ref).hostname}`);
-
-        // --- 2. THE JOURNEY ---
+        // 1. Google Search Journey
         await page.goto(`https://www.google.com/search?q=${encodeURIComponent(keyword)}`, { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+        await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+        
+        console.log(`\n[VIEW #${viewNumber}] Target: ${url}`);
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000 });
 
-        // --- 3. SMART POPUP & CONSENT MANAGER ---
+        // 2. Clear Popups/Consent First
         try {
-            await new Promise(r => setTimeout(r, 4000));
-            const handlers = await page.$$('button, a, div[role="button"]');
-            for (let h of handlers) {
-                const txt = await page.evaluate(el => el.innerText.toLowerCase(), h);
-                if (txt.includes('accept') || txt.includes('allow') || txt.includes('agree')) {
-                    await h.click(); break;
-                }
-            }
-        } catch (e) { console.log("-> Pop-up Auto-Cleared"); }
+            await new Promise(r => setTimeout(r, 3000));
+            await page.evaluate(() => {
+                const btns = [...document.querySelectorAll('button, a, div[role="button"]')];
+                const accept = btns.find(b => /accept|agree|allow|ok/i.test(b.innerText));
+                if (accept) accept.click();
+            });
+        } catch (e) {}
 
-        // --- 4. BEHAVIOR & REVENUE CLICKER ---
+        // 3. 🔥 SMART SCROLLING & CLICKING LOGIC
+        const sessionLimit = randomInt(50000, 80000); // 50-80 sec stay
         const startTime = Date.now();
-        const stayTime = randomInt(45000, 70000); 
 
-        while (Date.now() - startTime < stayTime) {
-            // Human Scrolling (Zig-Zag)
-            await page.evaluate(() => window.scrollBy({ top: Math.random() > 0.3 ? 400 : -200, behavior: 'smooth' }));
-            await page.mouse.move(randomInt(0, device.w), randomInt(0, device.h), { steps: 10 });
+        while (Date.now() - startTime < sessionLimit) {
+            
+            // --- RAPID SCROLLING (Top to Bottom & Back) ---
+            console.log("-> [ACTION] Rapid Scrolling (Human-Style)...");
+            // Niche jao (Fast)
+            await page.evaluate(async () => {
+                for(let i=0; i<10; i++) {
+                    window.scrollBy(0, 800);
+                    await new Promise(r => setTimeout(r, 800)); // 10 sec total loop approx
+                }
+            });
+            await new Promise(r => setTimeout(r, 2000)); // 2 sec wait at bottom
+            
+            // Upar aao (Fast)
+            await page.evaluate(async () => {
+                for(let i=0; i<5; i++) {
+                    window.scrollBy(0, -1200);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            });
 
-            // 🔥 ADVANCED ADS DETECTOR (Detects AdSense, Popunder, Hidden, Video)
-            if (isClickBatch) {
-                const ads = await page.evaluate(() => {
-                    const selectors = [
-                        'ins.adsbygoogle', 'iframe[src*="googleads"]', // AdSense
-                        'div[id*="pop"]', 'div[class*="popup"]',        // Pop-ups
-                        'a[href*="doubleclick"]', 'iframe[id^="aswift"]', // Direct Ad Links
-                        'div[style*="z-index: 9999"]',                  // Hidden/Overlay Ads
-                        'video', '.video-ad-unit'                       // Video Ads
+            // --- STRATEGIC AD CLICKING ---
+            if (isClickSession) {
+                console.log("-> [ACTION] Searching for Ads...");
+                await new Promise(r => setTimeout(r, 3000)); // 3 sec wait before click
+
+                const adFound = await page.evaluate(() => {
+                    const adSelectors = [
+                        'ins.adsbygoogle', 'iframe[src*="googleads"]', 
+                        'iframe[id^="aswift"]', 'a[href*="doubleclick.net"]',
+                        '.ad-unit', '[id*="google_ads"]'
                     ];
-                    return selectors.map(s => {
+                    
+                    for (let s of adSelectors) {
                         const el = document.querySelector(s);
                         if (el) {
                             const rect = el.getBoundingClientRect();
-                            return { x: rect.left, y: rect.top, w: rect.width, h: rect.height };
+                            if (rect.width > 20 && rect.height > 20 && rect.top > 0) {
+                                return { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+                            }
                         }
-                        return null;
-                    }).filter(v => v && v.w > 10);
+                    }
+                    return null;
                 });
 
-                if (ads.length > 0) {
-                    const target = ads[randomInt(0, ads.length - 1)];
-                    console.log(`[ACTION] 🎯 Targeted Ad Found! (Hidden/Pop/Banner)`);
-                    
-                    // Natural Move to Ad
-                    await page.mouse.move(target.x + 5, target.y + 5, { steps: 20 });
-                    await page.mouse.click(target.x + 5, target.y + 5);
-                    
-                    console.log(`[SUCCESS] 💰 Ad Clicked! Generating Revenue...`);
-                    await new Promise(r => setTimeout(r, 20000)); // Stay on ad site
-                    break; // Click done for this session
+                if (adFound) {
+                    await page.mouse.move(adFound.x, adFound.y, { steps: 15 });
+                    await page.mouse.click(adFound.x, adFound.y);
+                    console.log("-> [SUCCESS] 💰 Ad Clicked! Staying 25s on Ad.");
+                    await new Promise(r => setTimeout(r, 25000)); 
+                    break; // Exit loop after click
                 }
             }
+
+            // Normal Random Movement if no click
+            await page.mouse.move(randomInt(0, 300), randomInt(0, 500), { steps: 5 });
             await new Promise(r => setTimeout(r, 5000));
         }
 
-        console.log(`[FINISH] View #${viewNumber} Completed Successfully.`);
+        console.log(`[DONE] View #${viewNumber} Finished.`);
 
     } catch (err) {
-        console.error(`[CRITICAL ERROR]: ${err.message}`);
+        console.error(`[ERR] View #${viewNumber}:`, err.message);
     } finally {
         if (browser) await browser.close();
     }
