@@ -1118,7 +1118,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.evaluate(async (viewNum) => {
             const selectors = {
                 accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent'],
-                manage: ['button[aria-label="Manage options"]', '.fc-cta-manage'],
+                manage: ['button[aria-label="Manage options"]', 'button[aria-label="Accept all"]', '.fc-cta-manage'],
                 close: ['aria-label="Close"', '.fc-close-icon', 'button[class*="close"]']
             };
 
