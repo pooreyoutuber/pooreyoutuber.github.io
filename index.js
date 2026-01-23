@@ -1089,102 +1089,82 @@ const LANGUAGES = ["en-US,en;q=0.9", "de-DE,de;q=0.8", "fr-FR,fr;q=0.8", "en-GB,
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // Random Selection
-        const device = DEVICES[Math.floor(Math.random() * DEVICES.length)];
-        const referrerBase = REFERRERS[Math.floor(Math.random() * REFERRERS.length)];
-        const fullReferrer = referrerBase + encodeURIComponent(keyword);
-        const lang = LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)];
-
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
+        await page.setViewport({ width: 1366, height: 768 });
         
-        // Anti-Bot & Engagement Fixes
-        await page.setUserAgent(device.ua);
-        await page.setViewport(device.viewport);
-        await page.setExtraHTTPHeaders({ 'Accept-Language': lang });
+        // Anti-Bot: Set Random User Agent
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // Force Visibility State to "visible" (Engagement Fix)
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
-            Object.defineProperty(document, 'hidden', { value: false, writable: true });
-        });
+        // 1. STAGE: Google Search Simulation (Organic Entry)
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000)); 
 
-        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Lang: ${lang.split(',')[0]}`);
-        
-        // Go to Page
+        // 2. STAGE: Visit Target Site (30-35s Total Stay)
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
-            timeout: 60000, 
-            referer: fullReferrer 
+            timeout: 90000, 
+            referer: googleUrl 
         });
 
-        // --- 3. REALISTIC HUMAN BEHAVIOR LOOP ---
-        const pageStayTime = randomInt(30000, 50000); // 30-50 Sec Random
         const startTime = Date.now();
+        const targetStayTime = randomInt(30000, 35000); 
 
-        console.log(`[ACTION] Staying for ${pageStayTime/1000}s with auto-scrolling...`);
-
-        while (Date.now() - startTime < pageStayTime) {
-            // Random Scrolling Speed
-            const scrollDist = randomInt(150, 450);
-            await page.evaluate((d) => {
-                window.scrollBy({ top: d, behavior: 'smooth' });
-                window.focus();
-            }, scrollDist);
-
-            // Random Mouse/Touch Movement (Ads par nahi, just screen par)
-            await page.mouse.move(randomInt(50, 300), randomInt(50, 400), { steps: 10 });
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        while (Date.now() - startTime < targetStayTime) {
+            // Natural Scrolling
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // Random Internal Click (Non-Ads) - 10% chance
-            if (Math.random() < 0.10) {
-                await page.mouse.click(randomInt(10, 100), randomInt(10, 100));
-            }
+            // Mouse Movement (Bypass Bot Checks)
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // --- 4. ADVANCED AD HITTER (Hits 3-4 times in 20 views) ---
-            const shouldHitAd = (viewNumber % 20 >= 1 && viewNumber % 20 <= 4); 
-            if (shouldHitAd && (Date.now() - startTime > 15000)) { // Hit after 15s
-                const adClicked = await page.evaluate(() => {
-                    const adSelectors = [
-                        'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
-                        'div[class*="ad-"]', 'div[id*="ad-"]', 'a[href*="doubleclick.net"]',
-                        '.ad-unit', '.vjs-ad-playing'
-                    ];
-                    for (let s of adSelectors) {
-                        const el = document.querySelector(s);
-                        if (el) {
-                            const rect = el.getBoundingClientRect();
-                            if (rect.width > 20 && rect.height > 20) {
-                                el.scrollIntoView();
-                                el.click(); // Smart click
-                                return true;
-                            }
-                        }
+            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+            if (Math.random() < 0.18) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+
+                    if (box && box.width > 50 && box.height > 50) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
+                        await new Promise(r => setTimeout(r, 15000));
+                        break; 
                     }
-                    return false;
-                });
-
-                if (adClicked) {
-                    console.log(`\x1b[32m[REVENUE]\x1b[0m Ad hit successfully! Waiting 10s on Ad site...`);
-                    await new Promise(r => setTimeout(r, 10000));
-                    break; // Ad click ke baad session end logic
                 }
             }
-
-            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
         }
+        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
-        console.log(`[DONE] View #${viewNumber} Finished Successfully.`);
-
-    } catch (err) {
-        console.error(`[ERR] View #${viewNumber}: ${err.message}`);
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+        }
     }
 }
+
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
