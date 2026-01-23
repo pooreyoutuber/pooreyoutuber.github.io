@@ -1095,9 +1095,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
             ]
         });
 
-        const context = await browser.createIncognitoBrowserContext();
-        const page = await context.newPage();
-        
+        const page = await browser.newPage();
         // Setup Device & Referral
         const device = REAL_DEVICES[viewNumber % REAL_DEVICES.length];
         const ref = SOCIAL_REFS[Math.floor(Math.random() * SOCIAL_REFS.length)];
