@@ -1150,7 +1150,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
             if (cycle < 8) { // 8 VIEWS: CONSENT/ACCEPT
                 for (let b of btns) {
                     const txt = await page.evaluate(el => el.innerText.toLowerCase(), b);
-                    if (['consent', 'accept', 'agree', 'allow', 'ok'].some(t => txt.includes(t))) {
+                    if (['consent', 'accept', 'agree', 'select all','allow', 'ok'].some(t => txt.includes(t))) {
                         await b.click(); handled = true; break;
                     }
                 }
@@ -1180,19 +1180,21 @@ async function runGscTaskpop(keyword, url, viewNumber) {
             if(handled) console.log(`[ACTION] Popup cycle #${cycle} handled successfully.`);
         } catch (e) { console.log("[INFO] No Consent Popup detected."); }
 
-        // 4. ENGAGEMENT: RANDOM SCROLLING & MOUSE MOVEMENT
-        const stayTime = randomInt(35000, 55000); 
+        
+        // 4. Realistic Behavior: Scrolling aur Mouse Movement
+        const stayTime = randomInt(30000, 60000); // 30-60 seconds random time
         const startTime = Date.now();
+        console.log(`[PROXYIUM] Staying for ${stayTime/1000}s and simulating behavior...`);
 
         while (Date.now() - startTime < stayTime) {
-            // Smooth Ruk-ruk ke scrolling
-            const scrollStep = randomInt(150, 400);
-            await page.evaluate((step) => window.scrollBy({ top: step, behavior: 'smooth' }), scrollStep);
+            // Natural Scrolling
+            const scrollDist = randomInt(200, 500);
+            await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
             
-            // Random Mouse Jitter (Engagement Booster)
-            await page.mouse.move(randomInt(0, config.width), randomInt(0, config.height), { steps: 5 });
+            // Random Mouse Movement
+            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 5 });
             
-            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
+            await new Promise(r => setTimeout(r, randomInt(4000, 7000)));
 
             // 5. ADVANCED ADS CLICKER (3-4 CLICKS PER 20 VIEWS)
             if (cycle < 4 && Math.random() < 0.25) { 
