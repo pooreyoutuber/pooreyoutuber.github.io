@@ -1064,115 +1064,118 @@ app.post('/start-Proxyium', async (req, res) => {
 //===================================================================
 // 7. tool popup (WITH DYNAMIC POP-UP HANDLING)
 // ===================================================================
-// ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED WITH DEVICES & SEARCH)
-// ===================================================================
-
-// --- 1. DEVICE LIST (25 Diverse Devices) ---
 const TOOL5_DEVICES = [
     { name: "iPhone 15 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", w: 393, h: 852 },
-    { name: "iPhone 14", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
     { name: "Samsung Galaxy S23", ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36", w: 360, h: 780 },
-    { name: "Google Pixel 7", ua: "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36", w: 412, h: 915 },
-    { name: "iPad Pro 12.9", ua: "Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1", w: 1024, h: 1366 },
     { name: "Windows 11 Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", w: 1920, h: 1080 },
     { name: "MacBook Pro Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", w: 1440, h: 900 },
-    { name: "Linux Desktop Firefox", ua: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0", w: 1366, h: 768 },
-    { name: "Xiaomi Mi 11", ua: "Mozilla/5.0 (Linux; Android 12; Mi 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36", w: 393, h: 873 },
-    { name: "OnePlus 11", ua: "Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36", w: 384, h: 854 }
-    // Note: Aap is list mein aur devices isi tarah add kar sakte hain total 25 karne ke liye.
+    { name: "Google Pixel 7", ua: "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36", w: 412, h: 915 }
+    // Add more up to 25 as needed...
 ];
 
-// --- 2. MULTIPLE REFERRERS ---
 const TOOL5_REFERRERS = [
     "https://www.google.com/search?q=",
     "https://www.bing.com/search?q=",
-    "https://duckduckgo.com/?q=",
-    "https://t.co/", // X (Twitter)
-    "https://www.facebook.com/l.php?u=",
-    "https://www.reddit.com/r/news/"
+    "https://t.co/", 
+    "https://www.facebook.com/l.php?u="
 ];
 
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // Random Selection
         const device = TOOL5_DEVICES[Math.floor(Math.random() * TOOL5_DEVICES.length)];
         const refBase = TOOL5_REFERRERS[Math.floor(Math.random() * TOOL5_REFERRERS.length)];
         const fullReferrer = refBase + encodeURIComponent(keyword);
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        
-        // --- ADDED: DEVICE & USER AGENT ---
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.w, height: device.h });
 
-        // Engagement Fix: Visibility Hack
+        // Engagement Fix
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
-            Object.defineProperty(document, 'hidden', { value: false, writable: true });
         });
 
-        // --- ADDED: SEARCH URL LOGIC (For view_search_results) ---
-        // Hum URL mein ?q=keyword ya ?s=keyword inject karenge
+        // Search Result URL Logic
         const searchConnector = url.includes('?') ? '&' : '?';
         const searchResultUrl = `${url}${searchConnector}q=${encodeURIComponent(keyword)}`;
 
-        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Ref: ${refBase.split('.')[1]}`);
+        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Site: ${url}`);
         
-        // Visit the modified Search Result URL
         await page.goto(searchResultUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: fullReferrer 
         });
 
+        // --- NEW: SMART CONSENT/GDPR POPUP HANDLER ---
+        await new Promise(r => setTimeout(r, 5000)); // Wait for popup
+        await page.evaluate(async (viewNum) => {
+            const selectors = {
+                accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent'],
+                manage: ['button[aria-label="Manage options"]', '.fc-cta-manage'],
+                close: ['aria-label="Close"', '.fc-close-icon', 'button[class*="close"]']
+            };
+
+            const findAndClick = (list) => {
+                for (let s of list) {
+                    let el = document.querySelector(s);
+                    if (el) { el.click(); return true; }
+                }
+                return false;
+            };
+
+            const mode = viewNum % 20;
+            if (mode < 10) { // 1-10 views: Try to Close (X)
+                findAndClick(selectors.close);
+            } else if (mode < 15) { // 11-15 views: Direct Consent
+                findAndClick(selectors.accept);
+            } else { // 16-20 views: Manage -> Accept
+                if (findAndClick(selectors.manage)) {
+                    setTimeout(() => findAndClick(selectors.accept), 2000);
+                }
+            }
+        }, viewNumber);
+
+        // --- BEHAVIOR LOOP ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        const targetStayTime = randomInt(30000, 45000); 
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop (NO CHANGES HERE)
         while (Date.now() - startTime < targetStayTime) {
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => {
-                window.scrollBy(0, d);
-                window.focus(); // Keep focus for engagement
-            }, dist);
+            await page.evaluate(() => {
+                window.scrollBy({ top: Math.floor(Math.random() * 400), behavior: 'smooth' });
+                window.focus();
+            });
             
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            await page.mouse.move(randomInt(50, 500), randomInt(50, 500), { steps: 5 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-            if (Math.random() < 0.18) { 
+            // Smart Ad Clicker (18% Chance)
+            if (Math.random() < 0.18) {
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000));
-                        break; 
+                    const ad = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await ad.boundingBox();
+                    if (box && box.width > 50) {
+                        console.log(`[AD-CLICK] View #${viewNumber} clicking ad...`);
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        await new Promise(r => setTimeout(r, 12000)); // Stay on ad site
+                        break;
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} ✅`);
 
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } catch (err) {
+        console.error(`[ERR] View #${viewNumber}: ${err.message}`);
     } finally {
-        if (browser) await browser.close().catch(() => {});
+        if (browser) await browser.close();
     }
 }
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
