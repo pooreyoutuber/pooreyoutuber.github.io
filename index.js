@@ -1213,7 +1213,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         };
 
         // Note: ga_id aur api_key aapko function arguments mein pass karne honge
-        await sendData(ga_id, api_key, engagementPayload, viewNumber, 'user_engagement'
+        await sendData(ga_id, api_key, engagementPayload, viewNumber), 'user_engagement'
         console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
