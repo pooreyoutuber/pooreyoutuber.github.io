@@ -1093,35 +1093,30 @@ const TOOL5_REFERRERS = [
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // Original Tool 5 logic: User Agent diversity
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
         await page.setUserAgent(userAgent);
-        await page.setViewport({ width: 1366, height: 768 });
 
-        // --- STAGE 1: ORGANIC GOOGLE SEARCH (Tool 5 Core) ---
-        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        console.log(`[SEARCH] Navigating to: ${googleSearchUrl}`);
+        // 1. VARIABLE DEFINE KAREIN (Taki 'not defined' error na aaye)
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        
+        console.log(`[SEARCH] Navigating to: ${googleUrl}`);
 
-          await page.goto(googleSearchUrl, { 
-          waitUntil: 'networkidle2', 
-          timeout: 60000 
-});
+        // 2. PEHLE GOOGLE SEARCH PAR JAYEIN
+        await page.goto(googleUrl, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000 
+        });
 
-// 2. Thoda wait karein (Real search simulation ke liye)
-await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
-        // Site visit with referrer
+        await new Promise(r => setTimeout(r, 3000)); // Search result load hone ka wait
+
+        // 3. AB SITE PAR JAYEIN (Isse 'Visit Search Results' event banega)
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
