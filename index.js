@@ -1090,41 +1090,37 @@ const TOOL5_REFERRERS = [
     "https://www.facebook.com/l.php?u=",
     "https://www.reddit.com/r/news/"
 ];
-// --- TOOL 7: CROXYPROXY POP-UP WORKER ---
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        const device = TOOL5_DEVICES[Math.floor(Math.random() * TOOL5_DEVICES.length)];
+        // Original Tool 5 logic: User Agent diversity
+        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(device.ua);
-        await page.setViewport({ width: device.w, height: device.h });
+        await page.setUserAgent(userAgent);
+        await page.setViewport({ width: 1366, height: 768 });
 
-        // 1. CroxyProxy Main Site Open Karein
-        console.log(`[VIEW #${viewNumber}] Connecting to CroxyProxy...`);
-        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+        // --- STAGE 1: ORGANIC GOOGLE SEARCH (Tool 5 Core) ---
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000)); 
 
-        // 2. Search Bar dhoond kar URL enter karein
-        const inputSelector = '#url';
-        await page.waitForSelector(inputSelector);
-        await page.type(inputSelector, url, { delay: 150 });
-
-        // 3. Go button click karke proxy tunnel start karein
-        console.log(`[ACTION] Routing through Proxy...`);
-        await Promise.all([
-            page.click('#requestSubmit'),
-            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null)
-        ]);
-        
+        // Site visit with referrer
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
+        });
         // Popup wait logic
         const popupFound = await page.waitForSelector('.fc-consent-root, .google-anno-rendered, iframe[title*="consent"]', { timeout: 10000 })
             .catch(() => null);
