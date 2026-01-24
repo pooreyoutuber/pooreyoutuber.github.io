@@ -1098,7 +1098,7 @@ const TOOL7_REFERRERS = [
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        npredictable Pattern: Pick Random Device & Browser
+        //npredictable Pattern: Pick Random Device & Browser//
         const device = TOOL7_DEVICES[Math.floor(Math.random() * TOOL7_DEVICES.length)];
         
         // 50% Referral Logic: Har 10 me se 5 views social sources se
