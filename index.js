@@ -1090,9 +1090,6 @@ const TOOL5_REFERRERS = [
     "https://www.facebook.com/l.php?u=",
     "https://www.reddit.com/r/news/"
 ];
-// ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED WITH CROXYPROXY)
-// ===================================================================
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1102,7 +1099,6 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
@@ -1110,73 +1106,71 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
         
-        // Random User Agent
+        // Anti-Bot: Set Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- START: CROXYPROXY INTEGRATION ---
-        console.log(`[VIEW #${viewNumber}] Opening CroxyProxy...`);
-        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+        // --- STEP 1: Open Proxyium ---
+        console.log(`[VIEW #${viewNumber}] Opening Proxyium for: ${url}`);
+        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Search bar ka wait karein
-        await page.waitForSelector('#url', { visible: true });
-        await page.type('#url', url, { delay: 100 });
+        // --- STEP 2: Enter URL in Proxyium Search Bar ---
+        const searchInputSelector = 'input[placeholder*="Put a URL"]';
+        await page.waitForSelector(searchInputSelector);
         
-        // 'Go' button par click (Safe way: ID ke saath-saath tag check)
-        const goButton = await page.waitForSelector('#btn, button[type="submit"]');
-        await goButton.click();
+        // Human-like typing
+        await page.type(searchInputSelector, url, { delay: 100 });
+        await page.keyboard.press('Enter');
 
-        console.log(`[VIEW #${viewNumber}] Proxy loading site: ${url}`);
+        // --- STEP 3: Wait for the Proxied Site to load ---
+        console.log(`[PROXYIUM] Navigation started to target...`);
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null);
         
-        // Proxy redirect mein time lagta hai isliye extra wait
-        await new Promise(r => setTimeout(r, 10000)); 
-        // --- END: CROXYPROXY INTEGRATION ---
+        // Thoda extra wait taaki elements load ho jayein
+        await new Promise(r => setTimeout(r, 5000));
 
-
-        // --- YAHAN SE AAPKA PURANA TOOL 5 KA CODE SHURU ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        const targetStayTime = randomInt(35000, 45000); 
 
-        // Realistic Behavior & Ad-Clicker Loop
+        // --- STEP 4: Realistic Behavior & Ad-Clicker Loop (Inside Proxyium) ---
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
+            // 1. Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // Mouse Movement
+            // 2. Mouse Movement
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
+                // Proxyium ke andar ads detect karne ke liye selectors
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Ad Found inside Proxyium! Clicking...`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅`);
                         
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+        console.log(`[DONE] View #${viewNumber} via Proxyium Finished. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
 }
+        
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
