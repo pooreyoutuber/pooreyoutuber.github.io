@@ -1061,38 +1061,51 @@ app.post('/start-Proxyium', async (req, res) => {
     }
 }); 
 
-//===================================================================
-// 7. tool popup (WITH DYNAMIC POP-UP HANDLING)
 // ===================================================================
-//--- 1. DEVICE LIST (Expanded to 25 Devices) ---
-const TOOL5_DEVICES = [
-    { name: "iPhone 15 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", w: 393, h: 852 },
-    { name: "iPhone 14", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
-    { name: "Samsung Galaxy S23", ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36", w: 360, h: 780 },
-    { name: "Google Pixel 7", ua: "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36", w: 412, h: 915 },
-    { name: "iPad Pro 12.9", ua: "Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1", w: 1024, h: 1366 },
-    { name: "Windows 11 Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", w: 1920, h: 1080 },
-    { name: "MacBook Pro Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", w: 1440, h: 900 },
-    { name: "OnePlus 11", ua: "Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36", w: 384, h: 854 },
-    { name: "Xiaomi Mi 11", ua: "Mozilla/5.0 (Linux; Android 12; Mi 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36", w: 393, h: 873 },
-    { name: "Sony Xperia 5", ua: "Mozilla/5.0 (Linux; Android 11; SO-52A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Mobile Safari/537.36", w: 412, h: 960 },
-    { name: "Dell XPS 15", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36", w: 1536, h: 864 },
-    { name: "ASUS ROG Phone", ua: "Mozilla/5.0 (Linux; Android 12; ASUS_I006D) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36", w: 391, h: 846 }
-    // Note: Isi tarah total 25 devices add kiye ja sakte hain.
-];
+// 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
+// ===================================================================
 
-// --- 2. ORGANIC REFERRERS ---
-const TOOL5_REFERRERS = [
-    "https://www.google.com/search?q=",
-    "https://www.bing.com/search?q=",
-    "https://duckduckgo.com/?q=",
-    "https://t.co/", 
-    "https://www.facebook.com/l.php?u=",
-    "https://www.reddit.com/r/news/"
+// --- 1. EXPANDED DEVICE LIST (25+ MODELS) ---
+const TOOL7_DEVICES = [
+    // iPhones
+    { name: "iPhone 15 Pro Max", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1", w: 430, h: 932 },
+    { name: "iPhone 14 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Mobile/15E148 Safari/604.1", w: 393, h: 852 },
+    { name: "iPhone 13", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
+    { name: "iPhone 12 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.4 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
+    // Androids
+    { name: "Samsung Galaxy S23 Ultra", ua: "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", w: 384, h: 854 },
+    { name: "Samsung Galaxy S22", ua: "Mozilla/5.0 (Linux; Android 12; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36", w: 360, h: 780 },
+    { name: "Google Pixel 8 Pro", ua: "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", w: 412, h: 915 },
+    { name: "OnePlus 11", ua: "Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36", w: 384, h: 854 },
+    // Tablets
+    { name: "iPad Pro 12.9", ua: "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", w: 1024, h: 1366 },
+    { name: "iPad Air 5", ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", w: 820, h: 1180 },
+    // PCs (Chrome, Firefox, Safari)
+    { name: "Windows 11 Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", w: 1920, h: 1080 },
+    { name: "MacBook Pro M3 Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15", w: 1728, h: 1117 },
+    { name: "Windows 10 Firefox", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0", w: 1366, h: 768 }
+];
+// --- 2. REFERRAL SOURCES (50% Chance Logic) ---
+const TOOL7_REFERRERS = [
+    "https://www.facebook.com/",
+    "https://l.facebook.com/l.php?u=",
+    "https://www.pinterest.com/",
+    "https://t.co/", // Twitter/X
+    "https://www.reddit.com/",
+    "https://www.linkedin.com/",
+    "https://www.instagram.com/"
 ];
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
+        npredictable Pattern: Pick Random Device & Browser
+        const device = TOOL7_DEVICES[Math.floor(Math.random() * TOOL7_DEVICES.length)];
+        
+        // 50% Referral Logic: Har 10 me se 5 views social sources se
+        let referer = "https://www.google.com/"; // Default Organic
+        if (viewNumber % 2 === 0) {
+            referer = TOOL7_REFERRERS[Math.floor(Math.random() * TOOL7_REFERRERS.length)];
+        }
         browser = await puppeteer.launch({
             headless: "new",
             args: [
