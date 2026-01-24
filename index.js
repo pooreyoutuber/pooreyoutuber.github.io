@@ -1097,25 +1097,23 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
         await page.setUserAgent(userAgent);
+        await page.setViewport({ width: 1366, height: 768 });
 
-        // 1. VARIABLE DEFINE KAREIN (Taki 'not defined' error na aaye)
+        // --- STAGE 1: ORGANIC GOOGLE SEARCH (Tool 5 Core) ---
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000));
         
-        console.log(`[SEARCH] Navigating to: ${googleUrl}`);
-
-        // 2. PEHLE GOOGLE SEARCH PAR JAYEIN
-        await page.goto(googleUrl, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000 
-        });
-
-        await new Promise(r => setTimeout(r, 3000)); // Search result load hone ka wait
-
         // 3. AB SITE PAR JAYEIN (Isse 'Visit Search Results' event banega)
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
