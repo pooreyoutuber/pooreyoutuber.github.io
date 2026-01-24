@@ -1097,29 +1097,36 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
         await page.setUserAgent(userAgent);
         await page.setViewport({ width: 1366, height: 768 });
 
-        // --- STAGE 1: ORGANIC GOOGLE SEARCH (Tool 5 Core) ---
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000));
-        
-        // 3. AB SITE PAR JAYEIN (Isse 'Visit Search Results' event banega)
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
+        // --- STEP 1: NAVIGATE TO CROXYPROXY ---
+        console.log(`[VIEW #${viewNumber}] Navigating to CroxyProxy...`);
+        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // --- STEP 2: ENTER URL AND CLICK GO ---
+        try {
+            // CroxyProxy ke input field ka intezar karein
+            await page.waitForSelector('#url', { timeout: 10000 });
+            
+            // Site ka URL input box mein daalein
+            await page.type('#url', url, { delay: 100 });
+            
+            // 'Go' button par click karein
+            await page.click('#requestSubmit');
+            
+            console.log(`[PROXY] URL submitted. Loading site through proxy...`);
+            
+            // Proxy se site load hone ka intezar karein
+            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null);
+        } catch (e) {
+            console.error("[ERROR] CroxyProxy interaction failed, trying direct navigation.");
+            await page.goto(url, { waitUntil: 'networkidle2' });
+        }
 
         // --- STAGE 2: SMART TERMS POPUP HANDLER (Aapka Logic) ---
         console.log(`[VIEW #${viewNumber}] Checking for AdSense Terms (10s window)...`);
