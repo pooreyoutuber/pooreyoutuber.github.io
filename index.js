@@ -1143,7 +1143,42 @@ async function runGscTaskpop(keyword, url, viewNumber) {
 
         const startTime = Date.now();
         const targetStayTime = randomInt(35000, 45000); 
+        // --- NEW SEARCH INTERACTION LOGIC ---
+        try {
+            console.log(`[ACTION] Finding search bar for engagement...`);
+            const searchSelectors = [
+                'input[type="search"]', 
+                'input[name="q"]', 
+                'input[placeholder*="Search"]', 
+                'input[placeholder*="search"]',
+                'input[aria-label*="search"]',
+                '.search-field',
+                '#search'
+            ];
 
+            const searchInput = await page.evaluateHandle((selectors) => {
+                for (const s of selectors) {
+                    const el = document.querySelector(s);
+                    // Check if element is visible and not hidden
+                    if (el && el.offsetParent !== null) return el;
+                }
+                return null;
+            }, searchSelectors);
+
+            if (searchInput.asElement()) {
+                console.log(`[SUCCESS] Search bar found! Typing keyword...`);
+                await searchInput.focus();
+                // Keyword jo function ke parameter se aa raha hai
+                await page.keyboard.type(keyword, { delay: 150 }); 
+                console.log(`[INFO] Keyword typed successfully.`);
+                await new Promise(r => setTimeout(r, 2000));
+            } else {
+                console.log(`[SKIP] No search bar found on this site.`);
+            }
+        } catch (e) {
+            console.log(`[DEBUG] Interaction failed: ${e.message}`);
+        }
+        // --- END SEARCH INTERACTION ---
         // --- STEP 4: Realistic Behavior & Ad-Clicker Loop (Inside Proxyium) ---
         while (Date.now() - startTime < targetStayTime) {
             // 1. Natural Scrolling
