@@ -1110,37 +1110,39 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
         
-        // Anti-Bot: Set Random User Agent
+        // Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- NEW STARTING: CROXYPROXY INTEGRATION ---
-        console.log(`[VIEW #${viewNumber}] Opening CroxyProxy for: ${url}`);
+        // --- START: CROXYPROXY INTEGRATION ---
+        console.log(`[VIEW #${viewNumber}] Opening CroxyProxy...`);
         await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Search bar mein URL daalna (CroxyProxy ka input ID '#url' hota hai)
-        const searchInputSelector = '#url';
-        await page.waitForSelector(searchInputSelector);
-        await page.type(searchInputSelector, url, { delay: 100 });
+        // Search bar ka wait karein
+        await page.waitForSelector('#url', { visible: true });
+        await page.type('#url', url, { delay: 100 });
         
-        // 'Go' button par click karna (ID '#btn')
-        await page.click('#btn');
+        // 'Go' button par click (Safe way: ID ke saath-saath tag check)
+        const goButton = await page.waitForSelector('#btn, button[type="submit"]');
+        await goButton.click();
 
-        // Proxy ke through site load hone ka wait karein
-        console.log(`[VIEW #${viewNumber}] Waiting for site to load via Proxy...`);
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => console.log("Navigation timeout, continuing..."));
-        // --- END OF CROXYPROXY INTEGRATION ---
+        console.log(`[VIEW #${viewNumber}] Proxy loading site: ${url}`);
+        
+        // Proxy redirect mein time lagta hai isliye extra wait
+        await new Promise(r => setTimeout(r, 10000)); 
+        // --- END: CROXYPROXY INTEGRATION ---
 
-        // Baki ka code (Scrolling & Ad-Clicking) vese hi rahega
+
+        // --- YAHAN SE AAPKA PURANA TOOL 5 KA CODE SHURU ---
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 35000); 
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        // Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // Mouse Movement (Bypass Bot Checks)
+            // Mouse Movement
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
@@ -1155,7 +1157,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                         console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅`);
                         
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
@@ -1163,7 +1165,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
