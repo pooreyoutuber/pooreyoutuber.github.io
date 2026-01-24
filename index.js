@@ -1063,10 +1063,7 @@ app.post('/start-Proxyium', async (req, res) => {
 
 // ===================================================================
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
-// ===================================================================
-// ===================================================================
-// UPDATED Tool 5: CroxyProxy + Revenue Booster
-// ===================================================================
+// ========================================= 
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1083,69 +1080,72 @@ async function runGscTaskpop(keyword, url, viewNumber) {
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
-        
-        // Anti-Bot: Set Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- STEP A: CroxyProxy Navigation (Naya Step) ---
-        console.log(`[VIEW #${viewNumber}] Opening CroxyProxy...`);
+        // --- STEP 1: CroxyProxy par jana ---
+        console.log(`[VIEW #${viewNumber}] Opening CroxyProxy.com...`);
         await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Search bar mein URL daalna (Input selector for CroxyProxy)
-        const proxyInputSelector = '#url'; // CroxyProxy ka main input ID
+        // --- STEP 2: URL enter karna ---
+        const proxyInputSelector = '#url';
         await page.waitForSelector(proxyInputSelector, { visible: true });
-        await page.type(proxyInputSelector, url, { delay: 50 });
+        await page.type(proxyInputSelector, url, { delay: 100 });
         
-        // Go button par click karna
-        console.log(`[ACTION] Entering URL: ${url} and clicking GO...`);
+        // Go button click
+        console.log(`[ACTION] Entering URL and Clicking GO...`);
         await page.click('#requestSubmit'); 
 
-        // Wait for the proxied site to load
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null);
-        await new Promise(r => setTimeout(r, 5000)); // Buffer for loading
+        // --- STEP 3: Sabse important step - Launching Screen ko wait karna ---
+        // CroxyProxy "Proxy is launching" page dikhata hai, humein tab tak wait karna hai jab tak URL change na ho jaye
+        console.log(`[WAIT] Waiting for CroxyProxy to launch the site...`);
+        
+        // 15-20 second ka solid wait taaki site load ho jaye
+        await new Promise(r => setTimeout(r, 20000)); 
 
-        // --- STEP B: Existing Revenue Logic (Scrolling & Ad-Clicking) ---
+        // --- STEP 4: Scrolling aur Earning Logic ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); 
+        const targetStayTime = 50000; // GA4 ke liye 50 seconds stay zaroori hai
 
-        console.log(`[EARNING-MODE] Staying on proxied site for ${targetStayTime/1000}s...`);
+        console.log(`[LIVE] Site should be loaded now. Starting interactions...`);
 
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
+            // Scroll down
+            const dist = Math.floor(Math.random() * 400) + 200;
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // Mouse Movement
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            // Mouse hilana taaki real user lage
+            await page.mouse.move(Math.random() * 800, Math.random() * 600);
+            
+            await new Promise(r => setTimeout(r, 5000));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                // Proxied page ke andar ads dhoondna
-                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], a[href*="doubleclick.net"]');
+            // HIGH-VALUE AD CLICKER
+            if (Math.random() < 0.15) { 
+                // CroxyProxy ke andar ads aksar frames mein hote hain
+                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] CroxyProxy Ad Found! Clicking...`);
+                    if (box && box.width > 20) {
+                        console.log(`[AD-CLICK] Clicking Ad inside CroxyProxy...`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad
+                        await new Promise(r => setTimeout(r, 15000)); // Ad open hone ka wait
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished via CroxyProxy. ✅`);
+
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] Tool 5 Failure: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close().catch(() => {});
         }
     }
 }
+
 
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
