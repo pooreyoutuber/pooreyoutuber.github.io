@@ -1099,41 +1099,47 @@ async function runGscTaskpop(keyword, url, viewNumber) {
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
+        
+        // --- 1. SETTING CONTEXT (Engagement Fix) ---
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.w, height: device.h });
-
-        // --- ENGAGEMENT FIX: Bring page to front ---
+        
+        // Browser tab ko focus mein laana zaroori hai
         await page.bringToFront();
 
-        // Search URL Logic
         const searchConnector = url.includes('?') ? '&' : '?';
         const searchResultUrl = `${url}${searchConnector}q=${encodeURIComponent(keyword)}`;
 
-        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Engagement Mode: ACTIVE`);
+        console.log(`[VIEW #${viewNumber}] Engagement Mode: HIGH-ACTIVITY`);
 
+        // Navigation
         await page.goto(searchResultUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: fullReferrer 
         });
 
-        // --- ENGAGEMENT FIX: Initial Interaction ---
-        await page.mouse.click(10, 10); // Khali jagah click karke session activate karna
+        // --- 2. INITIAL INTERACTION (Engagement Trigger) ---
+        // Page load hote hi ek invisible click aur scroll taaki session start ho
+        await page.mouse.click(10, 10);
+        await page.mouse.wheel({ deltaY: 100 });
 
-        // ==========================================
-        // 🛡️ SMART CONSENT POPUP HANDLER (Vaisa hi rahega)
-        // ==========================================
+        // --- 3. CONSENT POPUP HANDLER (Same as before) ---
         try {
             await page.waitForSelector('.fc-consent-root, .google-anno-rendered', { timeout: 8000 }).catch(() => null);
             await page.evaluate(async (viewNum) => {
                 const selectors = {
-                    accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent', '.VfPpkd-LgbsSe'],
-                    manage: ['button[aria-label="Manage options"]', '.fc-cta-manage', 'button[aria-label="Accept all"]', 'button[aria-label="Manage"]'],
-                    close: ['[aria-label="Close"]', '.fc-close-icon', '.dismiss-button', 'button[class*="close"]']
+                    accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent'],
+                    manage: ['button[aria-label="Manage options"]', '.fc-cta-manage'],
+                    close: ['[aria-label="Close"]', '.fc-close-icon', '.dismiss-button']
                 };
                 const findAndClick = (list) => {
                     for (let s of list) {
@@ -1145,44 +1151,46 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                     return false;
                 };
                 const mode = viewNum % 20;
-                await new Promise(r => setTimeout(r, Math.random() * 2000 + 1500));
                 if (mode < 10) findAndClick(selectors.close);
                 else if (mode < 15) findAndClick(selectors.accept);
-                else { if (findAndClick(selectors.manage)) setTimeout(() => findAndClick(selectors.accept), 2500); }
+                else { if (findAndClick(selectors.manage)) setTimeout(() => findAndClick(selectors.accept), 2000); }
             }, viewNumber);
-        } catch (e) { }
+        } catch (e) {}
 
-        // ==========================================
-        // 3. BEHAVIOR LOOP (With Engagement Heartbeat)
-        // ==========================================
+        // --- 4. BEHAVIOR LOOP (Scroll & Engagement Fix) ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(40000, 55000); // GA4 engagement ke liye 40s+ safe hai
+        const targetStayTime = randomInt(45000, 60000); 
 
         while (Date.now() - startTime < targetStayTime) {
+            // Real Smooth Scroll
             await page.evaluate(() => {
-                window.scrollBy({ top: Math.floor(Math.random() * 400), behavior: 'smooth' });
-                // --- ENGAGEMENT FIX: Dispatch events to GA4 ---
+                const scrollStep = Math.floor(Math.random() * 300) + 100;
+                window.scrollBy({ top: scrollStep, behavior: 'smooth' });
+                
+                // Force GA4 to recognize activity
                 window.dispatchEvent(new Event('scroll'));
                 window.dispatchEvent(new Event('mousemove'));
             });
 
-            await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 8 });
-            
-            // --- ENGAGEMENT FIX: Har loop mein ek random click ---
+            // Random Mouse Movement
+            await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 10 });
+
+            // 🔥 Engagement Heartbeat Click
+            // Har loop mein ek bar body par click karna session ko "Engaged" banata hai
             if (Math.random() < 0.4) {
-                await page.mouse.click(randomInt(5, 20), randomInt(5, 20));
+                await page.mouse.click(randomInt(1, 20), randomInt(1, 20));
             }
 
-            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+            await new Promise(r => setTimeout(r, randomInt(4000, 7000)));
 
-            // 🔥 HIGH-VALUE AD CLICKER (Vaisa hi rahega)
+            // --- 5. ADSENSE CLICKER (Same as before) ---
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`[AD-CLICK] Target Found! Clicking for Revenue...`);
+                    if (box && box.width > 50) {
+                        console.log(`[AD-CLICK] Engagement + Click Success!`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         await new Promise(r => setTimeout(r, 15000)); 
                         break; 
@@ -1190,7 +1198,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished with Engagement ✅`);
+        console.log(`[DONE] View #${viewNumber} Engagement & Scroll Tracked ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
