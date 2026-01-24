@@ -1099,22 +1099,26 @@ async function runGscTaskpop(keyword, url, viewNumber) {
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
         
-        // --- 1. SETTINGS & BYPASS ---
+        // --- BYPASS & CONTEXT ---
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.w, height: device.h });
         
-        // IMPORTANT: Visibility lock hata diya hai engagement ke liye
+        // Fixed: Visibility lock hataya gaya taaki GA4 block na kare
         await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
 
         const searchConnector = url.includes('?') ? '&' : '?';
         const searchResultUrl = `${url}${searchConnector}q=${encodeURIComponent(keyword)}`;
 
-        console.log(`[VIEW #${viewNumber}] Target: ${url} | Device: ${device.name}`);
+        console.log(`[VIEW #${viewNumber}] Starting Engagement Mode | Device: ${device.name}`);
 
         // Navigation
         await page.goto(searchResultUrl, { 
@@ -1123,11 +1127,11 @@ async function runGscTaskpop(keyword, url, viewNumber) {
             referer: fullReferrer 
         });
 
-        // --- 2. INITIAL ENGAGEMENT (GA4 Activation) ---
+        // --- ENGAGEMENT TRIGGER: Initial Interaction ---
         await page.bringToFront();
-        await page.mouse.click(10, 10); // Start interaction
+        await page.mouse.click(10, 10); // Page focus aur session start ke liye
 
-        // --- 3. SMART POPUP HANDLER (Aapka Original) ---
+        // --- 1. POPUP HANDLER (Original Logic) ---
         try {
             await page.waitForSelector('.fc-consent-root, .google-anno-rendered', { timeout: 8000 }).catch(() => null);
             await page.evaluate(async (viewNum) => {
@@ -1138,8 +1142,10 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                 };
                 const findAndClick = (list) => {
                     for (let s of list) {
-                        let el = document.querySelector(s);
-                        if (el && el.offsetHeight > 0) { el.click(); return true; }
+                        try {
+                            let el = document.querySelector(s);
+                            if (el && el.offsetHeight > 0) { el.click(); return true; }
+                        } catch (e) {}
                     }
                     return false;
                 };
@@ -1150,48 +1156,51 @@ async function runGscTaskpop(keyword, url, viewNumber) {
             }, viewNumber);
         } catch (e) {}
 
-        // --- 4. BEHAVIOR LOOP (Fix: Scroll + Engagement) ---
+        // --- 2. BEHAVIOR LOOP (Fix: Scroll + Engagement) ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(45000, 60000); 
+        const targetStayTime = randomInt(45000, 65000); // 45s minimum for high engagement
 
         while (Date.now() - startTime < targetStayTime) {
             
-            // Real Scroll Activity
+            // Real Scrolling with Dispatch Events
             await page.evaluate(() => {
-                const scrollAmt = Math.floor(Math.random() * 350) + 100;
-                window.scrollBy({ top: scrollAmt, behavior: 'smooth' });
-                // Dispatch events to satisfy GA4
+                const distance = Math.floor(Math.random() * 350) + 150;
+                window.scrollBy({ top: distance, behavior: 'smooth' });
+                
+                // Dashboard mein data bhejane ke liye events force karein
                 window.dispatchEvent(new Event('scroll'));
                 window.dispatchEvent(new Event('mousemove'));
+                window.dispatchEvent(new Event('touchstart'));
             });
 
             // Random Mouse Movement
-            await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 8 });
+            await page.mouse.move(randomInt(50, 450), randomInt(50, 450), { steps: 10 });
 
-            // 🔥 ENGAGEMENT FIX: Har loop mein ek interaction click
-            // Tool 5 isliye chalta tha kyunki usme natural navigation thi
-            if (Math.random() < 0.6) {
-                await page.mouse.click(randomInt(1, 20), randomInt(1, 20)); 
+            // 🔥 CRITICAL ENGAGEMENT: Invisible Click Heartbeat
+            // Har loop mein click karne se GA4 ise "Engaged Session" maanta hai
+            if (Math.random() < 0.65) {
+                await page.mouse.click(randomInt(2, 20), randomInt(2, 20)); 
             }
 
-            await new Promise(r => setTimeout(r, randomInt(4000, 7000)));
+            // Waiting time
+            await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
 
-            // --- 5. ADSENSE CLICKER (Aapka Original) ---
-            if (Math.random() < 0.20) { 
+            // --- 3. ADSENSE CLICKER (Original Logic) ---
+            if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
                     if (box && box.width > 40) {
-                        console.log(`[AD-CLICK] Engagement + Click Triggered!`);
+                        console.log(`[AD-CLICK] Engagement confirm, clicking ad...`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); 
+                        await new Promise(r => setTimeout(r, 18000)); 
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} - All Events Tracked ✅`);
+        console.log(`[DONE] View #${viewNumber} - Engagement & Scroll Tracked ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
