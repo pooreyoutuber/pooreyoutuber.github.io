@@ -1090,37 +1090,40 @@ const TOOL5_REFERRERS = [
     "https://www.facebook.com/l.php?u=",
     "https://www.reddit.com/r/news/"
 ];
+// --- TOOL 7: CROXYPROXY POP-UP WORKER ---
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        const device = TOOL5_DEVICES[Math.floor(Math.random() * TOOL5_DEVICES.length)];
+        
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(userAgent);
-        await page.setViewport({ width: 1366, height: 768 });
+        await page.setUserAgent(device.ua);
+        await page.setViewport({ width: device.w, height: device.h });
 
-        // --- STEP 1: croxyproxy SE SITE LOAD KARNA (GA4 Friendly) ---
-        console.log(`[VIEW #${viewNumber}] Navigating to croxyproxy...`);
-        await page.goto('https://https://www.croxyproxy.com//', { waitUntil: 'networkidle2', timeout: 60000 });
+        // 1. CroxyProxy Main Site Open Karein
+        console.log(`[VIEW #${viewNumber}] Connecting to CroxyProxy...`);
+        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // croxyproxy ke input mein URL daalna
-        await page.waitForSelector('#url', { timeout: 10000 });
-        await page.type('#url', url, { delay: 100 });
-        
-        // Form submit (Go button)
+        // 2. Search Bar dhoond kar URL enter karein
+        const inputSelector = '#url';
+        await page.waitForSelector(inputSelector);
+        await page.type(inputSelector, url, { delay: 150 });
+
+        // 3. Go button click karke proxy tunnel start karein
+        console.log(`[ACTION] Routing through Proxy...`);
         await Promise.all([
-            page.click('#btn-go'),
+            page.click('#requestSubmit'),
             page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null)
         ]);
-
-        console.log(`[croxyproxy] Site loaded. Waiting 10s for Ads/Terms...`);
-
-        // --- STAGE 2: SMART TERMS POPUP HANDLER (Aapka Logic) ---
-        console.log(`[VIEW #${viewNumber}] Checking for AdSense Terms (10s window)...`);
         
         // Popup wait logic
         const popupFound = await page.waitForSelector('.fc-consent-root, .google-anno-rendered, iframe[title*="consent"]', { timeout: 10000 })
