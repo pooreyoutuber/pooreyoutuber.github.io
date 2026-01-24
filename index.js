@@ -1064,29 +1064,31 @@ app.post('/start-Proxyium', async (req, res) => {
 //===================================================================
 // 7. tool popup (WITH DYNAMIC POP-UP HANDLING)
 // ===================================================================
- // --- 1. DEVICE LIST (25 Diverse Devices) ---
-const TOOL7_DEVICES = [
+ // --- 1. TOOL 7 DEVICES (25 Varieties) ---
+const T7_DEVICES = [
     { name: "iPhone 15 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", w: 393, h: 852 },
     { name: "Samsung Galaxy S23", ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36", w: 360, h: 780 },
     { name: "Windows 11 Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", w: 1920, h: 1080 },
     { name: "MacBook Pro Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", w: 1440, h: 900 },
     { name: "Google Pixel 7", ua: "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36", w: 412, h: 915 }
-    // Note: Aap isme aur 20 devices isi pattern mein add kar sakte hain.
+    // Note: Isi tarah 25 devices list mein add karein
 ];
-
-const TOOL7_REFERRERS = [
+// --- 2. ORGANIC REFERRERS ---
+const TOOL5_REFERRERS = [
     "https://www.google.com/search?q=",
+    "https://www.bing.com/search?q=",
+    "https://duckduckgo.com/?q=",
+    "https://t.co/", 
     "https://www.facebook.com/l.php?u=",
-    "https://t.co/",
     "https://www.reddit.com/r/news/"
 ];
 
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        const device = TOOL7_DEVICES[Math.floor(Math.random() * TOOL7_DEVICES.length)];
-        const refBase = TOOL7_REFERRERS[Math.floor(Math.random() * TOOL7_REFERRERS.length)];
-        const fullReferrer = refBase + encodeURIComponent(keyword);
+        const device = T7_DEVICES[Math.floor(Math.random() * T7_DEVICES.length)];
+        const referrers = ["https://www.google.com/search?q=", "https://t.co/", "https://www.facebook.com/l.php?u="];
+        const fullReferrer = referrers[Math.floor(Math.random() * referrers.length)] + encodeURIComponent(keyword);
 
         browser = await puppeteer.launch({
             headless: "new",
@@ -1097,17 +1099,17 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.w, height: device.h });
 
-        // --- ENGAGEMENT HACK: Force Visibility ---
+        // 🔥 ENGAGEMENT LAYER 1: Visibility & Focus Hack
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
             Object.defineProperty(document, 'hidden', { value: false, writable: true });
         });
 
-        // Search URL logic for view_search_results event
+        // Search URL Inject for view_search_results event
         const connector = url.includes('?') ? '&' : '?';
         const searchUrl = `${url}${connector}q=${encodeURIComponent(keyword)}`;
 
-        console.log(`[TOOL 7] View #${viewNumber} | Device: ${device.name}`);
+        console.log(`[TOOL 7] View #${viewNumber} | Engaged Device: ${device.name}`);
 
         await page.goto(searchUrl, { 
             waitUntil: 'networkidle2', 
@@ -1115,7 +1117,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
             referer: fullReferrer 
         });
 
-        // --- SMART CONSENT HANDLER (X-Icon, Consent, Manage) ---
+        // --- SMART CONSENT HANDLER (The Fix you asked for) ---
         await new Promise(r => setTimeout(r, 6000)); 
         await page.evaluate(async (viewNum) => {
             const selectors = {
@@ -1123,8 +1125,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                 manage: ['button[aria-label="Manage options"]', '.fc-cta-manage'],
                 close: ['[aria-label="Close"]', '.fc-close-icon', 'button[class*="close"]']
             };
-
-            const clickElement = (list) => {
+            const clickEl = (list) => {
                 for (let s of list) {
                     try {
                         let el = document.querySelector(s);
@@ -1133,61 +1134,54 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                 }
                 return false;
             };
-
             const mode = viewNum % 20;
-            // Human-like random delay
-            await new Promise(r => setTimeout(r, 2000));
-
-            if (mode < 10) { clickElement(selectors.close); } 
-            else if (mode < 15) { clickElement(selectors.accept); } 
-            else { 
-                if (clickElement(selectors.manage)) {
-                    setTimeout(() => clickElement(selectors.accept), 3000);
-                }
-            }
+            if (mode < 10) clickEl(selectors.close);
+            else if (mode < 15) clickEl(selectors.accept);
+            else { if (clickEl(selectors.manage)) setTimeout(() => clickEl(selectors.accept), 2500); }
         }, viewNumber);
 
-        // --- REALISTIC BEHAVIOR LOOP (For Engagement) ---
+        // 🔥 ENGAGEMENT LAYER 2: Activity Heartbeat
         const startTime = Date.now();
-        const stayTime = randomInt(35000, 50000); // 35-50 sec random stay
+        const stayTime = randomInt(35000, 50000); 
 
         while (Date.now() - startTime < stayTime) {
             await page.evaluate(() => {
-                // Smooth scrolling trigger engagement
-                window.scrollBy({ top: Math.floor(Math.random() * 500), behavior: 'smooth' });
                 window.focus();
-                // Send heartbeat events
+                // Random Smooth Scroll
+                window.scrollBy({ top: Math.floor(Math.random() * 450), behavior: 'smooth' });
+                // Force GA4 Heartbeat
                 window.dispatchEvent(new Event('mousemove'));
                 window.dispatchEvent(new Event('scroll'));
+                window.dispatchEvent(new Event('touchstart'));
             });
 
             await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-            // --- ADS CLICKER (15-20% Chance) ---
+            // Smart Ad Clicker (Revenue Logic)
             if (Math.random() < 0.18) {
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const ad = ads[Math.floor(Math.random() * ads.length)];
                     const box = await ad.boundingBox();
                     if (box && box.width > 50) {
-                        console.log(`[AD-CLICK] View #${viewNumber} clicking for revenue...`);
+                        console.log(`[AD-CLICK] Triggering Revenue for View #${viewNumber}`);
                         await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                        await new Promise(r => setTimeout(r, 12000)); // Ad site stay
+                        await new Promise(r => setTimeout(r, 12000)); 
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} ✅`);
+        console.log(`[DONE] View #${viewNumber} | Engagement: SUCCESS ✅`);
 
     } catch (err) {
-        console.error(`[ERR] View #${viewNumber}: ${err.message}`);
+        console.error(`[ERR] Tool 7: ${err.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
-
+    
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
