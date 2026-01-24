@@ -1090,7 +1090,7 @@ const TOOL5_REFERRERS = [
     "https://www.facebook.com/l.php?u=",
     "https://www.reddit.com/r/news/"
 ];
-async function runGscTaskpop(keyword, url, viewNumber) 
+async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
         const device = TOOL5_DEVICES[Math.floor(Math.random() * TOOL5_DEVICES.length)];
