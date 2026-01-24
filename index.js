@@ -1094,7 +1094,6 @@ async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        
         browser = await puppeteer.launch({
             headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
@@ -1104,29 +1103,21 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.setUserAgent(userAgent);
         await page.setViewport({ width: 1366, height: 768 });
 
-        // --- STEP 1: NAVIGATE TO CROXYPROXY ---
-        console.log(`[VIEW #${viewNumber}] Navigating to CroxyProxy...`);
-        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+        // --- STEP 1: PROXYIUM SE SITE LOAD KARNA (GA4 Friendly) ---
+        console.log(`[VIEW #${viewNumber}] Navigating to Proxyium...`);
+        await page.goto('https://https://www.croxyproxy.com//', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // --- STEP 2: ENTER URL AND CLICK GO ---
-        try {
-            // CroxyProxy ke input field ka intezar karein
-            await page.waitForSelector('#url', { timeout: 10000 });
-            
-            // Site ka URL input box mein daalein
-            await page.type('#url', url, { delay: 100 });
-            
-            // 'Go' button par click karein
-            await page.click('#requestSubmit');
-            
-            console.log(`[PROXY] URL submitted. Loading site through proxy...`);
-            
-            // Proxy se site load hone ka intezar karein
-            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null);
-        } catch (e) {
-            console.error("[ERROR] CroxyProxy interaction failed, trying direct navigation.");
-            await page.goto(url, { waitUntil: 'networkidle2' });
-        }
+        // Proxyium ke input mein URL daalna
+        await page.waitForSelector('#url', { timeout: 10000 });
+        await page.type('#url', url, { delay: 100 });
+        
+        // Form submit (Go button)
+        await Promise.all([
+            page.click('#btn-go'),
+            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null)
+        ]);
+
+        console.log(`[PROXYIUM] Site loaded. Waiting 10s for Ads/Terms...`);
 
         // --- STAGE 2: SMART TERMS POPUP HANDLER (Aapka Logic) ---
         console.log(`[VIEW #${viewNumber}] Checking for AdSense Terms (10s window)...`);
