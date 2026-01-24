@@ -1111,10 +1111,16 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.setViewport({ width: 1366, height: 768 });
 
         // --- STAGE 1: ORGANIC GOOGLE SEARCH (Tool 5 Core) ---
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        console.log(`[SEARCH] Navigating to: ${googleSearchUrl}`);
 
+          await page.goto(googleSearchUrl, { 
+          waitUntil: 'networkidle2', 
+          timeout: 60000 
+});
+
+// 2. Thoda wait karein (Real search simulation ke liye)
+await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
         // Site visit with referrer
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
