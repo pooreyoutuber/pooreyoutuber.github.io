@@ -1090,84 +1090,61 @@ const TOOL5_REFERRERS = [
     "https://www.facebook.com/l.php?u=",
     "https://www.reddit.com/r/news/"
 ];
+// ===================================================================
+// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED WITH CROXYPROXY)
+// ===================================================================
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        // Original Tool 5 logic: User Agent diversity
-        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(userAgent);
         await page.setViewport({ width: 1366, height: 768 });
+        
+        // Anti-Bot: Set Random User Agent
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- STAGE 1: ORGANIC GOOGLE SEARCH (Tool 5 Core) ---
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        // --- NEW STARTING: CROXYPROXY INTEGRATION ---
+        console.log(`[VIEW #${viewNumber}] Opening CroxyProxy for: ${url}`);
+        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Site visit with referrer
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
-        // Popup wait logic
-        const popupFound = await page.waitForSelector('.fc-consent-root, .google-anno-rendered, iframe[title*="consent"]', { timeout: 10000 })
-            .catch(() => null);
+        // Search bar mein URL daalna (CroxyProxy ka input ID '#url' hota hai)
+        const searchInputSelector = '#url';
+        await page.waitForSelector(searchInputSelector);
+        await page.type(searchInputSelector, url, { delay: 100 });
+        
+        // 'Go' button par click karna (ID '#btn')
+        await page.click('#btn');
 
-        if (popupFound) {
-            const strategyKey = viewNumber % 10; // 10 views ki cycle
-            await page.evaluate(async (key) => {
-                const getBtn = (sel) => document.querySelector(sel);
-                
-                if (key >= 1 && key <= 5) {
-                    // 5 Baar X icon se close
-                    const close = getBtn('.fc-close-icon, [aria-label="Close"], .dismiss-button');
-                    if (close) close.click();
-                } 
-                else if (key >= 6 && key <= 8 || key === 0) {
-                    // 3 Baar Consent click
-                    const accept = getBtn('.fc-cta-consent, [aria-label="Consent"], [aria-label="Accept all"]');
-                    if (accept) accept.click();
-                } 
-                else {
-                    // 2 Baar Manage -> Select All
-                    const manage = getBtn('.fc-cta-manage, [aria-label="Manage options"]');
-                    if (manage) {
-                        manage.click();
-                        setTimeout(() => {
-                            const selectAll = document.querySelector('.fc-manage-vendors-allow-all');
-                            if (selectAll) selectAll.click();
-                        }, 1500);
-                    }
-                }
-            }, strategyKey);
-            console.log(`[POPUP] Strategy ${strategyKey} executed.`);
-        }
+        // Proxy ke through site load hone ka wait karein
+        console.log(`[VIEW #${viewNumber}] Waiting for site to load via Proxy...`);
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => console.log("Navigation timeout, continuing..."));
+        // --- END OF CROXYPROXY INTEGRATION ---
 
-        // --- STAGE 3: BEHAVIOR & ADS CLICKER ---
+        // Baki ka code (Scrolling & Ad-Clicking) vese hi rahega
         const startTime = Date.now();
-        const targetStayTime = randomInt(40000, 60000); 
+        const targetStayTime = randomInt(30000, 35000); 
 
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
-            // Engagement: Scrolling & Mouse Movement
-            await page.evaluate(() => {
-                window.scrollBy(0, Math.floor(Math.random() * 400) + 100);
-                window.dispatchEvent(new Event('scroll'));
-            });
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 5 });
+            // Natural Scrolling
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            
+            // Mouse Movement (Bypass Bot Checks)
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 ADS CLICKER (Tool 5 original probability)
+            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
@@ -1175,21 +1152,27 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`[AD-CLICK] Target Found! Revenue Generating...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); // Ad page stay
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        
+                        await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
-            await new Promise(r => setTimeout(r, randomInt(5000, 8000)));
         }
         console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+        }
     }
 }
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
