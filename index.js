@@ -1103,11 +1103,11 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.setUserAgent(userAgent);
         await page.setViewport({ width: 1366, height: 768 });
 
-        // --- STEP 1: PROXYIUM SE SITE LOAD KARNA (GA4 Friendly) ---
-        console.log(`[VIEW #${viewNumber}] Navigating to Proxyium...`);
+        // --- STEP 1: croxyproxy SE SITE LOAD KARNA (GA4 Friendly) ---
+        console.log(`[VIEW #${viewNumber}] Navigating to croxyproxy...`);
         await page.goto('https://https://www.croxyproxy.com//', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Proxyium ke input mein URL daalna
+        // croxyproxy ke input mein URL daalna
         await page.waitForSelector('#url', { timeout: 10000 });
         await page.type('#url', url, { delay: 100 });
         
@@ -1117,7 +1117,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
             page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null)
         ]);
 
-        console.log(`[PROXYIUM] Site loaded. Waiting 10s for Ads/Terms...`);
+        console.log(`[croxyproxy] Site loaded. Waiting 10s for Ads/Terms...`);
 
         // --- STAGE 2: SMART TERMS POPUP HANDLER (Aapka Logic) ---
         console.log(`[VIEW #${viewNumber}] Checking for AdSense Terms (10s window)...`);
