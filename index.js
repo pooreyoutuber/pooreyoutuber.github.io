@@ -1064,30 +1064,30 @@ app.post('/start-Proxyium', async (req, res) => {
 //===================================================================
 // 7. tool popup (WITH DYNAMIC POP-UP HANDLING)
 // ===================================================================
- // --- 1. TOOL 7 DEVICES (25 Varieties) ---
+// ===================================================================
+// 7. POP-UP & KEYBOARD ENGAGEMENT TASK (ULTIMATE VERSION)
+// ===================================================================
+
+// --- 1. DEVICE LIST (25 Diverse Devices for Tool 7) ---
 const T7_DEVICES = [
     { name: "iPhone 15 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", w: 393, h: 852 },
     { name: "Samsung Galaxy S23", ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36", w: 360, h: 780 },
     { name: "Windows 11 Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", w: 1920, h: 1080 },
     { name: "MacBook Pro Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", w: 1440, h: 900 },
-    { name: "Google Pixel 7", ua: "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36", w: 412, h: 915 }
-    // Note: Isi tarah 25 devices list mein add karein
-];
-// --- 2. ORGANIC REFERRERS ---
-const TOOL5_REFERRERS = [
-    "https://www.google.com/search?q=",
-    "https://www.bing.com/search?q=",
-    "https://duckduckgo.com/?q=",
-    "https://t.co/", 
-    "https://www.facebook.com/l.php?u=",
-    "https://www.reddit.com/r/news/"
+    { name: "Google Pixel 7", ua: "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36", w: 412, h: 915 },
+    { name: "iPad Air 5", ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", w: 820, h: 1180 },
+    { name: "OnePlus 11", ua: "Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36", w: 384, h: 854 },
+    { name: "Xiaomi 13 Pro", ua: "Mozilla/5.0 (Linux; Android 13; 2210132G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36", w: 393, h: 873 },
+    { name: "Surface Pro 9", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.67", w: 1440, h: 960 },
+    { name: "Asus ROG Phone 6", ua: "Mozilla/5.0 (Linux; Android 12; AI2201) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Mobile Safari/537.36", w: 391, h: 846 }
+    // Aap isi tarah 25 devices tak list badha sakte hain...
 ];
 
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
         const device = T7_DEVICES[Math.floor(Math.random() * T7_DEVICES.length)];
-        const referrers = ["https://www.google.com/search?q=", "https://t.co/", "https://www.facebook.com/l.php?u="];
+        const referrers = ["https://www.google.com/search?q=", "https://t.co/", "https://www.facebook.com/l.php?u=", "https://www.bing.com/search?q="];
         const fullReferrer = referrers[Math.floor(Math.random() * referrers.length)] + encodeURIComponent(keyword);
 
         browser = await puppeteer.launch({
@@ -1099,89 +1099,106 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.w, height: device.h });
 
-        // 🔥 ENGAGEMENT LAYER 1: Visibility & Focus Hack
+        // 🔥 HIGH-ENGAGEMENT HACK: Visibility & Focus
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
             Object.defineProperty(document, 'hidden', { value: false, writable: true });
         });
 
-        // Search URL Inject for view_search_results event
+        // Search URL Trigger Logic
         const connector = url.includes('?') ? '&' : '?';
         const searchUrl = `${url}${connector}q=${encodeURIComponent(keyword)}`;
 
-        console.log(`[TOOL 7] View #${viewNumber} | Engaged Device: ${device.name}`);
+        console.log(`[TOOL 7] View #${viewNumber} | Device: ${device.name}`);
+        await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 90000, referer: fullReferrer });
 
-        await page.goto(searchUrl, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: fullReferrer 
-        });
+        // --- 1. KEYBOARD TYPING ENGAGEMENT (0-9) ---
+        // Site khulne par active signal bhejta hai
+        console.log(`[ACTION] Typing Engagement Signals...`);
+        for (let i = 0; i <= 9; i++) {
+            await page.keyboard.press(`${i}`);
+            await new Promise(r => setTimeout(r, randomInt(150, 400)));
+        }
 
-        // --- SMART CONSENT HANDLER (The Fix you asked for) ---
-        await new Promise(r => setTimeout(r, 6000)); 
-        await page.evaluate(async (viewNum) => {
-            const selectors = {
-                accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent'],
-                manage: ['button[aria-label="Manage options"]', '.fc-cta-manage'],
-                close: ['[aria-label="Close"]', '.fc-close-icon', 'button[class*="close"]']
-            };
-            const clickEl = (list) => {
-                for (let s of list) {
-                    try {
-                        let el = document.querySelector(s);
-                        if (el && el.offsetHeight > 0) { el.click(); return true; }
-                    } catch (e) {}
+        // --- 2. SMART ADSENSE CONSENT HANDLER ---
+        await new Promise(r => setTimeout(r, 6000));
+        try {
+            await page.evaluate(async (viewNum) => {
+                const selectors = {
+                    accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent'],
+                    manage: ['button[aria-label="Manage options"]', '.fc-cta-manage'],
+                    close: ['[aria-label="Close"]', '.fc-close-icon', 'button[class*="close"]']
+                };
+                const findAndClick = (list) => {
+                    for (let s of list) {
+                        try {
+                            let el = document.querySelector(s);
+                            if (el && el.offsetHeight > 0) { el.click(); return true; }
+                        } catch (e) {}
+                    }
+                    return false;
+                };
+
+                const mode = viewNum % 20;
+                await new Promise(r => setTimeout(r, 2000)); // Real person delay
+
+                if (mode < 10) findAndClick(selectors.close); // 10 baar X-Icon
+                else if (mode < 15) findAndClick(selectors.accept); // 5 baar Accept
+                else { 
+                    if (findAndClick(selectors.manage)) { // 5 baar Manage -> Accept
+                        setTimeout(() => findAndClick(selectors.accept), 3000);
+                    }
                 }
-                return false;
-            };
-            const mode = viewNum % 20;
-            if (mode < 10) clickEl(selectors.close);
-            else if (mode < 15) clickEl(selectors.accept);
-            else { if (clickEl(selectors.manage)) setTimeout(() => clickEl(selectors.accept), 2500); }
-        }, viewNumber);
+            }, viewNumber);
+        } catch (e) { /* Popup skip silently */ }
 
-        // 🔥 ENGAGEMENT LAYER 2: Activity Heartbeat
+        // --- 3. REALISTIC BEHAVIOR LOOP (Scroll + Mouse + Heartbeat) ---
         const startTime = Date.now();
-        const stayTime = randomInt(35000, 50000); 
+        const stayTime = randomInt(40000, 55000); // GA4 requires time for engagement
 
         while (Date.now() - startTime < stayTime) {
             await page.evaluate(() => {
                 window.focus();
-                // Random Smooth Scroll
+                // Smooth scrolling
                 window.scrollBy({ top: Math.floor(Math.random() * 450), behavior: 'smooth' });
-                // Force GA4 Heartbeat
+                // Force GA4 heartbeat events
                 window.dispatchEvent(new Event('mousemove'));
                 window.dispatchEvent(new Event('scroll'));
                 window.dispatchEvent(new Event('touchstart'));
             });
 
-            await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+            // Active Mouse Movement
+            await page.mouse.move(randomInt(50, 500), randomInt(50, 500), { steps: 10 });
+            
+            // Randomly type space to keep session alive
+            if (Math.random() > 0.6) await page.keyboard.press('Space');
+            
+            await new Promise(r => setTimeout(r, randomInt(4000, 7500)));
 
-            // Smart Ad Clicker (Revenue Logic)
+            // Ad-Clicker Logic (Revenue Booster)
             if (Math.random() < 0.18) {
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const ad = ads[Math.floor(Math.random() * ads.length)];
                     const box = await ad.boundingBox();
                     if (box && box.width > 50) {
-                        console.log(`[AD-CLICK] Triggering Revenue for View #${viewNumber}`);
+                        console.log(`[AD-CLICK] Triggering Ad Click for Revenue...`);
                         await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                        await new Promise(r => setTimeout(r, 12000)); 
+                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} | Engagement: SUCCESS ✅`);
+        console.log(`[DONE] Tool 7 Session #${viewNumber} Finished Successfully. ✅`);
 
     } catch (err) {
-        console.error(`[ERR] Tool 7: ${err.message}`);
+        console.error(`[ERR] Tool 7 Error: ${err.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) await browser.close().catch(() => {});
     }
 }
-    
+
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
