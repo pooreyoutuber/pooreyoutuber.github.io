@@ -1103,31 +1103,39 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-
-        // --- FIXED: Yahan se Automation Lock hata diya gaya hai ---
+        
+        // --- 1. SETTINGS & BYPASS ---
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.w, height: device.h });
-        await page.bringToFront();
+        
+        // IMPORTANT: Visibility lock hata diya hai engagement ke liye
+        await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
 
         const searchConnector = url.includes('?') ? '&' : '?';
         const searchResultUrl = `${url}${searchConnector}q=${encodeURIComponent(keyword)}`;
 
-        console.log(`[VIEW #${viewNumber}] Connecting to URL...`);
+        console.log(`[VIEW #${viewNumber}] Target: ${url} | Device: ${device.name}`);
 
+        // Navigation
         await page.goto(searchResultUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: fullReferrer 
         });
 
-        // --- ENGAGEMENT TRIGGER #1: Mouse Movement & Click ---
-        await page.mouse.move(100, 100);
-        await page.mouse.click(5, 5); // Invisible Click for Engagement
+        // --- 2. INITIAL ENGAGEMENT (GA4 Activation) ---
+        await page.bringToFront();
+        await page.mouse.click(10, 10); // Start interaction
 
-        // --- POPUP HANDLER (Aapka Original Logic) ---
+        // --- 3. SMART POPUP HANDLER (Aapka Original) ---
         try {
-            await page.waitForSelector('.fc-consent-root, .google-anno-rendered', { timeout: 7000 }).catch(() => null);
+            await page.waitForSelector('.fc-consent-root, .google-anno-rendered', { timeout: 8000 }).catch(() => null);
             await page.evaluate(async (viewNum) => {
+                const selectors = {
+                    accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent'],
+                    manage: ['button[aria-label="Manage options"]', '.fc-cta-manage'],
+                    close: ['[aria-label="Close"]', '.fc-close-icon', '.dismiss-button']
+                };
                 const findAndClick = (list) => {
                     for (let s of list) {
                         let el = document.querySelector(s);
@@ -1135,57 +1143,55 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                     }
                     return false;
                 };
-                const selectors = {
-                    accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent'],
-                    close: ['[aria-label="Close"]', '.fc-close-icon', '.dismiss-button']
-                };
-                if (viewNum % 2 === 0) findAndClick(selectors.close);
-                else findAndClick(selectors.accept);
+                const mode = viewNum % 20;
+                if (mode < 10) findAndClick(selectors.close);
+                else if (mode < 15) findAndClick(selectors.accept);
+                else { if (findAndClick(selectors.manage)) setTimeout(() => findAndClick(selectors.accept), 2000); }
             }, viewNumber);
         } catch (e) {}
 
-        // --- BEHAVIOR LOOP (Scroll & Engagement Fix) ---
+        // --- 4. BEHAVIOR LOOP (Fix: Scroll + Engagement) ---
         const startTime = Date.now();
         const targetStayTime = randomInt(45000, 60000); 
 
         while (Date.now() - startTime < targetStayTime) {
             
-            // --- FIXED: REAL SCROLL TRIGGER ---
+            // Real Scroll Activity
             await page.evaluate(() => {
-                const distance = Math.floor(Math.random() * 300) + 150;
-                window.scrollBy({ top: distance, behavior: 'smooth' });
-                
-                // Ye events GA4 ko data bhejte hain
-                window.dispatchEvent(new Event('scroll')); 
+                const scrollAmt = Math.floor(Math.random() * 350) + 100;
+                window.scrollBy({ top: scrollAmt, behavior: 'smooth' });
+                // Dispatch events to satisfy GA4
+                window.dispatchEvent(new Event('scroll'));
                 window.dispatchEvent(new Event('mousemove'));
             });
 
-            // Random Mouse Activity
-            await page.mouse.move(randomInt(50, 300), randomInt(50, 300), { steps: 5 });
+            // Random Mouse Movement
+            await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 8 });
 
-            // --- ENGAGEMENT TRIGGER #2: Heartbeat Click ---
-            if (Math.random() < 0.5) {
-                await page.mouse.click(randomInt(1, 10), randomInt(1, 10));
+            // 🔥 ENGAGEMENT FIX: Har loop mein ek interaction click
+            // Tool 5 isliye chalta tha kyunki usme natural navigation thi
+            if (Math.random() < 0.6) {
+                await page.mouse.click(randomInt(1, 20), randomInt(1, 20)); 
             }
 
-            await new Promise(r => setTimeout(r, randomInt(4000, 6000)));
+            await new Promise(r => setTimeout(r, randomInt(4000, 7000)));
 
-            // --- AD CLICKER (Aapka Original Logic) ---
-            if (Math.random() < 0.15) { 
+            // --- 5. ADSENSE CLICKER (Aapka Original) ---
+            if (Math.random() < 0.20) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-                    if (box && box.width > 30) {
-                        console.log(`[AD-CLICK] Success!`);
+                    if (box && box.width > 40) {
+                        console.log(`[AD-CLICK] Engagement + Click Triggered!`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 12000)); 
+                        await new Promise(r => setTimeout(r, 15000)); 
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} - Engagement & Scroll Sent ✅`);
+        console.log(`[DONE] View #${viewNumber} - All Events Tracked ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
@@ -1193,7 +1199,6 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         if (browser) await browser.close().catch(() => {});
     }
 }
-                  
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
