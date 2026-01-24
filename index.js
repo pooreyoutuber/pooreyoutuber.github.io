@@ -1090,8 +1090,7 @@ const TOOL5_REFERRERS = [
     "https://www.facebook.com/l.php?u=",
     "https://www.reddit.com/r/news/"
 ];
-
-async function runGscTaskpop(keyword, url, viewNumber) {
+async function runGscTaskpop(keyword, url, viewNumber) 
     let browser;
     try {
         const device = TOOL5_DEVICES[Math.floor(Math.random() * TOOL5_DEVICES.length)];
@@ -1107,17 +1106,14 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.w, height: device.h });
 
-        // Engagement Fix: Visibility State
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
-            Object.defineProperty(document, 'hidden', { value: false, writable: true });
-        });
+        // --- ENGAGEMENT FIX: Bring page to front ---
+        await page.bringToFront();
 
-        // Search URL Logic (view_search_results trigger)
+        // Search URL Logic
         const searchConnector = url.includes('?') ? '&' : '?';
         const searchResultUrl = `${url}${searchConnector}q=${encodeURIComponent(keyword)}`;
 
-        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Referer: ${refBase.split('.')[1]}`);
+        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Engagement Mode: ACTIVE`);
 
         await page.goto(searchResultUrl, { 
             waitUntil: 'networkidle2', 
@@ -1125,81 +1121,76 @@ async function runGscTaskpop(keyword, url, viewNumber) {
             referer: fullReferrer 
         });
 
+        // --- ENGAGEMENT FIX: Initial Interaction ---
+        await page.mouse.click(10, 10); // Khali jagah click karke session activate karna
+
         // ==========================================
-        // 🛡️ SMART CONSENT POPUP HANDLER (ERROR-FREE) 🛡️
+        // 🛡️ SMART CONSENT POPUP HANDLER (Vaisa hi rahega)
         // ==========================================
         try {
-            // Wait for potential GDPR/Adsense popup (Max 8 sec)
             await page.waitForSelector('.fc-consent-root, .google-anno-rendered', { timeout: 8000 }).catch(() => null);
-
             await page.evaluate(async (viewNum) => {
                 const selectors = {
                     accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent', '.VfPpkd-LgbsSe'],
                     manage: ['button[aria-label="Manage options"]', '.fc-cta-manage', 'button[aria-label="Accept all"]', 'button[aria-label="Manage"]'],
                     close: ['[aria-label="Close"]', '.fc-close-icon', '.dismiss-button', 'button[class*="close"]']
                 };
-
                 const findAndClick = (list) => {
                     for (let s of list) {
                         try {
                             let el = document.querySelector(s);
-                            if (el && el.offsetHeight > 0) { 
-                                el.click(); 
-                                return true; 
-                            }
+                            if (el && el.offsetHeight > 0) { el.click(); return true; }
                         } catch (e) {}
                     }
                     return false;
                 };
-
                 const mode = viewNum % 20;
-                // Human-like delay before action
                 await new Promise(r => setTimeout(r, Math.random() * 2000 + 1500));
-
-                if (mode < 10) { 
-                    findAndClick(selectors.close); // 10 baar Close (X)
-                } else if (mode < 15) { 
-                    findAndClick(selectors.accept); // 5 baar Direct Accept
-                } else { 
-                    if (findAndClick(selectors.manage)) { // 5 baar Manage -> Accept
-                        setTimeout(() => findAndClick(selectors.accept), 2500);
-                    }
-                }
+                if (mode < 10) findAndClick(selectors.close);
+                else if (mode < 15) findAndClick(selectors.accept);
+                else { if (findAndClick(selectors.manage)) setTimeout(() => findAndClick(selectors.accept), 2500); }
             }, viewNumber);
-        } catch (e) { /* No popup, skip silently */ }
+        } catch (e) { }
 
         // ==========================================
-        // 3. BEHAVIOR LOOP (Scrolling & Mouse)
+        // 3. BEHAVIOR LOOP (With Engagement Heartbeat)
         // ==========================================
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 50000); 
+        const targetStayTime = randomInt(40000, 55000); // GA4 engagement ke liye 40s+ safe hai
 
         while (Date.now() - startTime < targetStayTime) {
             await page.evaluate(() => {
                 window.scrollBy({ top: Math.floor(Math.random() * 400), behavior: 'smooth' });
-                window.focus();
+                // --- ENGAGEMENT FIX: Dispatch events to GA4 ---
+                window.dispatchEvent(new Event('scroll'));
+                window.dispatchEvent(new Event('mousemove'));
             });
 
             await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 8 });
+            
+            // --- ENGAGEMENT FIX: Har loop mein ek random click ---
+            if (Math.random() < 0.4) {
+                await page.mouse.click(randomInt(5, 20), randomInt(5, 20));
+            }
+
             await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-            // Smart Ad Clicker (18% Chance)
+            // 🔥 HIGH-VALUE AD CLICKER (Vaisa hi rahega)
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-
                     if (box && box.width > 50 && box.height > 50) {
                         console.log(`[AD-CLICK] Target Found! Clicking for Revenue...`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
+                        await new Promise(r => setTimeout(r, 15000)); 
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished with Engagement ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
