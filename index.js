@@ -1086,48 +1086,51 @@ const T7_DEVICES = [
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        const device = T7_DEVICES[Math.floor(Math.random() * T7_DEVICES.length)];
-        const referrers = ["https://www.google.com/search?q=", "https://t.co/", "https://www.facebook.com/l.php?u=", "https://www.bing.com/search?q="];
-        const fullReferrer = referrers[Math.floor(Math.random() * referrers.length)] + encodeURIComponent(keyword);
+        const device = TOOL5_DEVICES[Math.floor(Math.random() * TOOL5_DEVICES.length)];
+        const refBase = TOOL5_REFERRERS[Math.floor(Math.random() * TOOL5_REFERRERS.length)];
+        const fullReferrer = refBase + encodeURIComponent(keyword);
 
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-blink-features=AutomationControlled',
+                '--window-size=1366,768'
+            ]
         });
 
         const page = await browser.newPage();
         await page.setUserAgent(device.ua);
         await page.setViewport({ width: device.w, height: device.h });
 
-        // 🔥 HIGH-ENGAGEMENT HACK: Visibility & Focus
+        // 🔥 FIX 1: Visibility aur Focus Force karna (Engagement ke liye zaroori)
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
             Object.defineProperty(document, 'hidden', { value: false, writable: true });
+            window.focus(); 
         });
 
-        // Search URL Trigger Logic
-        const connector = url.includes('?') ? '&' : '?';
-        const searchUrl = `${url}${connector}q=${encodeURIComponent(keyword)}`;
+        // Search URL Logic (view_search_results trigger)
+        const searchConnector = url.includes('?') ? '&' : '?';
+        const searchResultUrl = `${url}${searchConnector}q=${encodeURIComponent(keyword)}`;
 
-        console.log(`[TOOL 7] View #${viewNumber} | Device: ${device.name}`);
-        await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 90000, referer: fullReferrer });
+        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Engagement Mode: ACTIVE`);
 
-        // --- 1. KEYBOARD TYPING ENGAGEMENT (0-9) ---
-        // Site khulne par active signal bhejta hai
-        console.log(`[ACTION] Typing Engagement Signals...`);
-        for (let i = 0; i <= 9; i++) {
-            await page.keyboard.press(`${i}`);
-            await new Promise(r => setTimeout(r, randomInt(150, 400)));
-        }
+        await page.goto(searchResultUrl, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: fullReferrer 
+        });
 
-        // --- 2. SMART ADSENSE CONSENT HANDLER ---
-        await new Promise(r => setTimeout(r, 6000));
+        // 🛡️ POPUP HANDLER (Aapka existing logic)
         try {
+            await page.waitForSelector('.fc-consent-root, .google-anno-rendered', { timeout: 8000 }).catch(() => null);
             await page.evaluate(async (viewNum) => {
                 const selectors = {
-                    accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent'],
-                    manage: ['button[aria-label="Manage options"]', '.fc-cta-manage'],
-                    close: ['[aria-label="Close"]', '.fc-close-icon', 'button[class*="close"]']
+                    accept: ['button[aria-label="Consent"]', 'button[aria-label="Accept all"]', '.fc-cta-consent', '.VfPpkd-LgbsSe'],
+                    manage: ['button[aria-label="Manage options"]', '.fc-cta-manage', 'button[aria-label="Accept all"]', 'button[aria-label="Manage"]'],
+                    close: ['[aria-label="Close"]', '.fc-close-icon', '.dismiss-button', 'button[class*="close"]']
                 };
                 const findAndClick = (list) => {
                     for (let s of list) {
@@ -1138,62 +1141,58 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                     }
                     return false;
                 };
-
                 const mode = viewNum % 20;
-                await new Promise(r => setTimeout(r, 2000)); // Real person delay
-
-                if (mode < 10) findAndClick(selectors.close); // 10 baar X-Icon
-                else if (mode < 15) findAndClick(selectors.accept); // 5 baar Accept
-                else { 
-                    if (findAndClick(selectors.manage)) { // 5 baar Manage -> Accept
-                        setTimeout(() => findAndClick(selectors.accept), 3000);
-                    }
-                }
+                await new Promise(r => setTimeout(r, Math.random() * 2000 + 1500));
+                if (mode < 10) findAndClick(selectors.close);
+                else if (mode < 15) findAndClick(selectors.accept);
+                else { if (findAndClick(selectors.manage)) setTimeout(() => findAndClick(selectors.accept), 2500); }
             }, viewNumber);
-        } catch (e) { /* Popup skip silently */ }
+        } catch (e) { }
 
-        // --- 3. REALISTIC BEHAVIOR LOOP (Scroll + Mouse + Heartbeat) ---
+        // 🔥 FIX 2: Tool 5 ki tarah REAL BEHAVIOR LOOP
         const startTime = Date.now();
-        const stayTime = randomInt(40000, 55000); // GA4 requires time for engagement
+        const targetStayTime = randomInt(35000, 50000); 
 
-        while (Date.now() - startTime < stayTime) {
+        while (Date.now() - startTime < targetStayTime) {
+            // Har loop mein focus aur activity trigger karna
             await page.evaluate(() => {
                 window.focus();
-                // Smooth scrolling
-                window.scrollBy({ top: Math.floor(Math.random() * 450), behavior: 'smooth' });
-                // Force GA4 heartbeat events
-                window.dispatchEvent(new Event('mousemove'));
-                window.dispatchEvent(new Event('scroll'));
-                window.dispatchEvent(new Event('touchstart'));
+                // Real engagement signal bhejna
+                window.dispatchEvent(new Event('focus'));
+                window.dispatchEvent(new MouseEvent('mousemove'));
+                
+                // Tool 5 ki tarah scrolling logic
+                window.scrollBy({ 
+                    top: Math.floor(Math.random() * 400), 
+                    behavior: 'smooth' 
+                });
             });
 
-            // Active Mouse Movement
-            await page.mouse.move(randomInt(50, 500), randomInt(50, 500), { steps: 10 });
+            // Mouse ko randomly move karna
+            await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 8 });
             
-            // Randomly type space to keep session alive
-            if (Math.random() > 0.6) await page.keyboard.press('Space');
-            
-            await new Promise(r => setTimeout(r, randomInt(4000, 7500)));
+            // Random wait taaki GA4 ko human-like behavior lage
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-            // Ad-Clicker Logic (Revenue Booster)
-            if (Math.random() < 0.18) {
+            // Smart Ad Clicker (18% Chance - Same as Tool 5)
+            if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
-                    const ad = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await ad.boundingBox();
-                    if (box && box.width > 50) {
-                        console.log(`[AD-CLICK] Triggering Ad Click for Revenue...`);
-                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+                    if (box && box.width > 50 && box.height > 50) {
+                        console.log(`[AD-CLICK] Generating Revenue Engagement...`);
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        await new Promise(r => setTimeout(r, 15000)); // Ad site par engagement stay
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] Tool 7 Session #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Engagement Created. ✅`);
 
-    } catch (err) {
-        console.error(`[ERR] Tool 7 Error: ${err.message}`);
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close().catch(() => {});
     }
