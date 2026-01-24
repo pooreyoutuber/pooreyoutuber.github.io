@@ -1090,7 +1090,7 @@ const TOOL5_REFERRERS = [
     "https://www.facebook.com/l.php?u=",
     "https://www.reddit.com/r/news/"
 ];
-async function runGscTask(keyword, url, viewNumber) {
+async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
         // Original Tool 5 logic: User Agent diversity
