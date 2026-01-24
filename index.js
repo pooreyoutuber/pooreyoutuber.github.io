@@ -1064,54 +1064,19 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
 // ===================================================================
-
-// --- 1. EXPANDED DEVICE LIST (25+ MODELS) ---
-const TOOL7_DEVICES = [
-    // iPhones
-    { name: "iPhone 15 Pro Max", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1", w: 430, h: 932 },
-    { name: "iPhone 14 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Mobile/15E148 Safari/604.1", w: 393, h: 852 },
-    { name: "iPhone 13", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
-    { name: "iPhone 12 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.4 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
-    // Androids
-    { name: "Samsung Galaxy S23 Ultra", ua: "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", w: 384, h: 854 },
-    { name: "Samsung Galaxy S22", ua: "Mozilla/5.0 (Linux; Android 12; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36", w: 360, h: 780 },
-    { name: "Google Pixel 8 Pro", ua: "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", w: 412, h: 915 },
-    { name: "OnePlus 11", ua: "Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36", w: 384, h: 854 },
-    // Tablets
-    { name: "iPad Pro 12.9", ua: "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", w: 1024, h: 1366 },
-    { name: "iPad Air 5", ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", w: 820, h: 1180 },
-    // PCs (Chrome, Firefox, Safari)
-    { name: "Windows 11 Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", w: 1920, h: 1080 },
-    { name: "MacBook Pro M3 Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15", w: 1728, h: 1117 },
-    { name: "Windows 10 Firefox", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0", w: 1366, h: 768 }
-];
-// --- 2. REFERRAL SOURCES (50% Chance Logic) ---
-const TOOL7_REFERRERS = [
-    "https://www.facebook.com/",
-    "https://l.facebook.com/l.php?u=",
-    "https://www.pinterest.com/",
-    "https://t.co/", // Twitter/X
-    "https://www.reddit.com/",
-    "https://www.linkedin.com/",
-    "https://www.instagram.com/"
-];
+// ===================================================================
+// UPDATED Tool 5: CroxyProxy + Revenue Booster
+// ===================================================================
 async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
-        //npredictable Pattern: Pick Random Device & Browser//
-        const device = TOOL7_DEVICES[Math.floor(Math.random() * TOOL7_DEVICES.length)];
-        
-        // 50% Referral Logic: Har 10 me se 5 views social sources se
-        let referer = "https://www.google.com/"; // Default Organic
-        if (viewNumber % 2 === 0) {
-            referer = TOOL7_REFERRERS[Math.floor(Math.random() * TOOL7_REFERRERS.length)];
-        }
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
@@ -1122,93 +1087,56 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         // Anti-Bot: Set Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- STEP 1: Open Proxyium ---
-        console.log(`[VIEW #${viewNumber}] Opening Proxyium for: ${url}`);
-        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+        // --- STEP A: CroxyProxy Navigation (Naya Step) ---
+        console.log(`[VIEW #${viewNumber}] Opening CroxyProxy...`);
+        await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // --- STEP 2: Enter URL in Proxyium Search Bar ---
-        const searchInputSelector = 'input[placeholder*="Put a URL"]';
-        await page.waitForSelector(searchInputSelector);
+        // Search bar mein URL daalna (Input selector for CroxyProxy)
+        const proxyInputSelector = '#url'; // CroxyProxy ka main input ID
+        await page.waitForSelector(proxyInputSelector, { visible: true });
+        await page.type(proxyInputSelector, url, { delay: 50 });
         
-        // Human-like typing
-        await page.type(searchInputSelector, url, { delay: 100 });
-        await page.keyboard.press('Enter');
+        // Go button par click karna
+        console.log(`[ACTION] Entering URL: ${url} and clicking GO...`);
+        await page.click('#requestSubmit'); 
 
-        // --- STEP 3: Wait for the Proxied Site to load ---
-        console.log(`[PROXYIUM] Navigation started to target...`);
+        // Wait for the proxied site to load
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null);
-        
-        // Thoda extra wait taaki elements load ho jayein
-        await new Promise(r => setTimeout(r, 5000));
+        await new Promise(r => setTimeout(r, 5000)); // Buffer for loading
 
+        // --- STEP B: Existing Revenue Logic (Scrolling & Ad-Clicking) ---
         const startTime = Date.now();
         const targetStayTime = randomInt(35000, 45000); 
-        // --- NEW SEARCH INTERACTION LOGIC ---
-        try {
-            console.log(`[ACTION] Finding search bar for engagement...`);
-            const searchSelectors = [
-                'input[type="search"]', 
-                'input[name="q"]', 
-                'input[placeholder*="Search"]', 
-                'input[placeholder*="search"]',
-                'input[aria-label*="search"]',
-                '.search-field',
-                '#search'
-            ];
 
-            const searchInput = await page.evaluateHandle((selectors) => {
-                for (const s of selectors) {
-                    const el = document.querySelector(s);
-                    // Check if element is visible and not hidden
-                    if (el && el.offsetParent !== null) return el;
-                }
-                return null;
-            }, searchSelectors);
+        console.log(`[EARNING-MODE] Staying on proxied site for ${targetStayTime/1000}s...`);
 
-            if (searchInput.asElement()) {
-                console.log(`[SUCCESS] Search bar found! Typing keyword...`);
-                await searchInput.focus();
-                // Keyword jo function ke parameter se aa raha hai
-                await page.keyboard.type(keyword, { delay: 150 }); 
-                console.log(`[INFO] Keyword typed successfully.`);
-                await new Promise(r => setTimeout(r, 2000));
-            } else {
-                console.log(`[SKIP] No search bar found on this site.`);
-            }
-        } catch (e) {
-            console.log(`[DEBUG] Interaction failed: ${e.message}`);
-        }
-        // --- END SEARCH INTERACTION ---
-        // --- STEP 4: Realistic Behavior & Ad-Clicker Loop (Inside Proxyium) ---
         while (Date.now() - startTime < targetStayTime) {
-            // 1. Natural Scrolling
+            // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // 2. Mouse Movement
+            // Mouse Movement
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
-                // Proxyium ke andar ads detect karne ke liye selectors
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                // Proxied page ke andar ads dhoondna
+                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], a[href*="doubleclick.net"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Ad Found inside Proxyium! Clicking...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] CroxyProxy Ad Found! Clicking...`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} via Proxyium Finished. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished via CroxyProxy. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
@@ -1218,7 +1146,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         }
     }
 }
-        
+
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
