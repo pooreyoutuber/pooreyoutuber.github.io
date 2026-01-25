@@ -1332,8 +1332,145 @@ app.post('/api/real-view-boost', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false });
     }
 });
+// ===================================================================
+// 11. UPDATED GSC & ADSENSE REVENUE BOOSTER (WITH DEVICE & REFERRAL LOGIC)
+// ===================================================================
 
+// --- Advanced Device & Browser Profiles ---
+const DEVICE_PROFILES = [
+    { name: "iPhone 13 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1", viewport: { width: 390, height: 844, isMobile: true } },
+    { name: "Samsung Galaxy S21", ua: "Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", viewport: { width: 360, height: 800, isMobile: true } },
+    { name: "iPad Air", ua: "Mozilla/5.0 (iPad; CPU OS 16_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1", viewport: { width: 820, height: 1180, isMobile: true } },
+    { name: "Windows PC - Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", viewport: { width: 1920, height: 1080, isMobile: false } },
+    { name: "MacOS - Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15", viewport: { width: 1440, height: 900, isMobile: false } },
+    { name: "Linux - Firefox", ua: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0", viewport: { width: 1366, height: 768, isMobile: false } }
+];
 
+const SOCIAL_REFERRERS = [
+    "https://www.facebook.com/",
+    "https://t.co/", // Twitter/X
+    "https://www.reddit.com/",
+    "https://www.pinterest.com/",
+    "https://www.instagram.com/",
+    "https://www.linkedin.com/"
+];
+
+async function runGscTaskultimate(keyword, url, viewNumber) {
+    let browser;
+    try {
+        // 1. Random Device Profile Select Karein
+        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
+        
+        // 2. Referral Logic (50% Social, 50% Google Search)
+        let finalReferrer;
+        const isSocial = Math.random() < 0.50; // 5 out of 10 views (50%)
+        if (isSocial) {
+            finalReferrer = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
+            console.log(`[SOURCE] View #${viewNumber} | Social Referral: ${finalReferrer}`);
+        } else {
+            finalReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+            console.log(`[SOURCE] View #${viewNumber} | Google Search: ${keyword}`);
+        }
+
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+        });
+
+        const page = await browser.newPage();
+        
+        // --- Apply Device Profile ---
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.viewport);
+        
+        console.log(`[DEVICE] View #${viewNumber} | Profile: ${profile.name} | Browser: ${profile.ua.includes('Firefox') ? 'Firefox' : profile.ua.includes('Safari') ? 'Safari' : 'Chrome'}`);
+
+        // 3. STAGE: Visit Target Site
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: finalReferrer 
+        });
+
+        const startTime = Date.now();
+        const targetStayTime = randomInt(35000, 50000); 
+
+        // 4. STAGE: Behavior & Ad-Clicker
+        while (Date.now() - startTime < targetStayTime) {
+            const dist = randomInt(200, 500);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            await page.mouse.move(randomInt(50, 500), randomInt(50, 500), { steps: 5 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+
+            // High-Value Ad Clicker (18% Chance)
+            if (Math.random() < 0.18) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], a[href*="doubleclick.net"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+                    if (box && box.width > 50 && box.height > 50) {
+                        console.log(`\x1b[42m[AD-CLICK]\x1b[0m Clicking Ad on ${profile.name}...`);
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        await new Promise(r => setTimeout(r, 15000));
+                        break; 
+                    }
+                }
+            }
+        }
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) await browser.close().catch(() => {});
+    }
+}
+// ===================================================================
+// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// ===================================================================
+app.post('/ultimate', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        // Frontend se 'urls' array aa raha hai, use validate karein
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        }
+
+        const totalViews = parseInt(views);
+
+        // Immediate Success Response taaki frontend hang na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+        });
+
+        // Background Worker
+        (async () => {
+            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                // Randomly ek URL chunna rotation ke liye
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                
+                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
+                await runGscTaskultimte(keyword, randomUrl, i); 
+
+                if (i < totalViews) {
+                    // RAM management break
+                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                    await new Promise(r => setTimeout(r, restTime));
+                }
+            }
+            console.log("--- ALL SESSIONS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
                     
  
 //==================================================
