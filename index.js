@@ -1336,15 +1336,6 @@ app.post('/api/real-view-boost', async (req, res) => {
 // 11. UPDATED GSC & ADSENSE REVENUE BOOSTER (WITH DEVICE & REFERRAL LOGIC)
 // ===================================================================
 
-const SOCIAL_REFERRERS = [
-    "https://www.facebook.com/",
-    "https://t.co/", // Twitter/X
-    "https://www.reddit.com/",
-    "https://www.pinterest.com/",
-    "https://www.instagram.com/",
-    "https://www.linkedin.com/"
-];
-
 async function runGscTaskultimate(keyword, url, viewNumber) {
     let browser;
     try {
