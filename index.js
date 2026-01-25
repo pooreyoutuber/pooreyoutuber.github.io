@@ -1064,7 +1064,28 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
 // =============================== 
- async function runGscTaskpop(keyword, url, viewNumber) {
+ // --- TOOL 7 HELPERS: Device & Referral Config ---
+const DEVICE_PROFILES = [
+    { name: 'Desktop Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 } },
+    { name: 'Desktop Firefox', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0', view: { width: 1536, height: 864 } },
+    { name: 'Desktop Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15', view: { width: 1440, height: 900 } },
+    { name: 'Mobile Android', ua: 'Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800 } },
+    { name: 'Mobile iPhone', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1', view: { width: 390, height: 844 } },
+    { name: 'Tablet iPad', ua: 'Mozilla/5.0 (iPad; CPU OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1', view: { width: 810, height: 1080 } }
+];
+
+const SOCIAL_REFERRERS = [
+    'https://www.facebook.com/',
+    'https://t.co/', // X (Twitter)
+    'https://www.pinterest.com/',
+    'https://www.reddit.com/',
+    'https://www.blogger.com/'
+];
+
+// ===================================================================
+// 7. TOOL POPUP (UPDATED: Mobile/Tablet/PC + Social Referral 50%)
+// ===================================================================
+async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1073,72 +1094,64 @@ app.post('/start-Proxyium', async (req, res) => {
         });
 
         const page = await browser.newPage();
-        // 25+ Device Simulation logic bypass ke liye random resolution
-        const widths = [1366, 1920, 1536, 1440, 1280];
-        await page.setViewport({ width: widths[Math.floor(Math.random() * widths.length)], height: 800 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        
+        // 1. SELECT RANDOM DEVICE (PC, Mobile, Tablet)
+        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view);
 
-        console.log(`[VIEW #${viewNumber}] Connecting via Proxyium...`);
+        // 2. REFERRAL LOGIC: Har 10 mein se 5 views (50%) Social Referral honge
+        let referral = "";
+        if (viewNumber % 2 === 0) { // Every even view (10 me se 5 average)
+            referral = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
+        }
+
+        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Referral: ${referral || 'Direct/Proxy'}`);
+
+        // 3. Proxyium Navigation
         await page.goto('https://proxyium.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
         
         await page.waitForSelector('input[name="url"]', { visible: true, timeout: 60000 });
         await page.type('input[name="url"]', url, { delay: 100 });
         
+        // Referral spoofing (if applicable)
+        if (referral) {
+            await page.setExtraHTTPHeaders({ 'Referer': referral });
+        }
+
         await Promise.all([
             page.keyboard.press('Enter'),
             page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null)
         ]);
 
-        await new Promise(r => setTimeout(r, 15000)); // Site load buffer
+        await new Promise(r => setTimeout(r, 15000)); 
 
         const startTime = Date.now();
         const targetStayTime = randomInt(40000, 60000); 
 
-        // 🔥 ADVANCED DYNAMIC CLICKER SETTINGS
-        // 20 mein se 3-4 views (approx 18-20% chance)
+        // Ad Click Logic (Keep as is in your original tool)
         const shouldClickAd = Math.random() < 0.20; 
         let adClickedInThisSession = false;
 
         while (Date.now() - startTime < targetStayTime) {
-            // Natural human movement
             await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-            await page.mouse.move(randomInt(100, 700), randomInt(100, 500), { steps: 10 });
+            await page.mouse.move(randomInt(50, 300), randomInt(50, 300), { steps: 5 });
 
             if (shouldClickAd && !adClickedInThisSession) {
-                // Diversified Ad Selectors (Adsense + Pop + Push + Banners)
-                const adTypes = [
-                    { name: 'Adsense/Vignette', selector: 'ins.adsbygoogle, iframe[src*="googleads"], #google_ads_iframe' },
-                    { name: 'Popunder/Click', selector: 'a[href*="smartlink"], .onclick-ad, [id^="popunder"]' },
-                    { name: 'In-Page Push', selector: '.ipp-container, .notification-ad, .push-ad-unit' },
-                    { name: 'Interstitial/Overlay', selector: '.interstitial-close, .vignette-ad, [class*="overlay"]' },
-                    { name: 'General Banner', selector: 'a[href*="doubleclick.net"], [class*="banner-ad"], [id*="ad-slot"]' }
-                ];
-
-                // Shuffle ad types taaki har baar alag unit par click ho
-                adTypes.sort(() => Math.random() - 0.5);
-
-                for (const adType of adTypes) {
-                    const foundAd = await page.$(adType.selector);
-                    if (foundAd) {
-                        const box = await foundAd.boundingBox();
-                        if (box && box.width > 10 && box.height > 10) {
-                            console.log(`\x1b[35m[AD-SCOUT]\x1b[0m View #${viewNumber} targeting: ${adType.name}`);
-                            
-                            // Human-like click (move then click)
-                            await page.mouse.move(box.x + box.width/2, box.y + box.height/2, { steps: 15 });
-                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                            
-                            console.log(`\x1b[42m[SUCCESS]\x1b[0m Clicked ${adType.name}!`);
-                            adClickedInThisSession = true;
-                            await new Promise(r => setTimeout(r, 15000)); // Post-click stay
-                            break; 
-                        }
+                const adSelector = 'ins.adsbygoogle, iframe[src*="googleads"], a[href*="smartlink"]';
+                const foundAd = await page.$(adSelector);
+                if (foundAd) {
+                    const box = await foundAd.boundingBox();
+                    if (box && box.width > 10) {
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        adClickedInThisSession = true;
+                        console.log(`\x1b[42m[SUCCESS]\x1b[0m Ad Clicked on ${profile.name}`);
+                        await new Promise(r => setTimeout(r, 10000));
                     }
                 }
             }
-            await new Promise(r => setTimeout(r, randomInt(5000, 8000)));
+            await new Promise(r => setTimeout(r, 7000));
         }
-        console.log(`[DONE] View #${viewNumber} session finished.`);
 
     } catch (error) {
         console.error(`[ERROR] Tool 7: ${error.message}`);
