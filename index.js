@@ -1435,7 +1435,7 @@ app.post('/ultimate', async (req, res) => {
                 const randomUrl = urls[Math.floor(Math.random() * urls.length)];
                 
                 console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTaskultimte(keyword, randomUrl, i); 
+                await runGscTaskultimate(keyword, randomUrl, i); 
 
                 if (i < totalViews) {
                     // RAM management break
