@@ -1320,64 +1320,7 @@ app.post('/api/real-view-boost', async (req, res) => {
     }
 });
 
-// ===================================================================
-// TOOL 11: GOLOGIN ULTIMATE PROXY (2ND TAB & ADVANCED AD-CLICKER)
-// ===================================================================
 
-async function runGologinVideoTask(country, url, viewNumber) {
-    l
-
-// ENDPOINT
-app.post('/ultimate', async (req, res) => {
-    const { keyword, urls, views = 1000 } = req.body; // Keyword = Country
-    res.status(200).json({ success: true, message: "Gologin Multi-Tab Process Started" });
-
-    (async () => {
-        for (let i = 1; i <= views; i++) {
-            const currentSite = urls[Math.floor(Math.random() * urls.length)];
-            await runGologinVideoTask(keyword, currentSite, i);
-            await new Promise(r => setTimeout(r, 10000)); // Render Safety
-        }
-    })();
-});
-
-app.post('/ultimate', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
-
-        if (!urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: "URLs list is required!" });
-        }
-
-        // Render timeout se bachne ke liye fast response
-        res.status(200).json({ 
-            success: true, 
-            message: "GoLogin Ultimate Process Started. Tier-1 Countries Rotation Active." 
-        });
-
-        // Background Worker (Sequential execution to prevent RAM crash)
-        (async () => {
-            console.log(`\n--- STARTING ULTIMATE GOLOGIN TASK (Sequential) ---`);
-            for (let i = 1; i <= views; i++) {
-                // Multi-site rotation logic
-                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                // Ek time par ek hi browser chalega taaki Render crash na ho
-                await runGoLoginUltimateTask(targetUrl, i);
-
-                // Heavy session ke baad rest taaki server normal rahe
-                const restTime = 12000; // 12 seconds gap
-                console.log(`[REST] Waiting ${restTime/1000}s before next session...`);
-                await new Promise(r => setTimeout(r, restTime));
-            }
-            console.log("--- ALL ULTIMATE SESSIONS FINISHED ---");
-        })();
-
-    } catch (err) {
-        console.error("Ultimate Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
                     
  
 //==================================================
