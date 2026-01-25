@@ -1078,36 +1078,38 @@ app.post('/start-Proxyium', async (req, res) => {
 
         // --- STEP 1: Tool 6 wala exact Proxyium Navigation ---
         console.log(`[VIEW #${viewNumber}] Opening Proxyium (Tool 5 Mode)...`);
-        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
         
-        // Exact selectors from Tool 6
-        await page.waitForSelector('#url', { visible: true });
-        await page.type('#url', url, { delay: 100 });
+        // Tool 6 ki tarah direct goto aur wait
+        await page.goto('https://proxyium.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
         
-        // Tool 6 wala click aur wait pattern
+        // Wait for selector with Tool 6 style
+        await page.waitForSelector('input[name="url"]', { visible: true, timeout: 60000 });
+        await page.type('input[name="url"]', url, { delay: 100 });
+        
+        // Tool 6 wala click pattern
         await Promise.all([
-            page.click('#btn-go'),
+            page.keyboard.press('Enter'),
             page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null)
         ]);
 
-        // Tool 6 jaisa buffer wait
-        await new Promise(r => setTimeout(r, 10000));
+        // Loading buffer taaki site load ho jaye (Tool 6 jaisa)
+        await new Promise(r => setTimeout(r, 12000));
 
-        // --- STEP 2: Tool 5 ka Revenue Logic (Scrolling & Ad-Clicking) ---
+        // --- STEP 2: Tool 5 ka Original Revenue Logic ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); // Original stay time from Tool 5
+        const targetStayTime = randomInt(35000, 45000); 
 
-        console.log(`[REVENUE-ACTIVE] Site loaded via Proxyium. Starting Ad-Logic...`);
+        console.log(`[REVENUE-ACTIVE] Tunnel established. Starting Ad-Scout...`);
 
         while (Date.now() - startTime < targetStayTime) {
-            // Original Tool 5 scrolling
+            // Scroll logic (Original Tool 5)
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            await new Promise(r => setTimeout(r, randomInt(4000, 6000)));
 
-            // Original Tool 5 High-Value Ad Clicker
+            // Original Tool 5 High-Value Ad Clicker logic
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], a[href*="doubleclick.net"]');
                 if (ads.length > 0) {
@@ -1115,7 +1117,7 @@ app.post('/start-Proxyium', async (req, res) => {
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Tool 5 Revenue Generated!`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Tool 5: Success clicking ad via Proxyium!`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         await new Promise(r => setTimeout(r, 15000)); 
                         break; 
@@ -1123,7 +1125,7 @@ app.post('/start-Proxyium', async (req, res) => {
                 }
             }
         }
-        console.log(`[DONE] Tool 5 View #${viewNumber} via Proxyium Finished. ✅`);
+        console.log(`[DONE] Tool 5 View #${viewNumber} via Proxyium Success. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] Tool 5: ${error.message}`);
@@ -1131,8 +1133,6 @@ app.post('/start-Proxyium', async (req, res) => {
         if (browser) await browser.close().catch(() => {});
     }
  }
-
-
 
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
