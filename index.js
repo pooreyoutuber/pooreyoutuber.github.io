@@ -1064,7 +1064,7 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
 // =============================== 
-async function runGscTaskpop(keyword, url, viewNumber) {
+ async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1076,36 +1076,38 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- Naya Step: Proxyium Setup ---
-        console.log(`[VIEW #${viewNumber}] Opening Proxyium...`);
+        // --- STEP 1: Tool 6 wala exact Proxyium Navigation ---
+        console.log(`[VIEW #${viewNumber}] Opening Proxyium (Tool 5 Mode)...`);
         await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
         
+        // Exact selectors from Tool 6
         await page.waitForSelector('#url', { visible: true });
-        await page.type('#url', url, { delay: 50 });
+        await page.type('#url', url, { delay: 100 });
         
-        // Go button click aur navigation ka wait
+        // Tool 6 wala click aur wait pattern
         await Promise.all([
             page.click('#btn-go'),
             page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null)
         ]);
-        
-        // Proxyium loading buffer
+
+        // Tool 6 jaisa buffer wait
         await new Promise(r => setTimeout(r, 10000));
 
-        // --- Aapka Original Logic (Waisa ka Waisa hi) ---
+        // --- STEP 2: Tool 5 ka Revenue Logic (Scrolling & Ad-Clicking) ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); 
+        const targetStayTime = randomInt(35000, 45000); // Original stay time from Tool 5
 
-        console.log(`[EARNING-MODE] Staying on site for ${targetStayTime/1000}s...`);
+        console.log(`[REVENUE-ACTIVE] Site loaded via Proxyium. Starting Ad-Logic...`);
 
         while (Date.now() - startTime < targetStayTime) {
+            // Original Tool 5 scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 HIGH-VALUE AD CLICKER (Original Logic)
+            // Original Tool 5 High-Value Ad Clicker
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], a[href*="doubleclick.net"]');
                 if (ads.length > 0) {
@@ -1113,7 +1115,7 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Ad Found! Clicking...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Tool 5 Revenue Generated!`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         await new Promise(r => setTimeout(r, 15000)); 
                         break; 
@@ -1121,16 +1123,15 @@ async function runGscTaskpop(keyword, url, viewNumber) {
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+        console.log(`[DONE] Tool 5 View #${viewNumber} via Proxyium Finished. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] Tool 5: ${error.message}`);
     } finally {
-        if (browser) {
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close().catch(() => {});
     }
-}
+ }
+
 
 
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
