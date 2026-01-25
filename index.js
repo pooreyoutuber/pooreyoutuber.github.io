@@ -1064,10 +1064,7 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
 // =============================== 
- // ===================================================================
-// 7. TOOL POPUP (UPDATED: 60% Proxyium / 40% Direct Google)
-// ===================================================================
-async function runGscTaskpop(keyword, url, viewNumber) {
+ async function runGscTaskpop(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1076,60 +1073,75 @@ async function runGscTaskpop(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
+        // 25+ Device Simulation logic bypass ke liye random resolution
+        const widths = [1366, 1920, 1536, 1440, 1280];
+        await page.setViewport({ width: widths[Math.floor(Math.random() * widths.length)], height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 🔥 LOGIC: 10 mein se 6 views (1,2,3,4,5,6) Proxyium use karenge
-        // Baaki (7,8,9,0) direct Google Search se jayenge
-        const useProxyium = (viewNumber % 10) <= 6 && (viewNumber % 10) !== 0;
+        console.log(`[VIEW #${viewNumber}] Connecting via Proxyium...`);
+        await page.goto('https://proxyium.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+        
+        await page.waitForSelector('input[name="url"]', { visible: true, timeout: 60000 });
+        await page.type('input[name="url"]', url, { delay: 100 });
+        
+        await Promise.all([
+            page.keyboard.press('Enter'),
+            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null)
+        ]);
 
-        if (useProxyium) {
-            console.log(`[VIEW #${viewNumber}] Mode: PROXYIUM (6/10)`);
-            await page.goto('https://proxyium.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
-            await page.waitForSelector('input[name="url"]', { visible: true, timeout: 60000 });
-            await page.type('input[name="url"]', url, { delay: 100 });
-            await Promise.all([
-                page.keyboard.press('Enter'),
-                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null)
-            ]);
-        } else {
-            console.log(`[VIEW #${viewNumber}] Mode: DIRECT GOOGLE (4/10)`);
-            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-            await page.goto(googleUrl, { waitUntil: 'domcontentloaded' });
-            await new Promise(r => setTimeout(r, 3000));
-            // Direct target URL par jana with Google referrer
-            await page.goto(url, { waitUntil: 'networkidle2', referer: googleUrl });
-        }
+        await new Promise(r => setTimeout(r, 15000)); // Site load buffer
 
-        await new Promise(r => setTimeout(r, 5000)); // Loading buffer
-
-        // --- Revenue Logic (Same as before) ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); 
+        const targetStayTime = randomInt(40000, 60000); 
+
+        // 🔥 ADVANCED DYNAMIC CLICKER SETTINGS
+        // 20 mein se 3-4 views (approx 18-20% chance)
+        const shouldClickAd = Math.random() < 0.20; 
+        let adClickedInThisSession = false;
 
         while (Date.now() - startTime < targetStayTime) {
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(4000, 6000)));
+            // Natural human movement
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            await page.mouse.move(randomInt(100, 700), randomInt(100, 500), { steps: 10 });
 
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] View #${viewNumber} Success!`);
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); 
-                        break; 
+            if (shouldClickAd && !adClickedInThisSession) {
+                // Diversified Ad Selectors (Adsense + Pop + Push + Banners)
+                const adTypes = [
+                    { name: 'Adsense/Vignette', selector: 'ins.adsbygoogle, iframe[src*="googleads"], #google_ads_iframe' },
+                    { name: 'Popunder/Click', selector: 'a[href*="smartlink"], .onclick-ad, [id^="popunder"]' },
+                    { name: 'In-Page Push', selector: '.ipp-container, .notification-ad, .push-ad-unit' },
+                    { name: 'Interstitial/Overlay', selector: '.interstitial-close, .vignette-ad, [class*="overlay"]' },
+                    { name: 'General Banner', selector: 'a[href*="doubleclick.net"], [class*="banner-ad"], [id*="ad-slot"]' }
+                ];
+
+                // Shuffle ad types taaki har baar alag unit par click ho
+                adTypes.sort(() => Math.random() - 0.5);
+
+                for (const adType of adTypes) {
+                    const foundAd = await page.$(adType.selector);
+                    if (foundAd) {
+                        const box = await foundAd.boundingBox();
+                        if (box && box.width > 10 && box.height > 10) {
+                            console.log(`\x1b[35m[AD-SCOUT]\x1b[0m View #${viewNumber} targeting: ${adType.name}`);
+                            
+                            // Human-like click (move then click)
+                            await page.mouse.move(box.x + box.width/2, box.y + box.height/2, { steps: 15 });
+                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                            
+                            console.log(`\x1b[42m[SUCCESS]\x1b[0m Clicked ${adType.name}!`);
+                            adClickedInThisSession = true;
+                            await new Promise(r => setTimeout(r, 15000)); // Post-click stay
+                            break; 
+                        }
                     }
                 }
             }
+            await new Promise(r => setTimeout(r, randomInt(5000, 8000)));
         }
-        console.log(`[DONE] View #${viewNumber} Completed. ✅`);
+        console.log(`[DONE] View #${viewNumber} session finished.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] Tool 7: ${error.message}`);
     } finally {
         if (browser) await browser.close().catch(() => {});
     }
@@ -1313,116 +1325,7 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 
 async function runGologinVideoTask(country, url, viewNumber) {
-    let browser;
-    try {
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--window-size=1920,1080'
-            ]
-        });
-
-        const page = await browser.newPage();
-        await page.setViewport({ width: 1920, height: 1080 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        console.log(`[VIEW #${viewNumber}] Step 1: Opening Gologin Proxy...`);
-        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // --- 1. COUNTRY CHANGE KARNA ---
-        try {
-            await page.waitForSelector('.select-trigger', { timeout: 10000 });
-            await page.click('.select-trigger');
-            await new Promise(r => setTimeout(r, 2000));
-
-            const countrySet = await page.evaluate((target) => {
-                const options = Array.from(document.querySelectorAll('.select-option-text'));
-                const match = options.find(el => el.innerText.trim().toLowerCase().includes(target.toLowerCase()));
-                if (match) {
-                    match.click();
-                    return true;
-                }
-                return false;
-            }, country);
-            
-            if(countrySet) console.log(`[SUCCESS] Location set to: ${country}`);
-        } catch (e) { console.log("[INFO] Country skip/default used."); }
-
-        // --- 2. PUT A URL & CLICK GO ---
-        await page.waitForSelector('input[placeholder*="URL"]');
-        await page.type('input[placeholder*="URL"]', url, { delay: 100 });
-
-        console.log(`[ACTION] Clicking GO Button...`);
-        
-        // Go click karte hi 2nd tab khulega, humein use track karna hai
-        const [target] = await Promise.all([
-            new Promise(resolve => browser.once('targetcreated', resolve)), // 2nd tab ka wait
-            page.evaluate(() => {
-                const btns = Array.from(document.querySelectorAll('button, span'));
-                const goBtn = btns.find(b => b.innerText.trim().toLowerCase() === 'go');
-                if (goBtn) goBtn.click();
-            })
-        ]);
-
-        // --- 3. SWITCH TO 2ND TAB ---
-        const proxiedPage = await target.page();
-        await proxiedPage.setViewport({ width: 1920, height: 1080 });
-        console.log(`[SWITCH] Moved to 2nd Tab. Loading site...`);
-        
-        await new Promise(r => setTimeout(r, 15000)); // Page load hone ka wait
-
-        // --- 4. ADVANCED AD-CLICKER & HUMAN MOMENT ---
-        const startTime = Date.now();
-        const stayTime = 50000; // 50 seconds stay
-
-        while (Date.now() - startTime < stayTime) {
-            // Random Scroll & Mouse Movement
-            await proxiedPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await proxiedPage.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 5 });
-
-            // 🔥 ADVANCED AD CLICKER (Banner, Hidden, Video)
-            if (Math.random() < 0.35) { 
-                const clicked = await proxiedPage.evaluate(() => {
-                    const adSelectors = [
-                        'ins.adsbygoogle', 'iframe[src*="googleads"]', 'iframe[id^="aswift"]',
-                        '.ad-unit', '.vjs-ad-playing', 'video.video-ad', 'div[class*="ad-"]',
-                        'div[id*="google_ads"]', 'a[href*="doubleclick.net"]'
-                    ];
-                    
-                    for (let s of adSelectors) {
-                        const el = document.querySelector(s);
-                        if (el) {
-                            const rect = el.getBoundingClientRect();
-                            if (rect.width > 30 && rect.height > 30) {
-                                el.scrollIntoView();
-                                el.click(); // Standard click
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                });
-
-                if (clicked) {
-                    console.log(`\x1b[32m[REVENUE]\x1b[0m Ad Detected & Clicked! Staying on Ad page...`);
-                    await new Promise(r => setTimeout(r, 20000)); 
-                    break; 
-                }
-            }
-            await new Promise(r => setTimeout(r, 7000));
-        }
-
-        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
-
-    } catch (err) {
-        console.error(`[ERROR] View #${viewNumber}:`, err.message);
-    } finally {
-        if (browser) await browser.close();
-    }
-}
+    l
 
 // ENDPOINT
 app.post('/ultimate', async (req, res) => {
