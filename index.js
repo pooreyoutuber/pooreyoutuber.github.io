@@ -1195,163 +1195,28 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 9. FIXED YOUTUBE HITTER (ONE-BY-ONE WITH TAP-TO-PLAY)
 // ===================================================================
-const puppeteerExtra = require('puppeteer-extra');
+// ===================================================================
+// 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE
+// ===================================================================
 
-// Stealth plugin initialize
-if (puppeteerExtra.plugins.length === 0) {
-    puppeteerExtra.use(StealthPlugin());
-}
+// Global counter to track ad rotation
+let adRotationIndex = 0;
 
-async function runOrganicYoutubeTask(viewNumber, watchTimeSec) {
+async function runUltimateRevenueTask(targetUrl, viewNumber) {
     let browser;
     try {
-        // Mobile device simulation taaki YouTube player "Tap" accept kare
-        const device = { 
-            ua: "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", 
-            viewport: { width: 360, height: 740 } 
-        };
+        // 1. Device & Browser Diversity (PC, Mobile, Tablet + Chrome, Firefox, Safari)
+        const profiles = [
+            { name: 'PC-Chrome', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", width: 1920, height: 1080 },
+            { name: 'PC-Firefox', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0", width: 1536, height: 864 },
+            { name: 'Mobile-Safari', ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1", width: 390, height: 844 },
+            { name: 'Tablet-Chrome', ua: "Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/121.0.6167.13 Mobile/15E148 Safari/604.1", width: 820, height: 1180 }
+        ];
+        const profile = profiles[Math.floor(Math.random() * profiles.length)];
 
-        browser = await puppeteerExtra.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-        });
-
-        const page = await browser.newPage();
-        await page.setUserAgent(device.ua);
-        await page.setViewport(device.viewport);
-
-        console.log(`\n[VIEW #${viewNumber}] Target: YouTube Preview Site`);
-
-        // 1. Site par jaana
-        const previewSite = "https://macora225.github.io/youtube-short-preview.html";
-        await page.goto(previewSite, { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // 2. Sabse niche scroll karna jahan video hai
-        console.log("[ACTION] Scrolling to bottom for video...");
-        await page.evaluate(async () => {
-            window.scrollTo(0, document.body.scrollHeight);
-            await new Promise(r => setTimeout(r, 2000));
-        });
-
-        // 3. YouTube Video par Tap/Click karna
-        // Hum iframe ka bounding box nikal kar uske center par click karenge
-        const videoFrame = await page.$('iframe[src*="youtube.com"]');
-        if (videoFrame) {
-            const rect = await videoFrame.boundingBox();
-            if (rect) {
-                console.log("[ACTION] Video found! Tapping to play...");
-                // Video ke exact center par tap karna
-                await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
-                console.log("[SUCCESS] Play initiated.");
-            }
-        } else {
-            // Fallback: Agar iframe detect na ho toh screen ke niche wale hisse mein tap karein
-            await page.mouse.click(180, 600);
-            console.log("[INFO] Manual tap performed at bottom.");
-        }
-
-        // 4. Watch Time (Frontend se aaya hua samay)
-        const stayTimeMs = (parseInt(watchTimeSec) || 30) * 1000;
-        console.log(`[WAIT] Watching for ${watchTimeSec} seconds...`);
-        await new Promise(r => setTimeout(r, stayTimeMs));
-
-        console.log(`[DONE] View #${viewNumber} finished.`);
-
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
-    } finally {
-        if (browser) {
-            await browser.close(); // Browser band karna zaroori hai memory ke liye
-        }
-    }
-}
-
-// Updated Endpoint with Strict Await Loop
-app.post('/api/real-view-boost', async (req, res) => {
-    try {
-        const { views_count, watch_time } = req.body;
-        const totalViews = parseInt(views_count) || 1;
-
-        // Immediate response taaki request timeout na ho
-        res.status(200).json({ 
-            success: true, 
-            message: `Hitter Task Started: ${totalViews} views sequential execution.` 
-        });
-
-        // Background Worker: Ek khatam hone ke baad hi dusra shuru hoga
-        (async () => {
-            for (let i = 1; i <= totalViews; i++) {
-                console.log(`--- Starting View ${i} of ${totalViews} ---`);
-                // 'await' yahan ensure karta hai ki browser 1-by-1 khule
-                await runOrganicYoutubeTask(i, watch_time);
-                
-                if (i < totalViews) {
-                    console.log("[SYSTEM] Cooling down 5s before next browser...");
-                    await new Promise(r => setTimeout(r, 5000));
-                }
-            }
-            console.log("--- ALL SESSIONS COMPLETED ---");
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
-    }
-});
-
-// ===================================================================
-// Tool 9 Endpoint (Updated)
-// ===================================================================
-app.post('/api/real-view-boost', async (req, res) => {
-    try {
-        const { views_count, watch_time } = req.body;
-        const totalViews = parseInt(views_count) || 1;
-
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started: One-by-one browser execution for ${totalViews} views.` 
-        });
-
-        // Background Worker (Sequential)
-        (async () => {
-            for (let i = 1; i <= totalViews; i++) {
-                // AWAIT use kiya hai taaki ek browser band hone ke baad hi dusra khule
-                await runOrganicYoutubeTask(i, watch_time);
-                
-                if (i < totalViews) {
-                    const rest = 8000; // 8 seconds break for Render RAM
-                    console.log(`[SYSTEM] Cooling down for ${rest/1000}s...`);
-                    await new Promise(r => setTimeout(r, rest));
-                }
-            }
-            console.log("--- ALL YT TASKS FINISHED ---");
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
-    }
-});
-// ===================================================================
-// 11. UPDATED GSC & ADSENSE REVENUE BOOSTER (WITH DEVICE & REFERRAL LOGIC)
-// ===================================================================
-
-async function runGscTaskultimate(keyword, url, viewNumber) {
-    let browser;
-    try {
-        // 1. Random Device Profile Select Karein
-        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
-        
-        // 2. Referral Logic (50% Social, 50% Google Search)
-        let finalReferrer;
-        const isSocial = Math.random() < 0.50; // 5 out of 10 views (50%)
-        if (isSocial) {
-            finalReferrer = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
-            console.log(`[SOURCE] View #${viewNumber} | Social Referral: ${finalReferrer}`);
-        } else {
-            finalReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-            console.log(`[SOURCE] View #${viewNumber} | Google Search: ${keyword}`);
-        }
+        // 2. Multi-Source Referral Logic (Facebook, X, Blog, Direct)
+        const sources = ["https://www.facebook.com/", "https://t.co/", "https://www.blogger.com/", ""];
+        const referrer = sources[Math.floor(Math.random() * sources.length)];
 
         browser = await puppeteer.launch({
             headless: "new",
@@ -1359,100 +1224,100 @@ async function runGscTaskultimate(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        
-        // --- Apply Device Profile ---
         await page.setUserAgent(profile.ua);
-        await page.setViewport(profile.viewport);
-        
-        console.log(`[DEVICE] View #${viewNumber} | Profile: ${profile.name} | Browser: ${profile.ua.includes('Firefox') ? 'Firefox' : profile.ua.includes('Safari') ? 'Safari' : 'Chrome'}`);
+        await page.setViewport({ width: profile.width, height: profile.height });
 
-        // 3. STAGE: Visit Target Site
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: finalReferrer 
-        });
+        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Source: ${referrer || 'Direct'}`);
+        await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 60000, referer: referrer });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 50000); 
+        const stayTime = randomInt(30000, 50000); // 30-50 Sec Stay
 
-        // 4. STAGE: Behavior & Ad-Clicker
-        while (Date.now() - startTime < targetStayTime) {
-            const dist = randomInt(200, 500);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            await page.mouse.move(randomInt(50, 500), randomInt(50, 500), { steps: 5 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+        // 3. Human Behavior: Circle Mouse & Natural Scroll
+        let angle = 0;
+        while (Date.now() - startTime < stayTime) {
+            // Circular Mouse Movement (0 Circle Shape)
+            const centerX = profile.width / 2;
+            const centerY = profile.height / 2;
+            const radius = 100;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            await page.mouse.move(x, y);
+            angle += 0.2;
 
-            // High-Value Ad Clicker (18% Chance)
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"], a[href*="doubleclick.net"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m[AD-CLICK]\x1b[0m Clicking Ad on ${profile.name}...`);
+            // Natural Scroll
+            if (Math.random() < 0.3) await page.evaluate(() => window.scrollBy(0, 200));
+
+            // 4. SMART AD CLICKER (Click logic for 3-4 views out of 20)
+            const isClickSession = viewNumber % 5 === 0; // Approx 20% sessions
+            if (isClickSession && (Date.now() - startTime > 15000)) {
+                
+                // Rotation based Ad Selectors
+                const adTypes = [
+                    { name: 'PopUnder', selector: 'a[href*="smartlink"], .onclick-ad, #popunder-ad' },
+                    { name: 'Banner/Vignette', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad' },
+                    { name: 'Push/IPP', selector: '.push-ad-unit, .ipp-container, .notification-ad' },
+                    { name: 'Direct/SmartLink', selector: 'a[href*="go.ad"], .smart-link' }
+                ];
+
+                const currentAd = adTypes[adRotationIndex % adTypes.length];
+                const adElement = await page.$(currentAd.selector);
+
+                if (adElement) {
+                    const box = await adElement.boundingBox();
+                    if (box) {
+                        console.log(`\x1b[42m[CLICK]\x1b[0m Targeting: ${currentAd.name}`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000));
+                        adRotationIndex++; // Move to next ad type for next session
+                        
+                        console.log(`[WAIT] Staying 10s on Ad for Reality...`);
+                        await new Promise(r => setTimeout(r, 10000)); // 10 Sec Stay after click
                         break; 
                     }
                 }
             }
+            await new Promise(r => setTimeout(r, 2000));
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+        console.log(`[DONE] Session Finished Successfully.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR]: ${error.message}`);
     } finally {
-        if (browser) await browser.close().catch(() => {});
+        if (browser) await browser.close();
     }
 }
 // ===================================================================
-// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// TOOL 10: ULTIMATE SMART AD-CLICKER ENDPOINT
 // ===================================================================
-app.post('/ultimate', async (req, res) => {
+app.post('/api/ultimate-booster', async (req, res) => {
     try {
-        const { keyword, urls, views = 1000 } = req.body;
+        const { urls, views = 20 } = req.body;
 
-        // Frontend se 'urls' array aa raha hai, use validate karein
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        if (!urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "URLs array required." });
         }
 
-        const totalViews = parseInt(views);
-
-        // Immediate Success Response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+            message: `Ultimate Task Started: ${views} views with Smart Ad Rotation.` 
         });
 
-        // Background Worker
+        // Background execution (One-by-One to manage RAM)
         (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+            for (let i = 1; i <= views; i++) {
+                const target = urls[i % urls.length];
+                await runUltimateRevenueTask(target, i);
                 
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTaskultimate(keyword, randomUrl, i); 
-
-                if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
-                }
+                // Post-session cooling break
+                await new Promise(r => setTimeout(r, 8000)); 
             }
-            console.log("--- ALL SESSIONS COMPLETED ---");
         })();
 
     } catch (err) {
         console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+        if (!res.headersSent) res.status(500).json({ success: false });
     }
 });
-                    
  
 //==================================================
 // --- SERVER START ---
