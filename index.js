@@ -1195,101 +1195,82 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED WITH AUTO-SCROLL)
 // ===================================================================
-async function  runUltimateRevenueTask(keyword, url, viewNumber) {
+ async function runUltimateRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
+        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
+        
+        let finalReferrer;
+        const isSocial = Math.random() < 0.50; 
+        if (isSocial) {
+            finalReferrer = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
+        } else {
+            finalReferrer = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        }
+
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        // 1. Organic Search Entry
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
-
-        // 2. Visit Target Site
-        console.log(`[TOOL-5] View #${viewNumber} | URL: ${url}`);
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: googleUrl });
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view || { width: 1280, height: 800 });
+        
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: finalReferrer });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 50000); 
+        const targetStayTime = randomInt(40000, 60000); 
+        let adClickedInThisSession = false;
 
-        // 🔥 NEW ROTATION LOGIC: 20 mein se sirf 3-4 views mein click karega
-        // Iska matlab har 5-6 view mein 1 baar click hoga
-        const shouldClick = (viewNumber % 6 === 0 || viewNumber % 7 === 0); 
-        
-        // Ad Types Rotation Array
-        const adTypes = ['POP_UNDER', 'PUSH_NOTIF', 'IN_PAGE_PUSH', 'VIGNETTE', 'SMART_LINK'];
-        const selectedAd = adTypes[viewNumber % adTypes.length]; // Har view mein next ad type select hoga
+        // --- AD TYPE SELECTORS FOR ROTATION (Monetag & Adsterra) ---
+        const AD_TYPES = [
+            { name: 'Banner/Native', selector: 'ins.adsbygoogle, iframe[id^="atg_"], [id^="aswift_"]' },
+            { name: 'Push/IPP', selector: '.pro-ipp, [id^="p-container"], .label-push' },
+            { name: 'Vignette/Interstitial', selector: 'div[id^="vignette"], .vignette-close-button, #ad_iframe' },
+            { name: 'Popunder/Smartlink', selector: 'a[href*="clkrdr"], a[href*="engine.adglsh"], a[href*="smartlink"]' }
+        ];
 
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling & Mouse Movement
-            await page.evaluate((d) => window.scrollBy(0, d), randomInt(300, 600));
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await page.mouse.move(randomInt(50, 600), randomInt(50, 600), { steps: 10 });
 
-            if (shouldClick) {
-                console.log(`[AD-STRATEGY] Attempting ${selectedAd} click for View #${viewNumber}...`);
+            // 🔥 CTR CHECK: 20 mein se approx 3-4 views par click (18% probability)
+            if (Math.random() < 0.18 && !adClickedInThisSession) {
                 
-                const clickResult = await page.evaluate((type) => {
-                    let element;
-                    switch(type) {
-                        case 'POP_UNDER': 
-                            document.body.click(); // Trigger pop-under on body click
-                            return { success: true, type: 'PopUnder' };
-                        
-                        case 'PUSH_NOTIF':
-                            element = document.querySelector('#onesignal-slidedown-allow-button, .push-allow-btn, #allow-btn');
-                            break;
-                        
-                        case 'IN_PAGE_PUSH':
-                            element = document.querySelector('div[class*="ipp-"], div[id*="push-"], .in-page-push');
-                            break;
-                        
-                        case 'VIGNETTE':
-                            element = document.querySelector('ins.adsbygoogle, .vignette-ad, iframe[src*="googleads"]');
-                            break;
-                        
-                        case 'SMART_LINK':
-                            element = document.querySelector('a[href*="direct-link"], a[href*="smartlink"], .btn-main');
-                            break;
-                    }
+                // 🔄 ROTATION LOGIC: Har view par alag ad type target karega
+                const typeIndex = viewNumber % AD_TYPES.length;
+                const targetConfig = AD_TYPES[typeIndex];
 
-                    if (element) {
-                        element.scrollIntoView();
-                        element.click();
-                        return { success: true, type: type };
-                    }
-                    return { success: false };
-                }, selectedAd);
+                const foundAd = await page.$(targetConfig.selector);
+                
+                if (foundAd) {
+                    const box = await foundAd.boundingBox();
+                    if (box && box.width > 5 && box.height > 5) {
+                        console.log(`\x1b[42m[AD-CLICK]\x1b[0m View #${viewNumber} | Type: ${targetConfig.name} | Device: ${profile.name}`);
+                        
+                        // Exact center click
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        adClickedInThisSession = true;
 
-                if (clickResult.success) {
-                    console.log(`\x1b[42m%s\x1b[0m`, `[SUCCESS] ${clickResult.type} Clicked! ✅`);
-                    // Advertiser site par 15s-20s rukna zaroori hai
-                    await new Promise(r => setTimeout(r, 20000));
-                    break; 
+                        // ⏳ STAY TIME: Click ke baad 10-12 second rukna
+                        console.log(`[STAY] Waiting 10s on ad content...`);
+                        await new Promise(r => setTimeout(r, 10000));
+                        break; 
+                    }
                 }
             }
+            await new Promise(r => setTimeout(r, randomInt(5000, 8000)));
         }
-        console.log(`[DONE] View #${viewNumber} Finished.`);
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) await browser.close().catch(() => {});
     }
-}
+ }
+
 // ===================================================================
 // TOOL 10: ULTIMATE SMART AD-CLICKER ENDPOINT
 // ===================================================================
