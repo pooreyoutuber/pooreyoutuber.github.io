@@ -1202,7 +1202,7 @@ app.post('/popup', async (req, res) => {
 // Global index for Tool 5 Ad Rot
 let tool5AdRotationIndex = 0;
 
-async function runGscTask(keyword, url, viewNumber) {
+async function runUltimateRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
         // Fix: Ensure URL is a valid string to prevent Protocol Error
