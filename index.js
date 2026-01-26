@@ -1289,7 +1289,7 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
 // ===================================================================
 // TOOL 10: ULTIMATE SMART AD-CLICKER ENDPOINT
 // ===================================================================
-app.post('/api/ultimate-booster', async (req, res) => {
+app.post('/ultimate', async (req, res) => {
     try {
         const { urls, views = 20 } = req.body;
 
