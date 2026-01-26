@@ -1195,99 +1195,98 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED WITH AUTO-SCROLL)
 // ===================================================================
-// ===================================================================
-// 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED)
-// ===================================================================
 
-// Global counter to track ad rotation
-let adRotationIndex = 0;
 
-async function runUltimateRevenueTask(targetUrl, viewNumber) {
+// Global rotation index specifically for Tool 5
+let tool5AdRotationIndex = 0;
+
+async function runUltimateRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
-        // 1. Device & Browser Diversity
-        const profiles = [
-            { name: 'PC-Chrome', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", width: 1920, height: 1080 },
-            { name: 'PC-Firefox', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0", width: 1536, height: 864 },
-            { name: 'Mobile-Safari', ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1", width: 390, height: 844 },
-            { name: 'Tablet-Chrome', ua: "Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/121.0.6167.13 Mobile/15E148 Safari/604.1", width: 820, height: 1180 }
-        ];
-        const profile = profiles[Math.floor(Math.random() * profiles.length)];
-
-        // 2. Multi-Source Referral Logic
-        const sources = ["https://www.facebook.com/", "https://t.co/", "https://www.blogger.com/", ""];
-        const referrer = sources[Math.floor(Math.random() * sources.length)];
-
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
+        
+        // Multi-Device Simulation
+        const profiles = [
+            { name: 'PC-Chrome', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", width: 1920, height: 1080 },
+            { name: 'Mobile-Android', ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", width: 360, height: 800 }
+        ];
+        const profile = profiles[Math.floor(Math.random() * profiles.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport({ width: profile.width, height: profile.height });
 
-        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Source: ${referrer || 'Direct'}`);
-        await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 90000, referer: referrer });
+        // 1. STAGE: Google Search Simulation
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000)); 
+
+        // 2. STAGE: Visit Target Site
+        console.log(`[TOOL 5] View #${viewNumber} | Device: ${profile.name} | URL: ${url}`);
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
+        });
 
         const startTime = Date.now();
-        const stayTime = randomInt(35000, 55000); // 35-55 Sec Stay
+        const targetStayTime = randomInt(35000, 50000); 
 
-        // --- TOOL 5 BEHAVIOR INTEGRATED HERE ---
-        while (Date.now() - startTime < stayTime) {
-            
-            // 1. Natural Scrolling (Same as Tool 5)
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // 2. Mouse Movement (Same as Tool 5 - Bypass Bot Checks)
+        // 3. STAGE: Realistic Behavior & SMART AD CLICKER
+        let adClickedInThisSession = false;
+
+        while (Date.now() - startTime < targetStayTime) {
+            // Natural Scrolling & Mouse Movement
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             
-            // Random Wait between actions
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
-
-            // 3. SMART AD CLICKER (Click logic for 20% sessions)
+            // 🔥 SMART AD CLICKER LOGIC (20% chance: Approx 4 clicks in 20 views)
             const isClickSession = viewNumber % 5 === 0; 
-            if (isClickSession && (Date.now() - startTime > 15000)) {
-                
+            
+            if (isClickSession && !adClickedInThisSession && (Date.now() - startTime > 15000)) {
+                // Rotation based Ad Selectors (All Types Included)
                 const adTypes = [
-                    { name: 'PopUnder', selector: 'a[href*="smartlink"], .onclick-ad, #popunder-ad' },
-                    { name: 'Banner/Vignette', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad' },
-                    { name: 'Push/IPP', selector: '.push-ad-unit, .ipp-container, .notification-ad' },
-                    { name: 'Direct/SmartLink', selector: 'a[href*="go.ad"], .smart-link' }
+                    { name: 'OnClick/PopUnder', selector: 'a[href*="smartlink"], .onclick-ad, #popunder-ad' },
+                    { name: 'Vignette/Banners', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad, iframe[id^="aswift"]' },
+                    { name: 'Push/IPP', selector: '.push-ad-unit, .ipp-container, .notification-ad, #push-subscribe' },
+                    { name: 'Direct/SmartLink', selector: 'a[href*="go.ad"], .smart-link, a[href*="direct-link"]' }
                 ];
 
-                const currentAd = adTypes[adRotationIndex % adTypes.length];
-                const adElement = await page.$(currentAd.selector);
+                const currentAdConfig = adTypes[tool5AdRotationIndex % adTypes.length];
+                const adElement = await page.$(currentAdConfig.selector);
 
                 if (adElement) {
                     const box = await adElement.boundingBox();
-                    if (box && box.width > 20 && box.height > 20) {
-                        console.log(`\x1b[42m[AD-CLICK]\x1b[0m Targeting: ${currentAd.name}`);
-                        
-                        // Tool 5 style smooth move before click
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                    if (box && box.width > 5 && box.height > 5) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Tool 5: Clicking ${currentAdConfig.name}`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         
-                        adRotationIndex++; 
-                        console.log(`\x1b[44m[SUCCESS]\x1b[0m Ad Clicked! Staying 15s for Revenue.`);
-                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
+                        adClickedInThisSession = true;
+                        tool5AdRotationIndex++; // Rotate for next session
+                        
+                        // Advertiser site par wait
+                        await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
+            await new Promise(r => setTimeout(r, 5000));
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR]: ${error.message}`);
+        console.error(`[ERROR] Tool 5 View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) await browser.close().catch(() => {});
     }
 }
 // ===================================================================
