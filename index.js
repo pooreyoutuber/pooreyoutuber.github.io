@@ -1192,7 +1192,142 @@ app.post('/popup', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
+// ===================================================================
 
+async function runUltimateRevenueTask(keyword, url, viewNumber) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-blink-features=AutomationControlled']
+        });
+
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1366, height: 768 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // 1. Visit Target Site
+        console.log(`[VIEW #${viewNumber}] Target: ${url}`);
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000 });
+
+        const startTime = Date.now();
+        const targetStayTime = randomInt(35000, 45000); 
+        let actionTaken = false;
+
+        // --- HAR 6 VIEWS PAR CLICKING ROTATION LOGIC ---
+        // 6th View: Banner/Vignette, 12th View: Push/IPP, 18th View: Popunder/Smartlink
+        const clickCycle = viewNumber % 20; 
+
+        while (Date.now() - startTime < targetStayTime) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+
+            // Trigger Click on specific intervals
+            if (!actionTaken && [6, 12, 18].includes(clickCycle)) {
+                
+                let selector = "";
+                let actionName = "";
+
+                if (clickCycle === 6) {
+                    // 🎯 TARGET: Banners, Vignettes & Adsense
+                    selector = 'ins.adsbygoogle, iframe[id^="aswift"], .ad-unit, [class*="banner"], [id*="vignette"]';
+                    actionName = "BANNER/VIGNETTE";
+                } 
+                else if (clickCycle === 12) {
+                    // 🔔 TARGET: Push Notifications & In-Page Push (IPP)
+                    selector = '.ad-notification, .push-ad, #onesignal-popover-dialog, .pwa-tag, [id*="ipp"]';
+                    actionName = "PUSH/IPP";
+                } 
+                else if (clickCycle === 18) {
+                    // 🔗 TARGET: Smartlinks, Popunders, & Interstitials
+                    // Smartlinks usually look like regular links but with specific patterns
+                    selector = 'a[href*="smartlink"], a[href*="slk"], .interstitial-close, [id*="popunder"], body'; // Body click for Popunder
+                    actionName = "POPUNDER/SMARTLINK";
+                }
+
+                try {
+                    const adElement = await page.$(selector);
+                    if (adElement) {
+                        const box = await adElement.boundingBox();
+                        if (box && box.width > 2 && box.height > 2) {
+                            console.log(`\x1b[42m[AD-CLICK]\x1b[0m View #${viewNumber} | Type: ${actionName} | Found!`);
+                            
+                            // Human-like click
+                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                            actionTaken = true;
+
+                            // Agar Popunder/Smartlink hai toh 15s wait karein conversion ke liye
+                            await new Promise(r => setTimeout(r, 15000));
+                        }
+                    } else if (clickCycle === 18) {
+                        // Fallback: Agar kuch na mile toh Body par click karein Popunder trigger karne ke liye
+                        await page.click('body');
+                        console.log(`\x1b[43m[AD-CLICK]\x1b[0m View #${viewNumber} | Triggered Body Click for Popunder`);
+                        actionTaken = true;
+                        await new Promise(r => setTimeout(r, 15000));
+                    }
+                } catch (e) {
+                    console.log(`Click Attempt Failed: ${e.message}`);
+                }
+            }
+            await new Promise(r => setTimeout(r, 5000));
+        }
+        console.log(`[DONE] View #${viewNumber} finished.`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) await browser.close().catch(() => {});
+    }
+}
+// ===================================================================
+// Tool 8 Endpoint (Updated for Multi-Site Rotation)
+// ===================================================================
+app.post('/ultimate', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        // Frontend se 'urls' array aa raha hai, use validate karein
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        }
+
+        const totalViews = parseInt(views);
+
+        // Immediate Success Response taaki frontend hang na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+        });
+
+        // Background Worker
+        (async () => {
+            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                // Randomly ek URL chunna rotation ke liye
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                
+                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
+                await runUltimateRevenueTask(keyword, randomUrl, i); 
+
+                if (i < totalViews) {
+                    // RAM management break
+                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                    await new Promise(r => setTimeout(r, restTime));
+                }
+            }
+            console.log("--- ALL SESSIONS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
