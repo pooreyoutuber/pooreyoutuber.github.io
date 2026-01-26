@@ -1200,64 +1200,72 @@ async function runUltimateRevenueTask(keyword, url, viewNumber) {
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
+        
+        // Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. STAGE: Google Search Simulation
+        // 1. Google Search Simulation
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000)); 
 
-        // 2. STAGE: Visit Target Site
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
+        // 2. Visit Target Site
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url}`);
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: googleUrl });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        const targetStayTime = 35000; 
+        
+        // 20 mein se ~3-4 views (18% chance)
+        const shouldClickAds = Math.random() < 0.18; 
+        let alreadyClicked = false;
 
-        // 3. STAGE: Realistic Behavior & MULTI-AD CLICKER ROTATION
         while (Date.now() - startTime < targetStayTime) {
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            
+            // --- NEW: Realistic Mouse Movement ---
+            // Mouse ko randomly move karna screen par
+            await page.mouse.move(Math.floor(Math.random() * 800), Math.floor(Math.random() * 600), { steps: 20 });
 
-            // 🔥 UPDATED: ADVANCED AD CLICKER (Targeting specific Ad types)
-            // Chance: 18% (20 views mein se ~3-4 views)
-            if (Math.random() < 0.18) { 
+            // --- NEW: Smooth Scroll Simulation ---
+            await page.evaluate(async () => {
+                const distance = Math.floor(Math.random() * 400) + 100;
+                let scrolled = 0;
+                const timer = setInterval(() => {
+                    window.scrollBy(0, 10); // 10px karke scroll karega smooth feel ke liye
+                    scrolled += 10;
+                    if (scrolled >= distance) clearInterval(timer);
+                }, 20); // Har 20ms mein
+            });
+
+            await new Promise(r => setTimeout(r, 5000));
+
+            // Ad Click Logic
+            if (shouldClickAds && !alreadyClicked) {
                 const adClicked = await page.evaluate(() => {
-                    // Selectors for PopUnder, Push, IPP, Vignette, and Direct Links
-                    const adSelectors = [
-                        'a[href*="smartlink"]', 'a[href*="direct-link"]', // Direct Links
-                        '.ipp-container', '.push-notification', '.notification-permission', // Push/IPP
-                        'ins.adsbygoogle', 'iframe[src*="googleads"]', // Banners
-                        '.vignette-ad', '#vignette-container', // Vignette
-                        'body', // PopUnder (Often triggered by clicking anywhere on body)
-                        'a[target="_blank"]' // Common for Pop-ups
+                    const adTypes = [
+                        { name: 'SmartLink/Direct', sel: 'a[href*="smartlink"], a[href*="direct"]' },
+                        { name: 'Push/IPP', sel: '.ipp-container, .push-notification, #onesignal-slidedown-container' },
+                        { name: 'Banner', sel: 'ins.adsbygoogle, iframe[src*="googleads"], .ad-slot, [id^="div-gpt-ad"]' },
+                        { name: 'Vignette', sel: '.vignette-ad, #vignette-container' },
+                        { name: 'PopUnder/General', sel: 'a[target="_blank"], body' }
                     ];
 
-                    for (let selector of adSelectors) {
-                        const elements = document.querySelectorAll(selector);
-                        if (elements.length > 0) {
-                            const target = elements[Math.floor(Math.random() * elements.length)];
-                            const rect = target.getBoundingClientRect();
-                            if (rect.width > 2 || rect.height > 2) {
-                                target.click(); // Trigger click
-                                return { found: true, type: selector };
+                    // Randomize Ad Types for rotation
+                    adTypes.sort(() => Math.random() - 0.5);
+
+                    for (let ad of adTypes) {
+                        const elements = document.querySelectorAll(ad.sel);
+                        for (let el of elements) {
+                            const rect = el.getBoundingClientRect();
+                            if (rect.width > 5 && rect.height > 5) {
+                                el.scrollIntoView();
+                                el.click();
+                                return { found: true, type: ad.name };
                             }
                         }
                     }
@@ -1265,26 +1273,28 @@ async function runUltimateRevenueTask(keyword, url, viewNumber) {
                 });
 
                 if (adClicked.found) {
-                    console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Type: ${adClicked.type} | Revenue Triggered!`);
+                    alreadyClicked = true;
+                    console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK SUCCESS] Type: ${adClicked.type} | View: ${viewNumber}`);
                     
-                    // Stay on the new state/page for 15s to validate CTR
-                    await new Promise(r => setTimeout(r, 15000));
-                    break; 
+                    // Mouse ko click ke baad random move karna
+                    await page.mouse.move(Math.floor(Math.random() * 500), Math.floor(Math.random() * 500), { steps: 10 });
+                    
+                    await new Promise(r => setTimeout(r, 15000)); 
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        
+        if (!shouldClickAds) {
+            console.log(`[SURF-ONLY] View #${viewNumber} completed (Organic Scrolling).`);
+        }
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
+
 // ===================================================================
 // TOOL 10: ULTIMATE SMART AD-CLICKER ENDPOINT
 // ===================================================================
