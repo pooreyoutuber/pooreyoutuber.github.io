@@ -1195,30 +1195,35 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED WITH AUTO-SCROLL)
 // ===================================================================
-async function runUltimateRevenueTask(keyword, url, viewNumber) {
+async function  runUltimateRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. Organic Entry
+        // 1. Google Search Simulation
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000)); 
 
         // 2. Visit Target Site
-        console.log(`[VIEW #${viewNumber}] Target: ${url}`);
+        console.log(`[TOOL-5] View #${viewNumber} | URL: ${url}`);
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: googleUrl });
 
         const startTime = Date.now();
         const targetStayTime = randomInt(35000, 50000); 
-        
         // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
@@ -1227,70 +1232,64 @@ async function runUltimateRevenueTask(keyword, url, viewNumber) {
             
             // Mouse Movement (Bypass Bot Checks)
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));  
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000))); 
             
-        // 🔥 AD ROTATION CONFIGURATION (3-4 clicks per 20 views)
-        const shouldClick = (viewNumber % 6 === 0); // Roughly 15-18% probability
-        const adTypes = ['PUSH', 'IPP', 'VIGNETTE', 'SMARTLINK', 'BANNER'];
-        let selectedAdType = adTypes[viewNumber % adTypes.length]; 
+        // 🔥 STRATEGY: 20 mein se sirf 4 views mein click (Approx 20% CTR)
+        const shouldClick = (viewNumber % 5 === 0); 
+        const clickTypes = ['POP_UNDER', 'PUSH_NOTIF', 'IN_PAGE_PUSH', 'BANNER', 'SMART_LINK'];
+        const selectedType = clickTypes[Math.floor(Math.random() * clickTypes.length)];
 
         while (Date.now() - startTime < targetStayTime) {
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-            await page.mouse.move(randomInt(100, 700), randomInt(100, 500), { steps: 5 });
+            await page.evaluate((d) => window.scrollBy(0, d), randomInt(200, 500));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
             if (shouldClick) {
-                console.log(`[TARGETING] Attempting ${selectedAdType} action...`);
+                console.log(`[AD-STRATEGY] Target: ${selectedType} for View #${viewNumber}`);
                 
                 const clickResult = await page.evaluate((type) => {
-                    const selectors = {
-                        BANNER: ['ins.adsbygoogle', 'iframe[src*="googleads"]', 'div[id*="ad"]'],
-                        IPP: ['.ipp-container', '.in-page-push', 'div[class*="notification"]'],
-                        VIGNETTE: ['ins.adsbygoogle[data-vignette-loaded="true"]', 'a[href*="googleadservices"]'],
-                        PUSH: ['#onesignal-slidedown-allow-button', '.push-allow-btn', 'button:contains("Allow")']
-                    };
-
-                    // Logic to find and click
-                    const currentSelectors = selectors[type] || selectors['BANNER'];
-                    for (let s of currentSelectors) {
-                        const el = document.querySelector(s);
-                        if (el) {
-                            const rect = el.getBoundingClientRect();
-                            if (rect.width > 10 && rect.height > 10) {
-                                el.scrollIntoView();
-                                el.click();
-                                return true;
-                            }
-                        }
-                    }
-                    
-                    // SmartLink / Direct Link Logic (Clicking a random high-value internal/external link)
-                    if (type === 'SMARTLINK') {
-                        const links = Array.from(document.querySelectorAll('a[href^="http"]'));
-                        if (links.length > 5) {
-                            links[Math.floor(Math.random() * links.length)].click();
+                    let target;
+                    switch(type) {
+                        case 'POP_UNDER': 
+                            // Click anywhere on body to trigger pop-under
+                            document.body.click(); 
                             return true;
-                        }
+                        case 'PUSH_NOTIF':
+                            target = document.querySelector('#onesignal-slidedown-allow-button, .push-allow-btn');
+                            break;
+                        case 'IN_PAGE_PUSH':
+                            target = document.querySelector('div[class*="ipp-"], div[id*="push-"]');
+                            break;
+                        case 'BANNER':
+                            target = document.querySelector('ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad');
+                            break;
+                        case 'SMART_LINK':
+                            target = document.querySelector('a[href*="direct-link"], a[href*="smartlink"]');
+                            break;
+                    }
+                    if (target) {
+                        target.scrollIntoView();
+                        target.click();
+                        return true;
                     }
                     return false;
-                }, selectedAdType);
+                }, selectedType);
 
                 if (clickResult) {
-                    console.log(`\x1b[42m%s\x1b[0m`, `[SUCCESS] ${selectedAdType} Triggered! ✅`);
-                    await new Promise(r => setTimeout(r, 15000)); // Stay on ad/new page
+                    console.log(`\x1b[42m%s\x1b[0m`, `[SUCCESS] ${selectedType} Clicked! ✅ Revenue Generated.`);
+                    await new Promise(r => setTimeout(r, 15000)); // Stay on ad page
                     break; 
                 }
             }
-            await new Promise(r => setTimeout(r, 5000));
         }
         console.log(`[DONE] View #${viewNumber} Finished.`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close().catch(() => {});
+        if (browser) await browser.close();
     }
 }
-
 // ===================================================================
 // TOOL 10: ULTIMATE SMART AD-CLICKER ENDPOINT
 // ===================================================================
