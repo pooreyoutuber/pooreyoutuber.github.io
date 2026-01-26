@@ -1195,6 +1195,13 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED WITH AUTO-SCROLL)
 // ===================================================================
+// ===================================================================
+// 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED)
+// ===================================================================
+
+// Global counter to track ad rotation
+let adRotationIndex = 0;
+
 async function runUltimateRevenueTask(targetUrl, viewNumber) {
     let browser;
     try {
@@ -1207,7 +1214,7 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
         ];
         const profile = profiles[Math.floor(Math.random() * profiles.length)];
 
-        // 2. Multi-Source Referral
+        // 2. Multi-Source Referral Logic
         const sources = ["https://www.facebook.com/", "https://t.co/", "https://www.blogger.com/", ""];
         const referrer = sources[Math.floor(Math.random() * sources.length)];
 
@@ -1217,7 +1224,6 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
@@ -1227,42 +1233,31 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
         await page.setViewport({ width: profile.width, height: profile.height });
 
         console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Source: ${referrer || 'Direct'}`);
-        
-        // Navigation with Referral
-        await page.goto(targetUrl, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: referrer 
-        });
+        await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 90000, referer: referrer });
 
         const startTime = Date.now();
         const stayTime = randomInt(35000, 55000); // 35-55 Sec Stay
 
-        // --- MERGED REALISTIC BEHAVIOR (Tool 5 Style) ---
+        // --- TOOL 5 BEHAVIOR INTEGRATED HERE ---
         while (Date.now() - startTime < stayTime) {
             
-            // 1. Natural Scrolling (Tool 5 Logic)
-            const scrollDist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
+            // 1. Natural Scrolling (Same as Tool 5)
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // 2. Realistic Mouse Movement (Tool 5 Logic - Anti Bot)
-            // Randomly movement inside the viewport
-            await page.mouse.move(
-                randomInt(100, profile.width - 100), 
-                randomInt(100, profile.height - 100), 
-                { steps: 10 }
-            );
-
-            // Wait between actions (Tool 5 Style)
+            // 2. Mouse Movement (Same as Tool 5 - Bypass Bot Checks)
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            
+            // Random Wait between actions
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 3. SMART AD CLICKER (Tool 10 Logic with Tool 5 Click Style)
-            const isClickSession = viewNumber % 5 === 0; // Approx 20% sessions
-            if (isClickSession && (Date.now() - startTime > 20000)) {
+            // 3. SMART AD CLICKER (Click logic for 20% sessions)
+            const isClickSession = viewNumber % 5 === 0; 
+            if (isClickSession && (Date.now() - startTime > 15000)) {
                 
                 const adTypes = [
-                    { name: 'Banner/Vignette', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad' },
                     { name: 'PopUnder', selector: 'a[href*="smartlink"], .onclick-ad, #popunder-ad' },
+                    { name: 'Banner/Vignette', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad' },
                     { name: 'Push/IPP', selector: '.push-ad-unit, .ipp-container, .notification-ad' },
                     { name: 'Direct/SmartLink', selector: 'a[href*="go.ad"], .smart-link' }
                 ];
@@ -1275,12 +1270,12 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
                     if (box && box.width > 20 && box.height > 20) {
                         console.log(`\x1b[42m[AD-CLICK]\x1b[0m Targeting: ${currentAd.name}`);
                         
-                        // Tool 5 Style Mouse Move to Ad before clicking
+                        // Tool 5 style smooth move before click
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         
                         adRotationIndex++; 
-                        console.log(`\x1b[44m[SUCCESS]\x1b[0m Ad Clicked! Staying 15s for Revenue Validation.`);
+                        console.log(`\x1b[44m[SUCCESS]\x1b[0m Ad Clicked! Staying 15s for Revenue.`);
                         await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
                         break; 
                     }
@@ -1290,13 +1285,11 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
         console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR]: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
-
-                
 // ===================================================================
 // TOOL 10: ULTIMATE SMART AD-CLICKER ENDPOINT
 // ===================================================================
