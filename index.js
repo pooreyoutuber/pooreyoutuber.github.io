@@ -1195,89 +1195,96 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED WITH AUTO-SCROLL)
 // ===================================================================
-// ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED: SMART AD ROTATION)
-// ===================================================================
-// Global index for Tool 5 rotation (file ke upar ya function ke bahar rakhein)
-let tool5AdRotationIndex = 0;
-
 async function runUltimateRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
-        // Validation: Agar URL galat aaye toh use string banayein taaki crash na ho
-        const targetUrl = String(url); 
-
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
-        
-        // Multi-Device Profiles
-        const profiles = [
-            { name: 'PC-Chrome', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", width: 1920, height: 1080 },
-            { name: 'Mobile-Android', ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", width: 360, height: 800 }
-        ];
-        const profile = profiles[Math.floor(Math.random() * profiles.length)];
-        await page.setUserAgent(profile.ua);
-        await page.setViewport({ width: profile.width, height: profile.height });
+        await page.setViewport({ width: 1366, height: 768 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. Google Search Simulation
+        // 1. STAGE: Google Search Simulation
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000)); 
 
-        // 2. Visit Target Site
-        console.log(`[TOOL 5] View #${viewNumber} | Device: ${profile.name} | URL: ${targetUrl}`);
-        await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 90000, referer: googleUrl });
+        // 2. STAGE: Visit Target Site
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
+        });
 
         const startTime = Date.now();
-        const stayTime = randomInt(35000, 50000); 
-        let adClickedInThisSession = false;
+        const targetStayTime = randomInt(30000, 35000); 
 
-        // 3. Smart Behavior & Ad Rotation Clicker
-        while (Date.now() - startTime < stayTime) {
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600));
+        // 3. STAGE: Realistic Behavior & MULTI-AD CLICKER ROTATION
+        while (Date.now() - startTime < targetStayTime) {
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // CLICK LOGIC: Har 5th view mein click (20 views = 4 clicks)
-            const isClickSession = viewNumber % 5 === 0; 
-            
-            if (isClickSession && !adClickedInThisSession && (Date.now() - startTime > 15000)) {
-                // Har click par type change hoga (Rotation)
-                const adTypes = [
-                    { name: 'OnClick/PopUnder', selector: 'a[href*="smartlink"], .onclick-ad, #popunder-ad' },
-                    { name: 'Vignette/Banner', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad' },
-                    { name: 'Push/IPP', selector: '.push-ad-unit, .ipp-container, #push-subscribe' },
-                    { name: 'DirectLink', selector: 'a[href*="go.ad"], .smart-link, a[href*="direct-link"]' }
-                ];
+            // 🔥 UPDATED: ADVANCED AD CLICKER (Targeting specific Ad types)
+            // Chance: 18% (20 views mein se ~3-4 views)
+            if (Math.random() < 0.18) { 
+                const adClicked = await page.evaluate(() => {
+                    // Selectors for PopUnder, Push, IPP, Vignette, and Direct Links
+                    const adSelectors = [
+                        'a[href*="smartlink"]', 'a[href*="direct-link"]', // Direct Links
+                        '.ipp-container', '.push-notification', '.notification-permission', // Push/IPP
+                        'ins.adsbygoogle', 'iframe[src*="googleads"]', // Banners
+                        '.vignette-ad', '#vignette-container', // Vignette
+                        'body', // PopUnder (Often triggered by clicking anywhere on body)
+                        'a[target="_blank"]' // Common for Pop-ups
+                    ];
 
-                const currentAd = adTypes[tool5AdRotationIndex % adTypes.length];
-                const adElement = await page.$(currentAd.selector);
-
-                if (adElement) {
-                    const box = await adElement.boundingBox();
-                    if (box && box.width > 5) {
-                        console.log(`\x1b[42m[CLICK SUCCESS]\x1b[0m Tool 5: ${currentAd.name} clicked!`);
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        
-                        adClickedInThisSession = true;
-                        tool5AdRotationIndex++; // Agle session ke liye rotate karein
-                        await new Promise(r => setTimeout(r, 15000)); 
-                        break; 
+                    for (let selector of adSelectors) {
+                        const elements = document.querySelectorAll(selector);
+                        if (elements.length > 0) {
+                            const target = elements[Math.floor(Math.random() * elements.length)];
+                            const rect = target.getBoundingClientRect();
+                            if (rect.width > 2 || rect.height > 2) {
+                                target.click(); // Trigger click
+                                return { found: true, type: selector };
+                            }
+                        }
                     }
+                    return { found: false };
+                });
+
+                if (adClicked.found) {
+                    console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Type: ${adClicked.type} | Revenue Triggered!`);
+                    
+                    // Stay on the new state/page for 15s to validate CTR
+                    await new Promise(r => setTimeout(r, 15000));
+                    break; 
                 }
             }
-            await new Promise(r => setTimeout(r, 5000));
         }
+        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+
     } catch (error) {
-        console.error(`[ERROR] Tool 5 View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+        }
     }
 }
-        
 // ===================================================================
 // TOOL 10: ULTIMATE SMART AD-CLICKER ENDPOINT
 // ===================================================================
