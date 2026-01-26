@@ -1290,34 +1290,47 @@ async function runUltimateRevenueTask(keyword, url, viewNumber) {
 // ===================================================================
 app.post('/ultimate', async (req, res) => {
     try {
-        const { urls, views = 20 } = req.body;
+        const { keyword, urls, views = 1000 } = req.body;
 
-        if (!urls || !Array.isArray(urls)) {
-            return res.status(400).json({ success: false, message: "URLs array required." });
+        // Frontend se 'urls' array aa raha hai, use validate karein
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
         }
 
+        const totalViews = parseInt(views);
+
+        // Immediate Success Response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
-            message: `Ultimate Task Started: ${views} views with Smart Ad Rotation.` 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
         });
 
-        // Background execution (One-by-One to manage RAM)
+        // Background Worker
         (async () => {
-            for (let i = 1; i <= views; i++) {
-                const target = urls[i % urls.length];
-                await runUltimateRevenueTask(target, i);
+            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                // Randomly ek URL chunna rotation ke liye
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
                 
-                // Post-session cooling break
-                await new Promise(r => setTimeout(r, 8000)); 
+                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
+                await runUltimateRevenueTask(keyword, randomUrl, i); 
+
+                if (i < totalViews) {
+                    // RAM management break
+                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                    await new Promise(r => setTimeout(r, restTime));
+                }
             }
+            console.log("--- ALL SESSIONS COMPLETED ---");
         })();
 
     } catch (err) {
         console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
- 
 //==================================================
 // --- SERVER START ---
 // ===================================================================
