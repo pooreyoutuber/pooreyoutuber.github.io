@@ -1193,10 +1193,7 @@ app.post('/popup', async (req, res) => {
     }
 });
 // ===================================================================
-// 9. FIXED YOUTUBE HITTER (ONE-BY-ONE WITH TAP-TO-PLAY)
-// ===================================================================
-// ===================================================================
-// 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE
+// 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED WITH AUTO-SCROLL)
 // ===================================================================
 
 // Global counter to track ad rotation
@@ -1205,7 +1202,7 @@ let adRotationIndex = 0;
 async function runUltimateRevenueTask(targetUrl, viewNumber) {
     let browser;
     try {
-        // 1. Device & Browser Diversity (PC, Mobile, Tablet + Chrome, Firefox, Safari)
+        // 1. Device & Browser Diversity
         const profiles = [
             { name: 'PC-Chrome', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", width: 1920, height: 1080 },
             { name: 'PC-Firefox', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0", width: 1536, height: 864 },
@@ -1214,7 +1211,7 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
         ];
         const profile = profiles[Math.floor(Math.random() * profiles.length)];
 
-        // 2. Multi-Source Referral Logic (Facebook, X, Blog, Direct)
+        // 2. Multi-Source Referral Logic
         const sources = ["https://www.facebook.com/", "https://t.co/", "https://www.blogger.com/", ""];
         const referrer = sources[Math.floor(Math.random() * sources.length)];
 
@@ -1230,13 +1227,31 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
         console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Source: ${referrer || 'Direct'}`);
         await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 60000, referer: referrer });
 
-        const startTime = Date.now();
-        const stayTime = randomInt(30000, 50000); // 30-50 Sec Stay
+        // --- 🔥 ADDED: AUTO SCROLL LOGIC ON PAGE LOAD ---
+        await page.evaluate(async () => {
+            await new Promise((resolve) => {
+                let totalHeight = 0;
+                let distance = 100; // Har step mein kitna scroll kare
+                let timer = setInterval(() => {
+                    let scrollHeight = document.body.scrollHeight;
+                    window.scrollBy(0, distance);
+                    totalHeight += distance;
 
-        // 3. Human Behavior: Circle Mouse & Natural Scroll
+                    // Agar page ke end tak pahunch jaye ya 3000px scroll ho jaye to ruk jaye
+                    if(totalHeight >= scrollHeight || totalHeight >= 3000){
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, 200); // Har 200ms mein scroll kare (Smooth effect)
+            });
+        });
+
+        const startTime = Date.now();
+        const stayTime = randomInt(30000, 50000); 
+
+        // 3. Human Behavior: Circle Mouse & Additional Random Scroll
         let angle = 0;
         while (Date.now() - startTime < stayTime) {
-            // Circular Mouse Movement (0 Circle Shape)
             const centerX = profile.width / 2;
             const centerY = profile.height / 2;
             const radius = 100;
@@ -1245,14 +1260,12 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
             await page.mouse.move(x, y);
             angle += 0.2;
 
-            // Natural Scroll
-            if (Math.random() < 0.3) await page.evaluate(() => window.scrollBy(0, 200));
+            // Random scrolling during stay
+            if (Math.random() < 0.3) await page.evaluate(() => window.scrollBy(0, randomInt(-200, 400)));
 
-            // 4. SMART AD CLICKER (Click logic for 3-4 views out of 20)
-            const isClickSession = viewNumber % 5 === 0; // Approx 20% sessions
+            // 4. SMART AD CLICKER
+            const isClickSession = viewNumber % 5 === 0; 
             if (isClickSession && (Date.now() - startTime > 15000)) {
-                
-                // Rotation based Ad Selectors
                 const adTypes = [
                     { name: 'PopUnder', selector: 'a[href*="smartlink"], .onclick-ad, #popunder-ad' },
                     { name: 'Banner/Vignette', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad' },
@@ -1268,10 +1281,8 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
                     if (box) {
                         console.log(`\x1b[42m[CLICK]\x1b[0m Targeting: ${currentAd.name}`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        adRotationIndex++; // Move to next ad type for next session
-                        
-                        console.log(`[WAIT] Staying 10s on Ad for Reality...`);
-                        await new Promise(r => setTimeout(r, 10000)); // 10 Sec Stay after click
+                        adRotationIndex++;
+                        await new Promise(r => setTimeout(r, 10000)); 
                         break; 
                     }
                 }
@@ -1286,6 +1297,8 @@ async function runUltimateRevenueTask(targetUrl, viewNumber) {
         if (browser) await browser.close();
     }
 }
+
+                
 // ===================================================================
 // TOOL 10: ULTIMATE SMART AD-CLICKER ENDPOINT
 // ===================================================================
