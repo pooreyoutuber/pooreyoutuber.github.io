@@ -1195,14 +1195,23 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 10. SMART MULTI-BROWSER AD-CLICKER & ENGAGEMENT ENGINE (UPDATED WITH AUTO-SCROLL)
 // ===================================================================
+// ===================================================================
+// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED: SMART AD ROTATION)
+// ===================================================================
 
-
-// Global rotation index specifically for Tool 5
+// Global index for Tool 5 Ad Rot
 let tool5AdRotationIndex = 0;
 
-async function runUltimateRevenueTask(keyword, url, viewNumber) {
+async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
+        // Fix: Ensure URL is a valid string to prevent Protocol Error
+        const targetUrl = (url && typeof url === 'string') ? url : String(url);
+        if (!targetUrl.startsWith('http')) {
+            console.error(`[ERROR] Invalid URL format for View #${viewNumber}: ${targetUrl}`);
+            return;
+        }
+
         browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -1216,10 +1225,11 @@ async function runUltimateRevenueTask(keyword, url, viewNumber) {
 
         const page = await browser.newPage();
         
-        // Multi-Device Simulation
+        // Profiles for Multi-Device Simulation
         const profiles = [
             { name: 'PC-Chrome', ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", width: 1920, height: 1080 },
-            { name: 'Mobile-Android', ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", width: 360, height: 800 }
+            { name: 'Mobile-Android', ua: "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", width: 360, height: 800 },
+            { name: 'Tablet-iPad', ua: "Mozilla/5.0 (iPad; CPU OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1", width: 810, height: 1080 }
         ];
         const profile = profiles[Math.floor(Math.random() * profiles.length)];
         await page.setUserAgent(profile.ua);
@@ -1231,50 +1241,48 @@ async function runUltimateRevenueTask(keyword, url, viewNumber) {
         await new Promise(r => setTimeout(r, 3000)); 
 
         // 2. STAGE: Visit Target Site
-        console.log(`[TOOL 5] View #${viewNumber} | Device: ${profile.name} | URL: ${url}`);
-        await page.goto(url, { 
+        console.log(`[TOOL 5] View #${viewNumber} | Device: ${profile.name} | URL: ${targetUrl}`);
+        await page.goto(targetUrl, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
             referer: googleUrl 
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 50000); 
-
-        // 3. STAGE: Realistic Behavior & SMART AD CLICKER
+        const targetStayTime = randomInt(40000, 55000); 
         let adClickedInThisSession = false;
 
+        // 3. STAGE: Realistic Behavior & SMART AD ROTATION CLICKER
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling & Mouse Movement
+            // Natural Scrolling
             await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            
-            // 🔥 SMART AD CLICKER LOGIC (20% chance: Approx 4 clicks in 20 views)
+
+            // 🔥 CLICK LOGIC: Har 5th view me click (20 views = 4-5 clicks)
             const isClickSession = viewNumber % 5 === 0; 
             
             if (isClickSession && !adClickedInThisSession && (Date.now() - startTime > 15000)) {
-                // Rotation based Ad Selectors (All Types Included)
+                // Har click par Ad type change hoga (Rotation)
                 const adTypes = [
                     { name: 'OnClick/PopUnder', selector: 'a[href*="smartlink"], .onclick-ad, #popunder-ad' },
-                    { name: 'Vignette/Banners', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad, iframe[id^="aswift"]' },
+                    { name: 'Vignette/Banner', selector: 'ins.adsbygoogle, iframe[src*="googleads"], .vignette-ad, iframe[id^="aswift"]' },
                     { name: 'Push/IPP', selector: '.push-ad-unit, .ipp-container, .notification-ad, #push-subscribe' },
-                    { name: 'Direct/SmartLink', selector: 'a[href*="go.ad"], .smart-link, a[href*="direct-link"]' }
+                    { name: 'DirectLink/SmartLink', selector: 'a[href*="go.ad"], .smart-link, a[href*="direct-link"]' }
                 ];
 
-                const currentAdConfig = adTypes[tool5AdRotationIndex % adTypes.length];
-                const adElement = await page.$(currentAdConfig.selector);
+                const currentAd = adTypes[tool5AdRotationIndex % adTypes.length];
+                const adElement = await page.$(currentAd.selector);
 
                 if (adElement) {
                     const box = await adElement.boundingBox();
-                    if (box && box.width > 5 && box.height > 5) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Tool 5: Clicking ${currentAdConfig.name}`);
+                    if (box && box.width > 5) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Tool 5: Clicking ${currentAd.name}`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         
                         adClickedInThisSession = true;
-                        tool5AdRotationIndex++; // Rotate for next session
+                        tool5AdRotationIndex++; // Index badhao rotation ke liye
                         
-                        // Advertiser site par wait
-                        await new Promise(r => setTimeout(r, 15000));
+                        await new Promise(r => setTimeout(r, 15000)); // Ad page par wait
                         break; 
                     }
                 }
@@ -1286,7 +1294,11 @@ async function runUltimateRevenueTask(keyword, url, viewNumber) {
     } catch (error) {
         console.error(`[ERROR] Tool 5 View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close().catch(() => {});
+        if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+        }
     }
 }
 // ===================================================================
