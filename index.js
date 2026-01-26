@@ -1284,10 +1284,14 @@ async function  runUltimateRevenueTask(keyword, url, viewNumber) {
         }
         console.log(`[DONE] View #${viewNumber} Finished.`);
 
-    } catch (error) {
+      } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+        }
     }
 }
 // ===================================================================
