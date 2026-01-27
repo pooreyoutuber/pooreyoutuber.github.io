@@ -1299,14 +1299,13 @@ app.post('/ultimate', async (req, res) => {
         });
 
         // Background Worker
-        (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+         (async () => {
+            console.log(`--- PROXYIUM MULTI-SITE START ---`);
             for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
                 
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runUltimateRevenueTask(keyword, randomUrl, i); 
+                // 1 by 1 execution to prevent Render crash
+                await runUltimateRevenueTask(keyword, url, viewNumber);
 
                 if (i < totalViews) {
                     // RAM management break
