@@ -1,6 +1,6 @@
 // ===================================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
-// ==================================================================
+// ===================================================================
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -1046,7 +1046,7 @@ app.post('/start-Proxyium', async (req, res) => {
                 await runProxyiumTask(keyword, targetUrl, i);
 
                 if (i < totalViews) {
-                    // RAM clear karne ke liye bada ak har session ke baad
+                    // RAM clear karne ke liye bada break har session ke baad
                     const restTime = 15000; // 15 seconds gap
                     console.log(`[WAIT] Sleeping ${restTime/1000}s before next view...`);
                     await new Promise(r => setTimeout(r, restTime));
@@ -1059,131 +1059,119 @@ app.post('/start-Proxyium', async (req, res) => {
         console.error("Proxyium Endpoint Error:", err);
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
-}); 
-
+});
 // ===================================================================
-// 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
+// 7. tool popup (WITH DYNAMIC POP-UP HANDLING)
 // ===================================================================
 
-// --- 1. EXPANDED DEVICE LIST (25+ MODELS) ---
-const TOOL7_DEVICES = [
-    // iPhones
-    { name: "iPhone 15 Pro Max", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1", w: 430, h: 932 },
-    { name: "iPhone 14 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Mobile/15E148 Safari/604.1", w: 393, h: 852 },
-    { name: "iPhone 13", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
-    { name: "iPhone 12 Pro", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.4 Mobile/15E148 Safari/604.1", w: 390, h: 844 },
-    // Androids
-    { name: "Samsung Galaxy S23 Ultra", ua: "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36", w: 384, h: 854 },
-    { name: "Samsung Galaxy S22", ua: "Mozilla/5.0 (Linux; Android 12; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36", w: 360, h: 780 },
-    { name: "Google Pixel 8 Pro", ua: "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", w: 412, h: 915 },
-    { name: "OnePlus 11", ua: "Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36", w: 384, h: 854 },
-    // Tablets
-    { name: "iPad Pro 12.9", ua: "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", w: 1024, h: 1366 },
-    { name: "iPad Air 5", ua: "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1", w: 820, h: 1180 },
-    // PCs (Chrome, Firefox, Safari)
-    { name: "Windows 11 Chrome", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", w: 1920, h: 1080 },
-    { name: "MacBook Pro M3 Safari", ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15", w: 1728, h: 1117 },
-    { name: "Windows 10 Firefox", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0", w: 1366, h: 768 }
-];
-// --- 2. REFERRAL SOURCES (50% Chance Logic) ---
-const TOOL7_REFERRERS = [
-    "https://www.facebook.com/",
-    "https://l.facebook.com/l.php?u=",
-    "https://www.pinterest.com/",
-    "https://t.co/", // Twitter/X
-    "https://www.reddit.com/",
-    "https://www.linkedin.com/",
-    "https://www.instagram.com/"
-];
-async function runGscTaskpop(keyword, url, viewNumber) {
+async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
-        //npredictable Pattern: Pick Random Device & Browser//
-        const device = TOOL7_DEVICES[Math.floor(Math.random() * TOOL7_DEVICES.length)];
-        
-        // 50% Referral Logic: Har 10 me se 5 views social sources se
-        let referer = "https://www.google.com/"; // Default Organic
-        if (viewNumber % 2 === 0) {
-            referer = TOOL7_REFERRERS[Math.floor(Math.random() * TOOL7_REFERRERS.length)];
-        }
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
-        
-        // Anti-Bot: Set Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- STEP 1: Open Proxyium ---
-        console.log(`[VIEW #${viewNumber}] Opening Proxyium for: ${url}`);
-        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+        // 1. Google Search Simulation
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000)); 
 
-        // --- STEP 2: Enter URL in Proxyium Search Bar ---
-        const searchInputSelector = 'input[placeholder*="Put a URL"]';
-        await page.waitForSelector(searchInputSelector);
-        
-        // Human-like typing
-        await page.type(searchInputSelector, url, { delay: 100 });
-        await page.keyboard.press('Enter');
+        // 2. Visit Target Site
+        console.log(`\n[VIEW #${viewNumber}] Target: ${url}`);
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
+        });
 
-        // --- STEP 3: Wait for the Proxied Site to load ---
-        console.log(`[PROXYIUM] Navigation started to target...`);
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => null);
-        
-        // Thoda extra wait taaki elements load ho jayein
-        await new Promise(r => setTimeout(r, 5000));
+        // --- 🔥 CONSENT POP-UP HANDLING LOGIC ---
+        try {
+            const consentButtons = await page.$$('button, span, a, div');
+            const cycleIndex = viewNumber % 40; // 40 ke cycle mein rotate karega
 
+            if (cycleIndex < 20) {
+                // PHASE 1: KATE (Reject/Close) - 20 Times
+                console.log(`[ACTION] Pop-up Mode: REJECT/CLOSE (20/40 Cycle)`);
+                for (let btn of consentButtons) {
+                    const text = await page.evaluate(el => el.innerText.toLowerCase(), btn);
+                    if (text.includes('x') || text.includes('close') || text.includes('reject') || text.includes('deny')) {
+                        await btn.click();
+                        break;
+                    }
+                }
+            } else if (cycleIndex >= 20 && cycleIndex < 35) {
+                // PHASE 2: CONSENT (Accept All) - 15 Times
+                console.log(`[ACTION] Pop-up Mode: CONSENT/ACCEPT (15/40 Cycle)`);
+                for (let btn of consentButtons) {
+                    const text = await page.evaluate(el => el.innerText.toLowerCase(), btn);
+                    if (text.includes('accept') || text.includes('agree') || text.includes('consent') || text.includes('allow')) {
+                        await btn.click();
+                        break;
+                    }
+                }
+            } else {
+                // PHASE 3: MANAGE OPTIONS (All Set) - 5 Times
+                console.log(`[ACTION] Pop-up Mode: MANAGE/ALL-SET (5/40 Cycle)`);
+                for (let btn of consentButtons) {
+                    const text = await page.evaluate(el => el.innerText.toLowerCase(), btn);
+                    if (text.includes('manage') || text.includes('options') || text.includes('settings')) {
+                        await btn.click();
+                        await new Promise(r => setTimeout(r, 2000));
+                        // Save behavior simulate karein
+                        const saveBtn = await page.$('button[id*="save"], .save-settings, button.primary');
+                        if (saveBtn) await saveBtn.click();
+                        break;
+                    }
+                }
+            }
+        } catch (e) {
+            console.log("[INFO] No matching pop-up found or handled.");
+        }
+
+        // 3. Staying & Ad Clicker Loop
+        const stayTime = randomInt(30000, 35000);
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); 
 
-        // --- STEP 4: Realistic Behavior & Ad-Clicker Loop (Inside Proxyium) ---
-        while (Date.now() - startTime < targetStayTime) {
-            // 1. Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // 2. Mouse Movement
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+        while (Date.now() - startTime < stayTime) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 5 });
+            await new Promise(r => setTimeout(r, 5000));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+            // HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
-                // Proxyium ke andar ads detect karne ke liye selectors
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Ad Found inside Proxyium! Clicking...`);
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                    if (box && box.width > 50) {
+                        console.log(`[AD-CLICK] Clicking Ad for Revenue...`);
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        await new Promise(r => setTimeout(r, 15000)); // Stay on advertiser site
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} via Proxyium Finished. ✅`);
+        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
-        
+
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
 app.post('/popup', async (req, res) => {
     try {
@@ -1204,7 +1192,7 @@ app.post('/popup', async (req, res) => {
             console.log(`\n--- STARTING POP-UP REVENUE TASK ---`);
             for (let i = 1; i <= views; i++) {
                 const currentUrl = urls[(i - 1) % urls.length]; // Rotation between sites
-                await runGscTaskpop(keyword, currentUrl, i);
+                await runGscTask(keyword, currentUrl, i);
 
                 // RAM Management & Anti-Spam break
                 const breakTime = i % 5 === 0 ? 30000 : 10000;
@@ -1218,316 +1206,116 @@ app.post('/popup', async (req, res) => {
     }
 });
 // ===================================================================
-// 9. FIXED YOUTUBE HITTER (ONE-BY-ONE WITH TAP-TO-PLAY)
+// 8. YOUTUBE STUDIO HITTER (INTERACTION FOCUS)
 // ===================================================================
-const puppeteerExtra = require('puppeteer-extra');
 
-// Stealth plugin initialize
-if (puppeteerExtra.plugins.length === 0) {
-    puppeteerExtra.use(StealthPlugin());
-}
-
-async function runOrganicYoutubeTask(viewNumber, watchTimeSec) {
+async function runOrganicYoutubeTask(videoUrl, viewNumber, watchTime) {
     let browser;
     try {
-        // Mobile device simulation taaki YouTube player "Tap" accept kare
-        const device = { 
-            ua: "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.144 Mobile Safari/537.36", 
-            viewport: { width: 360, height: 740 } 
-        };
+        const puppeteer = require('puppeteer-extra');
+        const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+        puppeteer.use(StealthPlugin());
 
-        browser = await puppeteerExtra.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-        });
-
-        const page = await browser.newPage();
-        await page.setUserAgent(device.ua);
-        await page.setViewport(device.viewport);
-
-        console.log(`\n[VIEW #${viewNumber}] Target: YouTube Preview Site`);
-
-        // 1. Site par jaana
-        const previewSite = "https://macora225.github.io/youtube-short-preview.html";
-        await page.goto(previewSite, { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // 2. Sabse niche scroll karna jahan video hai
-        console.log("[ACTION] Scrolling to bottom for video...");
-        await page.evaluate(async () => {
-            window.scrollTo(0, document.body.scrollHeight);
-            await new Promise(r => setTimeout(r, 2000));
-        });
-
-        // 3. YouTube Video par Tap/Click karna
-        // Hum iframe ka bounding box nikal kar uske center par click karenge
-        const videoFrame = await page.$('iframe[src*="youtube.com"]');
-        if (videoFrame) {
-            const rect = await videoFrame.boundingBox();
-            if (rect) {
-                console.log("[ACTION] Video found! Tapping to play...");
-                // Video ke exact center par tap karna
-                await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
-                console.log("[SUCCESS] Play initiated.");
-            }
-        } else {
-            // Fallback: Agar iframe detect na ho toh screen ke niche wale hisse mein tap karein
-            await page.mouse.click(180, 600);
-            console.log("[INFO] Manual tap performed at bottom.");
-        }
-
-        // 4. Watch Time (Frontend se aaya hua samay)
-        const stayTimeMs = (parseInt(watchTimeSec) || 30) * 1000;
-        console.log(`[WAIT] Watching for ${watchTimeSec} seconds...`);
-        await new Promise(r => setTimeout(r, stayTimeMs));
-
-        console.log(`[DONE] View #${viewNumber} finished.`);
-
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
-    } finally {
-        if (browser) {
-            await browser.close(); // Browser band karna zaroori hai memory ke liye
-        }
-    }
-}
-
-// Updated Endpoint with Strict Await Loop
-app.post('/api/real-view-boost', async (req, res) => {
-    try {
-        const { views_count, watch_time } = req.body;
-        const totalViews = parseInt(views_count) || 1;
-
-        // Immediate response taaki request timeout na ho
-        res.status(200).json({ 
-            success: true, 
-            message: `Hitter Task Started: ${totalViews} views sequential execution.` 
-        });
-
-        // Background Worker: Ek khatam hone ke baad hi dusra shuru hoga
-        (async () => {
-            for (let i = 1; i <= totalViews; i++) {
-                console.log(`--- Starting View ${i} of ${totalViews} ---`);
-                // 'await' yahan ensure karta hai ki browser 1-by-1 khule
-                await runOrganicYoutubeTask(i, watch_time);
-                
-                if (i < totalViews) {
-                    console.log("[SYSTEM] Cooling down 5s before next browser...");
-                    await new Promise(r => setTimeout(r, 5000));
-                }
-            }
-            console.log("--- ALL SESSIONS COMPLETED ---");
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
-    }
-});
-
-// ===================================================================
-// Tool 9 Endpoint (Updated)
-// ===================================================================
-app.post('/api/real-view-boost', async (req, res) => {
-    try {
-        const { views_count, watch_time } = req.body;
-        const totalViews = parseInt(views_count) || 1;
-
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started: One-by-one browser execution for ${totalViews} views.` 
-        });
-
-        // Background Worker (Sequential)
-        (async () => {
-            for (let i = 1; i <= totalViews; i++) {
-                // AWAIT use kiya hai taaki ek browser band hone ke baad hi dusra khule
-                await runOrganicYoutubeTask(i, watch_time);
-                
-                if (i < totalViews) {
-                    const rest = 8000; // 8 seconds break for Render RAM
-                    console.log(`[SYSTEM] Cooling down for ${rest/1000}s...`);
-                    await new Promise(r => setTimeout(r, rest));
-                }
-            }
-            console.log("--- ALL YT TASKS FINISHED ---");
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false });
-    }
-});
-
-// ===================================================================
-// TOOL 11: GOLOGIN ULTIMATE PROXY (2ND TAB & ADVANCED AD-CLICKER)
-// ===================================================================
-
-async function runGologinVideoTask(country, url, viewNumber) {
-    let browser;
-    try {
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // Render par "new" headless mode best hai
             args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--window-size=1920,1080'
+                '--autoplay-policy=no-user-gesture-required', // Bina click video chalne ke liye
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1920, height: 1080 });
+        await page.setDefaultNavigationTimeout(120000); // 2 minute timeout
+        
+        // Random User Agent har baar alag device dikhane ke liye
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`[VIEW #${viewNumber}] Step 1: Opening Gologin Proxy...`);
-        await page.goto('https://gologin.com/free-web-proxy/', { waitUntil: 'networkidle2', timeout: 60000 });
+        console.log(`[VIEW #${viewNumber}] Loading Video...`);
+        
+        // Google Search se aane ka dikhawa (Referer)
+        await page.goto(videoUrl, { 
+            waitUntil: 'networkidle2', 
+            referer: 'https://www.google.com/' 
+        });
 
-        // --- 1. COUNTRY CHANGE KARNA ---
+        // --- 🔥 POP-UP HANDLING (20-15-5 Logic) ---
+        const cycleIndex = viewNumber % 40;
         try {
-            await page.waitForSelector('.select-trigger', { timeout: 10000 });
-            await page.click('.select-trigger');
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 7000)); // Wait for popup
+            await page.evaluate((idx) => {
+                const btns = Array.from(document.querySelectorAll('button, yt-formatted-string, span'));
+                const clickTarget = (list) => {
+                    const target = btns.find(b => list.some(w => b.innerText.toLowerCase().includes(w)));
+                    if (target) target.click();
+                };
+                if (idx < 20) clickTarget(['reject', 'x', 'close', 'no thanks', 'dismiss']);
+                else if (idx < 35) clickTarget(['accept', 'agree', 'allow', 'consent', 'i agree']);
+                else clickTarget(['manage', 'options', 'customize']);
+            }, cycleIndex);
+        } catch (e) { console.log("Popup skip."); }
 
-            const countrySet = await page.evaluate((target) => {
-                const options = Array.from(document.querySelectorAll('.select-option-text'));
-                const match = options.find(el => el.innerText.trim().toLowerCase().includes(target.toLowerCase()));
-                if (match) {
-                    match.click();
-                    return true;
-                }
-                return false;
-            }, country);
-            
-            if(countrySet) console.log(`[SUCCESS] Location set to: ${country}`);
-        } catch (e) { console.log("[INFO] Country skip/default used."); }
-
-        // --- 2. PUT A URL & CLICK GO ---
-        await page.waitForSelector('input[placeholder*="URL"]');
-        await page.type('input[placeholder*="URL"]', url, { delay: 100 });
-
-        console.log(`[ACTION] Clicking GO Button...`);
-        
-        // Go click karte hi 2nd tab khulega, humein use track karna hai
-        const [target] = await Promise.all([
-            new Promise(resolve => browser.once('targetcreated', resolve)), // 2nd tab ka wait
-            page.evaluate(() => {
-                const btns = Array.from(document.querySelectorAll('button, span'));
-                const goBtn = btns.find(b => b.innerText.trim().toLowerCase() === 'go');
-                if (goBtn) goBtn.click();
-            })
-        ]);
-
-        // --- 3. SWITCH TO 2ND TAB ---
-        const proxiedPage = await target.page();
-        await proxiedPage.setViewport({ width: 1920, height: 1080 });
-        console.log(`[SWITCH] Moved to 2nd Tab. Loading site...`);
-        
-        await new Promise(r => setTimeout(r, 15000)); // Page load hone ka wait
-
-        // --- 4. ADVANCED AD-CLICKER & HUMAN MOMENT ---
-        const startTime = Date.now();
-        const stayTime = 50000; // 50 seconds stay
-
-        while (Date.now() - startTime < stayTime) {
-            // Random Scroll & Mouse Movement
-            await proxiedPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await proxiedPage.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 5 });
-
-            // 🔥 ADVANCED AD CLICKER (Banner, Hidden, Video)
-            if (Math.random() < 0.35) { 
-                const clicked = await proxiedPage.evaluate(() => {
-                    const adSelectors = [
-                        'ins.adsbygoogle', 'iframe[src*="googleads"]', 'iframe[id^="aswift"]',
-                        '.ad-unit', '.vjs-ad-playing', 'video.video-ad', 'div[class*="ad-"]',
-                        'div[id*="google_ads"]', 'a[href*="doubleclick.net"]'
-                    ];
-                    
-                    for (let s of adSelectors) {
-                        const el = document.querySelector(s);
-                        if (el) {
-                            const rect = el.getBoundingClientRect();
-                            if (rect.width > 30 && rect.height > 30) {
-                                el.scrollIntoView();
-                                el.click(); // Standard click
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                });
-
-                if (clicked) {
-                    console.log(`\x1b[32m[REVENUE]\x1b[0m Ad Detected & Clicked! Staying on Ad page...`);
-                    await new Promise(r => setTimeout(r, 20000)); 
-                    break; 
-                }
+        // --- ⚡ HIT COUNT TRIGGER (Essential) ---
+        console.log(`[ACTION] Triggering Playback...`);
+        await page.evaluate(async () => {
+            const video = document.querySelector('video');
+            if (video) {
+                video.muted = false; // Muted view count nahi hote aksar
+                video.volume = 0.5;
+                await video.play();
+                // Randomly seek 2-3 seconds aage taaki activity detect ho
+                video.currentTime += Math.floor(Math.random() * 5);
             }
-            await new Promise(r => setTimeout(r, 7000));
+        });
+
+        // --- ⌚ WATCH TIME & HUMAN BEHAVIOR ---
+        const startTime = Date.now();
+        const targetSeconds = parseInt(watchTime);
+
+        while (Date.now() - startTime < (targetSeconds * 1000)) {
+            // Random Mouse Movement (Har 5-8 sec mein)
+            await page.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 5 });
+            
+            // Randomly scroll thoda sa upar niche
+            if (Math.random() > 0.8) {
+                await page.evaluate(() => window.scrollBy(0, 200));
+                await new Promise(r => setTimeout(r, 2000));
+                await page.evaluate(() => window.scrollBy(0, -200));
+            }
+            
+            await new Promise(r => setTimeout(r, 6000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
-
-    } catch (err) {
-        console.error(`[ERROR] View #${viewNumber}:`, err.message);
+        console.log(`[SUCCESS] View #${viewNumber} Hit Sent!`);
+    } catch (error) {
+        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// ENDPOINT
-app.post('/ultimate', async (req, res) => {
-    const { keyword, urls, views = 1000 } = req.body; // Keyword = Country
-    res.status(200).json({ success: true, message: "Gologin Multi-Tab Process Started" });
+// --- API ENDPOINT ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    // Immediate Response
+    res.status(200).json({ success: true, message: "Engine Started! Hits will appear soon." });
 
+    // Worker Loop
     (async () => {
-        for (let i = 1; i <= views; i++) {
-            const currentSite = urls[Math.floor(Math.random() * urls.length)];
-            await runGologinVideoTask(keyword, currentSite, i);
-            await new Promise(r => setTimeout(r, 10000)); // Render Safety
+        for (let i = 1; i <= views_count; i++) {
+            await runOrganicYoutubeTask(video_url, i, watch_time);
+            
+            // Render par 15s ka gap zaroori hai crash se bachne ke liye
+            console.log(`[REST] 15s cooling...`);
+            await new Promise(r => setTimeout(r, 15000));
         }
     })();
 });
 
-app.post('/ultimate', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
-
-        if (!urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: "URLs list is required!" });
-        }
-
-        // Render timeout se bachne ke liye fast response
-        res.status(200).json({ 
-            success: true, 
-            message: "GoLogin Ultimate Process Started. Tier-1 Countries Rotation Active." 
-        });
-
-        // Background Worker (Sequential execution to prevent RAM crash)
-        (async () => {
-            console.log(`\n--- STARTING ULTIMATE GOLOGIN TASK (Sequential) ---`);
-            for (let i = 1; i <= views; i++) {
-                // Multi-site rotation logic
-                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                // Ek time par ek hi browser chalega taaki Render crash na ho
-                await runGoLoginUltimateTask(targetUrl, i);
-
-                // Heavy session ke baad rest taaki server normal rahe
-                const restTime = 12000; // 12 seconds gap
-                console.log(`[REST] Waiting ${restTime/1000}s before next session...`);
-                await new Promise(r => setTimeout(r, restTime));
-            }
-            console.log("--- ALL ULTIMATE SESSIONS FINISHED ---");
-        })();
-
-    } catch (err) {
-        console.error("Ultimate Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
-                    
- 
-//==================================================
+//=====================================================
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
