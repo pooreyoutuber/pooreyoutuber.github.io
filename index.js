@@ -1196,82 +1196,87 @@ app.post('/popup', async (req, res) => {
 // UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
 // ===================================================================
 // ===================================================================
-// UPDATED TOOL 8: 100% WORKING MULTI-FORMAT AD CLICKER (POP, PUSH, VIGNETTE)
+// TOOL 8: SMART MULTI-AREA ADS CLICKER (6-12-18 LOGIC)
 // ===================================================================
 async function runUltimateRevenueTask(keyword, url, viewNumber) {
+    const puppeteer = require('puppeteer');
     let browser;
     try {
+        console.log(`\n[VIEW #${viewNumber}] 🚀 Starting View: ${url}`);
+        
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage', '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
-        const page = await browser.newPage();
-        page.setDefaultNavigationTimeout(90000); // 90s for heavy ads
-        await page.setViewport({ width: 1366, height: 768 });
-        
-        console.log(`[VIEW #${viewNumber}] Target: ${url}`);
 
-        // Step 1: Visit Target Site
-        await page.goto(url, { waitUntil: 'networkidle2' });
-        
-        // Wait for ads to stabilize
+        const page = await browser.newPage();
+        // Screen size set karein taki coordinates sahi jagah click ho
+        await page.setViewport({ width: 1280, height: 800 });
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // Ads load hone ka intezar
+        console.log(`[VIEW #${viewNumber}] ⏳ Waiting for Ads to load...`);
         await new Promise(r => setTimeout(r, 10000));
 
-        // --- ADVANCED AD DETECTION LOGIC ---
-        const adFormats = [
-            { name: 'Popunder/OnClick', selector: 'body, a, button' }, // Har click par pop khulta hai
-            { name: 'Push/IPP', selector: '.push-notification, .ipp-banner, [id*="push"]' },
-            { name: 'Vignette/Interstitial', selector: '.vignette-close, .interstitial-close, [class*="vignette"], [id*="google_ads_iframe"]' },
-            { name: 'Banner/Native', selector: 'ins.adsbygoogle, iframe[id^="aswift"], .native-ad' }
-        ];
+        // --- ADS CLICKER LOGIC (6, 12, 18 VIEW) ---
+        const clickViews = [6, 12, 18];
+        if (clickViews.includes(viewNumber)) {
+            console.log(`[TARGET] 🎯 High Revenue View Detected (#${viewNumber}). Activating Clicker...`);
 
-        // Randomly pick an action to simulate real human behavior
-        const randomFormat = adFormats[Math.floor(Math.random() * adFormats.length)];
-        console.log(`[TARGETING] Looking for: ${randomFormat.name}`);
+            // Ads Placement Locations (Math-based Coordinates)
+            const areas = [
+                { name: 'Top Banner', x: 640, y: 100 },
+                { name: 'Center Pop', x: 640, y: 400 },
+                { name: 'Bottom Float', x: 640, y: 700 },
+                { name: 'Right Side', x: 1100, y: 400 },
+                { name: 'Left Side', x: 150, y: 400 }
+            ];
 
-        // Step 2: Smart Interaction
-        const elements = await page.$$(randomFormat.selector);
-        if (elements.length > 0) {
-            // Pick a random element from the category
-            const target = elements[Math.floor(Math.random() * elements.length)];
-            const box = await target.boundingBox();
+            let tabOpened = false;
+            let clickCount = 0;
 
-            if (box && box.width > 2 && box.height > 2) {
-                console.log(`[ACTION] Clicking ${randomFormat.name} at (${box.x}, ${box.y})`);
+            // Jab tak 2nd tab na khule (Max 5 clicks)
+            while (!tabOpened && clickCount < areas.length) {
+                const target = areas[clickCount];
+                console.log(`[CLICKING] 🖱️ Attempting click on ${target.name} [${target.x}, ${target.y}]`);
+
+                // Real mouse simulation
+                await page.mouse.move(target.x, target.y);
+                await page.mouse.click(target.x, target.y);
                 
-                // Human-like mouse movement
-                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
-                
-                // Click to trigger Popunder or Ad
-                await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                
-                // Agar Popunder khula hai to context switch zaroori nahi, main page par stay karna revenue deta hai
-                console.log(`[SUCCESS] ${randomFormat.name} Action Triggered! ✅`);
-                
-                // Wait on ad-landing/main page for retention (Vital for CPM)
-                await new Promise(r => setTimeout(r, 25000)); 
+                // 5 second wait check karne ke liye ki naya tab khula ya nahi
+                await new Promise(r => setTimeout(r, 5000));
+
+                const pages = await browser.pages();
+                if (pages.length > 1) {
+                    tabOpened = true;
+                    console.log(`[SUCCESS] ✅ 2nd Tab Opened! Ad Click Verified for View #${viewNumber}`);
+                    
+                    // Stay on ad page for 15s for revenue validation
+                    const adPage = pages[pages.length - 1];
+                    try {
+                        await adPage.bringToFront();
+                        await new Promise(r => setTimeout(r, 15000));
+                    } catch (e) { /* ignore */ }
+                }
+                clickCount++;
             }
         } else {
-            // FALLBACK: Random Body Click for OnClick Popunders
-            console.log(`[FALLBACK] No specific ad found, triggering Body Click.`);
-            await page.mouse.click(500, 400);
+            // Normal Impression logic for other views
+            console.log(`[IMPRESSION] 👀 Normal view session...`);
+            await page.evaluate(() => window.scrollBy(0, 400));
             await new Promise(r => setTimeout(r, 15000));
         }
 
-        console.log(`[DONE] View #${viewNumber} completed.`);
     } catch (error) {
-        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
+        console.log(`[RENDER LOG] ❌ Error in View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close().catch(() => {});
-            console.log(`[CLEANUP] Browser closed.`);
+            await browser.close();
+            console.log(`[VIEW #${viewNumber}] 🔒 Done.\n`);
         }
     }
 }
-                        
 // ===================================================================
 // Tool 8 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
