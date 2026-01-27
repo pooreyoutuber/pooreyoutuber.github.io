@@ -1199,89 +1199,92 @@ async function runUltimateRevenueTask(keyword, url, viewNumber) {
     const puppeteer = require('puppeteer');
     let browser;
     try {
-        console.log(`\n[VIEW #${viewNumber}] 🚀 Loading Tool Page: ${url}`);
-        
         browser = await puppeteer.launch({
             headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
+        // Standard Desktop Viewport taaki X, Y coordinates sahi rahein
         await page.setViewport({ width: 1366, height: 768 });
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Ads load hone ka thoda intezar
-        await new Promise(r => setTimeout(r, 12000));
+        // Ads load hone ka buffer time
+        await new Promise(r => setTimeout(r, 10000));
 
-        // --- ADS CLICKER LOGIC (6-12-18 VIEWS) ---
+        // --- 100% STICKY CLICK LOGIC (View 6, 12, 18 par trigger) ---
         const targetViews = [6, 12, 18];
         if (targetViews.includes(viewNumber)) {
-            console.log(`[TARGET] 🎯 High Revenue Session Detected (#${viewNumber})`);
+            console.log(`[TARGET] View #${viewNumber}: Starting High-Precision Clicking...`);
 
-            // Aapke HTML ke hisab se ads ki locations
-            const adSelectors = [
-                '.ad-wrap iframe', // Top & Middle Ads
-                '#container-ad1288ee73006596cffbc44a44b97c80', // Specific Ad Container
-                '.ad-wrap script + ins', // Fallback for auto-ads
-                '.ad-wrap:nth-child(1)', // Top placement
-                '.ad-wrap:nth-last-child(2)' // Bottom placement
+            // Aapki files ke hisab se exact selectors
+            const placements = [
+                '.ad-wrap iframe', // Format 1: Standard Iframe Ads
+                '#container-ad1288ee73006596cffbc44a44b97c80', // Format 2: EffectiveGate Container
+                '.ad-wrap ins.adsbygoogle', // Format 3: Google Ads (if any)
+                '.ad-wrap:first-of-type', // Location 1: Top Ad
+                '.ad-wrap:last-of-type'   // Location 2: Bottom Ad
             ];
 
-            let tabOpened = false;
-            
-            // Loop jo har placement ko try karega jab tak tab na khule
-            for (let i = 0; i < adSelectors.length && !tabOpened; i++) {
-                try {
-                    console.log(`[TRYING] 🖱️ Attempting Click on Placement #${i + 1}...`);
-                    
-                    const adElement = await page.$(adSelectors[i]);
-                    if (adElement) {
-                        const box = await adElement.boundingBox();
-                        if (box) {
-                            // Seedha ad ki location par mouse move karna
-                            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
-                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                            
-                            // 5 second wait check karne ke liye ki naya tab khula ya nahi
-                            await new Promise(r => setTimeout(r, 5000));
-                            
-                            const pages = await browser.pages();
-                            if (pages.length > 1) {
-                                tabOpened = true;
-                                console.log(`[SUCCESS] ✅ 2nd Tab Opened via Placement #${i + 1}`);
-                                
-                                // 2nd Tab Engagement (10 Scrolls)
-                                const adPage = pages[pages.length - 1];
-                                await adPage.bringToFront();
-                                for (let s = 1; s <= 10; s++) {
-                                    await adPage.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
-                                    await new Promise(r => setTimeout(r, 2000));
-                                    console.log(`[2nd TAB] Scroll ${s}/10 Done.`);
+            let isTabOpened = false;
+
+            // Har placement par 1-1 karke try karna
+            for (let selector of placements) {
+                if (isTabOpened) break; // Agar tab khul gaya to maze karo, loop band
+
+                const adElement = await page.$(selector);
+                if (adElement) {
+                    const box = await adElement.boundingBox();
+                    if (box && box.width > 10 && box.height > 10) {
+                        console.log(`[CLICK] Trying Placement: ${selector} at X:${box.x} Y:${box.y}`);
+                        
+                        // Human-like Mouse movement to center of AD
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        
+                        // 2nd Tab open hone ka event listener
+                        const pageTarget = browser.waitForTarget(t => t.opener() === page.target());
+                        
+                        // Click attempt
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+
+                        try {
+                            // 6 seconds wait ki tab khula ya nahi
+                            const newTarget = await Promise.race([
+                                pageTarget,
+                                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000))
+                            ]);
+
+                            if (newTarget) {
+                                const newPage = await newTarget.page();
+                                if (newPage) {
+                                    isTabOpened = true;
+                                    console.log(`[SUCCESS] ✅ 2nd Tab Opened! Starting 10 Scrolls.`);
+                                    
+                                    await newPage.bringToFront();
+                                    // 10 Times Random Scrolling
+                                    for (let i = 1; i <= 10; i++) {
+                                        await newPage.evaluate(() => window.scrollBy(0, 400));
+                                        await new Promise(r => setTimeout(r, 2500));
+                                        console.log(`[2nd TAB] Scroll ${i}/10`);
+                                    }
+                                    await newPage.close();
                                 }
                             }
+                        } catch (e) {
+                            console.log(`[RETRY] Placement ${selector} failed to open tab. Trying next format...`);
                         }
                     }
-                } catch (e) {
-                    console.log(`[RETRY] Placement #${i + 1} failed, trying next...`);
                 }
             }
-            
-            if (!tabOpened) console.log(`[FAILED] ❌ Could not trigger Ad Tab in this session.`);
-        } else {
-            console.log(`[NORMAL] Impression only session.`);
-            await page.evaluate(() => window.scrollBy(0, 600));
-            await new Promise(r => setTimeout(r, 10000));
         }
 
-    } catch (error) {
-        console.log(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } catch (err) {
+        console.error("Error:", err.message);
     } finally {
-        if (browser) {
-            await browser.close();
-            console.log(`[VIEW #${viewNumber}] Session Closed.\n`);
-        }
+        if (browser) await browser.close();
     }
 }
+
 // ===================================================================
 // Tool 8 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
