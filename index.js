@@ -1195,85 +1195,90 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
 // ===================================================================
-// ===================================================================
-// TOOL 8: SMART MULTI-AREA ADS CLICKER (6-12-18 LOGIC)
-// ===================================================================
 async function runUltimateRevenueTask(keyword, url, viewNumber) {
     const puppeteer = require('puppeteer');
     let browser;
     try {
-        console.log(`\n[VIEW #${viewNumber}] 🚀 Starting View: ${url}`);
+        console.log(`\n[VIEW #${viewNumber}] 🚀 Loading Tool Page: ${url}`);
         
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        // Screen size set karein taki coordinates sahi jagah click ho
-        await page.setViewport({ width: 1280, height: 800 });
+        await page.setViewport({ width: 1366, height: 768 });
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Ads load hone ka intezar
-        console.log(`[VIEW #${viewNumber}] ⏳ Waiting for Ads to load...`);
-        await new Promise(r => setTimeout(r, 10000));
+        // Ads load hone ka thoda intezar
+        await new Promise(r => setTimeout(r, 12000));
 
-        // --- ADS CLICKER LOGIC (6, 12, 18 VIEW) ---
-        const clickViews = [6, 12, 18];
-        if (clickViews.includes(viewNumber)) {
-            console.log(`[TARGET] 🎯 High Revenue View Detected (#${viewNumber}). Activating Clicker...`);
+        // --- ADS CLICKER LOGIC (6-12-18 VIEWS) ---
+        const targetViews = [6, 12, 18];
+        if (targetViews.includes(viewNumber)) {
+            console.log(`[TARGET] 🎯 High Revenue Session Detected (#${viewNumber})`);
 
-            // Ads Placement Locations (Math-based Coordinates)
-            const areas = [
-                { name: 'Top Banner', x: 640, y: 100 },
-                { name: 'Center Pop', x: 640, y: 400 },
-                { name: 'Bottom Float', x: 640, y: 700 },
-                { name: 'Right Side', x: 1100, y: 400 },
-                { name: 'Left Side', x: 150, y: 400 }
+            // Aapke HTML ke hisab se ads ki locations
+            const adSelectors = [
+                '.ad-wrap iframe', // Top & Middle Ads
+                '#container-ad1288ee73006596cffbc44a44b97c80', // Specific Ad Container
+                '.ad-wrap script + ins', // Fallback for auto-ads
+                '.ad-wrap:nth-child(1)', // Top placement
+                '.ad-wrap:nth-last-child(2)' // Bottom placement
             ];
 
             let tabOpened = false;
-            let clickCount = 0;
-
-            // Jab tak 2nd tab na khule (Max 5 clicks)
-            while (!tabOpened && clickCount < areas.length) {
-                const target = areas[clickCount];
-                console.log(`[CLICKING] 🖱️ Attempting click on ${target.name} [${target.x}, ${target.y}]`);
-
-                // Real mouse simulation
-                await page.mouse.move(target.x, target.y);
-                await page.mouse.click(target.x, target.y);
-                
-                // 5 second wait check karne ke liye ki naya tab khula ya nahi
-                await new Promise(r => setTimeout(r, 5000));
-
-                const pages = await browser.pages();
-                if (pages.length > 1) {
-                    tabOpened = true;
-                    console.log(`[SUCCESS] ✅ 2nd Tab Opened! Ad Click Verified for View #${viewNumber}`);
+            
+            // Loop jo har placement ko try karega jab tak tab na khule
+            for (let i = 0; i < adSelectors.length && !tabOpened; i++) {
+                try {
+                    console.log(`[TRYING] 🖱️ Attempting Click on Placement #${i + 1}...`);
                     
-                    // Stay on ad page for 15s for revenue validation
-                    const adPage = pages[pages.length - 1];
-                    try {
-                        await adPage.bringToFront();
-                        await new Promise(r => setTimeout(r, 15000));
-                    } catch (e) { /* ignore */ }
+                    const adElement = await page.$(adSelectors[i]);
+                    if (adElement) {
+                        const box = await adElement.boundingBox();
+                        if (box) {
+                            // Seedha ad ki location par mouse move karna
+                            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
+                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                            
+                            // 5 second wait check karne ke liye ki naya tab khula ya nahi
+                            await new Promise(r => setTimeout(r, 5000));
+                            
+                            const pages = await browser.pages();
+                            if (pages.length > 1) {
+                                tabOpened = true;
+                                console.log(`[SUCCESS] ✅ 2nd Tab Opened via Placement #${i + 1}`);
+                                
+                                // 2nd Tab Engagement (10 Scrolls)
+                                const adPage = pages[pages.length - 1];
+                                await adPage.bringToFront();
+                                for (let s = 1; s <= 10; s++) {
+                                    await adPage.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
+                                    await new Promise(r => setTimeout(r, 2000));
+                                    console.log(`[2nd TAB] Scroll ${s}/10 Done.`);
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.log(`[RETRY] Placement #${i + 1} failed, trying next...`);
                 }
-                clickCount++;
             }
+            
+            if (!tabOpened) console.log(`[FAILED] ❌ Could not trigger Ad Tab in this session.`);
         } else {
-            // Normal Impression logic for other views
-            console.log(`[IMPRESSION] 👀 Normal view session...`);
-            await page.evaluate(() => window.scrollBy(0, 400));
-            await new Promise(r => setTimeout(r, 15000));
+            console.log(`[NORMAL] Impression only session.`);
+            await page.evaluate(() => window.scrollBy(0, 600));
+            await new Promise(r => setTimeout(r, 10000));
         }
 
     } catch (error) {
-        console.log(`[RENDER LOG] ❌ Error in View #${viewNumber}: ${error.message}`);
+        console.log(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close();
-            console.log(`[VIEW #${viewNumber}] 🔒 Done.\n`);
+            console.log(`[VIEW #${viewNumber}] Session Closed.\n`);
         }
     }
 }
