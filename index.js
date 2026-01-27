@@ -1198,104 +1198,106 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 8: MULTI-FORMAT AD CLICKER + 2ND TAB ENGAGEMENT
 // ===================================================================
+// ===================================================================
+// TOOL 8: PRECISION AD-CLICKER FOR MONETAG & ADSTERRA
+// ===================================================================
 async function runUltimateRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // "new" is better for bypassing detection
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        page.setDefaultNavigationTimeout(60000); 
-        await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
+        
         console.log(`[VIEW #${viewNumber}] Target: ${url}`);
         
-        // 1. Visit Target Site
-        await page.goto(url, { waitUntil: 'networkidle2' });
+        // 1. Page Load
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 50000); 
         const clickCycle = viewNumber % 20; 
-        let adClicked = false;
+        // Logic: 6, 12, 18 views par click hoga
+        const shouldClick = [6, 12, 18].includes(clickCycle);
 
-        // 2. Behavioral Loop
-        while (Date.now() - startTime < targetStayTime) {
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await new Promise(r => setTimeout(r, 4000));
+        if (shouldClick) {
+            console.log(`\x1b[33m[TARGET FOUND]\x1b[0m View #${viewNumber} is a Money-Click view.`);
+            
+            // Wait for Ads to load (Aapke page par scripts heavy hain)
+            await new Promise(r => setTimeout(r, 10000)); 
 
-            // Rotation Logic: 6, 12, 18
-            if (!adClicked && [6, 12, 18].includes(clickCycle)) {
-                
-                // Specific Selectors for Monetag & Adsterra
-                const adSelectors = [
-                    'iframe[src*="monetag"]', 
-                    'iframe[src*="adsterra"]',
-                    '.social-bar-container', // Adsterra Social Bar
-                    '[id^="pro_"]', // Monetag In-Page Push
-                    'a[href*="smartlink"]', // SmartLink
-                    'ins.adsbygoogle', 
-                    '.ad-notification',
-                    '[class*="banner"]'
-                ];
+            // Specific Selectors based on your HTML (HighPerformanceFormat & EffectiveGate)
+            const adSelectors = [
+                'iframe[src*="highperformanceformat.com"]',
+                'iframe[src*="effectivegatecpm.com"]',
+                'div[id^="container-ad"]', // Adsterra containers
+                'ins.adsbygoogle',
+                '#shortUrl', // Sometimes clicking near inputs triggers popunders
+                '.ad-wrap iframe'
+            ];
 
-                for (const selector of adSelectors) {
-                    const ads = await page.$$(selector);
-                    if (ads.length > 0) {
-                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                        const box = await targetAd.boundingBox();
+            let adFound = false;
+            for (const selector of adSelectors) {
+                const ads = await page.$$(selector);
+                if (ads.length > 0) {
+                    // Kisi bhi ek random ad ko pick karein
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
 
-                        if (box && box.width > 5) {
-                            console.log(`\x1b[42m[AD-FOUND]\x1b[0m Format: ${selector}. Clicking...`);
-                            
-                            // Capture New Tab Target
-                            const newPagePromise = new Promise(x => browser.once('targetcreated', target => x(target.page())));
-                            
-                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                            adClicked = true;
+                    if (box && box.width > 5) {
+                        console.log(`\x1b[42m[CLICKING]\x1b[0m Format: ${selector}`);
+                        
+                        // New Tab Promise
+                        const newPagePromise = new Promise(x => browser.once('targetcreated', target => x(target.page())));
+                        
+                        // Human-like click
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        
+                        adFound = true;
 
-                            // 3. Handle 2nd Tab Engagement
+                        // --- 2nd TAB ENGAGEMENT ---
+                        try {
                             const adPage = await newPagePromise;
                             if (adPage) {
-                                console.log(`\x1b[44m[2ND TAB]\x1b[0m Switched to Ad Page. Engaging for 15s...`);
-                                await adPage.waitForLoadState('domcontentloaded').catch(() => {});
+                                console.log(`\x1b[44m[ENGAGED]\x1b[0m 2nd Tab Detected. Staying 12s...`);
+                                await adPage.bringToFront();
                                 
-                                // Random Scroll on Ad Site
+                                // Scroll activity on ad page to satisfy advertiser
                                 for(let i=0; i<3; i++) {
-                                    await adPage.evaluate(() => window.scrollBy(0, 300));
-                                    await new Promise(r => setTimeout(r, 4000));
+                                    await adPage.evaluate(() => window.scrollBy(0, 400));
+                                    await new Promise(r => setTimeout(r, 3000));
                                 }
-                                await adPage.close().catch(() => {});
-                                console.log(`[2ND TAB] Closed.`);
+                                await adPage.close();
                             }
-                            break;
-                        }
+                        } catch (e) { console.log("Click registered but no new tab opened."); }
+                        break;
                     }
                 }
-
-                // Fallback for Popunder (Body Click)
-                if (!adClicked && clickCycle === 18) {
-                    console.log(`[FALLBACK] Triggering Popunder via Body Click...`);
-                    await page.click('body');
-                    adClicked = true;
-                    await new Promise(r => setTimeout(r, 10000));
-                }
             }
+
+            // FALLBACK: Agar banner nahi mila toh Popunder ke liye Body click
+            if (!adFound) {
+                console.log("[FALLBACK] No banner found, clicking body for Popunder...");
+                await page.click('body', { delay: 100 });
+                await new Promise(r => setTimeout(r, 8000));
+            }
+        } else {
+            // Normal View (No Click) - Just stay and scroll
+            await page.evaluate(() => window.scrollBy(0, 800));
+            await new Promise(r => setTimeout(r, 15000));
         }
-        
-        console.log(`[DONE] View #${viewNumber} Finished.`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close().catch(() => {});
+        if (browser) await browser.close();
+        console.log(`[FINISH] Browser Closed for View #${viewNumber}`);
     }
 }
 
