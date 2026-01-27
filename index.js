@@ -1196,135 +1196,108 @@ app.post('/popup', async (req, res) => {
 // UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
 // ===================================================================
 // ===================================================================
-// UPDATED TOOL 8: STABLE MULTI-FORMAT AD CLICKER (BANNER, PUSH, POP)
+// UPDATED TOOL 8: MULTI-FORMAT AD CLICKER + 2ND TAB ENGAGEMENT
 // ===================================================================
-
 async function runUltimateRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
-        // Ek time mein ek hi browser chale isliye hum await ka use kar rahe hain
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        // Timeout 60s tak rakha hai heavy ads load hone ke liye
         page.setDefaultNavigationTimeout(60000); 
         await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
         console.log(`[VIEW #${viewNumber}] Target: ${url}`);
         
-        // Step 1: Visit Target Site
+        // 1. Visit Target Site
         await page.goto(url, { waitUntil: 'networkidle2' });
 
-        // Random Page Stay Time: 30 to 50 seconds (User request ke mutabik)
-        const targetStayTime = randomInt(30000, 50000); 
         const startTime = Date.now();
-        let actionTaken = false;
-
-        // Click Rotation: 6, 12, aur 18 view par click hoga
+        const targetStayTime = randomInt(30000, 50000); 
         const clickCycle = viewNumber % 20; 
+        let adClicked = false;
 
+        // 2. Behavioral Loop
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scroll behavior
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
             await new Promise(r => setTimeout(r, 4000));
 
-            // Ads Click Logic
-            if (!actionTaken && [6, 12, 18].includes(clickCycle)) {
-                console.log(`[SEARCHING ADS] View #${viewNumber} - Identifying Ad Format...`);
+            // Rotation Logic: 6, 12, 18
+            if (!adClicked && [6, 12, 18].includes(clickCycle)) {
                 
-                // --- ADVANCED IFRAME & ELEMENT DETECTION ---
-                const frames = page.frames();
-                let adFound = false;
+                // Specific Selectors for Monetag & Adsterra
+                const adSelectors = [
+                    'iframe[src*="monetag"]', 
+                    'iframe[src*="adsterra"]',
+                    '.social-bar-container', // Adsterra Social Bar
+                    '[id^="pro_"]', // Monetag In-Page Push
+                    'a[href*="smartlink"]', // SmartLink
+                    'ins.adsbygoogle', 
+                    '.ad-notification',
+                    '[class*="banner"]'
+                ];
 
-                for (const frame of frames) {
-                    try {
-                        // Har tarah ke format ke selectors (Monetag/Adsterra/Adsense)
-                        const adSelector = 'ins.adsbygoogle, iframe[src*="googleads"], a[href*="smartlink"], .ad-notification, #container-ad1288ee73006596cffbc44a44b97c80, [class*="banner"]';
-                        const adElement = await frame.$(adSelector);
+                for (const selector of adSelectors) {
+                    const ads = await page.$$(selector);
+                    if (ads.length > 0) {
+                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                        const box = await targetAd.boundingBox();
 
-                        if (adElement) {
-                            const box = await adElement.boundingBox();
-                            if (box && box.width > 5 && box.height > 5) {
-                                console.log(`\x1b[42m[AD-FOUND]\x1b[0m Format detected in frame.`);
+                        if (box && box.width > 5) {
+                            console.log(`\x1b[42m[AD-FOUND]\x1b[0m Format: ${selector}. Clicking...`);
+                            
+                            // Capture New Tab Target
+                            const newPagePromise = new Promise(x => browser.once('targetcreated', target => x(target.page())));
+                            
+                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                            adClicked = true;
+
+                            // 3. Handle 2nd Tab Engagement
+                            const adPage = await newPagePromise;
+                            if (adPage) {
+                                console.log(`\x1b[44m[2ND TAB]\x1b[0m Switched to Ad Page. Engaging for 15s...`);
+                                await adPage.waitForLoadState('domcontentloaded').catch(() => {});
                                 
-                                // Scroll and Click
-                                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
-                                await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                                
-                                adFound = true;
-                                actionTaken = true;
-                                console.log(`\x1b[44m[SUCCESS]\x1b[0m Ad Clicked! Staying 15s for conversion...`);
-                                await new Promise(r => setTimeout(r, 15000)); // Stay after click for valid CTR
-                                break;
+                                // Random Scroll on Ad Site
+                                for(let i=0; i<3; i++) {
+                                    await adPage.evaluate(() => window.scrollBy(0, 300));
+                                    await new Promise(r => setTimeout(r, 4000));
+                                }
+                                await adPage.close().catch(() => {});
+                                console.log(`[2ND TAB] Closed.`);
                             }
+                            break;
                         }
-                    } catch (fErr) { continue; }
+                    }
                 }
 
-                // Fallback: Agar koi format na mile toh body click (Popunder trigger)
-                if (!adFound && clickCycle === 18) {
+                // Fallback for Popunder (Body Click)
+                if (!adClicked && clickCycle === 18) {
+                    console.log(`[FALLBACK] Triggering Popunder via Body Click...`);
                     await page.click('body');
-                    actionTaken = true;
-                    console.log(`[FALLBACK] Body click triggered for Popunder.`);
+                    adClicked = true;
                     await new Promise(r => setTimeout(r, 10000));
                 }
             }
         }
         
-        console.log(`[DONE] View #${viewNumber} completed.`);
+        console.log(`[DONE] View #${viewNumber} Finished.`);
 
     } catch (error) {
-        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            // RAM Cleanup: Pehle saare pages close karein phir browser
-            const openPages = await browser.pages();
-            await Promise.all(openPages.map(p => p.close().catch(() => {})));
-            await browser.close().catch(() => {});
-            console.log(`[CLEANUP] Browser closed for View #${viewNumber}`);
-        }
+        if (browser) await browser.close().catch(() => {});
     }
 }
-
-// ===================================================================
-// Tool 8 Endpoint: Fixed Background Loop
-// ===================================================================
-app.post('/ultimate', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
-        if (!urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: "URLs are required!" });
-        }
-
-        const totalViews = parseInt(views);
-        res.status(200).json({ success: true, message: `Task Started: ${totalViews} Views. Single-browser mode active.` });
-
-        // Background Worker (Awaited loop taaki RAM crash na ho)
-        (async () => {
-            for (let i = 1; i <= totalViews; i++) {
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                // "await" yahan zaroori hai taaki ek khatam hone par hi dusra shuru ho
-                await runUltimateRevenueTask(keyword, randomUrl, i); 
-
-                // Chhota break next browser session se pehle
-                await new Promise(r => setTimeout(r, 5000));
-            }
-        })();
-    } catch (err) {
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
 
 // ===================================================================
 // Tool 8 Endpoint (Updated for Multi-Site Rotation)
