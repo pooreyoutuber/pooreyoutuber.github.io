@@ -1195,93 +1195,137 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
 // ===================================================================
+// ===================================================================
+// UPDATED TOOL 8: STABLE MULTI-FORMAT AD CLICKER (BANNER, PUSH, POP)
+// ===================================================================
 
 async function runUltimateRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
+        // Ek time mein ek hi browser chale isliye hum await ka use kar rahe hain
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
+        // Timeout 60s tak rakha hai heavy ads load hone ke liye
+        page.setDefaultNavigationTimeout(60000); 
         await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. Visit Target Site
         console.log(`[VIEW #${viewNumber}] Target: ${url}`);
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000 });
+        
+        // Step 1: Visit Target Site
+        await page.goto(url, { waitUntil: 'networkidle2' });
 
+        // Random Page Stay Time: 30 to 50 seconds (User request ke mutabik)
+        const targetStayTime = randomInt(30000, 50000); 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); 
         let actionTaken = false;
 
-        // --- HAR 6 VIEWS PAR CLICKING ROTATION LOGIC ---
-        // 6th View: Banner/Vignette, 12th View: Push/IPP, 18th View: Popunder/Smartlink
+        // Click Rotation: 6, 12, aur 18 view par click hoga
         const clickCycle = viewNumber % 20; 
 
         while (Date.now() - startTime < targetStayTime) {
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            // Natural Scroll behavior
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            await new Promise(r => setTimeout(r, 4000));
 
-            // Trigger Click on specific intervals
+            // Ads Click Logic
             if (!actionTaken && [6, 12, 18].includes(clickCycle)) {
+                console.log(`[SEARCHING ADS] View #${viewNumber} - Identifying Ad Format...`);
                 
-                let selector = "";
-                let actionName = "";
+                // --- ADVANCED IFRAME & ELEMENT DETECTION ---
+                const frames = page.frames();
+                let adFound = false;
 
-                if (clickCycle === 6) {
-                    // 🎯 TARGET: Banners, Vignettes & Adsense
-                    selector = 'ins.adsbygoogle, iframe[id^="aswift"], .ad-unit, [class*="banner"], [id*="vignette"]';
-                    actionName = "BANNER/VIGNETTE";
-                } 
-                else if (clickCycle === 12) {
-                    // 🔔 TARGET: Push Notifications & In-Page Push (IPP)
-                    selector = '.ad-notification, .push-ad, #onesignal-popover-dialog, .pwa-tag, [id*="ipp"]';
-                    actionName = "PUSH/IPP";
-                } 
-                else if (clickCycle === 18) {
-                    // 🔗 TARGET: Smartlinks, Popunders, & Interstitials
-                    // Smartlinks usually look like regular links but with specific patterns
-                    selector = 'a[href*="smartlink"], a[href*="slk"], .interstitial-close, [id*="popunder"], body'; // Body click for Popunder
-                    actionName = "POPUNDER/SMARTLINK";
+                for (const frame of frames) {
+                    try {
+                        // Har tarah ke format ke selectors (Monetag/Adsterra/Adsense)
+                        const adSelector = 'ins.adsbygoogle, iframe[src*="googleads"], a[href*="smartlink"], .ad-notification, #container-ad1288ee73006596cffbc44a44b97c80, [class*="banner"]';
+                        const adElement = await frame.$(adSelector);
+
+                        if (adElement) {
+                            const box = await adElement.boundingBox();
+                            if (box && box.width > 5 && box.height > 5) {
+                                console.log(`\x1b[42m[AD-FOUND]\x1b[0m Format detected in frame.`);
+                                
+                                // Scroll and Click
+                                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
+                                await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                                
+                                adFound = true;
+                                actionTaken = true;
+                                console.log(`\x1b[44m[SUCCESS]\x1b[0m Ad Clicked! Staying 15s for conversion...`);
+                                await new Promise(r => setTimeout(r, 15000)); // Stay after click for valid CTR
+                                break;
+                            }
+                        }
+                    } catch (fErr) { continue; }
                 }
 
-                try {
-                    const adElement = await page.$(selector);
-                    if (adElement) {
-                        const box = await adElement.boundingBox();
-                        if (box && box.width > 2 && box.height > 2) {
-                            console.log(`\x1b[42m[AD-CLICK]\x1b[0m View #${viewNumber} | Type: ${actionName} | Found!`);
-                            
-                            // Human-like click
-                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                            actionTaken = true;
-
-                            // Agar Popunder/Smartlink hai toh 15s wait karein conversion ke liye
-                            await new Promise(r => setTimeout(r, 15000));
-                        }
-                    } else if (clickCycle === 18) {
-                        // Fallback: Agar kuch na mile toh Body par click karein Popunder trigger karne ke liye
-                        await page.click('body');
-                        console.log(`\x1b[43m[AD-CLICK]\x1b[0m View #${viewNumber} | Triggered Body Click for Popunder`);
-                        actionTaken = true;
-                        await new Promise(r => setTimeout(r, 15000));
-                    }
-                } catch (e) {
-                    console.log(`Click Attempt Failed: ${e.message}`);
+                // Fallback: Agar koi format na mile toh body click (Popunder trigger)
+                if (!adFound && clickCycle === 18) {
+                    await page.click('body');
+                    actionTaken = true;
+                    console.log(`[FALLBACK] Body click triggered for Popunder.`);
+                    await new Promise(r => setTimeout(r, 10000));
                 }
             }
-            await new Promise(r => setTimeout(r, 5000));
         }
-        console.log(`[DONE] View #${viewNumber} finished.`);
+        
+        console.log(`[DONE] View #${viewNumber} completed.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close().catch(() => {});
+        if (browser) {
+            // RAM Cleanup: Pehle saare pages close karein phir browser
+            const openPages = await browser.pages();
+            await Promise.all(openPages.map(p => p.close().catch(() => {})));
+            await browser.close().catch(() => {});
+            console.log(`[CLEANUP] Browser closed for View #${viewNumber}`);
+        }
     }
 }
+
+// ===================================================================
+// Tool 8 Endpoint: Fixed Background Loop
+// ===================================================================
+app.post('/ultimate', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+        if (!urls || !Array.isArray(urls) || urls.length === 0) {
+            return res.status(400).json({ success: false, message: "URLs are required!" });
+        }
+
+        const totalViews = parseInt(views);
+        res.status(200).json({ success: true, message: `Task Started: ${totalViews} Views. Single-browser mode active.` });
+
+        // Background Worker (Awaited loop taaki RAM crash na ho)
+        (async () => {
+            for (let i = 1; i <= totalViews; i++) {
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                
+                // "await" yahan zaroori hai taaki ek khatam hone par hi dusra shuru ho
+                await runUltimateRevenueTask(keyword, randomUrl, i); 
+
+                // Chhota break next browser session se pehle
+                await new Promise(r => setTimeout(r, 5000));
+            }
+        })();
+    } catch (err) {
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // ===================================================================
 // Tool 8 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
