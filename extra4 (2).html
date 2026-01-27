@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Shorts Multi-Viewer | YouTubeHelper</title>
+
+   <script async src="https://www.googletagmanager.com/gtag/js?id=G-9863GWKBRP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-9863GWKBRP');
+</script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --primary: #FF3D3D;
+            --text-main: #ffffff;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background: #0f172a;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Header --- */
+        .glass-header {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(15px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px 20px; }
+
+        /* --- Ad Styling --- */
+        .ad-wrap {
+            margin: 20px auto;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            min-height: 100px;
+        }
+
+        /* --- Input Area --- */
+        .input-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            max-width: 700px;
+            margin: 20px auto;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 15px 20px;
+            border-radius: 15px;
+            color: white;
+            outline: none;
+            font-size: 16px;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 30px;
+            border-radius: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-add:hover { background: #ff5e5e; transform: scale(1.05); }
+
+        /* --- Shorts Grid (Portrait Mode) --- */
+        .shorts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .short-slot {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            aspect-ratio: 9/16;
+            border: 2px solid var(--glass-border);
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .short-slot:hover { border-color: var(--primary); transform: translateY(-5px); }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        .btn-remove {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(255, 61, 61, 0.8);
+            color: white; border: none;
+            border-radius: 50%; width: 30px; height: 30px;
+            cursor: pointer; font-weight: bold;
+            z-index: 5;
+        }
+
+        /* --- SEO Description --- */
+        .content-section {
+            margin-top: 40px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 30px;
+            line-height: 1.8;
+            color: #cbd5e1;
+        }
+
+        .content-section h2 { color: var(--primary); margin-bottom: 20px; font-size: 2rem; }
+
+        @media (max-width: 600px) {
+            .shorts-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .input-group { flex-direction: column; }
+            .btn-add { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="glass-header">
+        <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:800; font-size:24px;">🚀 YouTubeHelper</a>
+        <span style="font-size: 14px; opacity: 0.7;">Shorts Multi-Viewer v2.0</span>
+    </header>
+
+    <div class="container">
+        
+        <div class="ad-wrap">
+            <script>
+                atOptions = { 'key' : '3fd5d7ef4ee9ad406a6171d1f98a0afe', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
+            </script>
+            <script src="https://www.highperformanceformat.com/3fd5d7ef4ee9ad406a6171d1f98a0afe/invoke.js"></script>
+        </div>
+
+        <div class="input-card">
+            <h1 style="margin-bottom: 10px;">YouTube Shorts View Booster</h1>
+            <p style="opacity: 0.8;">Paste your Shorts URL to play multiple instances side-by-side.</p>
+            
+            <div class="input-group">
+                <input type="text" id="shortUrl" placeholder="https://youtube.com/shorts/abcd123...">
+                <button class="btn-add" onclick="addShort()">Add Short</button>
+            </div>
+            <p id="counter" style="margin-top: 15px; font-size: 14px;">Active Instances: 0 / 20</p>
+        </div>
+
+        <div class="ad-wrap">
+            <script async="async" data-cfasync="false" src="https://pl28565685.effectivegatecpm.com/ad1288ee73006596cffbc44a44b97c80/invoke.js"></script>
+            <div id="container-ad1288ee73006596cffbc44a44b97c80"></div>
+        </div>
+
+        <div class="ad-wrap">
+            <script>
+                atOptions = { 'key' : '3fd5d7ef4ee9ad406a6171d1f98a0afe', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
+            </script>
+            <script src="https://www.highperformanceformat.com/3fd5d7ef4ee9ad406a6171d1f98a0afe/invoke.js"></script>
+        </div>
+
+        <div class="shorts-grid" id="shortsGrid"></div>
+
+        <div class="content-section">
+            <h2>Revolutionize Your Short-Form Content Strategy with YouTubeHelper</h2>
+            <p>Welcome to the most advanced <strong>YouTube Shorts Multi-Viewer</strong> available online. In the competitive world of short-form video, engagement and visibility are key. Our tool is specifically engineered to help creators, marketers, and enthusiasts view multiple YouTube Shorts simultaneously. This is not just a viewer; it's a productivity powerhouse designed for those who need to monitor content trends, analyze competitor shorts, or simply enjoy a multi-stream experience without the lag of multiple browser tabs.</p>
+            
+            <div class="ad-wrap">
+                <script async="async" data-cfasync="false" src="https://pl28565685.effectivegatecpm.com/ad1288ee73006596cffbc44a44b97c80/invoke.js"></script>
+                <div id="container-ad1288ee73006596cffbc44a44b97c80"></div>
+            </div>
+
+            <p><strong>Designed for Portrait Performance:</strong> Unlike standard video players, our Shorts viewer is optimized for the 9:16 aspect ratio. This ensures that every video fits perfectly within its "Glass Container," providing a crisp and clear viewing experience. When you add a link, our system automatically strips the unnecessary metadata and focuses purely on the video player. By default, videos are muted to comply with browser autoplay policies, allowing you to load up to 20 instances without causing an immediate audio overlap.</p>
+
+            <p><strong>Seamless User Experience:</strong> To use this tool, simply copy the URL of any YouTube Short. Our intelligent URL parser handles various formats, whether it's a direct 'shorts/' link or a standard mobile sharing link. Once you click "Add Short," a new slot is generated in our responsive grid. On a desktop, you'll see a beautiful side-by-side arrangement, while on mobile, the grid adjusts to show two videos per row, making it the perfect tool for testing how your content looks on different screen sizes.</p>
+
+            <div class="ad-wrap">
+                <script>
+                    atOptions = { 'key' : '3fd5d7ef4ee9ad406a6171d1f98a0afe', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
+                </script>
+                <script src="https://www.highperformanceformat.com/3fd5d7ef4ee9ad406a6171d1f98a0afe/invoke.js"></script>
+            </div>
+
+            <p><strong>Secure, Private, and Efficient:</strong> At YouTubeHelper, we believe in the "Privacy First" philosophy. This tool operates entirely on your local machine. We do not store your video history or collect any personal data. Furthermore, using embedded iFrames is significantly more memory-efficient than opening 20 separate browser windows, ensuring that your PC or Smartphone remains fast and responsive. Whether you are a social media manager tracking viral loops or a creator boosting your own workflow, our YouTube Shorts Multi-Viewer is your go-to digital utility in 2026.</p>
+        </div>
+    </div>
+
+    <script src="https://pl28565677.effectivegatecpm.com/90/50/f5/9050f54b6c10de9331b225e123bb342c.js"></script>
+    <script src="https://pl28565677.effectivegatecpm.com/90/50/f5/9050f54b6c10de9331b225e123bb342c.js"></script>
+    <script src="https://pl28566028.effectivegatecpm.com/cd/b1/3e/cdb13e373cdb73222c6ba23b3fa54e54.js"></script>
+    <script src="https://pl28566028.effectivegatecpm.com/cd/b1/3e/cdb13e373cdb73222c6ba23b3fa54e54.js"></script>
+
+    <script>
+        let shortCount = 0;
+        const maxShorts = 20;
+
+        function extractShortID(url) {
+            const regExp = /^.*(shorts\/|youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length == 11) ? match[2] : null;
+        }
+
+        function addShort() {
+            const input = document.getElementById('shortUrl');
+            const grid = document.getElementById('shortsGrid');
+            const videoId = extractShortID(input.value);
+
+            if (!videoId) {
+                alert("Please enter a valid YouTube Shorts URL!");
+                return;
+            }
+
+            if (shortCount >= maxShorts) {
+                alert("Maximum 20 Shorts reached!");
+                return;
+            }
+
+            shortCount++;
+            document.getElementById('counter').innerText = `Active Instances: ${shortCount} / 20`;
+
+            const slot = document.createElement('div');
+            slot.className = 'short-slot';
+            slot.innerHTML = `
+                <button class="btn-remove" onclick="removeShort(this)">X</button>
+                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                </iframe>
+            `;
+            grid.appendChild(slot);
+            input.value = "";
+        }
+
+        function removeShort(btn) {
+            btn.parentElement.remove();
+            shortCount--;
+            document.getElementById('counter').innerText = `Active Instances: ${shortCount} / 20`;
+        }
+    </script>
+</body>
+</html>
