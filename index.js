@@ -1195,23 +1195,6 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
 // ===================================================================
-// --- ADVANCED CONFIGURATION DATA ---
-const DEVICE_PROFILES = [
-    { name: 'Samsung Galaxy S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.64 Mobile Safari/537.36', view: { width: 312, height: 680 }, lang: 'en-US,en;q=0.9' },
-    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932 }, lang: 'en-GB,en;q=0.8' },
-    { name: 'iPad Pro 12.9', ua: 'Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', view: { width: 1024, height: 1366 }, lang: 'fr-FR,fr;q=0.9' },
-    { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 }, lang: 'en-US,en;q=0.9' },
-    { name: 'MacBook Pro - Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15', view: { width: 1728, height: 1117 }, lang: 'pl-PL,pl;q=0.9' },
-    { name: 'Linux Desktop - Firefox', ua: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0', view: { width: 1366, height: 768 }, lang: 'en-US,en;q=0.5' }
-];
-
-const REFERRERS = [
-    'https://www.facebook.com/',
-    'https://www.reddit.com/',
-    'https://t.co/', // X (Twitter)
-    'https://www.linkedin.com/',
-    'https://www.google.com/search?q='
-];
 
 // --- CORE SIMULATION FUNCTION ---
 async function runAdvancedRevenueTask(keyword, url, viewNumber) {
