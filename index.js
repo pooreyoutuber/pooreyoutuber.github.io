@@ -1195,91 +1195,82 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
 // ===================================================================
+// ===================================================================
+// 5. GSC & ADSENSE REVENUE BOOSTER (WITH JAPAN-FOCUSED FREE PROXIES)
+// ===================================================================
+
 async function runUltimateRevenueTask(keyword, url, viewNumber) {
-    const puppeteer = require('puppeteer');
     let browser;
     try {
+        // Aapki di gayi Free Proxy List (Randomly pick hogi)
+        const proxies = [
+            '167.99.236.14:80', '212.227.65.114:80', '213.142.156.97:80', '81.177.166.169:10808',
+            '154.61.76.24:8083', '45.229.6.75:999', '110.38.226.139:8080', '82.26.74.193:9009',
+            '163.5.128.37:14270', '195.133.11.246:1080', '38.224.21.1:999', '188.132.222.45:8080',
+            '103.121.199.138:62797', '119.18.147.179:96', '115.245.89.250:8080', '209.14.117.53:999'
+            // ... (Baki IPs bhi array mein isi tarah add kar sakte hain)
+        ];
+        
+        const selectedProxy = proxies[Math.floor(Math.random() * proxies.length)];
+        console.log(`[PROXY] View #${viewNumber} using IP: ${selectedProxy}`);
+
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                `--proxy-server=http://${selectedProxy}`, // Proxy Injection
+                '--lang=ja-JP,ja;q=0.9' // Japan Language Signal
+            ]
         });
 
         const page = await browser.newPage();
-        // Standard Desktop Viewport taaki X, Y coordinates sahi rahein
+        
+        // Anti-Detection: Timezone Japan ka set karna
+        await page.emulateTimezone('Asia/Tokyo');
         await page.setViewport({ width: 1366, height: 768 });
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // Ads load hone ka buffer time
-        await new Promise(r => setTimeout(r, 10000));
+        // 1. Google Search Simulation
+        const googleUrl = `https://www.google.co.jp/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-        // --- 100% STICKY CLICK LOGIC (View 6, 12, 18 par trigger) ---
-        const targetViews = [6, 12, 18];
-        if (targetViews.includes(viewNumber)) {
-            console.log(`[TARGET] View #${viewNumber}: Starting High-Precision Clicking...`);
+        // 2. Visit Target Site
+        console.log(`[VISITING] URL: ${url}`);
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
+        });
 
-            // Aapki files ke hisab se exact selectors
-            const placements = [
-                '.ad-wrap iframe', // Format 1: Standard Iframe Ads
-                '#container-ad1288ee73006596cffbc44a44b97c80', // Format 2: EffectiveGate Container
-                '.ad-wrap ins.adsbygoogle', // Format 3: Google Ads (if any)
-                '.ad-wrap:first-of-type', // Location 1: Top Ad
-                '.ad-wrap:last-of-type'   // Location 2: Bottom Ad
-            ];
+        // 3. Human Behavior & Ad-Clicker
+        const stayTime = randomInt(35000, 45000); // 35-45s stay for high retention
+        const startTime = Date.now();
 
-            let isTabOpened = false;
+        while (Date.now() - startTime < stayTime) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await new Promise(r => setTimeout(r, 5000));
 
-            // Har placement par 1-1 karke try karna
-            for (let selector of placements) {
-                if (isTabOpened) break; // Agar tab khul gaya to maze karo, loop band
-
-                const adElement = await page.$(selector);
-                if (adElement) {
-                    const box = await adElement.boundingBox();
-                    if (box && box.width > 10 && box.height > 10) {
-                        console.log(`[CLICK] Trying Placement: ${selector} at X:${box.x} Y:${box.y}`);
-                        
-                        // Human-like Mouse movement to center of AD
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        
-                        // 2nd Tab open hone ka event listener
-                        const pageTarget = browser.waitForTarget(t => t.opener() === page.target());
-                        
-                        // Click attempt
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-
-                        try {
-                            // 6 seconds wait ki tab khula ya nahi
-                            const newTarget = await Promise.race([
-                                pageTarget,
-                                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000))
-                            ]);
-
-                            if (newTarget) {
-                                const newPage = await newTarget.page();
-                                if (newPage) {
-                                    isTabOpened = true;
-                                    console.log(`[SUCCESS] ✅ 2nd Tab Opened! Starting 10 Scrolls.`);
-                                    
-                                    await newPage.bringToFront();
-                                    // 10 Times Random Scrolling
-                                    for (let i = 1; i <= 10; i++) {
-                                        await newPage.evaluate(() => window.scrollBy(0, 400));
-                                        await new Promise(r => setTimeout(r, 2500));
-                                        console.log(`[2nd TAB] Scroll ${i}/10`);
-                                    }
-                                    await newPage.close();
-                                }
-                            }
-                        } catch (e) {
-                            console.log(`[RETRY] Placement ${selector} failed to open tab. Trying next format...`);
-                        }
+            // Ads Clicker Logic
+            if (Math.random() < 0.15) { // 15% Click chance
+                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const ad = ads[Math.floor(Math.random() * ads.length)];
+                    const rect = await ad.boundingBox();
+                    if (rect) {
+                        console.log("🎯 Ad Clicked!");
+                        await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
+                        await new Promise(r => setTimeout(r, 15000)); // Advertiser site stay
+                        break;
                     }
                 }
             }
         }
+        console.log(`[DONE] View #${viewNumber} finished.`);
 
-    } catch (err) {
-        console.error("Error:", err.message);
+    } catch (error) {
+        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
