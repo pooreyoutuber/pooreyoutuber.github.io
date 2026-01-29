@@ -1197,7 +1197,7 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 
 // --- CORE SIMULATION FUNCTION ---
-async function runAdvancedRevenueTask(keyword, url, viewNumber) {
+async function runUltimateRevenueTask(keyword, randomUrl, i) {
     let browser;
     try {
         browser = await puppeteer.launch({
