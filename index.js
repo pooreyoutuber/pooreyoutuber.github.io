@@ -1195,88 +1195,111 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
 // ===================================================================
-// ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (WITH JAPAN-FOCUSED FREE PROXIES)
-// ===================================================================
+// --- ADVANCED CONFIGURATION DATA ---
+const DEVICE_PROFILES = [
+    { name: 'Samsung Galaxy S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.64 Mobile Safari/537.36', view: { width: 312, height: 680 }, lang: 'en-US,en;q=0.9' },
+    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932 }, lang: 'en-GB,en;q=0.8' },
+    { name: 'iPad Pro 12.9', ua: 'Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', view: { width: 1024, height: 1366 }, lang: 'fr-FR,fr;q=0.9' },
+    { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 }, lang: 'en-US,en;q=0.9' },
+    { name: 'MacBook Pro - Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15', view: { width: 1728, height: 1117 }, lang: 'pl-PL,pl;q=0.9' },
+    { name: 'Linux Desktop - Firefox', ua: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0', view: { width: 1366, height: 768 }, lang: 'en-US,en;q=0.5' }
+];
 
-async function runUltimateRevenueTask(keyword, url, viewNumber) {
+const REFERRERS = [
+    'https://www.facebook.com/',
+    'https://www.reddit.com/',
+    'https://t.co/', // X (Twitter)
+    'https://www.linkedin.com/',
+    'https://www.google.com/search?q='
+];
+
+// --- CORE SIMULATION FUNCTION ---
+async function runAdvancedRevenueTask(keyword, url, viewNumber) {
     let browser;
     try {
-        // Aapki di gayi Free Proxy List (Randomly pick hogi)
-        const proxies = [
-            '167.99.236.14:80', '212.227.65.114:80', '213.142.156.97:80', '81.177.166.169:10808',
-            '154.61.76.24:8083', '45.229.6.75:999', '110.38.226.139:8080', '82.26.74.193:9009',
-            '163.5.128.37:14270', '195.133.11.246:1080', '38.224.21.1:999', '188.132.222.45:8080',
-            '103.121.199.138:62797', '119.18.147.179:96', '115.245.89.250:8080', '209.14.117.53:999'
-            // ... (Baki IPs bhi array mein isi tarah add kar sakte hain)
-        ];
-        
-        const selectedProxy = proxies[Math.floor(Math.random() * proxies.length)];
-        console.log(`[PROXY] View #${viewNumber} using IP: ${selectedProxy}`);
-
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                `--proxy-server=http://${selectedProxy}`, // Proxy Injection
-                '--lang=ja-JP,ja;q=0.9' // Japan Language Signal
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        
-        // Anti-Detection: Timezone Japan ka set karna
-        await page.emulateTimezone('Asia/Tokyo');
-        await page.setViewport({ width: 1366, height: 768 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
+        const referral = REFERRERS[Math.floor(Math.random() * REFERRERS.length)] + (referral.includes('google') ? encodeURIComponent(keyword) : '');
 
-        // 1. Google Search Simulation
-        const googleUrl = `https://www.google.co.jp/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        // Apply Fingerprinting
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view);
+        await page.setExtraHTTPHeaders({ 'Accept-Language': profile.lang });
 
-        // 2. Visit Target Site
-        console.log(`[VISITING] URL: ${url}`);
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
+        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Lang: ${profile.lang.split(',')[0]}`);
 
-        // 3. Human Behavior & Ad-Clicker
-        const stayTime = randomInt(35000, 45000); // 35-45s stay for high retention
+        // Step 1: Visit Site
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000, referer: referral });
+
+        const stayTime = randomInt(30000, 50000);
         const startTime = Date.now();
+        let clicked = false;
+        const clickCycle = viewNumber % 20;
 
+        // Step 2: Realistic Behavior Loop
         while (Date.now() - startTime < stayTime) {
+            // Human-like scrolling
             await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await new Promise(r => setTimeout(r, 5000));
+            await page.mouse.move(randomInt(0, 500), randomInt(0, 500), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-            // Ads Clicker Logic
-            if (Math.random() < 0.15) { // 15% Click chance
-                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const ad = ads[Math.floor(Math.random() * ads.length)];
-                    const rect = await ad.boundingBox();
-                    if (rect) {
-                        console.log("🎯 Ad Clicked!");
-                        await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); // Advertiser site stay
-                        break;
+            // Step 3: Powerful Ad Clicker (Targeting 6, 12, 18)
+            if (!clicked && [6, 12, 18].includes(clickCycle)) {
+                // Video ke mutabik selectors (In-page push, banners, overlays)
+                const adSelectors = [
+                    'ins.adsbygoogle', 'iframe[src*="googleads"]', 
+                    'a[href*="smartlink"]', 'div[class*="ad-"]', 
+                    'iframe[id^="aswift"]', '#container-ad'
+                ];
+                
+                for (const selector of adSelectors) {
+                    const ad = await page.$(selector);
+                    if (ad) {
+                        const box = await ad.boundingBox();
+                        if (box && box.width > 10) {
+                            console.log(`\x1b[42m[CLICK]\x1b[0m Ad format found. Triggering Second Tab...`);
+                            
+                            // Human-like click
+                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                            clicked = true;
+                            
+                            // Step 4: Second Tab Interaction (Wait for new target)
+                            await new Promise(r => setTimeout(r, 5000)); 
+                            const pages = await browser.pages();
+                            const adTab = pages[pages.length - 1]; // Latest tab
+
+                            if (adTab && adTab !== page) {
+                                console.log(`[2ND TAB] Simulating activity on advertiser site...`);
+                                for (let j = 0; j < 10; j++) {
+                                    await adTab.evaluate(() => window.scrollBy(0, 200));
+                                    await adTab.mouse.move(randomInt(0, 400), randomInt(0, 400));
+                                    await new Promise(r => setTimeout(r, 1500));
+                                }
+                                await adTab.close();
+                                console.log(`[2ND TAB] Closed after successful conversion.`);
+                            }
+                            break;
+                        }
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} finished.`);
+        console.log(`[DONE] View #${viewNumber} completed successfully.`);
 
     } catch (error) {
-        console.error(`[FAIL] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// ===================================================================
+
+
 // Tool 8 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
 app.post('/ultimate', async (req, res) => {
