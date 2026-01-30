@@ -1062,26 +1062,30 @@ app.post('/start-Proxyium', async (req, res) => {
 }); 
 
 // ===================================================================
-// --- TOOL 7 UPGRADED CONFIGURATION ---
+// --- TOOL 7 UPGRADED CONFIGURATION ---.log(`\x1b[42m[ FINISH
+//==================================================
+// ===================================================================
+// UPGRADED TOOL 5: ULTIMATE REVENUE BOOSTER
+// ===================================================================
 
 const ADVANCED_DEVICES = [
-    { name: 'Samsung Galaxy S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.164 Mobile Safari/537.36', view: { width: 384, height: 854 }, lang: 'en-US,en;q=0.9' },
-    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932 }, lang: 'en-GB,en;q=0.8' },
-    { name: 'iPad Pro 12.9', ua: 'Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1', view: { width: 1024, height: 1366 }, lang: 'fr-FR,fr;q=0.9' },
-    { name: 'Google Pixel 8', ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 915 }, lang: 'pl-PL,pl;q=0.8' },
-    { name: 'Desktop Windows - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 }, lang: 'en-US,en;q=0.9' },
-    { name: 'Desktop Mac - Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15', view: { width: 1440, height: 900 }, lang: 'en-US,en;q=0.9' },
-    { name: 'Desktop Linux - Firefox', ua: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0', view: { width: 1366, height: 768 }, lang: 'de-DE,de;q=0.7' }
-    // ... Aap isi tarah 25 devices add kar sakte hain
+    { name: 'Samsung Galaxy S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.164 Mobile Safari/537.36', view: { width: 384, height: 854 }, lang: 'ko-KR,ko;q=0.9,en-US;q=0.8' },
+    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932 }, lang: 'en-US,en;q=0.9' },
+    { name: 'iPad Pro 12.9', ua: 'Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1', view: { width: 1024, height: 1366 }, lang: 'en-GB,en;q=0.9' },
+    { name: 'Google Pixel 8 Pro', ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.64 Mobile Safari/537.36', view: { width: 412, height: 892 }, lang: 'de-DE,de;q=0.9,en-US;q=0.8' },
+    { name: 'Desktop Windows - Chrome 122', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 }, lang: 'en-US,en;q=0.9' },
+    { name: 'Desktop Mac - Safari 17', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15', view: { width: 1440, height: 900 }, lang: 'fr-FR,fr;q=0.9' },
+    { name: 'Desktop Linux - Firefox 123', ua: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0', view: { width: 1366, height: 768 }, lang: 'pl-PL,pl;q=0.9' },
+    { name: 'Xiaomi 14 Pro', ua: 'Mozilla/5.0 (Linux; Android 14; 23127PN0CC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.164 Mobile Safari/537.36', view: { width: 393, height: 873 }, lang: 'zh-CN,zh;q=0.9,en-US;q=0.8' },
+    // ... Add more to reach 25 devices
 ];
 
 const EXTENDED_REFERRERS = [
-    'https://www.facebook.com/', 'https://www.instagram.com/', 'https://twitter.com/', 
+    'https://www.facebook.com/', 'https://www.instagram.com/', 'https://t.co/', 
     'https://www.pinterest.com/', 'https://www.reddit.com/', 'https://www.linkedin.com/',
-    'https://www.google.com/search?q=', 'https://www.youtube.com/'
+    'https://www.google.com/search?q=', 'https://www.youtube.com/', 'https://duckduckgo.com/'
 ];
 
-// --- CORE FUNCTION FOR TOOL 7 ---
 async function runUpgradedGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1092,95 +1096,97 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
 
         const page = await browser.newPage();
         const device = ADVANCED_DEVICES[Math.floor(Math.random() * ADVANCED_DEVICES.length)];
-        const referrer = EXTENDED_REFERRERS[Math.floor(Math.random() * EXTENDED_REFERRERS.length)];
+        const referrer = EXTENDED_REFERRERS[Math.floor(Math.random() * EXTENDED_REFERRERS.length)] + (referrer.includes('google') ? encodeURIComponent(keyword) : '');
         
-        // Setup Headers & Device
         await page.setUserAgent(device.ua);
         await page.setViewport(device.view);
         await page.setExtraHTTPHeaders({ 'Accept-Language': device.lang });
 
-        console.log(`\x1b[36m[VIEW #${viewNumber}]\x1b[0m Device: ${device.name} | Lang: ${device.lang} | Ref: ${referrer}`);
+        console.log(`\n\x1b[35m[SESSION #${viewNumber}]\x1b[0m 📱 ${device.name} | 🌐 ${device.lang}`);
+        console.log(`\x1b[36m[REFERRER]\x1b[0m ${referrer}`);
 
-        // Step 1: Navigation
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+        // Navigation with Referrer
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000, referer: referrer });
         
         const stayTime = randomInt(30000, 50000);
         const startTime = Date.now();
-        const clickCycle = [6, 12, 18].includes(viewNumber % 20);
+        const isClickCycle = [6, 12, 18].includes(viewNumber % 20);
 
-        // Step 2: Realistic Engagement Loop
         while (Date.now() - startTime < stayTime) {
-            // Random Mouse Movement
-            await page.mouse.move(randomInt(0, device.view.width), randomInt(0, device.view.height), { steps: 10 });
-            // Random Scroll
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await new Promise(r => setTimeout(r, randomInt(3000, 7000)));
+            // Human-like interactions
+            await page.mouse.move(randomInt(0, device.view.width), randomInt(0, device.view.height), { steps: 15 });
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
-            // Step 3: Ad Click Logic (100% Success Attempt)
-            if (clickCycle) {
-                console.log(`[LOG] Click Cycle Active. Searching for Ads...`);
-                // Selectors for various ad types
-                const adSelector = 'ins.adsbygoogle, iframe[src*="googleads"], a[href*="smartlink"], [id^="taboola"], .ad-unit';
-                const ads = await page.$$(adSelector);
+            // Ad Click Logic
+            if (isClickCycle) {
+                console.log(`\x1b[33m[ENGAGEMENT]\x1b[0m Searching for High-Value Ads...`);
+                // Comprehensive Ad Selector
+                const adSelectors = [
+                    'ins.adsbygoogle', 'iframe[src*="googleads"]', 'iframe[id^="aswift"]',
+                    'a[href*="doubleclick"]', '.ad-unit', '[id^="taboola"]', '.video-ad-client'
+                ];
+                
+                const ads = await page.$$(adSelectors.join(','));
 
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
-                    if (box) {
-                        console.log(`\x1b[42m[AD-CLICK]\x1b[0m Target Found! Clicking and handling 2nd tab...`);
+                    if (box && box.width > 10 && box.height > 10) {
+                        console.log(`\x1b[42m[AD-CLICK]\x1b[0m Hit detected! Opening 2nd Tab...`);
                         
-                        // Click aur naye tab ka intezar
                         const [newTarget] = await Promise.all([
                             new Promise(resolve => browser.once('targetcreated', resolve)),
                             page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
                         ]);
 
-                        const newPage = await newTarget.page();
-                        if (newPage) {
-                            console.log(`[2ND-TAB] Opened. Simulating 10 scrolls for revenue validation.`);
-                            await newPage.setViewport(device.view);
-                            for(let s=0; s<10; s++) {
-                                await newPage.evaluate(() => window.scrollBy(0, 300));
-                                await new Promise(r => setTimeout(r, 2000));
+                        const adPage = await newTarget.page();
+                        if (adPage) {
+                            console.log(`\x1b[44m[REVENUE-BOOST]\x1b[0m 2nd Tab Active. Simulating 10 scrolls for validation.`);
+                            await adPage.setViewport(device.view);
+                            for(let i=0; i<10; i++) {
+                                await adPage.evaluate(() => window.scrollBy(0, 250));
+                                await new Promise(r => setTimeout(r, 1500));
                             }
-                            await newPage.close();
-                            console.log(`[2ND-TAB] Closed. Success.`);
+                            await adPage.close();
+                            console.log(`[REVENUE-BOOST] 2nd Tab Engagement Finished. ✅`);
                         }
-                        break; // Exit loop after click
+                        break; 
                     }
                 }
             }
         }
-        console.log(`\x1b[32m[DONE]\x1b[0m View #${viewNumber} completed successfully.`);
+        console.log(`\x1b[32m[DONE]\x1b[0m Session #${viewNumber} completed. Total Stay: ${Math.floor((Date.now()-startTime)/1000)}s`);
 
     } catch (err) {
-        console.error(`\x1b[31m[ERROR]\x1b[0m View #${viewNumber} Failed: ${err.message}`);
+        console.error(`\x1b[31m[CRASH]\x1b[0m Session #${viewNumber} Failed: ${err.message}`);
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// --- TOOL 7 ENDPOINT ---
+// Updated Endpoint
 app.post('/ultimate', async (req, res) => {
-    const { keyword, urls, views = 10 } = req.body;
+    const { keyword, urls, views = 20 } = req.body;
     if (!urls || !Array.isArray(urls)) return res.status(400).json({ error: "Invalid URLs" });
 
-    res.status(200).json({ status: "STARTED", message: "Upgraded Tool 5 running with 25+ Devices & Ad-Click Logic." });
+    res.status(200).json({ 
+        status: "RUNNING", 
+        message: `Task started: ${views} views across ${urls.length} sites with 100% Ad Engagement logic.` 
+    });
 
-    // Background process - Single browser at a time to prevent crash
     (async () => {
         for (let i = 1; i <= views; i++) {
-            const targetUrl = urls[i % urls.length];
-            await runUpgradedGscTask(keyword, targetUrl, i);
-            // RAM Cool-down break
-            await new Promise(r => setTimeout(r, 5000)); 
+            const currentUrl = urls[i % urls.length];
+            await runUpgradedGscTask(keyword, currentUrl, i);
+            // RAM Cool-down to prevent Render OOM (Out of Memory)
+            await new Promise(r => setTimeout(r, 8000));
         }
-        console.log("--- TOOL 5 ALL SESSIONS FINISHED ---");
+        console.log("\n\x1b[42m--- ALL REVENUE SESSIONS COMPLETED ---\x1b[0m");
     })();
 });
 
-//==================================================
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
