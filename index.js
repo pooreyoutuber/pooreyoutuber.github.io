@@ -826,6 +826,7 @@ puppeteer.use(StealthPlugin());
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
         browser = await puppeteer.launch({
             headless: "new",
             args: [
@@ -839,6 +840,8 @@ async function runGscTask(keyword, url, viewNumber) {
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
+
+        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Res: ${profile.view.width}x${profile.view.height}`); 
         
         // Anti-Bot: Set Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
