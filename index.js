@@ -1250,51 +1250,93 @@ async function runYouTubeWatchTask(videoUrl, watchTimeSec, viewNumber) {
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled',
+                '--autoplay-policy=no-user-gesture-required', // Force Autoplay
+                '--mute-audio' // Mute zaroori hai autoplay ke liye
+            ]
         });
 
         const page = await browser.newPage();
-        
-        // Random Mobile Profile Select Karein
         const profile = MOBILE_PROFILES[Math.floor(Math.random() * MOBILE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
 
-        console.log(`[MOBILE-VIEW #${viewNumber}] Device: ${profile.name} | URL: ${videoUrl}`);
+        console.log(`\n\x1b[33m[VIEW #${viewNumber}]\x1b[0m Target: ${profile.name}`);
 
-        // 1. Google Open Karein
+        // 1. Google Search Entry
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-
-        // 2. Search Bar mein link daal kar Enter marein
         const searchInput = 'textarea[name="q"], input[name="q"]';
         await page.waitForSelector(searchInput);
         await page.type(searchInput, videoUrl);
         await page.keyboard.press('Enter');
+        
+        console.log(`[SYSTEM] Search Done. Waiting for Redirect...`);
+        await new Promise(r => setTimeout(r, 8000)); 
 
-        // 3. 5 second wait karein taaki link enter hone ke baad video load ho jaye
-        console.log(`[WATCHING] Search performed, waiting for video load...`);
-        await new Promise(r => setTimeout(r, 7000)); 
-
-        // 4. Stay & Scroll Logic (Watch Time)
-        const startTime = Date.now();
-        const durationMs = watchTimeSec * 1000;
-
-        console.log(`[ACTIVE] Staying on page for ${watchTimeSec} seconds...`);
-
-        while (Date.now() - startTime < durationMs) {
-            // Dheere dheere scroll karein (Human-like)
-            await page.evaluate(() => window.scrollBy(0, 200));
-            await new Promise(r => setTimeout(r, 5000)); // Har 5 sec mein scroll
-            
-            if (Math.random() > 0.8) {
-                await page.evaluate(() => window.scrollBy(0, -100)); // Thoda upar scroll
+        // 2. Click Check (Agar Google par hi ruka hai toh pehle link par click karega)
+        const isYoutube = page.url().includes('youtube.com') || page.url().includes('youtu.be');
+        if (!isYoutube) {
+            console.log(`[SYSTEM] Clicking Video Link from Search Results...`);
+            try {
+                await page.click('a[href*="youtube.com"], a[href*="youtu.be"]');
+                await new Promise(r => setTimeout(r, 5000));
+            } catch (e) {
+                console.log(`[WARN] Search click failed, forcing navigation.`);
+                await page.goto(videoUrl, { waitUntil: 'networkidle2' });
             }
         }
 
-        console.log(`[FINISH] View #${viewNumber} completed. Closing browser.`);
+        // 3. FORCE PLAY LOGIC (Sabse important step)
+        console.log(`[ACTION] Trying to Start Video Playback...`);
+        await page.evaluate(async () => {
+            // Popups hatana
+            const buttons = Array.from(document.querySelectorAll('button'));
+            const consent = buttons.find(b => b.innerText.includes('Accept') || b.innerText.includes('I agree') || b.innerText.includes('Reject'));
+            if (consent) consent.click();
+
+            // Video element dhoondna
+            const video = document.querySelector('video');
+            if (video) {
+                video.muted = true;
+                video.play(); // Direct Play call
+            }
+        });
+
+        // Center click as backup for mobile UI
+        await page.mouse.click(profile.view.width / 2, 250); 
+
+        // 4. MONITORING LOOP
+        const startTime = Date.now();
+        const durationMs = watchTimeSec * 1000;
+
+        while (Date.now() - startTime < durationMs) {
+            const timeLeft = Math.round((durationMs - (Date.now() - startTime)) / 1000);
+            
+            // Real-time status check from inside the browser
+            const videoStatus = await page.evaluate(() => {
+                const v = document.querySelector('video');
+                if (!v) return "NOT_FOUND";
+                if (v.paused) {
+                    v.play(); // Agar pause ho gaya toh firse play karo
+                    return "WAS_PAUSED_RESTARTED";
+                }
+                return "PLAYING_OK";
+            });
+
+            console.log(`\x1b[32m[PLAYING]\x1b[0m Status: ${videoStatus} | Time Left: ${timeLeft}s | URL: ${page.url().substring(0, 40)}...`);
+
+            // Scroll for engagement
+            await page.evaluate(() => window.scrollBy(0, 150));
+            await new Promise(r => setTimeout(r, 10000)); // Log every 10 seconds
+        }
+
+        console.log(`\x1b[42m[SUCCESS]\x1b[0m View #${viewNumber} Finished!`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`\x1b[41m[CRITICAL ERROR]\x1b[0m View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close().catch(() => {});
     }
