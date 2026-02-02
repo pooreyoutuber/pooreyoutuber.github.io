@@ -1062,47 +1062,45 @@ app.post('/start-Proxyium', async (req, res) => {
 }); 
 
 // ===================================================================
-// --- TOOL 7 UPGRADED CONFIGURATION 
 // ===================================================================
+// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED: 25+ REAL DEVICES)
 // ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED WITH 25+ DEVICES)
-// ===================================================================
-
-// 25+ Real Device Profiles (Mobile, Tablet, PC with Chrome, Firefox, Safari, Edge)
+// 🔥 25+ Real Device Profiles (Mobile, Tablet, Desktop)
 const ADVANCED_DEVICE_PROFILES = [
-    // --- PC / DESKTOP ---
-    { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 } },
-    { name: 'Windows PC - Firefox', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0', view: { width: 1536, height: 864 } },
-    { name: 'Windows PC - Edge', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0', view: { width: 1366, height: 768 } },
-    { name: 'MacBook Pro - Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15', view: { width: 1728, height: 1117 } },
-    { name: 'Linux Desktop - Chrome', ua: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1600, height: 900 } },
-    { name: 'MacBook Air - Chrome', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36', view: { width: 1440, height: 900 } },
+    // --- APPLE PHONES ---
+    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932, isMobile: true } },
+    { name: 'iPhone 14 Pro', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1', view: { width: 393, height: 852, isMobile: true } },
+    { name: 'iPhone 13 Mini', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1', view: { width: 375, height: 812, isMobile: true } },
+    { name: 'iPhone SE (3rd Gen)', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1', view: { width: 375, height: 667, isMobile: true } },
 
-    // --- MOBILE (Android & iOS) ---
-    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932 } },
-    { name: 'iPhone 14', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', view: { width: 390, height: 844 } },
-    { name: 'Samsung Galaxy S23 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.101 Mobile Safari/537.36', view: { width: 384, height: 854 } },
-    { name: 'Google Pixel 8 Pro', ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.101 Mobile Safari/537.36', view: { width: 448, height: 998 } },
-    { name: 'OnePlus 11', ua: 'Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800 } },
-    { name: 'Xiaomi 13 Pro', ua: 'Mozilla/5.0 (Linux; Android 13; 2210132G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36', view: { width: 393, height: 873 } },
-    { name: 'Vivo V27', ua: 'Mozilla/5.0 (Linux; Android 13; V2231) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36', view: { width: 388, height: 864 } },
-    { name: 'Oppo Reno 10', ua: 'Mozilla/5.0 (Linux; Android 13; CPH2531) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800 } },
-    { name: 'Nothing Phone (2)', ua: 'Mozilla/5.0 (Linux; Android 13; A065) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 919 } },
-    { name: 'Motorola Edge 40', ua: 'Mozilla/5.0 (Linux; Android 13; XT2303-2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 919 } },
-    { name: 'Sony Xperia 1 V', ua: 'Mozilla/5.0 (Linux; Android 13; XQ-DQ72) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36', view: { width: 384, height: 918 } },
+    // --- ANDROID PHONES ---
+    { name: 'Samsung Galaxy S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.101 Mobile Safari/537.36', view: { width: 412, height: 915, isMobile: true } },
+    { name: 'Samsung Galaxy S23', ua: 'Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800, isMobile: true } },
+    { name: 'Google Pixel 8 Pro', ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.193 Mobile Safari/537.36', view: { width: 412, height: 915, isMobile: true } },
+    { name: 'Google Pixel 7a', ua: 'Mozilla/5.0 (Linux; Android 13; Pixel 7a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 915, isMobile: true } },
+    { name: 'OnePlus 11', ua: 'Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800, isMobile: true } },
+    { name: 'Xiaomi 13 Pro', ua: 'Mozilla/5.0 (Linux; Android 13; 2210132G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36', view: { width: 393, height: 851, isMobile: true } },
+    { name: 'Oppo Find X6', ua: 'Mozilla/5.0 (Linux; Android 13; PGFM10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800, isMobile: true } },
+    { name: 'Vivo X90', ua: 'Mozilla/5.0 (Linux; Android 13; V2219A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36', view: { width: 393, height: 851, isMobile: true } },
+    { name: 'Sony Xperia 1 V', ua: 'Mozilla/5.0 (Linux; Android 13; XQ-DQ72) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Safari/537.36', view: { width: 384, height: 854, isMobile: true } },
+    { name: 'Motorola Edge 40', ua: 'Mozilla/5.0 (Linux; Android 13; XT2303-2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 915, isMobile: true } },
 
     // --- TABLETS ---
-    { name: 'iPad Pro 12.9', ua: 'Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 1024, height: 1366 } },
-    { name: 'Samsung Galaxy Tab S9', ua: 'Mozilla/5.0 (Linux; Android 13; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36', view: { width: 800, height: 1280 } },
-    { name: 'iPad Air', ua: 'Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1', view: { width: 820, height: 1180 } },
-    { name: 'iPad Mini', ua: 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1', view: { width: 744, height: 1133 } },
-    { name: 'Surface Pro 9', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0', view: { width: 1440, height: 960 } },
-    { name: 'Amazon Fire HD 10', ua: 'Mozilla/5.0 (Linux; Android 9; KFTRWI) AppleWebKit/537.36 (KHTML, like Gecko) Silk/115.0.0.0 like Chrome/115.0.0.0 Safari/537.36', view: { width: 800, height: 1280 } },
-    { name: 'Huawei MatePad', ua: 'Mozilla/5.0 (Linux; Android 10; BAH3-W09) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.181 Safari/537.36', view: { width: 800, height: 1280 } },
-    { name: 'Lenovo Tab P11', ua: 'Mozilla/5.0 (Linux; Android 11; Lenovo TB-J606F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36', view: { width: 800, height: 1280 } }
+    { name: 'iPad Pro 12.9 (6th Gen)', ua: 'Mozilla/5.0 (iPad; CPU OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1', view: { width: 1024, height: 1366, isMobile: true } },
+    { name: 'iPad Air (5th Gen)', ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', view: { width: 820, height: 1180, isMobile: true } },
+    { name: 'Samsung Galaxy Tab S9 Ultra', ua: 'Mozilla/5.0 (Linux; Android 13; SM-X916B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36', view: { width: 1125, height: 1800, isMobile: true } },
+    { name: 'Amazon Fire HD 10', ua: 'Mozilla/5.0 (Linux; Android 9; KFTRWI) AppleWebKit/537.36 (KHTML, like Gecko) Silk/93.0.4577.82 like Chrome/93.0.4577.82 Safari/537.36', view: { width: 800, height: 1280, isMobile: true } },
+    
+    // --- DESKTOP / LAPTOP ---
+    { name: 'Windows 11 PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080, isMobile: false } },
+    { name: 'Windows 11 PC - Edge', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0', view: { width: 1366, height: 768, isMobile: false } },
+    { name: 'Windows 10 PC - Firefox', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0', view: { width: 1536, height: 864, isMobile: false } },
+    { name: 'MacBook Pro M2 - Chrome', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', view: { width: 1728, height: 1117, isMobile: false } },
+    { name: 'MacBook Air - Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15', view: { width: 1440, height: 900, isMobile: false } },
+    { name: 'Linux Desktop (Ubuntu) - Firefox', ua: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0', view: { width: 1600, height: 900, isMobile: false } }
 ];
 
-async function runUpgradedGscTask(keyword, url, viewNumber) {
+async function runGscTaskultimate(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1117,24 +1115,30 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
         
-        // Randomly Select 1 from 25+ Device Profiles
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        // Apply Profile Settings
+        // -------------------------------------------------------------
+        // 🔥 NEW: SELECT RANDOM DEVICE PROFILE
+        // -------------------------------------------------------------
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+        
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
         
-        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Resolution: ${profile.view.width}x${profile.view.height}`);
+        // Extra header safety for mobile devices
+        if (profile.view.isMobile) {
+            await page.setExtraHTTPHeaders({ 'Sec-CH-UA-Mobile': '?1' });
+        }
+        
+        console.log(`\x1b[36m[View #${viewNumber}]\x1b[0m Simulating Device: \x1b[1m${profile.name}\x1b[0m (${profile.view.width}x${profile.view.height})`);
+        // -------------------------------------------------------------
 
-        // 1. Google Search Simulation
+        // 1. STAGE: Google Search Simulation (Organic Entry)
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000)); 
 
-        // 2. Visit Target Site
-        console.log(`[TARGET] View #${viewNumber} | URL: ${url}`);
+        // 2. STAGE: Visit Target Site (30-35s Total Stay)
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
@@ -1144,35 +1148,42 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 35000); 
 
-        // 3. Behavior & Ad-Clicker
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
+            // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            
+            // Mouse Movement (Bypass Bot Checks)
+            await page.mouse.move(randomInt(100, profile.view.width - 50), randomInt(100, profile.view.height - 50), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
+            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Device: ${profile.name} | Clicking...`);
+
+                    if (box && box.width > 20 && box.height > 20) { // Small adjustment for mobile ads
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // Original Cleanup Logic to ensure views count
             const pages = await browser.pages();
             for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
@@ -1180,32 +1191,50 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
     }
 }
 
-
-// Replacement Endpoint for /start-task
 app.post('/ultimate', async (req, res) => {
-    const { keyword, urls, views = 20 } = req.body;
-    if (!urls || !Array.isArray(urls)) return res.status(400).json({ error: "Invalid URLs array" });
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
 
-    res.status(200).json({ 
-        status: "RUNNING", 
-        message: `Upgraded Task: ${views} views with 2nd-tab ad engagement across ${urls.length} sites.` 
-    });
-
-    // Worker Loop (One by one execution to prevent Render OOM Crash)
-    (async () => {
-        console.log("\n\x1b[42m--- STARTING UPGRADED REVENUE ENGINE ---\x1b[0m");
-        for (let i = 1; i <= views; i++) {
-            const currentUrl = urls[i % urls.length];
-            // Wait for one session to finish completely before next
-            await runUpgradedGscTask(keyword, currentUrl, i);
-            // Cooldown break
-            await new Promise(r => setTimeout(r, 6000));
+        // Frontend se 'urls' array aa raha hai, use validate karein
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
         }
-        console.log("\n\x1b[42m--- ALL REVENUE SESSIONS COMPLETED ---\x1b[0m");
-    })();
-});
 
-// ===================================================================
+        const totalViews = parseInt(views);
+
+        // Immediate Success Response taaki frontend hang na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+        });
+
+        // Background Worker
+        (async () => {
+            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                // Randomly ek URL chunna rotation ke liye
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                
+                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
+                await runGscTaskultimate(keyword, randomUrl, i); 
+
+                if (i < totalViews) {
+                    // RAM management break
+                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                    await new Promise(r => setTimeout(r, restTime));
+                }
+            }
+            console.log("--- ALL SESSIONS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
+// ===================================================================//
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
