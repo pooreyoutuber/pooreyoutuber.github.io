@@ -1208,6 +1208,102 @@ app.post('/ultimate', async (req, res) => {
     })();
 });
 
+// --- NEW YOUTUBE ENGINE ---
+
+async function runYouTubeBoostTask(videoUrl, watchTime, viewNumber) {
+    let browser;
+    try {
+        // Random profile select karna (Desktop profiles prefer karein YouTube ke liye)
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+        
+        browser = await puppeteer.launch({
+            headless: "new", // "new" use karein ya fir non-headless testing ke liye false
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--mute-audio=false', // Sound allow karne ke liye
+                '--disable-blink-features=AutomationControlled'
+            ]
+        });
+
+        const page = await browser.newPage();
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view);
+
+        console.log(`[YT VIEW #${viewNumber}] Starting for: ${videoUrl}`);
+
+        // 1. YouTube par jaana
+        await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
+
+        // 2. Search Bar simulate karna (Real behavior)
+        await page.waitForSelector('input[name="search_query"]');
+        await page.type('input[name="search_query"]', videoUrl); 
+        await page.keyboard.press('Enter');
+
+        // 3. Video link par click karna (Wait for result)
+        await page.waitForTimeout(3000); 
+        // Direct URL par jaana safe hai agar search se click complex ho raha ho
+        await page.goto(videoUrl, { waitUntil: 'networkidle2' });
+
+        // 4. Play Button aur Sound Simulation
+        try {
+            // Video play hone ka wait karein
+            await page.waitForSelector('.ytp-play-button');
+            
+            // Unmute logic: YouTube aksar auto-play mute rakhta hai, hum use 'm' key se unmute karenge
+            await page.keyboard.press('m'); 
+            console.log(`[VIEW #${viewNumber}] Audio Unmuted & Video Playing`);
+
+            // 5. Random Scrolling (Real User behavior)
+            for(let i=0; i<3; i++) {
+                await page.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
+                await page.waitForTimeout(2000);
+            }
+
+            // 6. Watch Time Retention (Jitna front-end se aaya)
+            console.log(`[VIEW #${viewNumber}] Watching for ${watchTime} seconds...`);
+            await page.waitForTimeout(watchTime * 1000);
+
+        } catch (playError) {
+            console.log("Play error or ads issue: " + playError.message);
+        }
+
+    } catch (error) {
+        console.error(`[YT ERROR #${viewNumber}]: ${error.message}`);
+    } finally {
+        if (browser) {
+            // 7. Clear Session & History: Browser close karne se temporary session apne aap delete ho jata hai
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+            console.log(`[VIEW #${viewNumber}] Browser Closed & Cache Cleared.`);
+        }
+    }
+}
+
+// --- API ENDPOINT FOR FRONTEND ---
+
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+
+    if (!video_url) return res.status(400).json({ error: "URL missing" });
+
+    // Response turant bhej dein taaki frontend loading dikhaye
+    res.status(200).json({ status: "STARTED", message: "YouTube Boost Active" });
+
+    // Worker Loop (One by one execution to save RAM)
+    (async () => {
+        for (let i = 1; i <= views_count; i++) {
+            await runYouTubeBoostTask(video_url, watch_time, i);
+            
+            // 15 Seconds Gap as per your UI requirement
+            console.log("Waiting 15s for next session...");
+            await new Promise(r => setTimeout(r, 15000));
+        }
+        console.log("--- ALL YOUTUBE VIEWS COMPLETED ---");
+    })();
+});
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
