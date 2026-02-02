@@ -1234,6 +1234,149 @@ app.post('/ultimate', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// 8. YOUTUBE REAL WATCH & SCROLL (Google Search Entry)
+// ===================================================================
+
+/**
+ * Worker Function: Opens Google, searches URL, watches video, scrolls.
+ */
+async function runYouTubeWatchTask(videoUrl, watchTimeSec, viewNumber) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new", // Change to false if you want to see it (locally)
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled',
+                '--window-size=1280,800' // Fixed size for consistency
+            ]
+        });
+
+        const page = await browser.newPage();
+        
+        // 1. Pick a random device profile (uses your existing ADVANCED_DEVICE_PROFILES)
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view);
+
+        console.log(`[YT-WATCH #${viewNumber}] Device: ${profile.name} | Opening Google...`);
+
+        // 2. Open Google
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // 3. Type Video URL in Search Bar (Simulate "Paste & Enter")
+        // Google Search input selector is usually textarea[name="q"] or input[name="q"]
+        const searchBox = await page.waitForSelector('textarea[name="q"], input[name="q"]');
+        await page.type('textarea[name="q"], input[name="q"]', videoUrl, { delay: 50 }); // Typing delay for realism
+        await page.keyboard.press('Enter');
+
+        console.log(`[YT-WATCH #${viewNumber}] Searched Link. Finding result...`);
+        
+        // 4. Wait for results and click the first valid link (The Video)
+        // We wait for the 'h3' tag which is the title of search results
+        await page.waitForSelector('h3', { timeout: 15000 });
+        
+        // Click the first search result (usually the video itself since we searched the exact URL)
+        await Promise.all([
+            page.waitForNavigation({ waitUntil: 'networkidle2' }),
+            page.evaluate(() => {
+                const firstResult = document.querySelector('h3').closest('a');
+                if (firstResult) firstResult.click();
+            })
+        ]);
+
+        console.log(`[YT-WATCH #${viewNumber}] Video Loaded. Watching for ${watchTimeSec}s...`);
+
+        // 5. Video Interaction (Ensure Play & Handle Popups)
+        try {
+            // Try to click "Reject Cookies" or "No Thanks" if they appear (YouTube/Google specific)
+            await page.evaluate(() => {
+                const buttons = Array.from(document.querySelectorAll('button'));
+                const reject = buttons.find(b => b.innerText.includes('Reject') || b.innerText.includes('No thanks'));
+                if (reject) reject.click();
+            });
+
+            // Attempt to click the video to ensure it plays (sometimes autoplay is blocked)
+            await page.mouse.click(profile.view.width / 2, profile.view.height / 3); 
+        } catch (e) {
+            // Ignore if no popups or already playing
+        }
+
+        // 6. Watch & Scroll Loop (The "Active" Phase)
+        const startTime = Date.now();
+        const durationMs = watchTimeSec * 1000;
+
+        while (Date.now() - startTime < durationMs) {
+            // Random Scroll Down
+            const scrollAmount = randomInt(100, 400);
+            await page.evaluate((y) => window.scrollBy(0, y), scrollAmount);
+            
+            // Wait random time (2-5 seconds)
+            await new Promise(r => setTimeout(r, randomInt(2000, 5000)));
+
+            // Occasionally scroll up a little (Human behavior)
+            if (Math.random() > 0.7) {
+                await page.evaluate(() => window.scrollBy(0, -200));
+            }
+        }
+
+        console.log(`[YT-WATCH #${viewNumber}] Task Complete. Closing Browser. ✅`);
+
+    } catch (error) {
+        console.error(`[YT-WATCH ERROR] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) await browser.close().catch(() => {});
+    }
+}
+
+// ===================================================================
+// TOOL 8 ENDPOINT (API: /api/real-view-boost)
+// ===================================================================
+app.post('/api/real-view-boost', async (req, res) => {
+    try {
+        // Frontend sends: { video_url, views_count, watch_time }
+        const { video_url, views_count, watch_time } = req.body;
+
+        if (!video_url || !views_count || !watch_time) {
+            return res.status(400).json({ success: false, message: "Missing required fields (Link, Views, Time)." });
+        }
+
+        const totalViews = parseInt(views_count);
+        const timePerView = parseInt(watch_time);
+
+        // Send success immediately so Frontend shows "Active"
+        res.status(200).json({ 
+            success: true, 
+            message: `YouTube Task Started: ${totalViews} views, ${timePerView}s each. Google Search Mode.` 
+        });
+
+        // Background Worker (Sequential 1-by-1 Execution to save RAM)
+        (async () => {
+            console.log(`\n🚀 STARTING YOUTUBE BOOST: ${totalViews} Views on ${video_url}`);
+            
+            for (let i = 1; i <= totalViews; i++) {
+                // Run one browser task and WAIT for it to finish before starting the next
+                // This prevents Render server crash (RAM protection)
+                await runYouTubeWatchTask(videoUrl, timePerView, i);
+
+                // Small cooldown between views
+                if (i < totalViews) {
+                    console.log(`[COOLDOWN] Waiting 5s before next view...`);
+                    await new Promise(r => setTimeout(r, 5000));
+                }
+            }
+            console.log(`🏁 YOUTUBE BOOST COMPLETE.`);
+        })();
+
+    } catch (err) {
+        console.error("YouTube Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
 // ===================================================================//
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
