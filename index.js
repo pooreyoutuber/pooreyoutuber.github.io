@@ -1068,10 +1068,10 @@ app.post('/start-Proxyium', async (req, res) => {
 // --- TOOL 7 UPGRADED CONFIGURATION 
 // ===================================================================
 // ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED WITH 25+ DEVICES)
+// 5. GSC & ADSENSE REVENUE BOOSTER (UPDATED WITH DEVICE ROTATION)
 // ===================================================================
 
-// 25+ Real Device Profiles (Mobile, Tablet, PC with Chrome, Firefox, Safari, Edge)
+// --- Device Profiles Array (Moved here for Tool 5 access) ---
 const ADVANCED_DEVICE_PROFILES = [
     // --- PC / DESKTOP ---
     { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 } },
@@ -1120,24 +1120,22 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
         
-        // Randomly Select 1 from 25+ Device Profiles
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
+        // 🔥 FIX: Randomly Select a Device Profile
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+        
         // Apply Profile Settings
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
         
-        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Resolution: ${profile.view.width}x${profile.view.height}`);
+        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Res: ${profile.view.width}x${profile.view.height}`);
 
-        // 1. Google Search Simulation
+        // 1. STAGE: Google Search Simulation
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000)); 
 
-        // 2. Visit Target Site
-        console.log(`[TARGET] View #${viewNumber} | URL: ${url}`);
+        // 2. STAGE: Visit Target Site
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
@@ -1147,7 +1145,7 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 35000); 
 
-        // 3. Behavior & Ad-Clicker
+        // 3. STAGE: Behavior & Ad-Clicker
         while (Date.now() - startTime < targetStayTime) {
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
@@ -1159,8 +1157,9 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
+
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Device: ${profile.name} | Clicking...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] ${profile.name} clicked an ad!`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         await new Promise(r => setTimeout(r, 15000));
@@ -1169,20 +1168,16 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // Original Cleanup Logic to ensure views count
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
 }
-
 
 // Replacement Endpoint for /start-task
 app.post('/ultimate', async (req, res) => {
