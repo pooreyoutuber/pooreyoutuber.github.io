@@ -1237,94 +1237,89 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE REAL WATCH & SCROLL (Google Search Entry)
 // ===================================================================
-
-/**
- * Worker Function: Opens Google, searches URL, watches video, scrolls.
- */
 async function runYouTubeWatchTask(videoUrl, watchTimeSec, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new", // Change to false if you want to see it (locally)
+            headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled',
-                '--window-size=1280,800' // Fixed size for consistency
+                '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        
-        // 1. Pick a random device profile (uses your existing ADVANCED_DEVICE_PROFILES)
         const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
 
         console.log(`[YT-WATCH #${viewNumber}] Device: ${profile.name} | Opening Google...`);
 
-        // 2. Open Google
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2', timeout: 60000 });
+        // 1. Google par jana
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
 
-        // 3. Type Video URL in Search Bar (Simulate "Paste & Enter")
-        // Google Search input selector is usually textarea[name="q"] or input[name="q"]
-        const searchBox = await page.waitForSelector('textarea[name="q"], input[name="q"]');
-        await page.type('textarea[name="q"], input[name="q"]', videoUrl, { delay: 50 }); // Typing delay for realism
+        // 2. Search box mein URL type karke Enter maarna
+        const searchInput = 'textarea[name="q"], input[name="q"]';
+        await page.waitForSelector(searchInput);
+        await page.type(searchInput, videoUrl, { delay: 30 }); 
         await page.keyboard.press('Enter');
 
-        console.log(`[YT-WATCH #${viewNumber}] Searched Link. Finding result...`);
+        console.log(`[YT-WATCH #${viewNumber}] Search Sent. Checking Page Type...`);
+
+        // 3. Wait for Navigation (Kyuki direct video khulne mein thoda waqt lagta hai)
+        await new Promise(r => setTimeout(r, 5000)); 
+
+        // 4. CHECK: Kya hum abhi bhi Google par hain ya YouTube par pahunch gaye?
+        const currentUrl = page.url();
         
-        // 4. Wait for results and click the first valid link (The Video)
-        // We wait for the 'h3' tag which is the title of search results
-        await page.waitForSelector('h3', { timeout: 15000 });
-        
-        // Click the first search result (usually the video itself since we searched the exact URL)
-        await Promise.all([
-            page.waitForNavigation({ waitUntil: 'networkidle2' }),
-            page.evaluate(() => {
-                const firstResult = document.querySelector('h3').closest('a');
-                if (firstResult) firstResult.click();
-            })
-        ]);
-
-        console.log(`[YT-WATCH #${viewNumber}] Video Loaded. Watching for ${watchTimeSec}s...`);
-
-        // 5. Video Interaction (Ensure Play & Handle Popups)
-        try {
-            // Try to click "Reject Cookies" or "No Thanks" if they appear (YouTube/Google specific)
-            await page.evaluate(() => {
-                const buttons = Array.from(document.querySelectorAll('button'));
-                const reject = buttons.find(b => b.innerText.includes('Reject') || b.innerText.includes('No thanks'));
-                if (reject) reject.click();
-            });
-
-            // Attempt to click the video to ensure it plays (sometimes autoplay is blocked)
-            await page.mouse.click(profile.view.width / 2, profile.view.height / 3); 
-        } catch (e) {
-            // Ignore if no popups or already playing
+        if (currentUrl.includes('youtube.com/watch')) {
+            console.log(`[YT-WATCH #${viewNumber}] Direct Video Detected! ✅`);
+        } else {
+            console.log(`[YT-WATCH #${viewNumber}] Still on Google. Clicking first video link...`);
+            try {
+                await page.waitForSelector('a[href*="youtube.com/watch"]', { timeout: 10000 });
+                await page.click('a[href*="youtube.com/watch"]');
+                await new Promise(r => setTimeout(r, 3000));
+            } catch (e) {
+                console.log(`[YT-WATCH #${viewNumber}] Link not found. Forcing navigation...`);
+                await page.goto(videoUrl, { waitUntil: 'networkidle2' });
+            }
         }
 
-        // 6. Watch & Scroll Loop (The "Active" Phase)
+        // 5. INTERACTION: Autoplay ensure karne ke liye center click
+        try {
+            // "No Thanks" ya "Consent" popups ko hatane ki koshish
+            await page.evaluate(() => {
+                const btns = Array.from(document.querySelectorAll('button'));
+                const consentBtn = btns.find(b => b.innerText.includes('Reject') || b.innerText.includes('I agree') || b.innerText.includes('No thanks'));
+                if (consentBtn) consentBtn.click();
+            });
+            // Screen ke beech mein click taaki video play ho jaye
+            await page.mouse.click(profile.view.width / 2, profile.view.height / 2);
+        } catch (i) {}
+
+        // 6. REAL HUMAN BEHAVIOR: Watch & Scroll
+        console.log(`[YT-WATCH #${viewNumber}] Watching for ${watchTimeSec}s...`);
         const startTime = Date.now();
         const durationMs = watchTimeSec * 1000;
 
         while (Date.now() - startTime < durationMs) {
-            // Random Scroll Down
-            const scrollAmount = randomInt(100, 400);
-            await page.evaluate((y) => window.scrollBy(0, y), scrollAmount);
+            // Dheere dheere scroll down (Jaise log comments padhte hain)
+            const scrollY = Math.floor(Math.random() * 300) + 100;
+            await page.evaluate((y) => window.scrollBy(0, y), scrollY);
             
-            // Wait random time (2-5 seconds)
-            await new Promise(r => setTimeout(r, randomInt(2000, 5000)));
+            // Random wait 4-8 seconds
+            await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
 
-            // Occasionally scroll up a little (Human behavior)
-            if (Math.random() > 0.7) {
+            // Kabhi kabhi thoda upar scroll (Real behavior)
+            if (Math.random() > 0.75) {
                 await page.evaluate(() => window.scrollBy(0, -200));
             }
         }
 
-        console.log(`[YT-WATCH #${viewNumber}] Task Complete. Closing Browser. ✅`);
+        console.log(`[YT-WATCH #${viewNumber}] Task Finished Successfully! ✅`);
 
     } catch (error) {
         console.error(`[YT-WATCH ERROR] View #${viewNumber}: ${error.message}`);
