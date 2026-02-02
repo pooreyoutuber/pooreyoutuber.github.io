@@ -1101,7 +1101,7 @@ const ADVANCED_DEVICE_PROFILES = [
     { name: 'Nothing Phone (2)', ua: 'Mozilla/5.0 (Linux; Android 13; A065) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 919 } }
 ];
 
-async function runUpgradedGscTask((keyword, url, viewNumber) {
+async function runUpgradedGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
