@@ -1117,10 +1117,11 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
+        await page.setViewport({ width: 1366, height: 768 });
         
         // Randomly Select 1 from 25+ Device Profiles
-        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
-        
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
         // Apply Profile Settings
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
