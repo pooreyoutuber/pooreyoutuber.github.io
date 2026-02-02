@@ -1209,78 +1209,71 @@ app.post('/ultimate', async (req, res) => {
 });
 
 // --- NEW YOUTUBE ENGINE ---
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function runYouTubeBoostTask(videoUrl, watchTime, viewNumber) {
     let browser;
     try {
-        // Random profile select karna (Desktop profiles prefer karein YouTube ke liye)
         const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
         
         browser = await puppeteer.launch({
-            headless: "new", // "new" use karein ya fir non-headless testing ke liye false
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--mute-audio=false', // Sound allow karne ke liye
-                '--disable-blink-features=AutomationControlled'
-            ]
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
+        await page.setDefaultNavigationTimeout(90000); 
 
-        console.log(`[YT VIEW #${viewNumber}] Starting for: ${videoUrl}`);
+        console.log(`[YT VIEW #${viewNumber}] Strategy: Google Search Redirect`);
 
-        // 1. YouTube par jaana
-        await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
+        // 1. Google par jaao
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        
+        // 2. Google search bar mein URL daalo (Ye video link search karega)
+        await page.waitForSelector('textarea[name="q"]', { timeout: 5000 }).catch(() => {});
+        const searchInput = await page.$('textarea[name="q"]') || await page.$('input[name="q"]');
+        
+        if (searchInput) {
+            await searchInput.type(videoUrl);
+            await page.keyboard.press('Enter');
+            await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-        // 2. Search Bar simulate karna (Real behavior)
-        await page.waitForSelector('input[name="search_query"]');
-        await page.type('input[name="search_query"]', videoUrl); 
-        await page.keyboard.press('Enter');
-
-        // 3. Video link par click karna (Wait for result)
-        await page.waitForTimeout(3000); 
-        // Direct URL par jaana safe hai agar search se click complex ho raha ho
-        await page.goto(videoUrl, { waitUntil: 'networkidle2' });
-
-        // 4. Play Button aur Sound Simulation
-        try {
-            // Video play hone ka wait karein
-            await page.waitForSelector('.ytp-play-button');
-            
-            // Unmute logic: YouTube aksar auto-play mute rakhta hai, hum use 'm' key se unmute karenge
-            await page.keyboard.press('m'); 
-            console.log(`[VIEW #${viewNumber}] Audio Unmuted & Video Playing`);
-
-            // 5. Random Scrolling (Real User behavior)
-            for(let i=0; i<3; i++) {
-                await page.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
-                await page.waitForTimeout(2000);
-            }
-
-            // 6. Watch Time Retention (Jitna front-end se aaya)
-            console.log(`[VIEW #${viewNumber}] Watching for ${watchTime} seconds...`);
-            await page.waitForTimeout(watchTime * 1000);
-
-        } catch (playError) {
-            console.log("Play error or ads issue: " + playError.message);
+            // 3. Google search results mein pehle link par click karo (Jo aapka video hai)
+            // YouTube links aksar 'h3' ya anchor tags mein hote hain
+            await page.click('h3'); 
+            console.log(`[VIEW #${viewNumber}] Clicked Video from Google Results`);
+        } else {
+            // Agar Google Search fail hua, toh backup: Direct navigate
+            await page.goto(videoUrl, { waitUntil: 'networkidle2' });
         }
+
+        // 4. Video Interaction
+        await delay(5000); // Video load hone ka wait
+        
+        // Unmute and Play
+        await page.keyboard.press('m'); 
+        console.log(`[VIEW #${viewNumber}] Playing & Unmuted`);
+
+        // Random Scrolling (Niche comments ki taraf)
+        await page.evaluate(() => window.scrollBy(0, 500));
+        await delay(2000);
+
+        // 5. Retention (Watch Time)
+        console.log(`[VIEW #${viewNumber}] Watching for ${watchTime}s...`);
+        await delay(watchTime * 1000);
 
     } catch (error) {
         console.error(`[YT ERROR #${viewNumber}]: ${error.message}`);
     } finally {
         if (browser) {
-            // 7. Clear Session & History: Browser close karne se temporary session apne aap delete ho jata hai
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
-            console.log(`[VIEW #${viewNumber}] Browser Closed & Cache Cleared.`);
+            console.log(`[VIEW #${viewNumber}] Browser Closed.`);
         }
     }
 }
+
 
 // --- API ENDPOINT FOR FRONTEND ---
 
