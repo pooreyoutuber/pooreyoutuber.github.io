@@ -1237,92 +1237,64 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // 8. YOUTUBE REAL WATCH & SCROLL (Google Search Entry)
 // ===================================================================
+// 🔥 Sirf Mobile Devices ki list (View saare mobile se aayenge)
+const MOBILE_PROFILES = [
+    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932, isMobile: true } },
+    { name: 'Samsung Galaxy S24 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.101 Mobile Safari/537.36', view: { width: 412, height: 915, isMobile: true } },
+    { name: 'Pixel 8 Pro', ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.193 Mobile Safari/537.36', view: { width: 412, height: 915, isMobile: true } },
+    { name: 'iPhone 13 Mini', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1', view: { width: 375, height: 812, isMobile: true } }
+];
+
 async function runYouTubeWatchTask(videoUrl, watchTimeSec, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+        
+        // Random Mobile Profile Select Karein
+        const profile = MOBILE_PROFILES[Math.floor(Math.random() * MOBILE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
 
-        console.log(`[YT-WATCH #${viewNumber}] Device: ${profile.name} | Opening Google...`);
+        console.log(`[MOBILE-VIEW #${viewNumber}] Device: ${profile.name} | URL: ${videoUrl}`);
 
-        // 1. Google par jana
+        // 1. Google Open Karein
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
 
-        // 2. Search box mein URL type karke Enter maarna
+        // 2. Search Bar mein link daal kar Enter marein
         const searchInput = 'textarea[name="q"], input[name="q"]';
         await page.waitForSelector(searchInput);
-        await page.type(searchInput, videoUrl, { delay: 30 }); 
+        await page.type(searchInput, videoUrl);
         await page.keyboard.press('Enter');
 
-        console.log(`[YT-WATCH #${viewNumber}] Search Sent. Checking Page Type...`);
+        // 3. 5 second wait karein taaki link enter hone ke baad video load ho jaye
+        console.log(`[WATCHING] Search performed, waiting for video load...`);
+        await new Promise(r => setTimeout(r, 7000)); 
 
-        // 3. Wait for Navigation (Kyuki direct video khulne mein thoda waqt lagta hai)
-        await new Promise(r => setTimeout(r, 5000)); 
-
-        // 4. CHECK: Kya hum abhi bhi Google par hain ya YouTube par pahunch gaye?
-        const currentUrl = page.url();
-        
-        if (currentUrl.includes('youtube.com/watch')) {
-            console.log(`[YT-WATCH #${viewNumber}] Direct Video Detected! ✅`);
-        } else {
-            console.log(`[YT-WATCH #${viewNumber}] Still on Google. Clicking first video link...`);
-            try {
-                await page.waitForSelector('a[href*="youtube.com/watch"]', { timeout: 10000 });
-                await page.click('a[href*="youtube.com/watch"]');
-                await new Promise(r => setTimeout(r, 3000));
-            } catch (e) {
-                console.log(`[YT-WATCH #${viewNumber}] Link not found. Forcing navigation...`);
-                await page.goto(videoUrl, { waitUntil: 'networkidle2' });
-            }
-        }
-
-        // 5. INTERACTION: Autoplay ensure karne ke liye center click
-        try {
-            // "No Thanks" ya "Consent" popups ko hatane ki koshish
-            await page.evaluate(() => {
-                const btns = Array.from(document.querySelectorAll('button'));
-                const consentBtn = btns.find(b => b.innerText.includes('Reject') || b.innerText.includes('I agree') || b.innerText.includes('No thanks'));
-                if (consentBtn) consentBtn.click();
-            });
-            // Screen ke beech mein click taaki video play ho jaye
-            await page.mouse.click(profile.view.width / 2, profile.view.height / 2);
-        } catch (i) {}
-
-        // 6. REAL HUMAN BEHAVIOR: Watch & Scroll
-        console.log(`[YT-WATCH #${viewNumber}] Watching for ${watchTimeSec}s...`);
+        // 4. Stay & Scroll Logic (Watch Time)
         const startTime = Date.now();
         const durationMs = watchTimeSec * 1000;
 
-        while (Date.now() - startTime < durationMs) {
-            // Dheere dheere scroll down (Jaise log comments padhte hain)
-            const scrollY = Math.floor(Math.random() * 300) + 100;
-            await page.evaluate((y) => window.scrollBy(0, y), scrollY);
-            
-            // Random wait 4-8 seconds
-            await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
+        console.log(`[ACTIVE] Staying on page for ${watchTimeSec} seconds...`);
 
-            // Kabhi kabhi thoda upar scroll (Real behavior)
-            if (Math.random() > 0.75) {
-                await page.evaluate(() => window.scrollBy(0, -200));
+        while (Date.now() - startTime < durationMs) {
+            // Dheere dheere scroll karein (Human-like)
+            await page.evaluate(() => window.scrollBy(0, 200));
+            await new Promise(r => setTimeout(r, 5000)); // Har 5 sec mein scroll
+            
+            if (Math.random() > 0.8) {
+                await page.evaluate(() => window.scrollBy(0, -100)); // Thoda upar scroll
             }
         }
 
-        console.log(`[YT-WATCH #${viewNumber}] Task Finished Successfully! ✅`);
+        console.log(`[FINISH] View #${viewNumber} completed. Closing browser.`);
 
     } catch (error) {
-        console.error(`[YT-WATCH ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) await browser.close().catch(() => {});
     }
