@@ -1334,7 +1334,7 @@ async function runYouTubeWatchTask(videoUrl, watchTimeSec, viewNumber) {
 }
 
 // ===================================================================
-// TOOL 8 ENDPOINT (API: /api/real-view-boost)
+// TOOL 8 ENDPOINT (API: /api/real-view-boost) - FIXED
 // ===================================================================
 app.post('/api/real-view-boost', async (req, res) => {
     try {
@@ -1360,8 +1360,8 @@ app.post('/api/real-view-boost', async (req, res) => {
             
             for (let i = 1; i <= totalViews; i++) {
                 // Run one browser task and WAIT for it to finish before starting the next
-                // This prevents Render server crash (RAM protection)
-                await runYouTubeWatchTask(videoUrl, timePerView, i);
+                // FIXED: Changed 'videoUrl' to 'video_url' to match the variable above
+                await runYouTubeWatchTask(video_url, timePerView, i);
 
                 // Small cooldown between views
                 if (i < totalViews) {
