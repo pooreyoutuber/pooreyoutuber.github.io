@@ -1101,7 +1101,6 @@ const ADVANCED_DEVICES_LIST = [
     { name: 'Surface Pro 9 - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', view: { width: 1440, height: 960 } },
     { name: 'Nothing Phone 2', ua: 'Mozilla/5.0 (Linux; Android 13; A065) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 915 } }
 ];
-
 async function runUpgradedGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -1111,20 +1110,18 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        
-        // Random Device Selection (25 models)
         const device = ADVANCED_DEVICES_LIST[Math.floor(Math.random() * ADVANCED_DEVICES_LIST.length)];
         await page.setUserAgent(device.ua);
         await page.setViewport(device.view);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
+        // 1. STAGE: Google Search Simulation
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Source: Google Search`);
+        console.log(`[VIEW #${viewNumber}] Device: ${device.name} | Mode: ${viewNumber % 6 === 0 ? '🔥 AD-CLICK' : '👀 VIEW-ONLY'}`);
         
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, randomInt(3000, 5000))); 
 
-        // 2. STAGE: Visit Target Site via Referrer
+        // 2. STAGE: Visit Target Site
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
@@ -1134,24 +1131,66 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
         const startTime = Date.now();
         const targetStayTime = randomInt(35000, 45000); 
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker
+        // 3. STAGE: Behavior & Aggressive Clicker
         while (Date.now() - startTime < targetStayTime) {
             await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-            await page.mouse.move(randomInt(50, 500), randomInt(50, 500), { steps: 5 });
-            await new Promise(r => setTimeout(r, randomInt(4000, 6000)));
+            await page.mouse.move(randomInt(50, 400), randomInt(50, 400), { steps: 5 });
+            await new Promise(r => setTimeout(r, 4000));
 
-            // High-Value Ad Click (15% chance)
-            if (Math.random() < 0.15) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-                    if (box) {
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`[SUCCESS] Ad Clicked on ${device.name} ✅`);
-                        await new Promise(r => setTimeout(r, 12000)); // Stay on ad site
-                        break; 
+            // 🔥 UPGRADED CLICKER LOGIC (Runs on 6, 12, 18...)
+            if (viewNumber % 6 === 0) {
+                console.log(`[TARGETING AD] Attempting to find and click ads...`);
+
+                // A. Try finding known ad containers (AdSense, Monetag, etc.)
+                const adSelectors = [
+                    'ins.adsbygoogle', 'iframe[src*="googleads"]', 'a[href*="adclick"]',
+                    'div[id*="pro-"]', 'div[class*="monetag"]', 'iframe[id*="aswift"]',
+                    '#popover', '.close-button', 'button[onclick*="window.open"]'
+                ];
+
+                let adClicked = false;
+                for (const selector of adSelectors) {
+                    const ads = await page.$$(selector);
+                    if (ads.length > 0) {
+                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                        const box = await targetAd.boundingBox();
+                        if (box && box.width > 10 && box.height > 10) {
+                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                            console.log(`[SUCCESS] Specific Ad Element Clicked! ✅`);
+                            adClicked = true;
+                            break;
+                        }
                     }
+                }
+
+                // B. FALLBACK: Random Tap (For Pop-unders/Hidden Overlays like Adcash)
+                if (!adClicked) {
+                    console.log(`[FALLBACK] No specific ad found. Tapping randomly to trigger pop-under...`);
+                    await page.mouse.click(randomInt(100, 300), randomInt(200, 500));
+                }
+
+                // C. HANDLE 2ND TAB (The Ad Destination)
+                await new Promise(r => setTimeout(r, 3000)); // Wait for tab to trigger
+                const pages = await browser.pages();
+                
+                if (pages.length > 2) { // Page 1: about:blank, Page 2: Target, Page 3: Ad
+                    const adPage = pages[pages.length - 1];
+                    console.log(`[2ND TAB] Ad tab detected. Switching & Scrolling...`);
+                    
+                    try {
+                        await adPage.bringToFront();
+                        // 10-15 seconds of activity on the Ad site
+                        const adStartTime = Date.now();
+                        while (Date.now() - adStartTime < 12000) {
+                            await adPage.evaluate(() => window.scrollBy(0, 200));
+                            await new Promise(r => setTimeout(r, 3000));
+                        }
+                        await adPage.close();
+                        console.log(`[DONE] Ad Interaction Finished. 2nd tab closed.`);
+                    } catch (e) {
+                        console.log(`[2ND TAB ERROR] Interaction failed: ${e.message}`);
+                    }
+                    break; // Exit loop after successful click interaction
                 }
             }
         }
@@ -1161,8 +1200,6 @@ async function runUpgradedGscTask(keyword, url, viewNumber) {
         if (browser) await browser.close();
     }
 }
-
-
 
 // Replacement Endpoint for /start-task
 app.post('/ultimate', async (req, res) => {
