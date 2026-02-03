@@ -1060,7 +1060,7 @@ app.post('/start-Proxyium', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 }); 
-/ ===================================================================
+// ===================================================================
 // Tool 5 (Updated for Multi-Site Rotation)
 // ===================================================================
 async function runGscTasknew(keyword, url, viewNumber) {
@@ -1182,7 +1182,7 @@ async function runGscTasknew(keyword, url, viewNumber) {
         }
     }
 }
-/ ===================================================================
+// ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
 app.post('/ultimate', async (req, res) => {
