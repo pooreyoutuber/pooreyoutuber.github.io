@@ -1061,162 +1061,205 @@ app.post('/start-Proxyium', async (req, res) => {
     }
 }); 
 // ===================================================================
-// Tool 5 (Updated for Multi-Site Rotation)
+// 5. GSC & REVENUE BOOSTER (UPDATED: AdCash/Monetag/AdSense Support)
 // ===================================================================
+
+
 async function runGscTasknew(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // "new" is faster for background tasks
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
+                '--disable-blink-features=AutomationControlled',
+                '--disable-popup-blocking' // Allow popups for Monetag/AdCash
             ]
         });
 
         const page = await browser.newPage();
-        const viewport = { width: 1366, height: 768 };
-        await page.setViewport(viewport);
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        await page.setViewport({ width: 1366, height: 768 });
+        
+        // Random User Agent from your list
+        const randomUA = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        await page.setUserAgent(randomUA);
 
-        // 1. STAGE: Google Search Simulation
+        // 1. STAGE: Google Search Simulation (Organic Entry)
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        console.log(`[VIEW #${viewNumber}] Searching Google: ${keyword}`);
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        await new Promise(r => setTimeout(r, 2000)); 
 
         // 2. STAGE: Visit Target Site
-        console.log(`[VIEW #${viewNumber}] Visiting: ${url}`);
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: googleUrl });
+        console.log(`[VIEW #${viewNumber}] Visiting Target: ${url}`);
+        // Google referrer header set karke direct visit (more stable than finding link in SERP)
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 60000, 
+            referer: googleUrl 
+        });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); 
-        let adClickedThisSession = false;
+        const targetStayTime = randomInt(35000, 50000); // 35-50s stay time
 
-        // 🔥 CHECK IF THIS IS AN AD-CLICK VIEW (6, 12, 18...)
-        const isAdClickView = (viewNumber % 6 === 0);
+        // --- SCROLLING & BEHAVIOR START ---
+        
+        // Check if this view requires an Ad Click (Multiples of 6: 6, 12, 18...)
+        const shouldClickAd = (viewNumber % 6 === 0);
+
+        let adActionTaken = false;
 
         while (Date.now() - startTime < targetStayTime) {
-            // Realistic Behavior: Scroll & Mouse Move
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) + 200));
+            
+            // 1. Natural Scrolling
+            const dist = randomInt(200, 500);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            await new Promise(r => setTimeout(r, randomInt(2000, 4000)));
+
+            // 2. Random Mouse Jitter
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, 4000));
 
-            // 🔥 START ENHANCED AD-CLICKER LOGIC
-            if (isAdClickView && !adClickedThisSession) {
-                console.log(`[AD-MODE] View #${viewNumber} is a Target View. Searching for Ads...`);
+            // --- AD CLICK LOGIC (Only for View 6, 12, 18...) ---
+            if (shouldClickAd && !adActionTaken) {
+                console.log(`\x1b[43m[AD-MODE]\x1b[0m View #${viewNumber} is chosen for Ad Interaction.`);
+                
+                // Track number of open pages (tabs)
+                const initialPages = await browser.pages();
+                const initialPageCount = initialPages.length;
 
-                // A. Broad Selectors (AdSense, Monetag, Adcash, Popunders, Banners)
+                // Strategy A: Try to find standard Ad Frames/Elements first
                 const adSelectors = [
-                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
-                    'iframe[src*="ad-delivery"]', 'div[id^="monetag"]', 'a[href*="clk.sh"]',
-                    'div[class*="ad-"]', 'div[id*="ad-"]', 'iframe[src*="adnxs"]',
-                    'div[id^="adcash"]', '.ad-unit', 'a[href*="onclick"]'
+                    'iframe[src*="googleads"]', 
+                    'ins.adsbygoogle', 
+                    'div[id*="ad"]', 
+                    'a[href*="doubleclick"]',
+                    'iframe[id*="aswift"]'
                 ];
-
-                let adElement = null;
-                for (let selector of adSelectors) {
-                    const found = await page.$(selector);
-                    if (found) {
-                        const box = await found.boundingBox();
-                        if (box && box.width > 10 && box.height > 10) {
-                            adElement = found;
+                
+                let clickedElement = false;
+                
+                // Try specific selectors first
+                for (const selector of adSelectors) {
+                    const ads = await page.$$(selector);
+                    if (ads.length > 0) {
+                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                        const box = await targetAd.boundingBox();
+                        if (box) {
+                            console.log(`[CLICK] Target Ad Element Found (${selector}). Clicking...`);
+                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                            clickedElement = true;
+                            await new Promise(r => setTimeout(r, 3000)); // Wait for click to register
                             break;
                         }
                     }
                 }
 
-                if (adElement) {
-                    const box = await adElement.boundingBox();
-                    console.log(`[TARGET-FOUND] Found ad via selector. Clicking...`);
-                    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                    adClickedThisSession = true;
-                } else {
-                    // B. FALLBACK: RANDOM TAP (For Adcash/Monetag where ads are invisible or full-screen)
-                    console.log(`[FALLBACK] No specific ad found. Starting Random Tap...`);
-                    for (let attempt = 0; attempt < 5; attempt++) {
-                        const randomX = randomInt(100, viewport.width - 100);
-                        const randomY = randomInt(100, viewport.height - 100);
-                        await page.mouse.click(randomX, randomY);
-                        await new Promise(r => setTimeout(r, 2000));
+                // Strategy B: Fallback (Monetag/AdCash Popunders) - Click Random locations until tab opens
+                if (!clickedElement) {
+                    console.log(`[CLICK] No standard ad found. Initiating Random Click Strategy for Pop-under/Overlay...`);
+                    
+                    // Try up to 5 random clicks to trigger the pop-up/new tab
+                    for (let i = 0; i < 5; i++) {
+                        // Check if a new tab appeared already
+                        const currentPagesCheck = await browser.pages();
+                        if (currentPagesCheck.length > initialPageCount) break;
 
-                        // Check if 2nd tab opened
-                        const pages = await browser.pages();
-                        if (pages.length > 2) { 
-                            console.log(`[TAB-OPENED] Random tap triggered a new tab!`);
-                            adClickedThisSession = true;
-                            break; 
-                        }
+                        // Click random coordinate in the viewport
+                        const x = randomInt(50, 1200);
+                        const y = randomInt(50, 600);
+                        console.log(`[TRY #${i+1}] Clicking at ${x},${y} to trigger ad...`);
+                        await page.mouse.click(x, y);
+                        await new Promise(r => setTimeout(r, 2000)); // Wait for reaction
                     }
                 }
 
-                // 🔥 HANDLE 2ND TAB (Advertiser Page)
-                if (adClickedThisSession) {
-                    await new Promise(r => setTimeout(r, 5000)); // Wait for tab to load
-                    const allPages = await browser.pages();
-                    if (allPages.length > 2) {
-                        const adPage = allPages[allPages.length - 1]; // Latest Tab
-                        try {
-                            console.log(`[REVENUE-BOOST] Scrolling advertiser tab for 10s...`);
-                            await adPage.bringToFront();
-                            // Simple scroll on 2nd tab
-                            await adPage.evaluate(() => window.scrollBy(0, 500));
-                            await new Promise(r => setTimeout(r, 10000)); // 10 sec hold
-                            await adPage.close();
-                        } catch (e) {
-                            console.log("Error handling ad page:", e.message);
-                        }
+                // --- CHECK FOR 2ND TAB (AD DESTINATION) ---
+                const updatedPages = await browser.pages();
+                if (updatedPages.length > initialPageCount) {
+                    console.log(`\x1b[42m[SUCCESS]\x1b[0m New Tab Detected! (Ad Opened). Switching...`);
+                    
+                    // Get the new tab (usually the last one in the array)
+                    const newAdTab = updatedPages[updatedPages.length - 1];
+                    
+                    try {
+                        await newAdTab.bringToFront();
+                        
+                        // Fake interaction on the ad page
+                        await newAdTab.evaluate(() => window.scrollBy(0, 300));
+                        await new Promise(r => setTimeout(r, 2000));
+                        await newAdTab.evaluate(() => window.scrollBy(0, 500));
+                        
+                        // Stay on ad page for 10-15 seconds
+                        const adWait = randomInt(10000, 15000);
+                        console.log(`[AD-TAB] Staying for ${adWait/1000}s on ad page...`);
+                        await new Promise(r => setTimeout(r, adWait));
+
+                        console.log(`[AD-TAB] Closing Ad Tab.`);
+                        await newAdTab.close();
+                        
+                        // Return focus to main page
+                        await page.bringToFront();
+                        adActionTaken = true; // Mark as done so we don't click again this session
+
+                    } catch (e) {
+                        console.log(`[AD-TAB ERROR] Could not interact with new tab: ${e.message}`);
+                        // Ensure we try to close it if it exists
+                        if (newAdTab && !newAdTab.isClosed()) await newAdTab.close().catch(()=>{});
                     }
+                } else {
+                    console.log(`[FAIL] Tried clicking, but no new tab opened.`);
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+        
+        console.log(`[DONE] View #${viewNumber} Finished.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
+            // Close all pages to free RAM
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
 }
+
 // ===================================================================
-// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// Tool 5 Endpoint (UPDATED)
 // ===================================================================
 app.post('/ultimate', async (req, res) => {
     try {
-        const { keyword, urls, views = 1000 } = req.body;
+        const { keyword, urls, views = 100 } = req.body;
 
-        // Frontend se 'urls' array aa raha hai, use validate karein
         if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
             return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
         }
 
         const totalViews = parseInt(views);
+        const estimatedTime = (totalViews * 40) / 60; // Approx minutes
 
-        // Immediate Success Response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+            message: `Task Started: ${totalViews} Views. Ad Clicks scheduled on view #6, #12, #18... (Estimated time: ${Math.round(estimatedTime)} mins)` 
         });
 
         // Background Worker
         (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+            console.log(`--- STARTING ADVANCED REVENUE TASK ---`);
             for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
+                // Rotate URLs
                 const randomUrl = urls[Math.floor(Math.random() * urls.length)];
                 
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
                 await runGscTasknew(keyword, randomUrl, i); 
 
                 if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                    // Small break between views to save CPU
+                    const restTime = 5000; 
                     await new Promise(r => setTimeout(r, restTime));
                 }
             }
@@ -1228,6 +1271,7 @@ app.post('/ultimate', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+                 
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
