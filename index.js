@@ -1064,9 +1064,6 @@ app.post('/start-Proxyium', async (req, res) => {
 // 5. GSC & REVENUE BOOSTER (UPDATED: AdCash/Monetag/AdSense Support)
 // ===================================================================
 
-// Helper function for random delays
-const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
 async function runGscTasknew(keyword, url, viewNumber) {
     let browser;
     try {
