@@ -1064,166 +1064,141 @@ app.post('/start-Proxyium', async (req, res) => {
 // 5. GSC & REVENUE BOOSTER (UPDATED: AdCash/Monetag/AdSense Support)
 // ===================================================================
 
+// Helper function for random delays
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 async function runGscTasknew(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new", // "new" is faster for background tasks
+            headless: "new", // "new" ya false rakhein agar testing karni ho
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
-                '--disable-blink-features=AutomationControlled',
-                '--disable-popup-blocking' // Allow popups for Monetag/AdCash
+                '--disable-popup-blocking', // Popups allow karna zaroori hai
+                '--window-size=1366,768'
             ]
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
         
-        // Random User Agent from your list
-        const randomUA = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        await page.setUserAgent(randomUA);
+        // Random Desktop User Agent
+        const userAgents = [
+           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+           "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"
+        ];
+        await page.setUserAgent(userAgents[Math.floor(Math.random() * userAgents.length)]);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        console.log(`[VIEW #${viewNumber}] Searching Google: ${keyword}`);
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 2000)); 
-
-        // 2. STAGE: Visit Target Site
-        console.log(`[VIEW #${viewNumber}] Visiting Target: ${url}`);
-        // Google referrer header set karke direct visit (more stable than finding link in SERP)
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 60000, 
-            referer: googleUrl 
-        });
-
-        const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 50000); // 35-50s stay time
-
-        // --- SCROLLING & BEHAVIOR START ---
-        
-        // Check if this view requires an Ad Click (Multiples of 6: 6, 12, 18...)
-        const shouldClickAd = (viewNumber % 6 === 0);
-
-        let adActionTaken = false;
-
-        while (Date.now() - startTime < targetStayTime) {
-            
-            // 1. Natural Scrolling
-            const dist = randomInt(200, 500);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            await new Promise(r => setTimeout(r, randomInt(2000, 4000)));
-
-            // 2. Random Mouse Jitter
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-
-            // --- AD CLICK LOGIC (Only for View 6, 12, 18...) ---
-            if (shouldClickAd && !adActionTaken) {
-                console.log(`\x1b[43m[AD-MODE]\x1b[0m View #${viewNumber} is chosen for Ad Interaction.`);
-                
-                // Track number of open pages (tabs)
-                const initialPages = await browser.pages();
-                const initialPageCount = initialPages.length;
-
-                // Strategy A: Try to find standard Ad Frames/Elements first
-                const adSelectors = [
-                    'iframe[src*="googleads"]', 
-                    'ins.adsbygoogle', 
-                    'div[id*="ad"]', 
-                    'a[href*="doubleclick"]',
-                    'iframe[id*="aswift"]'
-                ];
-                
-                let clickedElement = false;
-                
-                // Try specific selectors first
-                for (const selector of adSelectors) {
-                    const ads = await page.$$(selector);
-                    if (ads.length > 0) {
-                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                        const box = await targetAd.boundingBox();
-                        if (box) {
-                            console.log(`[CLICK] Target Ad Element Found (${selector}). Clicking...`);
-                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                            clickedElement = true;
-                            await new Promise(r => setTimeout(r, 3000)); // Wait for click to register
-                            break;
-                        }
-                    }
-                }
-
-                // Strategy B: Fallback (Monetag/AdCash Popunders) - Click Random locations until tab opens
-                if (!clickedElement) {
-                    console.log(`[CLICK] No standard ad found. Initiating Random Click Strategy for Pop-under/Overlay...`);
-                    
-                    // Try up to 5 random clicks to trigger the pop-up/new tab
-                    for (let i = 0; i < 5; i++) {
-                        // Check if a new tab appeared already
-                        const currentPagesCheck = await browser.pages();
-                        if (currentPagesCheck.length > initialPageCount) break;
-
-                        // Click random coordinate in the viewport
-                        const x = randomInt(50, 1200);
-                        const y = randomInt(50, 600);
-                        console.log(`[TRY #${i+1}] Clicking at ${x},${y} to trigger ad...`);
-                        await page.mouse.click(x, y);
-                        await new Promise(r => setTimeout(r, 2000)); // Wait for reaction
-                    }
-                }
-
-                // --- CHECK FOR 2ND TAB (AD DESTINATION) ---
-                const updatedPages = await browser.pages();
-                if (updatedPages.length > initialPageCount) {
-                    console.log(`\x1b[42m[SUCCESS]\x1b[0m New Tab Detected! (Ad Opened). Switching...`);
-                    
-                    // Get the new tab (usually the last one in the array)
-                    const newAdTab = updatedPages[updatedPages.length - 1];
-                    
-                    try {
-                        await newAdTab.bringToFront();
-                        
-                        // Fake interaction on the ad page
-                        await newAdTab.evaluate(() => window.scrollBy(0, 300));
-                        await new Promise(r => setTimeout(r, 2000));
-                        await newAdTab.evaluate(() => window.scrollBy(0, 500));
-                        
-                        // Stay on ad page for 10-15 seconds
-                        const adWait = randomInt(10000, 15000);
-                        console.log(`[AD-TAB] Staying for ${adWait/1000}s on ad page...`);
-                        await new Promise(r => setTimeout(r, adWait));
-
-                        console.log(`[AD-TAB] Closing Ad Tab.`);
-                        await newAdTab.close();
-                        
-                        // Return focus to main page
-                        await page.bringToFront();
-                        adActionTaken = true; // Mark as done so we don't click again this session
-
-                    } catch (e) {
-                        console.log(`[AD-TAB ERROR] Could not interact with new tab: ${e.message}`);
-                        // Ensure we try to close it if it exists
-                        if (newAdTab && !newAdTab.isClosed()) await newAdTab.close().catch(()=>{});
-                    }
-                } else {
-                    console.log(`[FAIL] Tried clicking, but no new tab opened.`);
-                }
-            }
+        // 1. Visit Target Site directly (or via Google if needed)
+        console.log(`[VIEW #${viewNumber}] Opening Site: ${url}`);
+        try {
+            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        } catch (e) {
+            console.log(`[WARN] Loading timeout, but continuing...`);
         }
-        
-        console.log(`[DONE] View #${viewNumber} Finished.`);
+
+        // 2. Wait 2-4 seconds strictly before doing anything (User Request)
+        const initialWait = randomInt(2000, 4000);
+        console.log(`[WAIT] Cooling down for ${initialWait}ms before action...`);
+        await new Promise(r => setTimeout(r, initialWait));
+
+        // --- AD CLICK LOGIC (Only 6, 12, 18...) ---
+        if (viewNumber % 6 === 0) {
+            console.log(`\x1b[41m[AGGRESSIVE-MODE]\x1b[0m View #${viewNumber} -> Looking for Ads/Popups...`);
+            
+            let adTabOpened = false;
+            const initialPagesCount = (await browser.pages()).length;
+
+            // STRATEGY: Blind Aggressive Clicking
+            // Monetag/AdCash often put a transparent layer. We click random points.
+            
+            // Loop: Try up to 8 clicks until a tab opens
+            for (let i = 1; i <= 8; i++) {
+                
+                // Check if a new tab opened already
+                const currentPages = await browser.pages();
+                if (currentPages.length > initialPagesCount) {
+                    adTabOpened = true;
+                    break; // Stop clicking if ad is open
+                }
+
+                // Random Coordinates generator
+                // (Center area focus karein jaha content hota hai)
+                const x = randomInt(200, 1100);
+                const y = randomInt(200, 600);
+
+                console.log(`[CLICK ATTEMPT ${i}/8] Clicking Coords (${x}, ${y})...`);
+
+                // 1. Move Mouse
+                await page.mouse.move(x, y, { steps: 5 });
+                
+                // 2. Hard Click
+                await page.mouse.down();
+                await new Promise(r => setTimeout(r, 100)); // Small hold
+                await page.mouse.up();
+
+                // 3. Wait small time for browser to react (1.5 sec)
+                await new Promise(r => setTimeout(r, 1500));
+            }
+
+            // --- HANDLING THE AD TAB ---
+            const postClickPages = await browser.pages();
+            if (postClickPages.length > initialPagesCount) {
+                console.log(`\x1b[42m[SUCCESS]\x1b[0m AD TAB DETECTED! Switching...`);
+                
+                // Get the new tab (Last one in the array)
+                const adPage = postClickPages[postClickPages.length - 1];
+
+                try {
+                    // Switch to Ad Tab
+                    await adPage.bringToFront();
+                    await new Promise(r => setTimeout(r, 2000)); // Load time
+
+                    // SCROLLING in Ad Tab (Fake Interest)
+                    console.log(`[AD-TAB] Scrolling & Viewing...`);
+                    await adPage.evaluate(() => window.scrollBy(0, 300));
+                    await new Promise(r => setTimeout(r, 1500));
+                    await adPage.evaluate(() => window.scrollBy(0, 400));
+                    
+                    // Stay Time (10-15 seconds)
+                    const stayTime = randomInt(10000, 15000);
+                    await new Promise(r => setTimeout(r, stayTime));
+
+                    // Close Ad Tab
+                    console.log(`[AD-TAB] Closing Ad.`);
+                    await adPage.close();
+
+                    // Back to Main Page
+                    await page.bringToFront();
+                    console.log(`[MAIN] Back on site.`);
+
+                } catch (err) {
+                    console.log(`[AD ERROR] Error inside ad tab: ${err.message}`);
+                    if (!adPage.isClosed()) await adPage.close();
+                }
+
+            } else {
+                console.log(`[FAIL] No new tab opened after aggressive clicking.`);
+            }
+
+        } else {
+            // NORMAL VIEW (Non-Ad)
+            console.log(`[ORGANIC] View #${viewNumber} - Just scrolling...`);
+            // Simple scroll for views like 1, 2, 3, 4, 5...
+            await page.evaluate(() => window.scrollBy(0, randomInt(300, 600)));
+            await new Promise(r => setTimeout(r, randomInt(10000, 20000))); // Stay 10-20s
+        }
+
+        console.log(`[DONE] View #${viewNumber} Completed.`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
         if (browser) {
-            // Close all pages to free RAM
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
@@ -1234,43 +1209,29 @@ async function runGscTasknew(keyword, url, viewNumber) {
 // ===================================================================
 app.post('/ultimate', async (req, res) => {
     try {
-        const { keyword, urls, views = 100 } = req.body;
+        const { keyword, urls, views = 100 } = req.body; // Default 100 views if not sent
 
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        if (!urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "URLs array required" });
         }
 
-        const totalViews = parseInt(views);
-        const estimatedTime = (totalViews * 40) / 60; // Approx minutes
+        res.status(200).json({ success: true, message: "Task Started! Ad clicks only on view #6, #12, #18..." });
 
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started: ${totalViews} Views. Ad Clicks scheduled on view #6, #12, #18... (Estimated time: ${Math.round(estimatedTime)} mins)` 
-        });
-
-        // Background Worker
         (async () => {
-            console.log(`--- STARTING ADVANCED REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Rotate URLs
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+            for (let i = 1; i <= views; i++) {
+                const url = urls[Math.floor(Math.random() * urls.length)];
+                await runGscTasknew(keyword, url, i);
                 
-                await runGscTasknew(keyword, randomUrl, i); 
-
-                if (i < totalViews) {
-                    // Small break between views to save CPU
-                    const restTime = 5000; 
-                    await new Promise(r => setTimeout(r, restTime));
-                }
+                // Gap between views
+                await new Promise(r => setTimeout(r, 5000));
             }
-            console.log("--- ALL SESSIONS COMPLETED ---");
         })();
 
     } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ error: err.message });
     }
 });
+
                  
 // ===================================================================
 app.listen(PORT, () => {
