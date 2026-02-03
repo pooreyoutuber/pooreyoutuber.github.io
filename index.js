@@ -1060,9 +1060,174 @@ app.post('/start-Proxyium', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 }); 
+/ ===================================================================
+// Tool 5 (Updated for Multi-Site Rotation)
+// ===================================================================
+async function runGscTasknew(keyword, url, viewNumber) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
+        });
 
+        const page = await browser.newPage();
+        const viewport = { width: 1366, height: 768 };
+        await page.setViewport(viewport);
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
+        // 1. STAGE: Google Search Simulation
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000)); 
 
+        // 2. STAGE: Visit Target Site
+        console.log(`[VIEW #${viewNumber}] Visiting: ${url}`);
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: googleUrl });
+
+        const startTime = Date.now();
+        const targetStayTime = randomInt(35000, 45000); 
+        let adClickedThisSession = false;
+
+        // 🔥 CHECK IF THIS IS AN AD-CLICK VIEW (6, 12, 18...)
+        const isAdClickView = (viewNumber % 6 === 0);
+
+        while (Date.now() - startTime < targetStayTime) {
+            // Realistic Behavior: Scroll & Mouse Move
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) + 200));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, 4000));
+
+            // 🔥 START ENHANCED AD-CLICKER LOGIC
+            if (isAdClickView && !adClickedThisSession) {
+                console.log(`[AD-MODE] View #${viewNumber} is a Target View. Searching for Ads...`);
+
+                // A. Broad Selectors (AdSense, Monetag, Adcash, Popunders, Banners)
+                const adSelectors = [
+                    'ins.adsbygoogle', 'iframe[id^="aswift"]', 'iframe[src*="googleads"]',
+                    'iframe[src*="ad-delivery"]', 'div[id^="monetag"]', 'a[href*="clk.sh"]',
+                    'div[class*="ad-"]', 'div[id*="ad-"]', 'iframe[src*="adnxs"]',
+                    'div[id^="adcash"]', '.ad-unit', 'a[href*="onclick"]'
+                ];
+
+                let adElement = null;
+                for (let selector of adSelectors) {
+                    const found = await page.$(selector);
+                    if (found) {
+                        const box = await found.boundingBox();
+                        if (box && box.width > 10 && box.height > 10) {
+                            adElement = found;
+                            break;
+                        }
+                    }
+                }
+
+                if (adElement) {
+                    const box = await adElement.boundingBox();
+                    console.log(`[TARGET-FOUND] Found ad via selector. Clicking...`);
+                    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                    adClickedThisSession = true;
+                } else {
+                    // B. FALLBACK: RANDOM TAP (For Adcash/Monetag where ads are invisible or full-screen)
+                    console.log(`[FALLBACK] No specific ad found. Starting Random Tap...`);
+                    for (let attempt = 0; attempt < 5; attempt++) {
+                        const randomX = randomInt(100, viewport.width - 100);
+                        const randomY = randomInt(100, viewport.height - 100);
+                        await page.mouse.click(randomX, randomY);
+                        await new Promise(r => setTimeout(r, 2000));
+
+                        // Check if 2nd tab opened
+                        const pages = await browser.pages();
+                        if (pages.length > 2) { 
+                            console.log(`[TAB-OPENED] Random tap triggered a new tab!`);
+                            adClickedThisSession = true;
+                            break; 
+                        }
+                    }
+                }
+
+                // 🔥 HANDLE 2ND TAB (Advertiser Page)
+                if (adClickedThisSession) {
+                    await new Promise(r => setTimeout(r, 5000)); // Wait for tab to load
+                    const allPages = await browser.pages();
+                    if (allPages.length > 2) {
+                        const adPage = allPages[allPages.length - 1]; // Latest Tab
+                        try {
+                            console.log(`[REVENUE-BOOST] Scrolling advertiser tab for 10s...`);
+                            await adPage.bringToFront();
+                            // Simple scroll on 2nd tab
+                            await adPage.evaluate(() => window.scrollBy(0, 500));
+                            await new Promise(r => setTimeout(r, 10000)); // 10 sec hold
+                            await adPage.close();
+                        } catch (e) {
+                            console.log("Error handling ad page:", e.message);
+                        }
+                    }
+                }
+            }
+        }
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${error.message}`);
+    } finally {
+        if (browser) {
+            await browser.close().catch(() => {});
+        }
+    }
+}
+/ ===================================================================
+// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// ===================================================================
+app.post('/ultimate', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        // Frontend se 'urls' array aa raha hai, use validate karein
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        }
+
+        const totalViews = parseInt(views);
+
+        // Immediate Success Response taaki frontend hang na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+        });
+
+        // Background Worker
+        (async () => {
+            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                // Randomly ek URL chunna rotation ke liye
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                
+                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
+                await runGscTasknew(keyword, randomUrl, i); 
+
+                if (i < totalViews) {
+                    // RAM management break
+                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                    await new Promise(r => setTimeout(r, restTime));
+                }
+            }
+            console.log("--- ALL SESSIONS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
 // ===================================================================
 app.listen(PORT, () => {
     console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
