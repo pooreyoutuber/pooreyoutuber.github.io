@@ -1397,7 +1397,7 @@ async function solveCaptchaWithGemini(page) {
     }
 }
 
-async function runDeepChannelBoost(channelUrl, watchTime, viewsCount, baseUrl) {
+async function runAiYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
     const GMAIL_USER = "frankrebri753@gmail.com";
     const GMAIL_PASS = "Youtube@77#";
