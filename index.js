@@ -1376,27 +1376,38 @@ app.post('/ultimate', async (req, res) => {
 // TOOL 8: REAL YOUTUBE VIEW ENGINE (FRONTEND INTEGRATED)
 // ===================================================================
 // --- NEW HELPER: Gemini Vision to solve CAPTCHA ---
-async function solveCaptchaWithGemini(page) {
-    if (!ai || !GEMINI_KEY) return null;
-    
-    // Screenshot sirf captcha area ka ya poore page ka
+// --- Helper: Gemini Vision to handle Login Steps ---
+async function handleLoginStepWithAI(page, email, password) {
     const screenshot = await page.screenshot({ encoding: 'base64' });
     
-    const prompt = "In this Google sign-in image, there is a captcha text. Please read and return ONLY the characters of the captcha. If there is no captcha, return 'NONE'.";
-    
+    const prompt = `
+    You are an automation assistant. Look at this Google Sign-in screen.
+    User Email: ${email}
+    User Password: ${password}
+
+    Identify the current state and return ONLY a JSON object:
+    1. If it's the Email page: {"action": "type", "selector": "input[type='email']", "value": "${email}", "next": "press Enter"}
+    2. If a CAPTCHA is visible: {"action": "type", "selector": "input[aria-label*='characters'], input[name='ca']", "value": "EXTRACT_CAPTCHA_TEXT", "next": "press Enter"}
+    3. If it's the Password page: {"action": "type", "selector": "input[type='password']", "value": "${password}", "next": "press Enter"}
+    4. If logged in successfully or on Home: {"action": "done"}
+    5. If an error or 'Try another way': {"action": "manual_check"}
+    `;
+
     try {
         const result = await ai.getGenerativeModel({ model: "gemini-1.5-flash" }).generateContent([
             prompt,
             { inlineData: { data: screenshot, mimeType: "image/png" } }
         ]);
-        const captchaText = result.response.text().trim();
-        return captchaText === 'NONE' ? null : captchaText;
+        
+        const responseText = result.response.text().replace(/```json|```/g, "").trim();
+        return JSON.parse(responseText);
     } catch (e) {
-        console.error("Gemini Captcha Error:", e.message);
-        return null;
+        console.error("AI Login Helper Error:", e);
+        return { action: "retry" };
     }
 }
 
+// --- Main YouTube Tool Function ---
 async function runAiYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
     const GMAIL_USER = "frankrebri753@gmail.com";
@@ -1409,76 +1420,80 @@ async function runAiYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(USER_AGENTS[0]);
-
-        const updateLog = async (msg) => {
-            latestScreenshot = await page.screenshot();
-            console.log(`[LIVE] ${msg}`);
+        await page.setViewport({ width: 1280, height: 800 });
+        
+        const updateStatus = async (msg) => {
+            latestScreenshot = await page.screenshot(); // Live screenshot for frontend
+            console.log(`[STATUS] ${msg}`);
         };
 
-        // --- STEP 1: LOGIN WITH GEMINI AI ---
+        // STEP 1: AI-DRIVEN LOGIN
         await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
-        await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
-        await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 5000));
-
-        // CAPTCHA CHECK
-        const captchaText = await solveCaptchaWithGemini(page);
-        if (captchaText) {
-            console.log(`[AI] Captcha Detected: ${captchaText}`);
-            await page.type('input[aria-label="Type the text you hear or see"]', captchaText);
-            await page.keyboard.press('Enter');
-            await new Promise(r => setTimeout(r, 4000));
-        }
-
-        // PASSWORD
-        await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
-        await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 8000));
-        await updateLog("Login Success");
-
-        // --- STEP 2: MULTI-VIDEO BINGE WATCH ---
-        const videosUrl = channelUrl.endsWith('/videos') ? channelUrl : `${channelUrl}/videos`;
         
-        for (let i = 0; i < Math.min(viewsCount, 2); i++) { // Pehle 2 videos ke liye loop
-            await page.goto(videosUrl, { waitUntil: 'networkidle2' });
-            await updateLog(`Mapsd to Videos (Video #${i+1})`);
-
-            const videoLink = await page.evaluate((index) => {
-                const links = Array.from(document.querySelectorAll('a#video-title-link'));
-                return links[index] ? links[index].href : null;
-            }, i);
-
-            if (videoLink) {
-                await page.goto(videoLink, { waitUntil: 'networkidle2' });
-                
-                // UNMUTE AND PLAY
-                await page.evaluate(() => {
-                    const v = document.querySelector('video');
-                    if(v) { v.muted = false; v.volume = 1.0; }
-                });
-                await page.keyboard.press('k'); // Ensure Play
-
-                console.log(`[WATCHING] Video ${i+1} unmuted for ${watchTime}s`);
-                await new Promise(r => setTimeout(r, watchTime * 1000));
-                
-                // 30% par Like
-                await page.keyboard.press('l');
+        let loginComplete = false;
+        let attempts = 0;
+        
+        while (!loginComplete && attempts < 10) {
+            attempts++;
+            await new Promise(r => setTimeout(r, 2000));
+            const decision = await handleLoginStepWithAI(page, GMAIL_USER, GMAIL_PASS);
+            
+            if (decision.action === "done") {
+                loginComplete = true;
+                await updateStatus("Login Successful!");
+            } else if (decision.action === "type") {
+                await updateStatus(`AI Action: Entering ${decision.value}`);
+                await page.waitForSelector(decision.selector, { timeout: 5000 });
+                await page.type(decision.selector, decision.value, { delay: 100 });
+                await page.keyboard.press('Enter');
+            } else {
+                await updateStatus("AI waiting or retrying...");
             }
         }
 
-        // --- STEP 3: CLEANUP (History & Cache Delete) ---
-        console.log("[CLEANUP] Deleting history and cookies...");
+        // STEP 2: VIDEO WATCHING LOOP (Latest and 2nd Video)
+        const videosUrl = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
+
+        for (let i = 0; i < 2; i++) { // Loop for 2 videos
+            await page.goto(videosUrl, { waitUntil: 'networkidle2' });
+            await updateStatus(`Navigating to Videos tab - Video ${i+1}`);
+
+            // Selector for video thumbnails
+            const videoSelector = 'a#video-title-link';
+            await page.waitForSelector(videoSelector);
+            
+            const videos = await page.$$(videoSelector);
+            if (videos[i]) {
+                await videos[i].click();
+                await new Promise(r => setTimeout(r, 5000));
+
+                // Unmute logic
+                await page.evaluate(() => {
+                    const video = document.querySelector('video');
+                    if (video) {
+                        video.muted = false;
+                        video.volume = 1.0;
+                        video.play();
+                    }
+                });
+
+                await updateStatus(`Watching Video ${i+1} unmuted for ${watchTime}s`);
+                await new Promise(r => setTimeout(r, watchTime * 1000));
+            }
+        }
+
+        // STEP 3: CLEANUP
+        await updateStatus("Cleaning up history and cookies...");
         const client = await page.target().createCDPSession();
         await client.send('Network.clearBrowserCache');
         await client.send('Network.clearBrowserCookies');
 
     } catch (error) {
-        console.error(`[ERROR] ${error.message}`);
+        console.error("Main Task Error:", error);
     } finally {
         if (browser) await browser.close();
         latestScreenshot = null;
-        console.log("--- TASK COMPLETE ---");
+        console.log("Task Finished.");
     }
 }
 
