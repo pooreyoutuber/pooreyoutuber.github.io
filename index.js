@@ -1375,13 +1375,31 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // TOOL 8: REAL YOUTUBE VIEW ENGINE (FRONTEND INTEGRATED)
 // ===================================================================
-// ===================================================================
-// TOOL 8: AI-POWERED DEEP YOUTUBE GROWTH (GEMINI INTEGRATED)
-// ===================================================================
+// --- NEW HELPER: Gemini Vision to solve CAPTCHA ---
+async function solveCaptchaWithGemini(page) {
+    if (!ai || !GEMINI_KEY) return null;
+    
+    // Screenshot sirf captcha area ka ya poore page ka
+    const screenshot = await page.screenshot({ encoding: 'base64' });
+    
+    const prompt = "In this Google sign-in image, there is a captcha text. Please read and return ONLY the characters of the captcha. If there is no captcha, return 'NONE'.";
+    
+    try {
+        const result = await ai.getGenerativeModel({ model: "gemini-1.5-flash" }).generateContent([
+            prompt,
+            { inlineData: { data: screenshot, mimeType: "image/png" } }
+        ]);
+        const captchaText = result.response.text().trim();
+        return captchaText === 'NONE' ? null : captchaText;
+    } catch (e) {
+        console.error("Gemini Captcha Error:", e.message);
+        return null;
+    }
+}
 
-async function runAiYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
+async function runDeepChannelBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
-    const GMAIL_USER = "frankrebri753";
+    const GMAIL_USER = "frankrebri753@gmail.com";
     const GMAIL_PASS = "Youtube@77#";
 
     try {
@@ -1395,74 +1413,72 @@ async function runAiYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
 
         const updateLog = async (msg) => {
             latestScreenshot = await page.screenshot();
-            console.log(`\x1b[35m[AI-YT-LOG]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+            console.log(`[LIVE] ${msg}`);
         };
 
-        // --- STEP 1: LOGIN WITH AI ASSISTANCE ---
-        console.log("[AI] Starting Login Process...");
+        // --- STEP 1: LOGIN WITH GEMINI AI ---
         await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
-
-        // Email Phase
         await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
         await page.keyboard.press('Enter');
         await new Promise(r => setTimeout(r, 5000));
 
-        // Password Phase
+        // CAPTCHA CHECK
+        const captchaText = await solveCaptchaWithGemini(page);
+        if (captchaText) {
+            console.log(`[AI] Captcha Detected: ${captchaText}`);
+            await page.type('input[aria-label="Type the text you hear or see"]', captchaText);
+            await page.keyboard.press('Enter');
+            await new Promise(r => setTimeout(r, 4000));
+        }
+
+        // PASSWORD
         await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
         await page.keyboard.press('Enter');
         await new Promise(r => setTimeout(r, 8000));
-        await updateLog("Login Attempted");
+        await updateLog("Login Success");
 
-        // AI CHECK: Kya login success hua? (Gemini check karega)
-        const pageContent = await page.content();
-        const aiCheck = await ai.getGenerativeModel({ model: "gemini-pro" }).generateContent(
-            `Check if this HTML indicates a successful login or a captcha/security block: ${pageContent.substring(0, 2000)}`
-        );
-        console.log("[GEMINI RESPONSE]:", aiCheck.response.text());
-
-        // --- STEP 2: CHANNEL BINGE WATCHING ---
-        const videosUrl = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
+        // --- STEP 2: MULTI-VIDEO BINGE WATCH ---
+        const videosUrl = channelUrl.endsWith('/videos') ? channelUrl : `${channelUrl}/videos`;
         
-        for (let i = 0; i < viewsCount; i++) {
-            console.log(`[FLOW] Navigating to Channel Videos (View #${i+1})`);
+        for (let i = 0; i < Math.min(viewsCount, 2); i++) { // Pehle 2 videos ke liye loop
             await page.goto(videosUrl, { waitUntil: 'networkidle2' });
-            await new Promise(r => setTimeout(r, 3000));
+            await updateLog(`Mapsd to Videos (Video #${i+1})`);
 
-            // Select Latest Video (i-th index)
-            const videoToClick = await page.$$('a#video-title-link');
-            if (videoToClick[i]) {
-                await videoToClick[i].click();
-                console.log(`[PLAYING] Started Video #${i+1}`);
+            const videoLink = await page.evaluate((index) => {
+                const links = Array.from(document.querySelectorAll('a#video-title-link'));
+                return links[index] ? links[index].href : null;
+            }, i);
+
+            if (videoLink) {
+                await page.goto(videoLink, { waitUntil: 'networkidle2' });
                 
-                await new Promise(r => setTimeout(r, 5000));
-                await page.keyboard.press('k'); // Play
-                // Unmute handle: YouTube default mute hota hai
+                // UNMUTE AND PLAY
                 await page.evaluate(() => {
-                    const video = document.querySelector('video');
-                    if(video) { video.muted = false; video.volume = 1; }
+                    const v = document.querySelector('video');
+                    if(v) { v.muted = false; v.volume = 1.0; }
                 });
+                await page.keyboard.press('k'); // Ensure Play
 
-                let elapsed = 0;
-                while (elapsed < watchTime) {
-                    await new Promise(r => setTimeout(r, 10000));
-                    elapsed += 10;
-                    await page.mouse.move(Math.random()*200, Math.random()*200);
-                    await updateLog(`Watching Video ${i+1} | ${elapsed}/${watchTime}s`);
-                }
-                console.log(`[SUCCESS] Video ${i+1} watch time completed.`);
-            } else {
-                console.log("[INFO] No more videos found in the list.");
-                break;
+                console.log(`[WATCHING] Video ${i+1} unmuted for ${watchTime}s`);
+                await new Promise(r => setTimeout(r, watchTime * 1000));
+                
+                // 30% par Like
+                await page.keyboard.press('l');
             }
         }
 
+        // --- STEP 3: CLEANUP (History & Cache Delete) ---
+        console.log("[CLEANUP] Deleting history and cookies...");
+        const client = await page.target().createCDPSession();
+        await client.send('Network.clearBrowserCache');
+        await client.send('Network.clearBrowserCookies');
+
     } catch (error) {
-        console.error(`[AI-YT-ERROR] ${error.message}`);
+        console.error(`[ERROR] ${error.message}`);
     } finally {
-        if (browser) {
-            console.log("[CLEANUP] Deleting Session & History...");
-            await browser.close(); // Puppeteer automatically clears temp session on close
-        }
+        if (browser) await browser.close();
+        latestScreenshot = null;
+        console.log("--- TASK COMPLETE ---");
     }
 }
 
