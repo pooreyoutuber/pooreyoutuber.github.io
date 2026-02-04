@@ -1374,15 +1374,12 @@ app.post('/ultimate', async (req, res) => {
 });
 // ===================================================================
 // TOOL 8: REAL YOUTUBE VIEW ENGINE (FRONTEND INTEGRATED)
-// =============================================
+// ==================================== 
 // ===================================================================
-// TOOL 8: AI-VISION POWERED YOUTUBE ENGINE (LOGIN + BINGE WATCH)
-// ================================================================
-// ===================================================================
-// TOOL 8: AI-POWERED YOUTUBE ENGINE (FIXED GEMINI KEY & LOGIN)
+// TOOL 8: ULTIMATE AI-VISION YOUTUBE ENGINE (CAPTCHA & LOGIN SOLVER)
 // ===================================================================
 
-async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
+async function runUltimateAiYoutube(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
     const GMAIL_USER = "frankrebri753@gmail.com";
     const GMAIL_PASS = "Youtub@77#";
@@ -1396,76 +1393,79 @@ async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUr
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
 
-        // helper: Screenshot aur AI Decision (Render GEMINI_KEY using)
-        const getAiDecision = async (instruction) => {
+        // Helper: Screenshot capture aur update
+        const capture = async (msg) => {
+            latestScreenshot = await page.screenshot();
+            console.log(`\x1b[33m[STEP-SHOT]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+        };
+
+        // Helper: Gemini AI se screen analyze karwana
+        const askGemini = async (promptText) => {
             const screenshotB64 = await page.screenshot({ encoding: 'base64' });
-            
-            // Sahi tarika Gemini model ko call karne ka
-            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" }); 
-            
+            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
             const result = await model.generateContent([
-                instruction,
+                promptText,
                 { inlineData: { data: screenshotB64, mimeType: "image/png" } }
             ]);
             return result.response.text();
         };
 
-        const updateLog = async (msg) => {
-            latestScreenshot = await page.screenshot();
-            console.log(`\x1b[35m[AI-VISION]\x1b[0m ${msg} | Check: ${baseUrl}/live-check`);
-        };
-
-        // --- STEP 1: AI DRIVEN LOGIN ---
-        console.log("[AI] Starting Smart Login...");
+        // --- STEP 1: GMAIL SIGN IN ---
+        console.log("[START] Opening Google Login...");
         await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
+        await capture("Login Page Opened");
 
-        // Email Phase
+        // Email Daalna
         await page.type('input[type="email"]', GMAIL_USER, { delay: 150 });
         await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 6000));
+        await new Promise(r => setTimeout(r, 5000));
+        await capture("After Email Entry");
 
-        // AI Vision for Security/Captcha/Password
-        let decision = await getAiDecision("Analyze this screen. Is there a Captcha? If yes, solve it. If it's a password screen, say 'TYPE_PASSWORD'. If it's successful, say 'LOGGED_IN'.");
-        console.log("[GEMINI DECISION]:", decision);
+        // --- STEP 2: CAPTCHA & SECURITY CHECK ---
+        let aiDecision = await askGemini("Check this screen. If you see a Captcha, type ONLY the captcha characters. If it's a password screen, type 'PASSWORD'. If it's something else, describe it shortly.");
+        console.log("[AI DECISION]:", aiDecision);
 
-        if (decision.includes('TYPE_PASSWORD')) {
-            await page.type('input[type="password"]', GMAIL_PASS, { delay: 150 });
+        if (aiDecision.toUpperCase().includes("PASSWORD")) {
+            console.log("[AI] Password screen detected.");
+        } else if (aiDecision.length < 10) { 
+            // Agar AI ne chota code diya hai matlab wo captcha characters hain
+            console.log("[AI] Solving Captcha: " + aiDecision);
+            await page.type('input[aria-label="Type the text you hear or see"]', aiDecision, { delay: 100 });
             await page.keyboard.press('Enter');
-            await new Promise(r => setTimeout(r, 10000));
-        } else if (decision.includes('Captcha')) {
-            // AI se captcha ka text lekar fill karne ka logic yahan aayega
-            console.log("[AI] Attempting Captcha Bypass...");
+            await new Promise(r => setTimeout(r, 5000));
+            await capture("After Captcha Attempt");
         }
 
-        // --- STEP 2: CHANNEL BINGE WATCHING ---
-        const videosSection = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
+        // --- STEP 3: PASSWORD ENTRY ---
+        await page.type('input[type="password"]', GMAIL_PASS, { delay: 150 });
+        await page.keyboard.press('Enter');
+        await new Promise(r => setTimeout(r, 10000));
+        await capture("Final Login Status");
+
+        // --- STEP 4: CHANNEL NAVIGATION & BINGE WATCH ---
+        const videosLink = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
         
         for (let i = 0; i < viewsCount; i++) {
-            console.log(`[ACTION] Navigating to Video #${i+1}`);
-            await page.goto(videosSection, { waitUntil: 'networkidle2' });
+            console.log(`[FLOW] Moving to Video #${i+1}`);
+            await page.goto(videosLink, { waitUntil: 'networkidle2' });
             await new Promise(r => setTimeout(r, 5000));
 
-            // Select i-th video from the list
-            const clicked = await page.evaluate((index) => {
-                const links = document.querySelectorAll('a#video-title-link');
-                if (links[index]) {
-                    links[index].scrollIntoView();
-                    links[index].click();
+            const clicked = await page.evaluate((idx) => {
+                const vids = document.querySelectorAll('a#video-title-link');
+                if (vids[idx]) {
+                    vids[idx].scrollIntoView();
+                    vids[idx].click();
                     return true;
                 }
                 return false;
             }, i);
 
             if (clicked) {
-                await new Promise(r => setTimeout(r, 6000));
-                
-                // --- UNMUTE & VOLUME (Real Signal) ---
+                await new Promise(r => setTimeout(r, 5000));
+                // Unmute & Volume
                 await page.evaluate(() => {
-                    const video = document.querySelector('video');
-                    if (video) { 
-                        video.muted = false; 
-                        video.volume = 1; 
-                    }
+                    const v = document.querySelector('video');
+                    if(v) { v.muted = false; v.volume = 1; }
                 });
 
                 let elapsed = 0;
@@ -1473,23 +1473,18 @@ async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUr
                     await new Promise(r => setTimeout(r, 10000));
                     elapsed += 10;
                     await page.mouse.move(Math.random()*300, Math.random()*300);
-                    await updateLog(`Playing Video ${i+1} | ${elapsed}/${watchTime}s | UNMUTED`);
+                    await capture(`Watching Video ${i+1} (${elapsed}/${watchTime}s)`);
                 }
-                
-                // Har video ke baad wapas channel par jana (Binge logic)
-                console.log(`[FINISH] Video ${i+1} completed. Returning to channel...`);
-            } else {
-                console.log("[INFO] No more videos found.");
-                break;
+                console.log(`[DONE] Video ${i+1} Finished.`);
             }
         }
 
     } catch (error) {
-        console.error(`[AI-ERROR] Critical Failure: ${error.message}`);
+        console.error(`[FATAL ERROR]: ${error.message}`);
     } finally {
         if (browser) {
-            console.log("[CLEANUP] Wiping all session data and history...");
-            await browser.close(); 
+            console.log("[CLEANUP] Closing browser & clearing temporary data.");
+            await browser.close();
         }
     }
 }
