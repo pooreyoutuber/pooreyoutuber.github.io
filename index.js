@@ -1376,108 +1376,122 @@ app.post('/ultimate', async (req, res) => {
 // TOOL 8: REAL YOUTUBE VIEW ENGINE (FRONTEND INTEGRATED)
 // ===================================================================
 // ===================================================================
-// TOOL 8: ADVANCED YT VIEW ENGINE + LIVE SCREENSHOT MONITORING
+// TOOL 8: DEEP CHANNEL ENGAGEMENT (LOGIN + AUTO-WATCH LATEST)
 // ===================================================================
 
-// Live Screenshot dekhne ke liye endpoint
-app.get('/view-screenshot', (req, res) => {
-    if (!latestScreenshot) return res.send("No screenshot captured yet. Wait for task to start.");
-    res.contentType('image/png');
-    res.send(latestScreenshot);
+let latestScreenshot = null;
+
+// Live Monitoring Endpoint
+app.get('/live-check', (req, res) => {
+    if (!latestScreenshot) return res.send("System starting... Please wait 10 seconds.");
+    res.contentType('image/png').send(latestScreenshot);
 });
 
-async function runRealYoutubeView(url, watchTime, viewNumber, baseUrl) {
+async function runDeepChannelBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
+    // Render environment variables se uthana best hai, par aapne direct diya hai to:
+    const GMAIL_USER = "frankrebri753@gmail.com";
+    const GMAIL_PASS = "Youtube@77#";
+
     try {
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled', // Stealth: Bot detection bypass
-                '--mute-audio',
+                '--disable-blink-features=AutomationControlled',
                 '--window-size=1280,720'
             ]
         });
 
         const page = await browser.newPage();
-        
-        // Stealth: webdriver property delete karna
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
+        await page.setUserAgent(USER_AGENTS[0]);
 
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        console.log(`\n[YT-START] View #${viewNumber} Started...`);
-        
-        // Step 1: YouTube Load karna
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // Screenshot capture function
-        const capture = async (msg) => {
+        // Monitoring Function
+        const updateLog = async (msg) => {
             latestScreenshot = await page.screenshot();
-            console.log(`[LIVE-SCREEN] ${msg}: ${baseUrl}/view-screenshot`);
+            console.log(`\x1b[36m[LIVE-VIEW]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
         };
 
-        await capture("Video Loaded");
+        // --- STEP 1: GOOGLE LOGIN ---
+        console.log("[LOGIN] Starting Gmail Login...");
+        await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
+        
+        await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
+        await page.keyboard.press('Enter');
+        await new Promise(r => setTimeout(r, 5000));
+        await updateLog("Email Entered");
 
-        // Step 2: Human-like Play Action
-        try {
-            await page.keyboard.press('k'); // YouTube shortcut for Play/Pause
-            await capture("Play Button Pressed (K)");
-        } catch (e) {}
+        await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
+        await page.keyboard.press('Enter');
+        await new Promise(r => setTimeout(r, 8000));
+        await updateLog("Login Attempted");
 
-        // Step 3: Video Quality Low karna (144p) - Detection se bachne ke liye
-        try {
-            await page.keyboard.press('s'); // Open settings
-            await new Promise(r => setTimeout(r, 500));
-            await page.keyboard.press('Enter'); // Quality menu
-            await new Promise(r => setTimeout(r, 500));
-            await page.keyboard.press('ArrowUp'); // Select lowest
-            await page.keyboard.press('Enter');
-            await capture("Quality set to Low");
-        } catch (e) {}
+        // --- STEP 2: CHANNEL VIDEOS SECTION ---
+        const videosUrl = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
+        console.log(`[NAVIGATE] Going to: ${videosUrl}`);
+        await page.goto(videosUrl, { waitUntil: 'networkidle2' });
+        await updateLog("Channel Loaded");
 
-        // Step 4: Watch Time Loop (Har 10-15 sec mein screenshot link dega)
-        let elapsed = 0;
-        while (elapsed < watchTime) {
-            let chunk = 15; // 15 seconds ka interval
-            await new Promise(r => setTimeout(r, chunk * 1000));
-            elapsed += chunk;
+        // --- STEP 3: GET LATEST VIDEO LINKS ---
+        const videoLinks = await page.evaluate((count) => {
+            const links = Array.from(document.querySelectorAll('a#video-title-link'));
+            return links.slice(0, count).map(a => a.href);
+        }, parseInt(viewsCount));
+
+        console.log(`[INFO] Found ${videoLinks.length} latest videos to watch.`);
+
+        // --- STEP 4: BINGE WATCH LOOP ---
+        for (let i = 0; i < videoLinks.length; i++) {
+            const vUrl = videoLinks[i];
+            console.log(`[PLAYING] Video ${i + 1}: ${vUrl}`);
             
-            // Random Mouse Movement (Stealth)
-            await page.mouse.move(Math.random()*500, Math.random()*500);
+            await page.goto(vUrl, { waitUntil: 'networkidle2' });
+            await new Promise(r => setTimeout(r, 3000));
+
+            // Anti-Bot Actions: Play, Mute, and Low Quality
+            await page.keyboard.press('k'); // Play
+            await page.keyboard.press('m'); // Mute
             
-            await capture(`Watching... ${elapsed}/${watchTime}s`);
+            let elapsed = 0;
+            while (elapsed < watchTime) {
+                await new Promise(r => setTimeout(r, 5000)); // 5 Second Interval
+                elapsed += 5;
+
+                // Random Mouse Movement to stay active
+                await page.mouse.move(Math.random()*400, Math.random()*400);
+                
+                // Auto-Like (30% watch time par)
+                if (elapsed === 20) await page.keyboard.press('l'); 
+
+                await updateLog(`Watching Video ${i+1} (${elapsed}/${watchTime}s)`);
+            }
+            console.log(`[FINISH] Video ${i+1} completed.`);
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
-
     } catch (error) {
-        console.error(`[YT-ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] Task failed: ${error.message}`);
+        await updateLog("Error Occurred");
     } finally {
         if (browser) await browser.close();
+        console.log("--- CHANNEL BOOST SESSION ENDED ---");
     }
 }
 
-app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    // Aapke render app ka URL (e.g., https://app-name.onrender.com)
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const baseUrl = `${protocol}://${host}`;
+// Post Endpoint for Frontend
+app.post('/api/channel-grow-boost', async (req, res) => {
+    const { channel_url, views_count, watch_time } = req.body;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
 
-    res.status(200).json({ success: true, message: "Engine Running. Check Render Logs for Live Link." });
+    if (!channel_url) return res.status(400).json({ error: "Channel URL is missing" });
 
-    (async () => {
-        for (let i = 1; i <= parseInt(views_count); i++) {
-            await runRealYoutubeView(video_url, parseInt(watch_time), i, baseUrl);
-            console.log("[WAIT] Next view in 10s...");
-            await new Promise(r => setTimeout(r, 10000));
-        }
-    })();
+    res.status(200).json({ 
+        success: true, 
+        message: "Channel Engine Started. Watch Render logs for live link." 
+    });
+
+    // Run in background
+    runDeepChannelBoost(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
 });
 
 //==================================================
