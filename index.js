@@ -1378,105 +1378,170 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // TOOL 8: DEEP CHANNEL ENGAGEMENT (LOGIN + AUTO-WATCH LATEST)
 // ===================================================================
+// ===================================================================
+// TOOL 8: DEEP CHANNEL ENGAGEMENT (FIXED: GUEST MODE - NO LOGIN STUCK)
+// ===================================================================
 
 let latestScreenshot = null;
 
 // Live Monitoring Endpoint
 app.get('/live-check', (req, res) => {
-    if (!latestScreenshot) return res.send("System starting... Please wait 10 seconds.");
+    if (!latestScreenshot) return res.send("System starting... Image capture hone ka wait karein (10-15 sec).");
     res.contentType('image/png').send(latestScreenshot);
 });
 
 async function runDeepChannelBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
-    // Render environment variables se uthana best hai, par aapne direct diya hai to:
-    const GMAIL_USER = "frankrebri753@gmail.com";
-    const GMAIL_PASS = "Youtube@77#";
-
     try {
+        console.log(`[START] Launching Browser for Channel: ${channelUrl}`);
+        
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // "new" headless mode better hai
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled',
-                '--window-size=1280,720'
+                '--disable-blink-features=AutomationControlled', // Bot detection kam karta hai
+                '--window-size=1280,720',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(USER_AGENTS[0]);
+        
+        // Random User Agent (Mobile/Desktop mix)
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+        await page.setViewport({ width: 1280, height: 720 });
 
-        // Monitoring Function
+        // Monitoring Function (Screenshot Update)
         const updateLog = async (msg) => {
-            latestScreenshot = await page.screenshot();
-            console.log(`\x1b[36m[LIVE-VIEW]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+            try {
+                latestScreenshot = await page.screenshot();
+                console.log(`\x1b[36m[LIVE-VIEW]\x1b[0m ${msg} | Monitor: ${baseUrl}/live-check`);
+            } catch (e) {
+                console.log(`[SCREENSHOT ERROR] Could not capture.`);
+            }
         };
 
-        // --- STEP 1: GOOGLE LOGIN ---
-        console.log("[LOGIN] Starting Gmail Login...");
-        await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
+        await updateLog("Browser Started - Skipping Login (Guest Mode)");
+
+        // --- STEP 1: DIRECTLY GO TO VIDEOS (No Login) ---
+        // Login skip kar diya kyuki Google Captcha de raha tha
         
-        await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
-        await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 5000));
-        await updateLog("Email Entered");
+        let targetUrl = channelUrl;
+        if (!channelUrl.includes('/videos')) {
+            targetUrl = `${channelUrl}/videos`;
+        }
+        
+        console.log(`[NAVIGATE] Going to: ${targetUrl}`);
+        await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+        await updateLog("Channel Page Loaded");
 
-        await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
-        await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 8000));
-        await updateLog("Login Attempted");
+        // Popup handle (Accept Cookies wagera agar aaye)
+        try {
+            const buttons = await page.$$('button');
+            for (const button of buttons) {
+                const text = await page.evaluate(el => el.textContent, button);
+                if (text.includes('Accept') || text.includes('I agree') || text.includes('Reject all')) {
+                    await button.click();
+                    break;
+                }
+            }
+        } catch (e) {}
 
-        // --- STEP 2: CHANNEL VIDEOS SECTION ---
-        const videosUrl = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
-        console.log(`[NAVIGATE] Going to: ${videosUrl}`);
-        await page.goto(videosUrl, { waitUntil: 'networkidle2' });
-        await updateLog("Channel Loaded");
-
-        // --- STEP 3: GET LATEST VIDEO LINKS ---
+        // --- STEP 2: GET LATEST VIDEO LINKS ---
+        await page.waitForSelector('ytd-rich-grid-media, #video-title-link', { timeout: 10000 }).catch(() => console.log("Video grid not found immediately"));
+        
         const videoLinks = await page.evaluate((count) => {
-            const links = Array.from(document.querySelectorAll('a#video-title-link'));
-            return links.slice(0, count).map(a => a.href);
+            // Mobile aur Desktop dono ke selectors try karega
+            const links = Array.from(document.querySelectorAll('a#video-title-link, a.media-item-thumbnail-container'));
+            // Unique links filter karein
+            const uniqueLinks = [...new Set(links.map(a => a.href).filter(href => href.includes('/watch')))];
+            return uniqueLinks.slice(0, count);
         }, parseInt(viewsCount));
 
-        console.log(`[INFO] Found ${videoLinks.length} latest videos to watch.`);
+        if (videoLinks.length === 0) {
+            console.log("[ERROR] Koi video nahi mili. Page structure change ho sakta hai.");
+            await updateLog("Error: No Videos Found");
+            await browser.close();
+            return;
+        }
 
-        // --- STEP 4: BINGE WATCH LOOP ---
+        console.log(`[INFO] Found ${videoLinks.length} videos to watch.`);
+
+        // --- STEP 3: BINGE WATCH LOOP ---
         for (let i = 0; i < videoLinks.length; i++) {
             const vUrl = videoLinks[i];
             console.log(`[PLAYING] Video ${i + 1}: ${vUrl}`);
             
-            await page.goto(vUrl, { waitUntil: 'networkidle2' });
-            await new Promise(r => setTimeout(r, 3000));
-
-            // Anti-Bot Actions: Play, Mute, and Low Quality
-            await page.keyboard.press('k'); // Play
-            await page.keyboard.press('m'); // Mute
+            await page.goto(vUrl, { waitUntil: 'domcontentloaded' });
+            await updateLog(`Loading Video ${i+1}...`);
             
+            // Wait for player
+            await new Promise(r => setTimeout(r, 5000));
+
+            // Try to play if paused
+            try {
+                await page.keyboard.press('k'); // Play/Pause toggle
+            } catch (e) {}
+
             let elapsed = 0;
-            while (elapsed < watchTime) {
-                await new Promise(r => setTimeout(r, 5000)); // 5 Second Interval
+            const sessionWatchTime = watchTime + randomInt(5, 20); // Thoda random time add kiya
+
+            while (elapsed < sessionWatchTime) {
+                // Har 5 second mein screenshot aur log update
+                await new Promise(r => setTimeout(r, 5000)); 
                 elapsed += 5;
 
-                // Random Mouse Movement to stay active
-                await page.mouse.move(Math.random()*400, Math.random()*400);
+                // Random Mouse Movement (Human behavior)
+                await page.mouse.move(Math.random()*500, Math.random()*500);
                 
-                // Auto-Like (30% watch time par)
-                if (elapsed === 20) await page.keyboard.press('l'); 
+                // Scroll thoda sa
+                if (elapsed % 15 === 0) {
+                     await page.evaluate(() => window.scrollBy(0, 100));
+                }
 
-                await updateLog(`Watching Video ${i+1} (${elapsed}/${watchTime}s)`);
+                // Skip Ad Button Check
+                try {
+                    const skipBtn = await page.$('.ytp-ad-skip-button, .ytp-ad-skip-button-modern');
+                    if (skipBtn) {
+                        await skipBtn.click();
+                        console.log("[AD] Ad Skipped!");
+                    }
+                } catch (e) {}
+
+                await updateLog(`Watching V${i+1} (${elapsed}/${sessionWatchTime}s)`);
             }
             console.log(`[FINISH] Video ${i+1} completed.`);
         }
 
     } catch (error) {
-        console.error(`[ERROR] Task failed: ${error.message}`);
-        await updateLog("Error Occurred");
+        console.error(`[CRITICAL ERROR] Task failed: ${error.message}`);
+        if (page) await updateLog(`Error: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            await browser.close();
+        }
         console.log("--- CHANNEL BOOST SESSION ENDED ---");
     }
 }
+
+// Post Endpoint for Frontend
+app.post('/api/real-view-boost', async (req, res) => {
+    const { channel_url, views_count, watch_time } = req.body;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+    if (!channel_url) return res.status(400).json({ error: "Channel URL is missing" });
+
+    res.status(200).json({ 
+        success: true, 
+        message: "Channel Engine Started (Guest Mode). Login disabled to prevent errors. Live check par screenshot dekhein." 
+    });
+
+    // Run in background
+    runDeepChannelBoost(channel_url, parseInt(watch_time || 60), parseInt(views_count || 3), baseUrl);
+});
+                                              
 
 // Post Endpoint for Frontend
 app.post('/api/real-view-boost', async (req, res) => {
