@@ -111,11 +111,12 @@
                 const response = await fetch('https://pooreyoutuber-github-ioproxy.onrender.com/api/real-view-boost', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        video_url: channel_url, 
-                        views_count: qty,
-                        watch_time: watchSeconds // Naya parameter
-                    })
+                   body: JSON.stringify({ 
+          channel_url: videoUrl, // 'video_url' ko 'channel_url' kar dein
+           views_count: parseInt(qty),
+           watch_time: parseInt(watchSeconds)
+})
+                    
                 });
 
                 if (response.ok) {
