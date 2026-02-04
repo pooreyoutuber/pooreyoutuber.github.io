@@ -1386,10 +1386,12 @@ app.get('/live-check', (req, res) => {
     if (!latestScreenshot) return res.send("System starting... Please wait 10 seconds.");
     res.contentType('image/png').send(latestScreenshot);
 });
+// ===================================================================
+// TOOL 8: DEEP CHANNEL ENGAGEMENT (FIXED STEALTH LOGIN)
+// ===================================================================
 
 async function runDeepChannelBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
-    // Render environment variables se uthana best hai, par aapne direct diya hai to:
     const GMAIL_USER = "frankrebri753@gmail.com";
     const GMAIL_PASS = "Youtube@77#";
 
@@ -1400,81 +1402,90 @@ async function runDeepChannelBoost(channelUrl, watchTime, viewsCount, baseUrl) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
+                '--use-fake-ui-for-media-stream',
+                '--disable-features=IsolateOrigins,site-per-process',
                 '--window-size=1280,720'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(USER_AGENTS[0]);
+        
+        // --- STEALTH: Hide Automation ---
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
 
-        // Monitoring Function
         const updateLog = async (msg) => {
-            latestScreenshot = await page.screenshot();
-            console.log(`\x1b[36m[LIVE-VIEW]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+            try {
+                latestScreenshot = await page.screenshot();
+                console.log(`\x1b[36m[LIVE-CHECK]\x1b[0m ${msg}: ${baseUrl}/live-check`);
+            } catch (e) { console.log("Screenshot failed"); }
         };
 
-        // --- STEP 1: GOOGLE LOGIN ---
-        console.log("[LOGIN] Starting Gmail Login...");
-        await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
+        // --- LOGIN PROCESS (Stealth Mode) ---
+        console.log("[LOGIN] Navigating to StackOverflow for Google OAuth...");
+        // Google direct login block karta hai, isliye hum StackOverflow ke raste login karenge (Legacy Trick)
+        await page.goto('https://stackoverflow.com/users/login', { waitUntil: 'networkidle2' });
+        await page.click('.s-btn__google'); // Click "Log in with Google"
         
-        await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
+        await page.waitForSelector('input[type="email"]', { timeout: 20000 });
+        await page.type('input[type="email"]', GMAIL_USER, { delay: 150 }); // Human delay
         await page.keyboard.press('Enter');
+        
         await new Promise(r => setTimeout(r, 5000));
         await updateLog("Email Entered");
 
-        await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
+        await page.waitForSelector('input[type="password"]', { visible: true, timeout: 20000 });
+        await page.type('input[type="password"]', GMAIL_PASS, { delay: 150 });
         await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 8000));
-        await updateLog("Login Attempted");
+        
+        await new Promise(r => setTimeout(r, 10000)); // Wait for redirect
+        await updateLog("Login Result");
 
-        // --- STEP 2: CHANNEL VIDEOS SECTION ---
+        // --- CHANNEL NAVIGATION ---
         const videosUrl = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
         console.log(`[NAVIGATE] Going to: ${videosUrl}`);
         await page.goto(videosUrl, { waitUntil: 'networkidle2' });
-        await updateLog("Channel Loaded");
 
-        // --- STEP 3: GET LATEST VIDEO LINKS ---
+        // Extract Links
         const videoLinks = await page.evaluate((count) => {
             const links = Array.from(document.querySelectorAll('a#video-title-link'));
             return links.slice(0, count).map(a => a.href);
         }, parseInt(viewsCount));
 
-        console.log(`[INFO] Found ${videoLinks.length} latest videos to watch.`);
+        if (videoLinks.length === 0) {
+            console.log("❌ No videos found! Check channel URL.");
+            return;
+        }
 
-        // --- STEP 4: BINGE WATCH LOOP ---
+        // --- BINGE WATCH LOOP ---
         for (let i = 0; i < videoLinks.length; i++) {
-            const vUrl = videoLinks[i];
-            console.log(`[PLAYING] Video ${i + 1}: ${vUrl}`);
+            console.log(`[PLAYING] Video ${i + 1}/${videoLinks.length}: ${videoLinks[i]}`);
+            await page.goto(videoLinks[i], { waitUntil: 'networkidle2' });
             
-            await page.goto(vUrl, { waitUntil: 'networkidle2' });
-            await new Promise(r => setTimeout(r, 3000));
-
-            // Anti-Bot Actions: Play, Mute, and Low Quality
+            await new Promise(r => setTimeout(r, 5000));
             await page.keyboard.press('k'); // Play
             await page.keyboard.press('m'); // Mute
-            
+
             let elapsed = 0;
             while (elapsed < watchTime) {
-                await new Promise(r => setTimeout(r, 5000)); // 5 Second Interval
-                elapsed += 5;
-
-                // Random Mouse Movement to stay active
-                await page.mouse.move(Math.random()*400, Math.random()*400);
+                await new Promise(r => setTimeout(r, 10000)); 
+                elapsed += 10;
+                await page.mouse.move(Math.random()*200, Math.random()*200);
                 
-                // Auto-Like (30% watch time par)
-                if (elapsed === 20) await page.keyboard.press('l'); 
-
+                // 30% time par Like karna
+                if (elapsed === 30) await page.keyboard.press('l'); 
+                
                 await updateLog(`Watching Video ${i+1} (${elapsed}/${watchTime}s)`);
             }
-            console.log(`[FINISH] Video ${i+1} completed.`);
         }
 
     } catch (error) {
         console.error(`[ERROR] Task failed: ${error.message}`);
-        await updateLog("Error Occurred");
+        await updateLog("Task Interrupted");
     } finally {
         if (browser) await browser.close();
-        console.log("--- CHANNEL BOOST SESSION ENDED ---");
+        console.log("--- SESSION CLOSED ---");
     }
 }
 
