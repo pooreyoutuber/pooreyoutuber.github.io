@@ -1377,12 +1377,15 @@ app.post('/ultimate', async (req, res) => {
 // =============================================
 // ===================================================================
 // TOOL 8: AI-VISION POWERED YOUTUBE ENGINE (LOGIN + BINGE WATCH)
+// ================================================================
+// ===================================================================
+// TOOL 8: AI-POWERED YOUTUBE ENGINE (FIXED GEMINI KEY & LOGIN)
 // ===================================================================
 
 async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
     const GMAIL_USER = "frankrebri753@gmail.com";
-    const GMAIL_PASS = "Youtube@77#";
+    const GMAIL_PASS = "Youtub@77#";
 
     try {
         browser = await puppeteer.launch({
@@ -1393,12 +1396,13 @@ async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUr
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
 
-        // Helper: Screenshot aur AI Decision
+        // helper: Screenshot aur AI Decision (Render GEMINI_KEY using)
         const getAiDecision = async (instruction) => {
             const screenshotB64 = await page.screenshot({ encoding: 'base64' });
-            latestScreenshot = Buffer.from(screenshotB64, 'base64'); // For live-check link
             
-            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+            // Sahi tarika Gemini model ko call karne ka
+            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" }); 
+            
             const result = await model.generateContent([
                 instruction,
                 { inlineData: { data: screenshotB64, mimeType: "image/png" } }
@@ -1408,7 +1412,7 @@ async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUr
 
         const updateLog = async (msg) => {
             latestScreenshot = await page.screenshot();
-            console.log(`\x1b[35m[AI-VISION]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+            console.log(`\x1b[35m[AI-VISION]\x1b[0m ${msg} | Check: ${baseUrl}/live-check`);
         };
 
         // --- STEP 1: AI DRIVEN LOGIN ---
@@ -1416,31 +1420,32 @@ async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUr
         await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
 
         // Email Phase
-        await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
+        await page.type('input[type="email"]', GMAIL_USER, { delay: 150 });
         await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 5000));
+        await new Promise(r => setTimeout(r, 6000));
 
-        // AI Check for Captcha/Password
-        let loginStatus = await getAiDecision("Analyze this screen. Is there a Captcha? If yes, describe the characters. If it asks for a password, say 'PASSWORD_SCREEN'. If error, describe it.");
-        console.log("[AI DECISION]:", loginStatus);
+        // AI Vision for Security/Captcha/Password
+        let decision = await getAiDecision("Analyze this screen. Is there a Captcha? If yes, solve it. If it's a password screen, say 'TYPE_PASSWORD'. If it's successful, say 'LOGGED_IN'.");
+        console.log("[GEMINI DECISION]:", decision);
 
-        if (loginStatus.includes('PASSWORD_SCREEN')) {
-            await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
+        if (decision.includes('TYPE_PASSWORD')) {
+            await page.type('input[type="password"]', GMAIL_PASS, { delay: 150 });
             await page.keyboard.press('Enter');
             await new Promise(r => setTimeout(r, 10000));
-        } else {
-            console.log("[CRITICAL] AI detected block or Captcha. Manual intervention needed via logs.");
+        } else if (decision.includes('Captcha')) {
+            // AI se captcha ka text lekar fill karne ka logic yahan aayega
+            console.log("[AI] Attempting Captcha Bypass...");
         }
 
         // --- STEP 2: CHANNEL BINGE WATCHING ---
         const videosSection = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
         
         for (let i = 0; i < viewsCount; i++) {
-            console.log(`[ACTION] Accessing Channel Video #${i+1}`);
+            console.log(`[ACTION] Navigating to Video #${i+1}`);
             await page.goto(videosSection, { waitUntil: 'networkidle2' });
             await new Promise(r => setTimeout(r, 5000));
 
-            // Click i-th video
+            // Select i-th video from the list
             const clicked = await page.evaluate((index) => {
                 const links = document.querySelectorAll('a#video-title-link');
                 if (links[index]) {
@@ -1452,36 +1457,43 @@ async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUr
             }, i);
 
             if (clicked) {
-                await new Promise(r => setTimeout(r, 5000));
+                await new Promise(r => setTimeout(r, 6000));
                 
-                // Force Unmute & High Volume
+                // --- UNMUTE & VOLUME (Real Signal) ---
                 await page.evaluate(() => {
                     const video = document.querySelector('video');
-                    if (video) { video.muted = false; video.volume = 1; }
+                    if (video) { 
+                        video.muted = false; 
+                        video.volume = 1; 
+                    }
                 });
 
                 let elapsed = 0;
                 while (elapsed < watchTime) {
                     await new Promise(r => setTimeout(r, 10000));
                     elapsed += 10;
-                    await page.mouse.move(Math.random()*400, Math.random()*400); // Activity
-                    await updateLog(`Watching Video ${i+1} | ${elapsed}/${watchTime}s | Unmuted`);
+                    await page.mouse.move(Math.random()*300, Math.random()*300);
+                    await updateLog(`Playing Video ${i+1} | ${elapsed}/${watchTime}s | UNMUTED`);
                 }
+                
+                // Har video ke baad wapas channel par jana (Binge logic)
+                console.log(`[FINISH] Video ${i+1} completed. Returning to channel...`);
             } else {
-                console.log(`[INFO] No more videos found at index ${i}`);
+                console.log("[INFO] No more videos found.");
                 break;
             }
         }
 
     } catch (error) {
-        console.error(`[AI-ERROR] ${error.message}`);
+        console.error(`[AI-ERROR] Critical Failure: ${error.message}`);
     } finally {
         if (browser) {
-            console.log("[CLEANUP] Wiping Session & History...");
+            console.log("[CLEANUP] Wiping all session data and history...");
             await browser.close(); 
         }
     }
 }
+
 
 // Post Endpoint Update
 app.post('/api/real-view-boost', async (req, res) => {
