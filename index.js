@@ -1479,7 +1479,7 @@ async function runDeepChannelBoost(channelUrl, watchTime, viewsCount, baseUrl) {
 }
 
 // Post Endpoint for Frontend
-app.post('/api/channel-grow-boost', async (req, res) => {
+app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
     const baseUrl = `${req.protocol}://${req.get('host')}`;
 
