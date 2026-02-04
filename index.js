@@ -1374,41 +1374,12 @@ app.post('/ultimate', async (req, res) => {
 });
 // ===================================================================
 // TOOL 8: REAL YOUTUBE VIEW ENGINE (FRONTEND INTEGRATED)
+// =============================================
 // ===================================================================
-// --- NEW HELPER: Gemini Vision to solve CAPTCHA ---
-// --- Helper: Gemini Vision to handle Login Steps ---
-async function handleLoginStepWithAI(page, email, password) {
-    const screenshot = await page.screenshot({ encoding: 'base64' });
-    
-    const prompt = `
-    You are an automation assistant. Look at this Google Sign-in screen.
-    User Email: ${email}
-    User Password: ${password}
+// TOOL 8: AI-VISION POWERED YOUTUBE ENGINE (LOGIN + BINGE WATCH)
+// ===================================================================
 
-    Identify the current state and return ONLY a JSON object:
-    1. If it's the Email page: {"action": "type", "selector": "input[type='email']", "value": "${email}", "next": "press Enter"}
-    2. If a CAPTCHA is visible: {"action": "type", "selector": "input[aria-label*='characters'], input[name='ca']", "value": "EXTRACT_CAPTCHA_TEXT", "next": "press Enter"}
-    3. If it's the Password page: {"action": "type", "selector": "input[type='password']", "value": "${password}", "next": "press Enter"}
-    4. If logged in successfully or on Home: {"action": "done"}
-    5. If an error or 'Try another way': {"action": "manual_check"}
-    `;
-
-    try {
-        const result = await ai.getGenerativeModel({ model: "gemini-1.5-flash" }).generateContent([
-            prompt,
-            { inlineData: { data: screenshot, mimeType: "image/png" } }
-        ]);
-        
-        const responseText = result.response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(responseText);
-    } catch (e) {
-        console.error("AI Login Helper Error:", e);
-        return { action: "retry" };
-    }
-}
-
-// --- Main YouTube Tool Function ---
-async function runAiYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
+async function runAiVisionYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
     const GMAIL_USER = "frankrebri753@gmail.com";
     const GMAIL_PASS = "Youtube@77#";
@@ -1420,92 +1391,105 @@ async function runAiYoutubeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 800 });
-        
-        const updateStatus = async (msg) => {
-            latestScreenshot = await page.screenshot(); // Live screenshot for frontend
-            console.log(`[STATUS] ${msg}`);
+        await page.setViewport({ width: 1280, height: 720 });
+
+        // Helper: Screenshot aur AI Decision
+        const getAiDecision = async (instruction) => {
+            const screenshotB64 = await page.screenshot({ encoding: 'base64' });
+            latestScreenshot = Buffer.from(screenshotB64, 'base64'); // For live-check link
+            
+            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent([
+                instruction,
+                { inlineData: { data: screenshotB64, mimeType: "image/png" } }
+            ]);
+            return result.response.text();
         };
 
-        // STEP 1: AI-DRIVEN LOGIN
+        const updateLog = async (msg) => {
+            latestScreenshot = await page.screenshot();
+            console.log(`\x1b[35m[AI-VISION]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+        };
+
+        // --- STEP 1: AI DRIVEN LOGIN ---
+        console.log("[AI] Starting Smart Login...");
         await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
-        
-        let loginComplete = false;
-        let attempts = 0;
-        
-        while (!loginComplete && attempts < 10) {
-            attempts++;
-            await new Promise(r => setTimeout(r, 2000));
-            const decision = await handleLoginStepWithAI(page, GMAIL_USER, GMAIL_PASS);
-            
-            if (decision.action === "done") {
-                loginComplete = true;
-                await updateStatus("Login Successful!");
-            } else if (decision.action === "type") {
-                await updateStatus(`AI Action: Entering ${decision.value}`);
-                await page.waitForSelector(decision.selector, { timeout: 5000 });
-                await page.type(decision.selector, decision.value, { delay: 100 });
-                await page.keyboard.press('Enter');
-            } else {
-                await updateStatus("AI waiting or retrying...");
-            }
+
+        // Email Phase
+        await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
+        await page.keyboard.press('Enter');
+        await new Promise(r => setTimeout(r, 5000));
+
+        // AI Check for Captcha/Password
+        let loginStatus = await getAiDecision("Analyze this screen. Is there a Captcha? If yes, describe the characters. If it asks for a password, say 'PASSWORD_SCREEN'. If error, describe it.");
+        console.log("[AI DECISION]:", loginStatus);
+
+        if (loginStatus.includes('PASSWORD_SCREEN')) {
+            await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
+            await page.keyboard.press('Enter');
+            await new Promise(r => setTimeout(r, 10000));
+        } else {
+            console.log("[CRITICAL] AI detected block or Captcha. Manual intervention needed via logs.");
         }
 
-        // STEP 2: VIDEO WATCHING LOOP (Latest and 2nd Video)
-        const videosUrl = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
+        // --- STEP 2: CHANNEL BINGE WATCHING ---
+        const videosSection = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
+        
+        for (let i = 0; i < viewsCount; i++) {
+            console.log(`[ACTION] Accessing Channel Video #${i+1}`);
+            await page.goto(videosSection, { waitUntil: 'networkidle2' });
+            await new Promise(r => setTimeout(r, 5000));
 
-        for (let i = 0; i < 2; i++) { // Loop for 2 videos
-            await page.goto(videosUrl, { waitUntil: 'networkidle2' });
-            await updateStatus(`Navigating to Videos tab - Video ${i+1}`);
+            // Click i-th video
+            const clicked = await page.evaluate((index) => {
+                const links = document.querySelectorAll('a#video-title-link');
+                if (links[index]) {
+                    links[index].scrollIntoView();
+                    links[index].click();
+                    return true;
+                }
+                return false;
+            }, i);
 
-            // Selector for video thumbnails
-            const videoSelector = 'a#video-title-link';
-            await page.waitForSelector(videoSelector);
-            
-            const videos = await page.$$(videoSelector);
-            if (videos[i]) {
-                await videos[i].click();
+            if (clicked) {
                 await new Promise(r => setTimeout(r, 5000));
-
-                // Unmute logic
+                
+                // Force Unmute & High Volume
                 await page.evaluate(() => {
                     const video = document.querySelector('video');
-                    if (video) {
-                        video.muted = false;
-                        video.volume = 1.0;
-                        video.play();
-                    }
+                    if (video) { video.muted = false; video.volume = 1; }
                 });
 
-                await updateStatus(`Watching Video ${i+1} unmuted for ${watchTime}s`);
-                await new Promise(r => setTimeout(r, watchTime * 1000));
+                let elapsed = 0;
+                while (elapsed < watchTime) {
+                    await new Promise(r => setTimeout(r, 10000));
+                    elapsed += 10;
+                    await page.mouse.move(Math.random()*400, Math.random()*400); // Activity
+                    await updateLog(`Watching Video ${i+1} | ${elapsed}/${watchTime}s | Unmuted`);
+                }
+            } else {
+                console.log(`[INFO] No more videos found at index ${i}`);
+                break;
             }
         }
 
-        // STEP 3: CLEANUP
-        await updateStatus("Cleaning up history and cookies...");
-        const client = await page.target().createCDPSession();
-        await client.send('Network.clearBrowserCache');
-        await client.send('Network.clearBrowserCookies');
-
     } catch (error) {
-        console.error("Main Task Error:", error);
+        console.error(`[AI-ERROR] ${error.message}`);
     } finally {
-        if (browser) await browser.close();
-        latestScreenshot = null;
-        console.log("Task Finished.");
+        if (browser) {
+            console.log("[CLEANUP] Wiping Session & History...");
+            await browser.close(); 
+        }
     }
 }
 
-// Updated Endpoint
+// Post Endpoint Update
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-
-    res.status(200).json({ success: true, message: "AI Engine Started. Watch Logs." });
-    runAiYoutubeBoost(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
+    res.status(200).json({ success: true, message: "AI Vision Engine Active. Check Logs." });
+    runAiVisionYoutubeBoost(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
 });
-
 
 //==================================================
 // --- SERVER START ---
