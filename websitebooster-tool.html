@@ -44,7 +44,7 @@
             <div class="glass p-8 rounded-3xl shadow-2xl">
                 <form id="orderForm" class="space-y-6">
                     <div>
-                        <label class="block text-xs uppercase font-bold text-slate-500 mb-2 ml-1">Video Link</label>
+                        <label class="block text-xs uppercase font-bold text-slate-500 mb-2 ml-1">Channel or Video Link</label>
                         <div class="relative">
                             <i class="fa-brands fa-youtube absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
                             <input type="url" id="videoUrl" required
@@ -98,6 +98,9 @@
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const statusArea = document.getElementById('statusArea');
+            const statusText = document.getElementById('statusText');
+            
+            // Sahi input values lena
             const videoUrl = document.getElementById('videoUrl').value;
             const qty = document.getElementById('qty').value;
             const watchSeconds = document.getElementById('watchTime').value;
@@ -105,21 +108,24 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Processing...';
             statusArea.classList.remove('hidden');
+            statusText.innerText = "Deploying Nodes...";
 
             try {
-                // Backend ko request bhej rahe hain views_count aur watch_time ke saath
+                // Backend endpoint ke mutabik sahi data bhejna
                 const response = await fetch('https://pooreyoutuber-github-ioproxy.onrender.com/api/real-view-boost', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ 
-          channel_url: videoUrl, // 'video_url' ko 'channel_url' kar dein
-           views_count: parseInt(qty),
-           watch_time: parseInt(watchSeconds)
-})
-                    
+                    body: JSON.stringify({ 
+                        channel_url: videoUrl, // Backend yahi maang raha hai
+                        views_count: parseInt(qty), // Number format
+                        watch_time: parseInt(watchSeconds) // Number format
+                    })
                 });
 
                 if (response.ok) {
+                    const data = await response.json();
+                    statusText.innerText = "Task Running in Background...";
+                    
                     let width = 0;
                     const interval = setInterval(() => {
                         if (width >= 100) {
@@ -127,16 +133,18 @@
                             btn.innerHTML = "Success! Task Active ✅";
                             btn.className = "w-full bg-green-600 text-white font-black py-5 rounded-xl uppercase text-sm";
                         } else {
-                            width += 1;
+                            width += 2;
                             document.getElementById('progressBar').style.width = width + '%';
                             document.getElementById('percent').innerText = width + '%';
                         }
-                    }, 20);
+                    }, 50);
                 } else {
-                    throw new Error("Server rejected request");
+                    const errorMsg = await response.text();
+                    throw new Error(errorMsg || "Server rejected request");
                 }
             } catch (err) {
-                alert("Server Connection Failed! Check if backend is running.");
+                console.error(err);
+                alert("Error: " + err.message);
                 btn.disabled = false;
                 btn.innerHTML = "Start Boost Engine 🚀";
                 statusArea.classList.add('hidden');
@@ -145,4 +153,3 @@
     </script>
 </body>
 </html>
-
