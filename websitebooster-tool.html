@@ -3,143 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM Autopilot Control Center</title>
+    <title>SMM AUTOPILOT COCKPIT | LIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #0f172a; min-height: 100vh; overflow: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .live-window { aspect-ratio: 16/9; background: #000; border: 4px solid #1e293b; border-radius: 20px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .glow-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        body { background: #020617; color: #f1f5f9; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border: 1px solid #1e293b; }
+        /* Badi Live Window */
+        .live-window-container { flex: 1; position: relative; background: #000; border: 4px solid #1e293b; border-radius: 15px; margin: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        #streamImg { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .hud-overlay { position: absolute; top: 10px; left: 10px; background: rgba(220, 38, 38, 0.8); color: white; padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .side-panel { width: 350px; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+        input, button { width: 100%; border-radius: 10px; }
     </style>
 </head>
-<body class="text-slate-200">
+<body>
 
-    <div class="flex flex-col lg:flex-row h-screen p-4 gap-4">
-        
-        <div class="flex-1 flex flex-col gap-3">
-            <div class="flex justify-between items-center px-4">
-                <h1 class="text-xl font-black tracking-tighter text-blue-400">
-                    <i class="fa-solid fa-plane-up mr-2"></i>AUTOPILOT ENGINE 
-                </h1>
-                <div class="flex items-center gap-4 text-xs font-bold bg-slate-800 px-4 py-2 rounded-full">
-                    <span><span class="status-dot bg-green-500 animate-pulse"></span> SERVER ACTIVE</span>
-                    <span id="taskStatus" class="text-slate-400">| STANDBY</span>
-                </div>
-            </div>
+    <header class="glass p-3 flex justify-between items-center mx-2 mt-2 rounded-xl">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-plane-up text-blue-500 text-xl"></i>
+            <h1 class="font-black text-lg tracking-tight uppercase italic">Autopilot <span class="text-blue-500">Live</span></h1>
+        </div>
+        <div id="status" class="text-[10px] font-bold px-3 py-1 rounded-full bg-red-900/50 text-red-500 border border-red-500">ENGINE OFFLINE</div>
+    </header>
 
-            <div class="live-window relative overflow-hidden group">
-                <img id="browserStream" src="https://via.placeholder.com/1280x720?text=Initializing+Virtual+Display..." 
-                     class="w-full h-full object-contain">
-                
-                <div class="absolute bottom-4 left-4 right-4 flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div class="glass p-3 rounded-xl text-[10px] uppercase font-bold text-blue-300">
-                        Resolution: 1280x720 <br> FPS: 1.0 (Live Feed)
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass p-4 rounded-2xl">
-                <div class="flex justify-between text-xs mb-2 font-bold">
-                    <span>MISSION PROGRESS</span>
-                    <span id="percentText">0%</span>
-                </div>
-                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
-                    <div id="progFill" class="bg-blue-500 h-full w-0 transition-all duration-500"></div>
-                </div>
-            </div>
+    <div class="flex flex-1 overflow-hidden">
+        <div class="live-window-container shadow-2xl">
+            <div class="hud-overlay">LIVE FEED FROM SERVER</div>
+            <img id="streamImg" src="https://via.placeholder.com/1280x720?text=CLICK+LAUNCH+ENGINE+TO+START+LIVE+FEED" alt="Virtual Browser Stream">
         </div>
 
-        <div class="w-full lg:w-96 flex flex-col gap-4">
-            
-            <div class="glass p-6 rounded-3xl space-y-5">
-                <h2 class="text-lg font-bold text-white border-b border-slate-700 pb-3">Flight Parameters</h2>
+        <div class="side-panel glass m-2 rounded-2xl">
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase">Step 1: Start System</label>
+                <button onclick="launchEngine()" id="lchBtn" class="mt-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 transition-all">LAUNCH ENGINE 🚀</button>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <div class="space-y-4">
+                <label class="text-[10px] font-bold text-slate-500 uppercase">Step 2: Mission Config</label>
+                <input type="text" id="cUrl" placeholder="YouTube Channel Link" class="bg-slate-950 border border-slate-800 p-4 text-sm outline-none focus:border-blue-500 transition-all">
                 
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Target Channel URL</label>
-                    <input type="text" id="targetUrl" placeholder="https://youtube.com/@Channel" 
-                           class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="vQty" placeholder="Views" class="bg-slate-950 border border-slate-800 p-4 text-sm outline-none">
+                    <input type="number" id="tTime" placeholder="Secs" class="bg-slate-950 border border-slate-800 p-4 text-sm outline-none">
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Total Views</label>
-                        <input type="number" id="views" placeholder="50" 
-                               class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:outline-none text-sm">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Seconds/Video</label>
-                        <input type="number" id="timing" placeholder="300" 
-                               class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:outline-none text-sm">
-                    </div>
-                </div>
-
-                <button id="startBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black text-sm tracking-widest glow-blue transition-all">
-                    ENGAGE AUTOMATION <i class="fa-solid fa-rocket ml-2"></i>
-                </button>
+                <button onclick="startMission()" id="msnBtn" class="bg-slate-800 text-slate-500 font-bold py-4 cursor-not-allowed" disabled>ENGAGE AUTOPILOT ✈️</button>
             </div>
 
-            <div class="glass p-5 rounded-3xl flex-1 overflow-y-auto">
-                <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Mission Logs</h3>
-                <div id="logs" class="space-y-2 font-mono text-[10px]">
-                    <div class="text-blue-400">> System Ready...</div>
-                    <div class="text-slate-500">> Waiting for manual login or URL...</div>
-                </div>
+            <div id="logs" class="flex-1 bg-black/50 rounded-xl p-3 font-mono text-[10px] text-slate-400 overflow-y-auto mt-2">
+                > System Standby...
             </div>
-
         </div>
     </div>
 
     <script>
-        const streamImg = document.getElementById('browserStream');
-        const startBtn = document.getElementById('startBtn');
-        const logArea = document.getElementById('logs');
+        // HARDCODED RENDER URL - AB YE REQUEST ISI PAR JAYEGI
+        const RENDER_URL = "https://pooreyoutuber-github-ioproxy.onrender.com"; 
 
-        // Step 1: Har 1 second mein image refresh karna (Live Window)
-        setInterval(() => {
-            // Hum backend ke /live-check endpoint se photo mangenge
-            streamImg.src = `/live-check?t=${new Date().getTime()}`;
-        }, 1000);
+        const stream = document.getElementById('streamImg');
+        const logBox = document.getElementById('logs');
+        const lchBtn = document.getElementById('lchBtn');
+        const msnBtn = document.getElementById('msnBtn');
 
-        function addLog(msg, color='text-slate-400') {
-            const div = document.createElement('div');
-            div.className = color;
-            div.innerText = `> ${msg}`;
-            logArea.prepend(div);
+        function addLog(msg) {
+            const d = document.createElement('div');
+            d.innerHTML = `<span class="text-blue-500">[${new Date().toLocaleTimeString()}]</span> > ${msg}`;
+            logBox.prepend(d);
         }
 
-        startBtn.addEventListener('click', async () => {
-            const url = document.getElementById('targetUrl').value;
-            const views = document.getElementById('views').value;
-            const time = document.getElementById('timing').value;
+        async function launchEngine() {
+            addLog("Connecting to: " + RENDER_URL);
+            lchBtn.innerText = "POWERING UP...";
+            
+            try {
+                // Requesting your server to open browser
+                const res = await fetch(`${RENDER_URL}/api/init-engine`);
+                const data = await res.json();
+                
+                if(data.status) {
+                    addLog("Engine Online! Displaying Live Feed.");
+                    document.getElementById('status').innerText = "ENGINE ONLINE";
+                    document.getElementById('status').className = "text-[10px] font-bold px-3 py-1 rounded-full bg-green-900/50 text-green-400 border border-green-500";
+                    
+                    lchBtn.innerText = "ENGINE READY ✅";
+                    lchBtn.disabled = true;
+                    msnBtn.disabled = false;
+                    msnBtn.className = "bg-orange-600 hover:bg-orange-500 text-white font-bold py-4 transition-all";
+                    
+                    // Live Streaming logic - Refresh image every second
+                    setInterval(() => {
+                        stream.src = `${RENDER_URL}/live-check?t=` + new Date().getTime();
+                    }, 1000);
+                }
+            } catch (e) {
+                addLog("Error: Server not responding. Is Render App Sleeping?");
+                lchBtn.innerText = "RETRY LAUNCH";
+            }
+        }
 
-            if(!url) return alert("Enter Channel URL!");
+        async function startMission() {
+            const url = document.getElementById('cUrl').value;
+            const views = document.getElementById('vQty').value;
+            const time = document.getElementById('tTime').value;
 
-            addLog("Engaging Autopilot Engine...", "text-yellow-500");
-            startBtn.disabled = true;
-            startBtn.innerText = "SYSTEM ACTIVE ✈️";
+            if(!url || !views || !time) return alert("Fill all details!");
+
+            addLog("Mission Data Dispatched. Autopilot Engaged.");
+            msnBtn.innerText = "MISSION ACTIVE ✈️";
+            msnBtn.disabled = true;
 
             try {
-                const response = await fetch('/api/channel-grow-boost', {
+                await fetch(`${RENDER_URL}/api/channel-grow-boost`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         channel_url: url,
                         views_count: views,
                         watch_time: time
                     })
                 });
-
-                if(response.ok) {
-                    addLog("Autopilot taking control of the plane...", "text-green-400");
-                    document.getElementById('taskStatus').innerText = "| AUTOPILOT ON";
-                    document.getElementById('taskStatus').className = "text-green-400";
-                }
+                addLog("System Status: Binge Watching mode active.");
             } catch (err) {
-                addLog("Engine Crash! Connection failed.", "text-red-500");
+                addLog("Mission Failed to send.");
             }
-        });
+        }
     </script>
 </body>
 </html>
