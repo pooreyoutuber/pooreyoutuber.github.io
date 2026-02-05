@@ -1376,111 +1376,104 @@ app.post('/ultimate', async (req, res) => {
 // TOOL 8: GUEST ENGINE (NO LOGIN - POPUP BYPASS - STEP BINGE)
 // ===================================================================
 
-let latestScreenshot = null; // Live screenshot variable
-
-// Live check endpoint to see what's happening
-app.get('/live-check', (req, res) => {
-    if (!latestScreenshot) return res.send("Engine starting... Refresh in 5s.");
-    res.contentType('image/png').send(latestScreenshot);
-});
-
-async function runGuestBingeBoost(channelUrl, watchTime, totalViews, baseUrl) {
+// --- TOOL 9: HUMAN-ORGANIC YOUTUBE BOOST ---
+async function runOrganicYoutubeTask(channelUrl, watchTime, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled', '--mute-audio=false']
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        const logStep = async (msg) => {
-            latestScreenshot = await page.screenshot();
-            console.log(`\x1b[36m[GUEST-LOG]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
-        };
+        console.log(`[VIEW #${viewNumber}] 🎬 Starting Organic Flow for: ${channelUrl}`);
 
-        // --- STEP 1: OPEN GOOGLE & FIND CHANNEL ---
-        console.log("[START] Opening YouTube Guest Session...");
-        await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 4000));
+        // STEP 1: Google Search se entry (Referrer Spoofing)
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        console.log(`[STEP 1] Google.com Loaded. Referral set.`);
 
-        // Handle Cookie/Terms Popup
-        await page.evaluate(() => {
-            const buttons = Array.from(document.querySelectorAll('button'));
-            const acceptBtn = buttons.find(b => b.innerText.includes('Accept all') || b.innerText.includes('I agree'));
-            if (acceptBtn) acceptBtn.click();
-        });
-        await logStep("Terms Checked/Accepted");
-
-        // --- STEP 2: BINGE LOOP ---
-        let viewsDone = 0;
-        const channelBase = channelUrl.replace(/\/videos/g, "");
-
-        while (viewsDone < totalViews) {
-            console.log(`[FLOW] Accessing Videos Tab | Views Done: ${viewsDone}`);
-            await page.goto(`${channelBase}/videos`, { waitUntil: 'networkidle2' });
-            await new Promise(r => setTimeout(r, 4000));
-
-            // Saari videos ke links nikalna
-            const videoLinks = await page.evaluate(() => {
-                return Array.from(document.querySelectorAll('a#video-title-link')).map(a => a.href);
-            });
-
-            if (videoLinks.length === 0) {
-                console.log("No videos found! Breaking...");
-                break;
+        // STEP 2: Navigate to Channel
+        await page.goto(channelUrl, { waitUntil: 'networkidle2' });
+        
+        // Handle Cookie Popup (Accept All)
+        try {
+            const acceptBtn = await page.$('button[aria-label="Accept all"], button[aria-label="Accept the use of cookies and other data"]');
+            if (acceptBtn) {
+                await acceptBtn.click();
+                console.log(`[STEP 2] YouTube Terms Popup: ACCEPTED ✅`);
             }
+        } catch (e) { console.log("[STEP 2] No Popup detected, continuing..."); }
 
-            // Ek-ek karke har video par jana
-            for (let j = 0; j < videoLinks.length; j++) {
-                if (viewsDone >= totalViews) break;
+        // STEP 3: Go to 'Videos' Tab
+        const videoTabSelector = 'div[title="Videos"], a[href*="/videos"]';
+        await page.waitForSelector(videoTabSelector, { timeout: 10000 });
+        await page.click(videoTabSelector);
+        await new Promise(r => setTimeout(r, 3000));
+        console.log(`[STEP 3] Entered Video Session.`);
 
-                console.log(`[PLAY] Playing Video #${j + 1}: ${videoLinks[j]}`);
-                await page.goto(videoLinks[j], { waitUntil: 'networkidle2' });
-                await new Promise(r => setTimeout(r, 5000));
+        // STEP 4: Select Video based on viewNumber (Rotation Logic)
+        const videoThumbnails = await page.$$('a#video-title-link, ytd-grid-video-renderer a#video-title');
+        const videoIndex = (viewNumber - 1) % videoThumbnails.length;
+        console.log(`[STEP 4] Selecting Video #${videoIndex + 1} for rotation.`);
+        
+        await videoThumbnails[videoIndex].click();
+        await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-                // --- STEP 3: SIGN-IN POPUP BYPASS (The Trick) ---
-                // Side mein tap karna aur scrolling karna
-                await page.mouse.click(50, 200); // Left side tap
-                await page.mouse.click(1200, 200); // Right side tap
-                
-                for (let s = 0; s < 4; s++) {
-                    await page.evaluate(() => window.scrollBy(0, 300));
-                    await new Promise(r => setTimeout(r, 500));
-                    await page.evaluate(() => window.scrollBy(0, -150));
-                }
-                await logStep(`Popup Bypass Done for Video ${j+1}`);
+        // STEP 5: Bypass Sign-in & Interaction
+        console.log(`[STEP 5] Playing Video. Handling Sign-in prompt...`);
+        await page.evaluate(() => window.scrollBy(0, 500)); // Dismiss trigger scroll
+        await page.mouse.click(10, 10); // Click outside
 
-                // --- STEP 4: UNMUTE & WATCH ---
-                await page.evaluate(() => {
-                    const v = document.querySelector('video');
-                    if (v) { v.muted = false; v.volume = 1; v.play(); }
-                });
-                await page.keyboard.press('k'); // Force Play
-
-                let timer = 0;
-                while (timer < watchTime) {
-                    await new Promise(r => setTimeout(r, 10000));
-                    timer += 10;
-                    await page.mouse.move(Math.random()*200, Math.random()*200);
-                    await logStep(`Watching Video ${j+1} | ${timer}/${watchTime}s | Views: ${viewsDone+1}`);
-                }
-                viewsDone++;
-                
-                // Video khatam hone par wapas channel par jana logic loop handle karega
+        // Unmute Video
+        try {
+            await page.waitForSelector('.ytp-mute-button');
+            const isMuted = await page.evaluate(() => document.querySelector('.video-stream').muted);
+            if (isMuted) {
+                await page.click('.ytp-mute-button');
+                console.log(`[ACTION] Video UNMUTED 🔊`);
             }
+        } catch (e) { console.log("Unmute button not found, might be auto-playing."); }
+
+        // STEP 6: Watch Loop with Scrolling
+        console.log(`[WATCHING] Watching for ${watchTime} seconds...`);
+        const startTime = Date.now();
+        while (Date.now() - startTime < (watchTime * 1000)) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 200)));
+            await new Promise(r => setTimeout(r, 8000));
+            console.log(`[LOG] View #${viewNumber} | Time Remaining: ${Math.round((watchTime * 1000 - (Date.now() - startTime))/1000)}s`);
         }
+
+        console.log(`\x1b[42m[SUCCESS]\x1b[0m View #${viewNumber} Completed Successfully.`);
 
     } catch (error) {
-        console.error(`[ERROR]: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
     } finally {
-        if (browser) {
-            console.log("[CLEANUP] Wiping session and closing browser.");
-            await browser.close();
-        }
+        if (browser) await browser.close();
     }
 }
+
+// ENDPOINT FOR TOOL 9
+app.post('/api/real-view-boost', async (req, res) => {
+    const { channel_url, views_count, watch_time } = req.body;
+
+    if (!channel_url) return res.status(400).json({ error: "Channel link missing" });
+
+    res.status(200).json({ status: "In Progress", message: "Organic AI engine started in background." });
+
+    (async () => {
+        for (let i = 1; i <= views_count; i++) {
+            await runOrganicYoutubeTask(channel_url, watch_time, i);
+            // 15s Gap for server safety
+            console.log(`[COOLDOWN] Waiting 15s for next session...`);
+            await new Promise(r => setTimeout(r, 15000));
+        }
+        console.log("--- ALL VIEWS COMPLETED ---");
+    })();
+});
+
 
 // Endpoint for your websitebooster-tool.html
 app.post('/api/real-view-boost', async (req, res) => {
