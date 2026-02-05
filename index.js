@@ -1378,108 +1378,106 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // TOOL 8: ADVANCED YT VIEW ENGINE + LIVE SCREENSHOT MONITORING
 // ===================================================================
+// ===================================================================
+// TOOL 8: REAL YOUTUBE VIEW ENGINE (FRONTEND INTEGRATED)
+// ===================================================================
 
-// Live Screenshot dekhne ke liye endpoint
-app.get('/view-screenshot', (req, res) => {
-    if (!latestScreenshot) return res.send("No screenshot captured yet. Wait for task to start.");
-    res.contentType('image/png');
-    res.send(latestScreenshot);
-});
-
-async function runRealYoutubeView(url, watchTime, viewNumber, baseUrl) {
+async function runRealYoutubeView(url, watchTime, viewNumber) {
     let browser;
     try {
+        // Har baar ek fresh browser launch hoga (Clean Session)
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled', // Stealth: Bot detection bypass
-                '--mute-audio',
+                '--mute-audio', // Bandwidth bachane ke liye
+                '--disable-dev-shm-usage',
                 '--window-size=1280,720'
             ]
         });
 
         const page = await browser.newPage();
         
-        // Stealth: webdriver property delete karna
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
-
+        // Random User Agent from your existing list
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        console.log(`\n[YT-START] View #${viewNumber} Started...`);
+        console.log(`[YT-VIEW #${viewNumber}] Loading Video...`);
         
-        // Step 1: YouTube Load karna
+        // YouTube Video par jana
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Screenshot capture function
-        const capture = async (msg) => {
-            latestScreenshot = await page.screenshot();
-            console.log(`[LIVE-SCREEN] ${msg}: ${baseUrl}/view-screenshot`);
-        };
-
-        await capture("Video Loaded");
-
-        // Step 2: Human-like Play Action
+        // 1. Play Button Click (Agar video auto-play na ho)
         try {
-            await page.keyboard.press('k'); // YouTube shortcut for Play/Pause
-            await capture("Play Button Pressed (K)");
-        } catch (e) {}
+            await page.waitForSelector('.ytp-play-button', { timeout: 5000 });
+            await page.click('.ytp-play-button');
+        } catch (e) { console.log("Auto-playing or Play button not found."); }
 
-        // Step 3: Video Quality Low karna (144p) - Detection se bachne ke liye
+        // 2. Video Quality 144p set karna (RAM aur Data bachane ke liye)
+        // Shortcut: 'Settings' menu -> Quality -> 144p
         try {
-            await page.keyboard.press('s'); // Open settings
-            await new Promise(r => setTimeout(r, 500));
-            await page.keyboard.press('Enter'); // Quality menu
-            await new Promise(r => setTimeout(r, 500));
-            await page.keyboard.press('ArrowUp'); // Select lowest
-            await page.keyboard.press('Enter');
-            await capture("Quality set to Low");
-        } catch (e) {}
+            await page.keyboard.press('s'); // Settings open
+            await new Promise(r => setTimeout(r, 1000));
+            // Note: Key shortcuts use karna zyada fast hai
+            await page.keyboard.type('144'); 
+        } catch (e) { }
 
-        // Step 4: Watch Time Loop (Har 10-15 sec mein screenshot link dega)
-        let elapsed = 0;
-        while (elapsed < watchTime) {
-            let chunk = 15; // 15 seconds ka interval
-            await new Promise(r => setTimeout(r, chunk * 1000));
-            elapsed += chunk;
-            
-            // Random Mouse Movement (Stealth)
-            await page.mouse.move(Math.random()*500, Math.random()*500);
-            
-            await capture(`Watching... ${elapsed}/${watchTime}s`);
-        }
+        // 3. Mute kar dena (Safety)
+        await page.keyboard.press('m');
 
-        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
+        // 4. Watch Time wait (Jitna user ne frontend se bheja)
+        console.log(`[YT-VIEW #${viewNumber}] Watching for ${watchTime} seconds...`);
+        await new Promise(r => setTimeout(r, watchTime * 1000));
+
+        console.log(`[SUCCESS] View #${viewNumber} Completed.`);
 
     } catch (error) {
         console.error(`[YT-ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            // Browser close karne se session, cookies, aur cache apne aap clear ho jayenge
+            await browser.close();
+        }
     }
 }
 
+// POST Endpoint for Frontend
 app.post('/api/real-view-boost', async (req, res) => {
-    const { video_url, views_count, watch_time } = req.body;
-    
-    // Aapke render app ka URL (e.g., https://app-name.onrender.com)
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const baseUrl = `${protocol}://${host}`;
+    try {
+        const { video_url, views_count, watch_time } = req.body;
 
-    res.status(200).json({ success: true, message: "Engine Running. Check Render Logs for Live Link." });
-
-    (async () => {
-        for (let i = 1; i <= parseInt(views_count); i++) {
-            await runRealYoutubeView(video_url, parseInt(watch_time), i, baseUrl);
-            console.log("[WAIT] Next view in 10s...");
-            await new Promise(r => setTimeout(r, 10000));
+        if (!video_url || !views_count || !watch_time) {
+            return res.status(400).json({ success: false, message: "Missing Parameters" });
         }
-    })();
-});
 
+        const totalViews = parseInt(views_count);
+        const timeToWatch = parseInt(watch_time);
+
+        // Frontend ko turant response dena
+        res.status(200).json({ 
+            success: true, 
+            message: `Engine Started: ${totalViews} views for ${timeToWatch}s each.` 
+        });
+
+        // Background Loop (Sequential - Ek ke baad ek)
+        (async () => {
+            for (let i = 1; i <= totalViews; i++) {
+                await runRealYoutubeView(video_url, timeToWatch, i);
+                
+                // Har view ke baad 15 second ka gap (Server stability ke liye)
+                if (i < totalViews) {
+                    console.log(`[REST] Waiting 15s before next view...`);
+                    await new Promise(r => setTimeout(r, 15000));
+                }
+            }
+            console.log("--- ALL YOUTUBE VIEWS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 // Endpoint for your websitebooster-tool.html
 app.post('/api/real-view-boost', async (req, res) => {
