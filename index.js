@@ -1375,110 +1375,111 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // TOOL 8: GUEST ENGINE (NO LOGIN - POPUP BYPASS - STEP BINGE)
 // ===================================================================
+// ===================================================================
+// TOOL 8: ADVANCED YT VIEW ENGINE + LIVE SCREENSHOT MONITORING
+// ===================================================================
 
-app.post('/api/real-view-boost', async (req, res) => {
+// Live Screenshot dekhne ke liye endpoint
+app.get('/view-screenshot', (req, res) => {
+    if (!latestScreenshot) return res.send("No screenshot captured yet. Wait for task to start.");
+    res.contentType('image/png');
+    res.send(latestScreenshot);
+});
+
+async function runRealYoutubeView(url, watchTime, viewNumber, baseUrl) {
+    let browser;
     try {
-        const { channel_url, views_count, watch_time } = req.body;
-        const totalViews = parseInt(views_count) || 1;
-        const watchSeconds = parseInt(watch_time) || 60;
-
-        res.status(200).json({ 
-            success: true, 
-            message: `Engine Started: ${totalViews} Views task deployed for ${channel_url}` 
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled', // Stealth: Bot detection bypass
+                '--mute-audio',
+                '--window-size=1280,720'
+            ]
         });
 
-        // Background Automation Logic
-        (async () => {
-            console.log(`[START] YouTube Growth Engine for: ${channel_url}`);
+        const page = await browser.newPage();
+        
+        // Stealth: webdriver property delete karna
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
+
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        console.log(`\n[YT-START] View #${viewNumber} Started...`);
+        
+        // Step 1: YouTube Load karna
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // Screenshot capture function
+        const capture = async (msg) => {
+            latestScreenshot = await page.screenshot();
+            console.log(`[LIVE-SCREEN] ${msg}: ${baseUrl}/view-screenshot`);
+        };
+
+        await capture("Video Loaded");
+
+        // Step 2: Human-like Play Action
+        try {
+            await page.keyboard.press('k'); // YouTube shortcut for Play/Pause
+            await capture("Play Button Pressed (K)");
+        } catch (e) {}
+
+        // Step 3: Video Quality Low karna (144p) - Detection se bachne ke liye
+        try {
+            await page.keyboard.press('s'); // Open settings
+            await new Promise(r => setTimeout(r, 500));
+            await page.keyboard.press('Enter'); // Quality menu
+            await new Promise(r => setTimeout(r, 500));
+            await page.keyboard.press('ArrowUp'); // Select lowest
+            await page.keyboard.press('Enter');
+            await capture("Quality set to Low");
+        } catch (e) {}
+
+        // Step 4: Watch Time Loop (Har 10-15 sec mein screenshot link dega)
+        let elapsed = 0;
+        while (elapsed < watchTime) {
+            let chunk = 15; // 15 seconds ka interval
+            await new Promise(r => setTimeout(r, chunk * 1000));
+            elapsed += chunk;
             
-            const browser = await puppeteer.launch({
-                headless: "new",
-                args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
-            });
+            // Random Mouse Movement (Stealth)
+            await page.mouse.move(Math.random()*500, Math.random()*500);
+            
+            await capture(`Watching... ${elapsed}/${watchTime}s`);
+        }
 
-            try {
-                const page = await browser.newPage();
-                await page.setViewport({ width: 1280, height: 720 });
+        console.log(`[SUCCESS] View #${viewNumber} Finished.`);
 
-                for (let v = 1; v <= totalViews; v++) {
-                    console.log(`\n--- View Process #${v} Started ---`);
-                    
-                    // 1. Google.com par jana aur link paste karna
-                    await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-                    console.log(`[STEP 1] Google opened. Screenshot: ${page.url()}`); 
-                    
-                    // Search bar logic (Simulation)
-                    await page.goto(channel_url, { waitUntil: 'networkidle2' });
-
-                    // 2. Terms & Privacy Popup handle karna
-                    try {
-                        const cookieBtn = await page.$('button[aria-label="Accept all"], button[aria-label="Accept the use of cookies and other data"]');
-                        if (cookieBtn) {
-                            await cookieBtn.click();
-                            console.log("[ACTION] YouTube Terms Accepted.");
-                        }
-                    } catch (e) {}
-
-                    // 3. Videos Section mein jana
-                    await page.waitForTimeout(2000);
-                    const videoTab = await page.$x("//div[contains(text(), 'Videos')]");
-                    if (videoTab.length > 0) {
-                        await videoTab[0].click();
-                    } else {
-                        await page.goto(`${channel_url}/videos`);
-                    }
-                    console.log("[STEP 2] Navigated to Videos Section.");
-
-                    // 4. Video Selection (Loop based on video count)
-                    const videos = await page.$$('ytd-rich-item-renderer, ytd-grid-video-renderer');
-                    const videoIndex = (v - 1) % (videos.length || 1); // Agar 10 video hain to loop chalega
-                    
-                    console.log(`[ACTION] Clicking Video Index: ${videoIndex}`);
-                    await videos[videoIndex].click();
-                    await page.waitForTimeout(5000);
-
-                    // 5. Signup/Login Popup Bypass (Scrolling & Tapping)
-                    console.log("[ACTION] Bypassing Signup Popup...");
-                    await page.evaluate(() => window.scrollBy(0, 500));
-                    await page.waitForTimeout(1000);
-                    await page.evaluate(() => window.scrollBy(0, -200));
-                    
-                    // Side click simulation to close dialog
-                    await page.mouse.click(10, 10); 
-                    await page.mouse.click(20, 20);
-
-                    // 6. Play & Unmute
-                    try {
-                        await page.keyboard.press('m'); // Shortcut for Unmute
-                        const playBtn = await page.$('.ytp-play-button');
-                        if (playBtn) await playBtn.click();
-                    } catch (e) {}
-
-                    // 7. Watch Timing
-                    console.log(`[WATCHING] Playing for ${watchSeconds} seconds...`);
-                    await page.waitForTimeout(watchSeconds * 1000);
-
-                    // Log Progress & Screenshot Link (Simulated for Render Logs)
-                    console.log(`[SUCCESS] View #${v} Completed. | Video: ${page.url()}`);
-                    
-                    // Clear Cookies/History for next session
-                    const client = await page.target().createCDPSession();
-                    await client.send('Network.clearBrowserCookies');
-                    await client.send('Network.clearBrowserCache');
-                }
-
-            } catch (err) {
-                console.log(`[ERROR] Task Failed: ${err.message}`);
-            } finally {
-                console.log("--- TASK COMPLETED: CLOSING BROWSER ---");
-                await browser.close();
-            }
-        })();
-
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+    } catch (error) {
+        console.error(`[YT-ERROR] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) await browser.close();
     }
+}
+
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count, watch_time } = req.body;
+    
+    // Aapke render app ka URL (e.g., https://app-name.onrender.com)
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
+
+    res.status(200).json({ success: true, message: "Engine Running. Check Render Logs for Live Link." });
+
+    (async () => {
+        for (let i = 1; i <= parseInt(views_count); i++) {
+            await runRealYoutubeView(video_url, parseInt(watch_time), i, baseUrl);
+            console.log("[WAIT] Next view in 10s...");
+            await new Promise(r => setTimeout(r, 10000));
+        }
+    })();
 });
+
 
 // Endpoint for your websitebooster-tool.html
 app.post('/api/real-view-boost', async (req, res) => {
