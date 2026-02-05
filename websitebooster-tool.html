@@ -3,131 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM AUTOPILOT COCKPIT</title>
+    <title>Pilot-X | Live Autopilot Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
-        body { background: #020617; color: #f1f5f9; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
-        .glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border: 1px solid #1e293b; }
-        
-        /* UPAR BADI WINDOW */
-        .top-window { flex: 2; position: relative; background: #000; border-bottom: 4px solid #1e293b; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        #streamImg { height: 100%; width: auto; max-width: 100%; object-fit: contain; }
-        
-        /* NEECHE KA PANEL */
-        .bottom-panel { flex: 1; display: flex; gap: 15px; padding: 15px; background: #0f172a; }
-        
-        .logs-section { flex: 1.5; display: flex; flex-direction: column; gap: 5px; }
-        .terminal { flex: 1; background: #000; border: 1px solid #1e293b; border-radius: 12px; padding: 10px; font-family: monospace; font-size: 11px; color: #4ade80; overflow-y: auto; }
-        
-        .controls-section { flex: 1; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
-        
-        input { background: #1e293b; border: 1px solid #334155; padding: 12px; border-radius: 8px; font-size: 13px; color: white; outline: none; width: 100%; }
-        input:focus { border-color: #3b82f6; }
-        button { font-weight: bold; border-radius: 8px; transition: 0.3s; width: 100%; cursor: pointer; border: none; }
-        
-        .live-tag { position: absolute; top: 15px; left: 15px; background: #ef4444; color: white; padding: 4px 12px; border-radius: 4px; font-size: 10px; font-weight: bold; z-index: 10; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        body { background: #080c14; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .live-window { 
+            background: #000; 
+            border: 3px solid #1e293b; 
+            aspect-ratio: 16/9; 
+            position: relative;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        }
+        .glass-ui { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .log-screen { background: #000; height: 150px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 13px; color: #10b981; border: 1px solid #1e293b; }
+        .scan-line {
+            position: absolute; width: 100%; height: 2px; background: rgba(34, 197, 94, 0.3);
+            top: 0; animation: scanning 4s linear infinite; pointer-events: none;
+        }
+        @keyframes scanning { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-    <div class="top-window">
-        <div class="live-tag">LIVE FEED</div>
-        <img id="streamImg" src="https://via.placeholder.com/1280x720?text=WAITING+FOR+LAUNCH+COMMAND..." alt="Live Feed">
-    </div>
-
-    <div class="bottom-panel glass">
+    <div class="max-w-5xl mx-auto space-y-6">
         
-        <div class="logs-section">
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Mission Terminal</div>
-            <div class="terminal" id="logs">
-                <div class="text-blue-400 font-bold">> Cockpit Initialized. Ready for Pilot.</div>
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <h1 class="text-2xl font-black italic tracking-tighter text-blue-500">PILOT-X <span class="text-white text-sm not-italic font-medium ml-2 opacity-50 uppercase tracking-widest">Autopilot Engine</span></h1>
+            <div id="status" class="flex items-center gap-2 text-[10px] font-bold bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span> SYSTEM READY
             </div>
         </div>
 
-        <div class="controls-section">
-            <button onclick="launchEngine()" id="lchBtn" class="bg-blue-600 hover:bg-blue-500 text-white py-3 mb-2">
-                <i class="fa-solid fa-power-off mr-2"></i> LAUNCH ENGINE
-            </button>
+        <div class="live-window rounded-2xl overflow-hidden">
+            <div class="scan-line"></div>
+            <img id="liveDisplay" src="https://www.shutterstock.com/shutterstock/videos/1069335790/thumb/1.jpg" class="w-full h-full object-cover opacity-30" alt="Live Feed">
             
-            <input type="text" id="cUrl" placeholder="YouTube Link (Channel/Video)">
+            <div class="absolute top-4 left-4 right-4 flex justify-between pointer-events-none">
+                <div class="bg-black/60 p-2 rounded border-l-2 border-blue-500">
+                    <p class="text-[10px] text-blue-400">TARGET STATUS</p>
+                    <p id="hud-status" class="text-xs font-bold">AWAITING CO-ORDINATES...</p>
+                </div>
+                <div class="bg-black/60 p-2 rounded border-r-2 border-green-500 text-right">
+                    <p class="text-[10px] text-green-400">ENGINE LOAD</p>
+                    <p id="hud-load" class="text-xs font-bold">0% IDLE</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
             
-            <div class="flex gap-2">
-                <input type="number" id="vQty" placeholder="Total Views">
-                <input type="number" id="tTime" placeholder="Timing (Sec)">
+            <div class="glass-ui p-6 rounded-2xl space-y-4">
+                <h3 class="text-sm font-bold uppercase text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-gear"></i> Mission Configuration
+                </h3>
+                <div class="space-y-3">
+                    <input type="text" id="link" placeholder="Paste YouTube Video Link Here..." 
+                        class="w-full bg-slate-950 border border-slate-800 p-4 rounded-xl text-sm focus:border-blue-500 outline-none">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" id="views" placeholder="Total Views" 
+                            class="w-full bg-slate-950 border border-slate-800 p-4 rounded-xl text-sm focus:border-blue-500 outline-none">
+                        <input type="number" id="timing" placeholder="Watch Time (Sec)" 
+                            class="w-full bg-slate-950 border border-slate-800 p-4 rounded-xl text-sm focus:border-blue-500 outline-none">
+                    </div>
+                    
+                    <button id="startBtn" onclick="initiateFlight()" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-900/20 uppercase text-sm">
+                        Start Automation & Takeoff 🚀
+                    </button>
+                </div>
             </div>
 
-            <button onclick="startMission()" id="msnBtn" class="bg-slate-800 text-slate-500 py-3" disabled>
-                SUBMIT AUTOMATION ✈️
-            </button>
+            <div class="glass-ui p-6 rounded-2xl flex flex-col">
+                <h3 class="text-sm font-bold uppercase text-slate-500 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-terminal"></i> Flight Logs (Live)
+                </h3>
+                <div id="logBox" class="log-screen p-3 rounded-xl">
+                    <p class="opacity-50">> Initializing terminal...</p>
+                    <p class="opacity-50">> Connection established with PooreYouTuber Backend.</p>
+                </div>
+            </div>
+
         </div>
 
     </div>
 
     <script>
-        // AAPKA RENDER URL
-        const RENDER_URL = "https://pooreyoutuber-github-ioproxy.onrender.com";
-        const stream = document.getElementById('streamImg');
-        const logBox = document.getElementById('logs');
+        // Connectivity to your Backend
+        const socket = io('https://pooreyoutuber-github-ioproxy.onrender.com');
+        const logBox = document.getElementById('logBox');
+        const liveDisplay = document.getElementById('liveDisplay');
 
-        function addLog(msg, color="text-slate-400") {
-            const div = document.createElement('div');
-            div.className = color;
-            div.innerHTML = `> [${new Date().toLocaleTimeString()}] ${msg}`;
-            logBox.appendChild(div);
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString();
+            logBox.innerHTML += `<p class="mb-1"><span class="text-slate-500">[${time}]</span> ${msg}</p>`;
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        async function launchEngine() {
-            addLog("Sending Launch Command to: " + RENDER_URL, "text-yellow-500");
-            document.getElementById('lchBtn').innerText = "POWERING UP...";
-            
-            try {
-                const res = await fetch(`${RENDER_URL}/api/init-engine`);
-                const data = await res.json();
-                
-                if(data.status) {
-                    addLog("Engine Online! Feed Syncing...", "text-green-400");
-                    document.getElementById('lchBtn').innerText = "ENGINE READY ✅";
-                    document.getElementById('lchBtn').disabled = true;
-                    document.getElementById('lchBtn').classList.add('opacity-50');
-                    
-                    document.getElementById('msnBtn').disabled = false;
-                    document.getElementById('msnBtn').className = "bg-orange-600 hover:bg-orange-500 text-white py-3";
-                    
-                    // Har 1 sec me screenshot lena
-                    setInterval(() => {
-                        stream.src = `${RENDER_URL}/live-check?t=` + new Date().getTime();
-                    }, 1000);
-                }
-            } catch (e) {
-                addLog("CRITICAL ERROR: Server not reachable!", "text-red-500");
-                document.getElementById('lchBtn').innerText = "RETRY LAUNCH";
-            }
-        }
+        // Backend se Live Frame receive karna
+        socket.on('live-frame', (base64) => {
+            liveDisplay.src = `data:image/jpeg;base64,${base64}`;
+            liveDisplay.classList.remove('opacity-30');
+            document.getElementById('hud-load').innerText = "94% ACTIVE";
+        });
 
-        async function startMission() {
-            const url = document.getElementById('cUrl').value;
-            const views = document.getElementById('vQty').value;
-            const time = document.getElementById('tTime').value;
+        // Backend se Log receive karna
+        socket.on('autopilot-log', (msg) => {
+            addLog(msg);
+        });
 
-            if(!url || !views || !time) return alert("Bhai, Details to bharo!");
+        function initiateFlight() {
+            const data = {
+                url: document.getElementById('link').value,
+                total: document.getElementById('views').value,
+                time: document.getElementById('timing').value
+            };
 
-            addLog("Data Sent to Server. Autopilot taking over control.", "text-orange-400");
-            document.getElementById('msnBtn').innerText = "FLYING... ✈️";
-            document.getElementById('msnBtn').disabled = true;
+            if(!data.url) return alert("Bhai Link to daal!");
 
-            await fetch(`${RENDER_URL}/api/channel-grow-boost`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    channel_url: url,
-                    views_count: parseInt(views),
-                    watch_time: parseInt(time)
-                })
-            });
-            addLog("Status: MISSION IN PROGRESS. You can close this window.", "text-blue-300");
+            addLog(`<span class="text-blue-400">Initiating takeoff sequence for ${data.total} views...</span>`);
+            document.getElementById('hud-status').innerText = "IN FLIGHT";
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').innerText = "AUTO-PILOT ACTIVE ✅";
+
+            // Backend ko command bhejna
+            socket.emit('start-autopilot', data);
         }
     </script>
 </body>
