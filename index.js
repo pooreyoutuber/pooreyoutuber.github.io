@@ -1375,139 +1375,172 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // TOOL 8: AI-VISION CHANNEL GROWTH ENGINE (LONG + SHORTS BINGE)
 // ===================================================================
+ // ===================================================================
+// TOOL 8: GUEST MODE YOUTUBE ENGINE (NO LOGIN - POPUP BYPASS)
+// ===================================================================
 
 let latestScreenshot = null;
 
-// Screenshot Viewer Endpoint
+// Live Screenshot Viewer
 app.get('/live-check', (req, res) => {
-    if (!latestScreenshot) return res.send("System Initializing... Please wait.");
+    if (!latestScreenshot) return res.send("Guest Engine Starting...");
     res.contentType('image/png').send(latestScreenshot);
 });
 
-async function runUltimateChannelGrowth(channelUrl, watchTime, totalViews, baseUrl) {
+async function runGuestModeBoost(channelUrl, watchTime, viewsCount, baseUrl) {
     let browser;
-    const GMAIL_USER = "frankrebri753@gmail.com";
-    const GMAIL_PASS = "Youtub@77#";
-
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled',
+                '--window-size=1280,720',
+                '--disable-features=IsolateOrigins,site-per-process'
+            ]
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
+        await page.setUserAgent(USER_AGENTS[0]); // Random User Agent
 
-        // Helper: Log with Screenshot
+        // Helper: Log update
         const logStep = async (msg) => {
-            latestScreenshot = await page.screenshot();
-            console.log(`\x1b[35m[AI-GROWTH]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+            try {
+                latestScreenshot = await page.screenshot();
+                console.log(`\x1b[36m[GUEST-MODE]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+            } catch (e) {}
         };
 
-        // Helper: Ask Gemini Vision
-        const askGemini = async (prompt) => {
-            const screenB64 = await page.screenshot({ encoding: 'base64' });
-            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await model.generateContent([
-                prompt,
-                { inlineData: { data: screenB64, mimeType: "image/png" } }
-            ]);
-            return result.response.text();
-        };
+        // --- STEP 1: HANDLE "ACCEPT ALL" COOKIES (Starting Popup) ---
+        // Pehle YouTube home par jakar cookies accept karte hain
+        console.log("[START] Opening YouTube (Guest Mode)...");
+        await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 3000));
 
-        // --- STEP 1: SMART LOGIN ---
-        console.log("[LOGIN] Opening Google Sign-In...");
-        await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
+        try {
+            // "Accept All" button dhoondna (Google/YouTube consent popup)
+            const acceptBtn = await page.evaluate(() => {
+                const buttons = Array.from(document.querySelectorAll('button'));
+                const target = buttons.find(b => b.innerText.includes('Accept all') || b.innerText.includes('Reject all') || b.getAttribute('aria-label')?.includes('Accept'));
+                if (target) { target.click(); return true; }
+                return false;
+            });
+            if (acceptBtn) {
+                console.log("[POPUP] 'Accept All' clicked.");
+                await new Promise(r => setTimeout(r, 3000));
+            }
+        } catch (e) { console.log("[INFO] No Cookie Popup found."); }
         
-        await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
-        await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 5000));
+        await logStep("Home Page Loaded");
 
-        // AI Vision Check (Captcha or Password)
-        let aiDecision = await askGemini("Analyze this screen. If you see a Captcha, type ONLY the code. If it is a password screen, type 'PASS'.");
+        // --- STEP 2: CHANNEL NAVIGATION ---
+        const videosUrl = channelUrl.includes('/videos') ? channelUrl : `${channelUrl}/videos`;
         
-        if (aiDecision.includes('PASS')) {
-            await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
-        } else {
-            console.log("[AI] Solving Captcha: " + aiDecision);
-            await page.type('input[aria-label*="characters"]', aiDecision.trim(), { delay: 100 });
-            await page.keyboard.press('Enter');
+        for (let i = 0; i < viewsCount; i++) {
+            console.log(`[ACTION] Navigating to Channel Video #${i+1}`);
+            await page.goto(videosUrl, { waitUntil: 'networkidle2' });
             await new Promise(r => setTimeout(r, 4000));
-            await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
-        }
-        await page.keyboard.press('Enter');
-        await new Promise(r => setTimeout(r, 10000));
-        await logStep("Login Finished");
 
-        // --- STEP 2: CONTENT BINGE LOOP ---
-        let viewsDone = 0;
-        const channelBase = channelUrl.replace(/\/videos|\/shorts/g, "");
-
-        while (viewsDone < totalViews) {
-            // -- Part A: Watch Long Videos --
-            console.log("[BINGE] Loading Long Videos...");
-            await page.goto(`${channelBase}/videos`, { waitUntil: 'networkidle2' });
-            const longLinks = await page.evaluate(() => 
-                Array.from(document.querySelectorAll('a#video-title-link')).map(a => a.href)
-            );
-
-            for (let link of longLinks) {
-                if (viewsDone >= totalViews) break;
-                await page.goto(link, { waitUntil: 'networkidle2' });
-                await page.evaluate(() => { const v = document.querySelector('video'); if(v){v.muted=false; v.volume=1;} });
-                await page.keyboard.press('k'); 
-                
-                let timer = 0;
-                while(timer < watchTime) {
-                    await new Promise(r => setTimeout(r, 10000));
-                    timer += 10;
-                    await logStep(`Watching Long Video | ${timer}/${watchTime}s | Views: ${viewsDone+1}/${totalViews}`);
+            // Select Video (Latest sequence: 1st, then 2nd, then 3rd...)
+            const clicked = await page.evaluate((idx) => {
+                const vids = document.querySelectorAll('a#video-title-link');
+                if (vids[idx]) {
+                    vids[idx].scrollIntoView();
+                    vids[idx].click();
+                    return true;
                 }
-                viewsDone++;
+                return false;
+            }, i);
+
+            if (!clicked) {
+                console.log("[INFO] No more videos found.");
+                break;
             }
 
-            // -- Part B: Watch Shorts --
-            console.log("[BINGE] Loading Shorts...");
-            await page.goto(`${channelBase}/shorts`, { waitUntil: 'networkidle2' });
-            const shortLinks = await page.evaluate(() => 
-                Array.from(document.querySelectorAll('a[href*="/shorts/"]')).map(a => a.href)
-            );
+            console.log(`[LOADING] Video #${i+1} started...`);
+            await new Promise(r => setTimeout(r, 5000)); // Wait for player load
 
-            for (let link of shortLinks) {
-                if (viewsDone >= totalViews) break;
-                await page.goto(link, { waitUntil: 'networkidle2' });
-                await page.evaluate(() => { const v = document.querySelector('video'); if(v){v.muted=false; v.volume=1;} });
-                
-                let sTimer = 0;
-                let shortTime = 25; // Default Shorts Time
-                while(sTimer < shortTime) {
-                    await new Promise(r => setTimeout(r, 5000));
-                    sTimer += 5;
-                    await logStep(`Watching Short | ${sTimer}/${shortTime}s | Views: ${viewsDone+1}/${totalViews}`);
+            // --- STEP 3: "SIGN IN" POPUP BYPASS (The User Trick) ---
+            // User Logic: "Side tap kre 2-3 baar or scrolling kre"
+            
+            // 1. Side Taps (Body par click karna taaki popup focus hate)
+            await page.mouse.click(100, 100); // Top-left corner
+            await new Promise(r => setTimeout(r, 500));
+            await page.mouse.click(1200, 300); // Right side blank area
+            await new Promise(r => setTimeout(r, 1000));
+
+            // 2. Scrolling (Down and Up)
+            await page.evaluate(() => window.scrollBy(0, 400));
+            await new Promise(r => setTimeout(r, 1000));
+            await page.evaluate(() => window.scrollBy(0, -200));
+            await new Promise(r => setTimeout(r, 2000));
+
+            // 3. Close specific popups if visible (like "No thanks")
+            try {
+                await page.evaluate(() => {
+                    const dismiss = document.querySelector('button[aria-label="No thanks"]');
+                    if (dismiss) dismiss.click();
+                });
+            } catch(e) {}
+
+            await logStep("Popup Bypass Attempted");
+
+            // --- STEP 4: PLAY & UNMUTE ---
+            // Force Unmute & Play
+            await page.evaluate(() => {
+                const video = document.querySelector('video');
+                if (video) { 
+                    video.muted = false; 
+                    video.volume = 1; 
+                    video.play();
                 }
-                viewsDone++;
+            });
+            
+            // Keyboard 'K' press for safety
+            await page.keyboard.press('k'); 
+
+            // --- STEP 5: WATCH LOOP ---
+            let elapsed = 0;
+            while (elapsed < watchTime) {
+                await new Promise(r => setTimeout(r, 10000));
+                elapsed += 10;
+                
+                // Random mouse movement to prevent idle freeze
+                await page.mouse.move(Math.random()*500, Math.random()*500);
+                
+                // Kabhi-kabhi scroll bhi kar dena (Real user behavior)
+                if (elapsed % 30 === 0) {
+                    await page.evaluate(() => window.scrollBy(0, 100));
+                }
+
+                await logStep(`Watching Video ${i+1} | ${elapsed}/${watchTime}s`);
             }
+            console.log(`[DONE] Video ${i+1} Finished.`);
         }
 
     } catch (error) {
-        console.error(`[CRITICAL ERROR] ${error.message}`);
+        console.error(`[ERROR] ${error.message}`);
     } finally {
         if (browser) {
-            console.log("[CLEANUP] Closing browser and wiping session data...");
+            console.log("[CLEANUP] Closing browser (History/Cookies cleared automatically).");
             await browser.close();
         }
     }
 }
 
-// --- ENDPOINT FOR FRONTEND ---
+// Updated Endpoint
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
     const baseUrl = `${req.protocol}://${req.get('host')}`;
 
-    res.status(200).json({ success: true, message: "AI Engine Deployed. Check Logs for Live Feed." });
+    if (!channel_url) return res.status(400).json({ error: "URL Missing" });
+
+    res.status(200).json({ success: true, message: "Guest Mode Engine Started." });
     
-    // Background execute
-    runUltimateChannelGrowth(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
+    // Background execution
+    runGuestModeBoost(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
 });
 
 //==================================================
