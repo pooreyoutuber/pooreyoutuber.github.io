@@ -1372,6 +1372,143 @@ app.post('/ultimate', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// TOOL 8: AI-VISION CHANNEL GROWTH ENGINE (LONG + SHORTS BINGE)
+// ===================================================================
+
+let latestScreenshot = null;
+
+// Screenshot Viewer Endpoint
+app.get('/live-check', (req, res) => {
+    if (!latestScreenshot) return res.send("System Initializing... Please wait.");
+    res.contentType('image/png').send(latestScreenshot);
+});
+
+async function runUltimateChannelGrowth(channelUrl, watchTime, totalViews, baseUrl) {
+    let browser;
+    const GMAIL_USER = "frankrebri753@gmail.com";
+    const GMAIL_PASS = "Youtub@77#";
+
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+        });
+
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 720 });
+
+        // Helper: Log with Screenshot
+        const logStep = async (msg) => {
+            latestScreenshot = await page.screenshot();
+            console.log(`\x1b[35m[AI-GROWTH]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+        };
+
+        // Helper: Ask Gemini Vision
+        const askGemini = async (prompt) => {
+            const screenB64 = await page.screenshot({ encoding: 'base64' });
+            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent([
+                prompt,
+                { inlineData: { data: screenB64, mimeType: "image/png" } }
+            ]);
+            return result.response.text();
+        };
+
+        // --- STEP 1: SMART LOGIN ---
+        console.log("[LOGIN] Opening Google Sign-In...");
+        await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
+        
+        await page.type('input[type="email"]', GMAIL_USER, { delay: 100 });
+        await page.keyboard.press('Enter');
+        await new Promise(r => setTimeout(r, 5000));
+
+        // AI Vision Check (Captcha or Password)
+        let aiDecision = await askGemini("Analyze this screen. If you see a Captcha, type ONLY the code. If it is a password screen, type 'PASS'.");
+        
+        if (aiDecision.includes('PASS')) {
+            await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
+        } else {
+            console.log("[AI] Solving Captcha: " + aiDecision);
+            await page.type('input[aria-label*="characters"]', aiDecision.trim(), { delay: 100 });
+            await page.keyboard.press('Enter');
+            await new Promise(r => setTimeout(r, 4000));
+            await page.type('input[type="password"]', GMAIL_PASS, { delay: 100 });
+        }
+        await page.keyboard.press('Enter');
+        await new Promise(r => setTimeout(r, 10000));
+        await logStep("Login Finished");
+
+        // --- STEP 2: CONTENT BINGE LOOP ---
+        let viewsDone = 0;
+        const channelBase = channelUrl.replace(/\/videos|\/shorts/g, "");
+
+        while (viewsDone < totalViews) {
+            // -- Part A: Watch Long Videos --
+            console.log("[BINGE] Loading Long Videos...");
+            await page.goto(`${channelBase}/videos`, { waitUntil: 'networkidle2' });
+            const longLinks = await page.evaluate(() => 
+                Array.from(document.querySelectorAll('a#video-title-link')).map(a => a.href)
+            );
+
+            for (let link of longLinks) {
+                if (viewsDone >= totalViews) break;
+                await page.goto(link, { waitUntil: 'networkidle2' });
+                await page.evaluate(() => { const v = document.querySelector('video'); if(v){v.muted=false; v.volume=1;} });
+                await page.keyboard.press('k'); 
+                
+                let timer = 0;
+                while(timer < watchTime) {
+                    await new Promise(r => setTimeout(r, 10000));
+                    timer += 10;
+                    await logStep(`Watching Long Video | ${timer}/${watchTime}s | Views: ${viewsDone+1}/${totalViews}`);
+                }
+                viewsDone++;
+            }
+
+            // -- Part B: Watch Shorts --
+            console.log("[BINGE] Loading Shorts...");
+            await page.goto(`${channelBase}/shorts`, { waitUntil: 'networkidle2' });
+            const shortLinks = await page.evaluate(() => 
+                Array.from(document.querySelectorAll('a[href*="/shorts/"]')).map(a => a.href)
+            );
+
+            for (let link of shortLinks) {
+                if (viewsDone >= totalViews) break;
+                await page.goto(link, { waitUntil: 'networkidle2' });
+                await page.evaluate(() => { const v = document.querySelector('video'); if(v){v.muted=false; v.volume=1;} });
+                
+                let sTimer = 0;
+                let shortTime = 25; // Default Shorts Time
+                while(sTimer < shortTime) {
+                    await new Promise(r => setTimeout(r, 5000));
+                    sTimer += 5;
+                    await logStep(`Watching Short | ${sTimer}/${shortTime}s | Views: ${viewsDone+1}/${totalViews}`);
+                }
+                viewsDone++;
+            }
+        }
+
+    } catch (error) {
+        console.error(`[CRITICAL ERROR] ${error.message}`);
+    } finally {
+        if (browser) {
+            console.log("[CLEANUP] Closing browser and wiping session data...");
+            await browser.close();
+        }
+    }
+}
+
+// --- ENDPOINT FOR FRONTEND ---
+app.post('/api/channel-grow-boost', async (req, res) => {
+    const { channel_url, views_count, watch_time } = req.body;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+    res.status(200).json({ success: true, message: "AI Engine Deployed. Check Logs for Live Feed." });
+    
+    // Background execute
+    runUltimateChannelGrowth(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
+});
 
 //==================================================
 // --- SERVER START ---
