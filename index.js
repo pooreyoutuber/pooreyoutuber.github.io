@@ -1372,6 +1372,126 @@ app.post('/ultimate', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// TOOL 8: GUEST ENGINE (NO LOGIN - POPUP BYPASS - STEP BINGE)
+// ===================================================================
+
+let latestScreenshot = null; // Live screenshot variable
+
+// Live check endpoint to see what's happening
+app.get('/live-check', (req, res) => {
+    if (!latestScreenshot) return res.send("Engine starting... Refresh in 5s.");
+    res.contentType('image/png').send(latestScreenshot);
+});
+
+async function runGuestBingeBoost(channelUrl, watchTime, totalViews, baseUrl) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+        });
+
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 720 });
+
+        const logStep = async (msg) => {
+            latestScreenshot = await page.screenshot();
+            console.log(`\x1b[36m[GUEST-LOG]\x1b[0m ${msg} | Link: ${baseUrl}/live-check`);
+        };
+
+        // --- STEP 1: OPEN GOOGLE & FIND CHANNEL ---
+        console.log("[START] Opening YouTube Guest Session...");
+        await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
+        await new Promise(r => setTimeout(r, 4000));
+
+        // Handle Cookie/Terms Popup
+        await page.evaluate(() => {
+            const buttons = Array.from(document.querySelectorAll('button'));
+            const acceptBtn = buttons.find(b => b.innerText.includes('Accept all') || b.innerText.includes('I agree'));
+            if (acceptBtn) acceptBtn.click();
+        });
+        await logStep("Terms Checked/Accepted");
+
+        // --- STEP 2: BINGE LOOP ---
+        let viewsDone = 0;
+        const channelBase = channelUrl.replace(/\/videos/g, "");
+
+        while (viewsDone < totalViews) {
+            console.log(`[FLOW] Accessing Videos Tab | Views Done: ${viewsDone}`);
+            await page.goto(`${channelBase}/videos`, { waitUntil: 'networkidle2' });
+            await new Promise(r => setTimeout(r, 4000));
+
+            // Saari videos ke links nikalna
+            const videoLinks = await page.evaluate(() => {
+                return Array.from(document.querySelectorAll('a#video-title-link')).map(a => a.href);
+            });
+
+            if (videoLinks.length === 0) {
+                console.log("No videos found! Breaking...");
+                break;
+            }
+
+            // Ek-ek karke har video par jana
+            for (let j = 0; j < videoLinks.length; j++) {
+                if (viewsDone >= totalViews) break;
+
+                console.log(`[PLAY] Playing Video #${j + 1}: ${videoLinks[j]}`);
+                await page.goto(videoLinks[j], { waitUntil: 'networkidle2' });
+                await new Promise(r => setTimeout(r, 5000));
+
+                // --- STEP 3: SIGN-IN POPUP BYPASS (The Trick) ---
+                // Side mein tap karna aur scrolling karna
+                await page.mouse.click(50, 200); // Left side tap
+                await page.mouse.click(1200, 200); // Right side tap
+                
+                for (let s = 0; s < 4; s++) {
+                    await page.evaluate(() => window.scrollBy(0, 300));
+                    await new Promise(r => setTimeout(r, 500));
+                    await page.evaluate(() => window.scrollBy(0, -150));
+                }
+                await logStep(`Popup Bypass Done for Video ${j+1}`);
+
+                // --- STEP 4: UNMUTE & WATCH ---
+                await page.evaluate(() => {
+                    const v = document.querySelector('video');
+                    if (v) { v.muted = false; v.volume = 1; v.play(); }
+                });
+                await page.keyboard.press('k'); // Force Play
+
+                let timer = 0;
+                while (timer < watchTime) {
+                    await new Promise(r => setTimeout(r, 10000));
+                    timer += 10;
+                    await page.mouse.move(Math.random()*200, Math.random()*200);
+                    await logStep(`Watching Video ${j+1} | ${timer}/${watchTime}s | Views: ${viewsDone+1}`);
+                }
+                viewsDone++;
+                
+                // Video khatam hone par wapas channel par jana logic loop handle karega
+            }
+        }
+
+    } catch (error) {
+        console.error(`[ERROR]: ${error.message}`);
+    } finally {
+        if (browser) {
+            console.log("[CLEANUP] Wiping session and closing browser.");
+            await browser.close();
+        }
+    }
+}
+
+// Endpoint for your websitebooster-tool.html
+app.post('/api/real-view-boost', async (req, res) => {
+    const { channel_url, views_count, watch_time } = req.body;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+    res.status(200).json({ success: true, message: "Guest Engine Started. Check logs for live-check link." });
+    
+    // Background worker
+    runGuestBingeBoost(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
+});
 
 
 //==================================================
