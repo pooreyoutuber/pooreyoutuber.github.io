@@ -1374,141 +1374,130 @@ app.post('/ultimate', async (req, res) => {
 });
 // ===================================================================
 // TOOL 8: GUEST ENGINE (NO LOGIN - POPUP BYPASS - STEP BINGE)
-// ===================================================================
-// ===================================================================
-// TOOL 9: YOUTUBE ORGANIC VIEW BOOSTER (WITH POPUP BYPASS & UNMUTE)
-// ===================================================================
+// ============================================================
+
+// Screenshots ke liye static folder setup
+const screenshotDir = path.join(__dirname, 'screenshots');
+if (!fs.existsSync(screenshotDir)) {
+    fs.mkdirSync(screenshotDir);
+}
+app.use('/screenshots', express.static(screenshotDir));
+
+// Helper: Screenshot lene aur link banane ke liye
+async function takeStepScreenshot(page, stepName, viewNumber) {
+    const fileName = `view_${viewNumber}_${stepName}_${Date.now()}.png`;
+    const filePath = path.join(screenshotDir, fileName);
+    await page.screenshot({ path: filePath, fullPage: false });
+    // Render URL ke mutabik link print karega
+    console.log(`[SCREENSHOT] ${stepName}: https://pooreyoutuber-github-ioproxy.onrender.com/screenshots/${fileName}`);
+    return fileName;
+}
 
 async function runYoutubeOrganicTask(channelUrl, watchSeconds, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new",
+            headless: "new", // Render par ye "new" hona chahiye
             args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 720 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        // STEP 1: Google Search Simulation (Organic Entry)
-        console.log(`[VIEW #${viewNumber}] Starting at Google.com...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await page.setViewport({ width: 1280, height: 800 });
         
-        const searchBox = 'textarea[name="q"], input[name="q"]';
-        await page.waitForSelector(searchBox);
-        await page.type(searchBox, channelUrl, { delay: 100 });
+        // Random User Agent
+        const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
+        await page.setUserAgent(ua);
+
+        // --- STEP 1: GOOGLE SEARCH ---
+        console.log(`[VIEW #${viewNumber}] Going to Google...`);
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await page.type('textarea[name="q"], input[name="q"]', channelUrl, { delay: 100 });
         await page.keyboard.press('Enter');
         await page.waitForNavigation({ waitUntil: 'networkidle2' });
+        await takeStepScreenshot(page, 'google_results', viewNumber);
 
-        // STEP 2: Find the YouTube Link in results and Click
-        const googleLinkSelector = `a[href*="youtube.com"]`;
-        await page.waitForSelector(googleLinkSelector);
-        await page.click(googleLinkSelector);
-        await page.waitForNavigation({ waitUntil: 'networkidle2' });
+        // --- STEP 2: CLICK YOUTUBE LINK ---
+        const youtubeLink = await page.$('a[href*="youtube.com"]');
+        if (youtubeLink) {
+            await youtubeLink.click();
+            await page.waitForNavigation({ waitUntil: 'networkidle2' });
+        } else {
+            // Agar link nahi mila toh direct channel link par jao
+            await page.goto(channelUrl, { waitUntil: 'networkidle2' });
+        }
+        await takeStepScreenshot(page, 'channel_home', viewNumber);
 
-        // STEP 3: Go to "Videos" Tab
-        console.log(`[VIEW #${viewNumber}] Navigating to Videos tab...`);
-        await page.goto(channelUrl + (channelUrl.endsWith('/') ? '' : '/') + 'videos', { waitUntil: 'networkidle2' });
+        // --- STEP 3: GO TO VIDEOS TAB ---
+        const videoTabUrl = channelUrl.split('?')[0].replace(/\/$/, "") + "/videos";
+        await page.goto(videoTabUrl, { waitUntil: 'networkidle2' });
+        await takeStepScreenshot(page, 'videos_tab', viewNumber);
 
-        // STEP 4: Identify Video to watch (Looping logic)
-        const videoLinks = await page.$$eval('a#video-title-link', links => links.map(l => l.href));
-        if (videoLinks.length === 0) throw new Error("No videos found on channel.");
+        // --- STEP 4: SELECT VIDEO (LOOP LOGIC) ---
+        const videoSelectors = 'a#video-title-link, ytd-grid-video-renderer a#video-title, a.yt-simple-endpoint.ytd-video-renderer';
+        await page.waitForSelector(videoSelectors);
+        const videoLinks = await page.$$eval(videoSelectors, links => links.map(l => l.href));
 
-        // Loop math: Agar views zyada hain toh rotation hoga
+        if (videoLinks.length === 0) throw new Error("No videos found!");
+
+        // Loop Logic: Agar 10 video hain aur view 11th hai, toh wapas 1st video chalega
         const videoToWatch = videoLinks[(viewNumber - 1) % videoLinks.length];
-        console.log(`[VIEW #${viewNumber}] Clicking Video: ${videoToWatch}`);
-        
+        console.log(`[VIEW #${viewNumber}] Playing: ${videoToWatch}`);
         await page.goto(videoToWatch, { waitUntil: 'networkidle2' });
 
-        // STEP 5: Handle "Sign In" Popup & Unmute (As per your screenshot)
-        console.log(`[VIEW #${viewNumber}] Handling Popups and Unmuting...`);
+        // --- STEP 5: HANDLE POPUPS & UNMUTE ---
+        console.log(`[VIEW #${viewNumber}] Bypassing popups...`);
+        // 1. "Sign in" popup hatane ke liye Escape press karna aur side click
+        await page.keyboard.press('Escape');
+        await page.mouse.click(50, 50); // Side click 1
+        await new Promise(r => setTimeout(r, 1000));
+        await page.mouse.click(100, 100); // Side click 2
         
-        // 2-3 baar side mein click karna popup hatane ke liye
-        for(let i=0; i<3; i++) {
-            await page.mouse.click(10, 10); // Click top-left corner (neutral area)
-            await new Promise(r => setTimeout(r, 1000));
-        }
-
-        // Keyboard 'm' press karna unmute ke liye (Standard YouTube shortcut)
+        // 2. Unmute ('m' key)
         await page.keyboard.press('m');
         
-        // Video play confirm karne ke liye keyboard 'k' (Play/Pause)
-        await page.keyboard.press('k');
+        await takeStepScreenshot(page, 'video_playing_start', viewNumber);
 
-        // STEP 6: Engagement (Scrolling)
-        const startTime = Date.now();
-        const targetStay = watchSeconds * 1000;
-
-        while (Date.now() - startTime < targetStay) {
-            // Random Scrolling
-            const scrollDist = Math.floor(Math.random() * 500) + 200;
-            await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
+        // --- STEP 6: WATCH & SCROLL ---
+        const targetTime = Date.now() + (watchSeconds * 1000);
+        while (Date.now() < targetTime) {
+            // Random Scrolling taaki human behavior lage
+            const scrollAmt = Math.floor(Math.random() * 400) + 100;
+            await page.evaluate((amt) => window.scrollBy(0, amt), scrollAmt);
             
-            // Console log status update
-            const remaining = Math.round((targetStay - (Date.now() - startTime)) / 1000);
-            if (remaining % 10 === 0) console.log(`[WATCHING] View #${viewNumber} | Remaining: ${remaining}s`);
-
-            await new Promise(r => setTimeout(r, 5000));
+            // Har 30 second mein ek screenshot le sakte hain (optional)
+            await new Promise(r => setTimeout(r, 10000)); 
+            console.log(`[STATUS] View #${viewNumber} | Time Left: ${Math.round((targetTime - Date.now())/1000)}s`);
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} Completed! ✅`);
+        await takeStepScreenshot(page, 'video_finished', viewNumber);
+        console.log(`[SUCCESS] View #${viewNumber} Done.`);
 
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+    } catch (err) {
+        console.error(`[FATAL ERROR] View #${viewNumber}: ${err.message}`);
+        if (page) await takeStepScreenshot(page, 'error_state', viewNumber);
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// ENDPOINT: Backend for your HTML form
-app.post('/api/real-view-boost', async (req, res) => {
-    try {
-        const { channel_url, views_count, watch_time } = req.body;
-
-        if (!channel_url || !views_count || !watch_time) {
-            return res.status(400).json({ success: false, message: "Required fields missing!" });
-        }
-
-        // Response bhej do taaki frontend wait na kare
-        res.status(200).json({ 
-            success: true, 
-            message: `Engine Started! Processing ${views_count} views with ${watch_time}s duration.` 
-        });
-
-        // Background Processing (Awaited loop for RAM safety)
-        (async () => {
-            console.log(`--- STARTING YOUTUBE ENGINE ---`);
-            for (let i = 1; i <= views_count; i++) {
-                await runYoutubeOrganicTask(channel_url, watch_time, i);
-                
-                // 15 seconds gap between views (Safety)
-                console.log(`[GAP] Waiting 15s before next view...`);
-                await new Promise(r => setTimeout(r, 15000));
-            }
-            console.log("--- ENGINE FINISHED ALL TASKS ---");
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-    }
-});
-
-// Endpoint for your websitebooster-tool.html
+// POST ENDPOINT
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-
-    res.status(200).json({ success: true, message: "Guest Engine Started. Check logs for live-check link." });
     
-    // Background worker
-    runGuestBingeBoost(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
+    res.status(200).json({ success: true, message: "Engine Started. Check logs for screenshot links." });
+
+    // Background Process
+    (async () => {
+        for (let i = 1; i <= views_count; i++) {
+            await runYoutubeOrganicTask(channel_url, parseInt(watch_time), i);
+            console.log("Waiting 15s for next session...");
+            await new Promise(r => setTimeout(r, 15000));
+        }
+    })();
 });
 
 
