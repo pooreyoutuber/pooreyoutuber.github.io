@@ -1375,135 +1375,134 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // TOOL 8: GUEST ENGINE (NO LOGIN - POPUP BYPASS - STEP BINGE)
 // ===================================================================
+// ===================================================================
+// TOOL 8: GUEST ENGINE (FULL STEP-BY-STEP SCREENSHOTS & NO TIMEOUT)
+// ===================================================================
 
+let latestScreenshot = null; 
 
-// --- ORGANIC ENGINE ---
-async function runAdvancedOrganicTask(channelUrl, watchTime, currentView) {
+// Live Screenshot Viewer (Is link ko browser me refresh karte rahen)
+app.get('/live-check', (req, res) => {
+    if (!latestScreenshot) return res.send("Engine starting... Please wait.");
+    res.contentType('image/png').send(latestScreenshot);
+});
+
+async function runGuestBingeBoost(channelUrl, watchTime, totalViews, baseUrl) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        // User Agent Rotation for safety
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
         await page.setViewport({ width: 1280, height: 720 });
+        // Timeout ko 2 minute kar diya taaki slow internet pe error na aaye
+        await page.setDefaultNavigationTimeout(120000); 
 
-        console.log(`\n--- [VIEW #${currentView}] PROCESS STARTED ---`);
+        // Har step ka screenshot lene wala function
+        const capture = async (stepName) => {
+            latestScreenshot = await page.screenshot({ fullPage: false });
+            console.log(`\x1b[43m\x1b[30m[SCREENSHOT]\x1b[0m ${stepName} | View: ${baseUrl}/live-check`);
+        };
 
-        // STEP 1: Google.com Entry
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        console.log(`[STEP 1] SCREENSHOT: https://img.screenshot.com/google_entry_${Date.now()}`); // Simulated Link
+        // --- STEP 1: GOOGLE/YOUTUBE ENTRY ---
+        console.log("[START] Navigating to YouTube...");
+        await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
+        await capture("YouTube_Home_Loaded");
 
-        // STEP 2: Navigate to Channel
-        await page.goto(channelUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-        console.log(`[STEP 2] CHANNEL LOADED: ${channelUrl}`);
+        // Terms Popup Bypass
+        await page.evaluate(() => {
+            const btns = Array.from(document.querySelectorAll('button'));
+            const accept = btns.find(b => b.innerText.includes('Accept all') || b.innerText.includes('I agree'));
+            if (accept) accept.click();
+        });
+        await new Promise(r => setTimeout(r, 3000));
+        await capture("After_Terms_Popup");
 
-        // STEP 3: Handle YouTube Terms (Popup)
-        try {
-            const popupSelectors = ['button[aria-label="Accept all"]', 'button[aria-label="Agree"]'];
-            for (let selector of popupSelectors) {
-                const btn = await page.$(selector);
-                if (btn) {
-                    await btn.click();
-                    console.log(`[STEP 3] TERMS POPUP: ACCEPTED ✅`);
-                    await new Promise(r => setTimeout(r, 2000));
-                    break;
-                }
-            }
-        } catch (e) { console.log("[STEP 3] No Popup Detected."); }
+        // --- STEP 2: CHANNEL BINGE LOOP ---
+        let viewsDone = 0;
+        const channelBase = channelUrl.replace(/\/videos/g, "");
 
-        // STEP 4: Go to Video Session
-        const videoTab = 'div[title="Videos"], a[href*="/videos"]';
-        await page.waitForSelector(videoTab, { timeout: 15000 });
-        await page.click(videoTab);
-        await new Promise(r => setTimeout(r, 4000));
-        console.log(`[STEP 4] VIDEO SESSION: ACCESSED 📁`);
+        while (viewsDone < totalViews) {
+            await page.goto(`${channelBase}/videos`, { waitUntil: 'networkidle2' });
+            await new Promise(r => setTimeout(r, 4000));
+            await capture(`Channel_Videos_Tab_View_${viewsDone + 1}`);
 
-        // STEP 5: Select Video (Rotation Logic)
-        const videoLinks = await page.$$('a#video-title-link, ytd-grid-video-renderer a#video-title');
-        const videoIndex = (currentView - 1) % videoLinks.length;
-        console.log(`[STEP 5] SELECTING VIDEO #${videoIndex + 1} OF ${videoLinks.length}`);
-        
-        await videoLinks[videoIndex].click();
-        await page.waitForNavigation({ waitUntil: 'networkidle2' });
-
-        // STEP 6: Sign-up Bypass & Unmute
-        console.log(`[STEP 6] BYPASSING SIGN-UP & UNMUTING...`);
-        // Scroll to dismiss potential overlays
-        await page.evaluate(() => window.scrollBy(0, 500)); 
-        await page.mouse.click(10, 10); // Click outside area
-
-        try {
-            await page.waitForSelector('.ytp-mute-button', { timeout: 5000 });
-            const isMuted = await page.evaluate(() => document.querySelector('.video-stream').muted);
-            if (isMuted) {
-                await page.click('.ytp-mute-button');
-                console.log(`[ACTION] AUDIO: UNMUTED 🔊`);
-            }
-        } catch (e) { console.log("[INFO] Audio already playing or button hidden."); }
-
-        // STEP 7: Organic Watching (With Random Scrolling)
-        console.log(`[STEP 7] WATCHING FOR ${watchTime} SECONDS...`);
-        let currentTime = 0;
-        while (currentTime < watchTime) {
-            // Human activity: Random scrolling
-            await page.evaluate(() => {
-                window.scrollBy(0, Math.floor(Math.random() * 150) - 50);
+            // Saari videos ke links nikalna
+            const videoLinks = await page.evaluate(() => {
+                return Array.from(document.querySelectorAll('a#video-title-link')).map(a => a.href);
             });
-            await new Promise(r => setTimeout(r, 5000)); // 5s interval logs
-            currentTime += 5;
-            console.log(`[LIVE LOG] View #${currentView} | Progress: ${currentTime}/${watchTime}s | Screenshot: https://img.screenshot.com/live_frame_${Date.now()}`);
+
+            if (videoLinks.length === 0) {
+                console.log("No videos found!");
+                break;
+            }
+
+            // Loop through each video
+            for (let j = 0; j < videoLinks.length; j++) {
+                if (viewsDone >= totalViews) break;
+
+                console.log(`[PLAYING] Video ${j+1} of ${videoLinks.length}`);
+                await page.goto(videoLinks[j], { waitUntil: 'networkidle2' });
+                await capture(`Video_${j+1}_Loading`);
+
+                // --- STEP 3: SIGN-IN POPUP BYPASS (Aapka Trick) ---
+                // Side taps aur Scrolling
+                await page.mouse.click(10, 100); // Side click 1
+                await page.mouse.click(1250, 100); // Side click 2
+                await capture(`After_Side_Taps_Video_${j+1}`);
+
+                for (let s = 1; s <= 3; s++) {
+                    await page.evaluate(() => window.scrollBy(0, 500));
+                    await new Promise(r => setTimeout(r, 1000));
+                    await capture(`Scrolling_Down_Step_${s}`);
+                    await page.evaluate(() => window.scrollBy(0, -200));
+                }
+
+                // --- STEP 4: UNMUTE & PLAY ---
+                await page.evaluate(() => {
+                    const v = document.querySelector('video');
+                    if (v) { 
+                        v.muted = false; 
+                        v.volume = 1; 
+                        v.play(); 
+                    }
+                });
+                await page.keyboard.press('k'); 
+                await capture(`Video_Playing_Unmuted_No_Login`);
+
+                // Watch Time Wait
+                let timer = 0;
+                while (timer < watchTime) {
+                    await new Promise(r => setTimeout(r, 15000)); // Har 15 sec pe screenshot
+                    timer += 15;
+                    await page.mouse.move(Math.random()*100, Math.random()*100);
+                    await capture(`Watching_Progress_${timer}s`);
+                }
+
+                viewsDone++;
+                console.log(`[DONE] View #${viewsDone} Completed.`);
+            }
         }
 
-        console.log(`\x1b[32m[SUCCESS] View #${currentView} Completed.\x1b[0m`);
-
-    } catch (err) {
-        console.error(`\x1b[31m[ERROR] View #${currentView} Failed: ${err.message}\x1b[0m`);
+    } catch (error) {
+        console.error(`[CRITICAL ERROR]: ${error.message}`);
+        await capture("Error_State");
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            console.log("[CLEANUP] Closing browser.");
+            await browser.close();
+        }
     }
 }
 
-// --- MAIN API ENDPOINT ---
-app.post('/api/real-view-boost', (req, res) => {
+// Endpoint
+app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-
-    if (!channel_url) {
-        return res.status(400).json({ error: "Missing Channel URL" });
-    }
-
-    // 🔥 TIMEOUT FIX: Turant response bhejo, engine background mein chalega
-    res.status(200).json({
-        success: true,
-        message: "Boost Engine Started in Background. Check Render Logs for screenshots.",
-        task_details: { views: views_count, time: watch_time }
-    });
-
-    // Background Execution
-    (async () => {
-        for (let i = 1; i <= views_count; i++) {
-            await runAdvancedOrganicTask(channel_url, watch_time, i);
-            
-            // Server Safety Gap (15 Seconds)
-            if (i < views_count) {
-                console.log(`[COOLDOWN] Waiting 15s to clear RAM...`);
-                await new Promise(r => setTimeout(r, 15000));
-            }
-        }
-        console.log("\n✅ ALL TASKS COMPLETED SUCCESSFULLY");
-    })();
-});
-
-app.listen(PORT, () => {
-    console.log(`SMM Boost Pro Server Online on Port ${PORT}`);
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    res.status(200).json({ success: true, message: "Engine started. Check live-check link." });
+    runGuestBingeBoost(channel_url, parseInt(watch_time), parseInt(views_count), baseUrl);
 });
 
 
