@@ -1475,6 +1475,119 @@ app.post('/api/real-view-boost', async (req, res) => {
     })();
 });
 
+// ... (Tera purana code start mein rehne dena)
+// New Autopilot Logic yahan se start hota hai
+
+io.on('connection', (socket) => {
+    console.log('Pilot connected to Cockpit:', socket.id);
+
+    socket.on('start-autopilot', async (data) => {
+        const { url, total, time } = data;
+        let currentViews = 0;
+        
+        socket.emit('autopilot-log', '🚀 Engine Started: Heading to Google.com');
+
+        const browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--use-fake-ui-for-media-stream',
+                '--autoplay-policy=no-user-gesture-required'
+            ]
+        });
+
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 720 });
+
+        try {
+            // STEP 1: Google Search Logic (Organic Traffic)
+            await page.goto('https://www.google.com');
+            const searchBox = await page.waitForSelector('textarea[name="q"], input[name="q"]');
+            await searchBox.type(url);
+            await page.keyboard.press('Enter');
+            await page.waitForNavigation({ waitUntil: 'networkidle2' });
+            
+            socket.emit('autopilot-log', '✅ Search Result Found. Navigating to Channel...');
+
+            // Browser band hone par bhi ye chalta rahega (Loop)
+            while (currentViews < total) {
+                
+                // --- SECTION A: LONG VIDEOS ---
+                socket.emit('autopilot-log', `📂 Entering Video Session... [Target: ${currentViews + 1}/${total}]`);
+                await page.goto(url + '/videos', { waitUntil: 'networkidle2' });
+                await page.waitForTimeout(4000);
+
+                const longVideos = await page.$$('ytd-rich-item-renderer, ytd-grid-video-renderer');
+                if (longVideos.length > 0) {
+                    // Har baar alag video select karne ka logic (rotation)
+                    let videoIndex = currentViews % longVideos.length;
+                    await longVideos[videoIndex].click();
+                    
+                    await handlePlayback(page, time, socket);
+                    currentViews++;
+                    socket.emit('autopilot-log', `✅ Long Video #${currentViews} Done.`);
+                }
+
+                if (currentViews >= total) break;
+
+                // --- SECTION B: SHORTS ROTATION ---
+                socket.emit('autopilot-log', '🔀 Rotating to Shorts Session for Pattern Break...');
+                await page.goto(url + '/shorts', { waitUntil: 'networkidle2' });
+                await page.waitForTimeout(4000);
+
+                const shorts = await page.$$('ytd-rich-item-renderer, ytd-reel-item-renderer');
+                if (shorts.length > 0) {
+                    let shortIndex = Math.floor(Math.random() * shorts.length);
+                    await shorts[shortIndex].click();
+                    
+                    await handlePlayback(page, 25, socket); // Shorts fix 25s
+                    currentViews++;
+                    socket.emit('autopilot-log', `✅ Shorts View #${currentViews} Done.`);
+                }
+            }
+
+            socket.emit('autopilot-log', '🏁 Mission Accomplished. All views delivered.');
+            await browser.close();
+
+        } catch (err) {
+            socket.emit('autopilot-log', `⚠️ Pilot Error: ${err.message}`);
+            console.error(err);
+            // Browser close nahi karenge agar crash ho jaye toh debug ke liye, ya fir restart logic lagayenge
+        }
+    });
+});
+
+// Playback Handler: Unmute, Play and Live Stream
+async function handlePlayback(page, duration, socket) {
+    try {
+        await page.waitForSelector('video', { timeout: 15000 });
+        
+        await page.evaluate(() => {
+            const v = document.querySelector('video');
+            if (v) {
+                v.muted = false;
+                v.play().catch(e => console.log("Play error:", e));
+            }
+        });
+
+        // LIVE SCREENSHOT SYSTEM (Frontend Window ke liye)
+        const streamInterval = setInterval(async () => {
+            try {
+                const frame = await page.screenshot({ encoding: 'base64', quality: 30, type: 'jpeg' });
+                socket.emit('live-frame', frame);
+            } catch (e) { clearInterval(streamInterval); }
+        }, 2000);
+
+        // Watch duration tak wait
+        await new Promise(r => setTimeout(r, duration * 1000));
+        clearInterval(streamInterval);
+        
+    } catch (e) {
+        socket.emit('autopilot-log', '❌ Playback Error. Skipping to next...');
+    }
+}
 
 //==================================================
 // --- SERVER START ---
