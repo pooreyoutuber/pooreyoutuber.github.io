@@ -1374,24 +1374,8 @@ app.post('/ultimate', async (req, res) => {
 });
 // ===================================================================
 // TOOL 8: GUEST ENGINE (NO LOGIN - POPUP BYPASS - STEP BINGE)
-// ============================================================
+// ========================================================
 
-// Screenshots ke liye static folder setup
-const screenshotDir = path.join(__dirname, 'screenshots');
-if (!fs.existsSync(screenshotDir)) {
-    fs.mkdirSync(screenshotDir);
-}
-app.use('/screenshots', express.static(screenshotDir));
-
-// Helper: Screenshot lene aur link banane ke liye
-async function takeStepScreenshot(page, stepName, viewNumber) {
-    const fileName = `view_${viewNumber}_${stepName}_${Date.now()}.png`;
-    const filePath = path.join(screenshotDir, fileName);
-    await page.screenshot({ path: filePath, fullPage: false });
-    // Render URL ke mutabik link print karega
-    console.log(`[SCREENSHOT] ${stepName}: https://pooreyoutuber-github-ioproxy.onrender.com/screenshots/${fileName}`);
-    return fileName;
-}
 
 async function runYoutubeOrganicTask(channelUrl, watchSeconds, viewNumber) {
     let browser;
