@@ -1375,72 +1375,94 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ===================================================================
+let latestScreenshot = null; // Isme hamesha sabse naya screenshot save hoga
 
+// Live check endpoint jo image dikhayega
+app.get('/live-check', (req, res) => {
+    if (!latestScreenshot) {
+        return res.status(404).send("Wait... Script starting or no screenshot captured yet.");
+    }
+    // Buffer ko image format mein bhejna
+    res.set('Content-Type', 'image/png');
+    res.send(latestScreenshot);
+});
 async function runRealYoutubeTask(videoUrl, watchTime, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new", // "new" headless mode stable hota hai
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--mute-audio']
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // Screenshot helper function
-        const takeSnap = async (stepName) => {
-            const base64 = await page.screenshot({ encoding: 'base64' });
-            console.log(`[SCREENSHOT - ${stepName}]: data:image/png;base64,${base64.substring(0, 100)}... (truncated)`);
+        // HELPER: Screenshot capture karke global variable mein save karega
+        const updateLiveView = async (label) => {
+            console.log(`[LIVE-UPDATE] Action: ${label}`);
+            // Buffer format mein image save karna
+            latestScreenshot = await page.screenshot({ fullPage: false });
         };
 
-        console.log(`\n[VIEW #${viewNumber}] Starting for: ${videoUrl}`);
+        console.log(`\n[VIEW #${viewNumber}] Starting...`);
 
-        // STEP 1: Google se Redirect hoke jana (Organic vibe)
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-        await takeSnap("Page_Loaded");
+        // Step 1: YouTube Load
+        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
+        await updateLiveView("Page Loaded");
 
-        // STEP 2: YouTube Consent Popup handle karna (Accept All)
+        // Step 2: Terms/Consent Popup check
         try {
-            const acceptBtnSelector = 'button[aria-label="Accept all"], button[aria-label="Accept the use of cookies and other data for the purposes described"]';
-            const hasPopup = await page.$(acceptBtnSelector);
-            if (hasPopup) {
-                console.log("[POPUP] Consent popup detected. Clicking Accept All...");
-                await page.click(acceptBtnSelector);
-                await new Promise(r => setTimeout(r, 3000));
-                await takeSnap("Popup_Accepted");
+            const selectors = [
+                'button[aria-label="Accept all"]',
+                'button[aria-label="Accept the use of cookies and other data"]',
+                '#yDmH0d > c-wiz > div > div > div > div > div > div > button'
+            ];
+            
+            for (let selector of selectors) {
+                const btn = await page.$(selector);
+                if (btn) {
+                    await btn.click();
+                    console.log("[POPUP] Clicked Accept.");
+                    await new Promise(r => setTimeout(r, 3000));
+                    await updateLiveView("After Popup Accept");
+                    break;
+                }
             }
-        } catch (e) { console.log("[POPUP] No consent popup found."); }
+        } catch (e) { console.log("No popup found."); }
 
-        // STEP 3: Scrolling (4-6 baar) taaki video trigger ho
-        console.log("[BEHAVIOR] Simulating scrolls...");
-        for (let i = 0; i < randomInt(4, 6); i++) {
-            await page.evaluate(() => window.scrollBy(0, 400));
+        // Step 3: Scrolling
+        console.log("[BEHAVIOR] Scrolling 5 times...");
+        for (let i = 0; i < 5; i++) {
+            await page.evaluate(() => window.scrollBy(0, 500));
             await new Promise(r => setTimeout(r, 1000));
+            await updateLiveView(`Scrolling Step ${i+1}`);
         }
-        await takeSnap("After_Scrolling");
 
-        // STEP 4: Unmute aur Play Check
-        try {
-            await page.keyboard.press('m'); // YouTube shortcut for Unmute
-            console.log("[ACTION] Pressed 'M' to unmute.");
-        } catch (e) { console.log("[ACTION] Could not unmute."); }
+        // Step 4: Play/Unmute logic
+        await page.keyboard.press('m'); // Unmute
+        await page.keyboard.press('k'); // Play
+        await updateLiveView("Video Playing State");
 
-        // STEP 5: Watch Time (Wait)
-        console.log(`[WATCHING] Waiting for ${watchTime} seconds...`);
-        await new Promise(r => setTimeout(r, watchTime * 1000));
-        await takeSnap("Watch_Completed");
+        // Step 5: Waiting
+        console.log(`[WATCHING] Waiting for ${watchTime}s...`);
+        // Har 10-15 second mein screenshot update karenge taaki live-check par progress dikhe
+        let elapsed = 0;
+        while (elapsed < watchTime) {
+            await new Promise(r => setTimeout(r, 10000)); // 10s wait
+            elapsed += 10;
+            await updateLiveView(`Watching... ${elapsed}s/${watchTime}s`);
+        }
 
-        console.log(`[DONE] View #${viewNumber} Finished! ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished!`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+        console.error(`[ERROR]: ${error.message}`);
+        // Error hone par bhi screenshot khichega taaki pata chale kyu fail hua
+        if (browser) await updateLiveView("Error State");
     } finally {
         if (browser) await browser.close();
     }
 }
-
 // ENDPOINT
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
