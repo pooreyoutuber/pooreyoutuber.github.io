@@ -1374,108 +1374,99 @@ app.post('/ultimate', async (req, res) => {
 });
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
-// ===================================================================
-// ===================================================================
-// 12. NEW PLAN: MULTI-BROWSER GATEWAY ENGINE
-// ===================================================================
+// =========================
+// --- Global Variable for Screenshot & Logs ---
+let lastScreenshot = null;
+let activityLogs = [];
 
-async function runNewPlanBoost(videoUrl, watchTime, viewNum) {
+// Helper: Add log to memory
+function pushLog(message, type = 'info') {
+    activityLogs.push({ message, type, time: new Date().toLocaleTimeString() });
+    if (activityLogs.length > 50) activityLogs.shift(); // Limit logs
+    console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+// --- TOOL 9: Multi-Browser Bridge Booster ---
+async function runBridgeTask(videoUrl, watchTime, viewId) {
     let browser;
     try {
-        logToEngine(`Engine Start: View #${viewNum} (New Plan)`, 'info');
-        
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--mute-audio', // Start muted
-                '--window-size=1280,720'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(getRandomUserAgent());
         await page.setViewport({ width: 1280, height: 720 });
 
-        // STEP 1: Google.com kholna
-        logToEngine(`Step 1: Navigating to Google...`, 'node');
+        // Step 1: Google.com (Referrer set karne ke liye)
+        pushLog(`[View ${viewId}] Starting via Google...`);
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-        await page.screenshot({ path: 'live_view.png' });
 
-        // STEP 2: Teri custom site par jana
-        logToEngine(`Step 2: Going to Multi-Browser Site...`, 'info');
+        // Step 2: Bridge Site par jaana
+        pushLog(`[View ${viewId}] Opening Bridge Tool...`);
         await page.goto('https://macora225.github.io/multi-browser.html', { waitUntil: 'networkidle2' });
-        await page.screenshot({ path: 'live_view.png' });
 
-        // STEP 3: Input Link & Launch
-        logToEngine(`Step 3: Pasting Link & Launching Instance...`, 'success');
-        
-        // Input box ka selector (agar ID nahi hai toh placeholder se dhoondega)
-        await page.waitForSelector('input[type="text"], input[type="url"]');
-        await page.type('input', videoUrl, { delay: 50 }); // Insan ki tarah type karega
-        
-        await page.screenshot({ path: 'live_view.png' });
+        // Step 3: Video URL Paste aur Launch (2 baar)
+        const inputSelector = 'input[type="text"], #video-url'; // Selector check kar lena site par
+        const buttonSelector = 'button'; // Launch button ka selector
 
-        // Button par tap karna
-        await page.click('button'); // Launch button
-        logToEngine(`Instance Launched! Waiting for player...`, 'info');
-
-        // STEP 4: 15 Sec Wait & Unmute
-        // Yahan hum 15 sec wait karenge jaisa tune bola
-        const waitTime = 15000;
-        const startWait = Date.now();
-        
-        while (Date.now() - startWait < waitTime) {
-            await page.screenshot({ path: 'live_view.png' });
-            await new Promise(r => setTimeout(r, 3000));
+        for (let i = 1; i <= 2; i++) {
+            await page.waitForSelector(inputSelector);
+            await page.type(inputSelector, videoUrl, { delay: 50 });
+            await page.keyboard.press('Enter');
+            pushLog(`[View ${viewId}] Instance ${i} launched.`, 'success');
+            await new Promise(r => setTimeout(r, 2000));
         }
 
-        logToEngine(`Step 4: Unmuting Video...`, 'success');
-        // Unmute ke liye 'm' key press ya player par click (coordinates video ke hisab se)
-        await page.keyboard.press('m'); 
-        await page.mouse.click(100, 600); // Unmute button area (bottom left)
-        await page.screenshot({ path: 'live_view.png' });
-
-        // STEP 5: WATCH LOOP (Har 3 sec screenshot)
+        // Step 4: WatchTime Loop (Screenshot taking)
         const startTime = Date.now();
-        const durationMs = watchTime * 1000;
-        logToEngine(`Watching now for ${watchTime}s...`, 'success');
+        const duration = watchTime * 1000;
 
-        while (Date.now() - startTime < durationMs) {
-            await page.screenshot({ path: 'live_view.png' });
-            
-            // Random Activity
-            await page.evaluate(() => window.scrollBy(0, 100));
-            await new Promise(r => setTimeout(r, 3000));
-            await page.evaluate(() => window.scrollBy(0, -100));
+        while (Date.now() - startTime < duration) {
+            // Live Screenshot capture (Frontend ke liye)
+            lastScreenshot = await page.screenshot({ encoding: 'base64' });
+            await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me update
         }
 
-        logToEngine(`View #${viewNum} Completed Successfully.`, 'success');
+        pushLog(`[View ${viewId}] WatchTime Complete.`, 'success');
 
-    } catch (e) {
-        logToEngine(`Error: ${e.message}`, 'error');
+    } catch (err) {
+        pushLog(`Error in View ${viewId}: ${err.message}`, 'error');
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// UPDATE POST ENDPOINT
+// --- Endpoints for Frontend ---
+
+// 1. Start Boost
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-    
-    res.json({ status: 'success', message: 'New Plan Engine Booted 🚀' });
+    res.status(200).json({ status: "OK", message: "Cloud Engine Launched!" });
 
+    // Background processing (1 by 1 to prevent Render crash)
     (async () => {
-        engineLogs = [];
         for (let i = 1; i <= views_count; i++) {
-            // New Plan Function call
-            await runNewPlanBoost(channel_url, watch_time || 60, i);
-            await new Promise(r => setTimeout(r, 5000)); 
+            await runBridgeTask(channel_url, watch_time, i);
+            await new Promise(r => setTimeout(r, 5000)); // Cool down
         }
-        logToEngine("MISSION ACCOMPLISHED: All instances closed.", "success");
     })();
+});
+
+// 2. Get Live Screenshot
+app.get('/live-check', (req, res) => {
+    if (lastScreenshot) {
+        const img = Buffer.from(lastScreenshot, 'base64');
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': img.length });
+        res.end(img);
+    } else {
+        res.status(404).send("No live view available");
+    }
+});
+
+// 3. Get Logs
+app.get('/api/get-logs', (req, res) => {
+    res.json({ logs: activityLogs });
 });
 
 //==================================================
