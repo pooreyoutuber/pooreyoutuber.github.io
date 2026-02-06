@@ -1374,114 +1374,87 @@ app.post('/ultimate', async (req, res) => {
 });
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
-// =========================
+// ======================
 // ===================================================================
-// UPDATED TOOL 8: GITHUB MULTI-BROWSER AUTOMATION
+// UPDATED TOOL 8: MULTI-BROWSER AUTO-CLICKER (FIXED)
 // ===================================================================
 
-let latestScreenshot = null; // Frontend ke liye live view variable
+let latestScreenshot = null;
 
-// Live Monitoring Endpoint (Aapka frontend ise har 3 sec me call karega)
 app.get('/live-check', (req, res) => {
-    if (!latestScreenshot) return res.send("Engine starting... Please wait.");
+    if (!latestScreenshot) return res.send("Engine starting...");
     res.contentType('image/png').send(latestScreenshot);
 });
 
 async function runMultiBrowserEngine(videoUrl, watchTime, totalViews) {
-    // RAM management ke liye ek-ek karke browser chalega
     for (let i = 0; i < totalViews; i++) {
         let browser;
         try {
             browser = await puppeteer.launch({
                 headless: "new",
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-blink-features=AutomationControlled'
-                ]
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
             });
 
             const page = await browser.newPage();
             await page.setViewport({ width: 1280, height: 720 });
 
-            // Helper function: Screenshot lekar frontend update karne ke liye
-            const updateLiveView = async (msg) => {
+            const updateMonitor = async (msg) => {
                 latestScreenshot = await page.screenshot();
-                console.log(`[LIVE-STATUS] ${msg}`);
+                console.log(`[STATUS] ${msg}`);
             };
 
-            // STEP 1: Pehle Google par jana (Referral ke liye)
+            // 1. Google check
             await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
-            await updateLiveView("Google Loaded");
 
-            // STEP 2: Aapki Target Site par jana
-            const targetSite = "https://macora225.github.io/multi-browser.html";
-            await page.goto(targetSite, { waitUntil: 'networkidle2' });
-            await updateLiveView("Multi-Browser Tool Loaded");
+            // 2. Target Site
+            await page.goto('https://macora225.github.io/multi-browser.html', { waitUntil: 'networkidle2' });
+            await updateMonitor("Site Loaded");
 
-            // STEP 3: Multi-Browser Tool mein link daalna
-            // Selector: input[type="text"] (Aapki site ke hisab se)
-            const inputSelector = 'input[type="text"]';
+            // Selectors (Aapki site ke mutabiq)
+            const inputSelector = '#video-url, input[type="text"]'; 
+            const launchBtnSelector = '#launch-btn, button'; // "Launch Instance" button ka selector
+
             await page.waitForSelector(inputSelector);
 
-            // -- PEHLI VIDEO START --
+            // --- FIRST INSTANCE ---
             await page.type(inputSelector, videoUrl);
-            await page.keyboard.press('Enter');
-            await updateLiveView("First Video Started");
-            
-            // 3 Second ka wait jaisa aapne pucha
+            await page.click(launchBtnSelector); // AB BUTTON PRESS HOGA
+            await updateMonitor("Instance 1 Launched");
+
+            // 3 Second Wait
             await new Promise(r => setTimeout(r, 3000));
 
-            // -- DUSRI VIDEO START (Dobara Paste) --
-            // Purana text clear karke dubara paste karna
+            // --- SECOND INSTANCE ---
             await page.click(inputSelector, { clickCount: 3 });
             await page.keyboard.press('Backspace');
             await page.type(inputSelector, videoUrl);
-            await page.keyboard.press('Enter');
-            await updateLiveView("Second Video Started (Dual Mode)");
+            await page.click(launchBtnSelector); // DOBARA BUTTON PRESS HOGA
+            await updateMonitor("Instance 2 Launched");
 
-            // STEP 4: User ke diye huye WatchTime tak rukna
+            // --- WATCHING LOOP ---
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
-            
             while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me check
+                await new Promise(r => setTimeout(r, 3000));
                 elapsed += 3;
-                
-                // Screenshot for live monitoring
-                latestScreenshot = await page.screenshot();
-                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+                latestScreenshot = await page.screenshot(); // Har 3 sec me photo lega
             }
-
-            console.log(`[SUCCESS] View Session ${i+1} Finished.`);
 
         } catch (error) {
-            console.error(`[ENGINE ERROR] Session ${i+1}: ${error.message}`);
+            console.error(`Error: ${error.message}`);
         } finally {
-            if (browser) {
-                await browser.close();
-                console.log("[CLEANUP] Browser closed. Next session in 5s...");
-            }
-            await new Promise(r => setTimeout(r, 5000)); // Render stability break
+            if (browser) await browser.close();
+            await new Promise(r => setTimeout(r, 5000));
         }
     }
 }
 
-// Frontend API Endpoint
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-
-    if (!channel_url) return res.status(400).json({ error: "Video/Channel Link missing" });
-
-    res.status(200).json({ 
-        success: true, 
-        message: "Multi-Browser Engine Launched Successfully." 
-    });
-
-    // Background mein process start karna
+    res.status(200).json({ success: true, message: "Button Click Logic Active!" });
     runMultiBrowserEngine(channel_url, watch_time, views_count);
 });
-        
+
 
 //==================================================
 // --- SERVER START ---
