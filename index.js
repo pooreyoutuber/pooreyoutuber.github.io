@@ -1375,18 +1375,34 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ===================================================================
-let latestScreenshot = null; // Isme hamesha sabse naya screenshot save hoga
 
-// Live check endpoint jo image dikhayega
+
+// Global variable for Live Screenshot
+let latestScreenshot = null;
+let isTaskRunning = false;
+
+// --- 1. LIVE CHECK ENDPOINT ---
 app.get('/live-check', (req, res) => {
     if (!latestScreenshot) {
-        return res.status(404).send("Wait... Script starting or no screenshot captured yet.");
+        return res.status(404).send("Browser starting... please wait.");
     }
-    // Buffer ko image format mein bhejna
     res.set('Content-Type', 'image/png');
     res.send(latestScreenshot);
 });
-async function runRealYoutubeTask(videoUrl, watchTime, viewNumber) {
+
+// --- HELPER: UPDATE SCREENSHOT ---
+async function updateSnap(page, label) {
+    try {
+        latestScreenshot = await page.screenshot({ type: 'png' });
+        console.log(`[LIVE] ${label} captured.`);
+    } catch (e) {
+        console.log("Screenshot failed:", e.message);
+    }
+}
+
+// --- 2. MAIN ENGINE LOGIC ---
+async function runBoostEngine(channelUrl, totalViews, watchTime) {
+    isTaskRunning = true;
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1397,88 +1413,108 @@ async function runRealYoutubeTask(videoUrl, watchTime, viewNumber) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
 
-        // HELPER: Screenshot capture karke global variable mein save karega
-        const updateLiveView = async (label) => {
-            console.log(`[LIVE-UPDATE] Action: ${label}`);
-            // Buffer format mein image save karna
-            latestScreenshot = await page.screenshot({ fullPage: false });
-        };
+        // STEP 1: Google Login (User manually handles via live-check)
+        console.log("Navigating to Google Login...");
+        await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
+        await updateSnap(page, "Login_Page");
+        
+        console.log("Waiting 60s for User to Login...");
+        await new Promise(r => setTimeout(r, 60000)); // 1 minute for manual login
+        await updateSnap(page, "Post_Login_Check");
 
-        console.log(`\n[VIEW #${viewNumber}] Starting...`);
+        let viewsDone = 0;
 
-        // Step 1: YouTube Load
-        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
-        await updateLiveView("Page Loaded");
+        while (viewsDone < totalViews) {
+            console.log(`Starting Loop... Views completed: ${viewsDone}`);
 
-        // Step 2: Terms/Consent Popup check
-        try {
-            const selectors = [
-                'button[aria-label="Accept all"]',
-                'button[aria-label="Accept the use of cookies and other data"]',
-                '#yDmH0d > c-wiz > div > div > div > div > div > div > button'
-            ];
+            // STEP 2: Scrape Long Videos
+            await page.goto(`${channelUrl}/videos`, { waitUntil: 'networkidle2' });
+            await new Promise(r => setTimeout(r, 5000));
+            await updateSnap(page, "Channel_Videos_Section");
+
+            const longVideoLinks = await page.$$eval('#video-title-link', links => links.map(l => l.href));
             
-            for (let selector of selectors) {
-                const btn = await page.$(selector);
-                if (btn) {
-                    await btn.click();
-                    console.log("[POPUP] Clicked Accept.");
-                    await new Promise(r => setTimeout(r, 3000));
-                    await updateLiveView("After Popup Accept");
-                    break;
-                }
+            // Play Long Videos
+            for (let link of longVideoLinks) {
+                if (viewsDone >= totalViews) break;
+                await playVideo(page, link, watchTime);
+                viewsDone++;
             }
-        } catch (e) { console.log("No popup found."); }
 
-        // Step 3: Scrolling
-        console.log("[BEHAVIOR] Scrolling 5 times...");
-        for (let i = 0; i < 5; i++) {
-            await page.evaluate(() => window.scrollBy(0, 500));
-            await new Promise(r => setTimeout(r, 1000));
-            await updateLiveView(`Scrolling Step ${i+1}`);
+            // STEP 3: Scrape Shorts
+            await page.goto(`${channelUrl}/shorts`, { waitUntil: 'networkidle2' });
+            await new Promise(r => setTimeout(r, 5000));
+            await updateSnap(page, "Channel_Shorts_Section");
+
+            const shortLinks = await page.$$eval('a[href*="/shorts/"]', links => links.map(l => l.href));
+
+            // Play Shorts
+            for (let link of shortLinks) {
+                if (viewsDone >= totalViews) break;
+                await playVideo(page, link, 30); // Shorts ke liye fixed 30s
+                viewsDone++;
+            }
+            
+            if (viewsDone < totalViews) console.log("Restarting loop for more views...");
         }
-
-        // Step 4: Play/Unmute logic
-        await page.keyboard.press('m'); // Unmute
-        await page.keyboard.press('k'); // Play
-        await updateLiveView("Video Playing State");
-
-        // Step 5: Waiting
-        console.log(`[WATCHING] Waiting for ${watchTime}s...`);
-        // Har 10-15 second mein screenshot update karenge taaki live-check par progress dikhe
-        let elapsed = 0;
-        while (elapsed < watchTime) {
-            await new Promise(r => setTimeout(r, 10000)); // 10s wait
-            elapsed += 10;
-            await updateLiveView(`Watching... ${elapsed}s/${watchTime}s`);
-        }
-
-        console.log(`[DONE] View #${viewNumber} Finished!`);
 
     } catch (error) {
-        console.error(`[ERROR]: ${error.message}`);
-        // Error hone par bhi screenshot khichega taaki pata chale kyu fail hua
-        if (browser) await updateLiveView("Error State");
+        console.error("Critical Engine Error:", error);
     } finally {
         if (browser) await browser.close();
+        isTaskRunning = false;
+        latestScreenshot = null;
     }
 }
-// ENDPOINT
-app.post('/api/real-view-boost', async (req, res) => {
+
+// --- HELPER: VIDEO PLAYER ---
+async function playVideo(page, url, duration) {
+    try {
+        console.log(`Playing: ${url}`);
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 3000));
+
+        // Accept Terms Popup if exists
+        try {
+            const btn = await page.$('button[aria-label="Accept all"]');
+            if (btn) {
+                await btn.click();
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        } catch(e) {}
+
+        // Simulating Human Behavior: Scroll 4-6 times
+        for(let i=0; i<5; i++){
+            await page.evaluate(() => window.scrollBy(0, 400));
+            await new Promise(r => setTimeout(r, 1000));
+        }
+
+        await page.keyboard.press('m'); // Unmute
+        await updateSnap(page, "Video_Playing");
+
+        // Watch Time Loop with interval screenshots
+        let elapsed = 0;
+        while (elapsed < duration) {
+            await new Promise(r => setTimeout(r, 10000));
+            elapsed += 10;
+            await updateSnap(page, `Watching_${elapsed}s`);
+        }
+    } catch (e) {
+        console.log("Error playing video:", url);
+    }
+}
+
+// --- 3. API ENDPOINT ---
+app.post('/api/real-view-boost', (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
 
-    if (!channel_url) return res.status(400).json({ error: "URL is required" });
+    if (!channel_url) return res.status(400).json({ error: "Channel URL is required" });
+    if (isTaskRunning) return res.status(429).json({ error: "A task is already running!" });
 
-    res.status(200).json({ success: true, message: "Task started in background. Check Logs for Screenshots." });
+    // Background mein process chalu karo
+    runBoostEngine(channel_url, parseInt(views_count), parseInt(watch_time));
 
-    // Background Processing (1 by 1 browser)
-    (async () => {
-        for (let i = 1; i <= (views_count || 1); i++) {
-            await runRealYoutubeTask(channel_url, watch_time || 60, i);
-            // 15 seconds gap between views
-            await new Promise(r => setTimeout(r, 15000));
-        }
-    })();
+    res.status(200).json({ success: true, message: "Engine started. Monitor via /live-check" });
 });
 
 //==================================================
