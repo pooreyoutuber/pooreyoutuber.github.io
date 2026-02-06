@@ -1378,8 +1378,7 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 9: REAL YOUTUBE VIEW BOOSTER (With Hard Scroll & Left Tap)
 // ===================================================================
-const path = require('path');
-const fs = require('fs');
+
 
 // --- GLOBAL LOG STORE (For Frontend) ---
 let activityLogs = []; 
