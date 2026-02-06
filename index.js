@@ -1375,39 +1375,81 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ===================================================================
-// --- LOGGING SYSTEM FOR FRONTEND ---
+// ===================================================================
+// UPDATED TOOL 9: YOUTUBE CLOUD ENGINE (ANTI-BOT & AUTO-INTERACTION)
+// ===================================================================
+
+// Global state for logs
 let activityLogs = [];
+
+// Helper to push logs to the stack
 function pushLog(message, type = 'info') {
-    const logEntry = { message, type, timestamp: new Date().toLocaleTimeString() };
+    const logEntry = {
+        message: message,
+        type: type, // 'info', 'success', 'error', 'node'
+        timestamp: new Date().toLocaleTimeString()
+    };
     activityLogs.push(logEntry);
-    if (activityLogs.length > 100) activityLogs.shift();
     console.log(`[${type.toUpperCase()}] ${message}`);
+    
+    // Maintain last 100 logs
+    if (activityLogs.length > 100) activityLogs.shift();
 }
 
-// --- ENDPOINTS ---
-app.get('/api/get-logs', (req, res) => res.json({ logs: activityLogs }));
+// --- API ENDPOINTS ---
 
+// Logs endpoint for Frontend Polling
+app.get('/api/get-logs', (req, res) => {
+    res.json({ logs: activityLogs });
+});
+
+// Live Screenshot Endpoint
+app.get('/live-check', (req, res) => {
+    const filePath = path.join(__dirname, 'live_view.png');
+    if (fs.existsSync(filePath)) {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send('Waiting for engine...');
+    }
+});
+
+// Main Boost Engine
 app.post('/api/real-view-boost', async (req, res) => {
     try {
         const { channel_url, views_count, watch_time } = req.body;
-        if (!channel_url) return res.status(400).json({ success: false, message: "URL Missing" });
 
-        activityLogs = []; // Reset logs for new task
-        pushLog("Engine Initialized: Anti-Bot Mode Active", "success");
+        if (!channel_url) {
+            return res.status(400).json({ success: false, message: "Video URL required" });
+        }
 
-        res.status(200).json({ success: true, message: "Engine Started" });
+        activityLogs = []; // Reset for new session
+        pushLog("Initializing Cloud Terminal...", "info");
 
-        // Background Worker Task
+        res.status(200).json({ success: true, message: "Engine Launched" });
+
+        // Run in background
         (async () => {
+            pushLog(`Targeting ${views_count} views. Starting sequence.`, "success");
+            
             for (let i = 1; i <= views_count; i++) {
                 pushLog(`Deploying Node #${i}...`, "node");
                 await runYoutubeCloudTask(channel_url, watch_time, i);
-                if (i < views_count) await new Promise(r => setTimeout(r, 5000));
+                
+                if (i < views_count) {
+                    pushLog(`Node #${i} complete. 5s cooldown...`, "info");
+                    await new Promise(r => setTimeout(r, 5000));
+                }
             }
-            pushLog("--- ALL TASKS COMPLETED ---", "success");
+            pushLog("--- ALL SESSIONS FINISHED ---", "success");
         })();
-    } catch (err) { pushLog("Error: " + err.message, "error"); }
+
+    } catch (err) {
+        pushLog("Critical Engine Failure: " + err.message, "error");
+    }
 });
+
+// --- CORE PUPPETEER LOGIC ---
 
 async function runYoutubeCloudTask(videoUrl, watchTime, viewNum) {
     let browser;
@@ -1416,49 +1458,72 @@ async function runYoutubeCloudTask(videoUrl, watchTime, viewNum) {
             headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
+        
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        
+        // Random Human User Agent
+        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        await page.setUserAgent(ua);
 
-        pushLog(`Node #${viewNum}: Searching Google...`, "info");
+        pushLog(`Node #${viewNum}: Navigating to organic source...`, "info");
         await page.goto(`https://www.google.com/search?q=${encodeURIComponent(videoUrl)}`, { waitUntil: 'networkidle2' });
         
-        pushLog(`Node #${viewNum}: Loading Video...`, "info");
+        pushLog(`Node #${viewNum}: Landing on Video...`, "info");
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // --- ANTI-BOT: HARD SCROLLING (5 Times) ---
-        pushLog(`Node #${viewNum}: Hard Scrolling started...`, "info");
-        for (let i = 0; i < 5; i++) {
-            await page.evaluate(() => window.scrollBy(0, 500));
-            await new Promise(r => setTimeout(r, 600));
-            await page.evaluate(() => window.scrollBy(0, -300));
-            await new Promise(r => setTimeout(r, 600));
+        // --- STEP 1: HARD SCROLLING (BYPASS BOT OVERLAYS) ---
+        pushLog(`Node #${viewNum}: Executing Hard Scrolling...`, "info");
+        for (let s = 0; s < 5; s++) {
+            const direction = s % 2 === 0 ? 600 : -400; // Alternate down/up
+            await page.evaluate((y) => window.scrollBy(0, y), direction);
+            await new Promise(r => setTimeout(r, 800));
         }
 
-        // --- INTERACTION: BYPASS SIGN-IN/IDLE ---
-        pushLog(`Node #${viewNum}: Tapping Player & Sidebar...`, "info");
-        await page.mouse.click(640, 360); // Click center video
-        await new Promise(r => setTimeout(r, 1000));
-        await page.mouse.click(1000, 200); // Click sidebar/sign-in area
+        // --- STEP 2: VIDEO INTERACTION (BYPASS SIGNUP/BOT POPUPS) ---
+        pushLog(`Node #${viewNum}: Tapping Video Player area...`, "info");
         
+        // Click center of the video (usually 640x360 for 720p)
+        await page.mouse.click(640, 360); 
+        await new Promise(r => setTimeout(r, 1200));
+        
+        // Click near the Sign-In/Sidebar area to shift focus
+        await page.mouse.click(1000, 150); 
+        await new Promise(r => setTimeout(r, 1000));
+
+        // Keyboard commands (Play & Unmute)
         await page.keyboard.press('k'); // Force Play
         await new Promise(r => setTimeout(r, 500));
-        await page.keyboard.press('m'); // Unmute
+        await page.keyboard.press('m'); // Ensure Unmuted
         
-        pushLog(`Node #${viewNum}: Playback confirmed.`, "success");
+        pushLog(`Node #${viewNum}: Playback triggered. Watching...`, "success");
 
         const startTime = Date.now();
-        while (Date.now() - startTime < (watchTime * 1000)) {
+        const totalDuration = watchTime * 1000;
+
+        // Monitoring Loop
+        while (Date.now() - startTime < totalDuration) {
+            // Take Screenshot for Frontend Monitor (Every Loop)
             await page.screenshot({ path: 'live_view.png' });
-            await page.mouse.move(randomInt(100, 900), randomInt(100, 600));
             
-            let rem = Math.round(((watchTime * 1000) - (Date.now() - startTime)) / 1000);
-            if (rem % 10 === 0 && rem > 0) pushLog(`Node #${viewNum}: Watching (${rem}s left)`, "info");
-            await new Promise(r => setTimeout(r, 4000));
+            // Random Mouse Jitter
+            await page.mouse.move(randomInt(100, 1100), randomInt(100, 600), { steps: 5 });
+            
+            const elapsed = Math.round((Date.now() - startTime) / 1000);
+            if (elapsed % 10 === 0) {
+                pushLog(`Node #${viewNum}: Progress ${elapsed}s / ${watchTime}s`, "info");
+            }
+            
+            await new Promise(r => setTimeout(r, 3000)); // Sync with frontend 3s update
         }
-        pushLog(`Node #${viewNum}: Session Success!`, "success");
-    } catch (e) { pushLog(`Node #${viewNum} Error: ${e.message}`, "error"); }
-    finally { if (browser) await browser.close(); }
+
+        pushLog(`Node #${viewNum}: View complete.`, "success");
+
+    } catch (e) {
+        pushLog(`Node #${viewNum} Error: ${e.message}`, "error");
+    } finally {
+        if (browser) await browser.close();
+    }
 }
 //==================================================
 // --- SERVER START ---
