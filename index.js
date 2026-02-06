@@ -1375,96 +1375,101 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ===================================================================
-
-
-// Global variable taaki frontend '/live-check' se image le sake
+// Variable to store the latest screenshot buffer for the live monitor
 let latestScreenshot = null;
-let isBusy = false;
 
-// --- 1. LIVE CHECK ENDPOINT (Frontend ki Window ke liye) ---
-app.get('/live-check', (req, res) => {
-    if (!latestScreenshot) {
-        return res.status(404).send("Browser initializing...");
-    }
-    res.set('Content-Type', 'image/png');
-    res.send(latestScreenshot);
-});
+// Helper function for delay
+const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
-// Helper function: Screenshot update karne ke liye
-async function updateLiveWindow(page, label) {
-    try {
-        latestScreenshot = await page.screenshot({ type: 'png' });
-        console.log(`[MONITOR] Step: ${label}`);
-    } catch (e) {
-        console.log("Screenshot error:", e.message);
-    }
-}
-
-// --- 2. AUTOMATION ENGINE ---
-async function runBoostEngine(channelUrl, totalViews, watchTime) {
-    if (isBusy) return;
-    isBusy = true;
-
-    let browser;
-    try {
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--mute-audio']
-        });
-
-        const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 720 });
-
-        for (let i = 1; i <= totalViews; i++) {
-            console.log(`Starting View #${i}`);
-
-            // STEP 1: Video/Channel par jana
-            await page.goto(channelUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-            await updateLiveWindow(page, `View #${i} - Page Loaded`);
-
-            // STEP 2: Scrolling (YouTube Popups hatane ke liye)
-            for (let s = 1; s <= 5; s++) {
-                await page.evaluate(() => window.scrollBy(0, 400));
-                await new Promise(r => setTimeout(r, 1000));
-                await updateLiveWindow(page, `View #${i} - Scrolling Step ${s}`);
-            }
-
-            // STEP 3: Unmute aur Play
-            try {
-                await page.keyboard.press('m'); // Unmute shortcut
-                await updateLiveWindow(page, `View #${i} - Unmuted & Playing`);
-            } catch (e) {}
-
-            // STEP 4: Watch Time (Interval Screenshots ke saath)
-            let elapsed = 0;
-            while (elapsed < watchTime) {
-                await new Promise(r => setTimeout(r, 10000)); // Har 10 sec mein update
-                elapsed += 10;
-                await updateLiveWindow(page, `Watching: ${elapsed}s / ${watchTime}s`);
-            }
-
-            console.log(`View #${i} Completed.`);
-        }
-
-    } catch (error) {
-        console.error("Engine Error:", error.message);
-    } finally {
-        if (browser) await browser.close();
-        isBusy = false;
-        latestScreenshot = null;
-    }
-}
-
-// --- 3. API ENDPOINT ---
-app.post('/api/real-view-boost', (req, res) => {
+// --- NEW TOOL: HIGH RETENTION YOUTUBE BOOSTER ---
+app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
 
     if (!channel_url) return res.status(400).json({ error: "URL missing" });
 
-    // Background mein process start karna
-    runBoostEngine(channel_url, parseInt(views_count), parseInt(watch_time));
+    // Response turant bhej rahe hain taaki frontend "Start" ho jaye
+    // Kaam background mein chalta rahega (Phone band hone par bhi)
+    res.json({ success: true, message: "Boost Engine Started in Background" });
 
-    res.status(200).json({ success: true, message: "Engine started successfully" });
+    console.log(`[SYSTEM] YouTube Boost Started for: ${channel_url}`);
+
+    // Background Process Starts
+    (async () => {
+        for (let i = 1; i <= views_count; i++) {
+            let browser;
+            try {
+                console.log(`[VIEW #${i}] Launching Node...`);
+                browser = await puppeteer.launch({
+                    headless: "new",
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio=false'] 
+                });
+
+                const page = await browser.newPage();
+                await page.setViewport({ width: 1280, height: 720 });
+
+                // 1. Google par jaana
+                await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+                
+                // 2. Video URL par jaana (Referer Google se aayega)
+                await page.goto(channel_url, { waitUntil: 'networkidle2' });
+                await delay(3000);
+
+                // Live Screenshot Update Loop (Background mein chalta rahega)
+                const screenInterval = setInterval(async () => {
+                    try {
+                        if (browser && page) {
+                            latestScreenshot = await page.screenshot({ type: 'jpeg', quality: 50 });
+                        }
+                    } catch (e) { clearInterval(screenInterval); }
+                }, 3000);
+
+                // 3. Scrolling (4-5 baar)
+                for (let s = 0; s < 5; s++) {
+                    await page.evaluate(() => window.scrollBy(0, 400));
+                    await delay(1000);
+                }
+
+                // 4. Try to Unmute & Play
+                await page.evaluate(() => {
+                    const video = document.querySelector('video');
+                    if (video) {
+                        video.muted = false;
+                        video.play();
+                    }
+                    const unmuteBtn = document.querySelector('.ytp-unmute-button');
+                    if (unmuteBtn) unmuteBtn.click();
+                });
+
+                console.log(`[VIEW #${i}] Watching for ${watch_time}s...`);
+                await delay(watch_time * 1000);
+
+                clearInterval(screenInterval);
+                console.log(`[VIEW #${i}] Completed.`);
+
+            } catch (err) {
+                console.log(`[ERROR] View #${i} failed: ${err.message}`);
+            } finally {
+                if (browser) await browser.close();
+                // 15 Second Gap before next view
+                if (i < views_count) {
+                    console.log("Cooling down 15s...");
+                    await delay(15000);
+                }
+            }
+        }
+        console.log("--- ALL VIEWS COMPLETED ---");
+    })();
+});
+
+// --- LIVE MONITOR ENDPOINT ---
+app.get('/live-check', (req, res) => {
+    if (latestScreenshot) {
+        res.contentType('image/jpeg');
+        res.send(latestScreenshot);
+    } else {
+        // Agar koi process nahi chal rahi toh placeholder image
+        res.redirect('https://via.placeholder.com/1280x720/0f172a/3b82f6?text=Engine+Idle+...Waiting+for+Task');
+    }
 });
 
 //==================================================
