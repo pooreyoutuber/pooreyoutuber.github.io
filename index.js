@@ -1376,11 +1376,11 @@ app.post('/ultimate', async (req, res) => {
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ===================================================================
 // ===================================================================
-// 9. REAL YOUTUBE VIEW BOOST ENGINE (UPDATED PLAYBACK LOGIC)
+// 10. REAL YOUTUBE BOOST ENGINE (SCROLL & MULTI-TAP FIX)
 // ===================================================================
 const path = require('path');
 
-// Global variable for frontend log sync
+// Logs sync karne ke liye
 let engineLogs = [];
 function logToEngine(message, type = 'info') {
     engineLogs.push({ message, type, time: new Date().toLocaleTimeString() });
@@ -1395,7 +1395,7 @@ app.get('/api/get-logs', (req, res) => {
 async function runRealYoutubeBoost(videoUrl, watchTime, viewNum) {
     let browser;
     try {
-        logToEngine(`Initializing Engine for View #${viewNum}...`, 'info');
+        logToEngine(`Initializing Engine: View #${viewNum}`, 'info');
         
         browser = await puppeteer.launch({
             headless: "new",
@@ -1412,95 +1412,86 @@ async function runRealYoutubeBoost(videoUrl, watchTime, viewNum) {
         await page.setUserAgent(getRandomUserAgent());
         await page.setViewport({ width: 1280, height: 720 });
 
-        // STEP 1: Organic Entry via Google
-        logToEngine(`Simulating Organic Entry via Google...`, 'node');
+        // STEP 1: GOOGLE SE ENTRY (Organic Traffic)
+        logToEngine(`Step 1: Visiting Google...`, 'node');
         await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
         await page.screenshot({ path: 'live_view.png' });
 
-        // STEP 2: Load Video
-        logToEngine(`Loading YouTube Video...`, 'info');
+        // STEP 2: OPEN VIDEO LINK
+        logToEngine(`Step 2: Loading Video Link...`, 'info');
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
         await page.screenshot({ path: 'live_view.png' });
 
-        // STEP 3: Hard Scrolling (To mimic human and trigger player load)
-        logToEngine(`Executing Hard Scrolling to bypass overlays...`, 'node');
+        // STEP 3: HARD SCROLLING (3-4 Times)
+        // Isse YouTube ko lagta hai real user content check kar raha hai
+        logToEngine(`Step 3: Human-like Scrolling (Bypassing Bots)...`, 'node');
         for (let i = 0; i < 4; i++) {
-            await page.evaluate(() => window.scrollBy(0, 600));
-            await new Promise(r => setTimeout(r, 1200));
-            await page.evaluate(() => window.scrollBy(0, -300));
+            await page.evaluate(() => window.scrollBy(0, 700)); // Neeche scroll
+            await new Promise(r => setTimeout(r, 1000));
+            await page.evaluate(() => window.scrollBy(0, -300)); // Thoda upar scroll
             await page.screenshot({ path: 'live_view.png' });
         }
 
-        // STEP 4: TRIGGER PLAYBACK (Multi-Tap Strategy)
-        // Many times overlays or "Sign In" popups block the center.
-        // We tap 3 times in different spots around the center-left to force play.
-        logToEngine(`Triggering Playback (Multi-Tap Sequence)...`, 'success');
+        // STEP 4: CENTER-LEFT MULTI-TAP (Video Play Logic)
+        // 'Sign In' popup ke side mein aur video ke center-left par 3 baar click
+        logToEngine(`Step 4: Triggering Play (Multi-Tap Sequence)...`, 'success');
         
-        const clickPoints = [
-            {x: 450, y: 350}, // Center-Left
-            {x: 400, y: 400}, // Slightly lower left
-            {x: 500, y: 300}  // Slightly higher
+        const taps = [
+            {x: 400, y: 350}, // Center-Left
+            {x: 420, y: 380}, // Slightly Offset
+            {x: 380, y: 320}  // Different Angle
         ];
 
-        for (const pt of clickPoints) {
-            await page.mouse.click(pt.x, pt.y);
-            await new Promise(r => setTimeout(r, 800)); // Small gap between taps
+        for (const pos of taps) {
+            await page.mouse.click(pos.x, pos.y);
+            logToEngine(`Tapping at [${pos.x}, ${pos.y}]`, 'info');
+            await new Promise(r => setTimeout(r, 1000));
             await page.screenshot({ path: 'live_view.png' });
         }
 
-        // Try Keyboard Shortcut 'k' (YouTube Play/Pause) as a fallback
+        // Keyboard Fallback (Press 'k' to Play)
         await page.keyboard.press('k');
-        
-        // STEP 5: Watch Loop
+
+        // STEP 5: WATCH TIME LOOP
         const startTime = Date.now();
         const durationMs = watchTime * 1000;
-        logToEngine(`Playback confirmed. Monitoring session for ${watchTime}s...`, 'success');
+        logToEngine(`Playback Active. Monitoring for ${watchTime}s...`, 'success');
 
         while (Date.now() - startTime < durationMs) {
+            // Update live screenshot for frontend
             await page.screenshot({ path: 'live_view.png' });
             
-            // Random movements to keep the session alive
-            await page.mouse.move(randomInt(200, 800), randomInt(200, 600), { steps: 5 });
+            // Random mouse movement to avoid detection
+            await page.mouse.move(randomInt(200, 700), randomInt(200, 500), { steps: 3 });
             
-            await new Promise(r => setTimeout(r, 3000));
+            await new Promise(r => setTimeout(r, 3000)); // 3 sec update
         }
 
-        logToEngine(`View #${viewNum} watch time completed!`, 'success');
+        logToEngine(`View #${viewNum} Completed!`, 'success');
 
     } catch (e) {
-        logToEngine(`Engine Error (View #${viewNum}): ${e.message}`, 'error');
+        logToEngine(`Error: ${e.message}`, 'error');
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// ENDPOINT: Start the Boost
+// MAIN POST API
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
+    
+    // Quick Response to User
+    res.json({ status: 'running', message: 'Cloud Engine Started' });
 
-    if (!channel_url) return res.status(400).json({ error: 'URL required' });
-
-    res.json({ status: 'success', message: 'Engine Booted' });
-
+    // Background Processing (One by One to avoid Crash)
     (async () => {
-        engineLogs = [];
-        for (let i = 1; i <= (views_count || 1); i++) {
-            await runRealYoutubeBoost(channel_url, watch_time || 60, i);
-            await new Promise(r => setTimeout(r, 5000)); // Cool down
+        engineLogs = []; 
+        for (let i = 1; i <= views_count; i++) {
+            await runRealYoutubeBoost(channel_url, watch_time, i);
+            await new Promise(r => setTimeout(r, 3000)); // Small break
         }
-        logToEngine("JOB FINISHED: All views processed.", "success");
+        logToEngine("ALL TASKS FINISHED. ENGINE IDLE.", "success");
     })();
-});
-
-// ENDPOINT: Live View for Image
-app.get('/live-check', (req, res) => {
-    const filePath = path.join(__dirname, 'live_view.png');
-    if (fs.existsSync(filePath)) {
-        res.set('Cache-Control', 'no-store');
-        res.sendFile(filePath);
-    } else {
-        res.status(404).send('Engine offline');
-    }
 });
 //==================================================
 // --- SERVER START ---
