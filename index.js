@@ -1375,9 +1375,32 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ===================================================================
+// ===================================================================
+// UPDATED TOOL 9: YOUTUBE CLOUD ENGINE (WITH REAL-TIME LOGS)
+// ===================================================================
 const path = require('path');
 
-// --- TOOL 9: YOUTUBE CLOUD ENGINE (ORGANIC + LIVE VIEW) ---
+// Global array logs store karne ke liye
+let activityLogs = [];
+
+// Helper function logs add karne ke liye
+function pushLog(message, type = 'info') {
+    const logEntry = {
+        message: message,
+        type: type, // 'info', 'success', 'error', 'node'
+        timestamp: new Date().toLocaleTimeString()
+    };
+    activityLogs.push(logEntry);
+    console.log(`[LOG] ${message}`);
+    
+    // Memory manage karne ke liye purane logs delete karna (Max 100 logs)
+    if (activityLogs.length > 100) activityLogs.shift();
+}
+
+// --- NEW ENDPOINT: Frontend yahan se logs uthayega ---
+app.get('/api/get-logs', (req, res) => {
+    res.json({ logs: activityLogs });
+});
 
 app.post('/api/real-view-boost', async (req, res) => {
     try {
@@ -1387,25 +1410,34 @@ app.post('/api/real-view-boost', async (req, res) => {
             return res.status(400).json({ success: false, message: "Video URL is required!" });
         }
 
+        // Logs reset kar rahe hain naye task ke liye
+        activityLogs = [];
+        pushLog("Cloud Engine Initialization...", "info");
+
         // Turant response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
-            message: "Cloud Engine Launched! Monitoring live logs..." 
+            message: "Cloud Engine Launched!" 
         });
 
-        // Background Worker (1 by 1 views taaki Render crash na ho)
+        // Background Worker
         (async () => {
-            console.log(`[YT-ENGINE] Starting ${views_count} views for: ${channel_url}`);
+            pushLog(`Starting ${views_count} sessions for the video.`, "success");
+            
             for (let i = 1; i <= views_count; i++) {
+                pushLog(`Deploying Node #${i}...`, "node");
                 await runYoutubeCloudTask(channel_url, watch_time, i);
-                // Har view ke baad 5 sec ka cooldown RAM clear karne ke liye
-                await new Promise(r => setTimeout(r, 5000));
+                
+                if (i < views_count) {
+                    pushLog(`Cooling down Node #${i}. Waiting 5s...`, "info");
+                    await new Promise(r => setTimeout(r, 5000));
+                }
             }
-            console.log("--- ALL VIEWS COMPLETED ---");
+            pushLog("--- ALL SESSIONS COMPLETED ---", "success");
         })();
 
     } catch (err) {
-        console.error("YT Engine Error:", err);
+        pushLog("Critical Engine Error: " + err.message, "error");
     }
 });
 
@@ -1418,68 +1450,61 @@ async function runYoutubeCloudTask(videoUrl, watchTime, viewNum) {
         });
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        // STEP 1: Google Search Simulation (Organic Traffic)
-        console.log(`[VIEW #${viewNum}] Opening Google Search...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
         
-        // Google par link search karna taaki referral source "Google" aaye
-        await page.goto(`https://www.google.com/search?q=${encodeURIComponent(videoUrl)}`, { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 2000));
+        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        await page.setUserAgent(ua);
 
-        // STEP 2: YouTube par jaana
-        console.log(`[VIEW #${viewNum}] Navigating to Video...`);
+        pushLog(`Node #${viewNum}: Opening Google Search for organic entry.`, "info");
+        await page.goto(`https://www.google.com/search?q=${encodeURIComponent(videoUrl)}`, { waitUntil: 'networkidle2' });
+        
+        pushLog(`Node #${viewNum}: Navigating to YouTube video...`, "info");
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // STEP 3: Human Behavior (Scrolling & Unmuting)
-        // Video play karne ke liye thoda scroll down/up
-        for(let s=0; s<4; s++) {
-            await page.evaluate(() => window.scrollBy(0, 300));
-            await new Promise(r => setTimeout(r, 1000));
-            await page.evaluate(() => window.scrollBy(0, -300));
-        }
-
-        // Unmute and Play (Keyboard Shortcut 'm' for mute/unmute and 'k' for play/pause)
+        // Unmute and Interaction
+        await new Promise(r => setTimeout(r, 2000));
         await page.keyboard.press('m'); 
-        console.log(`[VIEW #${viewNum}] Audio Unmuted. Watching for ${watchTime}s...`);
+        pushLog(`Node #${viewNum}: Video unmuted. Starting playback.`, "success");
 
-        // STEP 4: Live Screenshot Loop & Watch Time
         const startTime = Date.now();
         const totalDurationMs = watchTime * 1000;
 
+        pushLog(`Node #${viewNum}: Watching video for ${watchTime} seconds.`, "info");
+
         while (Date.now() - startTime < totalDurationMs) {
-            // Live Preview ke liye screenshot save karna
+            // Live Screenshot capture
             await page.screenshot({ path: 'live_view.png' });
             
-            // Random Mouse Movement taaki YouTube ko bot na lage
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 500), { steps: 5 });
+            // Random interactions to avoid bot detection
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 500), { steps: 3 });
             
-            // 3-4 second ka gap screenshots ke beech mein
-            await new Promise(r => setTimeout(r, 3500));
+            // Update logs in the middle if needed
+            const remaining = Math.round((totalDurationMs - (Date.now() - startTime)) / 1000);
+            if (remaining % 10 === 0 && remaining > 0) {
+                pushLog(`Node #${viewNum}: ${remaining}s watchtime remaining...`, "info");
+            }
+
+            await new Promise(r => setTimeout(r, 4000));
         }
 
-        console.log(`[DONE] View #${viewNum} watch time complete.`);
+        pushLog(`Node #${viewNum}: Session finished successfully.`, "success");
 
     } catch (e) {
-        console.log(`[ERROR] View #${viewNum}: ${e.message}`);
+        pushLog(`Node #${viewNum} Error: ${e.message}`, "error");
     } finally {
         if (browser) await browser.close();
     }
 }
 
-// --- LIVE SCREENSHOT ENDPOINT (Frontend isse call karega) ---
+// --- LIVE SCREENSHOT ENDPOINT (Wahi purana) ---
 app.get('/live-check', (req, res) => {
     const filePath = path.join(__dirname, 'live_view.png');
     if (fs.existsSync(filePath)) {
-        // Cache prevent karne ke liye headers
         res.set('Cache-Control', 'no-store');
         res.sendFile(filePath);
     } else {
-        res.status(404).send('Waiting for first screenshot...');
+        res.status(404).send('Waiting for screenshot...');
     }
 });
-
 //==================================================
 // --- SERVER START ---
 // ===================================================================
