@@ -1372,6 +1372,92 @@ app.post('/ultimate', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
+// ===================================================================
+
+async function runRealYoutubeTask(videoUrl, watchTime, viewNumber) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new", // "new" headless mode stable hota hai
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio']
+        });
+
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 720 });
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // Screenshot helper function
+        const takeSnap = async (stepName) => {
+            const base64 = await page.screenshot({ encoding: 'base64' });
+            console.log(`[SCREENSHOT - ${stepName}]: data:image/png;base64,${base64.substring(0, 100)}... (truncated)`);
+        };
+
+        console.log(`\n[VIEW #${viewNumber}] Starting for: ${videoUrl}`);
+
+        // STEP 1: Google se Redirect hoke jana (Organic vibe)
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+        await takeSnap("Page_Loaded");
+
+        // STEP 2: YouTube Consent Popup handle karna (Accept All)
+        try {
+            const acceptBtnSelector = 'button[aria-label="Accept all"], button[aria-label="Accept the use of cookies and other data for the purposes described"]';
+            const hasPopup = await page.$(acceptBtnSelector);
+            if (hasPopup) {
+                console.log("[POPUP] Consent popup detected. Clicking Accept All...");
+                await page.click(acceptBtnSelector);
+                await new Promise(r => setTimeout(r, 3000));
+                await takeSnap("Popup_Accepted");
+            }
+        } catch (e) { console.log("[POPUP] No consent popup found."); }
+
+        // STEP 3: Scrolling (4-6 baar) taaki video trigger ho
+        console.log("[BEHAVIOR] Simulating scrolls...");
+        for (let i = 0; i < randomInt(4, 6); i++) {
+            await page.evaluate(() => window.scrollBy(0, 400));
+            await new Promise(r => setTimeout(r, 1000));
+        }
+        await takeSnap("After_Scrolling");
+
+        // STEP 4: Unmute aur Play Check
+        try {
+            await page.keyboard.press('m'); // YouTube shortcut for Unmute
+            console.log("[ACTION] Pressed 'M' to unmute.");
+        } catch (e) { console.log("[ACTION] Could not unmute."); }
+
+        // STEP 5: Watch Time (Wait)
+        console.log(`[WATCHING] Waiting for ${watchTime} seconds...`);
+        await new Promise(r => setTimeout(r, watchTime * 1000));
+        await takeSnap("Watch_Completed");
+
+        console.log(`[DONE] View #${viewNumber} Finished! ✅`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber} Failed: ${error.message}`);
+    } finally {
+        if (browser) await browser.close();
+    }
+}
+
+// ENDPOINT
+app.post('/api/real-view-boost', async (req, res) => {
+    const { channel_url, views_count, watch_time } = req.body;
+
+    if (!channel_url) return res.status(400).json({ error: "URL is required" });
+
+    res.status(200).json({ success: true, message: "Task started in background. Check Logs for Screenshots." });
+
+    // Background Processing (1 by 1 browser)
+    (async () => {
+        for (let i = 1; i <= (views_count || 1); i++) {
+            await runRealYoutubeTask(channel_url, watch_time || 60, i);
+            // 15 seconds gap between views
+            await new Promise(r => setTimeout(r, 15000));
+        }
+    })();
+});
 
 //==================================================
 // --- SERVER START ---
