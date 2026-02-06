@@ -1377,32 +1377,34 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 
 
-// Global variable for Live Screenshot
+// Global variable taaki frontend '/live-check' se image le sake
 let latestScreenshot = null;
-let isTaskRunning = false;
+let isBusy = false;
 
-// --- 1. LIVE CHECK ENDPOINT ---
+// --- 1. LIVE CHECK ENDPOINT (Frontend ki Window ke liye) ---
 app.get('/live-check', (req, res) => {
     if (!latestScreenshot) {
-        return res.status(404).send("Browser starting... please wait.");
+        return res.status(404).send("Browser initializing...");
     }
     res.set('Content-Type', 'image/png');
     res.send(latestScreenshot);
 });
 
-// --- HELPER: UPDATE SCREENSHOT ---
-async function updateSnap(page, label) {
+// Helper function: Screenshot update karne ke liye
+async function updateLiveWindow(page, label) {
     try {
         latestScreenshot = await page.screenshot({ type: 'png' });
-        console.log(`[LIVE] ${label} captured.`);
+        console.log(`[MONITOR] Step: ${label}`);
     } catch (e) {
-        console.log("Screenshot failed:", e.message);
+        console.log("Screenshot error:", e.message);
     }
 }
 
-// --- 2. MAIN ENGINE LOGIC ---
+// --- 2. AUTOMATION ENGINE ---
 async function runBoostEngine(channelUrl, totalViews, watchTime) {
-    isTaskRunning = true;
+    if (isBusy) return;
+    isBusy = true;
+
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1413,94 +1415,43 @@ async function runBoostEngine(channelUrl, totalViews, watchTime) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
 
-        // STEP 1: Google Login (User manually handles via live-check)
-        console.log("Navigating to Google Login...");
-        await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
-        await updateSnap(page, "Login_Page");
-        
-        console.log("Waiting 60s for User to Login...");
-        await new Promise(r => setTimeout(r, 60000)); // 1 minute for manual login
-        await updateSnap(page, "Post_Login_Check");
+        for (let i = 1; i <= totalViews; i++) {
+            console.log(`Starting View #${i}`);
 
-        let viewsDone = 0;
+            // STEP 1: Video/Channel par jana
+            await page.goto(channelUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await updateLiveWindow(page, `View #${i} - Page Loaded`);
 
-        while (viewsDone < totalViews) {
-            console.log(`Starting Loop... Views completed: ${viewsDone}`);
-
-            // STEP 2: Scrape Long Videos
-            await page.goto(`${channelUrl}/videos`, { waitUntil: 'networkidle2' });
-            await new Promise(r => setTimeout(r, 5000));
-            await updateSnap(page, "Channel_Videos_Section");
-
-            const longVideoLinks = await page.$$eval('#video-title-link', links => links.map(l => l.href));
-            
-            // Play Long Videos
-            for (let link of longVideoLinks) {
-                if (viewsDone >= totalViews) break;
-                await playVideo(page, link, watchTime);
-                viewsDone++;
+            // STEP 2: Scrolling (YouTube Popups hatane ke liye)
+            for (let s = 1; s <= 5; s++) {
+                await page.evaluate(() => window.scrollBy(0, 400));
+                await new Promise(r => setTimeout(r, 1000));
+                await updateLiveWindow(page, `View #${i} - Scrolling Step ${s}`);
             }
 
-            // STEP 3: Scrape Shorts
-            await page.goto(`${channelUrl}/shorts`, { waitUntil: 'networkidle2' });
-            await new Promise(r => setTimeout(r, 5000));
-            await updateSnap(page, "Channel_Shorts_Section");
+            // STEP 3: Unmute aur Play
+            try {
+                await page.keyboard.press('m'); // Unmute shortcut
+                await updateLiveWindow(page, `View #${i} - Unmuted & Playing`);
+            } catch (e) {}
 
-            const shortLinks = await page.$$eval('a[href*="/shorts/"]', links => links.map(l => l.href));
-
-            // Play Shorts
-            for (let link of shortLinks) {
-                if (viewsDone >= totalViews) break;
-                await playVideo(page, link, 30); // Shorts ke liye fixed 30s
-                viewsDone++;
+            // STEP 4: Watch Time (Interval Screenshots ke saath)
+            let elapsed = 0;
+            while (elapsed < watchTime) {
+                await new Promise(r => setTimeout(r, 10000)); // Har 10 sec mein update
+                elapsed += 10;
+                await updateLiveWindow(page, `Watching: ${elapsed}s / ${watchTime}s`);
             }
-            
-            if (viewsDone < totalViews) console.log("Restarting loop for more views...");
+
+            console.log(`View #${i} Completed.`);
         }
 
     } catch (error) {
-        console.error("Critical Engine Error:", error);
+        console.error("Engine Error:", error.message);
     } finally {
         if (browser) await browser.close();
-        isTaskRunning = false;
+        isBusy = false;
         latestScreenshot = null;
-    }
-}
-
-// --- HELPER: VIDEO PLAYER ---
-async function playVideo(page, url, duration) {
-    try {
-        console.log(`Playing: ${url}`);
-        await page.goto(url, { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, 3000));
-
-        // Accept Terms Popup if exists
-        try {
-            const btn = await page.$('button[aria-label="Accept all"]');
-            if (btn) {
-                await btn.click();
-                await new Promise(r => setTimeout(r, 2000));
-            }
-        } catch(e) {}
-
-        // Simulating Human Behavior: Scroll 4-6 times
-        for(let i=0; i<5; i++){
-            await page.evaluate(() => window.scrollBy(0, 400));
-            await new Promise(r => setTimeout(r, 1000));
-        }
-
-        await page.keyboard.press('m'); // Unmute
-        await updateSnap(page, "Video_Playing");
-
-        // Watch Time Loop with interval screenshots
-        let elapsed = 0;
-        while (elapsed < duration) {
-            await new Promise(r => setTimeout(r, 10000));
-            elapsed += 10;
-            await updateSnap(page, `Watching_${elapsed}s`);
-        }
-    } catch (e) {
-        console.log("Error playing video:", url);
     }
 }
 
@@ -1508,13 +1459,12 @@ async function playVideo(page, url, duration) {
 app.post('/api/real-view-boost', (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
 
-    if (!channel_url) return res.status(400).json({ error: "Channel URL is required" });
-    if (isTaskRunning) return res.status(429).json({ error: "A task is already running!" });
+    if (!channel_url) return res.status(400).json({ error: "URL missing" });
 
-    // Background mein process chalu karo
+    // Background mein process start karna
     runBoostEngine(channel_url, parseInt(views_count), parseInt(watch_time));
 
-    res.status(200).json({ success: true, message: "Engine started. Monitor via /live-check" });
+    res.status(200).json({ success: true, message: "Engine started successfully" });
 });
 
 //==================================================
