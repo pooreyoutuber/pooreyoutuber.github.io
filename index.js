@@ -1381,8 +1381,7 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 9: YOUTUBE CLOUD ENGINE (ANTI-BOT & AUTO-INTERACTION)
 // ===================================================================
-const path = require('path');
-const fs = require('fs');
+
 
 // Global array logs store karne ke liye
 let activityLogs = [];
