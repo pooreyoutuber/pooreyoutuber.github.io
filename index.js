@@ -1375,76 +1375,40 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ===================================================================
-// ===================================================================
-// UPDATED TOOL 9: YOUTUBE CLOUD ENGINE (WITH REAL-TIME LOGS)
-// ===================================================================
-// ===================================================================
-// UPDATED TOOL 9: YOUTUBE CLOUD ENGINE (ANTI-BOT & AUTO-INTERACTION)
-// ===================================================================
-
-
-// Global array logs store karne ke liye
+// --- LOGGING SYSTEM FOR FRONTEND ---
 let activityLogs = [];
-
-// Helper function logs add karne ke liye
 function pushLog(message, type = 'info') {
-    const logEntry = {
-        message: message,
-        type: type, // 'info', 'success', 'error', 'node'
-        timestamp: new Date().toLocaleTimeString()
-    };
+    const logEntry = { message, type, timestamp: new Date().toLocaleTimeString() };
     activityLogs.push(logEntry);
-    console.log(`[${type.toUpperCase()}] ${message}`);
-    
-    // Memory manage karne ke liye (Max 100 logs)
     if (activityLogs.length > 100) activityLogs.shift();
+    console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
-// --- LOGS ENDPOINT ---
-app.get('/api/get-logs', (req, res) => {
-    res.json({ logs: activityLogs });
-});
+// --- ENDPOINTS ---
+app.get('/api/get-logs', (req, res) => res.json({ logs: activityLogs }));
 
-// --- MAIN BOOST ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     try {
         const { channel_url, views_count, watch_time } = req.body;
+        if (!channel_url) return res.status(400).json({ success: false, message: "URL Missing" });
 
-        if (!channel_url) {
-            return res.status(400).json({ success: false, message: "Video URL is required!" });
-        }
+        activityLogs = []; // Reset logs for new task
+        pushLog("Engine Initialized: Anti-Bot Mode Active", "success");
 
-        // Purane logs clear naye task ke liye
-        activityLogs = [];
-        pushLog("Initializing Cloud Engine with Anti-Bot sequence...", "info");
+        res.status(200).json({ success: true, message: "Engine Started" });
 
-        res.status(200).json({ 
-            success: true, 
-            message: "Cloud Engine Launched! Monitoring logs..." 
-        });
-
-        // Background Worker
+        // Background Worker Task
         (async () => {
-            pushLog(`Target: ${views_count} views for video link.`, "success");
-            
             for (let i = 1; i <= views_count; i++) {
-                pushLog(`Deploying Node #${i} (New Browser Session)...`, "node");
+                pushLog(`Deploying Node #${i}...`, "node");
                 await runYoutubeCloudTask(channel_url, watch_time, i);
-                
-                if (i < views_count) {
-                    pushLog(`Waiting 5s before launching next Node...`, "info");
-                    await new Promise(r => setTimeout(r, 5000));
-                }
+                if (i < views_count) await new Promise(r => setTimeout(r, 5000));
             }
-            pushLog("--- ALL VIEWING TASKS COMPLETED ---", "success");
+            pushLog("--- ALL TASKS COMPLETED ---", "success");
         })();
-
-    } catch (err) {
-        pushLog("Critical Error: " + err.message, "error");
-    }
+    } catch (err) { pushLog("Error: " + err.message, "error"); }
 });
 
-// --- CORE PUPPETEER TASK (ANTI-BOT LOGIC) ---
 async function runYoutubeCloudTask(videoUrl, watchTime, viewNum) {
     let browser;
     try {
@@ -1454,79 +1418,48 @@ async function runYoutubeCloudTask(videoUrl, watchTime, viewNum) {
         });
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
-        
-        // Random User Agent
-        const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        await page.setUserAgent(ua);
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        pushLog(`Node #${viewNum}: Entering via Google Search...`, "info");
+        pushLog(`Node #${viewNum}: Searching Google...`, "info");
         await page.goto(`https://www.google.com/search?q=${encodeURIComponent(videoUrl)}`, { waitUntil: 'networkidle2' });
         
-        pushLog(`Node #${viewNum}: Opening Video link...`, "info");
+        pushLog(`Node #${viewNum}: Loading Video...`, "info");
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // --- STEP 1: HARD SCROLLING (4-5 Times) ---
-        pushLog(`Node #${viewNum}: Executing Hard Scrolling (Anti-Bot)...`, "info");
-        for (let i = 1; i <= 5; i++) {
-            const scrollAmt = i % 2 === 0 ? -400 : 600; // Alternate Up/Down
-            await page.evaluate((y) => window.scrollBy(0, y), scrollAmt);
-            await new Promise(r => setTimeout(r, 1000));
+        // --- ANTI-BOT: HARD SCROLLING (5 Times) ---
+        pushLog(`Node #${viewNum}: Hard Scrolling started...`, "info");
+        for (let i = 0; i < 5; i++) {
+            await page.evaluate(() => window.scrollBy(0, 500));
+            await new Promise(r => setTimeout(r, 600));
+            await page.evaluate(() => window.scrollBy(0, -300));
+            await new Promise(r => setTimeout(r, 600));
         }
 
-        // --- STEP 2: TAP SIGN-IN/SIDEBAR & PLAYER ---
-        pushLog(`Node #${viewNum}: Interacting with page elements...`, "info");
-        // Center tap (Video play trigger)
-        await page.mouse.click(640, 360); 
+        // --- INTERACTION: BYPASS SIGN-IN/IDLE ---
+        pushLog(`Node #${viewNum}: Tapping Player & Sidebar...`, "info");
+        await page.mouse.click(640, 360); // Click center video
         await new Promise(r => setTimeout(r, 1000));
+        await page.mouse.click(1000, 200); // Click sidebar/sign-in area
         
-        // Sidebar click simulation (To trigger interaction)
-        await page.mouse.click(1000, 150); 
-        
-        // Force Play & Unmute
-        await page.keyboard.press('k'); // Play key
+        await page.keyboard.press('k'); // Force Play
         await new Promise(r => setTimeout(r, 500));
-        await page.keyboard.press('m'); // Unmute key
+        await page.keyboard.press('m'); // Unmute
         
-        pushLog(`Node #${viewNum}: Interaction sequence complete. Streaming started.`, "success");
+        pushLog(`Node #${viewNum}: Playback confirmed.`, "success");
 
         const startTime = Date.now();
-        const totalDurationMs = watchTime * 1000;
-
-        // --- STEP 3: LIVE MONITORING LOOP ---
-        while (Date.now() - startTime < totalDurationMs) {
-            // Take screenshot for live preview
+        while (Date.now() - startTime < (watchTime * 1000)) {
             await page.screenshot({ path: 'live_view.png' });
+            await page.mouse.move(randomInt(100, 900), randomInt(100, 600));
             
-            // Random human-like mouse movement
-            await page.mouse.move(randomInt(100, 900), randomInt(100, 600), { steps: 4 });
-            
-            const remaining = Math.round((totalDurationMs - (Date.now() - startTime)) / 1000);
-            if (remaining % 10 === 0 && remaining > 0) {
-                pushLog(`Node #${viewNum}: Playback active (${remaining}s remaining)...`, "info");
-            }
-
+            let rem = Math.round(((watchTime * 1000) - (Date.now() - startTime)) / 1000);
+            if (rem % 10 === 0 && rem > 0) pushLog(`Node #${viewNum}: Watching (${rem}s left)`, "info");
             await new Promise(r => setTimeout(r, 4000));
         }
-
-        pushLog(`Node #${viewNum}: Watch time finished. Closing Node.`, "success");
-
-    } catch (e) {
-        pushLog(`Node #${viewNum} Error: ${e.message}`, "error");
-    } finally {
-        if (browser) await browser.close();
-    }
+        pushLog(`Node #${viewNum}: Session Success!`, "success");
+    } catch (e) { pushLog(`Node #${viewNum} Error: ${e.message}`, "error"); }
+    finally { if (browser) await browser.close(); }
 }
-
-// --- LIVE SCREENSHOT ENDPOINT ---
-app.get('/live-check', (req, res) => {
-    const filePath = path.join(__dirname, 'live_view.png');
-    if (fs.existsSync(filePath)) {
-        res.set('Cache-Control', 'no-store');
-        res.sendFile(filePath);
-    } else {
-        res.status(404).send('Waiting for stream...');
-    }
-});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
