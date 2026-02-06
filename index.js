@@ -1378,7 +1378,11 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // UPDATED TOOL 9: YOUTUBE CLOUD ENGINE (WITH REAL-TIME LOGS)
 // ===================================================================
+// ===================================================================
+// UPDATED TOOL 9: YOUTUBE CLOUD ENGINE (ANTI-BOT & AUTO-INTERACTION)
+// ===================================================================
 const path = require('path');
+const fs = require('fs');
 
 // Global array logs store karne ke liye
 let activityLogs = [];
@@ -1391,17 +1395,18 @@ function pushLog(message, type = 'info') {
         timestamp: new Date().toLocaleTimeString()
     };
     activityLogs.push(logEntry);
-    console.log(`[LOG] ${message}`);
+    console.log(`[${type.toUpperCase()}] ${message}`);
     
-    // Memory manage karne ke liye purane logs delete karna (Max 100 logs)
+    // Memory manage karne ke liye (Max 100 logs)
     if (activityLogs.length > 100) activityLogs.shift();
 }
 
-// --- NEW ENDPOINT: Frontend yahan se logs uthayega ---
+// --- LOGS ENDPOINT ---
 app.get('/api/get-logs', (req, res) => {
     res.json({ logs: activityLogs });
 });
 
+// --- MAIN BOOST ENDPOINT ---
 app.post('/api/real-view-boost', async (req, res) => {
     try {
         const { channel_url, views_count, watch_time } = req.body;
@@ -1410,37 +1415,37 @@ app.post('/api/real-view-boost', async (req, res) => {
             return res.status(400).json({ success: false, message: "Video URL is required!" });
         }
 
-        // Logs reset kar rahe hain naye task ke liye
+        // Purane logs clear naye task ke liye
         activityLogs = [];
-        pushLog("Cloud Engine Initialization...", "info");
+        pushLog("Initializing Cloud Engine with Anti-Bot sequence...", "info");
 
-        // Turant response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
-            message: "Cloud Engine Launched!" 
+            message: "Cloud Engine Launched! Monitoring logs..." 
         });
 
         // Background Worker
         (async () => {
-            pushLog(`Starting ${views_count} sessions for the video.`, "success");
+            pushLog(`Target: ${views_count} views for video link.`, "success");
             
             for (let i = 1; i <= views_count; i++) {
-                pushLog(`Deploying Node #${i}...`, "node");
+                pushLog(`Deploying Node #${i} (New Browser Session)...`, "node");
                 await runYoutubeCloudTask(channel_url, watch_time, i);
                 
                 if (i < views_count) {
-                    pushLog(`Cooling down Node #${i}. Waiting 5s...`, "info");
+                    pushLog(`Waiting 5s before launching next Node...`, "info");
                     await new Promise(r => setTimeout(r, 5000));
                 }
             }
-            pushLog("--- ALL SESSIONS COMPLETED ---", "success");
+            pushLog("--- ALL VIEWING TASKS COMPLETED ---", "success");
         })();
 
     } catch (err) {
-        pushLog("Critical Engine Error: " + err.message, "error");
+        pushLog("Critical Error: " + err.message, "error");
     }
 });
 
+// --- CORE PUPPETEER TASK (ANTI-BOT LOGIC) ---
 async function runYoutubeCloudTask(videoUrl, watchTime, viewNum) {
     let browser;
     try {
@@ -1451,42 +1456,60 @@ async function runYoutubeCloudTask(videoUrl, watchTime, viewNum) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
         
+        // Random User Agent
         const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         await page.setUserAgent(ua);
 
-        pushLog(`Node #${viewNum}: Opening Google Search for organic entry.`, "info");
+        pushLog(`Node #${viewNum}: Entering via Google Search...`, "info");
         await page.goto(`https://www.google.com/search?q=${encodeURIComponent(videoUrl)}`, { waitUntil: 'networkidle2' });
         
-        pushLog(`Node #${viewNum}: Navigating to YouTube video...`, "info");
+        pushLog(`Node #${viewNum}: Opening Video link...`, "info");
         await page.goto(videoUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // Unmute and Interaction
-        await new Promise(r => setTimeout(r, 2000));
-        await page.keyboard.press('m'); 
-        pushLog(`Node #${viewNum}: Video unmuted. Starting playback.`, "success");
+        // --- STEP 1: HARD SCROLLING (4-5 Times) ---
+        pushLog(`Node #${viewNum}: Executing Hard Scrolling (Anti-Bot)...`, "info");
+        for (let i = 1; i <= 5; i++) {
+            const scrollAmt = i % 2 === 0 ? -400 : 600; // Alternate Up/Down
+            await page.evaluate((y) => window.scrollBy(0, y), scrollAmt);
+            await new Promise(r => setTimeout(r, 1000));
+        }
+
+        // --- STEP 2: TAP SIGN-IN/SIDEBAR & PLAYER ---
+        pushLog(`Node #${viewNum}: Interacting with page elements...`, "info");
+        // Center tap (Video play trigger)
+        await page.mouse.click(640, 360); 
+        await new Promise(r => setTimeout(r, 1000));
+        
+        // Sidebar click simulation (To trigger interaction)
+        await page.mouse.click(1000, 150); 
+        
+        // Force Play & Unmute
+        await page.keyboard.press('k'); // Play key
+        await new Promise(r => setTimeout(r, 500));
+        await page.keyboard.press('m'); // Unmute key
+        
+        pushLog(`Node #${viewNum}: Interaction sequence complete. Streaming started.`, "success");
 
         const startTime = Date.now();
         const totalDurationMs = watchTime * 1000;
 
-        pushLog(`Node #${viewNum}: Watching video for ${watchTime} seconds.`, "info");
-
+        // --- STEP 3: LIVE MONITORING LOOP ---
         while (Date.now() - startTime < totalDurationMs) {
-            // Live Screenshot capture
+            // Take screenshot for live preview
             await page.screenshot({ path: 'live_view.png' });
             
-            // Random interactions to avoid bot detection
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 500), { steps: 3 });
+            // Random human-like mouse movement
+            await page.mouse.move(randomInt(100, 900), randomInt(100, 600), { steps: 4 });
             
-            // Update logs in the middle if needed
             const remaining = Math.round((totalDurationMs - (Date.now() - startTime)) / 1000);
             if (remaining % 10 === 0 && remaining > 0) {
-                pushLog(`Node #${viewNum}: ${remaining}s watchtime remaining...`, "info");
+                pushLog(`Node #${viewNum}: Playback active (${remaining}s remaining)...`, "info");
             }
 
             await new Promise(r => setTimeout(r, 4000));
         }
 
-        pushLog(`Node #${viewNum}: Session finished successfully.`, "success");
+        pushLog(`Node #${viewNum}: Watch time finished. Closing Node.`, "success");
 
     } catch (e) {
         pushLog(`Node #${viewNum} Error: ${e.message}`, "error");
@@ -1495,14 +1518,14 @@ async function runYoutubeCloudTask(videoUrl, watchTime, viewNum) {
     }
 }
 
-// --- LIVE SCREENSHOT ENDPOINT (Wahi purana) ---
+// --- LIVE SCREENSHOT ENDPOINT ---
 app.get('/live-check', (req, res) => {
     const filePath = path.join(__dirname, 'live_view.png');
     if (fs.existsSync(filePath)) {
         res.set('Cache-Control', 'no-store');
         res.sendFile(filePath);
     } else {
-        res.status(404).send('Waiting for screenshot...');
+        res.status(404).send('Waiting for stream...');
     }
 });
 //==================================================
