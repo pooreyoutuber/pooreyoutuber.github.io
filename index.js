@@ -1375,99 +1375,113 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // =========================
-// --- Global Variable for Screenshot & Logs ---
-let lastScreenshot = null;
-let activityLogs = [];
+// ===================================================================
+// UPDATED TOOL 8: GITHUB MULTI-BROWSER AUTOMATION
+// ===================================================================
 
-// Helper: Add log to memory
-function pushLog(message, type = 'info') {
-    activityLogs.push({ message, type, time: new Date().toLocaleTimeString() });
-    if (activityLogs.length > 50) activityLogs.shift(); // Limit logs
-    console.log(`[${type.toUpperCase()}] ${message}`);
-}
+let latestScreenshot = null; // Frontend ke liye live view variable
 
-// --- TOOL 9: Multi-Browser Bridge Booster ---
-async function runBridgeTask(videoUrl, watchTime, viewId) {
-    let browser;
-    try {
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+// Live Monitoring Endpoint (Aapka frontend ise har 3 sec me call karega)
+app.get('/live-check', (req, res) => {
+    if (!latestScreenshot) return res.send("Engine starting... Please wait.");
+    res.contentType('image/png').send(latestScreenshot);
+});
 
-        const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 720 });
+async function runMultiBrowserEngine(videoUrl, watchTime, totalViews) {
+    // RAM management ke liye ek-ek karke browser chalega
+    for (let i = 0; i < totalViews; i++) {
+        let browser;
+        try {
+            browser = await puppeteer.launch({
+                headless: "new",
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-blink-features=AutomationControlled'
+                ]
+            });
 
-        // Step 1: Google.com (Referrer set karne ke liye)
-        pushLog(`[View ${viewId}] Starting via Google...`);
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+            const page = await browser.newPage();
+            await page.setViewport({ width: 1280, height: 720 });
 
-        // Step 2: Bridge Site par jaana
-        pushLog(`[View ${viewId}] Opening Bridge Tool...`);
-        await page.goto('https://macora225.github.io/multi-browser.html', { waitUntil: 'networkidle2' });
+            // Helper function: Screenshot lekar frontend update karne ke liye
+            const updateLiveView = async (msg) => {
+                latestScreenshot = await page.screenshot();
+                console.log(`[LIVE-STATUS] ${msg}`);
+            };
 
-        // Step 3: Video URL Paste aur Launch (2 baar)
-        const inputSelector = 'input[type="text"], #video-url'; // Selector check kar lena site par
-        const buttonSelector = 'button'; // Launch button ka selector
+            // STEP 1: Pehle Google par jana (Referral ke liye)
+            await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+            await updateLiveView("Google Loaded");
 
-        for (let i = 1; i <= 2; i++) {
+            // STEP 2: Aapki Target Site par jana
+            const targetSite = "https://macora225.github.io/multi-browser.html";
+            await page.goto(targetSite, { waitUntil: 'networkidle2' });
+            await updateLiveView("Multi-Browser Tool Loaded");
+
+            // STEP 3: Multi-Browser Tool mein link daalna
+            // Selector: input[type="text"] (Aapki site ke hisab se)
+            const inputSelector = 'input[type="text"]';
             await page.waitForSelector(inputSelector);
-            await page.type(inputSelector, videoUrl, { delay: 50 });
+
+            // -- PEHLI VIDEO START --
+            await page.type(inputSelector, videoUrl);
             await page.keyboard.press('Enter');
-            pushLog(`[View ${viewId}] Instance ${i} launched.`, 'success');
-            await new Promise(r => setTimeout(r, 2000));
+            await updateLiveView("First Video Started");
+            
+            // 3 Second ka wait jaisa aapne pucha
+            await new Promise(r => setTimeout(r, 3000));
+
+            // -- DUSRI VIDEO START (Dobara Paste) --
+            // Purana text clear karke dubara paste karna
+            await page.click(inputSelector, { clickCount: 3 });
+            await page.keyboard.press('Backspace');
+            await page.type(inputSelector, videoUrl);
+            await page.keyboard.press('Enter');
+            await updateLiveView("Second Video Started (Dual Mode)");
+
+            // STEP 4: User ke diye huye WatchTime tak rukna
+            let elapsed = 0;
+            const watchLimit = parseInt(watchTime);
+            
+            while (elapsed < watchLimit) {
+                await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me check
+                elapsed += 3;
+                
+                // Screenshot for live monitoring
+                latestScreenshot = await page.screenshot();
+                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+            }
+
+            console.log(`[SUCCESS] View Session ${i+1} Finished.`);
+
+        } catch (error) {
+            console.error(`[ENGINE ERROR] Session ${i+1}: ${error.message}`);
+        } finally {
+            if (browser) {
+                await browser.close();
+                console.log("[CLEANUP] Browser closed. Next session in 5s...");
+            }
+            await new Promise(r => setTimeout(r, 5000)); // Render stability break
         }
-
-        // Step 4: WatchTime Loop (Screenshot taking)
-        const startTime = Date.now();
-        const duration = watchTime * 1000;
-
-        while (Date.now() - startTime < duration) {
-            // Live Screenshot capture (Frontend ke liye)
-            lastScreenshot = await page.screenshot({ encoding: 'base64' });
-            await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me update
-        }
-
-        pushLog(`[View ${viewId}] WatchTime Complete.`, 'success');
-
-    } catch (err) {
-        pushLog(`Error in View ${viewId}: ${err.message}`, 'error');
-    } finally {
-        if (browser) await browser.close();
     }
 }
 
-// --- Endpoints for Frontend ---
-
-// 1. Start Boost
+// Frontend API Endpoint
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-    res.status(200).json({ status: "OK", message: "Cloud Engine Launched!" });
 
-    // Background processing (1 by 1 to prevent Render crash)
-    (async () => {
-        for (let i = 1; i <= views_count; i++) {
-            await runBridgeTask(channel_url, watch_time, i);
-            await new Promise(r => setTimeout(r, 5000)); // Cool down
-        }
-    })();
-});
+    if (!channel_url) return res.status(400).json({ error: "Video/Channel Link missing" });
 
-// 2. Get Live Screenshot
-app.get('/live-check', (req, res) => {
-    if (lastScreenshot) {
-        const img = Buffer.from(lastScreenshot, 'base64');
-        res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': img.length });
-        res.end(img);
-    } else {
-        res.status(404).send("No live view available");
-    }
-});
+    res.status(200).json({ 
+        success: true, 
+        message: "Multi-Browser Engine Launched Successfully." 
+    });
 
-// 3. Get Logs
-app.get('/api/get-logs', (req, res) => {
-    res.json({ logs: activityLogs });
+    // Background mein process start karna
+    runMultiBrowserEngine(channel_url, watch_time, views_count);
 });
+        
 
 //==================================================
 // --- SERVER START ---
