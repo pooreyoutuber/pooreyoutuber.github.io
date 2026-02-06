@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,11 +20,10 @@
 <body class="text-slate-200 p-4 md:p-8">
 
     <div class="max-w-4xl mx-auto space-y-6">
-        
         <div class="live-window glass">
             <div class="flex justify-between items-center p-3 border-b border-slate-700 bg-slate-900/50">
                 <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    <span id="statusDot" class="w-2 h-2 bg-slate-500 rounded-full"></span>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live Engine Monitor</span>
                 </div>
                 <div class="text-[10px] text-blue-400 font-mono" id="lastUpdated">System: Idle</div>
@@ -77,6 +77,11 @@
         const terminal = document.getElementById('terminalBody');
         const liveImg = document.getElementById('livePreview');
         const lastUpdatedText = document.getElementById('lastUpdated');
+        const statusDot = document.getElementById('statusDot');
+        const API_BASE = "https://pooreyoutuber-github-ioproxy.onrender.com";
+        
+        let lastLogIndex = 0;
+        let isRunning = false;
 
         function addLog(msg, type = 'info') {
             const div = document.createElement('div');
@@ -87,11 +92,34 @@
             terminal.scrollTop = terminal.scrollHeight;
         }
 
+        // --- Screenshot Update Function ---
         function updateLiveView() {
+            if(!isRunning) return;
             const timestamp = new Date().getTime();
-            // Backend endpoint to get screenshot
-            liveImg.src = `https://pooreyoutuber-github-ioproxy.onrender.com/live-check?t=${timestamp}`;
+            // Cache bust karne ke liye timestamp zaroori hai
+            liveImg.src = `${API_BASE}/live-check?t=${timestamp}`;
             lastUpdatedText.innerText = "Live: " + new Date().toLocaleTimeString();
+            statusDot.className = "w-2 h-2 bg-red-500 animate-pulse rounded-full";
+        }
+
+        // --- Real Log Polling (Backend se asli logs mangwana) ---
+        async function pollLogs() {
+            if(!isRunning) return;
+            try {
+                // Maan lo backend par /api/logs endpoint hai jo activity return karta hai
+                const res = await fetch(`${API_BASE}/api/get-logs`); 
+                const data = await res.json();
+                
+                if(data.logs && data.logs.length > lastLogIndex) {
+                    const newLogs = data.logs.slice(lastLogIndex);
+                    newLogs.forEach(log => {
+                        addLog(log.message, log.type);
+                    });
+                    lastLogIndex = data.logs.length;
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
+            }
         }
 
         document.getElementById('orderForm').addEventListener('submit', async (e) => {
@@ -104,32 +132,33 @@
             };
 
             btn.disabled = true;
-            btn.innerHTML = "Processing...";
-            addLog("Requesting Cloud Browser Instance...", "info");
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-2'></i>BOOTING CLOUD ENGINE...";
+            terminal.innerHTML = ""; // Clear purane logs
+            addLog("Establishing Secure Tunnel...", "info");
 
             try {
-                const res = await fetch('https://pooreyoutuber-github-ioproxy.onrender.com/api/real-view-boost', {
+                const res = await fetch(`${API_BASE}/api/real-view-boost`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
                 if (res.ok) {
-                    addLog("Backend Linked! Starting Sequence.", "success");
-                    // Refresh Live Monitor every 5 seconds
-                    setInterval(updateLiveView, 5000);
+                    isRunning = true;
+                    addLog("Tunnel Established. Engine Online.", "success");
                     
-                    // Local Simulation for better UI feel
-                    for(let i=1; i<=data.views_count; i++) {
-                        addLog(`Deploying Node #${i}...`, "node");
-                        await new Promise(r => setTimeout(r, 3000));
-                        addLog(`Node #${i}: Watching video for ${data.watch_time}s`, "info");
-                        await new Promise(r => setTimeout(r, 10000)); // Simulating some work
-                    }
+                    // Har 3 second me screenshot update karo
+                    setInterval(updateLiveView, 3000);
+                    
+                    // Har 2 second me backend se asli logs mangwao
+                    setInterval(pollLogs, 2000);
+                    
+                    btn.innerHTML = "ENGINE RUNNING ⚡";
                 }
             } catch (err) {
-                addLog("Error: " + err.message, "error");
+                addLog("Deployment Failed: " + err.message, "error");
                 btn.disabled = false;
+                btn.innerHTML = "Launch Boost Engine 🚀";
             }
         });
     </script>
