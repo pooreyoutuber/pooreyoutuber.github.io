@@ -1375,23 +1375,24 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ======================
- // Global variable screenshot ke liye (Tool 9)
+// Global variable for Live Feed
 let latestScreenshot = null;
 
-// Frontend live view ke liye endpoint - ISSE DELETE MAT KARNA
+// 1. Live Check Endpoint (Screenshots yahan se dikhenge)
 app.get('/live-check', (req, res) => {
     if (latestScreenshot) {
         res.contentType('image/png').send(latestScreenshot);
     } else {
-        res.status(404).send("Engine Starting or Screenshot not ready...");
+        res.status(404).send("Initializing Video Stream...");
     }
 });
 
-async function runMultiBrowserEngine(videoUrl, watchTime, totalViews) {
+// 2. Main Engine (New Plan: CroxyProxy)
+async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
     for (let i = 0; i < totalViews; i++) {
         let browser;
         try {
-            console.log(`[START] Session ${i+1} via Proxyium`);
+            console.log(`[SESSION ${i+1}] Starting...`);
             browser = await puppeteer.launch({
                 headless: "new",
                 args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
@@ -1400,76 +1401,66 @@ async function runMultiBrowserEngine(videoUrl, watchTime, totalViews) {
             const page = await browser.newPage();
             await page.setViewport({ width: 1280, height: 720 });
 
-            // 1. Proxyium par jana
-            await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
-            latestScreenshot = await page.screenshot(); // Update screenshot
+            // STEP 1: CroxyProxy open karna
+            await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
+            latestScreenshot = await page.screenshot(); 
 
-            // 2. Multi-browser URL submit karna Proxyium mein
-            const proxyInput = 'input[name="url"]';
-            await page.waitForSelector(proxyInput);
-            await page.type(proxyInput, 'https://macora225.github.io/multi-browser.html');
-            await page.keyboard.press('Enter');
+            // STEP 2: URL daalna aur GO click karna
+            const inputSelector = '#url'; // CroxyProxy ka input ID
+            await page.waitForSelector(inputSelector);
+            await page.type(inputSelector, videoUrl);
             
-            console.log("Loading tool via proxy...");
-            await new Promise(r => setTimeout(r, 8000)); // Buffer for proxy loading
-            latestScreenshot = await page.screenshot(); // Update screenshot
+            // Go button par click
+            await page.click('#requestSubmit'); 
+            console.log("URL Submitted on CroxyProxy");
 
-            // 3. Video Link Paste karna (Inside Proxied Page)
-            await page.waitForSelector('input'); 
-            await page.type('input', videoUrl);
-            console.log("Link Pasted inside Proxied Tool");
+            // STEP 3: Proxy loading ka wait (Video page aane tak)
+            await new Promise(r => setTimeout(r, 10000)); 
             latestScreenshot = await page.screenshot();
 
-            // 4. Launch Instance Button Click karna (Hardcoded Logic)
-            await page.evaluate(() => {
-                const btns = Array.from(document.querySelectorAll('button'));
-                const launchBtn = btns.find(b => 
-                    b.innerText.toLowerCase().includes('launch') || 
-                    b.innerText.toLowerCase().includes('instance')
-                );
-                if (launchBtn) {
-                    launchBtn.scrollIntoView();
-                    launchBtn.click();
-                }
-            });
-            console.log("Launch Clicked ✅");
+            // STEP 4: Video Play karne ke liye click karna
+            // Hum screen ke center mein click karenge taaki YouTube play ho jaye
+            await page.mouse.click(640, 360); 
+            console.log("Video Clicked/Played");
 
-            // 5. Watch Time Loop + HAR 3 SEC MEIN SCREENSHOT UPDATE
+            // STEP 5: WATCH TIME LOOP + HAR 3 SEC MEIN SCREENSHOT
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
             
             while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 3000)); // 3 sec wait
+                await new Promise(r => setTimeout(r, 3000)); // 3 second gap
                 elapsed += 3;
                 
-                // Screenshot capture karke global variable mein daalna taaki frontend par dikhe
+                // Screenshot capture for live feed
                 latestScreenshot = await page.screenshot();
-                console.log(`[LIVE FEED] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
             }
 
-            console.log(`[FINISH] Session ${i+1} Done`);
+            console.log(`[SUCCESS] Session ${i+1} completed.`);
 
         } catch (error) {
-            console.error("Engine Error:", error.message);
+            console.error("Session Error:", error.message);
         } finally {
             if (browser) await browser.close();
-            await new Promise(r => setTimeout(r, 2000)); // Cool down
+            // 2 sec rest taaki Render crash na ho (Single browser policy)
+            await new Promise(r => setTimeout(r, 2000));
         }
     }
 }
 
-// API Endpoint for YouTube Tool - ISSE FRONTEND CONNECT HOGA
+// 3. API Endpoint (Frontend isse connect karega)
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
     
-    if(!channel_url) {
-        return res.status(400).json({ success: false, message: "URL Missing!" });
-    }
+    if(!channel_url) return res.status(400).json({ error: "Video URL missing" });
 
-    res.json({ success: true, message: "Proxyium Engine Started! Check /live-check for screenshots." });
-    
-    // Background execution start
-    runMultiBrowserEngine(channel_url, watch_time, views_count);
+    res.json({ 
+        success: true, 
+        message: "CroxyProxy Engine Started! Watch live at /live-check" 
+    });
+
+    // Background mein process start
+    runCroxyVideoEngine(channel_url, watch_time, views_count);
 });
 
 
