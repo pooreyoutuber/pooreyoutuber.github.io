@@ -1378,62 +1378,67 @@ app.post('/ultimate', async (req, res) => {
 // Global variable for Live Feed
 let latestScreenshot = null;
 
-// 1. Live Check Endpoint (Screenshots yahan se dikhenge)
+// 1. Live Check Endpoint
 app.get('/live-check', (req, res) => {
     if (latestScreenshot) {
         res.contentType('image/png').send(latestScreenshot);
     } else {
-        res.status(404).send("Initializing Video Stream...");
+        res.status(404).send("Initializing Mobile View Stream...");
     }
 });
 
-// 2. Main Engine (New Plan: CroxyProxy)
+// 2. Main Engine (CroxyProxy - MOBILE MODE)
 async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
     for (let i = 0; i < totalViews; i++) {
         let browser;
         try {
-            console.log(`[SESSION ${i+1}] Starting...`);
+            console.log(`[SESSION ${i+1}] Starting in Mobile Mode...`);
             browser = await puppeteer.launch({
                 headless: "new",
                 args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
             });
 
             const page = await browser.newPage();
-            await page.setViewport({ width: 1280, height: 720 });
+
+            // --- MOBILE SETTINGS ---
+            // 1. Mobile Viewport (iPhone/Android Size)
+            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+            
+            // 2. Mobile User Agent (Chrome on Android)
+            await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
             // STEP 1: CroxyProxy open karna
             await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
             latestScreenshot = await page.screenshot(); 
 
-            // STEP 2: URL daalna aur GO click karna
-            const inputSelector = '#url'; // CroxyProxy ka input ID
+            // STEP 2: URL daalna
+            const inputSelector = '#url';
             await page.waitForSelector(inputSelector);
             await page.type(inputSelector, videoUrl);
             
-            // Go button par click
+            // Go click
             await page.click('#requestSubmit'); 
-            console.log("URL Submitted on CroxyProxy");
+            console.log("Mobile URL Submitted");
 
-            // STEP 3: Proxy loading ka wait (Video page aane tak)
-            await new Promise(r => setTimeout(r, 10000)); 
+            // STEP 3: Wait for Proxy load (Mobile pages are faster)
+            await new Promise(r => setTimeout(r, 12000)); 
             latestScreenshot = await page.screenshot();
 
-            // STEP 4: Video Play karne ke liye click karna
-            // Hum screen ke center mein click karenge taaki YouTube play ho jaye
-            await page.mouse.click(640, 360); 
-            console.log("Video Clicked/Played");
+            // STEP 4: Video Play Click (Center of mobile screen)
+            // Mobile par click 200, 300 ke aas-paas thik rehta hai
+            await page.mouse.click(195, 422); 
+            console.log("Mobile Video Clicked");
 
-            // STEP 5: WATCH TIME LOOP + HAR 3 SEC MEIN SCREENSHOT
+            // STEP 5: WATCH TIME LOOP + LIVE SCREENSHOT (Har 3 sec)
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
             
             while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 3000)); // 3 second gap
+                await new Promise(r => setTimeout(r, 3000)); 
                 elapsed += 3;
                 
-                // Screenshot capture for live feed
                 latestScreenshot = await page.screenshot();
-                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+                console.log(`[WATCHING MOBILE] Session ${i+1}: ${elapsed}/${watchLimit}s`);
             }
 
             console.log(`[SUCCESS] Session ${i+1} completed.`);
@@ -1442,27 +1447,23 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             console.error("Session Error:", error.message);
         } finally {
             if (browser) await browser.close();
-            // 2 sec rest taaki Render crash na ho (Single browser policy)
             await new Promise(r => setTimeout(r, 2000));
         }
     }
 }
 
-// 3. API Endpoint (Frontend isse connect karega)
+// API Endpoint (Frontend Connect)
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-    
     if(!channel_url) return res.status(400).json({ error: "Video URL missing" });
 
     res.json({ 
         success: true, 
-        message: "CroxyProxy Engine Started! Watch live at /live-check" 
+        message: "Mobile Engine Started! Check /live-check for 3s updates." 
     });
 
-    // Background mein process start
     runCroxyVideoEngine(channel_url, watch_time, views_count);
 });
-
 
 //==================================================
 // --- SERVER START ---
