@@ -1392,7 +1392,7 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
     for (let i = 0; i < totalViews; i++) {
         let browser;
         try {
-            console.log(`[SESSION ${i+1}] Starting in Mobile Mode...`);
+            console.log(`[SESSION ${i+1}] Starting...`);
             browser = await puppeteer.launch({
                 headless: "new",
                 args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
@@ -1400,36 +1400,36 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
 
             const page = await browser.newPage();
 
-            // --- MOBILE SETTINGS ---
-            // 1. Mobile Viewport (iPhone/Android Size)
+            // Mobile Setup
             await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-            
-            // 2. Mobile User Agent (Chrome on Android)
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
-            // STEP 1: CroxyProxy open karna
+            // STEP 1: CroxyProxy par jana
             await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
             latestScreenshot = await page.screenshot(); 
 
-            // STEP 2: URL daalna
+            // STEP 2: URL daalna aur submit karna
             const inputSelector = '#url';
             await page.waitForSelector(inputSelector);
             await page.type(inputSelector, videoUrl);
-            
-            // Go click
             await page.click('#requestSubmit'); 
-            console.log("Mobile URL Submitted");
+            console.log("URL Submitted. Waiting for proxy to process...");
 
-            // STEP 3: Wait for Proxy load (Mobile pages are faster)
-            await new Promise(r => setTimeout(r, 12000)); 
+            // --- STEP 3: 15 SECONDS WAIT (As per your request) ---
+            // Is beech har 5 sec me screenshot capture karenge taaki progress dikhe
+            for(let wait = 1; wait <= 3; wait++) {
+                await new Promise(r => setTimeout(r, 5000));
+                latestScreenshot = await page.screenshot();
+                console.log(`Waiting for video load: ${wait * 5}s/15s`);
+            }
+
+            // STEP 4: Video Play Click
+            // Mobile screen ke center me click taaki play button hit ho
+            await page.mouse.click(195, 400); 
+            console.log("15 Seconds over: Video Clicked ✅");
             latestScreenshot = await page.screenshot();
 
-            // STEP 4: Video Play Click (Center of mobile screen)
-            // Mobile par click 200, 300 ke aas-paas thik rehta hai
-            await page.mouse.click(195, 422); 
-            console.log("Mobile Video Clicked");
-
-            // STEP 5: WATCH TIME LOOP + LIVE SCREENSHOT (Har 3 sec)
+            // STEP 5: WATCH TIME LOOP + HAR 3 SEC SCREENSHOT
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
             
@@ -1438,7 +1438,7 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
                 elapsed += 3;
                 
                 latestScreenshot = await page.screenshot();
-                console.log(`[WATCHING MOBILE] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
             }
 
             console.log(`[SUCCESS] Session ${i+1} completed.`);
@@ -1447,19 +1447,19 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             console.error("Session Error:", error.message);
         } finally {
             if (browser) await browser.close();
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 2000)); // Render stability gap
         }
     }
 }
 
-// API Endpoint (Frontend Connect)
+// 3. API Endpoint
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
     if(!channel_url) return res.status(400).json({ error: "Video URL missing" });
 
     res.json({ 
         success: true, 
-        message: "Mobile Engine Started! Check /live-check for 3s updates." 
+        message: "Mobile Engine Started! Waiting 15s for video play." 
     });
 
     runCroxyVideoEngine(channel_url, watch_time, views_count);
