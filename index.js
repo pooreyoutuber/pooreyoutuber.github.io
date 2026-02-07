@@ -1378,7 +1378,7 @@ app.post('/ultimate', async (req, res) => {
 // Global variable for Live Feed
 let latestScreenshot = null;
 
-// 1. Live Check Endpoint (Screenshots yahan se dikhenge)
+// 1. Live Check Endpoint
 app.get('/live-check', (req, res) => {
     if (latestScreenshot) {
         res.contentType('image/png').send(latestScreenshot);
@@ -1387,7 +1387,7 @@ app.get('/live-check', (req, res) => {
     }
 });
 
-// 2. Main Engine (New Plan: CroxyProxy)
+// 2. Main Engine (CroxyProxy - Mobile Mode)
 async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
     for (let i = 0; i < totalViews; i++) {
         let browser;
@@ -1399,39 +1399,45 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             });
 
             const page = await browser.newPage();
-            await page.setViewport({ width: 1280, height: 720 });
+
+            // Mobile Setup (Sahi coordination ke liye)
+            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+            await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
             // STEP 1: CroxyProxy open karna
             await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
             latestScreenshot = await page.screenshot(); 
 
-            // STEP 2: URL daalna aur GO click karna
-            const inputSelector = '#url'; // CroxyProxy ka input ID
+            // STEP 2: URL daalna aur submit karna
+            const inputSelector = '#url';
             await page.waitForSelector(inputSelector);
             await page.type(inputSelector, videoUrl);
-            
-            // Go button par click
             await page.click('#requestSubmit'); 
-            console.log("URL Submitted on CroxyProxy");
+            console.log("URL Submitted. 60 Seconds wait starts now...");
 
-            // STEP 3: Proxy loading ka wait (Video page aane tak)
-            await new Promise(r => setTimeout(r, 10000)); 
+            // --- STEP 3: 60 SECONDS WAIT (Loading Buffer) ---
+            // Is 60 sec ke dauran hum har 5 sec me screenshot lenge taaki user ko lage system chal raha hai
+            for(let wait = 5; wait <= 60; wait += 5) {
+                await new Promise(r => setTimeout(r, 5000));
+                latestScreenshot = await page.screenshot();
+                console.log(`Loading Video: ${wait}/60s`);
+            }
+
+            // STEP 4: Video ke center me click karna (Video upar load hota hai)
+            // Mobile screen (390 width) ke hisab se center (195) aur upar ka area (250-300 height)
+            await page.mouse.click(195, 280); 
+            console.log("60 Seconds Over: Video Center Clicked ✅");
             latestScreenshot = await page.screenshot();
 
-            // STEP 4: Video Play karne ke liye click karna
-            // Hum screen ke center mein click karenge taaki YouTube play ho jaye
-            await page.mouse.click(640, 360); 
-            console.log("Video Clicked/Played");
-
-            // STEP 5: WATCH TIME LOOP + HAR 3 SEC MEIN SCREENSHOT
+            // STEP 5: WATCH TIME COUNTING (Ab shuru hogi)
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
             
+            console.log("Watching started...");
             while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 3000)); // 3 second gap
+                await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me update
                 elapsed += 3;
                 
-                // Screenshot capture for live feed
                 latestScreenshot = await page.screenshot();
                 console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
             }
@@ -1442,24 +1448,21 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             console.error("Session Error:", error.message);
         } finally {
             if (browser) await browser.close();
-            // 2 sec rest taaki Render crash na ho (Single browser policy)
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 2000)); // Render Safety
         }
     }
 }
 
-// 3. API Endpoint (Frontend isse connect karega)
+// 3. API Endpoint
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-    
     if(!channel_url) return res.status(400).json({ error: "Video URL missing" });
 
     res.json({ 
         success: true, 
-        message: "CroxyProxy Engine Started! Watch live at /live-check" 
+        message: "Engine Started! 60s loading then play." 
     });
 
-    // Background mein process start
     runCroxyVideoEngine(channel_url, watch_time, views_count);
 });
 
