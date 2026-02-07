@@ -1375,21 +1375,23 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ======================
-// ===================================================================
-// UPDATED TOOL 8: MULTI-BROWSER AUTO-CLICKER (FIXED)
-// ===================================================================
-
+// Global variable screenshot ke liye
 let latestScreenshot = null;
 
+// Frontend live view ke liye endpoint
 app.get('/live-check', (req, res) => {
-    if (!latestScreenshot) return res.send("Engine starting...");
-    res.contentType('image/png').send(latestScreenshot);
+    if (latestScreenshot) {
+        res.contentType('image/png').send(latestScreenshot);
+    } else {
+        res.status(404).send("Engine Starting...");
+    }
 });
 
 async function runMultiBrowserEngine(videoUrl, watchTime, totalViews) {
     for (let i = 0; i < totalViews; i++) {
         let browser;
         try {
+            console.log(`[START] Session ${i+1}`);
             browser = await puppeteer.launch({
                 headless: "new",
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -1398,62 +1400,65 @@ async function runMultiBrowserEngine(videoUrl, watchTime, totalViews) {
             const page = await browser.newPage();
             await page.setViewport({ width: 1280, height: 720 });
 
-            const updateMonitor = async (msg) => {
-                latestScreenshot = await page.screenshot();
-                console.log(`[STATUS] ${msg}`);
-            };
-
             // 1. Google check
             await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
 
-            // 2. Target Site
+            // 2. Multi-browser site par jana
             await page.goto('https://macora225.github.io/multi-browser.html', { waitUntil: 'networkidle2' });
-            await updateMonitor("Site Loaded");
+            await page.waitForSelector('input');
+            
+            // Photo lekar frontend ko dikhana
+            latestScreenshot = await page.screenshot();
 
-            // Selectors (Aapki site ke mutabiq)
-            const inputSelector = '#video-url, input[type="text"]'; 
-            const launchBtnSelector = '#launch-btn, button'; // "Launch Instance" button ka selector
+            // 3. Link Paste karna (Sirf ek baar)
+            await page.type('input', videoUrl);
+            console.log("Link Pasted");
 
-            await page.waitForSelector(inputSelector);
+            // 4. Launch Instance Button Click karna
+            await page.evaluate(() => {
+                const btn = Array.from(document.querySelectorAll('button')).find(b => 
+                    b.innerText.toLowerCase().includes('launch') || 
+                    b.innerText.toLowerCase().includes('instance')
+                );
+                if (btn) btn.click();
+            });
+            console.log("Launch Clicked");
 
-            // --- FIRST INSTANCE ---
-            await page.type(inputSelector, videoUrl);
-            await page.click(launchBtnSelector); // AB BUTTON PRESS HOGA
-            await updateMonitor("Instance 1 Launched");
-
-            // 3 Second Wait
-            await new Promise(r => setTimeout(r, 3000));
-
-            // --- SECOND INSTANCE ---
-            await page.click(inputSelector, { clickCount: 3 });
-            await page.keyboard.press('Backspace');
-            await page.type(inputSelector, videoUrl);
-            await page.click(launchBtnSelector); // DOBARA BUTTON PRESS HOGA
-            await updateMonitor("Instance 2 Launched");
-
-            // --- WATCHING LOOP ---
+            // 5. Watch Time Loop + Live Screenshots
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
+            
             while (elapsed < watchLimit) {
+                // Har 3 second mein update
                 await new Promise(r => setTimeout(r, 3000));
                 elapsed += 3;
-                latestScreenshot = await page.screenshot(); // Har 3 sec me photo lega
+                
+                // Screenshot update karna
+                latestScreenshot = await page.screenshot();
+                console.log(`Watching: ${elapsed}/${watchLimit}s`);
             }
 
+            console.log(`[FINISH] Session ${i+1} Done`);
+
         } catch (error) {
-            console.error(`Error: ${error.message}`);
+            console.error("Error:", error.message);
         } finally {
             if (browser) await browser.close();
-            await new Promise(r => setTimeout(r, 5000));
+            // Agle browser se pehle 2 sec ka rest (Render safety)
+            await new Promise(r => setTimeout(r, 2000));
         }
     }
 }
 
+// API Endpoint for Frontend
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-    res.status(200).json({ success: true, message: "Button Click Logic Active!" });
+    res.json({ success: true, message: "Engine Started: Single Link Mode" });
+    
+    // Background execution
     runMultiBrowserEngine(channel_url, watch_time, views_count);
 });
+
 
 
 //==================================================
