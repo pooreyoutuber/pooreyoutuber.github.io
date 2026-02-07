@@ -1425,7 +1425,7 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
 
             // STEP 4: Video ke center me click karna (Video upar load hota hai)
             // Mobile screen (390 width) ke hisab se center (195) aur upar ka area (250-300 height)
-            await page.mouse.click(195, 280); 
+            await page.mouse.click(195, 150); 
             console.log("60 Seconds Over: Video Center Clicked ✅");
             latestScreenshot = await page.screenshot();
 
