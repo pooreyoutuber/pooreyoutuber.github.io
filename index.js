@@ -1400,11 +1400,11 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
 
             const page = await browser.newPage();
 
-            // Mobile Setup (Sahi coordination ke liye)
+            // Mobile Setup
             await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
-            // STEP 1: CroxyProxy open karna
+            // STEP 1: CroxyProxy par jana
             await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
             latestScreenshot = await page.screenshot(); 
 
@@ -1413,33 +1413,37 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             await page.waitForSelector(inputSelector);
             await page.type(inputSelector, videoUrl);
             await page.click('#requestSubmit'); 
-            console.log("URL Submitted. 60 Seconds wait starts now...");
+            console.log("URL Submitted. Waiting 60 seconds for loading...");
 
             // --- STEP 3: 60 SECONDS WAIT (Loading Buffer) ---
-            // Is 60 sec ke dauran hum har 5 sec me screenshot lenge taaki user ko lage system chal raha hai
+            // Is beech screenshots aate rahenge taaki tool chalta dikhe
             for(let wait = 5; wait <= 60; wait += 5) {
                 await new Promise(r => setTimeout(r, 5000));
                 latestScreenshot = await page.screenshot();
-                console.log(`Loading Video: ${wait}/60s`);
+                console.log(`Loading Status: ${wait}/60s`);
             }
 
-            // STEP 4: Video ke center me click karna (Video upar load hota hai)
-            // Mobile screen (390 width) ke hisab se center (195) aur upar ka area (250-300 height)
-            await page.mouse.click(195, 280); 
-            console.log("60 Seconds Over: Video Center Clicked ✅");
+            // --- STEP 4: CLICK ON "WATCH ON YOUTUBE" / CENTER ---
+            // Mobile screen (390x844) mein video aur link upar hote hain. 
+            // Coordinates (195, 250) button area ko hit karenge.
+            await page.mouse.click(195, 250); 
+            console.log("60s Done: Clicked on Video/Watch Button ✅");
+            
+            // Click ke baad 2 sec ka gap taaki player active ho jaye
+            await new Promise(r => setTimeout(r, 2000));
             latestScreenshot = await page.screenshot();
 
-            // STEP 5: WATCH TIME COUNTING (Ab shuru hogi)
+            // STEP 5: WATCH TIME COUNTING (User's Timing)
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
             
-            console.log("Watching started...");
+            console.log("Counting watch time now...");
             while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me update
+                await new Promise(r => setTimeout(r, 3000)); 
                 elapsed += 3;
                 
                 latestScreenshot = await page.screenshot();
-                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+                console.log(`[LIVE WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
             }
 
             console.log(`[SUCCESS] Session ${i+1} completed.`);
@@ -1456,11 +1460,11 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
 // 3. API Endpoint
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-    if(!channel_url) return res.status(400).json({ error: "Video URL missing" });
+    if(!channel_url) return res.status(400).json({ error: "URL missing" });
 
     res.json({ 
         success: true, 
-        message: "Engine Started! 60s loading then play." 
+        message: "Engine Started! Waiting 60s for video/watch button." 
     });
 
     runCroxyVideoEngine(channel_url, watch_time, views_count);
