@@ -1375,15 +1375,15 @@ app.post('/ultimate', async (req, res) => {
 // ===================================================================
 // NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
 // ======================
-// Global variable screenshot ke liye
+ // Global variable screenshot ke liye (Tool 9)
 let latestScreenshot = null;
 
-// Frontend live view ke liye endpoint (Same as before)
+// Frontend live view ke liye endpoint - ISSE DELETE MAT KARNA
 app.get('/live-check', (req, res) => {
     if (latestScreenshot) {
         res.contentType('image/png').send(latestScreenshot);
     } else {
-        res.status(404).send("Engine Starting...");
+        res.status(404).send("Engine Starting or Screenshot not ready...");
     }
 });
 
@@ -1399,99 +1399,78 @@ async function runMultiBrowserEngine(videoUrl, watchTime, totalViews) {
 
             const page = await browser.newPage();
             await page.setViewport({ width: 1280, height: 720 });
-            await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-            // --- STEP 1: PROXYIUM OPEN KARNA ---
-            console.log(`[PROXYIUM] Opening Proxyium...`);
+            // 1. Proxyium par jana
             await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+            latestScreenshot = await page.screenshot(); // Update screenshot
 
-            // --- STEP 2: MULTI-BROWSER URL DAALNA ---
-            const proxyInputSelector = 'input[placeholder*="Put a URL"], input[name="url"]';
-            await page.waitForSelector(proxyInputSelector);
-            await page.type(proxyInputSelector, 'https://macora225.github.io/multi-browser.html', { delay: 50 });
+            // 2. Multi-browser URL submit karna Proxyium mein
+            const proxyInput = 'input[name="url"]';
+            await page.waitForSelector(proxyInput);
+            await page.type(proxyInput, 'https://macora225.github.io/multi-browser.html');
             await page.keyboard.press('Enter');
+            
+            console.log("Loading tool via proxy...");
+            await new Promise(r => setTimeout(r, 8000)); // Buffer for proxy loading
+            latestScreenshot = await page.screenshot(); // Update screenshot
 
-            // Wait for Proxyium to load your site
-            console.log(`[PROXYIUM] Loading Multi-Browser Tool...`);
-            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null);
-            
-            // --- STEP 3: VIDEO LINK PASTE KARNA (Inside Proxyium) ---
-            // Thoda wait taaki internal elements load ho jayein
-            await new Promise(r => setTimeout(r, 5000));
-            
-            // Input selector dhundhna jo apke multi-browser page ka hai
+            // 3. Video Link Paste karna (Inside Proxied Page)
             await page.waitForSelector('input'); 
-            await page.type('input', videoUrl, { delay: 50 });
-            console.log("Video Link Pasted inside Proxied Page");
-
-            // Live Screenshot for Frontend
+            await page.type('input', videoUrl);
+            console.log("Link Pasted inside Proxied Tool");
             latestScreenshot = await page.screenshot();
 
-            // --- STEP 4: LAUNCH INSTANCE CLICK KARNA ---
+            // 4. Launch Instance Button Click karna (Hardcoded Logic)
             await page.evaluate(() => {
-                const buttons = Array.from(document.querySelectorAll('button'));
-                const launchBtn = buttons.find(b => 
+                const btns = Array.from(document.querySelectorAll('button'));
+                const launchBtn = btns.find(b => 
                     b.innerText.toLowerCase().includes('launch') || 
                     b.innerText.toLowerCase().includes('instance')
                 );
-                if (launchBtn) launchBtn.click();
+                if (launchBtn) {
+                    launchBtn.scrollIntoView();
+                    launchBtn.click();
+                }
             });
-            console.log("Launch Clicked inside Proxied Page");
+            console.log("Launch Clicked ✅");
 
-            // --- STEP 5: WATCH TIME LOOP ---
+            // 5. Watch Time Loop + HAR 3 SEC MEIN SCREENSHOT UPDATE
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
             
             while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 5000)); // 5 sec update interval
-                elapsed += 5;
+                await new Promise(r => setTimeout(r, 3000)); // 3 sec wait
+                elapsed += 3;
                 
-                // Screenshot update (Live Feed)
+                // Screenshot capture karke global variable mein daalna taaki frontend par dikhe
                 latestScreenshot = await page.screenshot();
-                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+                console.log(`[LIVE FEED] Session ${i+1}: ${elapsed}/${watchLimit}s`);
             }
 
             console.log(`[FINISH] Session ${i+1} Done`);
 
         } catch (error) {
-            console.error(`[ERROR] Session ${i+1}:`, error.message);
+            console.error("Engine Error:", error.message);
         } finally {
-            if (browser) {
-                await browser.close();
-                console.log(`[CLEANUP] Browser closed.`);
-            }
-            // Render/Server safety gap
-            await new Promise(r => setTimeout(r, 3000));
+            if (browser) await browser.close();
+            await new Promise(r => setTimeout(r, 2000)); // Cool down
         }
     }
 }
 
-// API Endpoint for Frontend (Same as before)
+// API Endpoint for YouTube Tool - ISSE FRONTEND CONNECT HOGA
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
     
-    if (!channel_url || !views_count || !watch_time) {
-        return res.status(400).json({ success: false, message: "Details missing!" });
+    if(!channel_url) {
+        return res.status(400).json({ success: false, message: "URL Missing!" });
     }
 
-    res.json({ 
-        success: true, 
-        message: "Proxyium Engine Started! Checking Live Feed..." 
-    });
+    res.json({ success: true, message: "Proxyium Engine Started! Check /live-check for screenshots." });
     
-    // Background worker
+    // Background execution start
     runMultiBrowserEngine(channel_url, watch_time, views_count);
 });
-
-// API Endpoint for Frontend
-app.post('/api/real-view-boost', async (req, res) => {
-    const { channel_url, views_count, watch_time } = req.body;
-    res.json({ success: true, message: "Engine Started: Single Link Mode" });
-    
-    // Background execution
-    runMultiBrowserEngine(channel_url, watch_time, views_count);
-});
-
 
 
 //==================================================
