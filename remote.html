@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Virtual Browser | PooreYou</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        #viewer { background: #000; transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center p-4">
+
+    <header class="w-full max-w-4xl flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+            Virtual Browser Control
+        </h1>
+        <div id="status" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-sm border border-emerald-500/50">
+            System Online
+        </div>
+    </header>
+
+    <div class="relative w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden glow border border-slate-700">
+        <img id="viewer" src="https://pooreyoutuber-github-io-pop.onrender.com/screen" class="w-full h-full object-contain" alt="Live Stream">
+        <div class="absolute bottom-4 right-4 flex gap-2">
+            <span class="bg-black/60 px-2 py-1 text-xs rounded">Live Feed</span>
+        </div>
+    </div>
+
+    <div class="w-full max-w-4xl mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h3 class="text-lg font-semibold mb-4 text-blue-400">View Settings</h3>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="changeView('mobile')" class="bg-slate-700 hover:bg-blue-600 px-4 py-2 rounded-lg transition">Mobile View</button>
+                <button onclick="changeView('desktop')" class="bg-slate-700 hover:bg-blue-600 px-4 py-2 rounded-lg transition">Desktop View</button>
+            </div>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h3 class="text-lg font-semibold mb-4 text-emerald-400">Data Management</h3>
+            <button onclick="downloadSession()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition">
+                <span>⬇️</span> Download Gmail Session (.zip)
+            </button>
+        </div>
+
+    </div>
+
+    <div class="w-full max-w-4xl mt-6 bg-slate-800 p-4 rounded-xl flex gap-2 border border-slate-700">
+        <input type="text" id="urlInput" placeholder="Enter URL (e.g. google.com)" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
+        <button onclick="navigate()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold">GO</button>
+    </div>
+
+    <script>
+        const RENDER_URL = "https://pooreyoutuber-github-io-pop.onrender.com";
+
+        // Screen Auto-Refresh (Every 2 seconds)
+        setInterval(() => {
+            document.getElementById('viewer').src = `${RENDER_URL}/screen?t=${Date.now()}`;
+        }, 2000);
+
+        async function changeView(mode) {
+            await fetch(`${RENDER_URL}/start?view=${mode}`);
+            alert("Switching to " + mode + " view...");
+        }
+
+        async function navigate() {
+            const url = document.getElementById('urlInput').value;
+            await fetch(`${RENDER_URL}/navigate?url=${encodeURIComponent(url)}`);
+        }
+
+        function downloadSession() {
+            window.location.href = `${RENDER_URL}/download-session`;
+        }
+    </script>
+</body>
+</html>
