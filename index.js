@@ -1386,8 +1386,7 @@ app.get('/live-check', (req, res) => {
         res.status(404).send("Initializing Video Stream...");
     }
 });
-
-// 2. Main Engine (CroxyProxy - Mobile Mode)
+// 2. Main Engine (CroxyProxy - Mobile Mode) - UPDATED AS PER YOUR INSTRUCTION
 async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
     for (let i = 0; i < totalViews; i++) {
         let browser;
@@ -1400,44 +1399,50 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
 
             const page = await browser.newPage();
 
-            // Mobile Setup (Sahi coordination ke liye)
-            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+            // Mobile Setup (For precise logo alignment)
+            const width = 390;
+            const height = 844;
+            await page.setViewport({ width: width, height: height, isMobile: true, hasTouch: true });
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
             // STEP 1: CroxyProxy open karna
             await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
             latestScreenshot = await page.screenshot(); 
 
-            // STEP 2: URL daalna aur submit karna
+            // STEP 2: URL submission
             const inputSelector = '#url';
             await page.waitForSelector(inputSelector);
             await page.type(inputSelector, videoUrl);
             await page.click('#requestSubmit'); 
-            console.log("URL Submitted. 60 Seconds wait starts now...");
+            console.log("URL Submitted. Loading Proxy... (3s Screenshot interval)");
 
-            // --- STEP 3: 60 SECONDS WAIT (Loading Buffer) ---
-            // Is 60 sec ke dauran hum har 5 sec me screenshot lenge taaki user ko lage system chal raha hai
-            for(let wait = 5; wait <= 60; wait += 5) {
-                await new Promise(r => setTimeout(r, 5000));
+            // --- STEP 3: 60 SECONDS WAIT (With 3s Screenshot Update) ---
+            for(let wait = 3; wait <= 60; wait += 3) {
+                await new Promise(r => setTimeout(r, 3000));
                 latestScreenshot = await page.screenshot();
                 console.log(`Loading Video: ${wait}/60s`);
             }
 
-            // STEP 4: Video ke center me click karna (Video upar load hota hai)
-            // Mobile screen (390 width) ke hisab se center (195) aur upar ka area (250-300 height)
-            await page.mouse.click(195, 280); 
-            console.log("60 Seconds Over: Video Center Clicked ✅");
+            // 🔥 STEP 4: CLICK ON YOUTUBE LOGO (Video Center)
+            // Aapki pic ke hisaab se YouTube logo player ke center (Y: 285 approx) par hai
+            const logoX = 195; // Horizontal Center (390/2)
+            const logoY = 285; // YouTube Logo center position
+            
+            console.log(`[CLICKER] Clicking on YouTube Logo at (${logoX}, ${logoY})...`);
+            await page.mouse.click(logoX, logoY); 
+            
+            await new Promise(r => setTimeout(r, 1000));
             latestScreenshot = await page.screenshot();
+            console.log("YouTube Logo Clicked ✅ Video should play now.");
 
-            // STEP 5: WATCH TIME COUNTING (Ab shuru hogi)
+            // STEP 5: WATCH TIME (3s Screenshot interval)
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
             
             console.log("Watching started...");
             while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me update
+                await new Promise(r => setTimeout(r, 3000)); 
                 elapsed += 3;
-                
                 latestScreenshot = await page.screenshot();
                 console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
             }
@@ -1448,10 +1453,11 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             console.error("Session Error:", error.message);
         } finally {
             if (browser) await browser.close();
-            await new Promise(r => setTimeout(r, 2000)); // Render Safety
+            await new Promise(r => setTimeout(r, 2000)); 
         }
     }
 }
+
 
 // 3. API Endpoint
 app.post('/api/real-view-boost', async (req, res) => {
