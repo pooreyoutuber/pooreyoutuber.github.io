@@ -1383,66 +1383,72 @@ app.get('/live-check', (req, res) => {
     if (latestScreenshot) {
         res.contentType('image/png').send(latestScreenshot);
     } else {
-        res.status(404).send("Initializing Video Stream...");
+        res.status(404).send("Initializing AI Video Stream...");
     }
 });
 
-// 2. Main Engine (CroxyProxy - Mobile Mode)
+// 2. Main Engine with Gemini AI Click Support
 async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
     for (let i = 0; i < totalViews; i++) {
         let browser;
         try {
-            console.log(`[SESSION ${i+1}] Starting...`);
+            console.log(`[SESSION ${i+1}] Starting with Gemini AI Vision...`);
             browser = await puppeteer.launch({
                 headless: "new",
                 args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
             });
 
             const page = await browser.newPage();
-
-            // Mobile Viewport (Accurate Mobile Size)
             await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
-            // STEP 1: CroxyProxy par jana
+            // STEP 1: CroxyProxy open karna
             await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
-            latestScreenshot = await page.screenshot(); 
-
+            
             // STEP 2: URL Submit
-            const inputSelector = '#url';
-            await page.waitForSelector(inputSelector);
-            await page.type(inputSelector, videoUrl);
+            await page.waitForSelector('#url');
+            await page.type('#url', videoUrl);
             await page.click('#requestSubmit'); 
-            console.log("URL Submitted. Waiting 60 seconds...");
+            console.log("URL Submitted. 60s Buffer for AI Analysis...");
 
-            // --- STEP 3: 60 SECONDS FULL WAIT ---
-            // Har 5 sec me photo update hogi frontend par
-            for(let wait = 5; wait <= 60; wait += 5) {
-                await new Promise(r => setTimeout(r, 5000));
+            // STEP 3: 60 SECONDS WAIT (AI Analysis se pehle loading)
+            for(let wait = 10; wait <= 60; wait += 10) {
+                await new Promise(r => setTimeout(r, 10000));
                 latestScreenshot = await page.screenshot();
-                console.log(`Loading: ${wait}/60s`);
+                console.log(`AI Waiting for load: ${wait}/60s`);
             }
 
-            // --- STEP 4: CLICK (Toda aur upar - Fixed) ---
-            // Width ka center 195 hai. 
-            // Click position ko thoda upar shift kiya (280) taaki arrow area hit ho.
-            await page.mouse.click(195, 280); 
-            console.log("60s Done: Clicked slightly higher (Arrow Area) ✅");
+            // --- STEP 4: GEMINI AI VISION FOR CLICK ---
+            console.log("Gemini AI is analyzing the screen for Play button...");
+            const screenshotBase64 = await page.screenshot({ encoding: 'base64' });
             
-            await new Promise(r => setTimeout(r, 4000)); // Play hone ka wait
-            latestScreenshot = await page.screenshot();
+            try {
+                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const prompt = "In this mobile screenshot of a video proxy, find the exact center coordinates (x, y) of the 'Watch on YouTube' button or the main Play icon. Return only the JSON: {x: number, y: number}. Screen size is 390x844.";
+                
+                const result = await model.generateContent([
+                    prompt,
+                    { inlineData: { data: screenshotBase64, mimeType: "image/png" } }
+                ]);
+
+                const responseText = result.response.text();
+                const coords = JSON.parse(responseText.match(/\{.*\}/)[0]);
+                
+                console.log(`Gemini Suggested Click at: X:${coords.x}, Y:${coords.y}`);
+                await page.mouse.click(coords.x, coords.y);
+            } catch (aiErr) {
+                console.log("Gemini Click failed, using fallback coordinates...");
+                await page.mouse.click(195, 280); // Fallback click
+            }
 
             // STEP 5: WATCH TIME COUNTING
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
-            
-            console.log("Watch counting started...");
             while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 3000)); // Har 3 sec updates
+                await new Promise(r => setTimeout(r, 3000));
                 elapsed += 3;
-                
                 latestScreenshot = await page.screenshot();
-                console.log(`[LIVE WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+                console.log(`[AI WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
             }
 
             console.log(`[SUCCESS] Session ${i+1} completed.`);
@@ -1451,7 +1457,7 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             console.error("Session Error:", error.message);
         } finally {
             if (browser) await browser.close();
-            await new Promise(r => setTimeout(r, 2000)); 
+            await new Promise(r => setTimeout(r, 2000));
         }
     }
 }
@@ -1459,13 +1465,7 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
 // 3. API Endpoint
 app.post('/api/real-view-boost', async (req, res) => {
     const { channel_url, views_count, watch_time } = req.body;
-    if(!channel_url) return res.status(400).json({ error: "URL missing" });
-
-    res.json({ 
-        success: true, 
-        message: "Engine Started! 60s loading, then playing video." 
-    });
-
+    res.json({ success: true, message: "AI Engine Started! Gemini will find and play the video." });
     runCroxyVideoEngine(channel_url, watch_time, views_count);
 });
 
