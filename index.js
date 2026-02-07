@@ -1400,7 +1400,7 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
 
             const page = await browser.newPage();
 
-            // Mobile Setup (Sahi coordination ke liye)
+            // Mobile Viewport (Accurate Mobile Size)
             await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
@@ -1408,31 +1408,31 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
             latestScreenshot = await page.screenshot(); 
 
-            // STEP 2: URL daalna aur submit karna
+            // STEP 2: URL Submit
             const inputSelector = '#url';
             await page.waitForSelector(inputSelector);
             await page.type(inputSelector, videoUrl);
             await page.click('#requestSubmit'); 
-            console.log("URL Submitted. 60 Seconds wait starts now...");
+            console.log("URL Submitted. Waiting 60 seconds...");
 
-            // --- STEP 3: 60 SECONDS FULL WAIT (Loading Buffer) ---
-            // Is beech har 5-10 sec me photo update hogi frontend par
+            // --- STEP 3: 60 SECONDS FULL WAIT ---
+            // Har 5 sec me photo update hogi frontend par
             for(let wait = 5; wait <= 60; wait += 5) {
                 await new Promise(r => setTimeout(r, 5000));
                 latestScreenshot = await page.screenshot();
-                console.log(`Loading Video: ${wait}/60s`);
+                console.log(`Loading: ${wait}/60s`);
             }
 
-            // --- STEP 4: CLICK ON "WATCH ON YOUTUBE" (Tere Arrow ke hisaab se) ---
-            // Mobile screen (390 width) ka center 195 hai.
-            // Upar ka 25% area chhod kar (Approx 210px), uske neeche 320px par click.
-            await page.mouse.click(195, 320); 
-            console.log("60s Over: Clicked on Arrow Position ✅");
+            // --- STEP 4: CLICK (Toda aur upar - Fixed) ---
+            // Width ka center 195 hai. 
+            // Click position ko thoda upar shift kiya (280) taaki arrow area hit ho.
+            await page.mouse.click(195, 280); 
+            console.log("60s Done: Clicked slightly higher (Arrow Area) ✅");
             
-            await new Promise(r => setTimeout(r, 3000)); // Click ke baad 3 sec wait player load hone ke liye
+            await new Promise(r => setTimeout(r, 4000)); // Play hone ka wait
             latestScreenshot = await page.screenshot();
 
-            // STEP 5: WATCH TIME COUNTING (User's Timing)
+            // STEP 5: WATCH TIME COUNTING
             let elapsed = 0;
             const watchLimit = parseInt(watchTime);
             
@@ -1451,7 +1451,7 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             console.error("Session Error:", error.message);
         } finally {
             if (browser) await browser.close();
-            await new Promise(r => setTimeout(r, 2000)); // Cool down
+            await new Promise(r => setTimeout(r, 2000)); 
         }
     }
 }
@@ -1463,12 +1463,11 @@ app.post('/api/real-view-boost', async (req, res) => {
 
     res.json({ 
         success: true, 
-        message: "Mobile Engine Started! Waiting 60s for play." 
+        message: "Engine Started! 60s loading, then playing video." 
     });
 
     runCroxyVideoEngine(channel_url, watch_time, views_count);
 });
-
 
 //==================================================
 // --- SERVER START ---
