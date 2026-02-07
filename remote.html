@@ -3,75 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Virtual Browser | PooreYou</title>
+    <title>Cloud Browser Pro | PooreYou</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
-        #viewer { background: #000; transition: all 0.3s ease; }
+        body { background-color: #0f172a; cursor: crosshair; }
+        .monitor-glow { box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.5); }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        #remoteScreen { transition: transform 0.2s ease; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center p-4">
+<body class="text-slate-200 font-sans p-2 md:p-8">
 
-    <header class="w-full max-w-4xl flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-            Virtual Browser Control
-        </h1>
-        <div id="status" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-sm border border-emerald-500/50">
-            System Online
-        </div>
-    </header>
-
-    <div class="relative w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden glow border border-slate-700">
-        <img id="viewer" src="https://pooreyoutuber-github-io-pop.onrender.com/screen" class="w-full h-full object-contain" alt="Live Stream">
-        <div class="absolute bottom-4 right-4 flex gap-2">
-            <span class="bg-black/60 px-2 py-1 text-xs rounded">Live Feed</span>
-        </div>
-    </div>
-
-    <div class="w-full max-w-4xl mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h3 class="text-lg font-semibold mb-4 text-blue-400">View Settings</h3>
-            <div class="flex flex-wrap gap-3">
-                <button onclick="changeView('mobile')" class="bg-slate-700 hover:bg-blue-600 px-4 py-2 rounded-lg transition">Mobile View</button>
-                <button onclick="changeView('desktop')" class="bg-slate-700 hover:bg-blue-600 px-4 py-2 rounded-lg transition">Desktop View</button>
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-black tracking-tighter bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    REMOTE VIRTUAL BROWSER
+                </h1>
+                <p class="text-slate-500 text-sm font-mono">Status: <span class="text-emerald-400" id="statusText">CONNECTED</span></p>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="control('start?view=mobile')" class="glass hover:bg-blue-600 px-5 py-2 rounded-full text-xs font-bold transition-all">📱 MOBILE</button>
+                <button onclick="control('start?view=desktop')" class="glass hover:bg-blue-600 px-5 py-2 rounded-full text-xs font-bold transition-all">💻 DESKTOP</button>
+                <button onclick="downloadZip()" class="bg-emerald-600 hover:bg-emerald-500 px-5 py-2 rounded-full text-xs font-bold shadow-lg shadow-emerald-900/20 transition-all">⬇️ DOWNLOAD SESSION</button>
             </div>
         </div>
 
-        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h3 class="text-lg font-semibold mb-4 text-emerald-400">Data Management</h3>
-            <button onclick="downloadSession()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition">
-                <span>⬇️</span> Download Gmail Session (.zip)
-            </button>
+        <div class="relative rounded-2xl overflow-hidden border border-slate-700 bg-black monitor-glow">
+            <div class="aspect-video w-full flex items-center justify-center overflow-auto bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+                <img id="remoteScreen" 
+                     src="https://pooreyoutuber-github-io-pop.onrender.com/remote/screen" 
+                     class="max-w-full shadow-2xl"
+                     onerror="this.src='https://placehold.co/800x450/000000/FFFFFF?text=Initializing+Cloud+Engine...'">
+            </div>
+            
+            <div class="absolute top-4 left-4 flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
+                <div class="w-2 h-2 bg-red-500 animate-pulse rounded-full"></div>
+                <span class="text-[10px] font-bold tracking-widest uppercase">Live Stream</span>
+            </div>
         </div>
 
-    </div>
+        <div class="mt-8 glass p-4 rounded-2xl flex flex-col md:flex-row gap-4">
+            <div class="flex-1 flex gap-2">
+                <input type="text" id="targetUrl" 
+                       placeholder="Enter Website URL (e.g. google.com)" 
+                       class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                <button onclick="navigate()" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-black text-sm uppercase tracking-wider">Navigate</button>
+            </div>
+        </div>
 
-    <div class="w-full max-w-4xl mt-6 bg-slate-800 p-4 rounded-xl flex gap-2 border border-slate-700">
-        <input type="text" id="urlInput" placeholder="Enter URL (e.g. google.com)" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
-        <button onclick="navigate()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold">GO</button>
+        <p class="mt-4 text-center text-slate-600 text-[10px] uppercase tracking-[0.2em]">PooreYou Cloud Infrastructure v2.1</p>
     </div>
 
     <script>
-        const RENDER_URL = "https://pooreyoutuber-github-io-pop.onrender.com";
+        const API_URL = "https://pooreyoutuber-github-io-pop.onrender.com/remote";
 
-        // Screen Auto-Refresh (Every 2 seconds)
+        // Auto Refresh Screen (Smooth updates)
         setInterval(() => {
-            document.getElementById('viewer').src = `${RENDER_URL}/screen?t=${Date.now()}`;
+            const img = document.getElementById('remoteScreen');
+            const newSrc = `${API_URL}/screen?t=${Date.now()}`;
+            
+            // Image pre-loading to avoid flicker
+            const tempImg = new Image();
+            tempImg.src = newSrc;
+            tempImg.onload = () => { img.src = newSrc; };
         }, 2000);
 
-        async function changeView(mode) {
-            await fetch(`${RENDER_URL}/start?view=${mode}`);
-            alert("Switching to " + mode + " view...");
+        async function control(endpoint) {
+            document.getElementById('statusText').innerText = "SYNCHRONIZING...";
+            await fetch(`${API_URL}/${endpoint}`);
+            setTimeout(() => { document.getElementById('statusText').innerText = "CONNECTED"; }, 2000);
         }
 
         async function navigate() {
-            const url = document.getElementById('urlInput').value;
-            await fetch(`${RENDER_URL}/navigate?url=${encodeURIComponent(url)}`);
+            const url = document.getElementById('targetUrl').value;
+            if(!url) return alert("URL to daal pehle!");
+            await fetch(`${API_URL}/navigate?url=${encodeURIComponent(url)}`);
         }
 
-        function downloadSession() {
-            window.location.href = `${RENDER_URL}/download-session`;
+        function downloadZip() {
+            window.location.href = `${API_URL}/download-session`;
         }
     </script>
 </body>
