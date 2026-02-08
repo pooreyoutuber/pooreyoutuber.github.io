@@ -1509,7 +1509,115 @@ app.get('/start-cloud-browser', async (req, res) => {
         res.status(500).json({ error: "Failed to launch cloud browser." });
     }
 });
+// ===================================================================
+// 6. GMAIL LOGIN & YOUTUBE VIDEO VIEWER (API: /api/real-gmail)
+// ===================================================================
+let globalBrowser = null;
+let currentScreenshot = null;
+let logHistory = [];
 
+// Logs save karne ka function
+function addSystemLog(msg, type = 'info') {
+    const logEntry = { timestamp: new Date().toLocaleTimeString(), message: msg, type: type };
+    logHistory.push(logEntry);
+    if (logHistory.length > 50) logHistory.shift(); 
+    console.log(`[SYSTEM LOG] ${msg}`);
+}
+
+// Frontend ke liye Logs endpoint
+app.get('/api/get-logs', (req, res) => {
+    res.json({ logs: logHistory });
+});
+
+// Live Screenshot endpoint
+app.get('/live-check', (req, res) => {
+    if (currentScreenshot) {
+        const img = Buffer.from(currentScreenshot, 'base64');
+        res.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Content-Length': img.length
+        });
+        res.end(img);
+    } else {
+        res.status(404).send('No live preview available.');
+    }
+});
+
+app.post('/api/real-gmail', async (req, res) => {
+    const { channel_url, views_count, watch_time } = req.body;
+
+    if (!channel_url) {
+        return res.status(400).json({ error: "Video URL missing" });
+    }
+
+    // Request accept karke backend process shuru karna
+    res.status(200).json({ success: true, message: "Engine starting..." });
+
+    (async () => {
+        try {
+            if (!globalBrowser) {
+                addSystemLog("Launching Stealth Cloud Browser...", "info");
+                globalBrowser = await puppeteer.launch({
+                    headless: "new",
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+                });
+            }
+
+            const page = await globalBrowser.newPage();
+            await page.setViewport({ width: 1280, height: 720 });
+
+            // 1. Gmail Sign-In Logic
+            addSystemLog("Navigating to Google Login...", "info");
+            await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
+            currentScreenshot = await page.screenshot({ encoding: 'base64' });
+
+            addSystemLog("Entering Gmail ID...", "info");
+            await page.type('input[type="email"]', 'robotf975@gmail.com');
+            await page.click('#identifierNext');
+            await new Promise(r => setTimeout(r, 3000));
+            
+            addSystemLog("Entering Password...", "info");
+            await page.type('input[type="password"]', 'Youtube@55#');
+            await page.click('#passwordNext');
+            await page.waitForNavigation({ waitUntil: 'networkidle2' });
+            
+            addSystemLog("Gmail Login Successful ✅", "success");
+            currentScreenshot = await page.screenshot({ encoding: 'base64' });
+
+            // 2. Views Loop (Har view ke liye naya tab)
+            for (let i = 1; i <= views_count; i++) {
+                addSystemLog(`Starting View Session #${i}...`, "node");
+                
+                const videoPage = await globalBrowser.newPage();
+                await videoPage.setViewport({ width: 1280, height: 720 });
+                
+                // Live screenshot update interval
+                const screenInterval = setInterval(async () => {
+                    try { 
+                        currentScreenshot = await videoPage.screenshot({ encoding: 'base64' }); 
+                    } catch(e) {}
+                }, 3000);
+
+                await videoPage.goto(channel_url, { waitUntil: 'networkidle2' });
+                addSystemLog(`Watching Video... Target: ${watch_time}s`, "info");
+                
+                // Auto-play koshish
+                try { await videoPage.click('.ytp-play-button'); } catch(e) {}
+
+                await new Promise(r => setTimeout(r, watch_time * 1000));
+                
+                clearInterval(screenInterval);
+                await videoPage.close();
+                addSystemLog(`View #${i} Finished. Tab closed.`, "success");
+            }
+
+            addSystemLog("All Boost Tasks Completed. Engine Idle.", "success");
+
+        } catch (error) {
+            addSystemLog("Engine Error: " + error.message, "error");
+        }
+    })();
+}); 
 //==================================================
 // --- SERVER START ---
 // ===================================================================
