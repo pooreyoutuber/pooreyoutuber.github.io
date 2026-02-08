@@ -1,129 +1,83 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Browser Pro</title>
+    <title>Cloud Browser Sync v1</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0f172a; color: white; font-family: sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .browser-screen { 
-            width: 100%; 
-            min-height: 400px; 
-            background: #1e293b; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            cursor: crosshair;
-            position: relative;
-        }
-        #screenView { width: 100%; height: auto; display: block; }
-        .loader { border-top-color: #3b82f6; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { background: #0b0f1a; color: #e2e8f0; }
+        .browser-frame { border: 8px solid #1e293b; border-radius: 15px; background: #000; position: relative; }
+        #screen { width: 100%; cursor: crosshair; }
+        .btn-green { background: #10b981; transition: 0.3s; }
+        .btn-green:hover { background: #059669; transform: scale(1.05); }
     </style>
 </head>
-<body class="p-4 md:p-8">
-
-    <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-bold italic"><i class="fa-solid fa-cloud text-blue-500 mr-2"></i>CloudBrowser</h1>
-            <div id="status" class="px-4 py-1 rounded-full bg-red-500/20 text-red-400 text-sm font-bold border border-red-500/50">OFFLINE</div>
+<body class="p-4">
+    <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-800 p-4 rounded-xl">
+            <input type="text" id="urlInput" placeholder="Enter URL (ex: google.com)" class="col-span-2 bg-slate-900 p-2 rounded border border-slate-700 outline-none">
+            <button onclick="launch()" class="bg-blue-600 p-2 rounded font-bold">Launch</button>
+            <button onclick="saveToDrive()" class="btn-green p-2 rounded font-bold">💾 Save to Drive</button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="glass p-6 rounded-2xl h-fit">
-                <div class="mb-6">
-                    <label class="block text-gray-400 text-xs font-bold mb-2 uppercase">Website URL</label>
-                    <input type="text" id="urlInput" placeholder="https://google.com" class="w-full bg-slate-900 border-none rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
+        <div class="mb-4 flex gap-2">
+            <input type="text" id="keyboardInput" placeholder="Type here and press Enter" class="flex-grow bg-slate-900 p-2 rounded border border-slate-700">
+            <button onclick="sendKey()" class="bg-orange-500 px-4 py-2 rounded font-bold">Send Text</button>
+        </div>
 
-                <div class="flex items-center justify-between mb-6">
-                    <span class="text-sm">Desktop Mode</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="desktopToggle" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                    </label>
-                </div>
-
-                <button id="startBtn" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-play text-sm"></i> Launch Browser
-                </button>
-
-                <div class="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <p class="text-[10px] text-yellow-200">Tip: Browser screen par click karke aap login ya navigation kar sakte hain. Cookies automatic save hongi.</p>
-                </div>
+        <div class="browser-frame overflow-hidden">
+            <div id="loader" class="absolute inset-0 flex items-center justify-center bg-black/70 hidden z-10">
+                <p class="text-white animate-pulse">Processing Action...</p>
             </div>
-
-            <div class="lg:col-span-2">
-                <div class="glass rounded-2xl p-2">
-                    <div class="flex items-center gap-2 p-3 bg-slate-900/50 rounded-t-xl border-b border-white/5">
-                        <div class="flex gap-1.5">
-                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                        </div>
-                        <div id="currentUrl" class="ml-4 text-xs text-gray-400 truncate bg-slate-800 px-4 py-1 rounded-full w-full">Not Running...</div>
-                    </div>
-
-                    <div class="browser-screen" id="screenContainer">
-                        <img id="screenView" src="https://via.placeholder.com/1280x720/1e293b/ffffff?text=Click+Launch+to+Start" alt="Browser Screen">
-                        
-                        <div id="loading" class="absolute inset-0 bg-slate-900/80 items-center justify-center flex hidden">
-                            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            <img id="screen" src="https://via.placeholder.com/1280x720?text=Press+Launch+to+Load+Session" onclick="handleClick(event)">
         </div>
     </div>
 
     <script>
-        const startBtn = document.getElementById('startBtn');
-        const screenView = document.getElementById('screenView');
-        const loading = document.getElementById('loading');
-        const status = document.getElementById('status');
+        const API = '/cloud';
+        const screen = document.getElementById('screen');
+        const loader = document.getElementById('loader');
 
-        // Render URL (Aapka API endpoint)
-        const API_URL = 'https://pooreyoutuber-github-io-pop.onrender.com/cloud';
-
-        async function updateScreen(postData) {
-            loading.classList.remove('hidden');
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(postData)
-                });
-                const data = await res.json();
-                if (data.screen) {
-                    screenView.src = "data:image/png;base64," + data.screen;
-                    status.innerText = "ONLINE";
-                    status.className = "px-4 py-1 rounded-full bg-green-500/20 text-green-400 text-sm font-bold border border-green-500/50";
-                }
-            } catch (err) {
-                console.error("Error:", err);
-            } finally {
-                loading.classList.add('hidden');
-            }
+        async function launch() {
+            const url = document.getElementById('urlInput').value;
+            updateStatus('Starting & Loading Session...');
+            await request({ action: 'launch', url });
         }
 
-        startBtn.onclick = () => {
-            const url = document.getElementById('urlInput').value || 'https://google.com';
-            const desktop = document.getElementById('desktopToggle').checked;
-            updateScreen({ action: 'start', url, desktop });
-        };
+        async function saveToDrive() {
+            updateStatus('Zipping & Uploading to Google Drive...');
+            const data = await request({ action: 'save' });
+            alert(data.message);
+        }
 
-        // Click Logic: Photo par jahan click karoge wahi click server par hoga
-        screenView.onclick = (e) => {
-            const rect = screenView.getBoundingClientRect();
-            const x = Math.round((e.clientX - rect.left) * (screenView.naturalWidth / rect.width));
-            const y = Math.round((e.clientY - rect.top) * (screenView.naturalHeight / rect.height));
-            
-            updateScreen({ action: 'click', x, y });
-        };
+        async function handleClick(e) {
+            const rect = screen.getBoundingClientRect();
+            const x = Math.round((e.clientX - rect.left) * (screen.naturalWidth / rect.width));
+            const y = Math.round((e.clientY - rect.top) * (screen.naturalHeight / rect.height));
+            await request({ action: 'click', x, y });
+        }
+
+        async function sendKey() {
+            const text = document.getElementById('keyboardInput').value;
+            await request({ action: 'type', text });
+            document.getElementById('keyboardInput').value = '';
+        }
+
+        async function request(body) {
+            loader.classList.remove('hidden');
+            const res = await fetch(API, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if(data.screen) screen.src = "data:image/png;base64," + data.screen;
+            loader.classList.add('hidden');
+            return data;
+        }
+
+        function updateStatus(msg) { console.log(msg); }
     </script>
 </body>
 </html>
