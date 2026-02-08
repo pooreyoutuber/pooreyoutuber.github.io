@@ -1,166 +1,98 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM gmail Boost Pro | Cloud Terminal Engine</title>
+    <title>Cloud Mirror Browser | Sync Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: radial-gradient(circle at top right, #0f172a, #020617); min-height: 100vh; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .live-window { border: 2px solid #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); border-radius: 1.5rem; overflow: hidden; background: #000; }
-        .terminal-scroll::-webkit-scrollbar { width: 6px; }
-        .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .cursor-blink { animation: blink 1s step-end infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .browser-container { height: 100vh; display: flex; flex-direction: column; }
+        .address-bar-area { background: #1e293b; padding: 10px 20px; border-bottom: 1px solid #334155; }
+        .search-input { background: #0f172a; border: 1px solid #334155; color: #94a3b8; transition: 0.3s; }
+        .search-input:focus { border-color: #3b82f6; color: white; outline: none; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        #viewport { flex-grow: 1; position: relative; background: #000; overflow: auto; display: flex; justify-content: center; }
+        #liveScreen { cursor: crosshair; max-width: none; border: 1px solid #334155; }
+        .loader-dot { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
-<body class="text-slate-200 p-4 md:p-8">
+<body>
 
-    <div class="max-w-4xl mx-auto space-y-6">
-        <div class="live-window glass">
-            <div class="flex justify-between items-center p-3 border-b border-slate-700 bg-slate-900/50">
-                <div class="flex items-center gap-2">
-                    <span id="statusDot" class="w-2 h-2 bg-slate-500 rounded-full"></span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live Engine Monitor</span>
-                </div>
-                <div class="text-[10px] text-blue-400 font-mono" id="lastUpdated">System: Idle</div>
+    <div class="browser-container">
+        <div class="address-bar-area flex items-center gap-4">
+            <div class="flex gap-2 text-slate-500">
+                <i class="fas fa-chevron-left"></i>
+                <i class="fas fa-chevron-right"></i>
+                <i class="fas fa-redo cursor-pointer hover:text-white" onclick="location.reload()"></i>
             </div>
-            <div class="aspect-video relative bg-slate-900">
-                <img id="livePreview" src="https://via.placeholder.com/1280x720/0f172a/3b82f6?text=Waiting+for+Engine+Start..." 
-                     class="w-full h-full object-contain" alt="Live View">
+            <div class="flex-1 relative">
+                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 text-xs"></i>
+                <input type="text" id="urlInput" placeholder="Search Google or type a URL..." 
+                       class="w-full search-input rounded-full py-2 pl-10 pr-4 text-sm">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 bg-red-500 rounded-full loader-dot"></span> LIVE SYNC
+                </span>
             </div>
         </div>
 
-        <div class="glass rounded-3xl p-6 shadow-2xl">
-            <form id="orderForm" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">Video Link</label>
-                        <input type="url" id="videoUrl" required placeholder="https://www.youtube.com/watch?v=..." 
-                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">Views</label>
-                        <input type="number" id="viewsCount" value="10" 
-                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">WatchTime (s)</label>
-                        <input type="number" id="watchTime" value="60" 
-                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none text-sm">
-                    </div>
-                </div>
-                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm">
-                    Launch Boost Engine 🚀
-                </button>
-            </form>
+        <div id="viewport">
+            <img id="liveScreen" src="https://via.placeholder.com/1280x720/000000/334155?text=Connecting+to+Cloud+Engine..." 
+                 alt="Cloud View">
         </div>
 
-        <div class="glass rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
-            <div class="bg-slate-800/50 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
-                <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Backend Deployment Logs</span>
-                <div class="flex gap-1">
-                    <div class="w-2 h-2 rounded-full bg-slate-700"></div>
-                    <div class="w-2 h-2 rounded-full bg-slate-700"></div>
-                </div>
-            </div>
-            <div id="terminalBody" class="p-4 h-48 overflow-y-auto font-mono text-[12px] terminal-scroll bg-black/40">
-                <div class="text-slate-500">Ready for connection...<span class="cursor-blink">_</span></div>
-            </div>
+        <div class="bg-slate-900 p-2 border-t border-slate-800 flex justify-between px-6 text-[10px] text-slate-500">
+            <div>Session Status: <span class="text-emerald-500">Persistent</span></div>
+            <div>Resolution: 1280x720 | Sync: 2s Delay</div>
         </div>
     </div>
 
     <script>
-        const terminal = document.getElementById('terminalBody');
-        const liveImg = document.getElementById('livePreview');
-        const lastUpdatedText = document.getElementById('lastUpdated');
-        const statusDot = document.getElementById('statusDot');
+        const liveScreen = document.getElementById('liveScreen');
+        const urlInput = document.getElementById('urlInput');
         const API_BASE = "https://pooreyoutuber-github-io-1ultimate.onrender.com";
-        
-        let lastLogIndex = 0;
-        let isRunning = false;
 
-        function addLog(msg, type = 'info') {
-            const div = document.createElement('div');
-            const colors = { info: 'text-blue-400', success: 'text-emerald-400', error: 'text-red-400', node: 'text-yellow-400' };
-            div.className = `py-0.5 ${colors[type] || 'text-slate-400'}`;
-            div.innerHTML = `<span class="opacity-40 mr-2">${new Date().toLocaleTimeString()}</span> > ${msg}`;
-            terminal.appendChild(div);
-            terminal.scrollTop = terminal.scrollHeight;
-        }
-
-        // --- Screenshot Update Function ---
-        function updateLiveView() {
-            if(!isRunning) return;
+        // 1. Live View Sync (Har 2 second mein automatic update)
+        function syncScreen() {
             const timestamp = new Date().getTime();
-            // Cache bust karne ke liye timestamp zaroori hai
-            liveImg.src = `${API_BASE}/live-check?t=${timestamp}`;
-            lastUpdatedText.innerText = "Live: " + new Date().toLocaleTimeString();
-            statusDot.className = "w-2 h-2 bg-red-500 animate-pulse rounded-full";
+            liveScreen.src = `${API_BASE}/live-check?t=${timestamp}`;
         }
+        setInterval(syncScreen, 2000);
 
-        // --- Real Log Polling (Backend se asli logs mangwana) ---
-        async function pollLogs() {
-            if(!isRunning) return;
-            try {
-                // Maan lo backend par /api/logs endpoint hai jo activity return karta hai
-                const res = await fetch(`${API_BASE}/api/get-logs`); 
-                const data = await res.json();
+        // 2. Navigation Control (Search Bar logic)
+        urlInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                const val = urlInput.value;
+                let finalUrl = val.includes('://') ? val : `https://www.google.com/search?q=${encodeURIComponent(val)}`;
                 
-                if(data.logs && data.logs.length > lastLogIndex) {
-                    const newLogs = data.logs.slice(lastLogIndex);
-                    newLogs.forEach(log => {
-                        addLog(log.message, log.type);
-                    });
-                    lastLogIndex = data.logs.length;
-                }
-            } catch (err) {
-                console.error("Polling error:", err);
-            }
-        }
-
-        document.getElementById('orderForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const data = {
-                channel_url: document.getElementById('videoUrl').value,
-                views_count: parseInt(document.getElementById('viewsCount').value),
-                watch_time: parseInt(document.getElementById('watchTime').value)
-            };
-
-            btn.disabled = true;
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-2'></i>BOOTING CLOUD ENGINE...";
-            terminal.innerHTML = ""; // Clear purane logs
-            addLog("Establishing Secure Tunnel...", "info");
-
-            try {
-                const res = await fetch(`${API_BASE}/api/real-gmail`, {
+                await fetch(`${API_BASE}/api/browser-action`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ action: 'navigate', data: { url: finalUrl } })
                 });
-
-                if (res.ok) {
-                    isRunning = true;
-                    addLog("Tunnel Established. Engine Online.", "success");
-                    
-                    // Har 3 second me screenshot update karo
-                    setInterval(updateLiveView, 3000);
-                    
-                    // Har 2 second me backend se asli logs mangwao
-                    setInterval(pollLogs, 2000);
-                    
-                    btn.innerHTML = "ENGINE RUNNING ⚡";
-                }
-            } catch (err) {
-                addLog("Deployment Failed: " + err.message, "error");
-                btn.disabled = false;
-                btn.innerHTML = "Launch Boost Engine 🚀";
+                urlInput.value = finalUrl;
             }
         });
+
+        // 3. Remote Mouse Click (Jahan click karoge vahan click hoga)
+        liveScreen.addEventListener('click', async (e) => {
+            const rect = liveScreen.getBoundingClientRect();
+            // Coordinates calculate karna scale ke hisab se
+            const x = Math.round((e.clientX - rect.left) * (1280 / rect.width));
+            const y = Math.round((e.clientY - rect.top) * (720 / rect.height));
+
+            console.log(`Clicking at: ${x}, ${y}`);
+
+            await fetch(`${API_BASE}/api/browser-action`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'click', data: { x, y } })
+            });
+        });
+
     </script>
 </body>
 </html>
