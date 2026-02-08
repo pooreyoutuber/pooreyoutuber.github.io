@@ -1472,6 +1472,7 @@ app.post('/api/real-view-boost', async (req, res) => {
 // NEW TOOL 9: SHARED LIVE BROWSER (CONTROL & MIRROR)
 // ===================================================================
 // Socket.io setup (Zaroori fix)
+const { Server } =
 require('socket.io');
 const server = http.createServer(app);
 const io = new Server(server, {
