@@ -1399,8 +1399,10 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             });
 
             const page = await browser.newPage();
-            await page.client().send('Network.clearBrowserCache');
-            await page.client().send('Network.clearBrowserCookies');
+
+            const client = await page.createCDPSession(); 
+            await client.send('Network.clearBrowserCache');
+            await client.send('Network.clearBrowserCookies');
             
             // Mobile Setup (Sahi coordination ke liye)
             await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
