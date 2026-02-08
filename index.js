@@ -1546,7 +1546,7 @@ app.get('/', (req, res) => {
 //==================================================
 // --- SERVER START ---
 // ===================================================================
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () {
     console.log('Server is live on port: ' + listener.address().port);
 });
  finalServer.listen(PORT, () => {
