@@ -3,87 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Browser Pro | PooreYou</title>
+    <title>Cloud Browser Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; cursor: crosshair; }
-        .monitor-glow { box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.5); }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        #remoteScreen { transition: transform 0.2s ease; border-radius: 4px; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
     </style>
 </head>
-<body class="text-slate-200 font-sans p-2 md:p-8">
+<body class="flex flex-col items-center p-4">
 
-    <div class="max-w-6xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <div>
-                <h1 class="text-3xl font-black tracking-tighter bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    REMOTE VIRTUAL BROWSER
-                </h1>
-                <p class="text-slate-500 text-sm font-mono">Status: <span class="text-emerald-400" id="statusText">CONNECTED</span></p>
+    <header class="w-full max-w-4xl flex justify-between items-center py-6">
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            CloudBrowser v1.0
+        </h1>
+        <div class="flex items-center gap-2">
+            <span id="status-text" class="text-sm text-gray-400">Disconnected</span>
+            <span id="status-dot" class="status-dot bg-red-500"></span>
+        </div>
+    </header>
+
+    <main class="w-full max-w-4xl">
+        <div class="glass-card p-8 shadow-2xl mb-6">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold mb-2">Browser Instance</h2>
+                    <p class="text-gray-400 text-sm">Open Gmail with persistent session storage.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="controlBrowser('start')" id="start-btn" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2">
+                        <i class="fas fa-play"></i> Launch Browser
+                    </button>
+                    <button onclick="controlBrowser('stop')" id="stop-btn" class="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg border border-red-600/50 transition-all">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card overflow-hidden h-[500px] relative">
+            <div id="loader" class="hidden absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
             </div>
             
-            <div class="flex gap-3">
-                <button onclick="control('start?view=mobile')" class="glass hover:bg-blue-600 px-5 py-2 rounded-full text-xs font-bold transition-all">📱 MOBILE</button>
-                <button onclick="control('start?view=desktop')" class="glass hover:bg-blue-600 px-5 py-2 rounded-full text-xs font-bold transition-all">💻 DESKTOP</button>
-                <button onclick="downloadZip()" class="bg-emerald-600 hover:bg-emerald-500 px-5 py-2 rounded-full text-xs font-bold shadow-lg shadow-emerald-900/20 transition-all">⬇️ DOWNLOAD SESSION</button>
+            <div id="placeholder" class="h-full flex flex-col items-center justify-center text-gray-500">
+                <i class="fas fa-browser text-6xl mb-4"></i>
+                <p>Browser not started yet</p>
             </div>
-        </div>
 
-        <div class="relative rounded-2xl overflow-hidden border border-slate-700 bg-black monitor-glow">
-            <div class="aspect-video w-full flex items-center justify-center overflow-auto bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
-                <img id="remoteScreen" 
-                     src="https://pooreyoutuber-github-io-pop.onrender.com/remote/screen" 
-                     class="max-w-full shadow-2xl"
-                     onerror="this.src='https://placehold.co/800x450/000000/FFFFFF?text=Initializing+Cloud+Engine...'">
-            </div>
-            
-            <div class="absolute top-4 left-4 flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
-                <div class="w-2 h-2 bg-red-500 animate-pulse rounded-full"></div>
-                <span class="text-[10px] font-bold tracking-widest uppercase">Live Stream</span>
-            </div>
+            <iframe id="browser-frame" src="" class="hidden w-full h-full border-none bg-white"></iframe>
         </div>
-
-        <div class="mt-8 glass p-4 rounded-2xl flex flex-col md:flex-row gap-4">
-            <div class="flex-1 flex gap-2">
-                <input type="text" id="targetUrl" 
-                       placeholder="Enter Website URL (e.g. google.com)" 
-                       class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
-                <button onclick="navigate()" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-black text-sm uppercase tracking-wider">Navigate</button>
-            </div>
-        </div>
-
-        <p class="mt-4 text-center text-slate-600 text-[10px] uppercase tracking-[0.2em]">PooreYou Cloud Infrastructure v2.1</p>
-    </div>
+    </main>
 
     <script>
-        const API_URL = "https://pooreyoutuber-github-io-pop.onrender.com/remote";
+        const API_URL = 'https://pooreyoutuber-github-io-pop.onrender.com';
 
-        // Auto Refresh Screen (Smooth updates)
-        setInterval(() => {
-            const img = document.getElementById('remoteScreen');
-            const newSrc = `${API_URL}/screen?t=${Date.now()}`;
+        async function controlBrowser(action) {
+            const statusText = document.getElementById('status-text');
+            const statusDot = document.getElementById('status-dot');
+            const loader = document.getElementById('loader');
+            const frame = document.getElementById('browser-frame');
+            const placeholder = document.getElementById('placeholder');
+
+            loader.classList.remove('hidden');
             
-            // Image pre-loading to avoid flicker
-            const tempImg = new Image();
-            tempImg.src = newSrc;
-            tempImg.onload = () => { img.src = newSrc; };
-        }, 2000);
+            try {
+                const endpoint = action === 'start' ? '/start-browser' : '/stop-browser';
+                const response = await fetch(`${API_URL}${endpoint}`);
+                const data = await response.json();
 
-        async function control(endpoint) {
-            document.getElementById('statusText').innerText = "SYNCHRONIZING...";
-            await fetch(`${API_URL}/${endpoint}`);
-            setTimeout(() => { document.getElementById('statusText').innerText = "CONNECTED"; }, 2000);
-        }
-
-        async function navigate() {
-            const url = document.getElementById('targetUrl').value;
-            if(!url) return alert("URL to daal pehle!");
-            await fetch(`${API_URL}/navigate?url=${encodeURIComponent(url)}`);
-        }
-
-        function downloadZip() {
-            window.location.href = `${API_URL}/download-session`;
+                if (data.success) {
+                    statusText.innerText = "Browser Active";
+                    statusDot.classList.replace('bg-red-500', 'bg-green-500');
+                    
+                    if(action === 'start') {
+                        // Agar aapka backend live stream URL bhej raha hai:
+                        placeholder.classList.add('hidden');
+                        frame.classList.remove('hidden');
+                        // frame.src = data.viewUrl; 
+                    }
+                }
+            } catch (err) {
+                console.error("Error:", err);
+                alert("Failed to connect to Render server!");
+            } finally {
+                loader.classList.add('hidden');
+            }
         }
     </script>
 </body>
