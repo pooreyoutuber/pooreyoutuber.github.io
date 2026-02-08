@@ -1,83 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Browser Tool</title>
+    <title>Cloud Browser Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        body { background: radial-gradient(circle, #1e293b, #0f172a); min-height: 100vh; color: white; }
-        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        body { background: #0f172a; color: white; font-family: sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .browser-screen { 
+            width: 100%; 
+            min-height: 400px; 
+            background: #1e293b; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            cursor: crosshair;
+            position: relative;
+        }
+        #screenView { width: 100%; height: auto; display: block; }
+        .loader { border-top-color: #3b82f6; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body class="p-4 md:p-8">
 
-    <div class="glass p-8 rounded-3xl w-full max-w-md shadow-2xl">
-        <h1 class="text-3xl font-bold text-center mb-8 tracking-tight">Cloud <span class="text-blue-400">Browser</span></h1>
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold italic"><i class="fa-solid fa-cloud text-blue-500 mr-2"></i>CloudBrowser</h1>
+            <div id="status" class="px-4 py-1 rounded-full bg-red-500/20 text-red-400 text-sm font-bold border border-red-500/50">OFFLINE</div>
+        </div>
 
-        <div class="bg-slate-800/50 p-4 rounded-2xl mb-6 flex justify-between items-center">
-            <div>
-                <p class="text-xs text-gray-400 uppercase font-semibold">Browser Status</p>
-                <h2 id="statusText" class="text-lg font-bold text-red-400">Offline</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="glass p-6 rounded-2xl h-fit">
+                <div class="mb-6">
+                    <label class="block text-gray-400 text-xs font-bold mb-2 uppercase">Website URL</label>
+                    <input type="text" id="urlInput" placeholder="https://google.com" class="w-full bg-slate-900 border-none rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div class="flex items-center justify-between mb-6">
+                    <span class="text-sm">Desktop Mode</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="desktopToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                </div>
+
+                <button id="startBtn" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play text-sm"></i> Launch Browser
+                </button>
+
+                <div class="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <p class="text-[10px] text-yellow-200">Tip: Browser screen par click karke aap login ya navigation kar sakte hain. Cookies automatic save hongi.</p>
+                </div>
             </div>
-            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                <input type="checkbox" name="toggle" id="browserToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                <label for="browserToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+
+            <div class="lg:col-span-2">
+                <div class="glass rounded-2xl p-2">
+                    <div class="flex items-center gap-2 p-3 bg-slate-900/50 rounded-t-xl border-b border-white/5">
+                        <div class="flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <div id="currentUrl" class="ml-4 text-xs text-gray-400 truncate bg-slate-800 px-4 py-1 rounded-full w-full">Not Running...</div>
+                    </div>
+
+                    <div class="browser-screen" id="screenContainer">
+                        <img id="screenView" src="https://via.placeholder.com/1280x720/1e293b/ffffff?text=Click+Launch+to+Start" alt="Browser Screen">
+                        
+                        <div id="loading" class="absolute inset-0 bg-slate-900/80 items-center justify-center flex hidden">
+                            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
-
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-400 mb-2">Target Website</label>
-            <input type="url" id="targetUrl" placeholder="https://google.com" 
-                   class="w-full bg-slate-700 border-none rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition">
-        </div>
-
-        <div class="flex items-center justify-between mb-8 px-2">
-            <span class="text-sm font-medium">Desktop Mode</span>
-            <input type="checkbox" id="desktopMode" class="w-5 h-5 accent-blue-500">
-        </div>
-
-        <button id="launchBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-lg transform active:scale-95 transition">
-            Launch Instance
-        </button>
-
-        <div id="msg" class="mt-4 text-center text-sm text-gray-400 hidden">Connecting to Render...</div>
     </div>
 
     <script>
-        const launchBtn = document.getElementById('launchBtn');
-        const statusText = document.getElementById('statusText');
-        const browserToggle = document.getElementById('browserToggle');
+        const startBtn = document.getElementById('startBtn');
+        const screenView = document.getElementById('screenView');
+        const loading = document.getElementById('loading');
+        const status = document.getElementById('status');
 
-        launchBtn.onclick = async () => {
-            const url = document.getElementById('targetUrl').value;
-            const isDesktop = document.getElementById('desktopMode').checked;
-            const msg = document.getElementById('msg');
+        // Render URL (Aapka API endpoint)
+        const API_URL = 'https://pooreyoutuber-github-io-pop.onrender.com/cloud';
 
-            msg.classList.remove('hidden');
-            msg.innerText = "Initializing Cloud Instance...";
-
+        async function updateScreen(postData) {
+            loading.classList.remove('hidden');
             try {
-                const response = await fetch('https://pooreyoutuber-github-io-pop.onrender.com/cloud', {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        url: url, 
-                        desktop: isDesktop,
-                        action: browserToggle.checked ? 'start' : 'stop'
-                    })
+                    body: JSON.stringify(postData)
                 });
-
-                const data = await response.json();
-                msg.innerText = "Success! Checking session...";
-                statusText.innerText = "Online";
-                statusText.classList.replace('text-red-400', 'text-green-400');
+                const data = await res.json();
+                if (data.screen) {
+                    screenView.src = "data:image/png;base64," + data.screen;
+                    status.innerText = "ONLINE";
+                    status.className = "px-4 py-1 rounded-full bg-green-500/20 text-green-400 text-sm font-bold border border-green-500/50";
+                }
             } catch (err) {
-                msg.innerText = "Error connecting to cloud server.";
-                console.error(err);
+                console.error("Error:", err);
+            } finally {
+                loading.classList.add('hidden');
             }
+        }
+
+        startBtn.onclick = () => {
+            const url = document.getElementById('urlInput').value || 'https://google.com';
+            const desktop = document.getElementById('desktopToggle').checked;
+            updateScreen({ action: 'start', url, desktop });
+        };
+
+        // Click Logic: Photo par jahan click karoge wahi click server par hoga
+        screenView.onclick = (e) => {
+            const rect = screenView.getBoundingClientRect();
+            const x = Math.round((e.clientX - rect.left) * (screenView.naturalWidth / rect.width));
+            const y = Math.round((e.clientY - rect.top) * (screenView.naturalHeight / rect.height));
+            
+            updateScreen({ action: 'click', x, y });
         };
     </script>
 </body>
