@@ -1471,58 +1471,77 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // NEW TOOL 9: SHARED LIVE BROWSER (CONTROL & MIRROR)
 // ===================================================================
-const { Server } = require('socket.io');
-const io = new Server(http.createServer(app)); // Existing app ke saath connect
+// Socket.io setup (Zaroori fix)
+require('socket.io');
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: "*" }
+});
 
+app.use(cors());
+app.use(express.json());
+
+// --- SHARED BROWSER GLOBAL VARIABLES ---
 let sharedBrowser;
 let sharedPage;
 
-async function startSharedSession(url = 'https://google.com') {
-    if (sharedBrowser) return; // Pehle se chalu hai toh dubara nahi
+async function startSharedSession() {
+    if (sharedBrowser) return; 
 
-    sharedBrowser = await puppeteer.launch({
-        headless: "new",
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-    sharedPage = await sharedBrowser.newPage();
-    await sharedPage.setViewport({ width: 1280, height: 720 });
-    await sharedPage.goto(url);
+    try {
+        sharedBrowser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        });
+        sharedPage = await sharedBrowser.newPage();
+        await sharedPage.setViewport({ width: 1280, height: 720 });
+        await sharedPage.goto('https://www.google.com');
 
-    // Live Screenshot Loop (Har 800ms mein screen bhejega)
-    setInterval(async () => {
-        if (sharedPage) {
-            try {
-                const screen = await sharedPage.screenshot({ encoding: 'base64', type: 'jpeg', quality: 40 });
-                io.emit('shared-screen-data', screen);
-            } catch (e) { /* Browser close hone par error handle */ }
-        }
-    }, 800);
+        // Screenshot Loop: Har 800ms mein sabhi users ko screen bhejta rahega
+        setInterval(async () => {
+            if (sharedPage) {
+                try {
+                    const screen = await sharedPage.screenshot({ 
+                        encoding: 'base64', 
+                        type: 'jpeg', 
+                        quality: 35 
+                    });
+                    io.emit('shared-screen-data', screen);
+                } catch (e) { /* Browser crash handle */ }
+            }
+        }, 800);
+    } catch (err) {
+        console.error("Puppeteer Launch Error:", err);
+    }
 }
 
+// --- SOCKET.IO EVENTS (Shared Control) ---
 io.on('connection', (socket) => {
-    console.log('New Peer Connected to Shared Browser:', socket.id);
-
-    // Pehli baar connect hone par browser start karein
+    console.log('User joined shared session:', socket.id);
     startSharedSession();
 
-    // 1. URL Change Command
+    // Jab koi URL change karega, sabka badlega
     socket.on('shared-open-url', async (url) => {
-        if (sharedPage) await sharedPage.goto(url.startsWith('http') ? url : 'https://' + url);
+        if (sharedPage) {
+            const target = url.startsWith('http') ? url : 'https://' + url;
+            await sharedPage.goto(target).catch(e => console.log("Nav Error"));
+        }
     });
 
-    // 2. Mouse Click Command (Mirroring)
+    // Jab koi click karega, server side click hoga
     socket.on('shared-mouse-click', async (pos) => {
         if (sharedPage) {
             await sharedPage.mouse.click(pos.x, pos.y);
-            console.log(`Click Executed at: ${pos.x}, ${pos.y}`);
         }
     });
 });
 
-// Purane Server Start ko thoda update karna padega taaki socket chale
-// Niche wala port listener tumhare purane listener ko replace kar dega
-const finalServer = http.createServer(app);
-const socketServer = new Server(finalServer, { cors: { origin: "*" } });
+// --- APKE PURANE ENDPOINTS (GA4, Revenue etc) ---
+app.get('/', (req, res) => {
+    res.send('Combined API Server with Shared Browser is Live!');
+});
+
+// [Yahan aapka purane tools ka logic (app.post) as it is rahega...]
 //==================================================
 // --- SERVER START ---
 // ===================================================================
