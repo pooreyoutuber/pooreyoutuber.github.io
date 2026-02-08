@@ -1468,156 +1468,110 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // NEW TOOL 10: CLOUD BROWSER (GMAIL PERSISTENCE)
 // ===================================================================
-
-const GMAIL_API_KEY = process.env.GMAIL; // Aapki Browser-use API Key
-
-app.get('/start-cloud-browser', async (req, res) => {
-    if (!GMAIL_API_KEY) {
-        return res.status(500).json({ error: "Cloud Browser API Key (GMAIL) is missing in environment variables." });
-    }
-
-    try {
-        // Browser-use API ko hit karne ke liye (Backend simulation)
-        // Note: browser-use aksar Python me chalta hai, 
-        // node.js me hum unke API endpoint ko hit karenge.
-        
-        const response = await axios.post('https://api.browser-use.com/v1/run-task', {
-            task: "Open gmail.com and keep the session alive",
-            use_vision: true,
-            browser_settings: {
-                window_width: 1280,
-                window_height: 800
-            },
-            // Ye session name login ko yaad rakhega
-            persistent_context: "user_gmail_session_001" 
-        }, {
-            headers: {
-                'Authorization': `Bearer ${GMAIL_API_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        res.status(200).json({
-            success: true,
-            message: "Cloud Browser Active",
-            // Unki API se milne wala live view URL
-            viewUrl: response.data.live_view_url || "https://cloud.browser-use.com/dashboard"
-        });
-
-    } catch (error) {
-        console.error("Cloud Browser Error:", error.message);
-        res.status(500).json({ error: "Failed to launch cloud browser." });
-    }
-});
 // ===================================================================
-// 6. GMAIL LOGIN & YOUTUBE VIDEO VIEWER (API: /api/real-gmail)
+// 6. AI GMAIL LOGIN & YOUTUBE VIEWER (With Live 3s Screenshot)
 // ===================================================================
-let globalBrowser = null;
-let currentScreenshot = null;
+
+let currentScreenshot = null; // Global variable for live view
 let logHistory = [];
 
-// Logs save karne ka function
+// Logs management
 function addSystemLog(msg, type = 'info') {
-    const logEntry = { timestamp: new Date().toLocaleTimeString(), message: msg, type: type };
-    logHistory.push(logEntry);
-    if (logHistory.length > 50) logHistory.shift(); 
-    console.log(`[SYSTEM LOG] ${msg}`);
+    const logEntry = { timestamp: new Date().toLocaleTimeString(), message: msg, type: type };
+    logHistory.push(logEntry);
+    if (logHistory.length > 50) logHistory.shift();
+    console.log(`[SYSTEM LOG] ${msg}`);
 }
 
-// Frontend ke liye Logs endpoint
-app.get('/api/get-logs', (req, res) => {
-    res.json({ logs: logHistory });
-});
+// Frontend Polling Endpoints
+app.get('/api/get-logs', (req, res) => res.json({ logs: logHistory }));
 
-// Live Screenshot endpoint
 app.get('/live-check', (req, res) => {
-    if (currentScreenshot) {
-        const img = Buffer.from(currentScreenshot, 'base64');
-        res.writeHead(200, {
-            'Content-Type': 'image/png',
-            'Content-Length': img.length
-        });
-        res.end(img);
-    } else {
-        res.status(404).send('No live preview available.');
-    }
+    if (currentScreenshot) {
+        const img = Buffer.from(currentScreenshot, 'base64');
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': img.length });
+        res.end(img);
+    } else {
+        res.status(404).send('No live preview.');
+    }
 });
 
 app.post('/api/real-gmail', async (req, res) => {
-    const { channel_url, views_count, watch_time } = req.body;
+    const { channel_url, views_count, watch_time } = req.body;
 
-    if (!channel_url) {
-        return res.status(400).json({ error: "Video URL missing" });
-    }
+    if (!channel_url) return res.status(400).json({ error: "URL missing" });
 
-    // Request accept karke backend process shuru karna
-    res.status(200).json({ success: true, message: "Engine starting..." });
+    res.status(200).json({ success: true, message: "AI Engine Initiated" });
 
-    (async () => {
-        try {
-            if (!globalBrowser) {
-                addSystemLog("Launching Stealth Cloud Browser...", "info");
-                globalBrowser = await puppeteer.launch({
-                    headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
-                });
-            }
+    (async () => {
+        try {
+            if (!globalBrowser) {
+                addSystemLog("Launching Stealth AI Browser...", "info");
+                globalBrowser = await puppeteer.launch({
+                    headless: "new",
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                });
+            }
 
-            const page = await globalBrowser.newPage();
-            await page.setViewport({ width: 1280, height: 720 });
+            const page = await globalBrowser.newPage();
+            await page.setViewport({ width: 1280, height: 720 });
 
-            // 1. Gmail Sign-In Logic
-            addSystemLog("Navigating to Google Login...", "info");
-            await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
-            currentScreenshot = await page.screenshot({ encoding: 'base64' });
+            // --- LIVE SCREENSHOT INTERVAL START ---
+            // Ye har 3 second me 'currentScreenshot' ko update karega jo frontend dekhta hai
+            const liveMonitor = setInterval(async () => {
+                try {
+                    const pages = await globalBrowser.pages();
+                    const activePage = pages[pages.length - 1]; // Hamesha last open tab ka shot lega
+                    currentScreenshot = await activePage.screenshot({ encoding: 'base64' });
+                } catch (e) {}
+            }, 3000);
 
-            addSystemLog("Entering Gmail ID...", "info");
-            await page.type('input[type="email"]', 'robotf975@gmail.com');
-            await page.click('#identifierNext');
-            await new Promise(r => setTimeout(r, 3000));
-            
-            addSystemLog("Entering Password...", "info");
-            await page.type('input[type="password"]', 'Youtube@55#');
-            await page.click('#passwordNext');
-            await page.waitForNavigation({ waitUntil: 'networkidle2' });
-            
-            addSystemLog("Gmail Login Successful ✅", "success");
-            currentScreenshot = await page.screenshot({ encoding: 'base64' });
+            // 1. Gmail Login Process with AI Verification
+            addSystemLog("Navigating to Gmail...", "info");
+            await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
 
-            // 2. Views Loop (Har view ke liye naya tab)
-            for (let i = 1; i <= views_count; i++) {
-                addSystemLog(`Starting View Session #${i}...`, "node");
-                
-                const videoPage = await globalBrowser.newPage();
-                await videoPage.setViewport({ width: 1280, height: 720 });
-                
-                // Live screenshot update interval
-                const screenInterval = setInterval(async () => {
-                    try { 
-                        currentScreenshot = await videoPage.screenshot({ encoding: 'base64' }); 
-                    } catch(e) {}
-                }, 3000);
+            await page.type('input[type="email"]', 'robotf975@gmail.com');
+            await page.click('#identifierNext');
+            await new Promise(r => setTimeout(r, 4000));
 
-                await videoPage.goto(channel_url, { waitUntil: 'networkidle2' });
-                addSystemLog(`Watching Video... Target: ${watch_time}s`, "info");
-                
-                // Auto-play koshish
-                try { await videoPage.click('.ytp-play-button'); } catch(e) {}
+            await page.type('input[type="password"]', 'Youtube@55#');
+            await page.click('#passwordNext');
+            await page.waitForNavigation({ waitUntil: 'networkidle2' });
+            addSystemLog("Login Verified by AI ✅", "success");
 
-                await new Promise(r => setTimeout(r, watch_time * 1000));
-                
-                clearInterval(screenInterval);
-                await videoPage.close();
-                addSystemLog(`View #${i} Finished. Tab closed.`, "success");
-            }
+            // 2. Views Loop
+            for (let i = 1; i <= views_count; i++) {
+                addSystemLog(`Starting Session #${i}...`, "node");
+                const videoPage = await globalBrowser.newPage();
+                await videoPage.setViewport({ width: 1280, height: 720 });
 
-            addSystemLog("All Boost Tasks Completed. Engine Idle.", "success");
+                await videoPage.goto(channel_url, { waitUntil: 'networkidle2' });
+                
+                // Gemini Vision Check
+                const shot = await videoPage.screenshot({ encoding: 'base64' });
+                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const aiResult = await model.generateContent([
+                    "Is the YouTube video playing? Just say 'Playing' or 'Stopped'.",
+                    { inlineData: { data: shot, mimeType: "image/png" } }
+                ]);
+                addSystemLog(`AI Status: ${aiResult.response.text()}`, "info");
 
-        } catch (error) {
-            addSystemLog("Engine Error: " + error.message, "error");
-        }
-    })();
-}); 
+                try { await videoPage.click('.ytp-play-button'); } catch(e) {}
+
+                await new Promise(r => setTimeout(r, watch_time * 1000));
+                await videoPage.close();
+                addSystemLog(`Session #${i} Done.`, "success");
+            }
+
+            clearInterval(liveMonitor);
+            addSystemLog("All tasks completed.", "success");
+
+        } catch (error) {
+            addSystemLog("Critical Error: " + error.message, "error");
+        }
+    })();
+});
+
 //==================================================
 // --- SERVER START ---
 // ===================================================================
