@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Share Tool | Remote Browser</title>
+    <title>Cloud Share Tool | Remote Shared Browser</title>
     <style>
-        /* ... (Tumhara saara CSS yahan rahega, design ekdum mast hai) ... */
         body { background: #0f0f0f; color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         .browser-header { background: #2b2b2b; padding: 10px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 10; }
         .controls { display: flex; gap: 8px; }
@@ -15,13 +14,14 @@
         .green { background: #27c93f; }
         .address-bar { flex-grow: 1; display: flex; background: #1a1a1a; border-radius: 20px; padding: 5px 15px; border: 1px solid #444; }
         .address-bar input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 14px; }
-        .btn-go { background: #007bff; color: white; border: none; padding: 5px 20px; border-radius: 15px; cursor: pointer; font-weight: bold; }
-        .viewport { flex-grow: 1; position: relative; background: #fff; display: flex; justify-content: center; align-items: center; overflow: auto; }
-        #browser-screen { max-width: 100%; cursor: crosshair; display: block; }
+        .btn-go { background: #007bff; color: white; border: none; padding: 5px 20px; border-radius: 15px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-go:hover { background: #0056b3; }
+        .viewport { flex-grow: 1; position: relative; background: #222; display: flex; justify-content: center; align-items: center; overflow: auto; }
+        #browser-screen { max-width: 100%; cursor: crosshair; display: block; border: 1px solid #444; }
         .status-bar { background: #1a1a1a; padding: 5px 20px; font-size: 12px; display: flex; justify-content: space-between; border-top: 1px solid #333; }
-        .status-online { color: #27c93f; }
-        .status-offline { color: #ff5f56; }
-        #loader { position: absolute; display: none; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        .status-online { color: #27c93f; font-weight: bold; }
+        .status-offline { color: #ff5f56; font-weight: bold; }
+        #loader { position: absolute; display: none; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; z-index: 20; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -34,25 +34,26 @@
             <div class="dot green"></div>
         </div>
         <div class="address-bar">
-            <input type="text" id="url-input" placeholder="https://www.google.com" value="https://google.com">
+            <input type="text" id="url-input" placeholder="Enter URL (e.g. google.com)" value="https://google.com">
         </div>
-        <button class="btn-go" id="load-url">Go</button>
+        <button class="btn-go" id="load-url">Go / Share</button>
     </div>
 
     <div class="viewport" id="viewport">
         <div id="loader"></div>
-        <img id="browser-screen" src="" alt="Connecting to Render...">
+        <img id="browser-screen" src="" alt="Waiting for Stream...">
     </div>
 
     <div class="status-bar">
         <div>Status: <span id="status" class="status-offline">Connecting...</span></div>
-        <div>URL: <span id="tool-id">https://pooreyoutuber-github-io-pop.onrender.com</span></div>
+        <div>User Role: <span style="color: #ffbd2e;">Shared Operator</span></div>
+        <div>Session: <span id="session-id">Syncing...</span></div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     
     <script>
-        // 2. FIXED: Render ka backend URL yahan pass karna zaroori hai
+        // Backend URL (Same for everyone)
         const socket = io("https://pooreyoutuber-github-io-pop.onrender.com", {
             transports: ['websocket']
         });
@@ -62,39 +63,46 @@
         const screenImg = document.getElementById('browser-screen');
         const statusText = document.getElementById('status');
         const loader = document.getElementById('loader');
+        const sessionIdText = document.getElementById('session-id');
 
         socket.on('connect', () => {
-            statusText.innerText = "Online (Connected to Render)";
+            statusText.innerText = "Online (Shared Session)";
             statusText.className = "status-online";
+            sessionIdText.innerText = socket.id.substring(0, 8);
         });
 
         socket.on('disconnect', () => {
-            statusText.innerText = "Offline (Server Down)";
+            statusText.innerText = "Disconnected";
             statusText.className = "status-offline";
         });
 
-        socket.on('screen-data', (base64) => {
+        // Backend se shared screen data receive karna
+        socket.on('shared-screen-data', (base64) => {
             screenImg.src = "data:image/jpeg;base64," + base64;
             loader.style.display = "none";
         });
 
+        // Jab user 'Go' dabaye, sabke liye URL badle
         loadBtn.addEventListener('click', () => {
             const url = urlInput.value;
             if(url) {
                 loader.style.display = "block";
-                socket.emit('open-url', url);
+                socket.emit('shared-open-url', url); 
             }
         });
 
+        // Mouse click events - Backend ko bhej raha hai
         screenImg.addEventListener('click', (e) => {
             const rect = screenImg.getBoundingClientRect();
+            
+            // Scaled coordinates calculate karna
             const x = Math.round(e.clientX - rect.left);
             const y = Math.round(e.clientY - rect.top);
 
             const widthRatio = screenImg.naturalWidth / rect.width;
             const heightRatio = screenImg.naturalHeight / rect.height;
 
-            socket.emit('mouse-click', {
+            socket.emit('shared-mouse-click', {
                 x: x * widthRatio,
                 y: y * heightRatio
             });
