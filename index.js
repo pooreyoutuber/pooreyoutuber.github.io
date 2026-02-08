@@ -1546,9 +1546,7 @@ app.get('/', (req, res) => {
 //==================================================
 // --- SERVER START ---
 // ===================================================================
-server.listen(PORT, '0.0.0.0', () {
-    console.log('Server is live on port: ' + listener.address().port);
-});
- finalServer.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Purane saare server.listen aur finalServer.listen ko hata kar sirf ye rakhein:
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 PooreYouTuber API is live on port: ${PORT}`);
 });
