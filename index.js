@@ -1469,109 +1469,60 @@ app.post('/api/real-view-boost', async (req, res) => {
 // NEW TOOL 10: CLOUD BROWSER (GMAIL PERSISTENCE)
 // ===================================================================
 // ===================================================================
-// 6. AI GMAIL LOGIN & YOUTUBE VIEWER (With Live 3s Screenshot)
+// NEW TOOL 9: SHARED LIVE BROWSER (CONTROL & MIRROR)
 // ===================================================================
+const { Server } = require('socket.io');
+const io = new Server(http.createServer(app)); // Existing app ke saath connect
 
-let currentScreenshot = null; // Global variable for live view
-let logHistory = [];
+let sharedBrowser;
+let sharedPage;
 
-// Logs management
-function addSystemLog(msg, type = 'info') {
-    const logEntry = { timestamp: new Date().toLocaleTimeString(), message: msg, type: type };
-    logHistory.push(logEntry);
-    if (logHistory.length > 50) logHistory.shift();
-    console.log(`[SYSTEM LOG] ${msg}`);
+async function startSharedSession(url = 'https://google.com') {
+    if (sharedBrowser) return; // Pehle se chalu hai toh dubara nahi
+
+    sharedBrowser = await puppeteer.launch({
+        headless: "new",
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    sharedPage = await sharedBrowser.newPage();
+    await sharedPage.setViewport({ width: 1280, height: 720 });
+    await sharedPage.goto(url);
+
+    // Live Screenshot Loop (Har 800ms mein screen bhejega)
+    setInterval(async () => {
+        if (sharedPage) {
+            try {
+                const screen = await sharedPage.screenshot({ encoding: 'base64', type: 'jpeg', quality: 40 });
+                io.emit('shared-screen-data', screen);
+            } catch (e) { /* Browser close hone par error handle */ }
+        }
+    }, 800);
 }
 
-// Frontend Polling Endpoints
-app.get('/api/get-logs', (req, res) => res.json({ logs: logHistory }));
+io.on('connection', (socket) => {
+    console.log('New Peer Connected to Shared Browser:', socket.id);
 
-app.get('/live-check', (req, res) => {
-    if (currentScreenshot) {
-        const img = Buffer.from(currentScreenshot, 'base64');
-        res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': img.length });
-        res.end(img);
-    } else {
-        res.status(404).send('No live preview.');
-    }
-});
+    // Pehli baar connect hone par browser start karein
+    startSharedSession();
 
-app.post('/api/real-gmail', async (req, res) => {
-    const { channel_url, views_count, watch_time } = req.body;
+    // 1. URL Change Command
+    socket.on('shared-open-url', async (url) => {
+        if (sharedPage) await sharedPage.goto(url.startsWith('http') ? url : 'https://' + url);
+    });
 
-    if (!channel_url) return res.status(400).json({ error: "URL missing" });
-
-    res.status(200).json({ success: true, message: "AI Engine Initiated" });
-
-    (async () => {
-        try {
-            if (!globalBrowser) {
-                addSystemLog("Launching Stealth AI Browser...", "info");
-                globalBrowser = await puppeteer.launch({
-                    headless: "new",
-                    args: ['--no-sandbox', '--disable-setuid-sandbox']
-                });
-            }
-
-            const page = await globalBrowser.newPage();
-            await page.setViewport({ width: 1280, height: 720 });
-
-            // --- LIVE SCREENSHOT INTERVAL START ---
-            // Ye har 3 second me 'currentScreenshot' ko update karega jo frontend dekhta hai
-            const liveMonitor = setInterval(async () => {
-                try {
-                    const pages = await globalBrowser.pages();
-                    const activePage = pages[pages.length - 1]; // Hamesha last open tab ka shot lega
-                    currentScreenshot = await activePage.screenshot({ encoding: 'base64' });
-                } catch (e) {}
-            }, 3000);
-
-            // 1. Gmail Login Process with AI Verification
-            addSystemLog("Navigating to Gmail...", "info");
-            await page.goto('https://accounts.google.com/signin', { waitUntil: 'networkidle2' });
-
-            await page.type('input[type="email"]', 'robotf975@gmail.com');
-            await page.click('#identifierNext');
-            await new Promise(r => setTimeout(r, 4000));
-
-            await page.type('input[type="password"]', 'Youtube@55#');
-            await page.click('#passwordNext');
-            await page.waitForNavigation({ waitUntil: 'networkidle2' });
-            addSystemLog("Login Verified by AI ✅", "success");
-
-            // 2. Views Loop
-            for (let i = 1; i <= views_count; i++) {
-                addSystemLog(`Starting Session #${i}...`, "node");
-                const videoPage = await globalBrowser.newPage();
-                await videoPage.setViewport({ width: 1280, height: 720 });
-
-                await videoPage.goto(channel_url, { waitUntil: 'networkidle2' });
-                
-                // Gemini Vision Check
-                const shot = await videoPage.screenshot({ encoding: 'base64' });
-                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-                const aiResult = await model.generateContent([
-                    "Is the YouTube video playing? Just say 'Playing' or 'Stopped'.",
-                    { inlineData: { data: shot, mimeType: "image/png" } }
-                ]);
-                addSystemLog(`AI Status: ${aiResult.response.text()}`, "info");
-
-                try { await videoPage.click('.ytp-play-button'); } catch(e) {}
-
-                await new Promise(r => setTimeout(r, watch_time * 1000));
-                await videoPage.close();
-                addSystemLog(`Session #${i} Done.`, "success");
-            }
-
-            clearInterval(liveMonitor);
-            addSystemLog("All tasks completed.", "success");
-
-        } catch (error) {
-            addSystemLog("Critical Error: " + error.message, "error");
+    // 2. Mouse Click Command (Mirroring)
+    socket.on('shared-mouse-click', async (pos) => {
+        if (sharedPage) {
+            await sharedPage.mouse.click(pos.x, pos.y);
+            console.log(`Click Executed at: ${pos.x}, ${pos.y}`);
         }
-    })();
+    });
 });
 
+// Purane Server Start ko thoda update karna padega taaki socket chale
+// Niche wala port listener tumhare purane listener ko replace kar dega
+const finalServer = http.createServer(app);
+const socketServer = new Server(finalServer, { cors: { origin: "*" } });
 //==================================================
 // --- SERVER START ---
 // ===================================================================
