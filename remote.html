@@ -1,83 +1,166 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Browser Sync v1</title>
+    <title>SMM gmail Boost Pro | Cloud Terminal Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #0b0f1a; color: #e2e8f0; }
-        .browser-frame { border: 8px solid #1e293b; border-radius: 15px; background: #000; position: relative; }
-        #screen { width: 100%; cursor: crosshair; }
-        .btn-green { background: #10b981; transition: 0.3s; }
-        .btn-green:hover { background: #059669; transform: scale(1.05); }
+        body { background: radial-gradient(circle at top right, #0f172a, #020617); min-height: 100vh; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .live-window { border: 2px solid #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); border-radius: 1.5rem; overflow: hidden; background: #000; }
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
-<body class="p-4">
-    <div class="max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-800 p-4 rounded-xl">
-            <input type="text" id="urlInput" placeholder="Enter URL (ex: google.com)" class="col-span-2 bg-slate-900 p-2 rounded border border-slate-700 outline-none">
-            <button onclick="launch()" class="bg-blue-600 p-2 rounded font-bold">Launch</button>
-            <button onclick="saveToDrive()" class="btn-green p-2 rounded font-bold">💾 Save to Drive</button>
-        </div>
+<body class="text-slate-200 p-4 md:p-8">
 
-        <div class="mb-4 flex gap-2">
-            <input type="text" id="keyboardInput" placeholder="Type here and press Enter" class="flex-grow bg-slate-900 p-2 rounded border border-slate-700">
-            <button onclick="sendKey()" class="bg-orange-500 px-4 py-2 rounded font-bold">Send Text</button>
-        </div>
-
-        <div class="browser-frame overflow-hidden">
-            <div id="loader" class="absolute inset-0 flex items-center justify-center bg-black/70 hidden z-10">
-                <p class="text-white animate-pulse">Processing Action...</p>
+    <div class="max-w-4xl mx-auto space-y-6">
+        <div class="live-window glass">
+            <div class="flex justify-between items-center p-3 border-b border-slate-700 bg-slate-900/50">
+                <div class="flex items-center gap-2">
+                    <span id="statusDot" class="w-2 h-2 bg-slate-500 rounded-full"></span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live Engine Monitor</span>
+                </div>
+                <div class="text-[10px] text-blue-400 font-mono" id="lastUpdated">System: Idle</div>
             </div>
-            <img id="screen" src="https://via.placeholder.com/1280x720?text=Press+Launch+to+Load+Session" onclick="handleClick(event)">
+            <div class="aspect-video relative bg-slate-900">
+                <img id="livePreview" src="https://via.placeholder.com/1280x720/0f172a/3b82f6?text=Waiting+for+Engine+Start..." 
+                     class="w-full h-full object-contain" alt="Live View">
+            </div>
+        </div>
+
+        <div class="glass rounded-3xl p-6 shadow-2xl">
+            <form id="orderForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">Video Link</label>
+                        <input type="url" id="videoUrl" required placeholder="https://www.youtube.com/watch?v=..." 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">Views</label>
+                        <input type="number" id="viewsCount" value="10" 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">WatchTime (s)</label>
+                        <input type="number" id="watchTime" value="60" 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none text-sm">
+                    </div>
+                </div>
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm">
+                    Launch Boost Engine 🚀
+                </button>
+            </form>
+        </div>
+
+        <div class="glass rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="bg-slate-800/50 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Backend Deployment Logs</span>
+                <div class="flex gap-1">
+                    <div class="w-2 h-2 rounded-full bg-slate-700"></div>
+                    <div class="w-2 h-2 rounded-full bg-slate-700"></div>
+                </div>
+            </div>
+            <div id="terminalBody" class="p-4 h-48 overflow-y-auto font-mono text-[12px] terminal-scroll bg-black/40">
+                <div class="text-slate-500">Ready for connection...<span class="cursor-blink">_</span></div>
+            </div>
         </div>
     </div>
 
     <script>
-        const API = '/cloud';
-        const screen = document.getElementById('screen');
-        const loader = document.getElementById('loader');
+        const terminal = document.getElementById('terminalBody');
+        const liveImg = document.getElementById('livePreview');
+        const lastUpdatedText = document.getElementById('lastUpdated');
+        const statusDot = document.getElementById('statusDot');
+        const API_BASE = "https://pooreyoutuber-github-io-1ultimate.onrender.com";
+        
+        let lastLogIndex = 0;
+        let isRunning = false;
 
-        async function launch() {
-            const url = document.getElementById('urlInput').value;
-            updateStatus('Starting & Loading Session...');
-            await request({ action: 'launch', url });
+        function addLog(msg, type = 'info') {
+            const div = document.createElement('div');
+            const colors = { info: 'text-blue-400', success: 'text-emerald-400', error: 'text-red-400', node: 'text-yellow-400' };
+            div.className = `py-0.5 ${colors[type] || 'text-slate-400'}`;
+            div.innerHTML = `<span class="opacity-40 mr-2">${new Date().toLocaleTimeString()}</span> > ${msg}`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
         }
 
-        async function saveToDrive() {
-            updateStatus('Zipping & Uploading to Google Drive...');
-            const data = await request({ action: 'save' });
-            alert(data.message);
+        // --- Screenshot Update Function ---
+        function updateLiveView() {
+            if(!isRunning) return;
+            const timestamp = new Date().getTime();
+            // Cache bust karne ke liye timestamp zaroori hai
+            liveImg.src = `${API_BASE}/live-check?t=${timestamp}`;
+            lastUpdatedText.innerText = "Live: " + new Date().toLocaleTimeString();
+            statusDot.className = "w-2 h-2 bg-red-500 animate-pulse rounded-full";
         }
 
-        async function handleClick(e) {
-            const rect = screen.getBoundingClientRect();
-            const x = Math.round((e.clientX - rect.left) * (screen.naturalWidth / rect.width));
-            const y = Math.round((e.clientY - rect.top) * (screen.naturalHeight / rect.height));
-            await request({ action: 'click', x, y });
+        // --- Real Log Polling (Backend se asli logs mangwana) ---
+        async function pollLogs() {
+            if(!isRunning) return;
+            try {
+                // Maan lo backend par /api/logs endpoint hai jo activity return karta hai
+                const res = await fetch(`${API_BASE}/api/get-logs`); 
+                const data = await res.json();
+                
+                if(data.logs && data.logs.length > lastLogIndex) {
+                    const newLogs = data.logs.slice(lastLogIndex);
+                    newLogs.forEach(log => {
+                        addLog(log.message, log.type);
+                    });
+                    lastLogIndex = data.logs.length;
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
+            }
         }
 
-        async function sendKey() {
-            const text = document.getElementById('keyboardInput').value;
-            await request({ action: 'type', text });
-            document.getElementById('keyboardInput').value = '';
-        }
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const data = {
+                channel_url: document.getElementById('videoUrl').value,
+                views_count: parseInt(document.getElementById('viewsCount').value),
+                watch_time: parseInt(document.getElementById('watchTime').value)
+            };
 
-        async function request(body) {
-            loader.classList.remove('hidden');
-            const res = await fetch(API, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body)
-            });
-            const data = await res.json();
-            if(data.screen) screen.src = "data:image/png;base64," + data.screen;
-            loader.classList.add('hidden');
-            return data;
-        }
+            btn.disabled = true;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-2'></i>BOOTING CLOUD ENGINE...";
+            terminal.innerHTML = ""; // Clear purane logs
+            addLog("Establishing Secure Tunnel...", "info");
 
-        function updateStatus(msg) { console.log(msg); }
+            try {
+                const res = await fetch(`${API_BASE}/api/real-gmail`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    isRunning = true;
+                    addLog("Tunnel Established. Engine Online.", "success");
+                    
+                    // Har 3 second me screenshot update karo
+                    setInterval(updateLiveView, 3000);
+                    
+                    // Har 2 second me backend se asli logs mangwao
+                    setInterval(pollLogs, 2000);
+                    
+                    btn.innerHTML = "ENGINE RUNNING ⚡";
+                }
+            } catch (err) {
+                addLog("Deployment Failed: " + err.message, "error");
+                btn.disabled = false;
+                btn.innerHTML = "Launch Boost Engine 🚀";
+            }
+        });
     </script>
 </body>
 </html>
