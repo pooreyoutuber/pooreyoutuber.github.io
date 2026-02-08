@@ -3,71 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Browser Pro</title>
+    <title>Cloud Browser Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0f172a; color: white; font-family: sans-serif; }
-        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        body { background: radial-gradient(circle, #1e293b, #0f172a); min-height: 100vh; color: white; }
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
     </style>
 </head>
-<body class="p-5 flex flex-col items-center">
+<body class="flex items-center justify-center p-4">
 
-    <div class="w-full max-w-lg glass p-6 rounded-2xl shadow-xl mt-10">
-        <h1 class="text-xl font-bold text-blue-400 mb-4 text-center">Cloud Browser Manager</h1>
-        
-        <div class="space-y-4">
-            <button onclick="launchBrowser()" id="btn" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-xl font-bold transition">
-                🚀 Launch Gmail Browser
-            </button>
-            
-            <div id="status" class="text-center text-sm text-gray-400">System Ready</div>
-        </div>
-    </div>
+    <div class="glass p-8 rounded-3xl w-full max-w-md shadow-2xl">
+        <h1 class="text-3xl font-bold text-center mb-8 tracking-tight">Cloud <span class="text-blue-400">Browser</span></h1>
 
-    <div id="view-container" class="w-full max-w-4xl mt-8 hidden">
-        <div class="bg-gray-800 p-2 rounded-t-xl flex justify-between px-4">
-            <span class="text-xs text-gray-400">Live Cloud Session</span>
-            <span class="text-xs text-green-400 font-bold">● ACTIVE</span>
+        <div class="bg-slate-800/50 p-4 rounded-2xl mb-6 flex justify-between items-center">
+            <div>
+                <p class="text-xs text-gray-400 uppercase font-semibold">Browser Status</p>
+                <h2 id="statusText" class="text-lg font-bold text-red-400">Offline</h2>
+            </div>
+            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="toggle" id="browserToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                <label for="browserToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+            </div>
         </div>
-        <iframe id="browser-iframe" src="" class="w-full h-[600px] border-none bg-white rounded-b-xl shadow-2xl"></iframe>
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-400 mb-2">Target Website</label>
+            <input type="url" id="targetUrl" placeholder="https://google.com" 
+                   class="w-full bg-slate-700 border-none rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+        </div>
+
+        <div class="flex items-center justify-between mb-8 px-2">
+            <span class="text-sm font-medium">Desktop Mode</span>
+            <input type="checkbox" id="desktopMode" class="w-5 h-5 accent-blue-500">
+        </div>
+
+        <button id="launchBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-lg transform active:scale-95 transition">
+            Launch Instance
+        </button>
+
+        <div id="msg" class="mt-4 text-center text-sm text-gray-400 hidden">Connecting to Render...</div>
     </div>
 
     <script>
-        async function launchBrowser() {
-            const btn = document.getElementById('btn');
-            const status = document.getElementById('status');
-            const container = document.getElementById('view-container');
-            const iframe = document.getElementById('browser-iframe');
+        const launchBtn = document.getElementById('launchBtn');
+        const statusText = document.getElementById('statusText');
+        const browserToggle = document.getElementById('browserToggle');
 
-            // UI Updates
-            btn.disabled = true;
-            btn.innerText = "Connecting to Cloud...";
-            status.innerText = "Starting Render instance & Browser-use Agent...";
+        launchBtn.onclick = async () => {
+            const url = document.getElementById('targetUrl').value;
+            const isDesktop = document.getElementById('desktopMode').checked;
+            const msg = document.getElementById('msg');
+
+            msg.classList.remove('hidden');
+            msg.innerText = "Initializing Cloud Instance...";
 
             try {
-                // FIXED ENDPOINT: Matches your backend /start-cloud-browser
-                const response = await fetch('https://pooreyoutuber-github-io-pop.onrender.com/start-cloud-browser');
-                const data = await response.json();
+                const response = await fetch('https://pooreyoutuber-github-io-pop.onrender.com/cloud', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        url: url, 
+                        desktop: isDesktop,
+                        action: browserToggle.checked ? 'start' : 'stop'
+                    })
+                });
 
-                if (data.success) {
-                    status.innerText = "Browser Started Successfully!";
-                    btn.innerText = "Browser Running";
-                    btn.classList.replace('bg-blue-600', 'bg-green-600');
-                    
-                    // Show Iframe with the Live URL from API
-                    container.classList.remove('hidden');
-                    iframe.src = data.viewUrl; 
-                } else {
-                    throw new Error(data.error || "Unknown Error");
-                }
+                const data = await response.json();
+                msg.innerText = "Success! Checking session...";
+                statusText.innerText = "Online";
+                statusText.classList.replace('text-red-400', 'text-green-400');
             } catch (err) {
+                msg.innerText = "Error connecting to cloud server.";
                 console.error(err);
-                status.innerText = "Error: " + err.message;
-                btn.disabled = false;
-                btn.innerText = "Retry Launch";
-                alert("Connection failed! Make sure Render is awake.");
             }
-        }
+        };
     </script>
 </body>
 </html>
