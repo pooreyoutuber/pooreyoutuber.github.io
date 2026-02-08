@@ -1465,88 +1465,10 @@ app.post('/api/real-view-boost', async (req, res) => {
 
     runCroxyVideoEngine(channel_url, watch_time, views_count);
 });
-// ===================================================================
-// NEW TOOL 10: CLOUD BROWSER (GMAIL PERSISTENCE)
-// ===================================================================
-// ===================================================================
-// NEW TOOL 9: SHARED LIVE BROWSER (CONTROL & MIRROR)
-// ===================================================================
-// Socket.io setup (Zaroori fix)
-const { Server } =
-require('socket.io');
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*" }
-});
 
-app.use(cors());
-app.use(express.json());
-
-// --- SHARED BROWSER GLOBAL VARIABLES ---
-let sharedBrowser;
-let sharedPage;
-
-async function startSharedSession() {
-    if (sharedBrowser) return; 
-
-    try {
-        sharedBrowser = await puppeteer.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-        });
-        sharedPage = await sharedBrowser.newPage();
-        await sharedPage.setViewport({ width: 1280, height: 720 });
-        await sharedPage.goto('https://www.google.com');
-
-        // Screenshot Loop: Har 800ms mein sabhi users ko screen bhejta rahega
-        setInterval(async () => {
-            if (sharedPage) {
-                try {
-                    const screen = await sharedPage.screenshot({ 
-                        encoding: 'base64', 
-                        type: 'jpeg', 
-                        quality: 35 
-                    });
-                    io.emit('shared-screen-data', screen);
-                } catch (e) { /* Browser crash handle */ }
-            }
-        }, 800);
-    } catch (err) {
-        console.error("Puppeteer Launch Error:", err);
-    }
-}
-
-// --- SOCKET.IO EVENTS (Shared Control) ---
-io.on('connection', (socket) => {
-    console.log('User joined shared session:', socket.id);
-    startSharedSession();
-
-    // Jab koi URL change karega, sabka badlega
-    socket.on('shared-open-url', async (url) => {
-        if (sharedPage) {
-            const target = url.startsWith('http') ? url : 'https://' + url;
-            await sharedPage.goto(target).catch(e => console.log("Nav Error"));
-        }
-    });
-
-    // Jab koi click karega, server side click hoga
-    socket.on('shared-mouse-click', async (pos) => {
-        if (sharedPage) {
-            await sharedPage.mouse.click(pos.x, pos.y);
-        }
-    });
-});
-
-// --- APKE PURANE ENDPOINTS (GA4, Revenue etc) ---
-app.get('/', (req, res) => {
-    res.send('Combined API Server with Shared Browser is Live!');
-});
-
-// [Yahan aapka purane tools ka logic (app.post) as it is rahega...]
 //==================================================
 // --- SERVER START ---
 // ===================================================================
-// Purane saare server.listen aur finalServer.listen ko hata kar sirf ye rakhein:
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 PooreYouTuber API is live on port: ${PORT}`);
+app.listen(PORT, () => {
+    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
 });
