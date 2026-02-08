@@ -1465,6 +1465,50 @@ app.post('/api/real-view-boost', async (req, res) => {
 
     runCroxyVideoEngine(channel_url, watch_time, views_count);
 });
+// ===================================================================
+// NEW TOOL 10: CLOUD BROWSER (GMAIL PERSISTENCE)
+// ===================================================================
+
+const GMAIL_API_KEY = process.env.GMAIL; // Aapki Browser-use API Key
+
+app.get('/start-cloud-browser', async (req, res) => {
+    if (!GMAIL_API_KEY) {
+        return res.status(500).json({ error: "Cloud Browser API Key (GMAIL) is missing in environment variables." });
+    }
+
+    try {
+        // Browser-use API ko hit karne ke liye (Backend simulation)
+        // Note: browser-use aksar Python me chalta hai, 
+        // node.js me hum unke API endpoint ko hit karenge.
+        
+        const response = await axios.post('https://api.browser-use.com/v1/run-task', {
+            task: "Open gmail.com and keep the session alive",
+            use_vision: true,
+            browser_settings: {
+                window_width: 1280,
+                window_height: 800
+            },
+            // Ye session name login ko yaad rakhega
+            persistent_context: "user_gmail_session_001" 
+        }, {
+            headers: {
+                'Authorization': `Bearer ${GMAIL_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Cloud Browser Active",
+            // Unki API se milne wala live view URL
+            viewUrl: response.data.live_view_url || "https://cloud.browser-use.com/dashboard"
+        });
+
+    } catch (error) {
+        console.error("Cloud Browser Error:", error.message);
+        res.status(500).json({ error: "Failed to launch cloud browser." });
+    }
+});
 
 //==================================================
 // --- SERVER START ---
