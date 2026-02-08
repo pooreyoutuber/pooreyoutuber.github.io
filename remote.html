@@ -1,115 +1,165 @@
+
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Share Tool | Remote Shared Browser</title>
+    <title>SMM Boost Pro | Cloud Terminal Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #0f0f0f; color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .browser-header { background: #2b2b2b; padding: 10px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 10; }
-        .controls { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .red { background: #ff5f56; }
-        .yellow { background: #ffbd2e; }
-        .green { background: #27c93f; }
-        .address-bar { flex-grow: 1; display: flex; background: #1a1a1a; border-radius: 20px; padding: 5px 15px; border: 1px solid #444; }
-        .address-bar input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 14px; }
-        .btn-go { background: #007bff; color: white; border: none; padding: 5px 20px; border-radius: 15px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-go:hover { background: #0056b3; }
-        .viewport { flex-grow: 1; position: relative; background: #222; display: flex; justify-content: center; align-items: center; overflow: auto; }
-        #browser-screen { max-width: 100%; cursor: crosshair; display: block; border: 1px solid #444; }
-        .status-bar { background: #1a1a1a; padding: 5px 20px; font-size: 12px; display: flex; justify-content: space-between; border-top: 1px solid #333; }
-        .status-online { color: #27c93f; font-weight: bold; }
-        .status-offline { color: #ff5f56; font-weight: bold; }
-        #loader { position: absolute; display: none; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; z-index: 20; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { background: radial-gradient(circle at top right, #0f172a, #020617); min-height: 100vh; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .live-window { border: 2px solid #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); border-radius: 1.5rem; overflow: hidden; background: #000; }
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
-<body>
+<body class="text-slate-200 p-4 md:p-8">
 
-    <div class="browser-header">
-        <div class="controls">
-            <div class="dot red"></div>
-            <div class="dot yellow"></div>
-            <div class="dot green"></div>
+    <div class="max-w-4xl mx-auto space-y-6">
+        <div class="live-window glass">
+            <div class="flex justify-between items-center p-3 border-b border-slate-700 bg-slate-900/50">
+                <div class="flex items-center gap-2">
+                    <span id="statusDot" class="w-2 h-2 bg-slate-500 rounded-full"></span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live Engine Monitor</span>
+                </div>
+                <div class="text-[10px] text-blue-400 font-mono" id="lastUpdated">System: Idle</div>
+            </div>
+            <div class="aspect-video relative bg-slate-900">
+                <img id="livePreview" src="https://via.placeholder.com/1280x720/0f172a/3b82f6?text=Waiting+for+Engine+Start..." 
+                     class="w-full h-full object-contain" alt="Live View">
+            </div>
         </div>
-        <div class="address-bar">
-            <input type="text" id="url-input" placeholder="Enter URL (e.g. google.com)" value="https://google.com">
+
+        <div class="glass rounded-3xl p-6 shadow-2xl">
+            <form id="orderForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">Video Link</label>
+                        <input type="url" id="videoUrl" required placeholder="https://www.youtube.com/watch?v=..." 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">Views</label>
+                        <input type="number" id="viewsCount" value="10" 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase text-blue-400 ml-1">WatchTime (s)</label>
+                        <input type="number" id="watchTime" value="60" 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none text-sm">
+                    </div>
+                </div>
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm">
+                    Launch Boost Engine 🚀
+                </button>
+            </form>
         </div>
-        <button class="btn-go" id="load-url">Go / Share</button>
+
+        <div class="glass rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="bg-slate-800/50 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Backend Deployment Logs</span>
+                <div class="flex gap-1">
+                    <div class="w-2 h-2 rounded-full bg-slate-700"></div>
+                    <div class="w-2 h-2 rounded-full bg-slate-700"></div>
+                </div>
+            </div>
+            <div id="terminalBody" class="p-4 h-48 overflow-y-auto font-mono text-[12px] terminal-scroll bg-black/40">
+                <div class="text-slate-500">Ready for connection...<span class="cursor-blink">_</span></div>
+            </div>
+        </div>
     </div>
 
-    <div class="viewport" id="viewport">
-        <div id="loader"></div>
-        <img id="browser-screen" src="" alt="Waiting for Stream...">
-    </div>
-
-    <div class="status-bar">
-        <div>Status: <span id="status" class="status-offline">Connecting...</span></div>
-        <div>User Role: <span style="color: #ffbd2e;">Shared Operator</span></div>
-        <div>Session: <span id="session-id">Syncing...</span></div>
-    </div>
-
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    
     <script>
-        // Backend URL (Same for everyone)
-        const socket = io("https://pooreyoutuber-github-io-pop.onrender.com", {
-            transports: ['websocket']
-        });
+        const terminal = document.getElementById('terminalBody');
+        const liveImg = document.getElementById('livePreview');
+        const lastUpdatedText = document.getElementById('lastUpdated');
+        const statusDot = document.getElementById('statusDot');
+        const API_BASE = "https://pooreyoutuber-github-io-1ultimate.onrender.com";
+        
+        let lastLogIndex = 0;
+        let isRunning = false;
 
-        const urlInput = document.getElementById('url-input');
-        const loadBtn = document.getElementById('load-url');
-        const screenImg = document.getElementById('browser-screen');
-        const statusText = document.getElementById('status');
-        const loader = document.getElementById('loader');
-        const sessionIdText = document.getElementById('session-id');
+        function addLog(msg, type = 'info') {
+            const div = document.createElement('div');
+            const colors = { info: 'text-blue-400', success: 'text-emerald-400', error: 'text-red-400', node: 'text-yellow-400' };
+            div.className = `py-0.5 ${colors[type] || 'text-slate-400'}`;
+            div.innerHTML = `<span class="opacity-40 mr-2">${new Date().toLocaleTimeString()}</span> > ${msg}`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
 
-        socket.on('connect', () => {
-            statusText.innerText = "Online (Shared Session)";
-            statusText.className = "status-online";
-            sessionIdText.innerText = socket.id.substring(0, 8);
-        });
+        // --- Screenshot Update Function ---
+        function updateLiveView() {
+            if(!isRunning) return;
+            const timestamp = new Date().getTime();
+            // Cache bust karne ke liye timestamp zaroori hai
+            liveImg.src = `${API_BASE}/live-check?t=${timestamp}`;
+            lastUpdatedText.innerText = "Live: " + new Date().toLocaleTimeString();
+            statusDot.className = "w-2 h-2 bg-red-500 animate-pulse rounded-full";
+        }
 
-        socket.on('disconnect', () => {
-            statusText.innerText = "Disconnected";
-            statusText.className = "status-offline";
-        });
-
-        // Backend se shared screen data receive karna
-        socket.on('shared-screen-data', (base64) => {
-            screenImg.src = "data:image/jpeg;base64," + base64;
-            loader.style.display = "none";
-        });
-
-        // Jab user 'Go' dabaye, sabke liye URL badle
-        loadBtn.addEventListener('click', () => {
-            const url = urlInput.value;
-            if(url) {
-                loader.style.display = "block";
-                socket.emit('shared-open-url', url); 
+        // --- Real Log Polling (Backend se asli logs mangwana) ---
+        async function pollLogs() {
+            if(!isRunning) return;
+            try {
+                // Maan lo backend par /api/logs endpoint hai jo activity return karta hai
+                const res = await fetch(`${API_BASE}/api/get-logs`); 
+                const data = await res.json();
+                
+                if(data.logs && data.logs.length > lastLogIndex) {
+                    const newLogs = data.logs.slice(lastLogIndex);
+                    newLogs.forEach(log => {
+                        addLog(log.message, log.type);
+                    });
+                    lastLogIndex = data.logs.length;
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
             }
-        });
+        }
 
-        // Mouse click events - Backend ko bhej raha hai
-        screenImg.addEventListener('click', (e) => {
-            const rect = screenImg.getBoundingClientRect();
-            
-            // Scaled coordinates calculate karna
-            const x = Math.round(e.clientX - rect.left);
-            const y = Math.round(e.clientY - rect.top);
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const data = {
+                channel_url: document.getElementById('videoUrl').value,
+                views_count: parseInt(document.getElementById('viewsCount').value),
+                watch_time: parseInt(document.getElementById('watchTime').value)
+            };
 
-            const widthRatio = screenImg.naturalWidth / rect.width;
-            const heightRatio = screenImg.naturalHeight / rect.height;
+            btn.disabled = true;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-2'></i>BOOTING CLOUD ENGINE...";
+            terminal.innerHTML = ""; // Clear purane logs
+            addLog("Establishing Secure Tunnel...", "info");
 
-            socket.emit('shared-mouse-click', {
-                x: x * widthRatio,
-                y: y * heightRatio
-            });
-        });
+            try {
+                const res = await fetch(`${API_BASE}/api/real-grow`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-        urlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') loadBtn.click();
+                if (res.ok) {
+                    isRunning = true;
+                    addLog("Tunnel Established. Engine Online.", "success");
+                    
+                    // Har 3 second me screenshot update karo
+                    setInterval(updateLiveView, 3000);
+                    
+                    // Har 2 second me backend se asli logs mangwao
+                    setInterval(pollLogs, 2000);
+                    
+                    btn.innerHTML = "ENGINE RUNNING ⚡";
+                }
+            } catch (err) {
+                addLog("Deployment Failed: " + err.message, "error");
+                btn.disabled = false;
+                btn.innerHTML = "Launch Boost Engine 🚀";
+            }
         });
     </script>
 </body>
