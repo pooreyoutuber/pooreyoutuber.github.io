@@ -1395,7 +1395,7 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             console.log(`[SESSION ${i+1}] Starting with Stealth...`);
             browser = await puppeteer.launch({
                 headless: "new",
-                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-blink-features=AutomationControlled']
             });
 
             const page = await browser.newPage();
