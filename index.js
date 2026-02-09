@@ -1405,8 +1405,11 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             await client.send('Network.clearBrowserCookies');
             
             // Mobile Setup (Sahi coordination ke liye)
-            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-            await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
+            // Viewport ko Laptop size (1920x1080) kar diya
+            await page.setViewport({ width: 1920, height: 1080, isMobile: false });
+            
+            // User Agent ko Windows PC wala kar diya
+            await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
 
             // STEP 1: CroxyProxy open karna
             await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
