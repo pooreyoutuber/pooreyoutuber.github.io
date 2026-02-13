@@ -1468,6 +1468,9 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // NEW TOOL 11: MULTI-SITE AD-REVENUE ENGINE (CROXYPROXY + SCREENSHOTS)
 // ===================================================================
+// ===================================================================
+// NEW TOOL 11: MULTI-SITE AD-REVENUE ENGINE (CROXYPROXY + SCREENSHOTS)
+// ===================================================================
 
 async function runAdRevenueEngine(targetUrl, keyword, viewsCount) {
     for (let i = 1; i <= viewsCount; i++) {
@@ -1573,7 +1576,7 @@ app.post('/api/ad-revenue-boost', async (req, res) => {
     // Background process start
     runAdRevenueEngine(url, keyword, parseInt(views));
 });
-                        
+
 //==================================================
 // --- SERVER START ---
 // ===================================================================
