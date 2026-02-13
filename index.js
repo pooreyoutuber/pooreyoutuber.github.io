@@ -1465,7 +1465,115 @@ app.post('/api/real-view-boost', async (req, res) => {
 
     runCroxyVideoEngine(channel_url, watch_time, views_count);
 });
+// ===================================================================
+// NEW TOOL 11: MULTI-SITE AD-REVENUE ENGINE (CROXYPROXY + SCREENSHOTS)
+// ===================================================================
 
+async function runAdRevenueEngine(targetUrl, keyword, viewsCount) {
+    for (let i = 1; i <= viewsCount; i++) {
+        let browser;
+        try {
+            console.log(`[REVENUE-TOOL] Session ${i}/${viewsCount} starting for: ${targetUrl}`);
+            
+            browser = await puppeteer.launch({
+                headless: "new",
+                executablePath: '/usr/bin/chromium',
+                args: [
+                    '--no-sandbox', 
+                    '--disable-setuid-sandbox', 
+                    '--disable-dev-shm-usage', 
+                    '--disable-blink-features=AutomationControlled'
+                ]
+            });
+
+            const page = await browser.newPage();
+            // Stealth settings
+            await page.setViewport({ width: 1280, height: 800 });
+            await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+            // STEP 1: CroxyProxy open karna
+            await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
+            latestScreenshot = await page.screenshot(); // Live Feed Update
+
+            // STEP 2: Target URL daalna
+            const inputSelector = '#url';
+            await page.waitForSelector(inputSelector);
+            await page.type(inputSelector, targetUrl);
+            
+            // Go button click karna
+            await Promise.all([
+                page.click('#requestSubmit'),
+                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null)
+            ]);
+
+            // STEP 3: Initial Stay & Behavior (30-50 Sec)
+            const stayTime = randomInt(30000, 50000);
+            const startTime = Date.now();
+            console.log(`[BEHAVIOR] Staying for ${stayTime/1000}s...`);
+
+            // Click Logic: 20 views me se 3 views me click (Approx 15% chance)
+            const shouldClickAd = [5, 12, 18].includes(i % 20);
+            let adClicked = false;
+
+            while (Date.now() - startTime < stayTime) {
+                // Random Scrolling
+                await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+                // Mouse Move
+                await page.mouse.move(randomInt(100, 1000), randomInt(100, 600), { steps: 5 });
+                
+                // Screenshot for Frontend (Har 5-7 sec me)
+                latestScreenshot = await page.screenshot();
+
+                // ADS CLICK LOGIC
+                if (shouldClickAd && !adClicked) {
+                    // Identifying Ads (Common Selectors)
+                    const adSelector = 'ins.adsbygoogle, iframe[src*="googleads"], a[href*="smartlink"]';
+                    const adElement = await page.$(adSelector);
+                    
+                    if (adElement) {
+                        const box = await adElement.boundingBox();
+                        if (box && box.width > 10) {
+                            console.log(`\x1b[42m[AD-CLICK]\x1b[0m Clicking Ad for CTR...`);
+                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                            adClicked = true;
+                            
+                            // Ad Click ke baad 10s wait (Ads page activity)
+                            await new Promise(r => setTimeout(r, 10000));
+                            latestScreenshot = await page.screenshot();
+                            console.log(`[AD-SUCCESS] Activity on Ad Page finished.`);
+                        }
+                    }
+                }
+                await new Promise(r => setTimeout(r, 5000));
+            }
+
+            console.log(`[SUCCESS] View #${i} Completed.`);
+
+        } catch (error) {
+            console.error(`[TOOL-11-ERROR] Session ${i}:`, error.message);
+        } finally {
+            if (browser) await browser.close();
+            // Render safety break (1 browser at a time)
+            await new Promise(r => setTimeout(r, 5000));
+        }
+    }
+}
+
+// ENDPOINT FOR TOOL 11
+app.post('/api/ad-revenue-boost', async (req, res) => {
+    const { url, keyword, views = 10 } = req.body;
+    
+    if(!url) return res.status(400).json({ error: "Target URL is required!" });
+
+    res.json({ 
+        success: true, 
+        message: "Revenue Engine Started! Live feed initialized." 
+    });
+
+    // Background process start
+    runAdRevenueEngine(url, keyword, parseInt(views));
+});
+                        
 //==================================================
 // --- SERVER START ---
 // ===================================================================
