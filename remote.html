@@ -7,99 +7,126 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=JetBrains+Mono&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 2rem; }
+        
+        /* Terminal Styling */
+        .terminal-bg { background: #0f172a; border-radius: 1rem; border: 1px solid #334155; }
+        .terminal-scroll::-webkit-scrollbar { width: 4px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        
+        /* Live Window Styling */
+        .live-window { border: 4px solid #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 1.5rem; overflow: hidden; background: #000; }
+        
         .loader { border-top-color: #4F46E5; animation: spinner 1.5s linear infinite; }
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .input-focus { transition: all 0.3s ease; }
-        .input-focus:focus { transform: scale(1.01); }
-        .terminal-box { background: #1a1a1a; color: #00ff00; font-family: 'JetBrains Mono', monospace; border-radius: 1rem; }
-        .live-frame { border: 4px solid #4F46E5; border-radius: 1.5rem; overflow: hidden; background: #000; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="p-4 md:p-8">
 
-    <div class="max-w-3xl w-full glass-card shadow-2xl p-6 md:p-10">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">🚀 Multi-Site Revenue Booster</h1>
-            <p class="text-gray-500 font-medium">Earn from 4 Sites at Once</p>
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <div id="monitorSection" class="hidden space-y-4">
+            <div class="live-window">
+                <div class="flex justify-between items-center p-3 bg-slate-900 border-b border-slate-700">
+                    <div class="flex items-center gap-2">
+                        <span id="statusDot" class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-white">Live Engine Monitor</span>
+                    </div>
+                    <div class="text-[10px] text-indigo-400 font-mono" id="lastUpdated">System: Ready</div>
+                </div>
+                <div class="aspect-video relative bg-slate-900">
+                    <img id="livePreview" src="https://via.placeholder.com/1280x720/0f172a/4F46E5?text=Waiting+for+Engine+Start..." 
+                         class="w-full h-full object-contain" alt="Live View">
+                </div>
+            </div>
         </div>
 
-        <div id="mainForm" class="space-y-4">
-            <div class="relative">
-                <label class="text-xs font-bold text-gray-600 ml-1 uppercase">Target Keyword</label>
-                <div class="mt-1 relative">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-indigo-500">
-                        <i class="fas fa-search"></i>
-                    </span>
-                    <input type="text" id="keyword" 
-                        class="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all input-focus" 
-                        placeholder="e.g. Best Physics Notes 2025">
+        <div class="glass-card shadow-2xl p-6 md:p-10">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">🚀 Multi-Site Revenue Booster</h1>
+                <p class="text-gray-500 font-medium">Earn from 4 Sites at Once</p>
+            </div>
+
+            <div id="mainForm" class="space-y-4">
+                <div class="relative">
+                    <label class="text-xs font-bold text-gray-600 ml-1 uppercase">Target Keyword</label>
+                    <div class="mt-1 relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-indigo-500">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" id="keyword" class="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none" placeholder="e.g. Best Physics Notes 2025">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="url" id="siteUrl1" class="px-4 py-3 bg-white border-2 border-indigo-100 rounded-xl outline-none" placeholder="Main Website (Compulsory)">
+                    <input type="url" id="siteUrl2" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none" placeholder="Optional Site 2">
+                    <input type="url" id="siteUrl3" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none" placeholder="Optional Site 3">
+                    <input type="url" id="siteUrl4" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none" placeholder="Optional Site 4">
+                </div>
+
+                <button onclick="submitTask()" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 mt-4">
+                    <span id="btnText">Start Multi-Site Process</span>
+                    <i class="fas fa-rocket"></i>
+                </button>
+            </div>
+
+            <div id="logSection" class="mt-6 hidden">
+                <div class="terminal-bg overflow-hidden shadow-2xl">
+                    <div class="bg-slate-800/50 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                        <span class="text-[10px] font-mono text-slate-300 uppercase tracking-widest">Backend Logs</span>
+                        <i class="fas fa-circle text-[8px] text-green-500 animate-pulse"></i>
+                    </div>
+                    <div id="terminalBody" class="p-4 h-40 overflow-y-auto font-mono text-[11px] terminal-scroll text-slate-300">
+                        <div>Initializing system...<span class="cursor-blink">_</span></div>
+                    </div>
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="url" id="siteUrl1" class="px-4 py-3 bg-white border-2 border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none input-focus" placeholder="Main Website URL">
-                <input type="url" id="siteUrl2" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none input-focus" placeholder="Optional Site 2">
-                <input type="url" id="siteUrl3" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none input-focus" placeholder="Optional Site 3">
-                <input type="url" id="siteUrl4" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none input-focus" placeholder="Optional Site 4">
-            </div>
-
-            <button onclick="submitTask()" id="btnSubmit"
-                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2">
-                <span id="btnText">Start Multi-Site Process</span>
-                <i class="fas fa-rocket"></i>
-            </button>
-        </div>
-
-        <div id="progressScreen" class="hidden space-y-6">
-            <div class="live-frame relative">
-                <div class="absolute top-2 left-4 flex items-center gap-2 z-10">
-                    <span class="w-2 h-2 bg-red-500 animate-pulse rounded-full"></span>
-                    <span class="text-[10px] text-white font-bold uppercase">Live Preview</span>
-                </div>
-                <img id="livePreview" src="https://via.placeholder.com/1280x720/000/fff?text=Initializing+Cloud+Browser..." class="w-full aspect-video object-cover">
-            </div>
-
-            <div class="terminal-box p-4 h-40 overflow-y-auto text-[11px]" id="terminal">
-                <div>>> Booting system...</div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="p-3 bg-green-50 rounded-xl border border-green-100 text-center">
-                    <p class="text-xl font-bold text-green-600">Active</p>
-                    <p class="text-[10px] text-green-700 uppercase font-bold">Rotation Status</p>
-                </div>
-                <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-center">
-                    <p class="text-xl font-bold text-purple-600">100%</p>
-                    <p class="text-[10px] text-purple-700 uppercase font-bold">Safe Mode</p>
-                </div>
-            </div>
-
-            <button onclick="location.reload()" class="w-full text-indigo-600 font-semibold text-sm hover:underline">
-                Stop Process & New Request
-            </button>
         </div>
     </div>
 
     <script>
         const API_BASE = "https://pooreyoutuber-github-io-ug80.onrender.com";
         let isRunning = false;
+        let lastLogIndex = 0;
 
-        function addLog(msg) {
-            const terminal = document.getElementById('terminal');
+        function addLog(msg, type = 'info') {
+            const terminal = document.getElementById('terminalBody');
             const div = document.createElement('div');
-            div.innerHTML = `<span class="text-gray-500">[${new Date().toLocaleTimeString()}]</span> > ${msg}`;
+            const colors = { info: 'text-indigo-300', success: 'text-emerald-400', error: 'text-red-400' };
+            div.className = `py-0.5 ${colors[type] || 'text-slate-400'}`;
+            div.innerHTML = `<span class="opacity-40 mr-2">${new Date().toLocaleTimeString()}</span> > ${msg}`;
             terminal.appendChild(div);
             terminal.scrollTop = terminal.scrollHeight;
         }
 
-        async function updatePreview() {
+        function updateLiveView() {
             if(!isRunning) return;
             const liveImg = document.getElementById('livePreview');
-            // Cache bust ke liye timestamp use kiya hai
-            liveImg.src = `${API_BASE}/live?t=${new Date().getTime()}`;
+            const statusDot = document.getElementById('statusDot');
+            const lastUpdatedText = document.getElementById('lastUpdated');
+            
+            const timestamp = new Date().getTime();
+            liveImg.src = `${API_BASE}/live-check?t=${timestamp}`;
+            lastUpdatedText.innerText = "Live: " + new Date().toLocaleTimeString();
+            statusDot.className = "w-2 h-2 bg-red-500 animate-pulse rounded-full";
+        }
+
+        async function pollLogs() {
+            if(!isRunning) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/get-logs`); 
+                const data = await res.json();
+                if(data.logs && data.logs.length > lastLogIndex) {
+                    const newLogs = data.logs.slice(lastLogIndex);
+                    newLogs.forEach(log => addLog(log.message, log.type));
+                    lastLogIndex = data.logs.length;
+                }
+            } catch (e) {}
         }
 
         async function submitTask() {
@@ -115,48 +142,35 @@
             ].filter(u => u.trim() !== "");
 
             if (!keyword || urls.length === 0) {
-                alert("Please enter keyword and at least the Main Website URL!");
+                alert("Please enter keyword and at least one URL!");
                 return;
             }
 
-            btnText.innerText = 'Connecting to Cloud...';
+            btnText.innerText = 'Launching Engine...';
             btn.disabled = true;
 
             try {
-                const response = await fetch(`${API_BASE}/window`, {
+                const response = await fetch(`${API_BASE}/start-task`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        keyword: keyword,
-                        urls: urls,
-                        views: 1000
-                    })
+                    body: JSON.stringify({ keyword, urls, views: 1000 })
                 });
 
                 if (response.ok) {
                     isRunning = true;
-                    document.getElementById('mainForm').classList.add('hidden');
-                    document.getElementById('progressScreen').classList.remove('hidden');
+                    document.getElementById('monitorSection').classList.remove('hidden');
+                    document.getElementById('logSection').classList.remove('hidden');
+                    addLog("Task authorized. Cloud instances booting...", "success");
                     
-                    addLog("Targeting: " + keyword);
-                    addLog("Rotation started for " + urls.length + " sites.");
+                    setInterval(updateLiveView, 3000);
+                    setInterval(pollLogs, 2000);
                     
-                    // Screenshot update cycle
-                    setInterval(updatePreview, 3000);
-                    
-                    // Fake log rotation
-                    setInterval(() => {
-                        const randomSite = urls[Math.floor(Math.random() * urls.length)];
-                        addLog("Success: View counted on " + randomSite);
-                    }, 5000);
-
-                } else {
-                    alert("Server error!");
-                    btn.disabled = false;
+                    btnText.innerText = 'ENGINE RUNNING ⚡';
                 }
             } catch (error) {
-                alert("Could not connect to server.");
+                addLog("Connection failed. Check Backend.", "error");
                 btn.disabled = false;
+                btnText.innerText = 'Start Multi-Site Process';
             }
         }
     </script>
