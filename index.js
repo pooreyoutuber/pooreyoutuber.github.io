@@ -1468,114 +1468,139 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // NEW TOOL 11: MULTI-SITE AD-REVENUE ENGINE (CROXYPROXY + SCREENSHOTS)
 // ===================================================================
-// ===================================================================
-// NEW TOOL 11: MULTI-SITE AD-REVENUE ENGINE (CROXYPROXY + SCREENSHOTS)
-// ===================================================================
 
-async function runAdRevenueEngine(targetUrl, keyword, viewsCount) {
-    for (let i = 1; i <= viewsCount; i++) {
-        let browser;
+let currentScreenshot = null;
+let earningLogs = [];
+
+// Helper: Log message function
+function addEarningLog(message, type = 'info') {
+    const entry = { message, type, time: new Date().toLocaleTimeString() };
+    earningLogs.push(entry);
+    if (earningLogs.length > 50) earningLogs.shift();
+    console.log(`[LOG] ${message}`);
+}
+
+// 1. Endpoint for Live Screenshot (Frontend 3 sec mein call karega)
+app.get('/live-new-check', (req, res) => {
+    if (currentScreenshot) {
+        res.contentType('image/jpeg');
+        res.send(currentScreenshot);
+    } else {
+        res.status(404).send('No preview available');
+    }
+});
+
+// 2. Endpoint to fetch logs
+app.get('/api/new-get-logs', (req, res) => {
+    res.json({ logs: earningLogs });
+});
+
+// 3. Main Automation Function
+async function startCroxyAutomation(keyword, urls, totalViews) {
+    for (let i = 1; i <= totalViews; i++) {
+        const targetUrl = urls[Math.floor(Math.random() * urls.length)];
+        addEarningLog(`Starting View #${i}/${totalViews} for ${targetUrl}`, 'success');
+
+        const browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--window-size=1920,1080',
+                '--disable-blink-features=AutomationControlled'
+            ]
+        });
+
         try {
-            console.log(`[REVENUE-TOOL] Session ${i}/${viewsCount} starting for: ${targetUrl}`);
-            
-            browser = await puppeteer.launch({
-                headless: "new",
-                executablePath: '/usr/bin/chromium',
-                args: [
-                    '--no-sandbox', 
-                    '--disable-setuid-sandbox', 
-                    '--disable-dev-shm-usage', 
-                    '--disable-blink-features=AutomationControlled'
-                ]
-            });
-
             const page = await browser.newPage();
-            // Stealth settings
-            await page.setViewport({ width: 1280, height: 800 });
+            // Desktop Mode Emulation
+            await page.setViewport({ width: 1920, height: 1080 });
             await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-            // STEP 1: CroxyProxy open karna
-            await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
-            latestScreenshot = await page.screenshot(); // Live Feed Update
-
-            // STEP 2: Target URL daalna
-            const inputSelector = '#url';
-            await page.waitForSelector(inputSelector);
-            await page.type(inputSelector, targetUrl);
+            // Step 1: CroxyProxy par jana
+            addEarningLog("Opening CroxyProxy...", "info");
+            await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2' });
             
-            // Go button click karna
+            // Step 2: URL daalna aur Go tap karna
+            await page.type('#url', targetUrl);
             await Promise.all([
                 page.click('#requestSubmit'),
-                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null)
+                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 })
             ]);
 
-            // STEP 3: Initial Stay & Behavior (30-50 Sec)
-            const stayTime = randomInt(30000, 50000);
-            const startTime = Date.now();
-            console.log(`[BEHAVIOR] Staying for ${stayTime/1000}s...`);
+            // Screenshot Loop (Har 3 sec mein update ke liye)
+            const screenshotInterval = setInterval(async () => {
+                try {
+                    currentScreenshot = await page.screenshot({ type: 'jpeg', quality: 60 });
+                } catch (e) {}
+            }, 3000);
 
-            // Click Logic: 20 views me se 3 views me click (Approx 15% chance)
-            const shouldClickAd = [5, 12, 18].includes(i % 20);
+            // Step 3: Realistic Behavior (30-60 sec)
+            const stayTime = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
+            const endTime = Date.now() + stayTime;
+            addEarningLog(`Interaction started for ${stayTime/1000}s...`, "info");
+
             let adClicked = false;
+            // 20 mein se 2-3 views mein ads click (approx 15% chance)
+            const shouldClickAd = Math.random() < 0.15; 
 
-            while (Date.now() - startTime < stayTime) {
-                // Random Scrolling
+            while (Date.now() < endTime) {
+                // Random Scroll
                 await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-                // Mouse Move
-                await page.mouse.move(randomInt(100, 1000), randomInt(100, 600), { steps: 5 });
+                // Random Mouse Move
+                await page.mouse.move(Math.random() * 800, Math.random() * 600);
                 
-                // Screenshot for Frontend (Har 5-7 sec me)
-                latestScreenshot = await page.screenshot();
-
-                // ADS CLICK LOGIC
+                // Ad Click Logic
                 if (shouldClickAd && !adClicked) {
-                    // Identifying Ads (Common Selectors)
-                    const adSelector = 'ins.adsbygoogle, iframe[src*="googleads"], a[href*="smartlink"]';
+                    const adSelector = 'ins, iframe[id^="aswift"], .adsbygoogle'; // Common ad selectors
                     const adElement = await page.$(adSelector);
-                    
                     if (adElement) {
-                        const box = await adElement.boundingBox();
-                        if (box && box.width > 10) {
-                            console.log(`\x1b[42m[AD-CLICK]\x1b[0m Clicking Ad for CTR...`);
-                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                            adClicked = true;
-                            
-                            // Ad Click ke baad 10s wait (Ads page activity)
+                        addEarningLog("Ad found! Attempting click...", "success");
+                        await adElement.click();
+                        adClicked = true;
+                        await new Promise(r => setTimeout(r, 5000)); // Wait for new tab
+                        
+                        // Handle 2nd Tab (if opened)
+                        const pages = await browser.pages();
+                        if (pages.length > 2) {
+                            const adPage = pages[pages.length - 1];
+                            await adPage.setViewport({ width: 1920, height: 1080 });
+                            addEarningLog("Interacting with Ad Tab...", "info");
+                            await adPage.evaluate(() => window.scrollBy(0, 300));
                             await new Promise(r => setTimeout(r, 10000));
-                            latestScreenshot = await page.screenshot();
-                            console.log(`[AD-SUCCESS] Activity on Ad Page finished.`);
+                            await adPage.close();
                         }
                     }
                 }
                 await new Promise(r => setTimeout(r, 5000));
             }
 
-            console.log(`[SUCCESS] View #${i} Completed.`);
+            clearInterval(screenshotInterval);
+            addEarningLog(`View #${i} completed successfully.`, "success");
 
-        } catch (error) {
-            console.error(`[TOOL-11-ERROR] Session ${i}:`, error.message);
+        } catch (err) {
+            addEarningLog(`Error in View #${i}: ${err.message}`, "error");
         } finally {
-            if (browser) await browser.close();
-            // Render safety break (1 browser at a time)
-            await new Promise(r => setTimeout(r, 5000));
+            await browser.close();
+            // Ek view ke baad break (optional)
+            await new Promise(r => setTimeout(r, 2000));
         }
     }
+    addEarningLog("All views finished!", "success");
 }
 
-// ENDPOINT FOR TOOL 11
-app.post('/api/ad-revenue-boost', async (req, res) => {
-    const { url, keyword, views = 10 } = req.body;
+// 4. Main API Endpoint
+app.post('/earnig', async (req, res) => {
+    const { keyword, urls, views } = req.body;
+    if (!keyword || !urls) return res.status(400).send("Missing data");
+
+    res.status(200).json({ status: "started" });
     
-    if(!url) return res.status(400).json({ error: "Target URL is required!" });
-
-    res.json({ 
-        success: true, 
-        message: "Revenue Engine Started! Live feed initialized." 
-    });
-
-    // Background process start
-    runAdRevenueEngine(url, keyword, parseInt(views));
+    // Background execution
+    startCroxyAutomation(keyword, urls, views || 20);
 });
+
+
 
 //==================================================
 // --- SERVER START ---
