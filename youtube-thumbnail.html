@@ -143,6 +143,35 @@
             background: var(--blue-accent-hover);
         }
 
+        /* Donation Section Styling */
+        .donation-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: var(--explanation-bg);
+            border: 2px dashed var(--blue-accent);
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .donation-box p {
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        .donate-btn {
+            display: inline-block;
+            background: #28a745;
+            color: white !important;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .donate-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
         /* Utility Explanation Section */
         .utility-explanation {
             text-align: left;
@@ -258,6 +287,13 @@
     <div id="output" class="result-section" style="display: none;">
         <img id="thumbnail" src="" alt="Thumbnail Preview">
         <a id="downloadLink" href="#" download="YouTube_Thumbnail.jpg">Download High-Resolution Thumbnail</a>
+        
+        <div class="donation-box">
+            <p>😊 Tool pasand aaya? Aap chahein toh support kar sakte hain (Optional)</p>
+            <a href="https://ldl1.com/link?z=10620818&var={SOURCE_ID}&ymid={CLICK_ID}" target="_blank" class="donate-btn">
+                ☕ Support This Tool
+            </a>
+        </div>
     </div>
     
     <div class="ad-container" id="ad-after-results">
@@ -274,11 +310,12 @@
 
     <div id="cpa-locker-8af823d6-0be3-11f1-816d-4e5c1971bddc"></div><script type="text/javascript" id="cpljs-8af823d6-0be3-11f1-816d-4e5c1971bddc" src="https://bestlocker.eu/iframeLoader/8af823d6-0be3-11f1-816d-4e5c1971bddc"></script>
     
+    <div class="utility-explanation" id="explanation-section">
         <h3>💡 Why Use This Thumbnail Downloader?</h3>
 
         <p>This simple, free **YouTube Thumbnail Downloader** is an indispensable tool for every content creator, marketer, and analyst. A video's thumbnail is its most critical marketing asset—it's the first thing viewers see and the primary driver of the **Click-Through Rate (CTR)**.</p>
 
-        <h4>How This Tool Empowers Your Content Strategy (Approx. 600-700 Words Total)</h4>
+        <h4>How This Tool Empowers Your Content Strategy</h4>
         <p>Whether you need to grab a high-quality thumbnail of your **own video** for social media promotion, or if you are conducting a **competitive analysis**, this tool delivers immediate results. By simply pasting a YouTube URL, you can extract the highest resolution image available for that video, typically **1280x720 (maxresdefault)**.</p>
 
         <p><strong>Use Cases for Creators:</strong></p>
@@ -328,21 +365,17 @@
       const thumbnailImg = document.getElementById("thumbnail");
       const downloadLink = document.getElementById("downloadLink");
       const outputSection = document.getElementById("output");
-      const adAfterResults = document.getElementById("ad-after-results"); // Naya Ad container
+      const adAfterResults = document.getElementById("ad-after-results");
       const container = document.querySelector('.container');
       const explanationSection = document.getElementById('explanation-section');
 
       // Clear previous results
       thumbnailImg.src = "";
       outputSection.style.display = "none";
-      adAfterResults.style.display = "none"; // Ad ko pehle chhupa dein
+      adAfterResults.style.display = "none";
 
       if (!videoId) {
         alert("Please enter a valid YouTube URL!");
-        // Ensure explanation section is visible if error
-        if (!container.contains(explanationSection)) {
-             container.appendChild(explanationSection);
-        }
         return;
       }
 
@@ -358,21 +391,18 @@
       thumbnailImg.src = thumbnailURL;
       downloadLink.href = thumbnailURL;
       outputSection.style.display = "block";
-      adAfterResults.style.display = "block"; // Jab result dikhe, tab ad bhi dikhao
+      adAfterResults.style.display = "block";
 
       // Optional: Force a small scroll to the result if it's below the fold
       outputSection.scrollIntoView({ behavior: 'smooth' });
-
-      // Note: If maxresdefault is not available, YouTube will automatically serve a lower resolution (e.g., hqdefault).
     }
 
-    // Ensure initial state is correct (Explanation and the Ad after results is hidden)
+    // Ensure initial state is correct
     document.addEventListener('DOMContentLoaded', () => {
         const outputSection = document.getElementById("output");
         const adAfterResults = document.getElementById("ad-after-results");
         outputSection.style.display = "none";
         adAfterResults.style.display = "none";
-
 
         // ==========================================================
         // 4. DARK MODE PERSISTENCE LOGIC
@@ -388,7 +418,6 @@
             }
         }
 
-        // पेज लोड होते ही थीम लागू करें
         applyThemeFromLocalStorage();
         
         // AdSense Initialization
