@@ -1629,7 +1629,7 @@ app.post('/earnig', async (req, res) => {
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
-async function runGscTaskipchange(keyword, url, viewNumber) {
+async function runGscTaskipchange(proxyAddress, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
@@ -1743,7 +1743,7 @@ app.post('/ip-change', async (req, res) => {
                 const randomUrl = urls[Math.floor(Math.random() * urls.length)];
                 
                 console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTaskipchange(keyword, randomUrl, i); 
+                await runGscTaskipchange(proxyAddress, url, viewNumber); 
 
                 if (i < totalViews) {
                     // RAM management break
