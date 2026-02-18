@@ -1635,7 +1635,8 @@ async function runGscTaskipchange(keyword, url, viewNumber) {
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                '--no-sandbox', 
+                `--proxy-server=http://${proxyAddress}`,
+                '--no-sandbox',
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
@@ -1644,58 +1645,64 @@ async function runGscTaskipchange(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
         
-        // Anti-Bot: Set Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        // Anti-Bot: Set Device Profile (Make sure DEVICE_PROFILES array is defined)
+        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        // Stealth logic to hide Puppeteer
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
+        // STAGE 1: Seedhe Website par jana (Organic Referer ke saath)
+        // Note: Google search page load karne se proxy block hone ka khatra rehta hai
+        console.log(`[EARNING-MODE] View #${viewNumber} | Proxy: ${proxyAddress} | Site: ${url}`);
+        
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
-            referer: googleUrl 
+            referer: 'https://www.google.com/search?q=best+services' // Fake organic traffic source
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        const targetStayTime = randomInt(40000, 50000); // 40-50s stay for safety
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        // STAGE 2: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // Mouse Movement (Bypass Bot Checks)
+            // Random Mouse Movement
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], a[href*="googleadservices"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] View #${viewNumber} | Click Triggered!`);
+                        
+                        // Click natural tarike se
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked Successfully! ✅`);
+                        
+                        // Advertiser site par wait zaroori hai
+                        await new Promise(r => setTimeout(r, 18000)); 
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} completed. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
@@ -1707,7 +1714,6 @@ async function runGscTaskipchange(keyword, url, viewNumber) {
         }
     }
 }
-
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
