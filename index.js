@@ -998,7 +998,7 @@ async function runProxyiumTask(keyword, url, viewNumber) {
 
         // --- STEP 4: Realistic Behavior & Ad-Clicker Loop ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); // 35-45 seconds stay
+        const targetStayTime = randomInt(45000, 65000); // 35-45 seconds stay
 
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
