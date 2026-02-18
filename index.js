@@ -1662,7 +1662,7 @@ async function runGscTaskipchange(proxyAddress, url, viewNumber) {
         
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
-            timeout: 90000, 
+            timeout: 120000, 
             referer: 'https://www.google.com/search?q=best+services' // Fake organic traffic source
         });
 
