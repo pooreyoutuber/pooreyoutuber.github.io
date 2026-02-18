@@ -1003,7 +1003,7 @@ async function runProxyiumTask(keyword, url, viewNumber) {
         });
 
         // 7. REALISTIC BEHAVIOR & ADS CLICKER (Logic from Tool 5)
-        const stayTime = randomInt(35000, 50000); 
+        const stayTime = randomInt(45000, 60000); 
         const startTime = Date.now();
         console.log(`[PROXYIUM] Interacting for ${stayTime/1000}s...`);
 
