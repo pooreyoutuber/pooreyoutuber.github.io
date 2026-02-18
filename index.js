@@ -969,11 +969,17 @@ async function runProxyiumTask(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
-        
-        // Anti-Bot: Set Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
+        // [A] DEVICE PROFILE: Har baar alag mobile/desktop choose karega
+        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view);
+        
+        // [B] STEALTH: Browser ko bot detection se bachayega
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
+        
         // --- STEP 1: Proxyium par jana ---
         console.log(`[VIEW #${viewNumber}] Opening Proxyium for: ${url}`);
         await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
@@ -1043,43 +1049,45 @@ app.post('/start-Proxyium', async (req, res) => {
     try {
         const { keyword, urls, views = 1000 } = req.body;
 
-        if (!urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: "URLs are required!" });
+        // Frontend se 'urls' array aa raha hai, use validate karein
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
         }
 
         const totalViews = parseInt(views);
 
-        // Success response turant bhej rahe hain taaki Render timeout na ho
+        // Immediate Success Response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
-            message: `Proxyium Task Started: ${totalViews} views for ${urls.length} sites.` 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
         });
 
-        // Background worker loop - 1 by 1 views processing
+        // Background Worker
         (async () => {
-            console.log(`--- PROXYIUM MULTI-SITE START ---`);
+            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
             for (let i = 1; i <= totalViews; i++) {
-                const targetUrl = urls[Math.floor(Math.random() * urls.length)];
+                // Randomly ek URL chunna rotation ke liye
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
                 
-                // 1 by 1 execution to prevent Render crash
-                await runProxyiumTask(keyword, targetUrl, i);
+                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
+                await runProxyiumTask(keyword, randomUrl, i); 
 
                 if (i < totalViews) {
-                    // RAM clear karne ke liye bada ak har session ke baad
-                    const restTime = 15000; // 15 seconds gap
-                    console.log(`[WAIT] Sleeping ${restTime/1000}s before next view...`);
+                    // RAM management break
+                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    console.log(`[REST] Waiting ${restTime/1000}s...`);
                     await new Promise(r => setTimeout(r, restTime));
                 }
             }
-            console.log("--- PROXYIUM ALL SESSIONS FINISHED ---");
+            console.log("--- ALL SESSIONS COMPLETED ---");
         })();
 
     } catch (err) {
-        console.error("Proxyium Endpoint Error:", err);
+        console.error("Endpoint Error:", err);
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
-}); 
-
+});
 // ===================================================================
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
 // =============================== 
