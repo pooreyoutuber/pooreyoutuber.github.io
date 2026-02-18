@@ -974,9 +974,7 @@ async function runProxyiumTask(keyword, url, viewNumber) {
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
         });
-        await page.setViewport({ width: 1280, height: 800 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
+    
         // 1. Proxyium Website par jana
         console.log(`[PROXYIUM] View #${viewNumber} | Opening Proxyium...`);
         await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
