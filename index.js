@@ -1626,7 +1626,134 @@ app.post('/earnig', async (req, res) => {
     // Background execution
     startCroxyAutomation(keyword, urls, views || 20);
 });
+// ===================================================================
+// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// ===================================================================
+async function runGscTaskipchange(keyword, url, viewNumber) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
+        });
 
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1366, height: 768 });
+        
+        // Anti-Bot: Set Random User Agent
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // 1. STAGE: Google Search Simulation (Organic Entry)
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000)); 
+
+        // 2. STAGE: Visit Target Site (30-35s Total Stay)
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
+        });
+
+        const startTime = Date.now();
+        const targetStayTime = randomInt(30000, 35000); 
+
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        while (Date.now() - startTime < targetStayTime) {
+            // Natural Scrolling
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            
+            // Mouse Movement (Bypass Bot Checks)
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+
+            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+            if (Math.random() < 0.18) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+
+                    if (box && box.width > 50 && box.height > 50) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
+                        await new Promise(r => setTimeout(r, 15000));
+                        break; 
+                    }
+                }
+            }
+        }
+        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } finally {
+        if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+        }
+    }
+}
+
+// ===================================================================
+// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// ===================================================================
+app.post('/ip-change', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        // Frontend se 'urls' array aa raha hai, use validate karein
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        }
+
+        const totalViews = parseInt(views);
+
+        // Immediate Success Response taaki frontend hang na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+        });
+
+        // Background Worker
+        (async () => {
+            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                // Randomly ek URL chunna rotation ke liye
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                
+                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
+                await runGscTaskipchange(keyword, randomUrl, i); 
+
+                if (i < totalViews) {
+                    // RAM management break
+                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                    await new Promise(r => setTimeout(r, restTime));
+                }
+            }
+            console.log("--- ALL SESSIONS COMPLETED ---");
+        })();
+
+    } catch (err) {
+        console.error("Endpoint Error:", err);
+        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 
 //==================================================
