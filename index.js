@@ -1717,36 +1717,40 @@ async function runGscTaskipchange(proxyAddress, url, viewNumber) {
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
+// ===================================================================
+// Tool 5 Endpoint (Fixed ReferenceError)
+// ===================================================================
 app.post('/ip-change', async (req, res) => {
     try {
+        // Frontend se 'keyword' mein Proxy IP:Port aa raha hai
         const { keyword, urls, views = 1000 } = req.body;
 
-        // Frontend se 'urls' array aa raha hai, use validate karein
         if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
             console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+            return res.status(400).json({ success: false, message: "Proxy and URLs are required!" });
         }
 
         const totalViews = parseInt(views);
+        // Yahan define kar rahe hain taaki loop ko mil sake
+        const proxyAddress = keyword; 
 
-        // Immediate Success Response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+            message: `Task Started: ${totalViews} Views on ${urls.length} sites via Proxy.` 
         });
 
         // Background Worker
         (async () => {
             console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
             for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
                 const randomUrl = urls[Math.floor(Math.random() * urls.length)];
                 
                 console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTaskipchange(proxyAddress, url, viewNumber); 
+                
+                // FIXED: Ab yahan 'proxyAddress', 'randomUrl' aur 'i' sahi se pass ho rahe hain
+                await runGscTaskipchange(proxyAddress, randomUrl, i); 
 
                 if (i < totalViews) {
-                    // RAM management break
                     const restTime = i % 5 === 0 ? 25000 : 12000; 
                     console.log(`[REST] Waiting ${restTime/1000}s...`);
                     await new Promise(r => setTimeout(r, restTime));
@@ -1760,7 +1764,6 @@ app.post('/ip-change', async (req, res) => {
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
-
 
 //==================================================
 // --- SERVER START ---
