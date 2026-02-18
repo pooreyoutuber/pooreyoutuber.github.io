@@ -965,6 +965,10 @@ async function runProxyiumTask(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
+        // Navigator.webdriver ko override karne ke liye
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
