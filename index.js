@@ -952,7 +952,7 @@ app.post('/start-task', async (req, res) => {
 // NEW TOOL 6: Proxyium Web Proxy Automation Logic
 // ===================================================================
 // ===================================================================
-// UPDATED TOOL 6: Proxyium Web Proxy with Tool 5 Ads Clicker
+// UPDATED TOOL 5: GSC & ADSENSE REVENUE BOOSTER (NOW WITH PROXYIUM)
 // ===================================================================
 async function runProxyiumTask(keyword, url, viewNumber) {
     let browser;
@@ -963,84 +963,75 @@ async function runProxyiumTask(keyword, url, viewNumber) {
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
+        await page.setViewport({ width: 1366, height: 768 });
         
-        // 1. Set Device Profile (Randomly)
-        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
-        await page.setUserAgent(profile.ua);
-        await page.setViewport(profile.view);
+        // Anti-Bot: Set Random User Agent
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 2. Anti-Bot: Hide Webdriver
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
-
-        // 3. Navigation to Proxyium
-        console.log(`[PROXYIUM] View #${viewNumber} | Device: ${profile.name} | Opening...`);
+        // --- STEP 1: Proxyium par jana ---
+        console.log(`[VIEW #${viewNumber}] Opening Proxyium for: ${url}`);
         await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-        // 4. Enter Target URL
-        const searchInputSelector = 'input[placeholder*="Put a URL"]';
-        await page.waitForSelector(searchInputSelector);
-        await page.type(searchInputSelector, url, { delay: 120 }); // Realistic typing
+        // --- STEP 2: Proxyium mein URL enter karna ---
+        const proxyInput = 'input[placeholder*="Put a URL"]'; 
+        await page.waitForSelector(proxyInput, { visible: true });
+        await page.type(proxyInput, url, { delay: 100 });
         await page.keyboard.press('Enter');
 
-        // 5. Wait for target site to load
-        console.log(`[PROXYIUM] Loading Site: ${url}`);
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {});
-
-        // 6. POP-UP CLEANER
-        await page.evaluate(() => {
-            const closeSelectors = ['button[aria-label="Close"]', '.close-button', '#close-icon', '.modal-close'];
-            closeSelectors.forEach(s => {
-                const el = document.querySelector(s);
-                if (el) el.click();
-            });
+        // --- STEP 3: Target Site load hone ka wait ---
+        console.log(`[VIEW #${viewNumber}] Waiting for target site to load via Proxy...`);
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {
+            console.log("Navigation timeout (Normal for heavy sites)");
         });
 
-        // 7. REALISTIC BEHAVIOR & ADS CLICKER (Logic from Tool 5)
-        const stayTime = randomInt(45000, 60000); 
+        // --- STEP 4: Realistic Behavior & Ad-Clicker Loop ---
         const startTime = Date.now();
-        console.log(`[PROXYIUM] Interacting for ${stayTime/1000}s...`);
+        const targetStayTime = randomInt(35000, 45000); // 35-45 seconds stay
 
-        while (Date.now() - startTime < stayTime) {
+        while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
-            const scrollDist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), scrollDist);
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
             
-            // Random Mouse Movement
-            await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 10 });
-            
-            // 🔥 TOOL 5 ADS CLICKER LOGIC (18% Chance)
-                    if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+            // Mouse Movement
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+
+            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+            if (Math.random() < 0.18) { 
+                // Proxyium ke andar ads detect karne ke liye selectors
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], a[href*="googleadservices"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking via Proxyium...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅`);
                         
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
+                        // Advertiser site par wait
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
-            await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
+                }
+            }
         }
-
-        console.log(`[DONE] Proxyium View #${viewNumber} completed. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
-        console.error(`[PROXYIUM ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
