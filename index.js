@@ -1016,29 +1016,22 @@ async function runProxyiumTask(keyword, url, viewNumber) {
             await page.mouse.move(randomInt(100, 1000), randomInt(100, 700), { steps: 10 });
             
             // 🔥 TOOL 5 ADS CLICKER LOGIC (18% Chance)
-            if (Math.random() < 0.18) { 
+                    if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Moving to click...`);
-                        
-                        // Move mouse to ad center with steps
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await new Promise(r => setTimeout(r, 1500)); 
-                        
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked via Proxyium! ✅`);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        // Stay on advertiser page inside the proxy
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
                         await new Promise(r => setTimeout(r, 15000));
-                        break; // Click ke baad loop se exit
+                        break; 
                     }
-                }
-            }
-
             await new Promise(r => setTimeout(r, randomInt(4000, 8000)));
         }
 
