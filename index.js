@@ -969,7 +969,11 @@ async function runProxyiumTask(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-
+        // FIX: Stealth plugin ke bawajud manually webdriver property delete karna best rehta hai
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
+        
         // [A] DEVICE PROFILE: Har baar alag mobile/desktop choose karega
         const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
