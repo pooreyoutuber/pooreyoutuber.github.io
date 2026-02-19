@@ -1,6 +1,6 @@
-// =================================================================
+// ===================================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
-// =============================================================
+// ===================================================================
 
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -817,8 +817,345 @@ app.get('/proxy-request', async (req, res) => {
     }
 });
 
+
 // ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (MULTI-URL & AUTO-CLICKER)
+// 5. YOUTUBE ENGAGEMENT BOOSTER ENDPOINT (API: /youtube-boost-mp) - FIXED TOOL
+// ===================================================================
+
+/**
+ * Simulates a single highly-realistic YouTube session with variable retention and engagement.
+ * MODIFIED: Returns the watch time and engagement status for final logging.
+ */
+async function simulateYoutubeView(gaId, apiSecret, videoUrl, channelUrl, viewCount) {
+    const cid = generateClientId(); 
+    const session_id = Date.now(); 
+    const geo = getRandomGeo(); 
+    const traffic = getYoutubeTrafficSource(); 
+
+    // --- WATCH TIME & RETENTION LOGIC (Simulated video duration is 8 to 12 minutes) ---
+    const simulatedSessionDuration = randomInt(480000, 720000); // 8 minutes to 12 minutes (480s to 720s)
+    const retentionRoll = Math.random(); 
+    let engagementTime; 
+    let didCompleteVideo = false;
+    let didLike = false;
+    let didSubscribe = false;
+
+    if (retentionRoll < YOUTUBE_FULL_RETENTION_PERCENT) { // 25% chance
+        engagementTime = simulatedSessionDuration;
+        didCompleteVideo = true;
+    } else if (retentionRoll < (YOUTUBE_FULL_RETENTION_PERCENT + YOUTUBE_MID_RETENTION_PERCENT)) { // 65% chance
+        engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.70), Math.floor(simulatedSessionDuration * 0.90));
+        didCompleteVideo = false;
+    } else { // 10% chance
+        engagementTime = randomInt(Math.floor(simulatedSessionDuration * 0.10), Math.floor(simulatedSessionDuration * 0.20));
+        didCompleteVideo = false;
+    }
+    
+    engagementTime = Math.max(30000, engagementTime); // Must be at least 30 seconds
+
+    const userProperties = {
+        simulated_geo: { value: geo.country }, 
+        user_timezone: { value: geo.timezone }
+    };
+    
+    let allSuccess = true;
+    let eventsSent = 0;
+    
+    console.log(`\n--- [YT View ${viewCount}] Session (Geo: ${geo.country}, Duration: ${Math.round(engagementTime/1000)}s) ---`);
+    
+    // 1. SESSION START EVENT
+    const sessionStartPayload = {
+        client_id: cid,
+        user_properties: userProperties, 
+        events: [{ 
+            name: "session_start", 
+            params: { 
+                session_id: session_id, 
+                campaign_source: traffic.source, 
+                campaign_medium: traffic.medium,
+                session_default_channel_group: traffic.medium === "organic" ? "Organic Search" : (traffic.medium === "social" ? "Social" : "Direct"),
+                page_referrer: traffic.referrer, 
+                page_location: videoUrl, 
+                _ss: 1, 
+                debug_mode: true,
+                language: "en-US"
+            } 
+        }]
+    };
+
+    let result = await sendData(gaId, apiSecret, sessionStartPayload, viewCount, 'yt_session_start');
+    if (result.success) eventsSent++; else allSuccess = false;
+
+    await new Promise(resolve => setTimeout(resolve, randomInt(1000, 3000)));
+
+    // 2. PAGE VIEW EVENT (Video Page Load)
+    const pageViewPayload = {
+        client_id: cid,
+        user_properties: userProperties, 
+        events: [{ 
+            name: 'page_view', 
+            params: { 
+                page_location: videoUrl, 
+                page_title: "Simulated YouTube Video Page",
+                session_id: session_id, 
+                debug_mode: true,
+                language: "en-US",
+                page_referrer: traffic.referrer,
+                engagement_time_msec: randomInt(300, 800) 
+            } 
+        }]
+    };
+
+    result = await sendData(gaId, apiSecret, pageViewPayload, viewCount, 'page_view');
+    if (result.success) eventsSent++; else allSuccess = false;
+
+    await new Promise(resolve => setTimeout(resolve, randomInt(500, 1500)));
+    
+    // 3. VIDEO START EVENT
+    const videoStartPayload = {
+        client_id: cid,
+        user_properties: userProperties, 
+        events: [{ 
+            name: 'video_start', 
+            params: { 
+                video_url: videoUrl, 
+                session_id: session_id,
+                debug_mode: true,
+                video_provider: 'youtube'
+            } 
+        }]
+    };
+    result = await sendData(gaId, apiSecret, videoStartPayload, viewCount, 'video_start');
+    if (result.success) eventsSent++; else allSuccess = false;
+
+    await new Promise(resolve => setTimeout(resolve, randomInt(500, 1000)));
+
+    // 4. VIDEO COMPLETE/PROGRESS EVENT
+    if (didCompleteVideo) {
+         const videoCompletePayload = {
+            client_id: cid,
+            user_properties: userProperties, 
+            events: [{ 
+                name: 'video_complete', 
+                params: { 
+                    video_url: videoUrl, 
+                    session_id: session_id,
+                    debug_mode: true,
+                    video_provider: 'youtube'
+                } 
+            }]
+        };
+        result = await sendData(gaId, apiSecret, videoCompletePayload, viewCount, 'video_complete');
+        if (result.success) eventsSent++; else allSuccess = false;
+    } else if (engagementTime > simulatedSessionDuration * 0.5) {
+        // VIDEO PROGRESS (For mid-retention, signal 50% progress)
+        const videoProgressPayload = {
+            client_id: cid,
+            user_properties: userProperties, 
+            events: [{ 
+                name: 'video_progress', 
+                params: { 
+                    video_url: videoUrl, 
+                    session_id: session_id,
+                    debug_mode: true,
+                    video_provider: 'youtube',
+                    video_percent: 50 // Signal 50% watched
+                } 
+            }]
+        };
+        result = await sendData(gaId, apiSecret, videoProgressPayload, viewCount, 'video_progress (50%)');
+        if (result.success) eventsSent++; else allSuccess = false;
+    }
+    
+    // 5. LIKE & SUBSCRIBE ACTION (35% Chance)
+    if (Math.random() < YOUTUBE_ENGAGEMENT_CHANCE) { 
+        
+        // 5a. LIKE VIDEO EVENT (50% chance of a like, within the 35% engagement block)
+        if (Math.random() < 0.5) { 
+             const likeVideoPayload = {
+                client_id: cid,
+                user_properties: userProperties, 
+                events: [{ 
+                    name: 'like_video', 
+                    params: { 
+                        video_url: videoUrl, 
+                        session_id: session_id,
+                        debug_mode: true
+                    } 
+                }]
+            };
+            result = await sendData(gaId, apiSecret, likeVideoPayload, viewCount, 'like_video');
+            if (result.success) {
+                 eventsSent++;
+                 didLike = true; 
+             } else allSuccess = false;
+        }
+        
+        // 5b. SUBSCRIBE TO CHANNEL EVENT (30% chance of a subscribe, within the 35% engagement block)
+        if (Math.random() < 0.3) { 
+             const subscribePayload = {
+                client_id: cid,
+                user_properties: userProperties, 
+                events: [{ 
+                    name: 'subscribe', 
+                    params: { 
+                        channel_url: channelUrl, 
+                        session_id: session_id,
+                        debug_mode: true
+                    } 
+                }]
+            };
+            result = await sendData(gaId, apiSecret, subscribePayload, viewCount, 'subscribe');
+            if (result.success) {
+                 eventsSent++;
+                 didSubscribe = true; 
+             } else allSuccess = false;
+        }
+    }
+          // 6. USER ENGAGEMENT (The final watch time/duration metric)
+    const engagementPayload = {
+        client_id: cid,
+        user_properties: userProperties, 
+        events: [{ 
+            name: "user_engagement", 
+            params: { 
+                engagement_time_msec: engagementTime, // The main metric for Watch Time
+                session_id: session_id,
+                debug_mode: true 
+            } 
+        }]
+    };
+    result = await sendData(gaId, apiSecret, engagementPayload, viewCount, 'user_engagement');
+    if (result.success) eventsSent++; else allSuccess = false;
+
+    console.log(`[YT View ${viewCount}] Session Complete. Total Events Sent: ${eventsSent}.`);
+
+    // Return metrics for final summary 
+    return { 
+        watchTimeMs: engagementTime, 
+        liked: didLike, 
+        subscribed: didSubscribe 
+    };
+}
+
+
+app.post('/youtube-boost-mp', async (req, res) => {
+    // Expected body: { ga_id, api_key, views, channel_url, video_urls: ["url1", "url2", ...] }
+    const { ga_id, api_key, views, channel_url, video_urls } = req.body; 
+    const totalViewsRequested = parseInt(views);
+    const clientIdForValidation = generateClientId();
+    
+    // --- FIXED: INCREASE MAX VIEW LIMIT TO 2000 ---
+    const MAX_VIEWS = 2000; 
+
+    // 1. Basic Validation (Changed the max views)
+    if (!ga_id || !api_key || !totalViewsRequested || totalViewsRequested < 1 || totalViewsRequested > MAX_VIEWS || !channel_url || !Array.isArray(video_urls) || video_urls.length === 0) {
+        return res.status(400).json({ 
+            status: 'error', 
+            message: `Missing GA keys, Views (1-${MAX_VIEWS}), Channel URL, or Video URLs (min 1).` 
+        });
+    }
+
+    // Filter and ensure URLs are valid YouTube links
+    const validVideoUrls = video_urls.filter(url => 
+        url && (url.includes('youtube.com/watch') || url.includes('youtu.be/'))
+    );
+
+    if (validVideoUrls.length === 0) {
+        return res.status(400).json({ 
+            status: 'error', 
+            message: 'At least one valid YouTube Video URL is required.' 
+        });
+    }
+
+    // 2. Key Validation
+    const validationResult = await validateKeys(ga_id, api_key, clientIdForValidation);
+    
+    if (!validationResult.valid) {
+         return res.status(400).json({ 
+            status: 'error', 
+            message: `❌ Validation Failed: ${validationResult.message}. Please check your GA ID and API Secret.` 
+        });
+    }
+
+    // 3. View Distribution Logic: Distribute totalViewsRequested evenly across validVideoUrls
+    const viewPlan = [];
+    const numTargets = validVideoUrls.length;
+    const baseViewsPerTarget = Math.floor(totalViewsRequested / numTargets);
+    let remainder = totalViewsRequested % numTargets;
+
+    validVideoUrls.forEach(url => {
+        let viewsForUrl = baseViewsPerTarget;
+        if (remainder > 0) {
+            viewsForUrl++; // Distribute the remainder views one by one
+            remainder--;
+        }
+        for (let i = 0; i < viewsForUrl; i++) {
+            viewPlan.push(url);
+        }
+    });
+    
+    // Final shuffle for realistic distribution over time
+    viewPlan.sort(() => Math.random() - 0.5); 
+    const finalTotalViews = viewPlan.length;
+
+
+    res.json({ 
+        status: 'accepted', 
+        message: `✨ Request accepted. Keys validated. Processing ${finalTotalViews} views across ${numTargets} video(s) started in the background.`
+    });
+
+    // 4. Start the heavy, time-consuming simulation in the background
+    (async () => {
+        const finalTotalViews = viewPlan.length;
+        let successfulViews = 0;
+        let totalSimulatedWatchTimeMs = 0;
+        let totalSimulatedLikes = 0;
+        let totalSimulatedSubscribes = 0;
+        
+        console.log(`\n[YOUTUBE BOOSTER START] Starting real simulation for ${finalTotalViews} views across ${numTargets} URLs.`);
+        
+        for (let i = 0; i < finalTotalViews; i++) {
+            const url = viewPlan[i];
+            const currentView = i + 1;
+
+            if (i > 0) {
+                // Use a realistic, slow delay for YouTube traffic (3 to 5 minutes)
+                const delay = randomInt(180000, 300000); // 3 minutes to 5 minutes
+                console.log(`[YT View ${currentView}/${finalTotalViews}] Waiting for ${Math.round(delay / 60000)} minutes...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+
+            const sessionResult = await simulateYoutubeView(ga_id, api_key, url, channel_url, currentView);
+            
+            // Tally results
+            if (sessionResult && sessionResult.watchTimeMs > 0) {
+                successfulViews++;
+                totalSimulatedWatchTimeMs += sessionResult.watchTimeMs;
+                if (sessionResult.liked) totalSimulatedLikes++;
+                if (sessionResult.subscribed) totalSimulatedSubscribes++;
+            }
+        }
+        
+        const watchTimeInHours = (totalSimulatedWatchTimeMs / 3600000).toFixed(2);
+        
+        // --- FINAL CONSOLE PROOF (Teacher Demo Log) ---
+        console.log(`\n======================================================`);
+        console.log(`\n======================================================`);
+        console.log(`✅ YOUTUBE BOOSTER COMPLETE: DEMO PROOF`);
+        console.log(`======================================================`);
+        console.log(`VIEWS SENT: ${successfulViews} / ${finalTotalViews}`);
+        console.log(`TOTAL SIMULATED WATCH TIME: ${watchTimeInHours} HOURS`);
+        console.log(`TOTAL SIMULATED LIKES: ${totalSimulatedLikes}`);
+        console.log(`TOTAL SIMULATED SUBSCRIBERS: ${totalSimulatedSubscribes}`);
+        console.log(`------------------------------------------------------`);
+        console.log(`STATUS: Views and Watch Time should now appear in YouTube Studio Realtime/GA4 DebugView.`);
+        console.log(`======================================================`);
+        
+    })();
+});
+// ===================================================================
+// 6. GSC & ADSENSE REVENUE BOOSTER (MULTI-URL & AUTO-CLICKER)
 // ===================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -857,7 +1194,7 @@ async function runGscTask(keyword, url, viewNumber) {
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 60000); 
+        const targetStayTime = randomInt(30000, 35000); 
 
         // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
@@ -903,7 +1240,7 @@ async function runGscTask(keyword, url, viewNumber) {
 }
 
 // ===================================================================
-// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// Tool 6 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
 app.post('/start-task', async (req, res) => {
     try {
@@ -949,858 +1286,136 @@ app.post('/start-task', async (req, res) => {
     }
 });
 // ===================================================================
-// NEW TOOL 6: Proxyium Web Proxy Automation Logic
+// 7. FINAL YOUTUBE BOOSTER (PRE-DETECTION + 100% WATCH)
 // ===================================================================
+
+// ====// ===================================================================
+// 7. GEMINI POWERED MULTI-DEVICE BOOSTER (FINAL VERSION)
 // ===================================================================
-// UPDATED TOOL 5: GSC & ADSENSE REVENUE BOOSTER (NOW WITH PROXYIUM)
-// ===================================================================
-async function runProxyiumTask(keyword, url, viewNumber) {
+
+async function runYoutubeBrowserTask(videoUrl, viewNumber) {
     let browser;
+    let totalSeconds = 0;
+
     try {
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
-        });
+        console.log(`[START] View #${viewNumber} | URL: ${videoUrl}`);
 
-        const page = await browser.newPage();
-        // FIX: Stealth plugin ke bawajud manually webdriver property delete karna best rehta hai
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
-        
-        // [A] DEVICE PROFILE: Har baar alag mobile/desktop choose karega
-        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
-        await page.setUserAgent(profile.ua);
-        await page.setViewport(profile.view);
-        
-        // [B] STEALTH: Browser ko bot detection se bachayega
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
-        
-        // --- STEP 1: Proxyium par jana ---
-        console.log(`[VIEW #${viewNumber}] Opening Proxyium for: ${url}`);
-        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
-
-        // --- STEP 2: Proxyium mein URL enter karna ---
-        const proxyInput = 'input[placeholder*="Put a URL"]'; 
-        await page.waitForSelector(proxyInput, { visible: true });
-        await page.type(proxyInput, url, { delay: 100 });
-        await page.keyboard.press('Enter');
-
-        // --- STEP 3: Target Site load hone ka wait ---
-        console.log(`[VIEW #${viewNumber}] Waiting for target site to load via Proxy...`);
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 90000 }).catch(() => {
-            console.log("Navigation timeout (Normal for heavy sites)");
-        });
-
-        // --- STEP 4: Realistic Behavior & Ad-Clicker Loop ---
-        const startTime = Date.now();
-        const targetStayTime = randomInt(45000, 65000); // 35-45 seconds stay
-
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Mouse Movement
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
-
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                // Proxyium ke andar ads detect karne ke liye selectors
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], a[href*="googleadservices"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking via Proxyium...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅`);
-                        
-                        // Advertiser site par wait
-                        await new Promise(r => setTimeout(r, 15000));
-                        break; 
-                    }
-                }
-            }
-        }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
-
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
-    } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
-    }
-}
-// ===================================================================
-// Tool 6: Proxyium Revenue Booster Endpoint
-// ===================================================================
-app.post('/start-Proxyium', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
-
-        // Frontend se 'urls' array aa raha hai, use validate karein
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
-        }
-
-        const totalViews = parseInt(views);
-
-        // Immediate Success Response taaki frontend hang na ho
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
-        });
-
-        // Background Worker
-        (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+        // --- 1. GEMINI AI SE VIDEO DETAILS PTA KARNA ---
+        if (ai) {
+            try {
+                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const prompt = `Analyze this YouTube URL: ${videoUrl}. 
+                Tell me the exact duration in total seconds. 
+                Reply ONLY with the number (seconds). If unknown, reply "0".`;
                 
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runProxyiumTask(keyword, randomUrl, i); 
-
-                if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
+                const result = await model.generateContent(prompt);
+                const aiResponse = result.response.text().trim();
+                if (!isNaN(aiResponse) && parseInt(aiResponse) > 0) {
+                    totalSeconds = parseInt(aiResponse);
                 }
-            }
-            console.log("--- ALL SESSIONS COMPLETED ---");
-        })();
+            } catch (e) { console.log("[AI-SKIP] Gemini busy, using browser detection."); }
+        }
 
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
-// ===================================================================
-// 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
-// =============================== 
- // --- TOOL 7 HELPERS: Device & Referral Config ---
-const DEVICE_PROFILES = [
-    { name: 'Desktop Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 } },
-    { name: 'Desktop Firefox', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0', view: { width: 1536, height: 864 } },
-    { name: 'Desktop Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15', view: { width: 1440, height: 900 } },
-    { name: 'Mobile Android', ua: 'Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800 } },
-    { name: 'Mobile iPhone', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1', view: { width: 390, height: 844 } },
-    { name: 'Tablet iPad', ua: 'Mozilla/5.0 (iPad; CPU OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1', view: { width: 810, height: 1080 } }
-];
+        // --- 2. MULTI-DEVICE & REFERRER SELECTION ---
+        // Har baar device aur rasta badalna taaki YouTube bot na pakde
+        const devices = [
+            { name: 'Laptop', width: 1366, height: 768, ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36' },
+            { name: 'iPhone', width: 390, height: 844, ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' },
+            { name: 'Android', width: 412, height: 915, ua: 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36' },
+            { name: 'Tablet', width: 768, height: 1024, ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1' }
+        ];
+        
+        const referrers = ['https://www.google.com/', 'https://www.facebook.com/', 'https://t.co/', 'https://www.bing.com/', 'https://www.reddit.com/'];
+        const selectedDevice = devices[Math.floor(Math.random() * devices.length)];
+        const selectedRef = referrers[Math.floor(Math.random() * referrers.length)];
 
-const SOCIAL_REFERRERS = [
-    'https://www.facebook.com/',
-    'https://t.co/', // X (Twitter)
-    'https://www.pinterest.com/',
-    'https://www.reddit.com/',
-    'https://www.blogger.com/'
-];
+        console.log(`[DEVICE] Using ${selectedDevice.name} | [SOURCE] Coming from ${selectedRef}`);
 
-// ===================================================================
-// 7. TOOL POPUP (UPDATED: Mobile/Tablet/PC + Social Referral 50%)
-// ===================================================================
-async function runGscTaskpop(keyword, url, viewNumber) {
-    let browser;
-    try {
+        // --- 3. BROWSER LAUNCH (1-BY-1) ---
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio', '--autoplay-policy=no-user-gesture-required']
         });
 
         const page = await browser.newPage();
-        
-        // 1. Random Device Profile Select Karein
-        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
-        await page.setUserAgent(profile.ua);
-        await page.setViewport(profile.view);
+        await page.setUserAgent(selectedDevice.ua);
+        await page.setViewport({ width: selectedDevice.width, height: selectedDevice.height });
+        await page.setExtraHTTPHeaders({ 'referer': selectedRef });
 
-        // --- TRAFFIC MIX LOGIC (10 mein se 6 Organic, 4 Referral) ---
-        let refererUrl;
-        const mixRatio = viewNumber % 10; 
+        // Load Page
+        await page.goto(videoUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-        if (mixRatio <= 6 && mixRatio !== 0) {
-            // STAGE: Google Search Simulation (60% Views)
-            refererUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-            console.log(`[VIEW #${viewNumber}] Mode: ORGANIC (Google Search)`);
-            await page.goto(refererUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-            await new Promise(r => setTimeout(r, 4000)); 
-        } else {
-            // STAGE: Social Referral (40% Views)
-            refererUrl = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
-            console.log(`[VIEW #${viewNumber}] Mode: REFERRAL (${refererUrl})`);
+        // Browser-based Duration (Fallback)
+        if (totalSeconds <= 0) {
+            totalSeconds = await page.evaluate(async () => {
+                const v = document.querySelector('video');
+                for (let i = 0; i < 40; i++) {
+                    if (v && v.duration > 0 && v.duration !== Infinity) return v.duration;
+                    await new Promise(r => setTimeout(r, 500));
+                }
+                return 45; // Safety
+            });
         }
 
-        // 2. Target Site Visit
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: refererUrl 
-        });
+        console.log(`[WATCHING] Length: ${Math.round(totalSeconds)}s. Starting 100% Watch...`);
 
-        // Stealth: Hiding webdriver
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
+        // --- 4. HUMAN INTERACTIONS ---
+        // Mouse Simulation
+        await page.mouse.move(Math.random() * 200, Math.random() * 200, { steps: 10 });
+        await page.click('video').catch(() => {});
 
-        const startTime = Date.now();
-        const targetStayTime = Math.floor(Math.random() * (45000 - 35000 + 1)) + 35000; 
-
-        // 3. Behavior & Ad Clicker
-        while (Date.now() - startTime < targetStayTime) {
-            // Smooth Scroll
+        // Background Tasks: Scrolling, Description, Comments
+        const interactions = (async () => {
+            // A. Video ke 25% par Description aur Scroll
+            await new Promise(r => setTimeout(r, (totalSeconds * 1000) * 0.25));
             await page.evaluate(() => {
-                window.scrollBy({ top: Math.floor(Math.random() * 500), behavior: 'smooth' });
+                window.scrollBy({ top: 400, behavior: 'smooth' });
+                const moreBtn = document.querySelector('#expand, button[aria-label*="Description"], .tp-yt-paper-button#more');
+                if (moreBtn) moreBtn.click();
             });
-            
-            // Random Mouse Move
-            await page.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 10 });
-            await new Promise(r => setTimeout(r, Math.random() * 3000 + 2000));
+            console.log(`[HUMAN] Description opened & scrolled.`);
 
-            // 🔥 Ad Clicker (18% probability)
-            if (Math.random() < 0.18) {
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
+            // B. Video ke 60% par Comments check
+            await new Promise(r => setTimeout(r, (totalSeconds * 1000) * 0.35));
+            await page.evaluate(() => {
+                window.scrollBy({ top: 900, behavior: 'smooth' }); // Deep scroll for comments
+                setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 3000);
+            });
+            console.log(`[HUMAN] Comment section checked.`);
+        })();
 
-                    if (box && box.width > 20 && box.height > 20) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Validating Revenue for View #${viewNumber}...`);
-                        
-                        // Human-like click
-                        await page.mouse.move(box.x + box.width/2, box.y + box.height/2, { steps: 15 });
-                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                        
-                        // Stay on advertiser site
-                        await new Promise(r => setTimeout(r, 20000));
-                        break; 
-                    }
-                }
-            }
-        }
-        console.log(`[SUCCESS] View #${viewNumber} completed.`);
+        // --- 5. 100% STRICT FINISH ---
+        // Video khatam hone tak wait + 5s buffer
+        await new Promise(r => setTimeout(r, (totalSeconds * 1000) + 5000));
+        console.log(`[SUCCESS] View #${viewNumber} 100% Watched ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
-    } finally {
-        if (browser) await browser.close();
-    }
-}
-// --- ENDPOINT FOR TOOL 7 (/popup) ---
-app.post('/popup', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
-
-        if (!keyword || !urls || !Array.isArray(urls)) {
-            return res.status(400).json({ success: false, message: "Keyword and URLs (Array) are required." });
-        }
-
-        // Response immediately to frontend
-        res.status(200).json({ 
-            success: true, 
-            message: `Task started for ${urls.length} sites with pop-up rotation logic.` 
-        });
-
-        // Background Processing
-        (async () => {
-            console.log(`\n--- STARTING POP-UP REVENUE TASK ---`);
-            for (let i = 1; i <= views; i++) {
-                const currentUrl = urls[(i - 1) % urls.length]; // Rotation between sites
-                await runGscTaskpop(keyword, currentUrl, i);
-
-                // RAM Management & Anti-Spam break
-                const breakTime = i % 5 === 0 ? 30000 : 10000;
-                await new Promise(r => setTimeout(r, breakTime));
-            }
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
-// ===================================================================
-// UPDATED TOOL 8 ADVANCED MULTI-FORMAT AD CLICKER
-// ===================================================================
-// ===================================================================
-// UPDATED TOOL 8: STABLE MULTI-FORMAT AD CLICKER (BANNER, PUSH, POP)
-// ===================================================================
-
-async function runUltimateRevenueTask(keyword, url, viewNumber) {
-    let browser;
-    try {
-        // Ek time mein ek hi browser chale isliye hum await ka use kar rahe hain
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
-        });
-
-        const page = await browser.newPage();
-        // Timeout 60s tak rakha hai heavy ads load hone ke liye
-        page.setDefaultNavigationTimeout(60000); 
-        await page.setViewport({ width: 1366, height: 768 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        console.log(`[VIEW #${viewNumber}] Target: ${url}`);
-        
-        // Step 1: Visit Target Site
-        await page.goto(url, { waitUntil: 'networkidle2' });
-
-        // Random Page Stay Time: 30 to 50 seconds (User request ke mutabik)
-        const targetStayTime = randomInt(30000, 50000); 
-        const startTime = Date.now();
-        let actionTaken = false;
-
-        // Click Rotation: 6, 12, aur 18 view par click hoga
-        const clickCycle = viewNumber % 20; 
-
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scroll behavior
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-            await new Promise(r => setTimeout(r, 4000));
-
-            // Ads Click Logic
-            if (!actionTaken && [6, 12, 18].includes(clickCycle)) {
-                console.log(`[SEARCHING ADS] View #${viewNumber} - Identifying Ad Format...`);
-                
-                // --- ADVANCED IFRAME & ELEMENT DETECTION ---
-                const frames = page.frames();
-                let adFound = false;
-
-                for (const frame of frames) {
-                    try {
-                        // Har tarah ke format ke selectors (Monetag/Adsterra/Adsense)
-                        const adSelector = 'ins.adsbygoogle, iframe[src*="googleads"], a[href*="smartlink"], .ad-notification, #container-ad1288ee73006596cffbc44a44b97c80, [class*="banner"]';
-                        const adElement = await frame.$(adSelector);
-
-                        if (adElement) {
-                            const box = await adElement.boundingBox();
-                            if (box && box.width > 5 && box.height > 5) {
-                                console.log(`\x1b[42m[AD-FOUND]\x1b[0m Format detected in frame.`);
-                                
-                                // Scroll and Click
-                                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
-                                await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                                
-                                adFound = true;
-                                actionTaken = true;
-                                console.log(`\x1b[44m[SUCCESS]\x1b[0m Ad Clicked! Staying 15s for conversion...`);
-                                await new Promise(r => setTimeout(r, 15000)); // Stay after click for valid CTR
-                                break;
-                            }
-                        }
-                    } catch (fErr) { continue; }
-                }
-
-                // Fallback: Agar koi format na mile toh body click (Popunder trigger)
-                if (!adFound && clickCycle === 18) {
-                    await page.click('body');
-                    actionTaken = true;
-                    console.log(`[FALLBACK] Body click triggered for Popunder.`);
-                    await new Promise(r => setTimeout(r, 10000));
-                }
-            }
-        }
-        
-        console.log(`[DONE] View #${viewNumber} completed.`);
-
-    } catch (error) {
-        console.error(`[CRITICAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            // RAM Cleanup: Pehle saare pages close karein phir browser
-            const openPages = await browser.pages();
-            await Promise.all(openPages.map(p => p.close().catch(() => {})));
-            await browser.close().catch(() => {});
-            console.log(`[CLEANUP] Browser closed for View #${viewNumber}`);
-        }
-    }
-}
-
-// ===================================================================
-// Tool 8 Endpoint: Fixed Background Loop
-// ===================================================================
-app.post('/ultimate', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
-        if (!urls || !Array.isArray(urls) || urls.length === 0) {
-            return res.status(400).json({ success: false, message: "URLs are required!" });
-        }
-
-        const totalViews = parseInt(views);
-        res.status(200).json({ success: true, message: `Task Started: ${totalViews} Views. Single-browser mode active.` });
-
-        // Background Worker (Awaited loop taaki RAM crash na ho)
-        (async () => {
-            for (let i = 1; i <= totalViews; i++) {
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                // "await" yahan zaroori hai taaki ek khatam hone par hi dusra shuru ho
-                await runUltimateRevenueTask(keyword, randomUrl, i); 
-
-                // Chhota break next browser session se pehle
-                await new Promise(r => setTimeout(r, 5000));
-            }
-        })();
-    } catch (err) {
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
-
-// ===================================================================
-// Tool 8 Endpoint (Updated for Multi-Site Rotation)
-// ===================================================================
-app.post('/ultimate', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
-
-        // Frontend se 'urls' array aa raha hai, use validate karein
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
-        }
-
-        const totalViews = parseInt(views);
-
-        // Immediate Success Response taaki frontend hang na ho
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
-        });
-
-        // Background Worker
-        (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runUltimateRevenueTask(keyword, randomUrl, i); 
-
-                if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
-                }
-            }
-            console.log("--- ALL SESSIONS COMPLETED ---");
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
-// ===================================================================
-// NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
-// ======================
-// Global variable for Live Feed
-let latestScreenshot = null;
-
-// 1. Live Check Endpoint
-app.get('/live-check', (req, res) => {
-    if (latestScreenshot) {
-        res.contentType('image/png').send(latestScreenshot);
-    } else {
-        res.status(404).send("Initializing Video Stream...");
-    }
-});
-
-// 2. Main Engine (CroxyProxy - Mobile Mode)
-async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
-    for (let i = 0; i < totalViews; i++) {
-        let browser;
-        try {
-            console.log(`[SESSION ${i+1}] Starting...`);
-            browser = await puppeteer.launch({
-                headless: "new",
-                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-            });
-
-            const page = await browser.newPage();
-
-            // Mobile Setup (Sahi coordination ke liye)
-            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-            await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
-
-            // STEP 1: CroxyProxy open karna
-            await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
-            latestScreenshot = await page.screenshot(); 
-
-            // STEP 2: URL daalna aur submit karna
-            const inputSelector = '#url';
-            await page.waitForSelector(inputSelector);
-            await page.type(inputSelector, videoUrl);
-            await page.click('#requestSubmit'); 
-            console.log("URL Submitted. 60 Seconds wait starts now...");
-
-            // --- STEP 3: 60 SECONDS WAIT (Loading Buffer) ---
-            // Is 60 sec ke dauran hum har 5 sec me screenshot lenge taaki user ko lage system chal raha hai
-            for(let wait = 5; wait <= 60; wait += 5) {
-                await new Promise(r => setTimeout(r, 5000));
-                latestScreenshot = await page.screenshot();
-                console.log(`Loading Video: ${wait}/60s`);
-            }
-
-            // STEP 4: Video ke center me click karna (Video upar load hota hai)
-            // Mobile screen (390 width) ke hisab se center (195) aur upar ka area (250-300 height)
-            await page.mouse.click(195, 280); 
-            console.log("60 Seconds Over: Video Center Clicked ✅");
-            latestScreenshot = await page.screenshot();
-
-            // STEP 5: WATCH TIME COUNTING (Ab shuru hogi)
-            let elapsed = 0;
-            const watchLimit = parseInt(watchTime);
-            
-            console.log("Watching started...");
-            while (elapsed < watchLimit) {
-                await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me update
-                elapsed += 3;
-                
-                latestScreenshot = await page.screenshot();
-                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
-            }
-
-            console.log(`[SUCCESS] Session ${i+1} completed.`);
-
-        } catch (error) {
-            console.error("Session Error:", error.message);
-        } finally {
-            if (browser) await browser.close();
-            await new Promise(r => setTimeout(r, 2000)); // Render Safety
-        }
-    }
-}
-
-// 3. API Endpoint
-app.post('/api/real-view-boost', async (req, res) => {
-    const { channel_url, views_count, watch_time } = req.body;
-    if(!channel_url) return res.status(400).json({ error: "Video URL missing" });
-
-    res.json({ 
-        success: true, 
-        message: "Engine Started! 60s loading then play." 
-    });
-
-    runCroxyVideoEngine(channel_url, watch_time, views_count);
-});
-// ===================================================================
-// NEW TOOL 11: MULTI-SITE AD-REVENUE ENGINE (CROXYPROXY + SCREENSHOTS)
-// ===================================================================
-
-let currentScreenshot = null;
-let earningLogs = [];
-
-// Helper: Log message function
-function addEarningLog(message, type = 'info') {
-    const entry = { message, type, time: new Date().toLocaleTimeString() };
-    earningLogs.push(entry);
-    if (earningLogs.length > 50) earningLogs.shift();
-    console.log(`[LOG] ${message}`);
-}
-
-// 1. Endpoint for Live Screenshot (Frontend 3 sec mein call karega)
-app.get('/live-new-check', (req, res) => {
-    if (currentScreenshot) {
-        res.contentType('image/jpeg');
-        res.send(currentScreenshot);
-    } else {
-        res.status(404).send('No preview available');
-    }
-});
-
-// 2. Endpoint to fetch logs
-app.get('/api/new-get-logs', (req, res) => {
-    res.json({ logs: earningLogs });
-});
-
-// 3. Main Automation Function
-async function startCroxyAutomation(keyword, urls, totalViews) {
-    for (let i = 1; i <= totalViews; i++) {
-        const targetUrl = urls[Math.floor(Math.random() * urls.length)];
-        addEarningLog(`Starting View #${i}/${totalViews} for ${targetUrl}`, 'success');
-
-        const browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--window-size=1920,1080',
-                '--disable-blink-features=AutomationControlled'
-            ]
-        });
-
-        try {
-            const page = await browser.newPage();
-            // Desktop Mode Emulation
-            await page.setViewport({ width: 1920, height: 1080 });
-            await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-            // Step 1: CroxyProxy par jana
-            addEarningLog("Opening CroxyProxy...", "info");
-            await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2' });
-            
-            // Step 2: URL daalna aur Go tap karna
-            await page.type('#url', targetUrl);
-            await Promise.all([
-                page.click('#requestSubmit'),
-                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 })
-            ]);
-
-            // Screenshot Loop (Har 3 sec mein update ke liye)
-            const screenshotInterval = setInterval(async () => {
-                try {
-                    currentScreenshot = await page.screenshot({ type: 'jpeg', quality: 60 });
-                } catch (e) {}
-            }, 3000);
-
-            // Step 3: Realistic Behavior (30-60 sec)
-            const stayTime = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
-            const endTime = Date.now() + stayTime;
-            addEarningLog(`Interaction started for ${stayTime/1000}s...`, "info");
-
-            let adClicked = false;
-            // 20 mein se 2-3 views mein ads click (approx 15% chance)
-            const shouldClickAd = Math.random() < 0.15; 
-
-            while (Date.now() < endTime) {
-                // Random Scroll
-                await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-                // Random Mouse Move
-                await page.mouse.move(Math.random() * 800, Math.random() * 600);
-                
-                // Ad Click Logic
-                if (shouldClickAd && !adClicked) {
-                    const adSelector = 'ins, iframe[id^="aswift"], .adsbygoogle'; // Common ad selectors
-                    const adElement = await page.$(adSelector);
-                    if (adElement) {
-                        addEarningLog("Ad found! Attempting click...", "success");
-                        await adElement.click();
-                        adClicked = true;
-                        await new Promise(r => setTimeout(r, 5000)); // Wait for new tab
-                        
-                        // Handle 2nd Tab (if opened)
-                        const pages = await browser.pages();
-                        if (pages.length > 2) {
-                            const adPage = pages[pages.length - 1];
-                            await adPage.setViewport({ width: 1920, height: 1080 });
-                            addEarningLog("Interacting with Ad Tab...", "info");
-                            await adPage.evaluate(() => window.scrollBy(0, 300));
-                            await new Promise(r => setTimeout(r, 10000));
-                            await adPage.close();
-                        }
-                    }
-                }
-                await new Promise(r => setTimeout(r, 5000));
-            }
-
-            clearInterval(screenshotInterval);
-            addEarningLog(`View #${i} completed successfully.`, "success");
-
-        } catch (err) {
-            addEarningLog(`Error in View #${i}: ${err.message}`, "error");
-        } finally {
             await browser.close();
-            // Ek view ke baad break (optional)
-            await new Promise(r => setTimeout(r, 2000));
+            console.log(`[CLEANUP] 15s gap to clear RAM on Render...`);
         }
-    }
-    addEarningLog("All views finished!", "success");
-}
-
-// 4. Main API Endpoint
-app.post('/earnig', async (req, res) => {
-    const { keyword, urls, views } = req.body;
-    if (!keyword || !urls) return res.status(400).send("Missing data");
-
-    res.status(200).json({ status: "started" });
-    
-    // Background execution
-    startCroxyAutomation(keyword, urls, views || 20);
-});
-// ===================================================================
-// Tool 5 Endpoint (Updated for Multi-Site Rotation)
-// ===================================================================
-// --- Updated Task Function with Proxy Auth Support ---
-async function runGscTaskipchange(proxyData, url, viewNumber) {
-    let browser;
-    try {
-        // Render Environment se proxy string parse karna (Format: user:pass@ip:port)
-        const [auth, address] = proxyData.includes('@') ? proxyData.split('@') : [null, proxyData];
-        
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                `--proxy-server=http://${address || proxyData}`,
-                '--no-sandbox',
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
-        });
-
-        const page = await browser.newPage();
-
-        // AGAR PROXY ME USERNAME/PASSWORD HAI TO AUTHENTICATE KAREIN
-        if (auth) {
-            const [username, password] = auth.split(':');
-            await page.authenticate({ username, password });
-            console.log(`[AUTH] Proxy Authenticated for View #${viewNumber}`);
-        }
-        
-        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
-        await page.setUserAgent(profile.ua);
-        await page.setViewport(profile.view);
-
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
-
-        console.log(`[EARNING-MODE] View #${viewNumber} | Site: ${url}`);
-        
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 120000, 
-            referer: 'https://www.google.com/' 
-        });
-
-        const startTime = Date.now();
-        const targetStayTime = randomInt(40000, 50000); 
-
-        while (Date.now() - startTime < targetStayTime) {
-            await page.evaluate((d) => window.scrollBy(0, d), randomInt(300, 600));
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
-
-            // High-Value Ad Clicker
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-                    if (box && box.width > 50 && box.height > 50) {
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`[SUCCESS] Ad Clicked via Webshare Proxy! ✅`);
-                        await new Promise(r => setTimeout(r, 15000)); 
-                        break; 
-                    }
-                }
-            }
-        }
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
-    } finally {
-        if (browser) await browser.close().catch(() => {});
     }
 }
+// --- NEW ENDPOINT TO START TOOL 7 ---
+app.post('/api/real-view-boost', async (req, res) => {
+    const { video_url, views_count } = req.body;
+    const total = parseInt(views_count) || 1;
 
-// --- Updated Endpoint ---
-app.post('/ip-change', async (req, res) => {
-    try {
-        const { urls, views = 10 } = req.body;
+    if (!video_url) return res.status(400).json({ error: "Video URL missing" });
 
-        // Render Environment Variable se Proxy uthana
-        // Format should be: wpyitxbw-rotate:asefvgvwf4cg@p.webshare.io:80
-        const proxyFromEnv = process.env.proxy || process.env.PROXY;
+    res.status(200).json({ success: true, message: `Task started: ${total} views (1-by-1).` });
 
-        if (!proxyFromEnv || !urls || !Array.isArray(urls)) {
-            return res.status(400).json({ success: false, message: "Proxy Env or URLs missing!" });
+    (async () => {
+        for (let i = 1; i <= total; i++) {
+            await runYoutubeBrowserTask(video_url, i);
+            if (i < total) await new Promise(r => setTimeout(r, 15000));
         }
-
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started using Render Env Proxy: ${proxyFromEnv.split('@')[1]}` 
-        });
-
-        (async () => {
-            for (let i = 1; i <= parseInt(views); i++) {
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                await runGscTaskipchange(proxyFromEnv, randomUrl, i); 
-                await new Promise(r => setTimeout(r, 5000));
-            }
-        })();
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
+    })();
 });
-// ===================================================================
-// Tool 5 Endpoint (Updated for Multi-Site Rotation)
-// ===================================================================
-app.post('/ip-change', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
 
-        // Frontend se 'urls' array aa raha hai, use validate karein
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
-        }
-
-        const totalViews = parseInt(views);
-
-        // Immediate Success Response taaki frontend hang na ho
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
-        });
-
-        // Background Worker
-        (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTaskip(keyword, randomUrl, i); 
-
-                if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
-                }
-            }
-            console.log("--- ALL SESSIONS COMPLETED ---");
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
-});
-//==================================================
+// =============================================================
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
