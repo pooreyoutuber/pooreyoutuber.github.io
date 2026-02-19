@@ -1121,73 +1121,91 @@ async function runGscTaskpop(keyword, url, viewNumber) {
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
         
-        // 1. SELECT RANDOM DEVICE (PC, Mobile, Tablet)
+        // 1. Random Device Profile Select Karein
         const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
 
-        // 2. REFERRAL LOGIC: Har 10 mein se 5 views (50%) Social Referral honge
-        let referral = "";
-        if (viewNumber % 2 === 0) { // Every even view (10 me se 5 average)
-            referral = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
+        // --- TRAFFIC MIX LOGIC (10 mein se 6 Organic, 4 Referral) ---
+        let refererUrl;
+        const mixRatio = viewNumber % 10; 
+
+        if (mixRatio <= 6 && mixRatio !== 0) {
+            // STAGE: Google Search Simulation (60% Views)
+            refererUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+            console.log(`[VIEW #${viewNumber}] Mode: ORGANIC (Google Search)`);
+            await page.goto(refererUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await new Promise(r => setTimeout(r, 4000)); 
+        } else {
+            // STAGE: Social Referral (40% Views)
+            refererUrl = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
+            console.log(`[VIEW #${viewNumber}] Mode: REFERRAL (${refererUrl})`);
         }
 
-        console.log(`[VIEW #${viewNumber}] Device: ${profile.name} | Referral: ${referral || 'Direct/Proxy'}`);
+        // 2. Target Site Visit
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: refererUrl 
+        });
 
-        // 3. Proxyium Navigation
-        await page.goto('https://proxyium.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
-        
-        await page.waitForSelector('input[name="url"]', { visible: true, timeout: 60000 });
-        await page.type('input[name="url"]', url, { delay: 100 });
-        
-        // Referral spoofing (if applicable)
-        if (referral) {
-            await page.setExtraHTTPHeaders({ 'Referer': referral });
-        }
-
-        await Promise.all([
-            page.keyboard.press('Enter'),
-            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => null)
-        ]);
-
-        await new Promise(r => setTimeout(r, 15000)); 
+        // Stealth: Hiding webdriver
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(40000, 60000); 
+        const targetStayTime = Math.floor(Math.random() * (45000 - 35000 + 1)) + 35000; 
 
-        // Ad Click Logic (Keep as is in your original tool)
-        const shouldClickAd = Math.random() < 0.20; 
-        let adClickedInThisSession = false;
-
+        // 3. Behavior & Ad Clicker
         while (Date.now() - startTime < targetStayTime) {
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-            await page.mouse.move(randomInt(50, 300), randomInt(50, 300), { steps: 5 });
+            // Smooth Scroll
+            await page.evaluate(() => {
+                window.scrollBy({ top: Math.floor(Math.random() * 500), behavior: 'smooth' });
+            });
+            
+            // Random Mouse Move
+            await page.mouse.move(Math.random() * 800, Math.random() * 600, { steps: 10 });
+            await new Promise(r => setTimeout(r, Math.random() * 3000 + 2000));
 
-            if (shouldClickAd && !adClickedInThisSession) {
-                const adSelector = 'ins.adsbygoogle, iframe[src*="googleads"], a[href*="smartlink"]';
-                const foundAd = await page.$(adSelector);
-                if (foundAd) {
-                    const box = await foundAd.boundingBox();
-                    if (box && box.width > 10) {
+            // 🔥 Ad Clicker (18% probability)
+            if (Math.random() < 0.18) {
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+
+                    if (box && box.width > 20 && box.height > 20) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Validating Revenue for View #${viewNumber}...`);
+                        
+                        // Human-like click
+                        await page.mouse.move(box.x + box.width/2, box.y + box.height/2, { steps: 15 });
                         await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                        adClickedInThisSession = true;
-                        console.log(`\x1b[42m[SUCCESS]\x1b[0m Ad Clicked on ${profile.name}`);
-                        await new Promise(r => setTimeout(r, 10000));
+                        
+                        // Stay on advertiser site
+                        await new Promise(r => setTimeout(r, 20000));
+                        break; 
                     }
                 }
             }
-            await new Promise(r => setTimeout(r, 7000));
         }
+        console.log(`[SUCCESS] View #${viewNumber} completed.`);
 
     } catch (error) {
-        console.error(`[ERROR] Tool 7: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close().catch(() => {});
+        if (browser) await browser.close();
     }
 }
 // --- ENDPOINT FOR TOOL 7 (/popup) ---
