@@ -1633,108 +1633,109 @@ app.post('/earnig', async (req, res) => {
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
-async function runGscTaskip(keyword, url, viewNumber) {
+// --- Updated Task Function with Proxy Auth Support ---
+async function runGscTaskipchange(proxyData, url, viewNumber) {
     let browser;
     try {
-        // 1. Render Environment se Proxy Details nikalna
-        // Bright Data format: username:password@brd.superproxy.io:22225
-        // Agar aapne sirf API Key rakhi hai, toh username aksar 'brd-customer-hl_XXXXX-zone-XXXXX' hota hai
-        const proxyServer = "http://brd.superproxy.io:22225"; 
-        const proxyAuth = process.env.proxy; // Aapki API key ya Auth string (user:pass)
-
-        addEarningLog(`[VIEW #${viewNumber}] Connecting via Bright Data Proxy...`, 'info');
-
+        // Render Environment se proxy string parse karna (Format: user:pass@ip:port)
+        const [auth, address] = proxyData.includes('@') ? proxyData.split('@') : [null, proxyData];
+        
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                `--proxy-server=${proxyServer}`,
+                `--proxy-server=http://${address || proxyData}`,
                 '--no-sandbox',
-                '--disable-setuid-sandbox',
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
 
-        // 2. Proxy Authentication (Zaroori Step)
-        // Agar aapka proxy env variable "username:password" format mein hai:
-        if (proxyAuth && proxyAuth.includes(':')) {
-            const [username, password] = proxyAuth.split(':');
+        // AGAR PROXY ME USERNAME/PASSWORD HAI TO AUTHENTICATE KAREIN
+        if (auth) {
+            const [username, password] = auth.split(':');
             await page.authenticate({ username, password });
+            console.log(`[AUTH] Proxy Authenticated for View #${viewNumber}`);
         }
-
-        // Stealth and Device Profile
+        
         const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
 
-        // 3. Google Search (GSC Logic)
-        addEarningLog(`[VIEW #${viewNumber}] Searching Keyword: ${keyword}`, 'info');
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
 
-        // Google Search Box mein type karna
-        await page.waitForSelector('textarea[name="q"], input[name="q"]');
-        await page.type('textarea[name="q"], input[name="q"]', keyword, { delay: 150 });
-        await page.keyboard.press('Enter');
+        console.log(`[EARNING-MODE] View #${viewNumber} | Site: ${url}`);
+        
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 120000, 
+            referer: 'https://www.google.com/' 
+        });
 
-        // Navigation ka wait
-        await page.waitForNavigation({ waitUntil: 'networkidle2' });
+        const startTime = Date.now();
+        const targetStayTime = randomInt(40000, 50000); 
 
-        // 4. Apne URL ko dhund kar click karna
-        const found = await page.evaluate((target) => {
-            const links = Array.from(document.querySelectorAll('a'));
-            const targetLink = links.find(l => l.href.includes(target));
-            if (targetLink) {
-                targetLink.scrollIntoView();
-                targetLink.click();
-                return true;
-            }
-            return false;
-        }, url);
+        while (Date.now() - startTime < targetStayTime) {
+            await page.evaluate((d) => window.scrollBy(0, d), randomInt(300, 600));
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-        if (found) {
-            addEarningLog(`[SUCCESS] Website found and clicked!`, 'success');
-            
-            // Interaction Loop
-            const stayTime = randomInt(40000, 60000);
-            const endTime = Date.now() + stayTime;
-
-            // Screenshot Interval start (Live Preview)
-            const screenshotInterval = setInterval(async () => {
-                try {
-                    currentScreenshot = await page.screenshot({ type: 'jpeg', quality: 50 });
-                } catch (e) {}
-            }, 3000);
-
-            while (Date.now() < endTime) {
-                await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-                await new Promise(r => setTimeout(r, 5000));
-                
-                // Random Ad Click Logic (15% chance)
-                if (Math.random() < 0.15) {
-                    const ad = await page.$('ins.adsbygoogle, iframe[src*="googleads"]');
-                    if (ad) {
-                        const box = await ad.boundingBox();
-                        if (box) {
-                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                            addEarningLog("Bright Data IP used for Ad Click!", "success");
-                            await new Promise(r => setTimeout(r, 15000));
-                            break;
-                        }
+            // High-Value Ad Clicker
+            if (Math.random() < 0.18) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+                    if (box && box.width > 50 && box.height > 50) {
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log(`[SUCCESS] Ad Clicked via Webshare Proxy! ✅`);
+                        await new Promise(r => setTimeout(r, 15000)); 
+                        break; 
                     }
                 }
             }
-            clearInterval(screenshotInterval);
-        } else {
-            addEarningLog(`[WARNING] Website link not found in Top results.`, 'error');
         }
-
-    } catch (err) {
-        addEarningLog(`[GSC-ERROR] ${err.message}`, 'error');
+    } catch (error) {
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) await browser.close().catch(() => {});
     }
 }
+
+// --- Updated Endpoint ---
+app.post('/ip-change', async (req, res) => {
+    try {
+        const { urls, views = 10 } = req.body;
+
+        // Render Environment Variable se Proxy uthana
+        // Format should be: wpyitxbw-rotate:asefvgvwf4cg@p.webshare.io:80
+        const proxyFromEnv = process.env.proxy || process.env.PROXY;
+
+        if (!proxyFromEnv || !urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "Proxy Env or URLs missing!" });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: `Task Started using Render Env Proxy: ${proxyFromEnv.split('@')[1]}` 
+        });
+
+        (async () => {
+            for (let i = 1; i <= parseInt(views); i++) {
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                await runGscTaskipchange(proxyFromEnv, randomUrl, i); 
+                await new Promise(r => setTimeout(r, 5000));
+            }
+        })();
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
