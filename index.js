@@ -1633,89 +1633,106 @@ app.post('/earnig', async (req, res) => {
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
-async function runGscTaskipchange(proxyAddress, url, viewNumber) {
+async function runGscTaskip(keyword, url, viewNumber) {
     let browser;
     try {
+        // 1. Render Environment se Proxy Details nikalna
+        // Bright Data format: username:password@brd.superproxy.io:22225
+        // Agar aapne sirf API Key rakhi hai, toh username aksar 'brd-customer-hl_XXXXX-zone-XXXXX' hota hai
+        const proxyServer = "http://brd.superproxy.io:22225"; 
+        const proxyAuth = process.env.proxy; // Aapki API key ya Auth string (user:pass)
+
+        addEarningLog(`[VIEW #${viewNumber}] Connecting via Bright Data Proxy...`, 'info');
+
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                `--proxy-server=http://${proxyAddress}`,
+                `--proxy-server=${proxyServer}`,
                 '--no-sandbox',
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
+                '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
-        
-        // Anti-Bot: Set Device Profile (Make sure DEVICE_PROFILES array is defined)
+
+        // 2. Proxy Authentication (Zaroori Step)
+        // Agar aapka proxy env variable "username:password" format mein hai:
+        if (proxyAuth && proxyAuth.includes(':')) {
+            const [username, password] = proxyAuth.split(':');
+            await page.authenticate({ username, password });
+        }
+
+        // Stealth and Device Profile
         const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
 
-        // Stealth logic to hide Puppeteer
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, 'webdriver', { get: () => false });
-        });
+        // 3. Google Search (GSC Logic)
+        addEarningLog(`[VIEW #${viewNumber}] Searching Keyword: ${keyword}`, 'info');
+        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
 
-        // STAGE 1: Seedhe Website par jana (Organic Referer ke saath)
-        // Note: Google search page load karne se proxy block hone ka khatra rehta hai
-        console.log(`[EARNING-MODE] View #${viewNumber} | Proxy: ${proxyAddress} | Site: ${url}`);
-        
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 120000, 
-            referer: 'https://www.google.com/search?q=best+services' // Fake organic traffic source
-        });
+        // Google Search Box mein type karna
+        await page.waitForSelector('textarea[name="q"], input[name="q"]');
+        await page.type('textarea[name="q"], input[name="q"]', keyword, { delay: 150 });
+        await page.keyboard.press('Enter');
 
-        const startTime = Date.now();
-        const targetStayTime = randomInt(40000, 50000); // 40-50s stay for safety
+        // Navigation ka wait
+        await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-        // STAGE 2: Realistic Behavior & Ad-Clicker Loop
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
+        // 4. Apne URL ko dhund kar click karna
+        const found = await page.evaluate((target) => {
+            const links = Array.from(document.querySelectorAll('a'));
+            const targetLink = links.find(l => l.href.includes(target));
+            if (targetLink) {
+                targetLink.scrollIntoView();
+                targetLink.click();
+                return true;
+            }
+            return false;
+        }, url);
+
+        if (found) {
+            addEarningLog(`[SUCCESS] Website found and clicked!`, 'success');
             
-            // Random Mouse Movement
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            // Interaction Loop
+            const stayTime = randomInt(40000, 60000);
+            const endTime = Date.now() + stayTime;
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], a[href*="googleadservices"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
+            // Screenshot Interval start (Live Preview)
+            const screenshotInterval = setInterval(async () => {
+                try {
+                    currentScreenshot = await page.screenshot({ type: 'jpeg', quality: 50 });
+                } catch (e) {}
+            }, 3000);
 
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] View #${viewNumber} | Click Triggered!`);
-                        
-                        // Click natural tarike se
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked Successfully! ✅`);
-                        
-                        // Advertiser site par wait zaroori hai
-                        await new Promise(r => setTimeout(r, 18000)); 
-                        break; 
+            while (Date.now() < endTime) {
+                await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+                await new Promise(r => setTimeout(r, 5000));
+                
+                // Random Ad Click Logic (15% chance)
+                if (Math.random() < 0.15) {
+                    const ad = await page.$('ins.adsbygoogle, iframe[src*="googleads"]');
+                    if (ad) {
+                        const box = await ad.boundingBox();
+                        if (box) {
+                            await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                            addEarningLog("Bright Data IP used for Ad Click!", "success");
+                            await new Promise(r => setTimeout(r, 15000));
+                            break;
+                        }
                     }
                 }
             }
+            clearInterval(screenshotInterval);
+        } else {
+            addEarningLog(`[WARNING] Website link not found in Top results.`, 'error');
         }
-        console.log(`[DONE] View #${viewNumber} completed. ✅`);
 
-    } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+    } catch (err) {
+        addEarningLog(`[GSC-ERROR] ${err.message}`, 'error');
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
 // ===================================================================
@@ -1752,7 +1769,7 @@ app.post('/ip-change', async (req, res) => {
                 console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
                 
                 // FIXED: Ab yahan 'proxyAddress', 'randomUrl' aur 'i' sahi se pass ho rahe hain
-                await runGscTaskipchange(proxyAddress, randomUrl, i); 
+                await runGscTaskipproxyAddress, randomUrl, i); 
 
                 if (i < totalViews) {
                     const restTime = i % 5 === 0 ? 25000 : 12000; 
