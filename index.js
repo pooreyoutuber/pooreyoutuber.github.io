@@ -1151,7 +1151,7 @@ app.post('/start-Proxyium', async (req, res) => {
         // 1. STAGE: Google Search Simulation (Organic Entry)
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
         // 2. STAGE: Visit Target Site (30-35s Total Stay)
         console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
