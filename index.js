@@ -841,9 +841,6 @@ const WARMUP_SITES = {
     ]
 };
 
-// 2. Uske baad ye helper function (Random Number ke liye)
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
 }
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
