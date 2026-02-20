@@ -827,26 +827,46 @@ async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            headless: "new", // "new" for latest versions
+            args: ['--no-sandbox', '--disable-setuid-sandbox',  '--disable-dev-shm-usage',  '--disable-gpu', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1366, height: 768 });
-        
-        // Anti-Bot: Set Random User Agent
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
+        // ==========================================
+        // STAGE 0: BROWSER WARM-UP (Building History)
+        // ==========================================
+        const categories = Object.keys(WARMUP_SITES);
+        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+        const targetLinks = WARMUP_SITES[randomCategory];
+
+        console.log(`[WARM-UP] Category: ${randomCategory.toUpperCase()} | Links: ${targetLinks.length}`);
+
+        for (const link of targetLinks) {
+            try {
+                console.log(`[WARM-UP] Visiting: ${link}`);
+                await page.goto(link, { waitUntil: 'domcontentloaded', timeout: 45000 });
+                
+                // Real human behavior: Scroll & Wait
+                const scrollCount = Math.floor(Math.random() * 3) + 2; 
+                for(let i=0; i<scrollCount; i++){
+                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500) + 200));
+                    await new Promise(r => setTimeout(r, Math.floor(Math.random() * 3000) + 2000));
+                }
+                console.log(`[WARM-UP] Finished interaction with ${link}`);
+            } catch (e) {
+                console.log(`[WARM-UP-ERROR] Skipping link...`);
+            }
+        }
+
+        // ==========================================
+        // STAGE 1: Organic Entry (Google Search)
+        // ==========================================
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
+        await new Promise(r => setTimeout(r, 3000));
 
         // 2. STAGE: Visit Target Site (30-35s Total Stay)
         console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
