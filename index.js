@@ -840,8 +840,6 @@ const WARMUP_SITES = {
         "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
     ]
 };
-
-}
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
