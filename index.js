@@ -823,6 +823,28 @@ app.get('/proxy-request', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+const WARMUP_SITES = {
+    crypto: [
+        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
+        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
+        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
+        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
+    ],
+    insurance: [
+        "https://www.policybazaar.com/",
+        "https://www.insurancejournal.com/"
+    ],
+    trade: [
+        "https://www.investing.com/academy/trading/",
+        "https://licindia.in/press-release",
+        "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
+    ]
+};
+
+// 2. Uske baad ye helper function (Random Number ke liye)
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
