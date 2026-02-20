@@ -969,17 +969,21 @@ async function runProxyiumTask(keyword, url, viewNumber) {
         });
 
         const page = await browser.newPage();
+        // FIX: Stealth plugin ke bawajud manually webdriver property delete karna best rehta hai
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
 
         // [A] DEVICE PROFILE: Har baar alag mobile/desktop choose karega
         const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
-        
+
         // [B] STEALTH: Browser ko bot detection se bachayega
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
         });
-        
+
         // --- STEP 1: Proxyium par jana ---
         console.log(`[VIEW #${viewNumber}] Opening Proxyium for: ${url}`);
         await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
@@ -1004,7 +1008,7 @@ async function runProxyiumTask(keyword, url, viewNumber) {
             // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
+
             // Mouse Movement
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
@@ -1022,7 +1026,7 @@ async function runProxyiumTask(keyword, url, viewNumber) {
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅`);
-                        
+
                         // Advertiser site par wait
                         await new Promise(r => setTimeout(r, 15000));
                         break; 
@@ -1629,13 +1633,16 @@ app.post('/earnig', async (req, res) => {
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
-async function runGscTaskipchange(proxyAddress, url, viewNumber) {
+async function runGscTaskipchange(proxyData, url, viewNumber) {
     let browser;
     try {
+        // Render Environment se proxy string parse karna (Format: user:pass@ip:port)
+        const [auth, address] = proxyData.includes('@') ? proxyData.split('@') : [null, proxyData];
+
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                `--proxy-server=http://${proxyAddress}`,
+                `--proxy-server=http://${address || proxyData}`,
                 '--no-sandbox',
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
@@ -1645,112 +1652,122 @@ async function runGscTaskipchange(proxyAddress, url, viewNumber) {
         });
 
         const page = await browser.newPage();
-        
-        // Anti-Bot: Set Device Profile (Make sure DEVICE_PROFILES array is defined)
+
+        // AGAR PROXY ME USERNAME/PASSWORD HAI TO AUTHENTICATE KAREIN
+        if (auth) {
+            const [username, password] = auth.split(':');
+            await page.authenticate({ username, password });
+            console.log(`[AUTH] Proxy Authenticated for View #${viewNumber}`);
+        }
+
         const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view);
 
-        // Stealth logic to hide Puppeteer
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
         });
 
-        // STAGE 1: Seedhe Website par jana (Organic Referer ke saath)
-        // Note: Google search page load karne se proxy block hone ka khatra rehta hai
-        console.log(`[EARNING-MODE] View #${viewNumber} | Proxy: ${proxyAddress} | Site: ${url}`);
-        
+        console.log(`[EARNING-MODE] View #${viewNumber} | Site: ${url}`);
+
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 120000, 
-            referer: 'https://www.google.com/search?q=best+services' // Fake organic traffic source
+            referer: 'https://www.google.com/' 
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(40000, 50000); // 40-50s stay for safety
+        const targetStayTime = randomInt(40000, 50000); 
 
-        // STAGE 2: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Random Mouse Movement
+            await page.evaluate((d) => window.scrollBy(0, d), randomInt(300, 600));
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+            // High-Value Ad Clicker
             if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"], a[href*="googleadservices"]');
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] View #${viewNumber} | Click Triggered!`);
-                        
-                        // Click natural tarike se
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked Successfully! ✅`);
-                        
-                        // Advertiser site par wait zaroori hai
-                        await new Promise(r => setTimeout(r, 18000)); 
+                        console.log(`[SUCCESS] Ad Clicked via Webshare Proxy! ✅`);
+                        await new Promise(r => setTimeout(r, 15000)); 
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} completed. ✅`);
-
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close().catch(() => {});
     }
 }
-// ===================================================================
-// Tool 5 Endpoint (Updated for Multi-Site Rotation)
-// ===================================================================
-// ===================================================================
-// Tool 5 Endpoint (Fixed ReferenceError)
-// ===================================================================
+
+// --- Updated Endpoint ---
 app.post('/ip-change', async (req, res) => {
     try {
-        // Frontend se 'keyword' mein Proxy IP:Port aa raha hai
-        const { keyword, urls, views = 1000 } = req.body;
+        const { urls, views = 10 } = req.body;
 
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Proxy and URLs are required!" });
+        // Render Environment Variable se Proxy uthana
+        // Format should be: wpyitxbw-rotate:asefvgvwf4cg@p.webshare.io:80
+        const proxyFromEnv = process.env.proxy || process.env.PROXY;
+
+        if (!proxyFromEnv || !urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "Proxy Env or URLs missing!" });
         }
-
-        const totalViews = parseInt(views);
-        // Yahan define kar rahe hain taaki loop ko mil sake
-        const proxyAddress = keyword; 
 
         res.status(200).json({ 
             success: true, 
-            message: `Task Started: ${totalViews} Views on ${urls.length} sites via Proxy.` 
+            message: `Task Started using Render Env Proxy: ${proxyFromEnv.split('@')[1]}` 
+        });
+
+        (async () => {
+            for (let i = 1; i <= parseInt(views); i++) {
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                await runGscTaskipchange(proxyFromEnv, randomUrl, i); 
+                await new Promise(r => setTimeout(r, 5000));
+            }
+        })();
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+// ===================================================================
+// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// ===================================================================
+app.post('/ip-change', async (req, res) => {
+    try {
+        const { keyword, urls, views = 1000 } = req.body;
+
+        // Frontend se 'urls' array aa raha hai, use validate karein
+        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        }
+
+        const totalViews = parseInt(views);
+
+        // Immediate Success Response taaki frontend hang na ho
+        res.status(200).json({ 
+            success: true, 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
         });
 
         // Background Worker
         (async () => {
             console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
             for (let i = 1; i <= totalViews; i++) {
+                // Randomly ek URL chunna rotation ke liye
                 const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
+
                 console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                
-                // FIXED: Ab yahan 'proxyAddress', 'randomUrl' aur 'i' sahi se pass ho rahe hain
-                await runGscTaskipchange(proxyAddress, randomUrl, i); 
+                await runGscTaskip(keyword, randomUrl, i); 
 
                 if (i < totalViews) {
+                    // RAM management break
                     const restTime = i % 5 === 0 ? 25000 : 12000; 
                     console.log(`[REST] Waiting ${restTime/1000}s...`);
                     await new Promise(r => setTimeout(r, restTime));
