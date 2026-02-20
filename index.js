@@ -1095,7 +1095,7 @@ app.post('/start-Proxyium', async (req, res) => {
 // ===================================================================
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
 // =============================== 
- async function runGscTask(keyword, url, viewNumber) {
+ async function runGscTaskpop(keyword, url, viewNumber) {
      const ADVANCED_DEVICE_PROFILES = [
         // --- PC / DESKTOP ---
         { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 } },
@@ -1211,9 +1211,9 @@ app.post('/start-Proxyium', async (req, res) => {
 }
 
 // ===================================================================
-// Tool 5 Endpoint (Updated for Multi-Site Rotation)
+// Tool 7 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
-app.post('/start-task', async (req, res) => {
+app.post('/popup', async (req, res) => {
     try {
         const { keyword, urls, views = 1000 } = req.body;
 
@@ -1239,7 +1239,7 @@ app.post('/start-task', async (req, res) => {
                 const randomUrl = urls[Math.floor(Math.random() * urls.length)];
                 
                 console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTask(keyword, randomUrl, i); 
+                await runGscTaskpop(keyword, randomUrl, i); 
 
                 if (i < totalViews) {
                     // RAM management break
