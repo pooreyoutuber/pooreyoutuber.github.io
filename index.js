@@ -1147,9 +1147,6 @@ app.post('/start-Proxyium', async (req, res) => {
         // SET VIEWPORT & UA
         await page.setViewport(profile.view);
         await page.setUserAgent(profile.ua);
-        
-        // Anti-Bot: Set Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
         // 1. STAGE: Google Search Simulation (Organic Entry)
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
