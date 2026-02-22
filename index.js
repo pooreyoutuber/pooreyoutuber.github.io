@@ -874,16 +874,51 @@ async function runGscTask(keyword, url, viewNumber) {
         console.log(`[TARGET] Visiting User Site: ${url}`);
         
         await finalPage.goto(url, { waitUntil: 'networkidle2', referer: 'https://www.google.com/' });
-        
-        // Yahan aap apna baki ka testing logic (minus ad clicks) rakh sakte hain
+         const startTime = Date.now();
+        const targetStayTime = randomInt(30000, 35000); 
+
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        while (Date.now() - startTime < targetStayTime) {
+            // Natural Scrolling
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            
+            // Mouse Movement (Bypass Bot Checks)
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+
+            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+            if (Math.random() < 0.18) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
+
+                    if (box && box.width > 50 && box.height > 50) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
+                        await new Promise(r => setTimeout(r, 15000));
+                        break; 
+                    }
+                }
+            }
+        }
+        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR]: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
+            await browser.close().catch(() => {});
+        }
     }
 }
-
 
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
