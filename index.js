@@ -823,80 +823,75 @@ app.get('/proxy-request', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-const WARMUP_SITES = {
-    crypto: [
-        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
-        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
-        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
-        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
-    ],
-    insurance: [
-        "https://www.policybazaar.com/",
-        "https://www.insurancejournal.com/"
-    ],
-    trade: [
-        "https://www.investing.com/academy/trading/",
-        "https://licindia.in/press-release",
-        "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
-    ]
-};
 async function runGscTask(keyword, url, viewNumber) {
+    // --- HIGH CPC TOPIC LINKS ---
+    const TOPIC_SITES = {
+        crypto: [
+            'https://www.binance.com/en-IN/blog/markets/7744511595520285761',
+            'https://www.binance.com/en-IN/blog/all/7318383218004275432',
+            'https://www.binance.com/en-IN/blog/all/2911606196614178290',
+            'https://www.binance.com/en-IN/blog/markets/2425827570913512077'
+        ],
+        insurance: [
+            'https://www.policybazaar.com/',
+            'https://www.insurancejournal.com/'
+        ],
+        trade: [
+            'https://www.investing.com/academy/trading/',
+            'https://licindia.in/press-release',
+            'https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/'
+        ]
+    };
+
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                 '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        
+        // 1. Random Device Profile & Viewport
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+        await page.setViewport(profile.view);
+        await page.setUserAgent(profile.ua);
 
         // ==========================================
-        // 1. STAGE: WARM-UP (THE SHEEP)
+        // 🏗️ PHASE 1: COOKIE WARMING (HISTORY BUILDING)
         // ==========================================
-        const categories = Object.keys(WARMUP_SITES);
-        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-        const targetLinks = WARMUP_SITES[randomCategory];
+        const topics = Object.keys(TOPIC_SITES);
+        const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+        const topicLinks = TOPIC_SITES[randomTopic];
 
-        console.log(`[WARM-UP] Category: ${randomCategory.toUpperCase()} | Mixing ${targetLinks.length} sheep...`);
+        console.log(`[WARMING] Topic: ${randomTopic.toUpperCase()} | Building History...`);
 
-        for (const link of targetLinks) {
+        // Bari-bari 2 random links visit karega history banane ke liye
+        for (let j = 0; j < 2; j++) {
+            const warmUrl = topicLinks[Math.floor(Math.random() * topicLinks.length)];
+            console.log(`[VISITING] Warming Site: ${warmUrl}`);
+            
             try {
-                console.log(`[WARM-UP] Visiting: ${link}`);
-                // Usi tab mein navigation (Sheep walking...)
-                await page.goto(link, { waitUntil: 'networkidle2', timeout: 50000 });
-                
-                // 15-20 second stay har sheep link par taaki history pakki ho jaye
-                const stay = randomInt(15000, 20000);
-                const localStart = Date.now();
-                while (Date.now() - localStart < stay) {
-                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+                await page.goto(warmUrl, { waitUntil: 'domcontentloaded', timeout: 40000 });
+                // 20-25 seconds scrolling like a real reader
+                const warmStartTime = Date.now();
+                while (Date.now() - warmStartTime < 25000) {
+                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) + 100));
                     await new Promise(r => setTimeout(r, 4000));
                 }
-            } catch (e) {
-                console.log(`[SKIP] Sheep link failed, moving to next.`);
-            }
+            } catch (e) { console.log("Warming skip: " + e.message); }
         }
 
         // ==========================================
-        // 2. STAGE: THE WOLF (USER SITE VIA GOOGLE)
+        // 🎯 PHASE 2: TARGET SITE (USER SITE)
         // ==========================================
-        console.log(`[EARNING-MODE] Now entering the WOLF...`);
         
-        // Organic Search Bridge
+        // Organic Entry via Google
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await new Promise(r => setTimeout(r, 4000)); 
 
-        // Target Site Visit
-        console.log(`[WOLF-STAY] URL: ${url} | View #${viewNumber}`);
+        console.log(`[TARGET] Entering User Site: ${url} | View #${viewNumber}`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
@@ -904,35 +899,40 @@ async function runGscTask(keyword, url, viewNumber) {
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); // Wolf stays longer
+        const targetStayTime = randomInt(35000, 45000); // Thoda zyada stay for better CPC
 
-        // Realistic Behavior & Ad-Clicker Loop
+        // 3. STAGE: Realistic Behavior & Ad-Clicker
         while (Date.now() - startTime < targetStayTime) {
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 HIGH-VALUE AD CLICKER
+            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
+
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] High CPC Ad Found!`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] High CPC Target Clicked! ✅`);
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 20000)); // Ad page stay
+                        await new Promise(r => setTimeout(r, 20000)); // Click ke baad 20s wait
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
+        console.log(`[DONE] View #${viewNumber} Complete. Cookie History was Active. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
