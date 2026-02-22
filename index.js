@@ -858,7 +858,6 @@ async function runGscTask(keyword, url, viewNumber) {
         const page = await browser.newPage();
 
         // --- FIX 1: User-Agent aur Viewport Match karein ---
-        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
         await page.setUserAgent(profile.ua);
         await page.setViewport(profile.view); 
         
