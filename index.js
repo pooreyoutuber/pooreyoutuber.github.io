@@ -850,12 +850,18 @@ async function runGscTask(keyword, url, viewNumber) {
         browser = await puppeteer.launch({
             headless: "new",
             args: [
-                '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
+                '--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security',  '--disable-gpu', '--lang=en-US,en', '--disable-dev-shm-usage',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const page = await browser.newPage();
+
+        // --- FIX 1: User-Agent aur Viewport Match karein ---
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+        await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view); 
+        
         await page.setViewport({ width: 1366, height: 768 });
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
