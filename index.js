@@ -1004,10 +1004,6 @@ async function runGscTask(keyword, url, viewNumber) {
     }
 }
 
-// Helper function (add if not present)
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
