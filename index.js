@@ -823,123 +823,98 @@ app.get('/proxy-request', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-const ADVANCED_DEVICE_PROFILES = [
-    { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 } },
-    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932 } },
-    { name: 'Samsung Galaxy S23 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.101 Mobile Safari/537.36', view: { width: 384, height: 854 } },
-    { name: 'MacBook Pro - Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15', view: { width: 1728, height: 1117 } }
-    // ... Baki saari 25+ profiles yahan paste karein
-];
-async function runGscTask(keyword, url, viewNumber) {
-    // --- HIGH CPC TOPIC LINKS ---
-    const TOPIC_SITES = {
-        crypto: [
-            'https://www.binance.com/en-IN/blog/markets/7744511595520285761',
-            'https://www.binance.com/en-IN/blog/all/7318383218004275432',
-            'https://www.binance.com/en-IN/blog/all/2911606196614178290',
-            'https://www.binance.com/en-IN/blog/markets/2425827570913512077'
-        ],
-        insurance: [
-            'https://www.policybazaar.com/',
-            'https://www.insurancejournal.com/'
-        ],
-        trade: [
-            'https://www.investing.com/academy/trading/',
-            'https://licindia.in/press-release',
-            'https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/'
-        ]
-    };
+// --- HIGH CPC DATABASE ---
+const HIGH_CPC_LINKS = {
+    crypto: [
+        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
+        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
+        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
+        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
+    ],
+    insurance: [
+        "https://www.policybazaar.com/",
+        "https://www.insurancejournal.com/",
+        "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
+    ],
+    trade: [
+        "https://www.investing.com/academy/trading/",
+        "https://licindia.in/press-release"
+    ]
+};
 
+async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
+        // Random Profile Selection
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+
         browser = await puppeteer.launch({
             headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        
-        // 1. Random Device Profile & Viewport
-        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
-        await page.setViewport(profile.view);
         await page.setUserAgent(profile.ua);
+        await page.setViewport(profile.view);
 
-        // ==========================================
-        // 🏗️ PHASE 1: COOKIE WARMING (HISTORY BUILDING)
-        // ==========================================
-        const topics = Object.keys(TOPIC_SITES);
+        // --- STAGE 1: COOKIE & HISTORY WARMING (High CPC sites visit) ---
+        const topics = Object.keys(HIGH_CPC_LINKS);
         const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-        const topicLinks = TOPIC_SITES[randomTopic];
+        const warmupLinks = HIGH_CPC_LINKS[randomTopic];
 
-        console.log(`[WARMING] Topic: ${randomTopic.toUpperCase()} | Building History...`);
+        console.log(`[WARMUP] Profile creating interest in: ${randomTopic.toUpperCase()}`);
 
-        // Bari-bari 2 random links visit karega history banane ke liye
-        for (let j = 0; j < 2; j++) {
-            const warmUrl = topicLinks[Math.floor(Math.random() * topicLinks.length)];
-            console.log(`[VISITING] Warming Site: ${warmUrl}`);
-            
+        for (const link of warmupLinks.slice(0, 2)) { // Har baar 2 random links visit karega
             try {
-                await page.goto(warmUrl, { waitUntil: 'domcontentloaded', timeout: 40000 });
-                // 20-25 seconds scrolling like a real reader
-                const warmStartTime = Date.now();
-                while (Date.now() - warmStartTime < 25000) {
-                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400) + 100));
-                    await new Promise(r => setTimeout(r, 4000));
-                }
-            } catch (e) { console.log("Warming skip: " + e.message); }
+                console.log(`[HISTORY] Visiting: ${link}`);
+                await page.goto(link, { waitUntil: 'domcontentloaded', timeout: 40000 });
+                
+                // Real human ki tarah scroll karna
+                await page.evaluate(() => window.scrollBy(0, 400));
+                await new Promise(r => setTimeout(r, 5000)); // 5 sec stay per link
+                await page.evaluate(() => window.scrollBy(0, 600));
+            } catch (e) { console.log("Warmup link skip..."); }
         }
 
-        // ==========================================
-        // 🎯 PHASE 2: TARGET SITE (USER SITE)
-        // ==========================================
-        
-        // Organic Entry via Google
+        // --- STAGE 2: ORGANIC GOOGLE SEARCH ---
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await page.goto(googleUrl, { waitUntil: 'networkidle2', timeout: 60000 });
         await new Promise(r => setTimeout(r, 4000)); 
 
-        console.log(`[TARGET] Entering User Site: ${url} | View #${viewNumber}`);
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
+        // --- STAGE 3: TARGET SITE (Aapki Site) ---
+        console.log(`[TARGET] View #${viewNumber} | URL: ${url} | CPC Mode Active`);
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: googleUrl });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); // Thoda zyada stay for better CPC
+        const targetStayTime = 35000; // 35 Seconds total stay
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker
         while (Date.now() - startTime < targetStayTime) {
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+            // Natural Scrolling & Mouse Movement
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400 + 200)));
+            await page.mouse.move(Math.random() * 500, Math.random() * 500, { steps: 5 });
+            await new Promise(r => setTimeout(r, 4000));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
+            // STAGE 4: AD-CLICKER (High CPC Session Click)
+            if (Math.random() < 0.20) { // 20% Chance to click
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] High CPC Target Clicked! ✅`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 20000)); // Click ke baad 20s wait
+                    if (box && box.width > 50) {
+                        console.log(`\x1b[42m[AD-CLICK]\x1b[0m High Value Click Triggered!`);
+                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
+                        await new Promise(r => setTimeout(r, 20000)); // Click ke baad 20s stay
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Complete. Cookie History was Active. ✅`);
+        console.log(`[DONE] View #${viewNumber} Complete. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
