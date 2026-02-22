@@ -844,8 +844,14 @@ async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new", // "new" for latest versions
-            args: ['--no-sandbox', '--disable-setuid-sandbox',  '--disable-dev-shm-usage',  '--disable-gpu', '--disable-blink-features=AutomationControlled']
+            headless: "new",
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                 '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
@@ -853,40 +859,44 @@ async function runGscTask(keyword, url, viewNumber) {
         await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
         // ==========================================
-        // STAGE 0: BROWSER WARM-UP (Building History)
+        // 1. STAGE: WARM-UP (THE SHEEP)
         // ==========================================
         const categories = Object.keys(WARMUP_SITES);
         const randomCategory = categories[Math.floor(Math.random() * categories.length)];
         const targetLinks = WARMUP_SITES[randomCategory];
 
-        console.log(`[WARM-UP] Category: ${randomCategory.toUpperCase()} | Links: ${targetLinks.length}`);
+        console.log(`[WARM-UP] Category: ${randomCategory.toUpperCase()} | Mixing ${targetLinks.length} sheep...`);
 
         for (const link of targetLinks) {
             try {
                 console.log(`[WARM-UP] Visiting: ${link}`);
-                await page.goto(link, { waitUntil: 'domcontentloaded', timeout: 45000 });
+                // Usi tab mein navigation (Sheep walking...)
+                await page.goto(link, { waitUntil: 'networkidle2', timeout: 50000 });
                 
-                // Real human behavior: Scroll & Wait
-                const scrollCount = Math.floor(Math.random() * 3) + 2; 
-                for(let i=0; i<scrollCount; i++){
-                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500) + 200));
-                    await new Promise(r => setTimeout(r, Math.floor(Math.random() * 3000) + 2000));
+                // 15-20 second stay har sheep link par taaki history pakki ho jaye
+                const stay = randomInt(15000, 20000);
+                const localStart = Date.now();
+                while (Date.now() - localStart < stay) {
+                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+                    await new Promise(r => setTimeout(r, 4000));
                 }
-                console.log(`[WARM-UP] Finished interaction with ${link}`);
             } catch (e) {
-                console.log(`[WARM-UP-ERROR] Skipping link...`);
+                console.log(`[SKIP] Sheep link failed, moving to next.`);
             }
         }
 
         // ==========================================
-        // STAGE 1: Organic Entry (Google Search)
+        // 2. STAGE: THE WOLF (USER SITE VIA GOOGLE)
         // ==========================================
+        console.log(`[EARNING-MODE] Now entering the WOLF...`);
+        
+        // Organic Search Bridge
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 4000)); 
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
+        // Target Site Visit
+        console.log(`[WOLF-STAY] URL: ${url} | View #${viewNumber}`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
@@ -894,51 +904,39 @@ async function runGscTask(keyword, url, viewNumber) {
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        const targetStayTime = randomInt(35000, 45000); // Wolf stays longer
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        // Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Mouse Movement (Bypass Bot Checks)
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+            // 🔥 HIGH-VALUE AD CLICKER
             if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] High CPC Ad Found!`);
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
-                        
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        await new Promise(r => setTimeout(r, 20000)); // Ad page stay
                         break; 
                     }
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Finished. ✅`);
 
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
 }
-
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
