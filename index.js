@@ -823,102 +823,141 @@ app.get('/proxy-request', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-// --- HIGH CPC DATABASE ---
-const HIGH_CPC_LINKS = {
-    crypto: [
-        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
-        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
-        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
-        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
-    ],
-    insurance: [
-        "https://www.policybazaar.com/",
-        "https://www.insurancejournal.com/",
-        "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
-    ],
-    trade: [
-        "https://www.investing.com/academy/trading/",
-        "https://licindia.in/press-release"
-    ]
-};
+const puppeteer = require('puppeteer');
+const USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15'
+];
 
-async function runGscTask(keyword, url, viewNumber) {
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+async function runGscTask(keyword, urls, viewNumber) {
     let browser;
     try {
-        // Random Profile Selection
-        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
-
+        console.log(`[STARTING] Task #${viewNumber} | Topic: ${keyword}`);
+        
+        // सिर्फ एक ब्राउज़र खोलो
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setUserAgent(profile.ua);
-        await page.setViewport(profile.view);
+        await page.setViewport({ width: 1366, height: 768 });
+        
+        // Anti-Bot: Set Random User Agent
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // --- STAGE 1: COOKIE & HISTORY WARMING (High CPC sites visit) ---
-        const topics = Object.keys(HIGH_CPC_LINKS);
-        const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-        const warmupLinks = HIGH_CPC_LINKS[randomTopic];
+        // किसी ऐसे टॉपिक के लिए स्क्रॉल करने के लिए जारी रखें
+        for (let i = 0; i < urls.length; i++) {
+            const url = urls[i];
+            console.log(`[VIEWING] ${i+1}/${urls.length} - URL: ${url}`);
 
-        console.log(`[WARMUP] Profile creating interest in: ${randomTopic.toUpperCase()}`);
+            // 2. STAGE: Visit Target Site (30-35s Total Stay)
+            console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
+            
+            await page.goto(url, { 
+                waitUntil: 'networkidle2', 
+                timeout: 90000 
+            });
 
-        for (const link of warmupLinks.slice(0, 2)) { // Har baar 2 random links visit karega
-            try {
-                console.log(`[HISTORY] Visiting: ${link}`);
-                await page.goto(link, { waitUntil: 'domcontentloaded', timeout: 40000 });
+            const startTime = Date.now();
+            const targetStayTime = randomInt(30000, 35000);
+
+            // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+            while (Date.now() - startTime < targetStayTime) {
+                // Natural Scrolling
+                const dist = randomInt(300, 600);
+                await page.evaluate((d) => window.scrollBy(0, d), dist);
                 
-                // Real human ki tarah scroll karna
-                await page.evaluate(() => window.scrollBy(0, 400));
-                await new Promise(r => setTimeout(r, 5000)); // 5 sec stay per link
-                await page.evaluate(() => window.scrollBy(0, 600));
-            } catch (e) { console.log("Warmup link skip..."); }
-        }
+                // Mouse Movement (Bypass Bot Checks)
+                await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+                await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
-        // --- STAGE 2: ORGANIC GOOGLE SEARCH ---
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 4000)); 
+                // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+                if (Math.random() < 0.18) { 
+                    const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                    if (ads.length > 0) {
+                        const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                        const box = await targetAd.boundingBox();
 
-        // --- STAGE 3: TARGET SITE (Aapki Site) ---
-        console.log(`[TARGET] View #${viewNumber} | URL: ${url} | CPC Mode Active`);
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000, referer: googleUrl });
-
-        const startTime = Date.now();
-        const targetStayTime = 35000; // 35 Seconds total stay
-
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling & Mouse Movement
-            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400 + 200)));
-            await page.mouse.move(Math.random() * 500, Math.random() * 500, { steps: 5 });
-            await new Promise(r => setTimeout(r, 4000));
-
-            // STAGE 4: AD-CLICKER (High CPC Session Click)
-            if (Math.random() < 0.20) { // 20% Chance to click
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-                    if (box && box.width > 50) {
-                        console.log(`\x1b[42m[AD-CLICK]\x1b[0m High Value Click Triggered!`);
-                        await page.mouse.click(box.x + box.width/2, box.y + box.height/2);
-                        await new Promise(r => setTimeout(r, 20000)); // Click ke baad 20s stay
-                        break; 
+                        if (box && box.width > 50 && box.height > 50) {
+                            console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                            console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                            
+                            // Advertiser site par 15s wait (Necessary for valid CTR)
+                            await new Promise(r => setTimeout(r, 15000));
+                            break; 
+                        }
                     }
                 }
             }
+            
+            console.log(`[DONE] View #${viewNumber} | URL: ${url} Finished Successfully. ✅`);
         }
-        console.log(`[DONE] View #${viewNumber} Complete. ✅`);
+
+        console.log(`[FINISHED] Task #${viewNumber} Completed Successfully. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] Task #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
 }
+
+// उपयोग उदाहरण:
+// क्रिप्टो टॉपिक के लिए लिंक्स
+const cryptoUrls = [
+    "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
+    "https://www.binance.com/en-IN/blog/all/7318383218004275432",
+    "https://www.binance.com/en-IN/blog/all/2911606196614178290",
+    "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
+];
+
+// बीमा टॉपिक के लिए लिंक्स
+const insuranceUrls = [
+    "https://www.policybazaar.com/",
+    "https://www.insurancejournal.com/"
+];
+
+// ट्रेडिंग टॉपिक के लिए लिंक्स
+const tradeUrls = [
+    "https://www.investing.com/academy/trading/",
+    "https://licindia.in/press-release",
+    "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
+];
+
+// कार्य क्रम में चलाएं
+async function main() {
+    // पहले क्रिप्टो की पढ़ाई
+    await runGscTask("Cryptocurrency", cryptoUrls, 1);
+    
+    // फिर बीमा की पढ़ाई
+    await runGscTask("Insurance", insuranceUrls, 2);
+    
+    // फिर ट्रेडिंग की पढ़ाई
+    await runGscTask("Trading", tradeUrls, 3);
+}
+
+// चलाने के लिए:
+// main();
+
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
