@@ -823,98 +823,121 @@ app.get('/proxy-request', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+// ===================================================================
+// 5. GSC & ADSENSE REVENUE BOOSTER (MULTI-STAGE HISTORY BUILDER)
+// ===================================================================
+const topics = {
+    crypto: [
+        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
+        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
+        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
+        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
+    ],
+    insurance: [
+        "https://www.policybazaar.com/",
+        "https://www.insurancejournal.com/"
+    ],
+    trade: [
+        "https://www.investing.com/academy/trading/",
+        "https://licindia.in/press-release",
+        "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
+    ]
+};
+
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
-        const topics = {
-            crypto: [
-                "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
-                "https://www.binance.com/en-IN/blog/all/7318383218004275432"
-                // Baki links yahan add karein...
-            ],
-            insurance: ["https://www.policybazaar.com/", "https://www.insurancejournal.com/"],
-            trade: ["https://www.investing.com/academy/trading/", "https://licindia.in/press-release"]
-        };
-
-        // 1. Pick a Random Topic
+        // --- STAGE 1: History Building (Warm-up Links) ---
         const keys = Object.keys(topics);
         const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
-        const links = topics[selectedTopic];
+        const warmUpLinks = topics[selectedTopic];
+        
+        console.log(`[HISTORY-MODE] Selected Topic: ${selectedTopic.toUpperCase()} | Links: ${warmUpLinks.length}`);
 
-        // 2. Visit Topic Links one by one
-        for (let i = 0; i < links.length; i++) {
-            const page = await browser.newPage(); // New Tab
-            await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-            
-            console.log(`[PRE-WARM] Visiting Topic Link ${i + 1}: ${links[i]}`);
-            
+        for (const warmUrl of warmUpLinks) {
+            const tempPage = await browser.newPage();
+            await tempPage.setViewport({ width: 1366, height: 768 });
+            await tempPage.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+            console.log(`[WARM-UP] Visiting: ${warmUrl}`);
             try {
-                await page.goto(links[i], { waitUntil: 'networkidle2', timeout: 60000 });
+                await tempPage.goto(warmUrl, { waitUntil: 'networkidle2', timeout: 60000 });
                 
-                // Realistic Scrolling for 30 seconds
-                const start = Date.now();
-                while (Date.now() - start < 30000) {
-                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-                    await new Promise(r => setTimeout(r, 3000));
+                // Realistic Scrolling & Movement (30-35s)
+                const warmStart = Date.now();
+                const stayTime = randomInt(30000, 35000);
+                while (Date.now() - warmStart < stayTime) {
+                    const dist = randomInt(300, 600);
+                    await tempPage.evaluate((d) => window.scrollBy(0, d), dist);
+                    await tempPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 5 });
+                    await new Promise(r => setTimeout(r, randomInt(4000, 6000)));
                 }
             } catch (e) {
-                console.log(`Link skip: ${e.message}`);
+                console.log(`[SKIP] Warmup link failed: ${warmUrl}`);
             }
-
-            await page.close(); // Tab close taaki memory crash na ho
+            await tempPage.close(); // Tab close to save RAM
+            console.log(`[CLOSED] Tab finished. Moving to next...`);
         }
 
-        // 3. Finally Visit User Site
-        const finalPage = await browser.newPage();
-        console.log(`[TARGET] Visiting User Site: ${url}`);
-        
-        await finalPage.goto(url, { waitUntil: 'networkidle2', referer: 'https://www.google.com/' });
-         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000); 
+        // --- STAGE 2: Google Search Simulation ---
+        const mainPage = await browser.newPage();
+        await mainPage.setViewport({ width: 1366, height: 768 });
+        await mainPage.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        console.log(`[SEARCH] Simulating Organic Search for: ${keyword}`);
+        await mainPage.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 4000)); 
+
+        // --- STAGE 3: Final Target Site Visit ---
+        console.log(`[TARGET-MODE] View #${viewNumber} | URL: ${url}`);
+        await mainPage.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
+        });
+
+        const startTime = Date.now();
+        const targetStayTime = randomInt(35000, 45000); 
+
+        // Interaction & Ad Logic
         while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            await mainPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await mainPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             
-            // Mouse Movement (Bypass Bot Checks)
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
-
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+            // Ad Clicker Logic (18% probability as per your request)
             if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                const ads = await mainPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
-                        
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] High Value Target!`);
+                        await mainPage.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        await new Promise(r => setTimeout(r, 15000)); // Stay on advertiser site
                         break; 
                     }
                 }
             }
+            await new Promise(r => setTimeout(r, 5000));
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+        console.log(`[DONE] View #${viewNumber} Session Finished Successfully.`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[FATAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
