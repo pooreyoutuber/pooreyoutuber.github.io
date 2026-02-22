@@ -819,188 +819,68 @@ app.get('/proxy-request', async (req, res) => {
 
 // ===================================================================
 // 5. GSC & ADSENSE REVENUE BOOSTER (MULTI-URL & AUTO-CLICKER)
-// ===================================================================
+// ========================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-// Topic-wise links configuration
-const TOPIC_LINKS = {
-    crypto: [
-        'https://www.binance.com/en-IN/blog/markets/7744511595520285761',
-        'https://www.binance.com/en-IN/blog/all/7318383218004275432',
-        'https://www.binance.com/en-IN/blog/all/2911606196614178290',
-        'https://www.binance.com/en-IN/blog/markets/2425827570913512077'
-    ],
-    insurance: [
-        'https://www.policybazaar.com/',
-        'https://www.insurancejournal.com/'
-    ],
-    trade: [
-        'https://www.investing.com/academy/trading/',
-        'https://licindia.in/press-release',
-        'https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/'
-    ]
-};
-
-// Random topic picker
-function getRandomTopic() {
-    const topics = Object.keys(TOPIC_LINKS);
-    return topics[Math.floor(Math.random() * topics.length)];
-}
-
-// Random link from topic
-function getRandomLinks(topic, count = 2) {
-    const links = TOPIC_LINKS[topic];
-    const shuffled = [...links].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, Math.min(count, links.length));
-}
-
-// Natural scrolling function
-async function naturalScroll(page, duration = 30000) {
-    const startTime = Date.now();
-    
-    while (Date.now() - startTime < duration) {
-        // Random scroll distance
-        const scrollDist = randomInt(300, 700);
-        await page.evaluate((dist) => {
-            window.scrollBy({ top: dist, behavior: 'smooth' });
-        }, scrollDist);
-        
-        // Mouse movement (human-like)
-        await page.mouse.move(
-            randomInt(200, 800), 
-            randomInt(200, 600), 
-            { steps: randomInt(10, 20) }
-        );
-        
-        // Random pause (reading simulation)
-        await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
-        
-        // Occasionally scroll up (realistic behavior)
-        if (Math.random() < 0.2) {
-            await page.evaluate(() => window.scrollBy({ top: -200, behavior: 'smooth' }));
-            await new Promise(r => setTimeout(r, randomInt(2000, 3000)));
-        }
-    }
-}
-
-// MAIN FUNCTION - Modified
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
-        const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
-        
-        // Random User Agent
-        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+        const topics = {
+            crypto: [
+                "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
+                "https://www.binance.com/en-IN/blog/all/7318383218004275432"
+                // Baki links yahan add karein...
+            ],
+            insurance: ["https://www.policybazaar.com/", "https://www.insurancejournal.com/"],
+            trade: ["https://www.investing.com/academy/trading/", "https://licindia.in/press-release"]
+        };
 
-        // 🔥 STEP 1: Google Search Simulation
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        console.log(`[VIEW #${viewNumber}] 🔍 Google Search: "${keyword}"`);
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, randomInt(2000, 4000))); 
+        // 1. Pick a Random Topic
+        const keys = Object.keys(topics);
+        const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
+        const links = topics[selectedTopic];
 
-        // 🔥 STEP 2: BROWSE HISTORY - Random Topic Links
-        const selectedTopic = getRandomTopic();
-        const topicLinks = getRandomLinks(selectedTopic, randomInt(2, 3)); // 2-3 links
-        
-        console.log(`[HISTORY] 📚 Building browsing history - Topic: ${selectedTopic.toUpperCase()}`);
-        
-        for (let i = 0; i < topicLinks.length; i++) {
-            const topicUrl = topicLinks[i];
-            console.log(`[HISTORY] 🌐 Opening ${selectedTopic} link ${i + 1}/${topicLinks.length}`);
+        // 2. Visit Topic Links one by one
+        for (let i = 0; i < links.length; i++) {
+            const page = await browser.newPage(); // New Tab
+            await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+            
+            console.log(`[PRE-WARM] Visiting Topic Link ${i + 1}: ${links[i]}`);
             
             try {
-                await page.goto(topicUrl, { 
-                    waitUntil: 'networkidle2', 
-                    timeout: 60000 
-                });
+                await page.goto(links[i], { waitUntil: 'networkidle2', timeout: 60000 });
                 
-                // 30-35 sec realistic browsing
-                console.log(`[HISTORY] 📖 Reading for 30-35s...`);
-                await naturalScroll(page, randomInt(30000, 35000));
-                
-                console.log(`[HISTORY] ✅ Finished reading ${topicUrl.substring(0, 50)}...`);
-                
-            } catch (err) {
-                console.log(`[HISTORY] ⚠️ Skipping ${topicUrl} - Error: ${err.message}`);
-            }
-            
-            // Small gap between topic links
-            await new Promise(r => setTimeout(r, randomInt(2000, 4000)));
-        }
-
-        // 🔥 STEP 3: NOW VISIT YOUR TARGET SITE (User Ki Site)
-        console.log(`\n[TARGET-SITE] 🎯 Now visiting YOUR site: ${url}`);
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
-
-        const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 35000);
-
-        // 🔥 STEP 4: Ad Click Loop + Natural Behavior
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Mouse Movement
-            await page.mouse.move(
-                randomInt(100, 800), 
-                randomInt(100, 600), 
-                { steps: 10 }
-            );
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
-
-            // 🔥 AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] 💰 Target Found! Clicking...`);
-                        await page.mouse.move(
-                            box.x + box.width / 2, 
-                            box.y + box.height / 2, 
-                            { steps: 15 }
-                        );
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] ✅ Ad Clicked! Revenue Generated.`);
-                        
-                        // Advertiser site wait
-                        await new Promise(r => setTimeout(r, 15000));
-                        break; 
-                    }
+                // Realistic Scrolling for 30 seconds
+                const start = Date.now();
+                while (Date.now() - start < 30000) {
+                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+                    await new Promise(r => setTimeout(r, 3000));
                 }
+            } catch (e) {
+                console.log(`Link skip: ${e.message}`);
             }
+
+            await page.close(); // Tab close taaki memory crash na ho
         }
+
+        // 3. Finally Visit User Site
+        const finalPage = await browser.newPage();
+        console.log(`[TARGET] Visiting User Site: ${url}`);
         
-        console.log(`\n[DONE] ✅ View #${viewNumber} Completed Successfully!\n`);
+        await finalPage.goto(url, { waitUntil: 'networkidle2', referer: 'https://www.google.com/' });
+        
+        // Yahan aap apna baki ka testing logic (minus ad clicks) rakh sakte hain
 
     } catch (error) {
-        console.error(`[ERROR] ❌ View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR]: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
 
