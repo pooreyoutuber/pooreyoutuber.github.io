@@ -930,18 +930,18 @@ async function runGscTask(keyword, url, viewNumber) {
             await new Promise(r => setTimeout(r, 5000));
         }
 
-        console.log(`[SUCCESS] View #${viewNumber} mission complete.`);
 
+
+        console.log(`[SUCCESS] View #${viewNumber} mission complete.`);
     } catch (error) {
         console.error(`[ERROR] View #${viewNumber} crashed: ${error.message}`);
     } finally {
         if (browser) {
             await browser.close().catch(() => {});
-            console.log(`[CLEANUP] Browser closed. Waiting for next session...`);
+         console.log(`[CLEANUP] Browser closed. Waiting for next session...`);
         }
-    }
-}
 
+    }
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
