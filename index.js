@@ -927,6 +927,7 @@ async function runGscTask(keyword, url, viewNumber) {
         }
         // 3. WOLF PHASE: Target Site (Main Money Maker)
         console.log(`[WOLF] Entering Target: ${url}`);
+        const wolfPage = await browser.newPage(); 
         await wolfPage.setUserAgent(device.ua); 
         await wolfPage.setViewport(device.view); 
     // Google Search Referrer simulation
