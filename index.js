@@ -859,6 +859,7 @@ async function runGscTask(keyword, url, viewNumber) {
                 '--disable-blink-features=AutomationControlled'
             ]
         });
+        const device = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         // 1. SELECT RANDOM TOPIC (SHEEP)
       const keys = Object.keys(topics);
@@ -868,8 +869,8 @@ async function runGscTask(keyword, url, viewNumber) {
         // 2. SHEEP LOOP: Trust Build-up (Authority Sites Visit)
         for (let i = 0; i < sheepLinks.length; i++) {
             const page = await browser.newPage();
-            await page.setUserAgent(userAgent);
-            await page.setViewport({ width: 1366, height: 768 });
+            await page.setUserAgent(device.ua); // Use Device UA
+            await page.setViewport(device.view); // Use Device Viewport
             console.log(`[SHEEP #${i+1}] Grazing: ${sheepLinks[i]}`);
             try {
                 // Simulating organic arrival from Google
@@ -894,8 +895,8 @@ async function runGscTask(keyword, url, viewNumber) {
         }
         // 3. WOLF PHASE: Target Site (Main Money Maker)
         console.log(`[WOLF] Entering Target: ${url}`);
-        const wolfPage = await browser.newPage();
-        await wolfPage.setUserAgent(userAgent);
+        await wolfPage.setUserAgent(device.ua); 
+        await wolfPage.setViewport(device.view); 
     // Google Search Referrer simulation
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await wolfPage.goto(url, { 
