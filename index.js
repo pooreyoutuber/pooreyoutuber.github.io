@@ -835,6 +835,8 @@ const topics = {
         "https://www.insurancejournal.com/",
         "https://www.investing.com/academy/trading/",
         "https://licindia.in/press-release"
+        "https://www.skadden.com/"
+        "https://www.forthepeople.com/"
     ]
 };
 async function runGscTask(keyword, url, viewNumber) {
