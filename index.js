@@ -824,81 +824,39 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 const topics = {
-
-    crypto: [
-
+   crypto: [
         "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
-
         "https://www.binance.com/en-IN/blog/all/7318383218004275432",
-
         "https://www.binance.com/en-IN/blog/all/2911606196614178290",
-
         "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
-
     ],
-
     insurance: [
-
         "https://www.policybazaar.com/",
-
         "https://www.insurancejournal.com/",
-
         "https://www.investing.com/academy/trading/",
-
         "https://licindia.in/press-release"
-
     ]
-
 };
-
-
-
 async function runGscTask(keyword, url, viewNumber) {
-
     let browser;
-
     try {
-
+        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
         // Har view ke liye FRESH browser launch (Headless: "new" for stealth)
-
         browser = await puppeteer.launch({
-
             headless: "new",
-
             args: [
-
                 '--no-sandbox', 
-
                 '--disable-setuid-sandbox', 
-
                 '--disable-dev-shm-usage',
-
                 '--disable-blink-features=AutomationControlled'
-
             ]
-
         });
-
-
-
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-
-        
-
         // 1. SELECT RANDOM TOPIC (SHEEP)
-
-        const keys = Object.keys(topics);
-
+      const keys = Object.keys(topics);
         const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
-
         const sheepLinks = topics[selectedTopic];
-
-
-
         console.log(`\n[VIEW #${viewNumber}] Strategy: ${selectedTopic.toUpperCase()}`);
-
-
-
         // 2. SHEEP LOOP: Trust Build-up (Authority Sites Visit)
 
         for (let i = 0; i < sheepLinks.length; i++) {
