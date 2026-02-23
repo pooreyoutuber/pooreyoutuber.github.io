@@ -910,17 +910,15 @@ async function runGscTask(keyword, url, viewNumber) {
 
         const wolfStart = Date.now();
         const wolfStay = randomInt(35000, 45000); 
+      while (Date.now() - wolfStart < wolfStay) { // Variables correctly used
+    // Natural Scrolling - wolfPage use karein
+    const dist = Math.floor(Math.random() * 300) + 300; 
+    await wolfPage.evaluate((d) => window.scrollBy(0, d), dist);
+    
+    // Mouse Movement
+    await wolfPage.mouse.move(Math.floor(Math.random() * 700), Math.floor(Math.random() * 500), { steps: 10 });
+    await new Promise(r => setTimeout(r, Math.floor(Math.random() * 2000) + 3000));
         
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Mouse Movement (Bypass Bot Checks)
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
-
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) {
                 const ads = await wolfPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
