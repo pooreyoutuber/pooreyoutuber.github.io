@@ -823,10 +823,6 @@ app.get('/proxy-request', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-// ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (THE SHEEP & WOLF STRATEGY)
-// ===================================================================
-
 const topics = {
     crypto: [
         "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
@@ -842,30 +838,32 @@ const topics = {
     ]
 };
 
+// Helper function (Ensure this is at the top)
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
-        // Har view ke liye FRESH browser launch (Headless: "new" for stealth)
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         
-        // 1. SELECT RANDOM TOPIC (SHEEP)
         const keys = Object.keys(topics);
         const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
         const sheepLinks = topics[selectedTopic];
 
         console.log(`\n[VIEW #${viewNumber}] Strategy: ${selectedTopic.toUpperCase()}`);
 
-        // 2. SHEEP LOOP: Trust Build-up (Authority Sites Visit)
+        // 2. SHEEP LOOP (Trust Building)
         for (let i = 0; i < sheepLinks.length; i++) {
             const page = await browser.newPage();
             await page.setUserAgent(userAgent);
@@ -874,14 +872,12 @@ async function runGscTask(keyword, url, viewNumber) {
             console.log(`[SHEEP #${i+1}] Grazing: ${sheepLinks[i]}`);
             
             try {
-                // Simulating organic arrival from Google
+                // Sheep sites ke liye Google search referer zaruri nahi (Natural behavior)
                 await page.goto(sheepLinks[i], { 
                     waitUntil: 'networkidle2', 
-                    timeout: 45000,
-                    referer: `https://www.google.com/search?q=${encodeURIComponent(selectedTopic)}`
+                    timeout: 45000 
                 });
 
-                // Random Scrolling (15-20 Seconds stay for sheep)
                 const stayTime = randomInt(15000, 20000);
                 const start = Date.now();
                 while (Date.now() - start < stayTime) {
@@ -891,22 +887,26 @@ async function runGscTask(keyword, url, viewNumber) {
             } catch (err) {
                 console.log(`[SKIP] Sheep link failed.`);
             }
-            
-            // Tab close after grazing to save RAM
             await page.close();
-            await new Promise(r => setTimeout(r, 2000));
         }
 
-        // 3. WOLF PHASE: Target Site (Main Money Maker)
-        console.log(`[WOLF] Entering Target: ${url}`);
+        // 3. WOLF PHASE: Target Site (GA4 & AdSense Optimized)
+        console.log(`[WOLF] Preparing Organic Journey for: ${url}`);
         const wolfPage = await browser.newPage();
         await wolfPage.setUserAgent(userAgent);
 
-        // Google Search Referrer simulation
+        // STEP A: Go to Google Search first (Sahi Referer aur Cookies ke liye)
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        console.log(`[GA4-FIX] Simulating Google Search...`);
+        await wolfPage.goto(googleSearchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
         
+        // Wait for 3-5 seconds on Google page to look real
+        await new Promise(r => setTimeout(r, 4000));
+
+        // STEP B: Go to Target URL with Referer header
+        console.log(`[WOLF] Entering Target with Organic Referer...`);
         await wolfPage.goto(url, { 
-            waitUntil: 'networkidle2', 
+            waitUntil: 'networkidle0', // Network idle 0 zaroori hai GA tracking ke liye
             timeout: 60000, 
             referer: googleSearchUrl 
         });
@@ -915,9 +915,11 @@ async function runGscTask(keyword, url, viewNumber) {
         const wolfStay = randomInt(35000, 45000); 
         
         while (Date.now() - wolfStart < wolfStay) {
+            // Natural Scrolling
             await wolfPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await wolfPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-
+            
+            // Real Mouse Movement
+            await
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) {
                 const ads = await wolfPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
