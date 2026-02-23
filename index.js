@@ -837,10 +837,6 @@ const topics = {
         "https://licindia.in/press-release"
     ]
 };
-
-// Helper function (Ensure this is at the top)
-const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
