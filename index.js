@@ -823,122 +823,86 @@ app.get('/proxy-request', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-// ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (MULTI-STAGE HISTORY BUILDER)
-// ===================================================================
-const topics = {
-    crypto: [
-        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
-        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
-        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
-        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
-    ],
-    insurance: [
-        "https://www.policybazaar.com/",
-        "https://www.insurancejournal.com/"
-    ],
-    trade: [
-        "https://www.investing.com/academy/trading/",
-        "https://licindia.in/press-release",
-        "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
-    ]
-};
-
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
+        // Topic aur Links ki List
+        const topics = [
+            {
+                name: "Crypto",
+                links: [
+                    "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
+                    "https://www.binance.com/en-IN/blog/all/7318383218004275432",
+                    "https://www.binance.com/en-IN/blog/all/2911606196614178290",
+                    "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
+                ]
+            },
+            {
+                name: "Insurance & Trade",
+                links: [
+                    "https://www.policybazaar.com/",
+                    "https://www.insurancejournal.com/",
+                    "https://www.investing.com/academy/trading/",
+                    "https://licindia.in/press-release",
+                    "https://www.policybazaar.com/lic-of-india/articles/lic-policy-list/"
+                ]
+            }
+        ];
+
+        // 1. Random Topic Select Karein
+        const selectedTopic = topics[Math.floor(Math.random() * topics.length)];
+        console.log(`[VIEW #${viewNumber}] Warm-up Start: ${selectedTopic.name}`);
+
         browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
-            ]
+            headless: "new", 
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--incognito'] // Fresh session
         });
 
-        // --- STAGE 1: History Building (Warm-up Links) ---
-        const keys = Object.keys(topics);
-        const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
-        const warmUpLinks = topics[selectedTopic];
+        const page = await browser.newPage();
         
-        console.log(`[HISTORY-MODE] Selected Topic: ${selectedTopic.toUpperCase()} | Links: ${warmUpLinks.length}`);
+        // Random User Agent for realism
+        const profile = DEVICE_PROFILES[Math.floor(Math.random() * DEVICE_PROFILES.length)];
+        await page.setUserAgent(profile.ua);
 
-        for (const warmUrl of warmUpLinks) {
-            const tempPage = await browser.newPage();
-            await tempPage.setViewport({ width: 1366, height: 768 });
-            await tempPage.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-            console.log(`[WARM-UP] Visiting: ${warmUrl}`);
+        // 2. Pehle Warm-up Links par jayein (One by One in same tab)
+        for (const link of selectedTopic.links) {
+            console.log(`[WARM-UP] Navigating to: ${link}`);
             try {
-                await tempPage.goto(warmUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+                await page.goto(link, { waitUntil: 'networkidle2', timeout: 60000 });
                 
-                // Realistic Scrolling & Movement (30-35s)
-                const warmStart = Date.now();
-                const stayTime = randomInt(30000, 35000);
-                while (Date.now() - warmStart < stayTime) {
-                    const dist = randomInt(300, 600);
-                    await tempPage.evaluate((d) => window.scrollBy(0, d), dist);
-                    await tempPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 5 });
-                    await new Promise(r => setTimeout(r, randomInt(4000, 6000)));
+                // 30-35 Sec scrolling aur mouse movement
+                const endTime = Date.now() + 32000; 
+                while (Date.now() < endTime) {
+                    await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+                    await page.mouse.move(Math.random() * 500, Math.random() * 500, { steps: 10 });
+                    await new Promise(r => setTimeout(r, 4000));
                 }
             } catch (e) {
-                console.log(`[SKIP] Warmup link failed: ${warmUrl}`);
+                console.log(`[SKIP] Link failed: ${link}`);
             }
-            await tempPage.close(); // Tab close to save RAM
-            console.log(`[CLOSED] Tab finished. Moving to next...`);
         }
 
-        // --- STAGE 2: Google Search Simulation ---
-        const mainPage = await browser.newPage();
-        await mainPage.setViewport({ width: 1366, height: 768 });
-        await mainPage.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
-
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        console.log(`[SEARCH] Simulating Organic Search for: ${keyword}`);
-        await mainPage.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 4000)); 
-
-        // --- STAGE 3: Final Target Site Visit ---
-        console.log(`[TARGET-MODE] View #${viewNumber} | URL: ${url}`);
-        await mainPage.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: googleUrl 
-        });
-
-        const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 45000); 
-
-        // Interaction & Ad Logic
-        while (Date.now() - startTime < targetStayTime) {
-            await mainPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await mainPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            
-            // Ad Clicker Logic (18% probability as per your request)
-            if (Math.random() < 0.18) { 
-                const ads = await mainPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] High Value Target!`);
-                        await mainPage.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); // Stay on advertiser site
-                        break; 
-                    }
-                }
-            }
+        // 3. Ab User ki Main Site (Target URL) par jayein
+        console.log(`[TARGET] Navigating to User Link: ${url}`);
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+        
+        // Same process for Target Link
+        const targetEndTime = Date.now() + 35000;
+        while (Date.now() < targetEndTime) {
+            await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await page.mouse.move(Math.random() * 600, Math.random() * 600, { steps: 15 });
             await new Promise(r => setTimeout(r, 5000));
         }
-        console.log(`[DONE] View #${viewNumber} Session Finished Successfully.`);
+
+        console.log(`[SUCCESS] View #${viewNumber} completed.`);
 
     } catch (error) {
-        console.error(`[FATAL ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
-            await browser.close().catch(() => {});
+            // 4. Browser close (Isse history automatic delete ho jayegi kyunki naya instance tha)
+            await browser.close();
+            console.log(`[CLEANUP] Browser Closed & History Cleared.`);
         }
     }
 }
