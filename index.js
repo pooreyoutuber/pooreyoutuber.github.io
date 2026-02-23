@@ -837,6 +837,8 @@ const topics = {
         "https://licindia.in/press-release"
         "https://www.skadden.com/"
         "https://www.forthepeople.com/"
+         "https://www.aoshearman.com/en"
+        "https://www.cochranfirm.com/"
     ]
 };
 async function runGscTask(keyword, url, viewNumber) {
