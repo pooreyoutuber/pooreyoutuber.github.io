@@ -826,16 +826,21 @@ puppeteer.use(StealthPlugin());
 const topics = {
    crypto: [
         "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
+      "https://coinmarketcap.com/rankings/exchanges/",
         "https://www.binance.com/en-IN/blog/all/7318383218004275432",
+          "https://www.coinbase.com/en-in",
         "https://www.binance.com/en-IN/blog/all/2911606196614178290",
+           "https://www.theblock.co/",
+           "https://coinswitch.co/",
+           "https://www.coingecko.com/",
         "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
     ],
     insurance: [
         "https://www.policybazaar.com/",
         "https://www.insurancejournal.com/",
         "https://www.investing.com/academy/trading/",
-        "https://licindia.in/press-release"
-        "https://www.skadden.com/"
+        "https://licindia.in/press-release",
+        "https://www.skadden.com/",
         "https://www.forthepeople.com/"
          "https://www.aoshearman.com/en"
         "https://www.cochranfirm.com/"
