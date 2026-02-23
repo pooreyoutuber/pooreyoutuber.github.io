@@ -860,7 +860,7 @@ async function runGscTask(keyword, url, viewNumber) {
             ]
         });
         const device = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
-        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        
         // 1. SELECT RANDOM TOPIC (SHEEP)
       const keys = Object.keys(topics);
         const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
