@@ -911,9 +911,15 @@ async function runGscTask(keyword, url, viewNumber) {
         const wolfStart = Date.now();
         const wolfStay = randomInt(35000, 45000); 
         
-        while (Date.now() - wolfStart < wolfStay) {
-            await wolfPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await wolfPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        while (Date.now() - startTime < targetStayTime) {
+            // Natural Scrolling
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            
+            // Mouse Movement (Bypass Bot Checks)
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) {
