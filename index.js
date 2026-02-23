@@ -837,6 +837,7 @@ const topics = {
         "https://licindia.in/press-release"
     ]
 };
+
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -846,20 +847,20 @@ async function runGscTask(keyword, url, viewNumber) {
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
 
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         
+        // 1. SELECT RANDOM TOPIC (SHEEP)
         const keys = Object.keys(topics);
         const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
         const sheepLinks = topics[selectedTopic];
 
         console.log(`\n[VIEW #${viewNumber}] Strategy: ${selectedTopic.toUpperCase()}`);
 
-        // 2. SHEEP LOOP (Trust Building)
+        // 2. SHEEP LOOP: Trust Build-up
         for (let i = 0; i < sheepLinks.length; i++) {
             const page = await browser.newPage();
             await page.setUserAgent(userAgent);
@@ -868,7 +869,7 @@ async function runGscTask(keyword, url, viewNumber) {
             console.log(`[SHEEP #${i+1}] Grazing: ${sheepLinks[i]}`);
             
             try {
-                // Sheep sites ke liye Google search referer zaruri nahi (Natural behavior)
+                // FIXED: Yahan se Google referrer hata diya gaya hai (Natural visit dikhane ke liye)
                 await page.goto(sheepLinks[i], { 
                     waitUntil: 'networkidle2', 
                     timeout: 45000 
@@ -883,39 +884,35 @@ async function runGscTask(keyword, url, viewNumber) {
             } catch (err) {
                 console.log(`[SKIP] Sheep link failed.`);
             }
+            
             await page.close();
+            await new Promise(r => setTimeout(r, 2000));
         }
 
-        // 3. WOLF PHASE: Target Site (GA4 & AdSense Optimized)
-        console.log(`[WOLF] Preparing Organic Journey for: ${url}`);
+        // 3. WOLF PHASE: Target Site
+        console.log(`[WOLF] Entering Target: ${url}`);
         const wolfPage = await browser.newPage();
         await wolfPage.setUserAgent(userAgent);
 
-        // STEP A: Go to Google Search first (Sahi Referer aur Cookies ke liye)
+        // FIXED: Referrer sirf yahan (Main Site par) hi trigger hoga
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        console.log(`[GA4-FIX] Simulating Google Search...`);
-        await wolfPage.goto(googleSearchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
         
-        // Wait for 3-5 seconds on Google page to look real
-        await new Promise(r => setTimeout(r, 4000));
-
-        // STEP B: Go to Target URL with Referer header
-        console.log(`[WOLF] Entering Target with Organic Referer...`);
         await wolfPage.goto(url, { 
-            waitUntil: 'networkidle0', // Network idle 0 zaroori hai GA tracking ke liye
+            waitUntil: 'networkidle2', 
             timeout: 60000, 
             referer: googleSearchUrl 
         });
 
         const wolfStart = Date.now();
         const wolfStay = randomInt(35000, 45000); 
-        
         while (Date.now() - wolfStart < wolfStay) {
-            // Natural Scrolling
+
             await wolfPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            
-            // Real Mouse Movement
-            await
+
+            await wolfPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+        while (Date.now() - wolfStart < wolfStay) {
+            await wolfPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await wolfPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) {
                 const ads = await wolfPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
