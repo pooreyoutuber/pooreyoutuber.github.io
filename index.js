@@ -823,6 +823,10 @@ app.get('/proxy-request', async (req, res) => {
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+// ===================================================================
+// 5. GSC & ADSENSE REVENUE BOOSTER (THE SHEEP & WOLF STRATEGY)
+// ===================================================================
+
 const topics = {
     crypto: [
         "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
@@ -848,7 +852,6 @@ async function runGscTask(keyword, url, viewNumber) {
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
@@ -879,7 +882,7 @@ async function runGscTask(keyword, url, viewNumber) {
                 });
 
                 // Random Scrolling (15-20 Seconds stay for sheep)
-                const stayTime = randomInt(30000, 35000);
+                const stayTime = randomInt(15000, 20000);
                 const start = Date.now();
                 while (Date.now() - start < stayTime) {
                     await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
@@ -910,15 +913,11 @@ async function runGscTask(keyword, url, viewNumber) {
 
         const wolfStart = Date.now();
         const wolfStay = randomInt(35000, 45000); 
-      while (Date.now() - wolfStart < wolfStay) { // Variables correctly used
-    // Natural Scrolling - wolfPage use karein
-    const dist = Math.floor(Math.random() * 300) + 300; 
-    await wolfPage.evaluate((d) => window.scrollBy(0, d), dist);
-    
-    // Mouse Movement
-    await wolfPage.mouse.move(Math.floor(Math.random() * 700), Math.floor(Math.random() * 500), { steps: 10 });
-    await new Promise(r => setTimeout(r, Math.floor(Math.random() * 2000) + 3000));
         
+        while (Date.now() - wolfStart < wolfStay) {
+            await wolfPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+            await wolfPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) {
                 const ads = await wolfPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
