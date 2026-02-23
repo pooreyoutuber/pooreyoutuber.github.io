@@ -841,8 +841,8 @@ const topics = {
         "https://www.investing.com/academy/trading/",
         "https://licindia.in/press-release",
         "https://www.skadden.com/",
-        "https://www.forthepeople.com/"
-         "https://www.aoshearman.com/en"
+        "https://www.forthepeople.com/",
+         "https://www.aoshearman.com/en",
         "https://www.cochranfirm.com/"
     ]
 };
