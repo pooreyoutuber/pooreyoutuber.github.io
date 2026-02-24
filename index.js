@@ -916,7 +916,7 @@ async function runGscTask(keyword, url, viewNumber) {
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist).catch(() => {});
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 }).catch(() => {});
-
+}
         while (Date.now() - wolfStartTime < wolfTargetStayTime) {
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
