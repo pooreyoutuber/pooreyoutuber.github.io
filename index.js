@@ -878,46 +878,45 @@ async function runGscTask(keyword, url, viewNumber) {
             ]
         });
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        // 1. SELECT RANDOM TOPIC (SHEEP)
-      const keys = Object.keys(topics);
-        const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
-        const sheepLinks = topics[selectedTopic];
-        console.log(`\n[VIEW #${viewNumber}] Strategy: ${selectedTopic.toUpperCase()}`);
+        // --- SINGLE TAB INITIALIZATION ---
+        const page = await browser.newPage();
+        const userAgent = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
+        await page.setUserAgent(userAgent);
+        await page.setViewport({ width: 1366, height: 768 });
         // 2. SHEEP LOOP: Trust Build-up (Authority Sites Visit)
+        // 2. SHEEP PHASE (Usi Tab Par Sari Sites)
         for (let i = 0; i < sheepLinks.length; i++) {
-            const page = await browser.newPage();
-            await page.setUserAgent(userAgent);
-            await page.setViewport({ width: 1366, height: 768 });
-            console.log(`[SHEEP #${i+1}] Grazing: ${sheepLinks[i]}`);
+            console.log(`[SHEEP #${i+1}] Loading: ${sheepLinks[i]}`);
             try {
-                // Simulating organic arrival from Google
                 await page.goto(sheepLinks[i], { 
                     waitUntil: 'networkidle2', 
                     timeout: 45000,
-                 referer: `https://www.google.com/search?q=${encodeURIComponent(selectedTopic)}`
+                    referer: "https://www.google.com/" 
                 });
-             // YAHAN UPDATE: Sheep site par bhi natural behavior (15-20 seconds)
+                // Har Sheep site par 15-20s rukna CPC ke liye zaroori hai
                 await simulateHumanBehavior(page, randomInt(15000, 20000));
             } catch (err) {
                 console.log(`[SKIP] Sheep link failed.`);
             }
-            // Tab close after grazing to save RAM
-            await page.close();
-            await new Promise(r => setTimeout(r, 2000));
         }
         // 3. WOLF PHASE: Target Site (Main Money Maker)
         console.log(`[WOLF] Entering Target: ${url}`);
-        const wolfPage = await browser.newPage();
-        await wolfPage.setUserAgent(userAgent);
-    // Google Search Referrer simulation
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await wolfPage.goto(url, { 
-        waitUntil: 'networkidle2', 
+        
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
             timeout: 60000, 
             referer: googleSearchUrl 
         });
-         const wolfStartTime = Date.now(); // Naam match kar diya
-         const wolfTargetStayTime = randomInt(35000, 45000); // Naam match kar diya
+
+        const wolfStartTime = Date.now();
+        const wolfTargetStayTime = randomInt(35000, 45000);
+
+        while (Date.now() - wolfStartTime < wolfTargetStayTime) {
+            // Natural Behavior
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist).catch(() => {});
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 }).catch(() => {});
 
         while (Date.now() - wolfStartTime < wolfTargetStayTime) {
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
