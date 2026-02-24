@@ -846,6 +846,24 @@ const topics = {
         "https://www.cochranfirm.com/"
     ]
 };
+// --- HELPER FUNCTION: Realistic Scrolling & Mouse Movement ---
+async function simulateHumanBehavior(page, stayTime) {
+    const startTime = Date.now();
+    while (Date.now() - startTime < stayTime) {
+        // 1. Natural Scrolling (300px to 600px)
+        const dist = Math.floor(Math.random() * (600 - 300 + 1) + 300);
+        await page.evaluate((d) => window.scrollBy(0, d), dist).catch(() => {});
+        
+        // 2. Human-like Mouse Movement
+        const x = Math.floor(Math.random() * 800 + 100);
+        const y = Math.floor(Math.random() * 600 + 100);
+        await page.mouse.move(x, y, { steps: 10 }).catch(() => {});
+        
+        // 3. Random Pause (3-5 seconds)
+        await new Promise(r => setTimeout(r, Math.floor(Math.random() * 2000 + 3000)));
+    }
+}
+
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
@@ -878,13 +896,8 @@ async function runGscTask(keyword, url, viewNumber) {
                     timeout: 45000,
                  referer: `https://www.google.com/search?q=${encodeURIComponent(selectedTopic)}`
                 });
-             // Random Scrolling (15-20 Seconds stay for sheep)
-                const stayTime = randomInt(15000, 20000);
-                const start = Date.now();
-                while (Date.now() - start < stayTime) {
-                  await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-                    await new Promise(r => setTimeout(r, 4000))
-                }
+             // YAHAN UPDATE: Sheep site par bhi natural behavior (15-20 seconds)
+                await simulateHumanBehavior(page, randomInt(15000, 20000));
             } catch (err) {
                 console.log(`[SKIP] Sheep link failed.`);
             }
@@ -905,9 +918,8 @@ async function runGscTask(keyword, url, viewNumber) {
         });
         const wolfStart = Date.now();
         const wolfStay = randomInt(35000, 45000); 
-        while (Date.now() - wolfStart < wolfStay) {
-            await wolfPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await wolfPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+        while (Date.now() - wolfStartTime < wolfTargetStayTime) {    
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) {
               const ads = await wolfPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
