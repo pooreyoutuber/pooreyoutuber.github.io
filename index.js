@@ -916,9 +916,10 @@ async function runGscTask(keyword, url, viewNumber) {
             timeout: 60000, 
             referer: googleSearchUrl 
         });
-        const wolfStart = Date.now();
-        const wolfStay = randomInt(35000, 45000); 
-        while (Date.now() - wolfStartTime < wolfTargetStayTime) {    
+         const wolfStartTime = Date.now(); // Naam match kar diya
+         const wolfTargetStayTime = randomInt(35000, 45000); // Naam match kar diya
+
+        while (Date.now() - wolfStartTime < wolfTargetStayTime) {
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) {
