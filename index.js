@@ -883,6 +883,10 @@ async function runGscTask(keyword, url, viewNumber) {
         await page.setUserAgent(userAgent);
         await page.setViewport({ width: 1366, height: 768 });
         // 2. SHEEP LOOP: Trust Build-up (Authority Sites Visit)
+        const keys = Object.keys(topics);
+        const selectedTopic = keys[randomInt(0, keys.length - 1)];
+        const sheepLinks = topics[selectedTopic];
+        console.log(`\n[VIEW #${viewNumber}] Strategy: ${selectedTopic.toUpperCase()} (Single Tab Mode)`);
         // 2. SHEEP PHASE (Usi Tab Par Sari Sites)
         for (let i = 0; i < sheepLinks.length; i++) {
             console.log(`[SHEEP #${i+1}] Loading: ${sheepLinks[i]}`);
