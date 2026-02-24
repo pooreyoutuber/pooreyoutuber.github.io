@@ -880,7 +880,6 @@ async function runGscTask(keyword, url, viewNumber) {
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
         // --- SINGLE TAB INITIALIZATION ---
         const page = await browser.newPage();
-        const userAgent = USER_AGENTS[randomInt(0, USER_AGENTS.length - 1)];
         await page.setUserAgent(userAgent);
         await page.setViewport({ width: 1366, height: 768 });
         // 2. SHEEP LOOP: Trust Build-up (Authority Sites Visit)
