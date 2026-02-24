@@ -1,7 +1,7 @@
 // =================================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // =============================================================
-const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
+
 // --- Imports (Node.js Modules) ---
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai'); 
