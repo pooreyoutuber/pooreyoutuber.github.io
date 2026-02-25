@@ -821,11 +821,8 @@ app.get('/proxy-request', async (req, res) => {
 // 5. GSC & ADSENSE REVENUE BOOSTER (MULTI-URL & AUTO-CLICKER)
 
 // ========================================================
-
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-
-puppeteer.use(StealthPlugin());
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 const topics = {
 
