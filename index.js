@@ -816,150 +816,239 @@ app.get('/proxy-request', async (req, res) => {
     }
 });
 
-// ===================================================================
-// 5. GSC & ADSENSE REVENUE BOOSTER (MULTI-URL & AUTO-CLICKER)
-// ========================================================
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
-const topics = {
-   crypto: [
-        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
-      "https://coinmarketcap.com/rankings/exchanges/",
-        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
-          "https://www.coinbase.com/en-in",
-        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
-           "https://www.theblock.co/",
-           "https://coinswitch.co/",
-           "https://www.coingecko.com/",
-        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
-    ],
-    insurance: [
-        "https://www.policybazaar.com/",
-        "https://www.insurancejournal.com/",
-        "https://www.investing.com/academy/trading/",
-        "https://licindia.in/press-release",
-        "https://www.skadden.com/",
-        "https://www.forthepeople.com/",
-         "https://www.aoshearman.com/en",
-        "https://www.cochranfirm.com/"
-    ]
-};
-// Helper function to handle realistic behavior (Scrolling & Mouse)
-async function simulateRealisticBehavior(page, stayTime) {
-    const startTime = Date.now();
-    while (Date.now() - startTime < stayTime) {
-        // Natural Scrolling
-        const dist = Math.floor(Math.random() * (600 - 300 + 1)) + 300; 
-        await page.evaluate((d) => window.scrollBy(0, d), dist);
-        
-        // Mouse Movement (Bypass Bot Checks)
-        await page.mouse.move(
-            Math.floor(Math.random() * (800 - 100 + 1)) + 100, 
-            Math.floor(Math.random() * (600 - 100 + 1)) + 100, 
-            { steps: 10 }
-        );
+===================================================================
 
-        // Random Wait between actions
-        await new Promise(r => setTimeout(r, Math.floor(Math.random() * (5000 - 3000 + 1)) + 3000));
-    }
-}
+// 5. GSC & ADSENSE REVENUE BOOSTER (MULTI-URL & AUTO-CLICKER)
+
+// ========================================================
+
+const puppeteer = require('puppeteer-extra');
+
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
+puppeteer.use(StealthPlugin());
+
+const topics = {
+
+   crypto: [
+
+        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
+
+      "https://coinmarketcap.com/rankings/exchanges/",
+
+        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
+
+          "https://www.coinbase.com/en-in",
+
+        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
+
+           "https://www.theblock.co/",
+
+           "https://coinswitch.co/",
+
+           "https://www.coingecko.com/",
+
+        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
+
+    ],
+
+    insurance: [
+
+        "https://www.policybazaar.com/",
+
+        "https://www.insurancejournal.com/",
+
+        "https://www.investing.com/academy/trading/",
+
+        "https://licindia.in/press-release",
+
+        "https://www.skadden.com/",
+
+        "https://www.forthepeople.com/",
+
+         "https://www.aoshearman.com/en",
+
+        "https://www.cochranfirm.com/"
+
+    ]
+
+};
+
 async function runGscTask(keyword, url, viewNumber) {
+
     let browser;
+
     try {
+
         // Har view ke liye FRESH browser launch (Headless: "new" for stealth)
+
         browser = await puppeteer.launch({
+
             headless: "new",
+
             args: [
+
                 '--no-sandbox', 
+
                 '--disable-setuid-sandbox', 
+
                 '--disable-dev-shm-usage',
+
                 '--disable-blink-features=AutomationControlled'
+
             ]
+
         });
+
         const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        const keys = Object.keys(topics);
+
+        // 1. SELECT RANDOM TOPIC (SHEEP)
+
+      const keys = Object.keys(topics);
+
         const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
+
         const sheepLinks = topics[selectedTopic];
 
         console.log(`\n[VIEW #${viewNumber}] Strategy: ${selectedTopic.toUpperCase()}`);
 
-        // 2. SHEEP PHASE: Trust Build-up
+        // 2. SHEEP LOOP: Trust Build-up (Authority Sites Visit)
+
         for (let i = 0; i < sheepLinks.length; i++) {
+
             const page = await browser.newPage();
+
             await page.setUserAgent(userAgent);
+
             await page.setViewport({ width: 1366, height: 768 });
 
             console.log(`[SHEEP #${i+1}] Grazing: ${sheepLinks[i]}`);
+
             try {
+
+                // Simulating organic arrival from Google
+
                 await page.goto(sheepLinks[i], { 
+
                     waitUntil: 'networkidle2', 
+
                     timeout: 45000,
-                    referer: `https://www.google.com/search?q=${encodeURIComponent(selectedTopic)}`
+
+                 referer: `https://www.google.com/search?q=${encodeURIComponent(selectedTopic)}`
+
                 });
 
-                // UPDATED: Realistic behavior for Sheep site
-                const sheepStay = Math.floor(Math.random() * (20000 - 15000 + 1)) + 15000;
-                await simulateRealisticBehavior(page, sheepStay);
+             // Random Scrolling (15-20 Seconds stay for sheep)
+
+                const stayTime = randomInt(15000, 20000);
+
+                const start = Date.now();
+
+                while (Date.now() - start < stayTime) {
+
+                  await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+
+                    await new Promise(r => setTimeout(r, 4000))
+
+                }
 
             } catch (err) {
+
                 console.log(`[SKIP] Sheep link failed.`);
+
             }
+
+            // Tab close after grazing to save RAM
+
             await page.close();
+
             await new Promise(r => setTimeout(r, 2000));
+
         }
 
         // 3. WOLF PHASE: Target Site (Main Money Maker)
+
         console.log(`[WOLF] Entering Target: ${url}`);
+
         const wolfPage = await browser.newPage();
+
         await wolfPage.setUserAgent(userAgent);
 
+    // Google Search Referrer simulation
+
         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+
         await wolfPage.goto(url, { 
-            waitUntil: 'networkidle2', 
+
+        waitUntil: 'networkidle2', 
+
             timeout: 60000, 
+
             referer: googleSearchUrl 
+
         });
 
         const wolfStart = Date.now();
-        const wolfTotalStay = Math.floor(Math.random() * (45000 - 35000 + 1)) + 35000; 
 
-        // UPDATED: Realistic behavior loop for Wolf site including Ad-Clicker check
-        while (Date.now() - wolfStart < wolfTotalStay) {
-            // Natural Scrolling & Mouse Movement
-            const dist = Math.floor(Math.random() * (600 - 300 + 1)) + 300;
-            await wolfPage.evaluate((d) => window.scrollBy(0, d), dist);
-            await wolfPage.mouse.move(
-                Math.floor(Math.random() * (800 - 100 + 1)) + 100, 
-                Math.floor(Math.random() * (600 - 100 + 1)) + 100, 
-                { steps: 10 }
-            );
+        const wolfStay = randomInt(35000, 45000); 
+
+        while (Date.now() - wolfStart < wolfStay) {
+
+            await wolfPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
+
+            await wolfPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
+
             if (Math.random() < 0.18) {
+
               const ads = await wolfPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+
                 if (ads.length > 0) {
+
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
+
                     const box = await targetAd.boundingBox();
+
                    if (box && box.width > 50 && box.height > 50) {
+
                         console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Wolf found the target!`);
+
                         await wolfPage.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+
                         await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
+
                         break; 
+
                     }
+
                 }
+
             }
+
             await new Promise(r => setTimeout(r, 5000));
+
         }
+
         console.log(`[SUCCESS] View #${viewNumber} mission complete.`);
+
     } catch (error) {
+
         console.error(`[ERROR] View #${viewNumber} crashed: ${error.message}`);
+
     } finally {
+
         if (browser) {
+
             await browser.close().catch(() => {});
+
             console.log(`[CLEANUP] Browser closed. Waiting for next session...`);
+
         }
+
     }
-}
+
+} 
 // ===================================================================
 // Tool 5 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
