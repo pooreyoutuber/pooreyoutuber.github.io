@@ -1243,38 +1243,24 @@ app.post('/start-Proxyium', async (req, res) => {
 
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
             if (Math.random() < 0.18) { 
-    // Wait for ad to actually appear in DOM
-    const adSelector = 'ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]';
-    const ads = await page.$$(adSelector);
-    
-    if (ads.length > 0) {
-        const targetAd = ads[Math.floor(Math.random() * ads.length)];
-        
-        // 1. Scroll ad into view (Zaruri hai mobile profiles ke liye)
-        await page.evaluate((el) => {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, targetAd);
-        
-        // Small delay after scroll
-        await new Promise(r => setTimeout(r, 2000));
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+                if (ads.length > 0) {
+                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                    const box = await targetAd.boundingBox();
 
-        const box = await targetAd.boundingBox();
-
-        if (box && box.width > 50 && box.height > 50) {
-            console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-            
-            // 2. Realistic Mouse Movement
-            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 20 });
-            await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-            
-            console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
-            
-            // 3. Advertiser site stay (CTR fix)
-            await new Promise(r => setTimeout(r, 15000));
-            break; 
+                    if (box && box.width > 50 && box.height > 50) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
+                        await new Promise(r => setTimeout(r, 15000));
+                        break; 
+                    }
+                }
+            }
         }
-    }
-}
         console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
