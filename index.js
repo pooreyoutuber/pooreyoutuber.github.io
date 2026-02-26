@@ -1212,9 +1212,29 @@ app.post('/start-Proxyium', async (req, res) => {
         // 🔄 PICK RANDOM PROFILE
         const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
         // SET VIEWPORT & UA
+        // 🛡️ INJECT MATCHED HARDWARE (Based on selected profile)
+        await page.evaluateOnNewDocument((hw) => {
+            const getParameter = HTMLCanvasElement.prototype.getContext;
+            HTMLCanvasElement.prototype.getContext = function(type, attributes) {
+                const context = getParameter.apply(this, arguments);
+                if (type === 'webgl' || type === 'experimental-webgl' || type === 'webgl2') {
+                    const getParameterOriginal = context.getParameter;
+                    context.getParameter = function(param) {
+                        // Unmasked Vendor & Renderer codes
+                        if (param === 37445) return hw.vendor;
+                        if (param === 37446) return hw.renderer;
+                        return getParameterOriginal.apply(this, arguments);
+                    };
+                }
+                return context;
+            };
+        }, profile.hw);
+        
         await page.setViewport(profile.view);
         await page.setUserAgent(profile.ua);
 
+        console.log(`[DEVICE] Using: ${profile.name} | GPU: ${profile.hw.renderer}`);
+        
         // 1. STAGE: Google Search Simulation (Organic Entry)
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
