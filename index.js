@@ -1203,7 +1203,6 @@ app.post('/start-Proxyium', async (req, res) => {
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
