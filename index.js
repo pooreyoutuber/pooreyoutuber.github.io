@@ -5,6 +5,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 // --- Imports (Node.js Modules) ---
 const express = require('express');
 const nodeFetch = require('node-fetch'); 
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 // --- MIDDLEWARE ---
