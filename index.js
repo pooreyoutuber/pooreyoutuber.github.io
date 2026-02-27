@@ -188,5 +188,5 @@ app.post('/popup', async (req, res) => {
 // --- SERVER START ---
 // ===================================================================
 app.listen(PORT, () => {
-    console.log(`PooreYouTuber Combined API Server is running on port ${PORT}`);
+    console.log(` Combined API Server is running on port ${PORT}`);
 });
