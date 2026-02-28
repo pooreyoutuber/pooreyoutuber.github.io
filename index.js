@@ -1534,10 +1534,11 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
             // STEP 1: CroxyProxy open karna
-            console.log(`Searching for keyword: ${keyword}`);
-            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-            await page.goto(googleUrl, { waitUntil: 'networkidle2' });
+            
+            const searchQuery = encodeURIComponent(keywords || "your video title");
+            await page.goto(`https://www.google.com/search?q=${searchQuery}`, { waitUntil: 'networkidle2' });
             latestScreenshot = await page.screenshot();
+            console.log(`Searching for: ${keywords}`);
 
             // STEP 2: URL daalna aur submit karna
             const inputSelector = '#url';
