@@ -1533,29 +1533,16 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews, keyword, vie
             await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
-            // --- STEP 1: Proxyium Open Karna ---
-            console.log(`[VIEW #${i+1}] Opening Proxyium...`);
-            await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
-
-            // --- STEP 2: URL Enter & Submit ---
-            // Proxyium ka asli input selector ye hai:
-            const proxyInput = 'input[name="url"]'; 
-            await page.waitForSelector(proxyInput, { visible: true });
-            
-            // Video URL type karna
-            await page.type(proxyInput, videoUrl, { delay: 100 });
-            await page.keyboard.press('Enter');
-            
-            console.log("URL Submitted. Waiting for Proxy to load YouTube...");
+         // STEP 1: CroxyProxy open karna
+            await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
             latestScreenshot = await page.screenshot(); 
 
-            // --- STEP 3: Loading Buffer (Proxy processing) ---
-            // Proxy site ko YouTube redirect karne mein time lagta hai
-            for(let wait = 5; wait <= 30; wait += 5) {
-                await new Promise(r => setTimeout(r, 5000));
-                latestScreenshot = await page.screenshot();
-                console.log(`Proxy Routing: ${wait}/30s`);
-            }
+            // STEP 2: URL daalna aur submit karna
+            const inputSelector = '#url';
+            await page.waitForSelector(inputSelector);
+            await page.type(inputSelector, videoUrl);
+            await page.click('#requestSubmit'); 
+            console.log("URL Submitted. 60 Seconds wait starts now...");
 
             // --- STEP 3: 60 SECONDS WAIT (Loading Buffer) ---
             // Is 60 sec ke dauran hum har 5 sec me screenshot lenge taaki user ko lage system chal raha hai
