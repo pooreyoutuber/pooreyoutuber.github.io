@@ -1534,7 +1534,14 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews, keyword) {
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
             // STEP 1: CroxyProxy open karna
-            await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2' });
+            console.log(`[VIEW #${viewNumber}] Opening Proxyium for: ${url}`);
+        await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // --- STEP 2: Proxyium mein URL enter karna ---
+        const proxyInput = 'input[placeholder*="Put a URL"]'; 
+        await page.waitForSelector(proxyInput, { visible: true });
+        await page.type(proxyInput, url, { delay: 100 });
+        await page.keyboard.press('Enter');
             latestScreenshot = await page.screenshot(); 
 
             // STEP 2: URL daalna aur submit karna
