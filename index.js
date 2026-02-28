@@ -1517,7 +1517,7 @@ app.get('/live-check', (req, res) => {
 });
 
 // 2. Main Engine (CroxyProxy - Mobile Mode)
-async function runCroxyVideoEngine(videoUrl, watchTime, totalViews, keyword, viewNumber) {
+async function runCroxyVideoEngine(videoUrl, watchTime, totalViews, keyword, viewNumber, url) {
     for (let i = 0; i < totalViews; i++) {
         let browser;
         try {
