@@ -1534,13 +1534,8 @@ async function runCroxyVideoEngine(videoUrl, watchTime, totalViews, keyword) {
             await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
 
             // STEP 1: CroxyProxy open karna
-            
-             const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000)); 
-
-            latestScreenshot = await page.screenshot();
-            
+            await page.goto('https://proxyium.com/', { waitUntil: 'networkidle2' });
+            latestScreenshot = await page.screenshot(); 
 
             // STEP 2: URL daalna aur submit karna
             const inputSelector = '#url';
