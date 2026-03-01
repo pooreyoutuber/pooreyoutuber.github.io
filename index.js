@@ -1231,38 +1231,43 @@ app.post('/start-Proxyium', async (req, res) => {
         // =============================================================
         // NEW ACTION LOGIC: Site khulte hi interaction shuru (Search/Button)
         // =============================================================
-        console.log("Searching for interactive elements...");
+        // CHECK: Kya 15-25 sec ho gaye aur action baaki hai?
+            if (!actionDone && elapsed >= timeToType) {
+                console.log("⏸ Scrolling paused. Starting Interaction Logic...");
+                
+                try {
+                    const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search, input[name="s"]';
+                    const searchBar = await page.waitForSelector(searchSelector, { timeout: 5000 }).catch(() => null);
 
-        try {
-            const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search, input[name="s"]';
-            const searchBar = await page.waitForSelector(searchSelector, { timeout: 7000 }).catch(() => null);
-
-            if (searchBar) {
-                const randomSearchTerm = Math.floor(10000 + Math.random() * 90000).toString();
-                console.log(`Search bar found! Typing '${randomSearchTerm}'...`);
-                
-                await searchBar.click({ clickCount: 3 });
-                await page.keyboard.press('Backspace');
-                await page.type(searchSelector, randomSearchTerm, { delay: 150 }); 
-                await page.keyboard.press('Enter');
-                
-                // Wait for search result navigation
-                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 }).catch(() => null);
-            } else {
-                const btnSelector = 'button, input[type="button"], input[type="submit"], a.btn';
-                const buttons = await page.$$(btnSelector);
-                
-                if (buttons.length > 0) {
-                    console.log(`Found ${buttons.length} buttons. Clicking one...`);
-                    const clickableBtn = buttons[Math.floor(Math.random() * Math.min(buttons.length, 5))];
-                    await clickableBtn.click();
-                    await new Promise(r => setTimeout(r, 3000));
+                    if (searchBar) {
+                        const randomSearchTerm = Math.floor(10000 + Math.random() * 90000).toString();
+                        console.log(`[ACTION] Typing '${randomSearchTerm}'...`);
+                        
+                        await searchBar.click({ clickCount: 3 });
+                        await page.keyboard.press('Backspace');
+                        await page.type(searchSelector, randomSearchTerm, { delay: 150 }); 
+                        await page.keyboard.press('Enter');
+                        
+                        // Action ke baad thoda wait taaki results load hon (3-5 sec)
+                        await new Promise(r => setTimeout(r, 4000));
+                    } else {
+                        const btnSelector = 'button, input[type="button"], input[type="submit"], a.btn';
+                        const buttons = await page.$$(btnSelector);
+                        if (buttons.length > 0) {
+                            console.log(`[ACTION] Clicking button...`);
+                            const clickableBtn = buttons[Math.floor(Math.random() * Math.min(buttons.length, 5))];
+                            await clickableBtn.click();
+                            await new Promise(r => setTimeout(r, 3000));
+                        }
+                    }
+                } catch (e) {
+                    console.log("Action Error: " + e.message);
                 }
+
+                actionDone = true; // Taaki dubara type na kare
+                console.log("▶ Action finished. Resuming scrolling...");
             }
-        } catch (actionErr) {
-            console.error(`Action Error: ${actionErr.message}`);
-        }
-        
+        // =============================================================
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 50000); 
 
@@ -1277,7 +1282,7 @@ app.post('/start-Proxyium', async (req, res) => {
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
+            if (Math.random() < 0.15) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
