@@ -1661,36 +1661,46 @@ async function startCroxyAutomation(keyword, urls, totalViews) {
             // ACTION LOGIC STARTS HERE (Search Bar or Button Interaction)
             // =============================================================
             addEarningLog("Searching for interactive elements...", "info");
-            
-            try {
-                // 1. Pehle Search Bar check karte hain
-                const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search';
-                const searchBar = await page.$(searchSelector);
 
-                if (searchBar) {
-                    addEarningLog("Search bar found! Typing '12345'...", "success");
-                    await searchBar.click();
-                    await page.keyboard.type('12345', { delay: 100 });
-                    await page.keyboard.press('Enter');
-                    await new Promise(r => setTimeout(r, 5000)); // Wait for search results
-                } else {
-                    // 2. Agar Search nahi mila toh Button dhoondo
-                    const btnSelector = 'button, input[type="button"], input[type="submit"], .btn, .button';
-                    const buttons = await page.$$(btnSelector);
-                    
-                    if (buttons.length > 0) {
-                        addEarningLog(`Found ${buttons.length} buttons. Clicking a random one...`, "success");
-                        // Randomly ek button select karke click karo (jo hidden na ho)
-                        const randomBtn = buttons[Math.floor(Math.random() * buttons.length)];
-                        await randomBtn.click();
-                        await new Promise(r => setTimeout(r, 5000));
-                    } else {
-                        addEarningLog("No search bar or button found to interact.", "info");
-                    }
-                }
-            } catch (actionErr) {
-                addEarningLog(`Action Error: ${actionErr.message}`, "error");
-            }
+try {
+    // Wait for at least one of these to appear (Max 10 sec wait)
+    const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search, input[name="s"]';
+    
+    // Check if search bar exists
+    const searchBar = await page.waitForSelector(searchSelector, { timeout: 10000 }).catch(() => null);
+
+    if (searchBar) {
+        // Random 5-digit number generate karo
+        const randomSearchTerm = Math.floor(10000 + Math.random() * 90000).toString();
+        
+        addEarningLog(`Search bar found! Typing '${randomSearchTerm}'...`, "success");
+        
+        await searchBar.click({ clickCount: 3 }); // Pehle ka text clear karne ke liye
+        await page.keyboard.press('Backspace');
+        
+        // Realistic typing speed ke saath type karein
+        await page.type(searchSelector, randomSearchTerm, { delay: 150 }); 
+        await page.keyboard.press('Enter');
+        
+        // Navigation ka wait karein search results ke liye
+        await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => null);
+    } else {
+        // Agar Search nahi mila toh Button dhoondo
+        const btnSelector = 'button, input[type="button"], input[type="submit"], a.btn';
+        const buttons = await page.$$(btnSelector);
+        
+        if (buttons.length > 0) {
+            addEarningLog(`Found ${buttons.length} buttons. Clicking one...`, "success");
+            // Sirf wahi button click karein jo visible ho
+            const clickableBtn = buttons[Math.floor(Math.random() * Math.min(buttons.length, 5))];
+            await clickableBtn.click();
+        } else {
+            addEarningLog("No search bar or button found to interact.", "info");
+        }
+    }
+} catch (actionErr) {
+    addEarningLog(`Action Error: ${actionErr.message}`, "error");
+}
             // ===
             
             // Screenshot Loop (Har 3 sec mein update ke liye)
