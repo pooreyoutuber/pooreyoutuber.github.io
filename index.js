@@ -1163,6 +1163,14 @@ app.post('/start-Proxyium', async (req, res) => {
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
 // =============================== 
  async function runGscTaskpop(keyword, url, viewNumber) {
+     // --- SOCIAL REFERRERS LIST ---
+    const SOCIAL_REFERRERS = [
+        { name: 'Facebook', url: 'https://l.facebook.com/l.php?u=' },
+        { name: 'Instagram', url: 'https://instagram.com/' },
+        { name: 'X (Twitter)', url: 'https://t.co/' },
+        { name: 'Reddit', url: 'https://www.reddit.com/' },
+        { name: 'LinkedIn', url: 'https://www.linkedin.com/sharing/share-offsite/?url=' }
+    ]
      const ADVANCED_DEVICE_PROFILES = [
         // --- PC / DESKTOP ---
         { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 } },
@@ -1215,6 +1223,21 @@ app.post('/start-Proxyium', async (req, res) => {
         await page.setViewport(profile.view);
         await page.setUserAgent(profile.ua);
 
+        // --- 50/50 TRAFFIC SPLIT LOGIC ---
+        let refererUrl = "";
+        const isSocial = Math.random() < 0.25; // 50% chance
+
+        if (isSocial) {
+            // STAGE: Social Referral
+            const social = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
+            refererUrl = social.url + encodeURIComponent(url);
+            console.log(`[TRAFFIC] View #${viewNumber} | Type: SOCIAL (${social.name})`);
+            
+            // Social site par thoda wait simulation
+            await page.goto(social.url, { waitUntil: 'domcontentloaded' });
+            await new Promise(r => setTimeout(r, randomInt(2000, 4000)));
+        } else {
+            
         // 1. STAGE: Google Search Simulation (Organic Entry)
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -1225,59 +1248,11 @@ app.post('/start-Proxyium', async (req, res) => {
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
-            referer: googleUrl 
+            referer: refererUrl
         });
 
-        // =============================================================
-        // NEW ACTION LOGIC: Site khulte hi interaction shuru (Search/Button)
-        // =============================================================
-        // Random time decide karna (15-25 sec ke beech) jab typing hogi
-        const timeToType = randomInt(15000, 25000); 
-        let actionDone = false;
-
-        // 3. STAGE: Realistic Behavior Loop
-        while (Date.now() - startTime < targetStayTime) {
-            const elapsed = Date.now() - startTime;
-
-            // CHECK: Kya 15-25 sec ho gaye aur action baaki hai?
-            if (!actionDone && elapsed >= timeToType) {
-                console.log("⏸ Scrolling paused. Starting Interaction Logic...");
-                
-                try {
-                    const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search, input[name="s"]';
-                    const searchBar = await page.waitForSelector(searchSelector, { timeout: 5000 }).catch(() => null);
-
-                    if (searchBar) {
-                        const randomSearchTerm = Math.floor(10000 + Math.random() * 90000).toString();
-                        console.log(`[ACTION] Typing '${randomSearchTerm}'...`);
-                        
-                        await searchBar.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
-                        await page.type(searchSelector, randomSearchTerm, { delay: 150 }); 
-                        await page.keyboard.press('Enter');
-                        
-                        // Action ke baad thoda wait taaki results load hon (3-5 sec)
-                        await new Promise(r => setTimeout(r, 4000));
-                    } else {
-                        const btnSelector = 'button, input[type="button"], input[type="submit"], a.btn';
-                        const buttons = await page.$$(btnSelector);
-                        if (buttons.length > 0) {
-                            console.log(`[ACTION] Clicking button...`);
-                            const clickableBtn = buttons[Math.floor(Math.random() * Math.min(buttons.length, 5))];
-                            await clickableBtn.click();
-                            await new Promise(r => setTimeout(r, 3000));
-                        }
-                    }
-                } catch (e) {
-                    console.log("Action Error: " + e.message);
-                }
-
-                actionDone = true; // Taaki dubara type na kare
-                console.log("▶ Action finished. Resuming scrolling...");
-            }
-        // =============================================================
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 50000); 
+        const targetStayTime = randomInt(35000, 55000); 
 
         // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
