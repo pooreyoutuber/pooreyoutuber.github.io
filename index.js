@@ -1231,12 +1231,15 @@ app.post('/start-Proxyium', async (req, res) => {
         // =============================================================
         // NEW ACTION LOGIC: Site khulte hi interaction shuru (Search/Button)
         // =============================================================
-        // CHECK: Kya 15-25 sec ho gaye aur action baaki hai?
-        const timeToType = randomInt(15000, 25000);     // 15-25s ke beech action hoga
-       let actionDone = false;                         // <--- Ye define hona zaroori hai
+        // Random time decide karna (15-25 sec ke beech) jab typing hogi
+        const timeToType = randomInt(15000, 25000); 
+        let actionDone = false;
 
-      while (Date.now() - startTime < targetStayTime) {
-       const elapsed = Date.now() - startTime;
+        // 3. STAGE: Realistic Behavior Loop
+        while (Date.now() - startTime < targetStayTime) {
+            const elapsed = Date.now() - startTime;
+
+            // CHECK: Kya 15-25 sec ho gaye aur action baaki hai?
             if (!actionDone && elapsed >= timeToType) {
                 console.log("⏸ Scrolling paused. Starting Interaction Logic...");
                 
