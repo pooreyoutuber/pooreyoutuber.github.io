@@ -1228,6 +1228,41 @@ app.post('/start-Proxyium', async (req, res) => {
             referer: googleUrl 
         });
 
+        // =============================================================
+        // NEW ACTION LOGIC: Site khulte hi interaction shuru (Search/Button)
+        // =============================================================
+        console.log("Searching for interactive elements...");
+
+        try {
+            const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search, input[name="s"]';
+            const searchBar = await page.waitForSelector(searchSelector, { timeout: 7000 }).catch(() => null);
+
+            if (searchBar) {
+                const randomSearchTerm = Math.floor(10000 + Math.random() * 90000).toString();
+                console.log(`Search bar found! Typing '${randomSearchTerm}'...`);
+                
+                await searchBar.click({ clickCount: 3 });
+                await page.keyboard.press('Backspace');
+                await page.type(searchSelector, randomSearchTerm, { delay: 150 }); 
+                await page.keyboard.press('Enter');
+                
+                // Wait for search result navigation
+                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 }).catch(() => null);
+            } else {
+                const btnSelector = 'button, input[type="button"], input[type="submit"], a.btn';
+                const buttons = await page.$$(btnSelector);
+                
+                if (buttons.length > 0) {
+                    console.log(`Found ${buttons.length} buttons. Clicking one...`);
+                    const clickableBtn = buttons[Math.floor(Math.random() * Math.min(buttons.length, 5))];
+                    await clickableBtn.click();
+                    await new Promise(r => setTimeout(r, 3000));
+                }
+            }
+        } catch (actionErr) {
+            console.error(`Action Error: ${actionErr.message}`);
+        }
+        
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 50000); 
 
