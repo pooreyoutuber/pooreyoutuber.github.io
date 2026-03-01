@@ -1657,6 +1657,42 @@ async function startCroxyAutomation(keyword, urls, totalViews) {
                 page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 })
             ]);
 
+            // =============================================================
+            // ACTION LOGIC STARTS HERE (Search Bar or Button Interaction)
+            // =============================================================
+            addEarningLog("Searching for interactive elements...", "info");
+            
+            try {
+                // 1. Pehle Search Bar check karte hain
+                const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search';
+                const searchBar = await page.$(searchSelector);
+
+                if (searchBar) {
+                    addEarningLog("Search bar found! Typing '12345'...", "success");
+                    await searchBar.click();
+                    await page.keyboard.type('12345', { delay: 100 });
+                    await page.keyboard.press('Enter');
+                    await new Promise(r => setTimeout(r, 5000)); // Wait for search results
+                } else {
+                    // 2. Agar Search nahi mila toh Button dhoondo
+                    const btnSelector = 'button, input[type="button"], input[type="submit"], .btn, .button';
+                    const buttons = await page.$$(btnSelector);
+                    
+                    if (buttons.length > 0) {
+                        addEarningLog(`Found ${buttons.length} buttons. Clicking a random one...`, "success");
+                        // Randomly ek button select karke click karo (jo hidden na ho)
+                        const randomBtn = buttons[Math.floor(Math.random() * buttons.length)];
+                        await randomBtn.click();
+                        await new Promise(r => setTimeout(r, 5000));
+                    } else {
+                        addEarningLog("No search bar or button found to interact.", "info");
+                    }
+                }
+            } catch (actionErr) {
+                addEarningLog(`Action Error: ${actionErr.message}`, "error");
+            }
+            // ===
+            
             // Screenshot Loop (Har 3 sec mein update ke liye)
             const screenshotInterval = setInterval(async () => {
                 try {
