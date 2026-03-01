@@ -1163,14 +1163,6 @@ app.post('/start-Proxyium', async (req, res) => {
 // 7. TOOL POPUP (UPDATED: 50% SOCIAL REFERRAL & 25+ DEVICE MODELS)
 // =============================== 
  async function runGscTaskpop(keyword, url, viewNumber) {
-     // --- SOCIAL REFERRERS LIST ---
-    const SOCIAL_REFERRERS = [
-        { name: 'Facebook', url: 'https://l.facebook.com/l.php?u=' },
-        { name: 'Instagram', url: 'https://instagram.com/' },
-        { name: 'X (Twitter)', url: 'https://t.co/' },
-        { name: 'Reddit', url: 'https://www.reddit.com/' },
-        { name: 'LinkedIn', url: 'https://www.linkedin.com/sharing/share-offsite/?url=' }
-    ]
      const ADVANCED_DEVICE_PROFILES = [
         // --- PC / DESKTOP ---
         { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 } },
@@ -1223,21 +1215,6 @@ app.post('/start-Proxyium', async (req, res) => {
         await page.setViewport(profile.view);
         await page.setUserAgent(profile.ua);
 
-        // --- 50/50 TRAFFIC SPLIT LOGIC ---
-        let refererUrl = "";
-        const isSocial = Math.random() < 0.25; // 50% chance
-
-        if (isSocial) {
-            // STAGE: Social Referral
-            const social = SOCIAL_REFERRERS[Math.floor(Math.random() * SOCIAL_REFERRERS.length)];
-            refererUrl = social.url + encodeURIComponent(url);
-            console.log(`[TRAFFIC] View #${viewNumber} | Type: SOCIAL (${social.name})`);
-            
-            // Social site par thoda wait simulation
-            await page.goto(social.url, { waitUntil: 'domcontentloaded' });
-            await new Promise(r => setTimeout(r, randomInt(2000, 4000)));
-        } else {
-            
         // 1. STAGE: Google Search Simulation (Organic Entry)
         const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
         await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -1248,7 +1225,7 @@ app.post('/start-Proxyium', async (req, res) => {
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
-            referer: refererUrl
+            referer: googleUrl 
         });
 
         const startTime = Date.now();
