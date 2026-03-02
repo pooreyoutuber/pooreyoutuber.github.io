@@ -1613,26 +1613,27 @@ async function startCroxyAutomation(keyword, urls, totalViews) {
             await page.setViewport({ width: 1920, height: 1080 });
             await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-            // Step 1: Direct Google Search URL par jana
-            addEarningLog(`Searching Google for: ${keyword}`, "info");
-            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-            
-            await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-            await new Promise(r => setTimeout(r, 3000));
-            
-            // Step 2: URL daalna aur Go tap karna
-            await page.type('#url', targetUrl);
-            await Promise.all([
-                page.click('#requestSubmit'),
-                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 })
-            ]);
+           // Step 1: Google Search par gaye (Aapka existing code)
+const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+await page.goto(googleUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-            // Screenshot Loop (Har 3 sec mein update ke liye)
-            const screenshotInterval = setInterval(async () => {
-                try {
-                    currentScreenshot = await page.screenshot({ type: 'jpeg', quality: 60 });
-                } catch (e) {}
-            }, 3000);
+// Step 2: Search results load hone ka wait karein
+await page.waitForSelector('h3', { timeout: 10000 });
+
+// Step 3: Apni URL waali link dhoondo aur click karo
+const linkClicked = await page.evaluate((target) => {
+    const anchors = Array.from(document.querySelectorAll('a'));
+    // Aapki URL se match hone waali link dhoondo
+    const match = anchors.find(a => a.href.includes(target));
+    if (match) {
+        match.click();
+        return true;
+    }
+    return false;
+}, targetUrl);
+
+if (!linkClicked) {
+    addEarningLog(`Target URL not found in first page of Google`, "error");
 
             // Step 3: Realistic Behavior (30-60 sec)
             const stayTime = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
