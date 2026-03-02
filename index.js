@@ -819,118 +819,85 @@ app.get('/proxy-request', async (req, res) => {
 
 // ===================================================================
 // 5. GSC & ADSENSE REVENUE BOOSTER (MULTI-URL & AUTO-CLICKER)
-// ========================================================
+// ===================================================================
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-const topics = {
-   crypto: [
-        "https://www.binance.com/en-IN/blog/markets/7744511595520285761",
-      "https://coinmarketcap.com/rankings/exchanges/",
-        "https://www.binance.com/en-IN/blog/all/7318383218004275432",
-          "https://www.coinbase.com/en-in",
-        "https://www.binance.com/en-IN/blog/all/2911606196614178290",
-           "https://www.theblock.co/",
-           "https://coinswitch.co/",
-           "https://www.coingecko.com/",
-        "https://www.binance.com/en-IN/blog/markets/2425827570913512077"
-    ],
-    insurance: [
-        "https://www.policybazaar.com/",
-        "https://www.insurancejournal.com/",
-        "https://www.investing.com/academy/trading/",
-        "https://licindia.in/press-release",
-        "https://www.skadden.com/",
-        "https://www.forthepeople.com/",
-         "https://www.aoshearman.com/en",
-        "https://www.cochranfirm.com/"
-    ]
-};
 async function runGscTask(keyword, url, viewNumber) {
     let browser;
     try {
-        // Har view ke liye FRESH browser launch (Headless: "new" for stealth)
         browser = await puppeteer.launch({
             headless: "new",
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-blink-features=AutomationControlled'
             ]
         });
-        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        // 1. SELECT RANDOM TOPIC (SHEEP)
-      const keys = Object.keys(topics);
-        const selectedTopic = keys[Math.floor(Math.random() * keys.length)];
-        const sheepLinks = topics[selectedTopic];
-        console.log(`\n[VIEW #${viewNumber}] Strategy: ${selectedTopic.toUpperCase()}`);
-        // 2. SHEEP LOOP: Trust Build-up (Authority Sites Visit)
-        for (let i = 0; i < sheepLinks.length; i++) {
-            const page = await browser.newPage();
-            await page.setUserAgent(userAgent);
-            await page.setViewport({ width: 1366, height: 768 });
-            console.log(`[SHEEP #${i+1}] Grazing: ${sheepLinks[i]}`);
-            try {
-                // Simulating organic arrival from Google
-                await page.goto(sheepLinks[i], { 
-                    waitUntil: 'networkidle2', 
-                    timeout: 45000,
-                 referer: `https://www.google.com/search?q=${encodeURIComponent(selectedTopic)}`
-                });
-             // Random Scrolling (15-20 Seconds stay for sheep)
-                const stayTime = randomInt(15000, 20000);
-                const start = Date.now();
-                while (Date.now() - start < stayTime) {
-                  await page.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
-                    await new Promise(r => setTimeout(r, 4000))
-                }
-            } catch (err) {
-                console.log(`[SKIP] Sheep link failed.`);
-            }
-            // Tab close after grazing to save RAM
-            await page.close();
-            await new Promise(r => setTimeout(r, 2000));
-        }
-        // 3. WOLF PHASE: Target Site (Main Money Maker)
-        console.log(`[WOLF] Entering Target: ${url}`);
-        const wolfPage = await browser.newPage();
-        await wolfPage.setUserAgent(userAgent);
-    // Google Search Referrer simulation
-        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await wolfPage.goto(url, { 
-        waitUntil: 'networkidle2', 
-            timeout: 60000, 
-            referer: googleSearchUrl 
+
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1366, height: 768 });
+        
+        // Anti-Bot: Set Random User Agent
+        await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
+
+        // 1. STAGE: Google Search Simulation (Organic Entry)
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 3000)); 
+
+        // 2. STAGE: Visit Target Site (30-35s Total Stay)
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
+        await page.goto(url, { 
+            waitUntil: 'networkidle2', 
+            timeout: 90000, 
+            referer: googleUrl 
         });
-        const wolfStart = Date.now();
-        const wolfStay = randomInt(35000, 45000); 
-        while (Date.now() - wolfStart < wolfStay) {
-            await wolfPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 500)));
-            await wolfPage.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+
+        const startTime = Date.now();
+        const targetStayTime = randomInt(30000, 35000); 
+
+        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
+        while (Date.now() - startTime < targetStayTime) {
+            // Natural Scrolling
+            const dist = randomInt(300, 600);
+            await page.evaluate((d) => window.scrollBy(0, d), dist);
+            
+            // Mouse Movement (Bypass Bot Checks)
+            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) {
-              const ads = await wolfPage.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
+            if (Math.random() < 0.18) { 
+                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
-                   if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Wolf found the target!`);
-                        await wolfPage.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        await new Promise(r => setTimeout(r, 15000)); // Stay on ad site
+
+                    if (box && box.width > 50 && box.height > 50) {
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
+                        
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
+                        await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
             }
-            await new Promise(r => setTimeout(r, 5000));
         }
-        console.log(`[SUCCESS] View #${viewNumber} mission complete.`);
+        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
+
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber} crashed: ${error.message}`);
+        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
-            console.log(`[CLEANUP] Browser closed. Waiting for next session...`);
         }
     }
 }
