@@ -1196,7 +1196,7 @@ app.post('/start-Proxyium', async (req, res) => {
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(35000, 55000); 
+        const targetStayTime = randomInt(30000, 50000); 
 
         // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
@@ -1217,17 +1217,45 @@ app.post('/start-Proxyium', async (req, res) => {
 
                     if (box && box.width > 50 && box.height > 50) {
                         console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+
+                        const newPagePromise = new Promise(x => browser.once('targetcreated', target => x(target.page())));
+                        
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
                         console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
-                        break; 
-                    }
+                       // 3. Naye tab ko capture karein
+                      const adPage = await newPagePromise;
+                        
+            if (adPage) {
+                console.log(`[SUCCESS] Switched to Ad Tab. Performing activities...`);
+                
+                // Ad tab ko active karein
+                await adPage.bringToFront();
+                
+                // Thoda wait karein page load hone ke liye (Bohat zaroori hai!)
+                await new Promise(r => setTimeout(r, 5000)); 
+
+                // 4. AD PAGE ACTIVITY: Scrolling & Mouse Movement (10-15s)
+                const adEndTime = Date.now() + 15000; 
+                while (Date.now() < adEndTime) {
+                    // Random Scroll
+                    await adPage.evaluate(() => window.scrollBy(0, Math.floor(Math.random() * 400)));
+                    // Random Mouse Move
+                    await adPage.mouse.move(Math.random() * 500, Math.random() * 500, { steps: 5 });
+                    await new Promise(r => setTimeout(r, 3000));
                 }
+
+                console.log(`[DONE] Ad Page activity finished. Closing ad tab.`);
+                await adPage.close().catch(() => {}); // Ad tab band
             }
+
+            // Waapas main page par focus
+            await page.bringToFront();
+            break; 
         }
+    }
+}
         console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
