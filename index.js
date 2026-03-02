@@ -1613,9 +1613,12 @@ async function startCroxyAutomation(keyword, urls, totalViews) {
             await page.setViewport({ width: 1920, height: 1080 });
             await page.setUserAgent(USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]);
 
-            // Step 1: CroxyProxy par jana
-            addEarningLog("Opening CroxyProxy...", "info");
-            await page.goto('https://www.croxyproxy.com/', { waitUntil: 'networkidle2' });
+            // Step 1: Direct Google Search URL par jana
+            addEarningLog(`Searching Google for: ${keyword}`, "info");
+            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+            
+            await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await new Promise(r => setTimeout(r, 3000));
             
             // Step 2: URL daalna aur Go tap karna
             await page.type('#url', targetUrl);
@@ -1624,52 +1627,6 @@ async function startCroxyAutomation(keyword, urls, totalViews) {
                 page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 })
             ]);
 
-            // =============================================================
-            // ACTION LOGIC STARTS HERE (Search Bar or Button Interaction)
-            // =============================================================
-            addEarningLog("Searching for interactive elements...", "info");
-
-try {
-    // Wait for at least one of these to appear (Max 10 sec wait)
-    const searchSelector = 'input[type="text"], input[type="search"], .search-field, #search, input[name="s"]';
-    
-    // Check if search bar exists
-    const searchBar = await page.waitForSelector(searchSelector, { timeout: 10000 }).catch(() => null);
-
-    if (searchBar) {
-        // Random 5-digit number generate karo
-        const randomSearchTerm = Math.floor(10000 + Math.random() * 90000).toString();
-        
-        addEarningLog(`Search bar found! Typing '${randomSearchTerm}'...`, "success");
-        
-        await searchBar.click({ clickCount: 3 }); // Pehle ka text clear karne ke liye
-        await page.keyboard.press('Backspace');
-        
-        // Realistic typing speed ke saath type karein
-        await page.type(searchSelector, randomSearchTerm, { delay: 150 }); 
-        await page.keyboard.press('Enter');
-        
-        // Navigation ka wait karein search results ke liye
-        await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => null);
-    } else {
-        // Agar Search nahi mila toh Button dhoondo
-        const btnSelector = 'button, input[type="button"], input[type="submit"], a.btn';
-        const buttons = await page.$$(btnSelector);
-        
-        if (buttons.length > 0) {
-            addEarningLog(`Found ${buttons.length} buttons. Clicking one...`, "success");
-            // Sirf wahi button click karein jo visible ho
-            const clickableBtn = buttons[Math.floor(Math.random() * Math.min(buttons.length, 5))];
-            await clickableBtn.click();
-        } else {
-            addEarningLog("No search bar or button found to interact.", "info");
-        }
-    }
-} catch (actionErr) {
-    addEarningLog(`Action Error: ${actionErr.message}`, "error");
-}
-            // ===
-            
             // Screenshot Loop (Har 3 sec mein update ke liye)
             const screenshotInterval = setInterval(async () => {
                 try {
