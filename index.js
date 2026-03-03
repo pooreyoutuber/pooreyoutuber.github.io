@@ -40,10 +40,8 @@ try {
 
 let ai;
 if (GEMINI_KEY) {
-    ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-} else {
-    // Fallback in case AI key is missing
-    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
+    const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+    ai = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 }
 
 // --- MIDDLEWARE & UTILITIES ---
