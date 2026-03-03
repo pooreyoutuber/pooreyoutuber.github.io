@@ -4,7 +4,11 @@
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 // --- Imports (Node.js Modules) ---
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai');
+let GoogleGenAI;
+const setupGemini = async () => {
+    const genai = await import('@google/genai');
+    GoogleGenAI = genai.GoogleGenAI;
+};
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
