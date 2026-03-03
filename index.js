@@ -1196,7 +1196,7 @@ app.post('/start-Proxyium', async (req, res) => {
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 50000); 
+        const targetStayTime = randomInt(32000, 50000); 
 
         // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
@@ -1209,45 +1209,20 @@ app.post('/start-Proxyium', async (req, res) => {
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
             // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-          // 🔥 AD CLICK LOGIC WITH NEW TAB HANDLING
-            if (Math.random() < 0.18) { 
+           if (Math.random() < 0.18) { 
                 const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
                 if (ads.length > 0) {
                     const targetAd = ads[Math.floor(Math.random() * ads.length)];
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`[AD-CLICK] Target Found! Clicking...`);
-
-                        // --- NEW TAB HANDLING START ---
-                        const newPagePromise = new Promise(x => browser.once('targetcreated', target => x(target.page())));
-                        
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-
-                        const adPage = await newPagePromise; // Ad wale naye tab ko pakadna
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        if (adPage) {
-                            console.log(`[INFO] Switch to New Tab. Simulating activity...`);
-                            await adPage.setViewport({ width: 1366, height: 768 });
-                            
-                            // Naye tab par 5-10 second activity
-                            let adStay = randomInt(5000, 10000);
-                            let adStart = Date.now();
-                            while(Date.now() - adStart < adStay) {
-                                await adPage.evaluate(() => window.scrollBy(0, 200));
-                                await adPage.mouse.move(randomInt(100, 500), randomInt(100, 500), { steps: 5 });
-                                await new Promise(r => setTimeout(r, 2000));
-                            }
-                            await adPage.close(); // Ad tab band kiya
-                            console.log(`[INFO] Ad Tab Closed. Returning to main site...`);
-                        }
-                        
-                        // Purane tab (original site) par wapas aakar 2-5 sec wait
-                        console.log(`[INFO] Waiting on main site for 2-5s before exit...`);
-                        await new Promise(r => setTimeout(r, randomInt(2000, 5000)));
-                        // --- NEW TAB HANDLING END ---
-
+                        // Advertiser site par 15s wait (Necessary for valid CTR)
+                        await new Promise(r => setTimeout(r, 15000));
                         break; 
                     }
                 }
@@ -1259,6 +1234,8 @@ app.post('/start-Proxyium', async (req, res) => {
         console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
+            const pages = await browser.pages();
+            for (const p of pages) await p.close().catch(() => {});
             await browser.close().catch(() => {});
         }
     }
