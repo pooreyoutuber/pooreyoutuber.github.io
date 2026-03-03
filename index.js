@@ -4,6 +4,7 @@
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 // --- Imports (Node.js Modules) ---
 const express = require('express');
+const genAI = new GoogleGenerativeAI(GEMINI_KEY);
 let GoogleGenAI;
 const setupGemini = async () => {
     const genai = await import('@google/genai');
