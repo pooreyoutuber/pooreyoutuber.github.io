@@ -24,7 +24,7 @@ const app = express();
 const PORT = process.env.PORT || 10000; 
 
 // --- GEMINI KEY CONFIGURATION ---
-
+let GEMINI_KEY;
 try {
     // Attempt to read from Replit secret store (preferred method)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
@@ -35,10 +35,11 @@ try {
 
 let ai;
 if (GEMINI_KEY) {
-    const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-    ai = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+} else {
+    // Fallback in case AI key is missing
+    ai = { models: { generateContent: () => Promise.reject(new Error("AI Key Missing")) } };
 }
-
 // --- MIDDLEWARE & UTILITIES ---
 // Updated CORS to allow all for simplicity in deployment
 app.use(cors({
