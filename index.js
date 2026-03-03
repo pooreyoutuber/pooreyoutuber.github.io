@@ -29,7 +29,7 @@ const app = express();
 const PORT = process.env.PORT || 10000; 
 
 // --- GEMINI KEY CONFIGURATION ---
-let GEMINI_KEY;
+
 try {
     // Attempt to read from Replit secret store (preferred method)
     GEMINI_KEY = fs.readFileSync('/etc/secrets/gemini', 'utf8').trim(); 
