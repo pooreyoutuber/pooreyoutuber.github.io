@@ -4,18 +4,17 @@
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 // --- Imports (Node.js Modules) ---
 const express = require('express');
+onst { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// --- Gemini Setup ---
+const GEMINI_KEY = process.env.GEMINI_KEY; // ya jo bhi aapka key variable hai
+
 const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-// Line 7 ke aas-paas (Import style)
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Line 37 ke aas-paas (Initialization)
+const model = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash"
+});
 
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-let GoogleGenAI;
-const setupGemini = async () => {
-    const genai = await import('@google/genai');
-    GoogleGenAI = genai.GoogleGenAI;
-};
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
