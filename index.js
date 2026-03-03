@@ -6,8 +6,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const express = require('express');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// --- Gemini Setup ---
-const GEMINI_KEY = process.env.GEMINI_KEY; // ya jo bhi aapka key variable hai
+
 
 const genAI = new GoogleGenerativeAI(GEMINI_KEY);
 
