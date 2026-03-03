@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(GEMINI_KEY);
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Line 37 ke aas-paas (Initialization)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY || GEMINI_KEY);
+
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 let GoogleGenAI;
 const setupGemini = async () => {
