@@ -1,15 +1,10 @@
-// ============================================================
+// =================================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // =============================================================
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
 // --- Imports (Node.js Modules) ---
 const express = require('express');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash"
-});
-
+const { GoogleGenAI } = require('@google/genai'); 
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
 const fs = require('fs'); 
