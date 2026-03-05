@@ -1196,7 +1196,7 @@ app.post('/start-Proxyium', async (req, res) => {
         await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
 
         // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying random time ...`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
@@ -1204,7 +1204,7 @@ app.post('/start-Proxyium', async (req, res) => {
         });
 
         const startTime = Date.now();
-        const targetStayTime = randomInt(32000, 50000); 
+        const targetStayTime = randomInt(32000, 45000); 
 
         // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
