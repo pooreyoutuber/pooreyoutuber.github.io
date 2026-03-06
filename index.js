@@ -138,7 +138,7 @@ puppeteer.use(StealthPlugin());
 
 
 // ===================================================================
-// Tool 7 Endpoint (Updated for Multi-Site Rotation)
+// Tool 1 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
 app.post('/popup', async (req, res) => {
     try {
