@@ -111,13 +111,47 @@ puppeteer.use(StealthPlugin());
                     const box = await targetAd.boundingBox();
 
                     if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
+                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Moving Mouse...`);
+
+                        // 1. New Tab ka wait setup karna (Browser level par)
+                        const newTargetPromise = new Promise(resolve => 
+                            browser.once('targetcreated', target => resolve(target.page()))
+                        );
+
                         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
                         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
                         
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
+                        try {
+                            // 2. 2nd Tab (Advertiser Site) par switch karna
+                            const adPage = await newTargetPromise;
+                            
+                            if (adPage) {
+                                console.log(`\x1b[44m%s\x1b[0m`, `[2nd TAB] Ad Site Opened! Starting Movement...`);
+                                
+                                // Random Scrolling & Movement Loop (15-20 seconds)
+                                const adEndTime = Date.now() + randomInt(15000, 20000);
+                                while (Date.now() < adEndTime) {
+                                    const adScroll = randomInt(200, 500);
+                                    await adPage.evaluate((d) => window.scrollBy(0, d), adScroll).catch(() => {});
+                                    await adPage.mouse.move(randomInt(100, 600), randomInt(100, 600), { steps: 5 });
+                                    
+                                    console.log(`[ENGAGEMENT] Scrolling Ad Page...`);
+                                    await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
+                                }
+
+                                await adPage.close().catch(() => {});
+                                console.log(`\x1b[33m%s\x1b[0m`, `[2nd TAB] Ad Page Closed.`);
+                            }
+                        } catch (adError) {
+                            console.log(`\x1b[31m%s\x1b[0m`, `[ERROR] Ad Interaction Failed: ${adError.message}`);
+                        }
+
+                        // 3. Wapas Main Site par focus aur 2-3 sec wait
+                        await page.bringToFront();
+                        console.log(`[FOCUS] Back to Main Site. Waiting 3s before closing...`);
+                        await new Promise(r => setTimeout(r, 3000));
+                        
+                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Click & Engagement Task Complete! ✅`);
                         break; 
                     }
                 }
@@ -126,7 +160,7 @@ puppeteer.use(StealthPlugin());
         console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`\x1b[31m%s\x1b[0m`, `[FATAL ERROR] View #${viewNumber}: ${error.message}`);
     } finally {
         if (browser) {
             const pages = await browser.pages();
@@ -134,7 +168,8 @@ puppeteer.use(StealthPlugin());
             await browser.close().catch(() => {});
         }
     }
-}
+ }
+
 
 
 // ===================================================================
