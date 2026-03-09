@@ -149,8 +149,9 @@ puppeteer.use(StealthPlugin());
                         // 3. Wapas Main Site par focus aur 2-3 sec wait
                         await page.bringToFront();
                         console.log(`[FOCUS] Back to Main Site. Waiting 3s before closing...`);
-                        await new Promise(r => setTimeout(r, 3000));
                         
+                        const finalWait = randomInt(3000, 6000); 
+                        await new Promise(r => setTimeout(r, finalWait)); 
                         console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Click & Engagement Task Complete! ✅`);
                         break; 
                     }
