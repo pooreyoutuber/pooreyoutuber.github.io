@@ -123,7 +123,10 @@ puppeteer.use(StealthPlugin());
                         
                         try {
                             // 2. 2nd Tab (Advertiser Site) par switch karna
-                            const adPage = await newTargetPromise;
+                            const adPage = await Promise.race([
+                             newTargetPromise,
+                            new Promise(res => setTimeout(() => res(null), 12000)) 
+                            ]);
                             
                             if (adPage) {
                                 console.log(`\x1b[44m%s\x1b[0m`, `[2nd TAB] Ad Site Opened! Starting Movement...`);
