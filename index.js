@@ -34,8 +34,7 @@ puppeteer.use(StealthPlugin());
         'https://www.reddit.com/',
         'https://medium.com/',
         'https://www.quora.com/',
-        '' // Direct (No Referrer)
-    ];
+
         // --- PC / DESKTOP --
     { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 }, hw: { vendor: 'Google Inc. (Intel)', renderer: 'ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11)' } },
     { name: 'Windows PC - Firefox', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0', view: { width: 1536, height: 864 }, hw: { vendor: 'Google Inc. (NVIDIA)', renderer: 'ANGLE (NVIDIA, NVIDIA GeForce RTX 3060, Direct3D11)' } },
