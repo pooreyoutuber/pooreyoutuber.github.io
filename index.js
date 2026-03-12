@@ -1044,14 +1044,14 @@ async function runProxyiumTask(keyword, url, viewNumber) {
 
         // --- STEP 4: Realistic Behavior & Ad-Clicker Loop ---
         const startTime = Date.now();
-        const targetStayTime = randomInt(45000, 65000); // 35-45 seconds stay
+        const targetStayTime = randomInt(40000, 51000); // 35-45 seconds stay
 
-        while (Date.now() - startTime < targetStayTime) {
+            while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
-
-            // Mouse Movement
+            
+            // Mouse Movement (Bypass Bot Checks)
             await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
             await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
 
