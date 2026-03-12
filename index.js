@@ -92,7 +92,48 @@ puppeteer.use(StealthPlugin());
 
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 50000); 
+        let searchActionDone = false;
+        // 3. Realistic Behavior Loop
+        while (Date.now() - startTime < targetStayTime) {
+            
+            // 🔍 NEW ACTION: Search Bar Interaction (0-9 Type)
+            // Loop ke beech mein 40% chance par ye trigger hoga
+            if (!searchActionDone && Math.random() < 0.4) {
+                console.log(`[ACTION] Pausing scrolling to perform search...`);
+                
+                const searchSelectors = ['input[type="text"]', 'input[name="s"]', 'input[placeholder*="Search"]', '#search', '.search-field'];
+                let searchBar;
 
+                for (let selector of searchSelectors) {
+                    searchBar = await page.$(selector);
+                    if (searchBar) break;
+                }
+
+                if (searchBar) {
+                    const box = await searchBar.boundingBox();
+                    if (box) {
+                        // Mouse se search bar par ja kar click karna (Human-like)
+                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 20 });
+                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                        
+                        // 0-9 random number typing
+                        const randomDigit = Math.floor(Math.random() * 10).toString();
+                        await new Promise(r => setTimeout(r, 1500)); // Click ke baad thoda wait
+                        await page.keyboard.type(randomDigit, { delay: randomInt(150, 300) });
+                        
+                        console.log(`[ACTION] Typed "${randomDigit}" in search bar.`);
+                        await new Promise(r => setTimeout(r, 1000));
+                        await page.keyboard.press('Enter');
+                        
+                        searchActionDone = true;
+                        console.log(`[ACTION] Search submitted. Resuming normal movement in 5s...`);
+                        await new Promise(r => setTimeout(r, 5000)); // Action ke baad 5 sec ka pause
+                    }
+                } else {
+                    searchActionDone = true; // Agar search bar na mile toh skip karein
+                }
+            }
+            
         // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
         while (Date.now() - startTime < targetStayTime) {
             // Natural Scrolling
