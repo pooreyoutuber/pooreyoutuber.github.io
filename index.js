@@ -26,7 +26,6 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
  async function runGscTaskpop(keyword, url, viewNumber) {
      const ADVANCED_DEVICE_PROFILES = [
-         const socialSources = [
         'https://www.facebook.com/',
         'https://www.instagram.com/',
         'https://www.whatsapp.com/',
