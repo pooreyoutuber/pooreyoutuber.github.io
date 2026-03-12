@@ -106,7 +106,7 @@ page.on('dialog', async dialog => {
             if (!searchActionDone && Math.random() < 0.4) {
                 console.log(`[ACTION] Pausing scrolling to perform search...`);
                 
-                const searchSelectors = ['input[type="text"]', 'input[name="s"]', 'input[placeholder*="Search"]', '#search', '.search-field'];
+                const searchSelectors = ['#shortUrl', 'input[type="text"]','input[type="text"]', 'input[name="s"]', 'input[placeholder*="Search"]', '#search', '.search-field'];
                 let searchBar;
 
                 for (let selector of searchSelectors) {
