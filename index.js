@@ -1,235 +1,117 @@
-// =======================================================
-// index.js (ULTIMATE FINAL VERSION - Part 1/2)
-// =======================================================
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-// --- Imports (Node.js Modules) ---
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const express = require('express');
-const nodeFetch = require('node-fetch'); 
 const cors = require('cors');
-const app = express();
-const PORT = process.env.PORT || 10000; 
-// --- MIDDLEWARE ---
-app.use(cors({ origin: '*', methods: ['GET', 'POST'], credentials: true }));
-app.use(express.json({ limit: '5mb' }));
-
-app.get('/', (req, res) => {
-    res.status(200).send('Tool 7 API Server is running!'); 
-});
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-// ===================================================================
-// 1. TOOL 
-// =============================== 
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
 puppeteer.use(StealthPlugin());
- async function runGscTaskpop(keyword, url, viewNumber) {
-     const ADVANCED_DEVICE_PROFILES = [
-        'https://www.facebook.com/',
-        'https://www.instagram.com/',
-        'https://www.whatsapp.com/',
-        'https://www.linkedin.com/',
-        'https://t.co/', // Twitter
-        'https://www.reddit.com/',
-        'https://medium.com/',
-        'https://www.quora.com/',
+const app = express();
+const PORT = process.env.PORT || 10000;
 
-        // --- PC / DESKTOP --
-    { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 }, hw: { vendor: 'Google Inc. (Intel)', renderer: 'ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11)' } },
-    { name: 'Windows PC - Firefox', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0', view: { width: 1536, height: 864 }, hw: { vendor: 'Google Inc. (NVIDIA)', renderer: 'ANGLE (NVIDIA, NVIDIA GeForce RTX 3060, Direct3D11)' } },
-    { name: 'Windows PC - Edge', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0', view: { width: 1366, height: 768 }, hw: { vendor: 'Google Inc. (Intel)', renderer: 'ANGLE (Intel, Intel(R) HD Graphics 620, Direct3D11)' } },
-    { name: 'MacBook Pro - Safari', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15', view: { width: 1728, height: 1117 }, hw: { vendor: 'Apple Inc.', renderer: 'Apple M2 Pro' } },
-    { name: 'Linux Desktop - Chrome', ua: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1600, height: 900 }, hw: { vendor: 'Google Inc. (AMD)', renderer: 'ANGLE (AMD, AMD Radeon(TM) Graphics, Direct3D11)' } },
-    { name: 'MacBook Air - Chrome', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36', view: { width: 1440, height: 900 }, hw: { vendor: 'Apple Inc.', renderer: 'Apple M1' } },
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 
-    // --- MOBILE ---
-    { name: 'iPhone 15 Pro Max', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 430, height: 932 }, hw: { vendor: 'Apple Inc.', renderer: 'Apple GPU' } },
-    { name: 'iPhone 14', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1', view: { width: 390, height: 844 }, hw: { vendor: 'Apple Inc.', renderer: 'Apple GPU' } },
-    { name: 'Samsung Galaxy S23 Ultra', ua: 'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.101 Mobile Safari/537.36', view: { width: 384, height: 854 }, hw: { vendor: 'Google Inc. (Qualcomm)', renderer: 'Adreno (TM) 740' } },
-    { name: 'Google Pixel 8 Pro', ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.101 Mobile Safari/537.36', view: { width: 448, height: 998 }, hw: { vendor: 'Google Inc. (Google)', renderer: 'Mali-G715' } },
-    { name: 'OnePlus 11', ua: 'Mozilla/5.0 (Linux; Android 13; CPH2447) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800 }, hw: { vendor: 'Google Inc. (Qualcomm)', renderer: 'Adreno (TM) 730' } },
-    { name: 'Xiaomi 13 Pro', ua: 'Mozilla/5.0 (Linux; Android 13; 2210132G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36', view: { width: 393, height: 873 }, hw: { vendor: 'Google Inc. (Qualcomm)', renderer: 'Adreno (TM) 730' } },
-    { name: 'Vivo V27', ua: 'Mozilla/5.0 (Linux; Android 13; V2231) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36', view: { width: 388, height: 864 }, hw: { vendor: 'Google Inc. (MediaTek)', renderer: 'Mali-G610 MC6' } },
-    { name: 'Oppo Reno 10', ua: 'Mozilla/5.0 (Linux; Android 13; CPH2531) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36', view: { width: 360, height: 800 }, hw: { vendor: 'Google Inc. (MediaTek)', renderer: 'Mali-G68 MC4' } },
-    { name: 'Nothing Phone (2)', ua: 'Mozilla/5.0 (Linux; Android 13; A065) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 919 }, hw: { vendor: 'Google Inc. (Qualcomm)', renderer: 'Adreno (TM) 730' } },
-    { name: 'Motorola Edge 40', ua: 'Mozilla/5.0 (Linux; Android 13; XT2303-2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Safari/537.36', view: { width: 412, height: 919 }, hw: { vendor: 'Google Inc. (MediaTek)', renderer: 'Mali-G77 MC9' } },
-    { name: 'Sony Xperia 1 V', ua: 'Mozilla/5.0 (Linux; Android 13; XQ-DQ72) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36', view: { width: 384, height: 918 }, hw: { vendor: 'Google Inc. (Qualcomm)', renderer: 'Adreno (TM) 740' } },
+app.use(cors());
+app.use(express.json());
 
-    // --- TABLETS ---
-    { name: 'iPad Pro 12.9', ua: 'Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1', view: { width: 1024, height: 1366 }, hw: { vendor: 'Apple Inc.', renderer: 'Apple GPU' } },
-    { name: 'Samsung Galaxy Tab S9', ua: 'Mozilla/5.0 (Linux; Android 13; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36', view: { width: 800, height: 1280 }, hw: { vendor: 'Google Inc. (Qualcomm)', renderer: 'Adreno (TM) 740' } },
-    { name: 'iPad Air', ua: 'Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1', view: { width: 820, height: 1180 }, hw: { vendor: 'Apple Inc.', renderer: 'Apple GPU' } },
-    { name: 'iPad Mini', ua: 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1', view: { width: 744, height: 1133 }, hw: { vendor: 'Apple Inc.', renderer: 'Apple GPU' } },
-    { name: 'Surface Pro 9', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0', view: { width: 1440, height: 960 }, hw: { vendor: 'Google Inc. (Intel)', renderer: 'Intel(R) Iris(R) Xe Graphics' } },
-    { name: 'Amazon Fire HD 10', ua: 'Mozilla/5.0 (Linux; Android 9; KFTRWI) AppleWebKit/537.36 (KHTML, like Gecko) Silk/115.0.0.0 like Chrome/115.0.0.0 Safari/537.36', view: { width: 800, height: 1280 }, hw: { vendor: 'Google Inc. (ARM)', renderer: 'Mali-G72 MP3' } },
-    { name: 'Huawei MatePad', ua: 'Mozilla/5.0 (Linux; Android 10; BAH3-W09) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.181 Safari/537.36', view: { width: 800, height: 1280 }, hw: { vendor: 'Google Inc. (ARM)', renderer: 'Mali-G51' } },
-    { name: 'Lenovo Tab P11', ua: 'Mozilla/5.0 (Linux; Android 11; Lenovo TB-J606F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36', view: { width: 800, height: 1280 }, hw: { vendor: 'Google Inc. (Qualcomm)', renderer: 'Adreno (TM) 610' } }
-];
+// --- AI BRAIN: Generates Random Human Actions ---
+async function getAiBehavior(url, keyword) {
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const prompt = `Act as a human browsing a website about ${keyword}. 
+        Provide a JSON response with:
+        1. "searchQuery": A random related word to type in a search bar.
+        2. "scrollDepth": A random number between 1000 and 4000.
+        3. "pauseTime": Random milliseconds between 2000 and 5000.
+        4. "interactionType": Either "click_text" or "move_mouse".`;
+        
+        const result = await model.generateContent(prompt);
+        return JSON.parse(result.response.text());
+    } catch (e) {
+        // Fallback agar AI fail ho jaye
+        return { searchQuery: "latest news", scrollDepth: 1500, pauseTime: 3000 };
+    }
+}
+
+async function runAiGscTask(keyword, url, viewNumber) {
     let browser;
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-blink-features=AutomationControlled' ,
-                '--disable-canvas-aa', 
-                 '--disable-2d-canvas-clip-aa',
-                  '--disable-gl-drawing-for-tests'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled']
         });
 
         const page = await browser.newPage();
-        // 🔄 PICK RANDOM PROFILE
-        const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
-        // SET VIEWPORT & UA
-        await page.setViewport(profile.view);
-        await page.setUserAgent(profile.ua);
+        
+        // 1. AI Persona & Plan
+        const aiPlan = await getAiBehavior(url, keyword);
+        console.log(`[AI-PLAN] View #${viewNumber} initialized with query: ${aiPlan.searchQuery}`);
 
-        // 50% chance for Organic (Google), 50% chance for Social/Direct
-        const isOrganic = Math.random() < 0.5;
-        let finalReferer = '';
+        // 2. Navigation
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-        if (isOrganic) {
-            console.log(`[TRAFFIC] Mode: Organic Search (${keyword})`);
-            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-            await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
-            finalReferer = googleUrl;
-        } else {
-            finalReferer = socialSources[Math.floor(Math.random() * socialSources.length)];
-            console.log(`[TRAFFIC] Mode: Referral Source -> ${finalReferer || 'Direct'}`);
-            // Referral mode mein google search ki zarurat nahi, directly land karenge
-        }
+        // 3. HUMAN ACTION: Search Bar Interaction
+        try {
+            const searchSelectors = ['input[type="text"]', 'input[type="search"]', '.search-field'];
+            for (let selector of searchSelectors) {
+                const searchBar = await page.$(selector);
+                if (searchBar) {
+                    await searchBar.click();
+                    await page.keyboard.type(aiPlan.searchQuery, { delay: 150 });
+                    await page.keyboard.press('Enter');
+                    console.log(`[ACTION] AI Typed: ${aiPlan.searchQuery}`);
+                    await new Promise(r => setTimeout(r, 5000));
+                    break;
+                }
+            }
+        } catch (err) { console.log("[SKIP] No search bar found."); }
 
-        // Navigate to Target Site
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Referer: ${finalReferer || 'Direct'}`);
-        await page.goto(url, { 
-            waitUntil: 'networkidle2', 
-            timeout: 90000, 
-            referer: finalReferer 
-        });
+        // 4. SMART SCROLLING
+        await page.evaluate((depth) => {
+            window.scrollTo({ top: depth, behavior: 'smooth' });
+        }, aiPlan.scrollDepth);
 
-        const startTime = Date.now();
-        const targetStayTime = randomInt(30000, 50000); 
-
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
-        while (Date.now() - startTime < targetStayTime) {
-            // Natural Scrolling
-            const dist = randomInt(300, 600);
-            await page.evaluate((d) => window.scrollBy(0, d), dist);
-            
-            // Mouse Movement (Bypass Bot Checks)
-            await page.mouse.move(randomInt(100, 800), randomInt(100, 600), { steps: 10 });
-            await new Promise(r => setTimeout(r, randomInt(3000, 5000)));
-
-            // 🔥 HIGH-VALUE AD CLICKER (18% Probability)
-            if (Math.random() < 0.18) { 
-                const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"], iframe[src*="googleads"]');
-                if (ads.length > 0) {
-                    const targetAd = ads[Math.floor(Math.random() * ads.length)];
-                    const box = await targetAd.boundingBox();
-
-                    if (box && box.width > 50 && box.height > 50) {
-                        console.log(`\x1b[42m%s\x1b[0m`, `[AD-CLICK] Target Found! Clicking...`);
-                        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 15 });
-                        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-                        console.log(`\x1b[44m%s\x1b[0m`, `[SUCCESS] Ad Clicked! ✅ Revenue Generated.`);
-                        
-                        // Advertiser site par 15s wait (Necessary for valid CTR)
-                        await new Promise(r => setTimeout(r, 15000));
-                        break; 
-                    }
+        // 5. HIGH-VALUE AD CLICKER (Gemini Logic)
+        if (Math.random() < 0.18) {
+            const ads = await page.$$('ins.adsbygoogle, iframe[id^="aswift"]');
+            if (ads.length > 0) {
+                const targetAd = ads[Math.floor(Math.random() * ads.length)];
+                const box = await targetAd.boundingBox();
+                
+                if (box) {
+                    // Random mouse movement to AD
+                    await page.mouse.move(box.x + (box.width/2), box.y + (box.height/2), { steps: 20 });
+                    await page.mouse.click(box.x + (box.width/2), box.y + (box.height/2));
+                    console.log(`[REVENUE] High-Value Ad Clicked! ✅`);
+                    await new Promise(r => setTimeout(r, 20000)); // Stay on ad site
                 }
             }
         }
-        console.log(`[DONE] View #${viewNumber} Finished Successfully. ✅`);
 
     } catch (error) {
-        console.error(`[ERROR] View #${viewNumber}: ${error.message}`);
+        console.error(`[ERROR] #${viewNumber}: ${error.message}`);
     } finally {
-        if (browser) {
-            const pages = await browser.pages();
-            for (const p of pages) await p.close().catch(() => {});
-            await browser.close().catch(() => {});
-        }
+        if (browser) await browser.close();
     }
 }
 
-
-// ===================================================================
-// Tool 1 Endpoint (Updated for Multi-Site Rotation)
-// ===================================================================
+// --- ENDPOINT ---
 app.post('/popup', async (req, res) => {
-    try {
-        const { keyword, urls, views = 1000 } = req.body;
+    const { keyword, urls, views = 10 } = req.body;
+    res.status(200).json({ success: true, message: "AI Task Started" });
 
-        // Frontend se 'urls' array aa raha hai, use validate karein
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+    (async () => {
+        for (let i = 1; i <= views; i++) {
+            const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+            await runAiGscTask(keyword, randomUrl, i);
+            // Dynamic Rest
+            const rest = randomInt(15000, 30000);
+            await new Promise(r => setTimeout(r, rest));
         }
-
-        const totalViews = parseInt(views);
-
-        // Immediate Success Response taaki frontend hang na ho
-        res.status(200).json({ 
-            success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
-        });
-
-        // Background Worker
-        (async () => {
-            console.log(`\n\x1b[36m%s\x1b[0m`, `--- STARTING MULTI-SITE REVENUE TASK ---`);
-            console.log(`Target: ${totalViews} views | Keywords: ${keyword}`);
-
-            for (let i = 1; i <= totalViews; i++) {
-                try {
-                    // 1. URL Selection (Randomly pick from provided array)
-                    const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                    
-                    console.log(`\n\x1b[32m%s\x1b[0m`, `[JOB #${i}/${totalViews}]`);
-                    console.log(`Active URL: ${randomUrl}`);
-
-                    // 2. Run the actual Puppeteer task
-                    await runGscTaskpop(keyword, randomUrl, i); 
-
-                    // 3. Smart Resting Logic (Anti-Detection)
-                    if (i < totalViews) {
-                        // Base delay 12s to 25s (Random)
-                        let restTime = Math.floor(Math.random() * (25000 - 12000 + 1) + 12000);
-                        
-                        // Every 10th view: Bada break for RAM and Safety (30s to 50s)
-                        const isMajorBreak = (i % 10 === 0);
-                        if (isMajorBreak) {
-                            restTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
-                            console.log(`\x1b[33m%s\x1b[0m`, `[SYSTEM] RAM Cleanup Break: Waiting ${restTime/1000}s...`);
-                        } else {
-                            console.log(`[REST] Anti-Pattern Delay: ${restTime/1000}s...`);
-                        }
-
-                        await new Promise(r => setTimeout(r, restTime));
-                    }
-                } catch (viewError) {
-                    console.error(`[CRITICAL-ERROR] View #${i} failed:`, viewError.message);
-                    // Short break if error occurs before retrying
-                    await new Promise(r => setTimeout(r, 5000));
-                }
-            }
-            console.log(`\n\x1b[42m%s\x1b[0m`, `--- ALL ${totalViews} SESSIONS COMPLETED SUCCESSFULLY ---`);
-        })();
-
-    } catch (err) {
-        console.error("Endpoint Panic Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
-    }
+    })();
 });
-//==================================================
-// --- SERVER START ---
-// ===================================================================
-app.listen(PORT, () => {
-    console.log(` Combined API Server is running on port ${PORT}`);
-});
+
+function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
+
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
