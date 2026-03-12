@@ -93,8 +93,7 @@ puppeteer.use(StealthPlugin());
         const startTime = Date.now();
         const targetStayTime = randomInt(30000, 50000); 
         let searchActionDone = false;
-        // 3. Realistic Behavior Loop
-        while (Date.now() - startTime < targetStayTime) {
+      
             
             // 🔍 NEW ACTION: Search Bar Interaction (0-9 Type)
             // Loop ke beech mein 40% chance par ye trigger hoga
