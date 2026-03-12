@@ -163,30 +163,50 @@ app.post('/popup', async (req, res) => {
 
         // Background Worker
         (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTaskpop(keyword, randomUrl, i); 
+            console.log(`\n\x1b[36m%s\x1b[0m`, `--- STARTING MULTI-SITE REVENUE TASK ---`);
+            console.log(`Target: ${totalViews} views | Keywords: ${keyword}`);
 
-                if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
+            for (let i = 1; i <= totalViews; i++) {
+                try {
+                    // 1. URL Selection (Randomly pick from provided array)
+                    const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                    
+                    console.log(`\n\x1b[32m%s\x1b[0m`, `[JOB #${i}/${totalViews}]`);
+                    console.log(`Active URL: ${randomUrl}`);
+
+                    // 2. Run the actual Puppeteer task
+                    await runGscTaskpop(keyword, randomUrl, i); 
+
+                    // 3. Smart Resting Logic (Anti-Detection)
+                    if (i < totalViews) {
+                        // Base delay 12s to 25s (Random)
+                        let restTime = Math.floor(Math.random() * (25000 - 12000 + 1) + 12000);
+                        
+                        // Every 10th view: Bada break for RAM and Safety (30s to 50s)
+                        const isMajorBreak = (i % 10 === 0);
+                        if (isMajorBreak) {
+                            restTime = Math.floor(Math.random() * (50000 - 30000 + 1) + 30000);
+                            console.log(`\x1b[33m%s\x1b[0m`, `[SYSTEM] RAM Cleanup Break: Waiting ${restTime/1000}s...`);
+                        } else {
+                            console.log(`[REST] Anti-Pattern Delay: ${restTime/1000}s...`);
+                        }
+
+                        await new Promise(r => setTimeout(r, restTime));
+                    }
+                } catch (viewError) {
+                    console.error(`[CRITICAL-ERROR] View #${i} failed:`, viewError.message);
+                    // Short break if error occurs before retrying
+                    await new Promise(r => setTimeout(r, 5000));
                 }
             }
-            console.log("--- ALL SESSIONS COMPLETED ---");
+            console.log(`\n\x1b[42m%s\x1b[0m`, `--- ALL ${totalViews} SESSIONS COMPLETED SUCCESSFULLY ---`);
         })();
 
     } catch (err) {
-        console.error("Endpoint Error:", err);
+        console.error("Endpoint Panic Error:", err);
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
-
 //==================================================
 // --- SERVER START ---
 // ===================================================================
