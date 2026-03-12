@@ -97,6 +97,7 @@ puppeteer.use(StealthPlugin());
             
             // 🔍 NEW ACTION: Search Bar Interaction (0-9 Type)
             // Loop ke beech mein 40% chance par ye trigger hoga
+        while (Date.now() - startTime < targetStayTime) {
             if (!searchActionDone && Math.random() < 0.4) {
                 console.log(`[ACTION] Pausing scrolling to perform search...`);
                 
@@ -133,8 +134,7 @@ puppeteer.use(StealthPlugin());
                 }
             }
             
-        // 3. STAGE: Realistic Behavior & Ad-Clicker Loop
-        while (Date.now() - startTime < targetStayTime) {
+    
             // Natural Scrolling
             const dist = randomInt(300, 600);
             await page.evaluate((d) => window.scrollBy(0, d), dist);
