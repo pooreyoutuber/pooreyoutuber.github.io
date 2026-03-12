@@ -71,6 +71,11 @@ puppeteer.use(StealthPlugin());
         });
 
         const page = await browser.newPage();
+        // ✅ YAHAN DALNA HAI: Alert handling logic
+page.on('dialog', async dialog => {
+    console.log(`[BOT] Alert detected: "${dialog.message()}". Dismissing...`);
+    await dialog.dismiss(); 
+});
         // 🔄 PICK RANDOM PROFILE
         const profile = ADVANCED_DEVICE_PROFILES[Math.floor(Math.random() * ADVANCED_DEVICE_PROFILES.length)];
         // SET VIEWPORT & UA
