@@ -66,7 +66,10 @@ puppeteer.use(StealthPlugin());
                 '--disable-setuid-sandbox', 
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
-                '--disable-blink-features=AutomationControlled'
+                '--disable-blink-features=AutomationControlled' ,
+                '--disable-canvas-aa', 
+                 '--disable-2d-canvas-clip-aa',
+                  '--disable-gl-drawing-for-tests'
             ]
         });
 
