@@ -26,6 +26,17 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
  async function runGscTaskpop(keyword, url, viewNumber) {
      const ADVANCED_DEVICE_PROFILES = [
+         const socialSources = [
+        'https://www.facebook.com/',
+        'https://www.instagram.com/',
+        'https://www.whatsapp.com/',
+        'https://www.linkedin.com/',
+        'https://t.co/', // Twitter
+        'https://www.reddit.com/',
+        'https://medium.com/',
+        'https://www.quora.com/',
+        '' // Direct (No Referrer)
+    ];
         // --- PC / DESKTOP --
     { name: 'Windows PC - Chrome', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', view: { width: 1920, height: 1080 }, hw: { vendor: 'Google Inc. (Intel)', renderer: 'ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11)' } },
     { name: 'Windows PC - Firefox', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0', view: { width: 1536, height: 864 }, hw: { vendor: 'Google Inc. (NVIDIA)', renderer: 'ANGLE (NVIDIA, NVIDIA GeForce RTX 3060, Direct3D11)' } },
@@ -80,17 +91,28 @@ puppeteer.use(StealthPlugin());
         await page.setViewport(profile.view);
         await page.setUserAgent(profile.ua);
 
-        // 1. STAGE: Google Search Simulation (Organic Entry)
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-        await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+        // 50% chance for Organic (Google), 50% chance for Social/Direct
+        const isOrganic = Math.random() < 0.5;
+        let finalReferer = '';
 
-        // 2. STAGE: Visit Target Site (30-35s Total Stay)
-        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Staying 35s...`);
+        if (isOrganic) {
+            console.log(`[TRAFFIC] Mode: Organic Search (${keyword})`);
+            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+            await page.goto(googleUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await new Promise(r => setTimeout(r, randomInt(3000, 6000)));
+            finalReferer = googleUrl;
+        } else {
+            finalReferer = socialSources[Math.floor(Math.random() * socialSources.length)];
+            console.log(`[TRAFFIC] Mode: Referral Source -> ${finalReferer || 'Direct'}`);
+            // Referral mode mein google search ki zarurat nahi, directly land karenge
+        }
+
+        // Navigate to Target Site
+        console.log(`[EARNING-MODE] View #${viewNumber} | URL: ${url} | Referer: ${finalReferer || 'Direct'}`);
         await page.goto(url, { 
             waitUntil: 'networkidle2', 
             timeout: 90000, 
-            referer: googleUrl 
+            referer: finalReferer 
         });
 
         const startTime = Date.now();
