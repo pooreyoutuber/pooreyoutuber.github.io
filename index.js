@@ -187,7 +187,7 @@ page.on('dialog', async dialog => {
 // ===================================================================
 app.post('/popup', async (req, res) => {
     try {
-        const { keyword, urls, views = 1000 } = req.body;
+        const { keyword, urls, views = 50 } = req.body;
 
         // Frontend se 'urls' array aa raha hai, use validate karein
         if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
