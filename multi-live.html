@@ -252,9 +252,19 @@
         const maxSlots = 20;
 
         function extractVideoID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length == 11) ? match[2] : null;
+            const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/|live\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    
+    if (match && match[1].length === 11) {
+        return match[1];
+    } else {
+        // Agar normal regex fail ho jaye, toh manually 'live/' ke baad check karein
+        if (url.includes('/live/')) {
+            const parts = url.split('/live/');
+            return parts[1].split(/[?&]/)[0];
+        }
+        return null;
+    }
         }
 
         function addVideo() {
