@@ -8,6 +8,8 @@ const nodeFetch = require('node-fetch');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
+let taskQueue = []; 
+let isProcessing = false;
 // --- MIDDLEWARE ---
 app.use(cors({ origin: '*', methods: ['GET', 'POST'], credentials: true }));
 app.use(express.json({ limit: '5mb' }));
@@ -192,6 +194,14 @@ app.post('/popup', async (req, res) => {
         // Frontend se 'urls' array aa raha hai, use validate karein
         if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
             console.log("[FAIL] Invalid Request Body");
+            (Queue) mein add karna
+        for (let i = 1; i <= parseInt(views); i++) {
+            taskQueue.push({
+                keyword,
+                url: urls[Math.floor(Math.random() * urls.length)],
+                viewIndex: i
+            });
+        }
             return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
         }
 
