@@ -208,52 +208,48 @@ async function processQueue() {
 // ===================================================================
 // Tool 1 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
+ // ===================================================================
+// Tool 1 Endpoint (Sequential Processing - FIXED)
+// ===================================================================
 app.post('/popup', async (req, res) => {
     try {
         const { keyword, urls, views = 50 } = req.body;
+        
+        // 1. totalViews define karna zaroori hai
+        const totalViews = parseInt(views);
+
         if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
             return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
         }
 
-        // Har request ke views ko line ke peeche add kar dena
-        for (let i = 1; i <= parseInt(views); i++) {
+        // 2. Sabke views ko line (taskQueue) ke peeche add kar do
+        for (let i = 1; i <= totalViews; i++) {
             taskQueue.push({
                 keyword: keyword,
                 url: urls[Math.floor(Math.random() * urls.length)],
                 viewIndex: i
             });
         }
-        // Immediate Success Response taaki frontend hang na ho
+
+        // 3. Immediate Success Response
         res.status(200).json({ 
             success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+            message: `Task Started: ${totalViews} views added to queue. Total in line: ${taskQueue.length}` 
         });
 
-        // Background Worker
-        (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTaskpop(keyword, randomUrl, i); 
-
-                if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
-                }
-            }
-            console.log("--- ALL SESSIONS COMPLETED ---");
-        })();
+        // 4. AGER PROCESSOR NAHI CHAL RAHA, TO SHURU KARO
+        // Jab 10 log ek saath aayenge, ye block ensure karega ki 
+        // sir ek hi processQueue loop chale jo sabko bari-bari handle kare.
+        if (!isProcessing) {
+            processQueue(); 
+        }
 
     } catch (err) {
         console.error("Endpoint Error:", err);
         if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
     }
 });
+
 
 //==================================================
 // --- SERVER START ---
