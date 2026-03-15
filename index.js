@@ -182,7 +182,28 @@ page.on('dialog', async dialog => {
         }
     }
 }
+// ===================================================================
+// 2. QUEUE PROCESSOR (LINE SYSTEM)
+// ===================================================================
+async function processQueue() {
+    if (isProcessing || taskQueue.length === 0) return;
+    
+    isProcessing = true;
+    console.log(`--- QUEUE STARTED: ${taskQueue.length} tasks in line ---`);
 
+    while (taskQueue.length > 0) {
+        const task = taskQueue.shift(); // Line mein sabse aage wala uthao
+        await runGscTaskpop(task.keyword, task.url, task.viewIndex);
+        
+        // Ek view ke baad break (Server ki RAM bachaane ke liye)
+        const nextBreak = randomInt(8000, 15000);
+        console.log(`[WAIT] Next task in ${nextBreak/1000}s... Remaining: ${taskQueue.length}`);
+        await new Promise(r => setTimeout(r, nextBreak));
+    }
+
+    isProcessing = false;
+    console.log(`--- QUEUE EMPTY: All tasks completed ---`);
+}
 
 // ===================================================================
 // Tool 1 Endpoint (Updated for Multi-Site Rotation)
@@ -190,23 +211,18 @@ page.on('dialog', async dialog => {
 app.post('/popup', async (req, res) => {
     try {
         const { keyword, urls, views = 50 } = req.body;
-
-        // Frontend se 'urls' array aa raha hai, use validate karein
         if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            (Queue) mein add karna
+            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        }
+
+        // Har request ke views ko line ke peeche add kar dena
         for (let i = 1; i <= parseInt(views); i++) {
             taskQueue.push({
-                keyword,
+                keyword: keyword,
                 url: urls[Math.floor(Math.random() * urls.length)],
                 viewIndex: i
             });
         }
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
-        }
-
-        const totalViews = parseInt(views);
-
         // Immediate Success Response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
