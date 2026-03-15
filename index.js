@@ -8,8 +8,7 @@ const nodeFetch = require('node-fetch');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
-let taskQueue = []; 
-let isProcessing = false;
+
 // --- MIDDLEWARE ---
 app.use(cors({ origin: '*', methods: ['GET', 'POST'], credentials: true }));
 app.use(express.json({ limit: '5mb' }));
@@ -183,66 +182,45 @@ page.on('dialog', async dialog => {
     }
 }
 // ===================================================================
-// 2. QUEUE PROCESSOR (LINE SYSTEM)
-// ===================================================================
-async function processQueue() {
-    if (isProcessing || taskQueue.length === 0) return;
-    
-    isProcessing = true;
-    console.log(`--- QUEUE STARTED: ${taskQueue.length} tasks in line ---`);
-
-    while (taskQueue.length > 0) {
-        const task = taskQueue.shift(); // Line mein sabse aage wala uthao
-        await runGscTaskpop(task.keyword, task.url, task.viewIndex);
-        
-        // Ek view ke baad break (Server ki RAM bachaane ke liye)
-        const nextBreak = randomInt(8000, 15000);
-        console.log(`[WAIT] Next task in ${nextBreak/1000}s... Remaining: ${taskQueue.length}`);
-        await new Promise(r => setTimeout(r, nextBreak));
-    }
-
-    isProcessing = false;
-    console.log(`--- QUEUE EMPTY: All tasks completed ---`);
-}
-
-// ===================================================================
 // Tool 1 Endpoint (Updated for Multi-Site Rotation)
-// ===================================================================
- // ===================================================================
-// Tool 1 Endpoint (Sequential Processing - FIXED)
 // ===================================================================
 app.post('/popup', async (req, res) => {
     try {
-        const { keyword, urls, views = 50 } = req.body;
-        
-        // 1. totalViews define karna zaroori hai
-        const totalViews = parseInt(views);
+        const { keyword, urls, views = 1000 } = req.body;
 
+        // Frontend se 'urls' array aa raha hai, use validate karein
         if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
+            console.log("[FAIL] Invalid Request Body");
             return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
         }
 
-        // 2. Sabke views ko line (taskQueue) ke peeche add kar do
-        for (let i = 1; i <= totalViews; i++) {
-            taskQueue.push({
-                keyword: keyword,
-                url: urls[Math.floor(Math.random() * urls.length)],
-                viewIndex: i
-            });
-        }
+        const totalViews = parseInt(views);
 
-        // 3. Immediate Success Response
+        // Immediate Success Response taaki frontend hang na ho
         res.status(200).json({ 
             success: true, 
-            message: `Task Started: ${totalViews} views added to queue. Total in line: ${taskQueue.length}` 
+            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
         });
 
-        // 4. AGER PROCESSOR NAHI CHAL RAHA, TO SHURU KARO
-        // Jab 10 log ek saath aayenge, ye block ensure karega ki 
-        // sir ek hi processQueue loop chale jo sabko bari-bari handle kare.
-        if (!isProcessing) {
-            processQueue(); 
-        }
+        // Background Worker
+        (async () => {
+            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
+            for (let i = 1; i <= totalViews; i++) {
+                // Randomly ek URL chunna rotation ke liye
+                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+                
+                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
+                await runGscTaskpop(keyword, randomUrl, i); 
+
+                if (i < totalViews) {
+                    // RAM management break
+                    const restTime = i % 5 === 0 ? 25000 : 12000; 
+                    console.log(`[REST] Waiting ${restTime/1000}s...`);
+                    await new Promise(r => setTimeout(r, restTime));
+                }
+            }
+            console.log("--- ALL SESSIONS COMPLETED ---");
+        })();
 
     } catch (err) {
         console.error("Endpoint Error:", err);
