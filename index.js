@@ -9,6 +9,9 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
+let globalQueue = []; // Sabhi requests yahan jama hongi
+let isWorkerRunning = false;
+
 // --- MIDDLEWARE ---
 app.use(cors({ origin: '*', methods: ['GET', 'POST'], credentials: true }));
 app.use(express.json({ limit: '5mb' }));
@@ -181,53 +184,83 @@ page.on('dialog', async dialog => {
         }
     }
 }
+
+// Worker Function: Jo line se ek-ek view bhejega
+async function startGlobalWorker() {
+    if (isWorkerRunning) return; // Agar pehle se chal raha hai toh dubara start na karein
+    isWorkerRunning = true;
+
+    console.log("--- GLOBAL WORKER STARTED ---");
+
+    while (globalQueue.length > 0) {
+        // Queue se pehla task uthao
+        const currentTask = globalQueue[0]; 
+
+        if (currentTask.remainingViews > 0) {
+            const currentViewNumber = currentTask.totalViews - currentTask.remainingViews + 1;
+            const randomUrl = currentTask.urls[Math.floor(Math.random() * currentTask.urls.length)];
+
+            console.log(`[QUEUE] User: ${currentTask.id} | View #${currentViewNumber} | URL: ${randomUrl}`);
+            
+            // Puppeteer task chalao
+            await runGscTaskpop(currentTask.keyword, randomUrl, currentViewNumber);
+
+            // Ek view kam karo
+            currentTask.remainingViews--;
+
+            // Is task ko queue ke peeche bhej do (Round Robin)
+            globalQueue.shift(); // Aage se nikalo
+            if (currentTask.remainingViews > 0) {
+                globalQueue.push(currentTask); // Peeche daal do
+            }
+
+            // RAM ko rest dene ke liye chhota break
+            await new Promise(r => setTimeout(r, 5000)); 
+        } else {
+            // Agar task poora ho gaya toh nikaal do
+            globalQueue.shift();
+        }
+    }
+
+    isWorkerRunning = false;
+    console.log("--- ALL QUEUES CLEARED. WORKER ASLEEP ---");
+}
+
 // ===================================================================
 // Tool 1 Endpoint (Updated for Multi-Site Rotation)
 // ===================================================================
 app.post('/popup', async (req, res) => {
     try {
-        const { keyword, urls, views = 1000 } = req.body;
+        const { keyword, urls, views = 50 } = req.body;
 
-        // Frontend se 'urls' array aa raha hai, use validate karein
-        if (!keyword || !urls || !Array.isArray(urls) || urls.length === 0) {
-            console.log("[FAIL] Invalid Request Body");
-            return res.status(400).json({ success: false, message: "Keyword and URLs are required!" });
+        if (!keyword || !urls || !Array.isArray(urls)) {
+            return res.status(400).json({ success: false, message: "Invalid Data!" });
         }
 
-        const totalViews = parseInt(views);
+        // Naye task ko queue mein add karo
+        const newTask = {
+            id: Date.now(), // Unique ID pehchan ke liye
+            keyword,
+            urls,
+            totalViews: parseInt(views),
+            remainingViews: parseInt(views)
+        };
 
-        // Immediate Success Response taaki frontend hang na ho
+        globalQueue.push(newTask);
+        
+        // Background worker ko jagao (agar so raha hai)
+        startGlobalWorker();
+
         res.status(200).json({ 
             success: true, 
-            message: `Task Started: ${totalViews} Views Distributing across ${urls.length} sites.` 
+            message: `Request added to queue. Your ${views} views will be delivered in line.` 
         });
-
-        // Background Worker
-        (async () => {
-            console.log(`--- STARTING MULTI-SITE REVENUE TASK ---`);
-            for (let i = 1; i <= totalViews; i++) {
-                // Randomly ek URL chunna rotation ke liye
-                const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-                
-                console.log(`[QUEUE] View #${i} | Active URL: ${randomUrl}`);
-                await runGscTaskpop(keyword, randomUrl, i); 
-
-                if (i < totalViews) {
-                    // RAM management break
-                    const restTime = i % 5 === 0 ? 25000 : 12000; 
-                    console.log(`[REST] Waiting ${restTime/1000}s...`);
-                    await new Promise(r => setTimeout(r, restTime));
-                }
-            }
-            console.log("--- ALL SESSIONS COMPLETED ---");
-        })();
 
     } catch (err) {
         console.error("Endpoint Error:", err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
-
 
 //==================================================
 // --- SERVER START ---
