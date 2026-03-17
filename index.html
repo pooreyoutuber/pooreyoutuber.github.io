@@ -32,180 +32,180 @@ var infolinks_pid = 3442969;
 var infolinks_wsid = 0;
 </script>
 <script type="text/javascript" src="http://resources.infolinks.com/js/infolinks_main.js"></script>
-
+    
     <style>
         :root {
-            --primary: #ff0000;
-            --primary-hover: #cc0000;
-            --bg-light: #f4f7f6;
-            --card-light: #ffffff;
-            --text-light: #1a1a1a;
-            --border-light: #e0e0e0;
-            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --brand-red: #ff0000;
+            --brand-dark: #202020;
+            --bg-body: #f1f3f4;
+            --card-bg: #ffffff;
+            --text-main: #0f0f0f;
+            --text-muted: #606060;
+            --border: #e5e5e5;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
             --radius: 12px;
         }
 
         body.dark-mode {
-            --bg-light: #0f0f0f;
-            --card-light: #1e1e1e;
-            --text-light: #f1f1f1;
-            --border-light: #333333;
-            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --bg-body: #0f0f0f;
+            --card-bg: #1e1e1e;
+            --text-main: #f1f1f1;
+            --text-muted: #aaaaaa;
+            --border: #333333;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
             margin: 0;
-            background: var(--bg-light);
-            color: var(--text-light);
-            transition: all 0.3s ease;
-            line-height: 1.6;
+            background: var(--bg-body);
+            color: var(--text-main);
+            transition: background 0.3s;
         }
 
-        /* Modern Header */
+        /* --- Modern Navigation --- */
         header {
-            background: var(--card-light);
-            padding: 15px 5%;
+            background: var(--card-bg);
+            padding: 10px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
             z-index: 1000;
-            border-bottom: 1px solid var(--border-light);
-            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 10px rgba(0,0,0,0.02);
         }
 
-        .logo-container { display: flex; align-items: center; gap: 12px; }
-        .logo { height: 40px; border-radius: 8px; }
-        .home-link { color: var(--primary); font-size: 24px; font-weight: 800; text-decoration: none; letter-spacing: -0.5px; }
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo { height: 35px; border-radius: 4px; }
+        .home-link { color: var(--text-main); font-size: 20px; font-weight: 800; text-decoration: none; letter-spacing: -0.5px; }
 
-        .nav-controls { display: flex; align-items: center; gap: 20px; }
-        nav { display: flex; gap: 20px; }
-        nav a { color: var(--text-light); text-decoration: none; font-weight: 500; font-size: 15px; transition: color 0.2s; }
-        nav a:hover { color: var(--primary); }
+        .nav-controls { display: flex; align-items: center; gap: 15px; }
+        nav { display: flex; gap: 15px; }
+        nav a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        nav a:hover { color: var(--brand-red); }
 
         #dark-mode-toggle {
-            background: var(--primary);
+            background: var(--brand-red);
             color: white;
             border: none;
-            padding: 10px 18px;
-            border-radius: 50px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
-            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(255,0,0,0.2);
         }
-        #dark-mode-toggle:active { transform: scale(0.95); }
 
-        /* Container & Typography */
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; text-align: center; }
-        h1 { font-size: 2.8rem; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
-        .hero-p { font-size: 1.1rem; opacity: 0.8; max-width: 700px; margin: 0 auto 40px; }
+        /* --- Hero Section --- */
+        .hero {
+            padding: 60px 20px 40px;
+            text-align: center;
+        }
+        .hero h1 { font-size: 2.5rem; font-weight: 900; margin: 0; letter-spacing: -1.5px; }
+        .hero h1 span { color: var(--brand-red); }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 15px auto; }
 
+        /* --- Tools Grid --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
         .section-heading {
-            font-size: 1.5rem;
-            color: var(--primary);
-            margin: 50px 0 25px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 40px 0 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
+            gap: 10px;
         }
-        .section-heading::before, .section-heading::after {
-            content: ""; height: 2px; width: 50px; background: var(--primary); opacity: 0.3;
-        }
+        .section-heading::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 
-        /* Premium Tools Grid */
         .tools {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
         }
 
         .tool {
-            background: var(--card-light);
+            background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 24px;
-            border: 1px solid var(--border-light);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
+            box-shadow: var(--shadow);
         }
 
         .tool:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow);
-            border-color: var(--primary);
+            transform: translateY(-5px);
+            border-color: var(--brand-red);
+            box-shadow: 0 10px 20px rgba(255,0,0,0.05);
         }
 
-        .tool h3 { 
-            margin: 0 0 20px 0; 
-            font-size: 1.15rem; 
-            font-weight: 700;
-            color: var(--text-light);
+        .tool h3 {
+            margin: 0 0 15px;
+            font-size: 1rem;
             line-height: 1.4;
+            color: var(--text-main);
+            font-weight: 600;
+            min-height: 2.8em;
         }
 
         .tool a {
-            background: var(--bg-light);
-            color: var(--primary);
+            background: var(--bg-body);
+            color: var(--brand-red);
             text-decoration: none;
-            padding: 12px;
+            text-align: center;
+            padding: 10px;
             border-radius: 8px;
             font-weight: 700;
-            text-align: center;
-            border: 1px solid var(--primary);
-            transition: all 0.3s;
+            font-size: 0.9rem;
+            border: 1px solid var(--brand-red);
+            transition: all 0.2s;
         }
 
         .tool a:hover {
-            background: var(--primary);
-            color: white;
+            background: var(--brand-red);
+            color: #fff;
         }
 
-        /* SEO & Ads */
+        /* --- Footer & SEO --- */
         .seo-description {
-            background: var(--card-light);
-            border: 1px solid var(--border-light);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 40px;
-            text-align: left;
-            margin-top: 80px;
-            box-shadow: var(--shadow);
+            padding: 30px;
+            margin: 60px 0;
+            line-height: 1.8;
+            font-size: 0.95rem;
+            color: var(--text-muted);
         }
-        .seo-description h2 { color: var(--primary); font-size: 1.8rem; margin-bottom: 20px; }
+        .seo-description h2 { color: var(--text-main); margin-top: 0; }
 
         footer {
-            padding: 50px 20px;
-            background: var(--card-light);
-            border-top: 1px solid var(--border-light);
-            margin-top: 80px;
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            background: var(--card-bg);
         }
-        footer a { color: var(--primary); text-decoration: none; margin: 0 10px; font-weight: 600; }
+        footer a { color: var(--brand-red); text-decoration: none; font-weight: 600; margin: 0 10px; }
 
-        /* Mobile Optimization */
+        /* --- Mobile Responsiveness --- */
         @media (max-width: 768px) {
-            header { padding: 15px 20px; flex-direction: column; gap: 15px; }
-            .nav-controls { flex-direction: column; width: 100%; }
-            nav { flex-wrap: wrap; justify-content: center; gap: 12px; }
-            h1 { font-size: 1.8rem; }
+            header { padding: 10px 15px; }
+            .home-link { font-size: 18px; }
+            .hero { padding: 40px 15px; }
+            .hero h1 { font-size: 1.8rem; }
+            .nav-controls nav { display: none; } /* Mobile par nav hide taaki clean rahe */
+            
             .tools { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .tool { padding: 15px; }
-            .tool h3 { font-size: 0.95rem; min-height: 45px; margin-bottom: 10px; }
-            .tool a { padding: 8px; font-size: 0.85rem; }
-            .logo { height: 32px; }
-        }
-
-        @media (max-width: 480px) {
-            .tools { grid-template-columns: 1fr; }
+            .tool { padding: 15px; border-radius: 10px; }
+            .tool h3 { font-size: 0.9rem; min-height: 3em; margin-bottom: 10px; }
+            .tool a { font-size: 0.8rem; padding: 8px; }
         }
     </style>
 </head>
@@ -218,31 +218,32 @@ var infolinks_wsid = 0;
         <div class="nav-controls">
             <nav>
                 <a href="about.html">About</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="contact.html">Contact</a>
                 <a href="Articals.html">Articles</a>
+                <a href="contact.html">Contact</a>
             </nav>
             <button id="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
         </div>
     </header>
 
-    <div class="container">
-        <h1>🚀 Free Pro Tools</h1>
-        <p class="hero-p">Modern utilities for creators and developers. Fast, secure, and always free.</p>
+    <div class="hero">
+        <h1>Powerful <span>Digital Tools</span></h1>
+        <p>Your all-in-one suite for YouTube growth, Social Media boost, and Web utilities. Fast, Secure, and 100% Free.</p>
+    </div>
 
-        <h2 class="section-heading">🔥 YouTube & Content</h2>
+    <div class="container">
+        <h2 class="section-heading">🔥 YouTube & Content Tools</h2>
         <div class="tools">
-            <div class="tool"><h3>1. Multi YouTube Live Viewer</h3><a href="multi-live.html">Launch Tool</a></div>
-            <div class="tool"><h3>2. YouTube Shorts Views</h3><a href="youtube-short-preview.html">Launch Tool</a></div>
-            <div class="tool"><h3>3. YouTube Video Views</h3><a href="youtube-view-checker.html">Launch Tool</a></div>
-            <div class="tool"><h3>4. Multi Browser</h3><a href="multi-browser.html">Launch Tool</a></div>
-            <div class="tool"><h3>5. YouTube Thumbnail</h3><a href="youtube-thumbnail.html">Launch Tool</a></div>
-            <div class="tool"><h3>6. YouTube Description & Tags</h3><a href="youtube-tool.html">Launch Tool</a></div>
-            <div class="tool"><h3>7. YouTube Audit</h3><a href="youtube-channel-audit.html">Launch Tool</a></div>
-            <div class="tool"><h3>8. Multi View</h3><a href="multi-view.html">Launch Tool</a></div>
+            <div class="tool"><h3>Multi YouTube Live Viewer</h3><a href="multi-live.html">Open Tool</a></div>
+            <div class="tool"><h3>YouTube Shorts Views</h3><a href="youtube-short-preview.html">Open Tool</a></div>
+            <div class="tool"><h3>YouTube Video Views</h3><a href="youtube-view-checker.html">Open Tool</a></div>
+            <div class="tool"><h3>Multi Browser (WatchTime)</h3><a href="multi-browser.html">Open Tool</a></div>
+            <div class="tool"><h3>YouTube Thumbnail Maker</h3><a href="youtube-thumbnail.html">Open Tool</a></div>
+            <div class="tool"><h3>SEO Tags Generator</h3><a href="youtube-tool.html">Open Tool</a></div>
+            <div class="tool"><h3>YouTube Channel Audit</h3><a href="youtube-channel-audit.html">Open Tool</a></div>
+            <div class="tool"><h3>Multi View Booster</h3><a href="multi-view.html">Open Tool</a></div>
         </div>
 
-        <div class="ad-section" style="margin:40px 0;">
+        <div class="ad-section" style="margin:40px 0; text-align: center;">
             <ins class="adsbygoogle"
                  style="display:block"
                  data-ad-client="ca-pub-9877532310172541"
@@ -254,26 +255,26 @@ var infolinks_wsid = 0;
 
         <h2 class="section-heading">⚙️ Web & Utilities</h2>
         <div class="tools">
-            <div class="tool"><h3>9. Image Resize</h3><a href="image-resize.html">Launch Tool</a></div>
-            <div class="tool"><h3>10. Instagram Boost</h3><a href="instagram.html">Launch Tool</a></div>
-            <div class="tool"><h3>11. Instagram AI Caption</h3><a href="insta-tool.html">Launch Tool</a></div>
-            <div class="tool"><h3>12. Photo to PDF</h3><a href="photo-to-pdf.html">Launch Tool</a></div>
-            <div class="tool"><h3>13. PDF to Image</h3><a href="pdf-to-image.html">Launch Tool</a></div>
-            <div class="tool"><h3>14. Website Booster</h3><a href="website-booster.html">Launch Tool</a></div>
-            <div class="tool"><h3>15. Website Booster Pro</h3><a href="websitebooster-tool.html">Launch Tool</a></div>
-            <div class="tool"><h3>16. Website Ads</h3><a href="website-ads.html">Launch Tool</a></div>
-            <div class="tool"><h3>17. Website Ads 1</h3><a href="website-ads1.html">Launch Tool</a></div>
-            <div class="tool"><h3>18. Website Ads 2</h3><a href="website-ads2.html">Launch Tool</a></div>
-            <div class="tool"><h3>19. Website Ads 3</h3><a href="website-ads3.html">Launch Tool</a></div>
-            <div class="tool"><h3>20. Website Ads 4</h3><a href="website-ads4.html">Launch Tool</a></div>
-            <div class="tool"><h3>21. Website Ads 5</h3><a href="website-ads5.html">Launch Tool</a></div>
-            <div class="tool"><h3>22. Proxyium</h3><a href="proxium.html">Launch Tool</a></div>
-            <div class="tool"><h3>23. Ultimate</h3><a href="Ultimate.html">Launch Tool</a></div>
-            <div class="tool"><h3>24. Remote</h3><a href="remote.html">Launch Tool</a></div>
-            <div class="tool"><h3>25. IP Checker</h3><a href="ip.html">Launch Tool</a></div>
+            <div class="tool"><h3>Professional Image Resize</h3><a href="image-resize.html">Open Tool</a></div>
+            <div class="tool"><h3>Instagram Post Booster</h3><a href="instagram.html">Open Tool</a></div>
+            <div class="tool"><h3>AI Instagram Captions</h3><a href="insta-tool.html">Open Tool</a></div>
+            <div class="tool"><h3>Instant Photo to PDF</h3><a href="photo-to-pdf.html">Open Tool</a></div>
+            <div class="tool"><h3>PDF to Image Converter</h3><a href="pdf-to-image.html">Open Tool</a></div>
+            <div class="tool"><h3>Website Traffic Booster</h3><a href="website-booster.html">Open Tool</a></div>
+            <div class="tool"><h3>Website Booster Pro</h3><a href="websitebooster-tool.html">Open Tool</a></div>
+            <div class="tool"><h3>Website Ads Optimizer</h3><a href="website-ads.html">Open Tool</a></div>
+            <div class="tool"><h3>Ads Slot 1</h3><a href="website-ads1.html">Open Tool</a></div>
+            <div class="tool"><h3>Ads Slot 2</h3><a href="website-ads2.html">Open Tool</a></div>
+            <div class="tool"><h3>Ads Slot 3</h3><a href="website-ads3.html">Open Tool</a></div>
+            <div class="tool"><h3>Ads Slot 4</h3><a href="website-ads4.html">Open Tool</a></div>
+            <div class="tool"><h3>Ads Slot 5</h3><a href="website-ads5.html">Open Tool</a></div>
+            <div class="tool"><h3>Proxyium Web Proxy</h3><a href="proxium.html">Open Tool</a></div>
+            <div class="tool"><h3>Ultimate Dashboard</h3><a href="Ultimate.html">Open Tool</a></div>
+            <div class="tool"><h3>Remote Access Tool</h3><a href="remote.html">Open Tool</a></div>
+            <div class="tool"><h3>IP Address Checker</h3><a href="ip.html">Open Tool</a></div>
         </div>
 
-        <div class="ad-section" style="margin:40px 0;">
+        <div class="ad-section" style="margin:40px 0; text-align:center;">
             <ins class="adsbygoogle"
                  style="display:block"
                  data-ad-client="ca-pub-9877532310172541"
@@ -293,7 +294,7 @@ var infolinks_wsid = 0;
 
             <p><strong>Fast, Secure, & Free:</strong> PooreYouTuber Tools is designed with user safety in mind. All operations happen locally in your browser, guaranteeing your data remains private. No sign-ups, no hidden trackers, just free tools designed to save time and enhance productivity.</p>
             
-            <div class="ad-section" style="margin:30px 0;">
+            <div class="ad-section" style="margin:30px 0; text-align:center;">
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-format="autorelaxed"
@@ -314,9 +315,9 @@ var infolinks_wsid = 0;
     <footer>
         <p>&copy; 2025 PooreYouTuber. All Rights Reserved.</p>
         <p>
-            <a href="privacy.html">Privacy</a> | 
+            <a href="privacy.html">Privacy Policy</a> | 
             <a href="disclaimer.html">Disclaimer</a> | 
-            <a href="contact.html">Contact</a>
+            <a href="contact.html">Support</a>
         </p>
     </footer>
 
