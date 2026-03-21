@@ -2,6 +2,9 @@
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // =============================================================
 // --- Imports (Node.js Modules) ---
+const result = await model.generateContent(prompt);
+const response = await result.response;
+const keywords = JSON.parse(response.text().trim());
 const express = require('express');
 const nodeFetch = require('node-fetch'); 
 const cors = require('cors'); 
