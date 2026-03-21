@@ -14,6 +14,9 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const http = require('http'); 
 const { URL } = require('url'); // Added URL import
 
+let globalQueue = []; // Sabhi requests yahan jama hongi
+let isWorkerRunning = false;
+
 const app = express();
 const PORT = process.env.PORT || 10000; 
 
