@@ -25,7 +25,7 @@ try {
     // Fallback to environment variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
 }
-/ --- GEMINI KEY CONFIGURATION (Render Friendly) ---
+// --- GEMINI KEY CONFIGURATION (Render Friendly) ---
 const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY;
 
 let ai;
