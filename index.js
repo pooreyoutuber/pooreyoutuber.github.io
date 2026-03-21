@@ -437,8 +437,8 @@ app.post('/api/caption-generate', async (req, res) => {
 4. The final output MUST be a JSON array of 10 objects, where each object has a single key called 'caption'.`;
 
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+        const response = await ai.getGenerativeModel({
+            model: "gemini-1.5-flash",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -478,8 +478,8 @@ Original Caption: "${originalCaption}"
 Requested Change: "${requestedChange}"`;
     
     try {
-          const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+          const response = await ai.getGenerativeModel({
+            model: "gemini-1.5-flash",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
