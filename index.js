@@ -439,7 +439,7 @@ app.post('/api/caption-generate', async (req, res) => {
 4. The final output MUST be a JSON array of 10 objects, where each object has a single key called 'caption'.`;
 
     try {
-        const response = await ai.models.generateContent({
+        const response = await model.generateContent({
             model: "gemini-1.5-flash",
             contents: prompt,
             config: {
@@ -480,7 +480,7 @@ Original Caption: "${originalCaption}"
 Requested Change: "${requestedChange}"`;
     
     try {
-          const response = await ai.models.generateContent({
+          const response = await model.generateContent({
             model: "gemini-1.5-flash",
             contents: prompt,
             config: {
