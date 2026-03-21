@@ -25,22 +25,25 @@ try {
     // Fallback to environment variables
     GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY; 
 }
-// --- DYNAMIC IMPORT FIX ---
+/ --- GEMINI KEY CONFIGURATION (Render Friendly) ---
+const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY;
+
 let ai;
+let model;
+
 (async () => {
     try {
-        // Hum yahan dynamic import use kar rahe hain taaki ESM error na aaye
-        const { GoogleGenAI } = await import('@google/genai');
-
-if (GEMINI_KEY) {
-            ai = new GoogleGenAI(GEMINI_KEY); // Note: Sirf GEMINI_KEY pass karein ya {apiKey: GEMINI_KEY}
+        const { GoogleGenerativeAI } = await import('@google/genai');
+        if (GEMINI_KEY) {
+            ai = new GoogleGenerativeAI(GEMINI_KEY);
+            // Model ko yahan global define kar dete hain
+            model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
             console.log("✅ Gemini AI Initialized Successfully");
         } else {
-            console.error("❌ AI Key Missing");
-            ai = { getGenerativeModel: () => ({ generateContent: () => Promise.reject("AI Key Missing") }) };
+            console.error("❌ GEMINI_KEY missing in Environment Variables");
         }
-    } catch (err) {
-        console.error("Failed to load GoogleGenAI:", err);
+    } catch (e) {
+        console.error("❌ Dynamic Import Error:", e.message);
     }
 })();
 // --- MIDDLEWARE & UTILITIES ---
