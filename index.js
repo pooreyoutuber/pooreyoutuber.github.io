@@ -19,7 +19,6 @@ const PORT = process.env.PORT || 10000;
 
 app.get('/', (req, res) => {
     res.status(200).send('Tool 7 API Server is running!'); 
-}
 
 // --- GEMINI KEY CONFIGURATION ---
 let GEMINI_KEY;
