@@ -1,7 +1,7 @@
 // ================================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // =============================================================
-
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 // --- Imports (Node.js Modules) ---
 const express = require('express');
 const nodeFetch = require('node-fetch'); 
