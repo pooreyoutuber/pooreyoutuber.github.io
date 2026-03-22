@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Thumbnail Pro - Create Viral YouTube Thumbnails</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .yt-gradient { background: linear-gradient(90deg, #FF0000 0%, #CC0000 100%); }
+        body { background-color: #0f0f0f; color: white; font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <nav class="p-4 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-[#0f0f0f] z-50">
+        <div class="flex items-center gap-2">
+            <i class="fab fa-youtube text-red-600 text-3xl"></i>
+            <span class="text-xl font-bold tracking-tight">Thumbnail<span class="text-red-600">AI</span></span>
+        </div>
+        <div class="hidden md:block text-gray-400 text-sm italic">Generate 3 variations in one click!</div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-6">
+        <div class="text-center my-12">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Create High-Clickrate <span class="text-red-600">Thumbnails</span></h1>
+            <p class="text-gray-400 text-lg">Enter your video topic and let Gemini AI design 3 viral concepts for you.</p>
+        </div>
+
+        <div class="glass p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="topicInput" placeholder="Ex: Best Crypto Investment 2025..." 
+                       class="flex-1 bg-black border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600 transition">
+                <button onclick="generateThumbnails()" id="genBtn" class="yt-gradient px-8 py-3 rounded-lg font-bold hover:scale-105 transition-all">
+                    Generate
+                </button>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden text-center mt-10">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-red-600"></div>
+            <p class="mt-2 text-gray-400">AI is imagining your thumbnails...</p>
+        </div>
+
+        <div id="resultArea" class="grid md:grid-cols-3 gap-6 mt-16">
+            </div>
+
+        <section class="mt-24 border-t border-gray-800 pt-12 text-gray-300 leading-relaxed">
+            <h2 class="text-2xl font-bold text-white mb-6">How to Use AI Thumbnail Generator for High Revenue</h2>
+            <div id="description-text">
+                </div>
+        </section>
+    </main>
+
+    <script>
+        const API_URL = "https://website-1-7oo1.onrender.com/api/generate-thumbnail-prompts";
+
+        async function generateThumbnails() {
+            const topic = document.getElementById('topicInput').value;
+            if (!topic) return alert("Please enter a topic!");
+
+            const btn = document.getElementById('genBtn');
+            const loader = document.getElementById('loading');
+            const resultArea = document.getElementById('resultArea');
+
+            btn.disabled = true;
+            loader.classList.remove('hidden');
+            resultArea.innerHTML = "";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic: topic })
+                });
+                
+                const data = await response.json();
+                loader.classList.add('hidden');
+                
+                data.generatedPrompts.slice(0, 3).forEach((prompt, index) => {
+                    const card = document.createElement('div');
+                    card.className = "glass p-4 rounded-xl flex flex-col items-center";
+                    
+                    // Note: Direct image generation from Gemini requires specific models. 
+                    // This UI displays the AI concept & a placeholder for visual effect.
+                    card.innerHTML = `
+                        <div class="w-full aspect-video bg-gray-900 rounded-lg mb-4 flex items-center justify-center text-center p-4">
+                             <p class="text-sm text-gray-400">${prompt}</p>
+                        </div>
+                        <h3 class="font-bold mb-2">Variation ${index + 1}</h3>
+                        <button onclick="downloadText('${prompt}', ${index+1})" class="w-full bg-gray-800 hover:bg-gray-700 py-2 rounded-lg text-sm transition">
+                           <i class="fas fa-download mr-2"></i> Save Concept
+                        </button>
+                    `;
+                    resultArea.appendChild(card);
+                });
+            } catch (err) {
+                alert("Error connecting to server!");
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                loader.classList.add('hidden');
+            }
+        }
+
+        function downloadText(text, id) {
+            const element = document.createElement('a');
+            const file = new Blob([text], {type: 'text/plain'});
+            element.href = URL.createObjectURL(file);
+            element.download = `thumbnail-idea-${id}.txt`;
+            document.body.appendChild(element);
+            element.click();
+        }
+    </script>
+</body>
+</html>
