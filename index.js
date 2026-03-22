@@ -745,7 +745,55 @@ app.post('/popup', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// 4. AI YOUTUBE THUMBNAIL GENERATOR - GEMINI TOOL
+// ===================================================================
+app.post('/api/generate-thumbnail-prompts', async (req, res) => {
+    // Check if Gemini AI is initialized (using your 'ai' variable)
+    if (!ai) {
+        return res.status(500).json({ error: 'AI system is initializing or Gemini API Key is missing.' });
+    }
 
+    const { topic } = req.body;
+
+    if (!topic) {
+        return res.status(400).json({ error: 'Video topic is required.' });
+    }
+
+    // High CPC context integrated into the prompt instructions
+    const prompt = `Act as an expert YouTube Thumbnail designer for high-revenue niches like Finance, Crypto, Personal Loans, and Insurance. 
+    Generate 3 distinct, highly clickable (Viral) image descriptions for a YouTube thumbnail based on the topic: "${topic}".
+    
+    --- DESIGN RULES ---
+    1. Each description must be vivid, mentioning colors, lighting (e.g., cinematic, bright), and layout.
+    2. Focus on "High CPC" visual triggers (e.g., professional growth charts for Finance, luxury elements for Cars, or trust-building icons for Loans).
+    3. The output MUST be a JSON array of 3 objects, where each object has a single key called 'prompt'.
+    4. Language must be perfect English with no grammar mistakes.`;
+
+    try {
+        // Using your existing 'ai' instance logic
+        const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" }); // Using Flash for speed
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let text = response.text();
+        
+        // Cleaning the response to ensure valid JSON
+        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        const prompts = JSON.parse(text);
+
+        // Standardizing response for your frontend
+        res.status(200).json({ 
+            success: true,
+            generatedPrompts: prompts.map(p => p.prompt) 
+        });
+
+    } catch (error) {
+        console.error('Gemini Thumbnail Error:', error.message);
+        res.status(500).json({ error: `AI Generation Failed: ${error.message.substring(0, 50)}` });
+    }
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
