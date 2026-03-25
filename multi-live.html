@@ -301,17 +301,21 @@
 
             const slot = document.createElement('div');
             slot.className = 'video-slot';
+            
+            // Yaha autoplay hai par mute=1 hata diya hai
+            // enablejsapi=1 aur origin dalna zaroori hai view signal ke liye
             slot.innerHTML = `
                 <button class="remove-btn" onclick="removeVideo(this)">X</button>
-                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1" 
+                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0&origin=${window.location.origin}" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        referrerpolicy="no-referrer-when-downgrade"
                         allowfullscreen>
                 </iframe>
             `;
             grid.appendChild(slot);
             input.value = ""; 
         }
-
+        
         function removeVideo(btn) {
             btn.parentElement.remove();
             count--;
