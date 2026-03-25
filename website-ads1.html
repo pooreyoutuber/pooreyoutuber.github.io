@@ -201,7 +201,28 @@
                 alert("Please enter keyword and at least the Main Website URL!");
                 return;
             }
+             // Filter karke sirf bhari hui links nikalna
+    const urls = urlInputs.filter(u => u.trim() !== "");
 
+    // --- Validation Start ---
+    if (!keyword || urls.length === 0) {
+        alert("Please enter keyword and at least the Main Website URL!");
+        return;
+    }
+
+    // Social Media Keywords Check
+    const restrictedDomains = ['youtube.com', 'youtu.be', 'instagram.com', 'facebook.com', 'fb.watch', 'fb.com'];
+    
+    const isSocialMedia = urls.some(url => 
+        restrictedDomains.some(domain => url.toLowerCase().includes(domain))
+    );
+
+    if (isSocialMedia) {
+        alert("❌ This tool is NOT for YouTube, Instagram, or Facebook. Please provide a valid Website or Blog URL.");
+        return;
+    }
+    // --- Validation End ---
+            
             btnText.innerText = 'Connecting to Secure Cloud...';
             btn.disabled = true;
             btn.classList.add('opacity-70');
