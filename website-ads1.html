@@ -197,26 +197,28 @@
                 document.getElementById('siteUrl4').value
             ].filter(u => u.trim() !== "");
 
-             // Filter karke sirf bhari hui links nikalna
-    const urls = urlInputs.filter(u => u.trim() !== "");
+             // 2. Khali links ko hatana
+    const urls = rawUrls.filter(u => u.trim() !== "");
 
-    // --- Validation Start ---
+    // 3. Basic Validation (Khali hone par)
     if (!keyword || urls.length === 0) {
         alert("Please enter keyword and at least the Main Website URL!");
         return;
     }
 
-    // Social Media Keywords Check
-    const restrictedDomains = ['youtube.com', 'youtu.be', 'instagram.com', 'facebook.com', 'fb.watch', 'fb.com'];
+    // 4. Social Media Restriction Check
+    const restricted = ['youtube.com', 'youtu.be', 'instagram.com', 'facebook.com', 'fb.watch', 'tiktok.com'];
     
-    const isSocialMedia = urls.some(url => 
-        restrictedDomains.some(domain => url.toLowerCase().includes(domain))
+    const hasSocialLink = urls.some(url => 
+        restricted.some(domain => url.toLowerCase().includes(domain))
     );
 
-    if (isSocialMedia) {
-        alert("❌ This tool is NOT for YouTube, Instagram, or Facebook. Please provide a valid Website or Blog URL.");
+    if (hasSocialLink) {
+        alert("❌ Error: This tool is ONLY for Websites & Blogs!\n\nIf you want to boost Social Media, please go to the HOME PAGE and try Tool 1, Tool 2, or Tool 3.");
+        window.location.href = "index.html"; // User ko home page par bhej dega
         return;
     }
+
     // --- Validation End ---
             
             btnText.innerText = 'Connecting to Secure Cloud...';
