@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Channel Growth Dashboard | PooreYoutuber</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff0000;
+            --primary-dark: #cc0000;
+            --accent: #007bff;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--card-bg);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .logo { font-size: 24px; font-weight: 800; color: var(--primary); text-decoration: none; }
+
+        .main-card {
+            max-width: 900px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        /* Naya Search Box Design */
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        input, select {
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        .btn-fetch {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-generate {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .channel-preview {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 15px;
+            display: none; /* Fetch hone ke baad dikhega */
+        }
+
+        #players {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        iframe {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <a href="#" class="logo">🚀 PooreYoutuber Pro</a>
+</header>
+
+<div class="main-card">
+    <h1>📺 Channel-Wide Multi Viewer</h1>
+    <p>Apne channel ka handle ya link daalein aur latest videos ek saath play karein.</p>
+
+    <div class="search-box">
+        <div class="input-row">
+            <input type="text" id="channelInput" placeholder="Enter Channel Link or @Handle (e.g. @PooreYoutuber)">
+            <button class="btn-fetch" onclick="fetchChannelData()">Find Channel</button>
+        </div>
+
+        <div class="loader" id="loader"></div>
+
+        <div id="channelPreview" class="channel-preview">
+            <h3 id="channelName">Channel Name</h3>
+            <p id="videoStatus">Ready to boost videos</p>
+        </div>
+
+        <div class="options-grid">
+            <select id="videoType">
+                <option value="latest_long">Latest Long Video</option>
+                <option value="oldest_long">Oldest Long Video</option>
+                <option value="latest_shorts">Latest Shorts</option>
+                <option value="oldest_shorts">Oldest Shorts</option>
+            </select>
+            <input type="number" id="viewCount" value="4" min="1" max="50" title="Number of Windows">
+            <select id="audioSetting">
+                <option value="1">Mute (Safe)</option>
+                <option value="0">Sound On</option>
+            </select>
+        </div>
+
+        <button class="btn-generate" onclick="startBoost()">Generate Growth Session</button>
+    </div>
+</div>
+
+<div id="players"></div>
+
+<script>
+    let currentChannelVideos = [];
+
+    async function fetchChannelData() {
+        const input = document.getElementById('channelInput').value;
+        const loader = document.getElementById('loader');
+        const preview = document.getElementById('channelPreview');
+
+        if(!input) return alert("Please enter channel handle or link");
+
+        loader.style.display = 'block';
+        preview.style.display = 'none';
+
+        try {
+            // Aapka Render Cloud API yahan call hoga
+            const response = await fetch('https://website-1-7oo1.onrender.com/fetch-channel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ channelHandle: input })
+            });
+
+            const data = await response.json();
+            
+            if(data.success) {
+                document.getElementById('channelName').innerText = data.channelTitle;
+                document.getElementById('videoStatus').innerText = `Found ${data.totalVideos} videos. Select type and boost!`;
+                currentChannelVideos = data.videos; // Store videos locally
+                preview.style.display = 'block';
+            } else {
+                alert("Channel not found. Check the handle.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            // Testing ke liye dummy data (Jab tak backend set na ho)
+            document.getElementById('channelName').innerText = "Testing Mode (API Offline)";
+            preview.style.display = 'block';
+        } finally {
+            loader.style.display = 'none';
+        }
+    }
+
+    function startBoost() {
+        const type = document.getElementById('videoType').value;
+        const count = document.getElementById('viewCount').value;
+        const isMuted = document.getElementById('audioSetting').value;
+        const playerContainer = document.getElementById('players');
+
+        // Yahan hum decide karenge kaunsi video load karni hai
+        // Example: logic to select videoId from currentChannelVideos based on 'type'
+        let videoId = "dQw4w9WgXcQ"; // Placeholder
+
+        playerContainer.innerHTML = '';
+        const muteParam = (isMuted === "1") ? "&mute=1" : "&mute=0";
+
+        for (let i = 0; i < count; i++) {
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1${muteParam}&rel=0`;
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            playerContainer.appendChild(iframe);
+        }
+        playerContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
