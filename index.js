@@ -748,7 +748,70 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 4. AI YOUTUBE api user tool
 // ===================================================================
+// ===================================================================
+// 5. SMART YOUTUBE CHANNEL TOOL (NEW)
+// ===================================================================
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
+// A. Suggestion Endpoint: Jab user search bar mein likhega
+app.get('/search-suggest', async (req, res) => {
+    const query = req.query.q;
+    if (!query || !YOUTUBE_API_KEY) return res.json({ channels: [] });
+
+    try {
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=5&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
+        const response = await axios.get(url);
+        
+        const channels = response.data.items.map(item => ({
+            id: item.id.channelId,
+            title: item.snippet.title,
+            thumbnail: item.snippet.thumbnails.default.url,
+            handle: item.snippet.channelTitle
+        }));
+        
+        res.json({ channels });
+    } catch (error) {
+        res.status(500).json({ error: "Suggestion error" });
+    }
+});
+
+// B. Main Fetch Endpoint: Channel ki videos nikalne ke liye
+app.post('/fetch-channel', async (req, res) => {
+    const { channelHandle } = req.body;
+    if (!YOUTUBE_API_KEY) return res.status(500).json({ success: false, message: "API Key Missing" });
+
+    try {
+        // Step 1: Find Channel ID
+        let cleanHandle = channelHandle.replace('@', '').trim();
+        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(cleanHandle)}&key=${YOUTUBE_API_KEY}`;
+        const searchRes = await axios.get(searchUrl);
+
+        if (!searchRes.data.items.length) return res.json({ success: false });
+
+        const channel = searchRes.data.items[0];
+        const channelId = channel.id.channelId;
+
+        // Step 2: Fetch 50 Latest Videos
+        const videoUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=50&order=date&type=video&key=${YOUTUBE_API_KEY}`;
+        const videoRes = await axios.get(videoUrl);
+
+        const videos = videoRes.data.items.map(item => ({
+            id: item.id.videoId,
+            title: item.snippet.title,
+            isShort: item.snippet.title.toLowerCase().includes('#shorts') || false
+        }));
+
+        res.json({
+            success: true,
+            channelTitle: channel.snippet.title,
+            thumbnail: channel.snippet.thumbnails.high.url,
+            totalVideos: videos.length,
+            videos: videos
+        });
+    } catch (error) {
+        res.status(500).json({ success: false });
+    }
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
