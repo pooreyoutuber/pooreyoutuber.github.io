@@ -16,6 +16,8 @@
     <meta property="og:type" content="website">
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://www.youtube.com/iframe_api"></script>
     
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
@@ -113,7 +115,13 @@
             margin-top: 40px;
             display: none;
         }
-
+        #players div {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
         iframe {
             width: 100%;
             aspect-ratio: 16/9;
@@ -316,20 +324,30 @@
         playerContainer.innerHTML = '';
         playerContainer.style.display = 'grid';
 
-        for (let i = 0; i < count; i++) {
-            const iframe = document.createElement('iframe');
-            // Logic: if isMuted is 1, add mute parameter.
-            const muteParam = (isMuted === "1") ? "&mute=1" : "&mute=0";
-            
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0${muteParam}&rel=0`;
-            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            iframe.allowFullscreen = true;
-            playerContainer.appendChild(iframe);
+     for (let i = 0; i < count; i++) {
+            let playerId = 'player-' + i;
+            let div = document.createElement('div');
+            div.id = playerId;
+            playerContainer.appendChild(div);
+
+            // YouTube Player API ka istemal (Real Player behavior)
+            new YT.Player(playerId, {
+                height: '100%',
+                width: '100%',
+                videoId: videoId,
+                playerVars: {
+                    'autoplay': 0, // Manual play for better view counting
+                    'mute': isMuted ? 1 : 0,
+                    'rel': 0,
+                    'controls': 1,
+                    'modestbranding': 1,
+                    'origin': window.location.origin
+                }
+            });
         }
 
         playerContainer.scrollIntoView({ behavior: 'smooth' });
     }
 </script>
-
 </body>
 </html>
