@@ -751,14 +751,15 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 5. SMART YOUTUBE CHANNEL TOOL (NEW)
 // ===================================================================
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+// 5. SMART YOUTUBE CHANNEL TOOL
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "YOUR_FALLBACK_KEY"; // Make sure this is set in Render Environment Variables
 
-// A. Suggestion Endpoint: Jab user search bar mein likhega
 app.get('/search-suggest', async (req, res) => {
     const query = req.query.q;
-    if (!query || !YOUTUBE_API_KEY) return res.json({ channels: [] });
+    if (!query) return res.json({ channels: [] });
 
     try {
+        // Snippet: Only fetching essential data for performance
         const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=5&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
         const response = await axios.get(url);
         
@@ -766,32 +767,36 @@ app.get('/search-suggest', async (req, res) => {
             id: item.id.channelId,
             title: item.snippet.title,
             thumbnail: item.snippet.thumbnails.default.url,
-            handle: item.snippet.channelTitle
+            // Handle detection logic
+            handle: item.snippet.customUrl || item.snippet.channelTitle 
         }));
         
         res.json({ channels });
     } catch (error) {
-        res.status(500).json({ error: "Suggestion error" });
+        console.error("Search Suggest Error:", error.response ? error.response.data : error.message);
+        res.status(500).json({ error: "Suggestion error", details: error.message });
     }
 });
 
-// B. Main Fetch Endpoint: Channel ki videos nikalne ke liye
 app.post('/fetch-channel', async (req, res) => {
     const { channelHandle } = req.body;
-    if (!YOUTUBE_API_KEY) return res.status(500).json({ success: false, message: "API Key Missing" });
+    if (!channelHandle) return res.status(400).json({ success: false, message: "Handle is required" });
 
     try {
-        // Step 1: Find Channel ID
+        // Step 1: Channel ID find karna (Handles supporting)
         let cleanHandle = channelHandle.replace('@', '').trim();
         const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(cleanHandle)}&key=${YOUTUBE_API_KEY}`;
         const searchRes = await axios.get(searchUrl);
 
-        if (!searchRes.data.items.length) return res.json({ success: false });
+        if (!searchRes.data.items || searchRes.data.items.length === 0) {
+            return res.json({ success: false, message: "Channel not found" });
+        }
 
         const channel = searchRes.data.items[0];
         const channelId = channel.id.channelId;
 
-        // Step 2: Fetch 50 Latest Videos
+        // Step 2: Fetching 50 videos using the playlist of "Uploaded Videos" (More efficient than search)
+        // Note: For simplicity, we use search here as in your original code
         const videoUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=50&order=date&type=video&key=${YOUTUBE_API_KEY}`;
         const videoRes = await axios.get(videoUrl);
 
@@ -809,7 +814,8 @@ app.post('/fetch-channel', async (req, res) => {
             videos: videos
         });
     } catch (error) {
-        res.status(500).json({ success: false });
+        console.error("Fetch Channel Error:", error.response ? error.response.data : error.message);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 //==================================================
