@@ -745,63 +745,6 @@ app.post('/popup', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
-// ===================================================================
-// 4. AI YOUTUBE api user tool
-// ===================================================================
-// ===================================================================
-// 5. SMART YOUTUBE CHANNEL TOOL (NEW)
-// ===================================================================
-// B. Main Fetch Endpoint: Channel ki videos nikalne ke liye
-app.post('/fetch-channel', async (req, res) => {
-    const { channelHandle } = req.body;
-    if (!YOUTUBE_API_KEY) return res.status(500).json({ success: false, message: "API Key Missing" });
-
-    try {
-        let channelId = "";
-        let cleanHandle = channelHandle.trim();
-
-        // Agar input direct Channel ID hai (UC...)
-        if (cleanHandle.startsWith('UC') && cleanHandle.length > 20) {
-            channelId = cleanHandle;
-        } else {
-            // Handle parsing logic
-            if (cleanHandle.includes('@')) {
-                cleanHandle = cleanHandle.split('@')[1].split(/[/?]/)[0];
-                cleanHandle = '@' + cleanHandle;
-            }
-            
-            const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(cleanHandle)}&key=${YOUTUBE_API_KEY}`;
-            const searchRes = await axios.get(searchUrl);
-            if (!searchRes.data.items.length) return res.json({ success: false, message: "Channel not found" });
-            channelId = searchRes.data.items[0].id.channelId;
-        }
-
-        // Fetch 50 Latest Videos with Snippet and ContentDetails
-        const videoUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=50&order=date&type=video&key=${YOUTUBE_API_KEY}`;
-        const videoRes = await axios.get(videoUrl);
-
-        const videos = videoRes.data.items.map(item => ({
-            id: item.id.videoId,
-            title: item.snippet.title,
-            // Shorts identify karne ke liye basic check
-            isShort: item.snippet.title.toLowerCase().includes('#shorts') 
-        }));
-
-        // Channel info for preview
-        const channelData = videoRes.data.items[0]?.snippet;
-
-        res.json({
-            success: true,
-            channelTitle: channelData?.channelTitle || "Channel Found",
-            thumbnail: `https://img.youtube.com/vi/${videos[0]?.id}/hqdefault.jpg`,
-            totalVideos: videos.length,
-            videos: videos // Poori list bhej rahe hain
-        });
-    } catch (error) {
-        console.error("Fetch Error:", error.message);
-        res.status(500).json({ success: false });
-    }
-});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
