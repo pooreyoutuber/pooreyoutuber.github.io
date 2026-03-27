@@ -312,7 +312,7 @@
     function startMultiView() {
         const url = document.getElementById('videoUrl').value;
         const count = document.getElementById('viewCount').value;
-        const isMuted = document.getElementById('audioSetting').value;
+        const isMuted = document.getElementById('audioSetting').value=== "1";
         const videoId = getID(url);
         const playerContainer = document.getElementById('players');
 
@@ -342,12 +342,20 @@
                     'controls': 1,
                     'modestbranding': 1,
                     'origin': window.location.origin
+                    },
+                events: {
+                    'onReady': function(event) {
+                        // Agar mute setting "0" (Sound On) hai, toh manually unMute karo
+                        if (!isMuted) {
+                            event.target.unMute();
+                            event.target.setVolume(100); // Full volume set karein
+                        } else {
+                            event.target.mute();
+                        }
+                    }
                 }
             });
-        }
-
-        playerContainer.scrollIntoView({ behavior: 'smooth' });
-    }
-</script>
+     }
+    <script>
 </body>
 </html>
