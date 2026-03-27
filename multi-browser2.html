@@ -44,12 +44,12 @@
             text-align: center;
         }
 
-        /* Naya Search Box Design */
         .search-box {
             display: flex;
             flex-direction: column;
             gap: 15px;
             margin-top: 25px;
+            position: relative;
         }
 
         .input-row {
@@ -98,13 +98,54 @@
             margin-top: 10px;
         }
 
+        /* Suggested Channels Styling */
+        .suggestions-list {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 65%;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            text-align: left;
+        }
+
+        .suggestion-item {
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: 0.2s;
+        }
+
+        .suggestion-item:hover { background: #f8fafc; }
+
+        .suggestion-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
         .channel-preview {
             margin: 20px 0;
-            padding: 15px;
+            padding: 20px;
             background: #f1f5f9;
             border-radius: 15px;
-            display: none; /* Fetch hone ke baad dikhega */
+            display: none;
+            text-align: left;
+            border: 2px solid var(--accent);
         }
+
+        .preview-content { display: flex; align-items: center; gap: 20px; }
+        .preview-img { width: 60px; height: 60px; border-radius: 50%; }
 
         #players {
             display: grid;
@@ -124,7 +165,7 @@
 
         .loader {
             display: none;
-            margin: 20px auto;
+            margin: 10px auto;
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary);
             border-radius: 50%;
@@ -143,19 +184,25 @@
 
 <div class="main-card">
     <h1>📺 Channel-Wide Multi Viewer</h1>
-    <p>Apne channel ka handle ya link daalein aur latest videos ek saath play karein.</p>
+    <p>Dhundho aur ek saath play karo apne channel ki videos.</p>
 
     <div class="search-box">
         <div class="input-row">
-            <input type="text" id="channelInput" placeholder="Enter Channel Link or @Handle (e.g. @PooreYoutuber)">
-            <button class="btn-fetch" onclick="fetchChannelData()">Find Channel</button>
+            <input type="text" id="channelInput" autocomplete="off" placeholder="Name, Link, or @Handle daalein..." oninput="handleInputSearch()">
+            <button class="btn-fetch" onclick="fetchChannelData()">Search & Select</button>
+            <div id="suggestions" class="suggestions-list"></div>
         </div>
 
         <div class="loader" id="loader"></div>
 
         <div id="channelPreview" class="channel-preview">
-            <h3 id="channelName">Channel Name</h3>
-            <p id="videoStatus">Ready to boost videos</p>
+            <div class="preview-content">
+                <img id="previewImg" src="" class="preview-img">
+                <div>
+                    <h3 id="channelName" style="margin:0;">Channel Name</h3>
+                    <p id="videoStatus" style="margin:5px 0 0;">Ready to boost videos</p>
+                </div>
+            </div>
         </div>
 
         <div class="options-grid">
@@ -165,7 +212,7 @@
                 <option value="latest_shorts">Latest Shorts</option>
                 <option value="oldest_shorts">Oldest Shorts</option>
             </select>
-            <input type="number" id="viewCount" value="4" min="1" max="50" title="Number of Windows">
+            <input type="number" id="viewCount" value="4" min="1" max="50">
             <select id="audioSetting">
                 <option value="1">Mute (Safe)</option>
                 <option value="0">Sound On</option>
@@ -180,19 +227,65 @@
 
 <script>
     let currentChannelVideos = [];
+    let selectedVideoId = "";
+    let searchTimeout;
+
+    // Smart Input Handling: Naam ya link detection
+    function handleInputSearch() {
+        clearTimeout(searchTimeout);
+        const query = document.getElementById('channelInput').value;
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        if (query.length < 3) {
+            suggestionsDiv.style.display = 'none';
+            return;
+        }
+
+        // debounce to avoid too many API calls
+        searchTimeout = setTimeout(() => {
+            getChannelSuggestions(query);
+        }, 500);
+    }
+
+    async function getChannelSuggestions(query) {
+        try {
+            const response = await fetch(`https://part-5.onrender.com/search-suggest?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            const suggestionsDiv = document.getElementById('suggestions');
+            suggestionsDiv.innerHTML = '';
+
+            if (data.channels && data.channels.length > 0) {
+                data.channels.forEach(ch => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerHTML = `
+                        <img src="${ch.thumbnail}" class="suggestion-img">
+                        <span>${ch.title}</span>
+                    `;
+                    item.onclick = () => selectChannel(ch.handle || ch.id);
+                    suggestionsDiv.appendChild(item);
+                });
+                suggestionsDiv.style.display = 'block';
+            }
+        } catch (e) { console.error("Suggest error", e); }
+    }
+
+    async function selectChannel(handle) {
+        document.getElementById('channelInput').value = handle;
+        document.getElementById('suggestions').style.display = 'none';
+        fetchChannelData();
+    }
 
     async function fetchChannelData() {
         const input = document.getElementById('channelInput').value;
         const loader = document.getElementById('loader');
         const preview = document.getElementById('channelPreview');
 
-        if(!input) return alert("Please enter channel handle or link");
-
+        if(!input) return;
         loader.style.display = 'block';
-        preview.style.display = 'none';
 
         try {
-            // Aapka Render Cloud API yahan call hoga
             const response = await fetch('https://part-5.onrender.com/fetch-channel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -200,20 +293,15 @@
             });
 
             const data = await response.json();
-            
             if(data.success) {
                 document.getElementById('channelName').innerText = data.channelTitle;
-                document.getElementById('videoStatus').innerText = `Found ${data.totalVideos} videos. Select type and boost!`;
-                currentChannelVideos = data.videos; // Store videos locally
+                document.getElementById('previewImg').src = data.thumbnail || "https://via.placeholder.com/60";
+                document.getElementById('videoStatus').innerText = `${data.totalVideos} videos found.`;
+                currentChannelVideos = data.videos;
                 preview.style.display = 'block';
-            } else {
-                alert("Channel not found. Check the handle.");
             }
         } catch (error) {
-            console.error("Error:", error);
-            // Testing ke liye dummy data (Jab tak backend set na ho)
-            document.getElementById('channelName').innerText = "Testing Mode (API Offline)";
-            preview.style.display = 'block';
+            alert("Connection error. Using fallback.");
         } finally {
             loader.style.display = 'none';
         }
@@ -225,16 +313,20 @@
         const isMuted = document.getElementById('audioSetting').value;
         const playerContainer = document.getElementById('players');
 
-        // Yahan hum decide karenge kaunsi video load karni hai
-        // Example: logic to select videoId from currentChannelVideos based on 'type'
-        let videoId = "dQw4w9WgXcQ"; // Placeholder
+        if(currentChannelVideos.length === 0) return alert("Pehle channel select karein!");
 
+        // Video logic based on selection
+        let video;
+        if (type.includes('latest')) video = currentChannelVideos[0];
+        else video = currentChannelVideos[currentChannelVideos.length - 1];
+
+        const videoId = video.id;
         playerContainer.innerHTML = '';
         const muteParam = (isMuted === "1") ? "&mute=1" : "&mute=0";
 
         for (let i = 0; i < count; i++) {
             const iframe = document.createElement('iframe');
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1${muteParam}&rel=0`;
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1${muteParam}&rel=0&playlist=${videoId}&loop=1`;
             iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
             playerContainer.appendChild(iframe);
         }
