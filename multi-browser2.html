@@ -112,7 +112,6 @@
         .suggestion-item:hover { background: var(--bg); }
         .suggestion-item img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--border); }
         .suggestion-item .name { font-weight: 700; font-size: 1rem; display: block; }
-        .suggestion-item .handle { font-size: 0.85rem; color: var(--text-secondary); }
 
         /* Preview Area */
         .channel-preview {
@@ -205,8 +204,8 @@
     <div class="main-card">
         <div class="search-wrapper">
             <div class="input-group">
-                <input type="text" id="channelInput" placeholder="Enter Channel Name, @Handle or URL..." autocomplete="off" oninput="handleSearchDebounce()">
-                <button class="btn-primary" onclick="fetchChannelData()">Search</button>
+                <input type="text" id="channelInput" placeholder="Paste Channel Link (e.g., https://youtube.com/@user)" autocomplete="off">
+                <button class="btn-primary" onclick="fetchChannelData()">Load Channel</button>
             </div>
             <div id="suggestions" class="suggestions-box"></div>
         </div>
@@ -227,19 +226,19 @@
             <div class="config-item">
                 <label>Playback Type</label>
                 <select id="videoType">
-                    <option value="latest_long">Latest Video</option>
-                    <option value="oldest_long">Oldest Video</option>
+                    <option value="latest_long">Latest Long Videos</option>
+                    <option value="oldest_long">Oldest Long Videos</option>
                     <option value="latest_shorts">Latest Shorts</option>
                 </select>
             </div>
             <div class="config-item">
-                <label>Window Count</label>
-                <input type="number" id="viewCount" class="num-input" value="4" min="1" max="50">
+                <label>Number of Windows</label>
+                <input type="number" id="viewCount" class="num-input" value="15" min="1" max="50">
             </div>
             <div class="config-item">
-                <label>Audio Mode</label>
+                <label>Audio</label>
                 <select id="audioSetting">
-                    <option value="1">Muted (Recommended)</option>
+                    <option value="1">Muted (Faster Load)</option>
                     <option value="0">Sound On</option>
                 </select>
             </div>
@@ -253,110 +252,90 @@
 
 <script>
     let currentVideos = [];
-    let timer;
+    const API_BASE = "https://part-5.onrender.com"; // Isse apni Render URL se check karle
 
-    // Helper: Extract Handle or ID from URL
+    // URL se Handle ya ID nikalne ka updated logic
     function parseInput(val) {
+        val = val.trim();
         if (val.includes('youtube.com/')) {
-            const parts = val.split('/');
-            const last = parts[parts.length - 1];
-            return last.startsWith('@') ? last : last.split('?')[0];
+            // Poora URL parse karna
+            if (val.includes('/@')) {
+                return '@' + val.split('/@')[1].split(/[/?]/)[0];
+            } else if (val.includes('/channel/')) {
+                return val.split('/channel/')[1].split(/[/?]/)[0];
+            }
         }
-        return val.replace('@', '').trim();
-    }
-
-    function handleSearchDebounce() {
-        clearTimeout(timer);
-        timer = setTimeout(async () => {
-            const val = document.getElementById('channelInput').value;
-            if (val.length < 3) return;
-            
-            try {
-                const res = await fetch(`https://part-5.onrender.com/search-suggest?q=${encodeURIComponent(parseInput(val))}`);
-                const data = await res.json();
-                showSuggestions(data.channels);
-            } catch (e) {}
-        }, 500);
-    }
-
-    function showSuggestions(channels) {
-        const box = document.getElementById('suggestions');
-        box.innerHTML = '';
-        if (!channels || channels.length === 0) {
-            box.style.display = 'none';
-            return;
-        }
-
-        channels.forEach(ch => {
-            const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.innerHTML = `
-                <img src="${ch.thumbnail}">
-                <div>
-                    <span class="name">${ch.title}</span>
-                    <span class="handle">${ch.handle || 'Channel'}</span>
-                </div>
-            `;
-            div.onclick = () => {
-                document.getElementById('channelInput').value = ch.id;
-                box.style.display = 'none';
-                fetchChannelData();
-            };
-            box.appendChild(div);
-        });
-        box.style.display = 'block';
+        return val.startsWith('@') ? val : '@' + val;
     }
 
     async function fetchChannelData() {
-        const input = parseInput(document.getElementById('channelInput').value);
-        if (!input) return;
+        const rawInput = document.getElementById('channelInput').value;
+        const input = parseInput(rawInput);
+        
+        if (!rawInput) return alert("Pehle link ya handle toh daal!");
 
         document.getElementById('loader').style.display = 'block';
-        document.getElementById('suggestions').style.display = 'none';
+        document.getElementById('channelPreview').style.display = 'none';
 
         try {
-            const res = await fetch('https://part-5.onrender.com/fetch-channel', {
+            const res = await fetch(`${API_BASE}/fetch-channel`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ channelHandle: input })
             });
             const data = await res.json();
 
-            if (data.success) {
+            if (data.success && data.videos.length > 0) {
                 document.getElementById('channelName').innerText = data.channelTitle;
                 document.getElementById('previewImg').src = data.thumbnail;
-                document.getElementById('videoStatus').innerText = `${data.totalVideos} videos ready for boost.`;
-                currentVideos = data.videos;
+                document.getElementById('videoStatus').innerText = `${data.totalVideos} videos fetched from channel.`;
+                currentVideos = data.videos; // Yeh poori list store karega
                 document.getElementById('channelPreview').style.display = 'block';
             } else {
-                alert("Channel not found. Try a direct link or different name.");
+                alert("Channel nahi mila! Make sure the link is correct.");
             }
         } catch (e) {
-            alert("Error connecting to server.");
+            alert("Server connection error! Check if Render is awake.");
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
     }
 
     function launchSession() {
-        if (currentVideos.length === 0) return alert("Please search and select a channel first!");
+        if (currentVideos.length === 0) return alert("Pehle channel load karo!");
         
         const type = document.getElementById('videoType').value;
-        const count = document.getElementById('viewCount').value;
+        const count = parseInt(document.getElementById('viewCount').value);
         const muted = document.getElementById('audioSetting').value === "1" ? "&mute=1" : "&mute=0";
         const grid = document.getElementById('playerGrid');
         
         grid.innerHTML = '';
         
-        // Selection Logic
-        let videoId = "";
-        if (type === 'latest_long' || type === 'latest_shorts') videoId = currentVideos[0].id;
-        else videoId = currentVideos[currentVideos.length - 1].id;
+        // Videos Filter aur Sort Logic
+        let listToPlay = [];
+        if (type === 'latest_shorts') {
+            listToPlay = currentVideos.filter(v => v.isShort);
+            if(listToPlay.length === 0) listToPlay = currentVideos; // Fallback
+        } else if (type === 'oldest_long') {
+            listToPlay = [...currentVideos].reverse();
+        } else {
+            listToPlay = currentVideos; // Latest Long
+        }
 
+        // Loop through the count and rotate videos
         for (let i = 0; i < count; i++) {
+            const videoIndex = i % listToPlay.length; // Yeh har window mein alag video daalega
+            const videoId = listToPlay[videoIndex].id;
+
             const wrapper = document.createElement('div');
             wrapper.className = 'video-wrapper';
-            wrapper.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1${muted}&rel=0&playlist=${videoId}&loop=1" allow="autoplay; encrypted-media"></iframe>`;
+            // Added playlist & loop param for continuous watch
+            wrapper.innerHTML = `
+                <iframe 
+                    src="https://www.youtube.com/embed/${videoId}?autoplay=1${muted}&rel=0&playlist=${videoId}&loop=1" 
+                    allow="autoplay; encrypted-media" 
+                    allowfullscreen>
+                </iframe>`;
             grid.appendChild(wrapper);
         }
         grid.scrollIntoView({ behavior: 'smooth' });
