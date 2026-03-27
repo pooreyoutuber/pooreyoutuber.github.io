@@ -344,18 +344,19 @@
                     'origin': window.location.origin
                     },
                 events: {
-                    'onReady': function(event) {
-                        // Agar mute setting "0" (Sound On) hai, toh manually unMute karo
+                              'onReady': function(event) {
                         if (!isMuted) {
                             event.target.unMute();
-                            event.target.setVolume(100); // Full volume set karein
+                            event.target.setVolume(100);
                         } else {
                             event.target.mute();
                         }
+                        event.target.playVideo(); // Video start karne ke liye
                     }
                 }
             });
-     }
+        }
+    } // Loop aur function yahan sahi se band ho rahe hain
 </script>
 </body>
 </html>
