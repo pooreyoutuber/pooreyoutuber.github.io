@@ -361,7 +361,7 @@
                     },
                 events: {
                               'onReady': function(event) {
-                                  event.target.setPlaybackQuality(selectedQuality);
+                            event.target.setPlaybackQuality(selectedQuality);
                         if (!isMuted) {
                             event.target.unMute();
                             event.target.setVolume(100);
@@ -369,10 +369,16 @@
                             event.target.mute();
                         }
                     }
-                }
+      },
+    'onStateChange': function(event) {
+        if (event.data == YT.PlayerState.PLAYING) {
+            event.target.setPlaybackQuality(selectedQuality);
+        }
+    }
+}
             });
         }
-    } // Loop aur function yahan sahi se band ho rahe hain
+    } 
 </script>
 </body>
 </html>
