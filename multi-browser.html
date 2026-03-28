@@ -359,21 +359,20 @@
                     'modestbranding': 1,
                     'origin': window.location.origin
                     },
-                events: {
-                              'onReady': function(event) {
-                            event.target.setPlaybackQuality(selectedQuality);
+               events: {
+                    'onReady': function(event) {
+                        event.target.setPlaybackQuality(selectedQuality);
                         if (!isMuted) {
                             event.target.unMute();
                             event.target.setVolume(100);
                         } else {
                             event.target.mute();
                         }
-                    }
-      },
+                    },
     'onStateChange': function(event) {
-        if (event.data == YT.PlayerState.PLAYING) {
-            event.target.setPlaybackQuality(selectedQuality);
-      }
+                        if (event.data == YT.PlayerState.PLAYING) {
+                            event.target.setPlaybackQuality(selectedQuality);
+                        }
                     }
                 }
             });
