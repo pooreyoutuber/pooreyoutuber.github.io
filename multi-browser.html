@@ -360,45 +360,21 @@ const platforms = [
          const randomRef = platforms[Math.floor(Math.random() * platforms.length)];
          const randomStart = Math.floor(Math.random() * 15);
          
-            // YouTube Player API ka istemal (Real Player behavior)
-            new YT.Player(playerId, {
-                height: '100%',
-                width: '100%',
-                videoId: videoId,
-                playerVars: {
-                    'autoplay': 0, // Manual play for better view counting
-                    'mute': isMuted ? 1 : 0,
-                    'vq': selectedQuality,
-                    'rel': 0,
-                    'controls': 1,
-                    'modestbranding': 1,
-                    'start': randomStart,
-                    'origin': randomRef, 
-                    'playlist': videoId,
-                    'widget_referrer': 'https://www.youtube.com/',
-                    'widget_referrer': randomRef 
-                    
-                },
-               events: {
-                    'onReady': function(event) {
-                        event.target.setPlaybackQuality(selectedQuality);
-                        const speeds = [0.75, 1, 1, 1.25];
-                        event.target.setPlaybackRate(speeds[Math.floor(Math.random() * speeds.length)]);
-                        
-                        if (!isMuted) {
-                            event.target.unMute();
-                            event.target.setVolume(100);
-                        } else {
-                            event.target.mute();
-                        }
-                    },
-    'onStateChange': function(event) {
-                        if (event.data == YT.PlayerState.PLAYING) {
-                            event.target.setPlaybackQuality(selectedQuality);
-                        }
-                    }
-                }
-            });
+           let div = document.createElement('div');
+            
+            // API हटाकर सीधा iframe कोड
+            const iframe = document.createElement('iframe');
+            iframe.width = "100%";
+            iframe.height = "100%";
+            // तुम्हारा सारा पुराना लॉजिक (Mute, Start Time, Referrer) यहाँ URL में है
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${randomRef}`;
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+            iframe.setAttribute('allowfullscreen', 'true');
+            iframe.style.border = "none";
+            iframe.style.borderRadius = "12px";
+
+            div.appendChild(iframe);
+            playerContainer.appendChild(div);
         }
     }
 </script>
