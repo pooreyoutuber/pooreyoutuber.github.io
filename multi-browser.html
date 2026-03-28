@@ -232,14 +232,11 @@
                 <option value="1">Mute Audio (Fastest)</option>
                 <option value="0">Sound On(High chances view)</option>
             </select>
-            <select id="qualitySetting">
-        <option value="default">Auto Quality</option>
-        <option value="small">240p</option>
-        <option value="medium">360p</option>
-        <option value="large">480p</option>
-        <option value="hd720">720p HD</option>
-        <option value="hd1080">1080p Full HD</option>
-    </select>
+             <select id="autoplaySetting">
+    <option value="1">Autoplay: ON (Continuous Loop)</option>
+    <option value="0">Autoplay: OFF (Manual Play)</option>
+             </select>
+            
             <button class="btn-play" onclick="startMultiView()">Generate Players</button>
         </div>
     </div>
@@ -355,6 +352,7 @@
         const selectedQuality = document.getElementById('qualitySetting').value;
         const videoId = getID(url);
         const playerContainer = document.getElementById('players');
+        const autoPlayStatus = document.getElementById('autoplaySetting').value;
         
 const platforms = [
              "https://www.youtube.com/feed/trending",
@@ -389,7 +387,7 @@ const platforms = [
             const iframe = document.createElement('iframe');
             iframe.width = "100%";
             iframe.height = "100%";
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${randomRef}`;
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=${autoPlayStatus}&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${randomRef}`;
             iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
             iframe.setAttribute('allowfullscreen', 'true');
             iframe.style.border = "none";
