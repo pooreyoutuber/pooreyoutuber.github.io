@@ -80,8 +80,8 @@
         .input-group {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 15px;
-            margin-top: 25px;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         input, select {
@@ -201,6 +201,14 @@
                 <option value="1">Mute Audio (Fastest)</option>
                 <option value="0">Sound On(High chances view)</option>
             </select>
+            <select id="qualitySetting">
+        <option value="default">Auto Quality</option>
+        <option value="small">240p</option>
+        <option value="medium">360p</option>
+        <option value="large">480p</option>
+        <option value="hd720">720p HD</option>
+        <option value="hd1080">1080p Full HD</option>
+    </select>
             <button class="btn-play" onclick="startMultiView()">Generate Players</button>
         </div>
     </div>
@@ -338,6 +346,7 @@
                 playerVars: {
                     'autoplay': 0, // Manual play for better view counting
                     'mute': isMuted ? 1 : 0,
+                    'vq': selectedQuality,
                     'rel': 0,
                     'controls': 1,
                     'modestbranding': 1,
