@@ -330,7 +330,15 @@
         const selectedQuality = document.getElementById('qualitySetting').value;
         const videoId = getID(url);
         const playerContainer = document.getElementById('players');
-
+        
+const platforms = [
+            "https://www.youtube.com/search",
+            "https://www.google.com",
+            "https://www.facebook.com",
+            "https://www.instagram.com",
+            "https://t.co", // Twitter/X
+            "https://www.bing.com"
+        ];
         if (!videoId) {
             alert("Please enter a valid YouTube URL");
             return;
@@ -345,6 +353,8 @@
             div.id = playerId;
             playerContainer.appendChild(div);
 
+         const randomRef = platforms[Math.floor(Math.random() * platforms.length)];
+         
             // YouTube Player API ka istemal (Real Player behavior)
             new YT.Player(playerId, {
                 height: '100%',
@@ -357,11 +367,16 @@
                     'rel': 0,
                     'controls': 1,
                     'modestbranding': 1,
-                    'origin': window.location.origin
-                    },
+                    'start': randomStart,
+                    'origin': randomRef, 
+                    'widget_referrer': randomRef 
+                },
                events: {
                     'onReady': function(event) {
                         event.target.setPlaybackQuality(selectedQuality);
+                        const speeds = [0.75, 1, 1, 1.25];
+                        event.target.setPlaybackRate(speeds[Math.floor(Math.random() * speeds.length)]);
+                        
                         if (!isMuted) {
                             event.target.unMute();
                             event.target.setVolume(100);
