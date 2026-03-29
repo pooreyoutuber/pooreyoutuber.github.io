@@ -372,7 +372,7 @@ const platforms = [
         playerContainer.innerHTML = '';
         playerContainer.style.display = 'grid';
         for (let i = 0; i < count; i++) {
-            // setTimeout missing tha aur syntax galat tha, yeha theek kar diya hai
+      
             setTimeout(() => {
                 let playerId = 'player-' + i;
                 let div = document.createElement('div');
@@ -385,17 +385,16 @@ const platforms = [
                 const iframe = document.createElement('iframe');
                 iframe.width = "100%";
                 iframe.height = "100%";
-                // Added cacheBuster to src if needed, or keeping your exact url structure
                 iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${autoPlayStatus}&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${randomRef}`;
                 iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-                // Removed invalid allow values according to standard iframe attributes
+            
                 iframe.setAttribute('allowfullscreen', 'true');
                 iframe.style.border = "none";
                 iframe.style.borderRadius = "12px";
                 
                 div.appendChild(iframe);
                 playerContainer.appendChild(div);
-            }, i * 1500); // 1.5 Second ka delay
+            }, i * 1500); 
         }
     }
 </script>
