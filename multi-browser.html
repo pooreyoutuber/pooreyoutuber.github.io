@@ -373,32 +373,52 @@ const platforms = [
         playerContainer.innerHTML = '';
         playerContainer.style.display = 'grid';
 
-     for (let i = 0; i < count; i++) {
+          for (let i = 0; i < count; i++) {
+
             let playerId = 'player-' + i;
+
             let div = document.createElement('div');
+
             div.id = playerId;
+
             playerContainer.appendChild(div);
+
+
 
          const randomRef = platforms[Math.floor(Math.random() * platforms.length)];
+
          const randomStart = Math.floor(Math.random() * 15);
+
          
-            const iframe = document.createElement('iframe');
-            iframe.width = "100%";
-            iframe.height = "100%";
-            iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${autoPlayStatus}&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${randomRef}`;
-            iframe.setAttribute('referrerpolicy', 'no-referrer');
-         
-            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-            iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation allow-presentation');
-            iframe.setAttribute('allowfullscreen', 'true');
+
             
+
+            const iframe = document.createElement('iframe');
+
+            iframe.width = "100%";
+
+            iframe.height = "100%";
+
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=${autoPlayStatus}&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${randomRef}`;
+
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+
+            iframe.setAttribute('allowfullscreen', 'true');
+
             iframe.style.border = "none";
+
             iframe.style.borderRadius = "12px";
 
+
+
             div.appendChild(iframe);
+
             playerContainer.appendChild(div);
+
         }
+
     }
+
 </script>
 </body>
 </html>
