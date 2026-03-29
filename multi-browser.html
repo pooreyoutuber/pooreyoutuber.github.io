@@ -227,12 +227,7 @@
 
         <div class="input-group">
             <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL here...">
-            <input type="text" id="videoTitle" placeholder="Video Title (for Search Mode)"> 
             <input type="number" id="viewCount" value="4" min="1" max="50" placeholder="Number of Views">
-            <select id="trafficMode">
-            <option value="direct">Direct Mode</option>
-            <option value="search">Search Mode (Organic)</option>
-             </select>
             <select id="audioSetting">
                 <option value="1">Mute Audio (Fastest)</option>
                 <option value="0">Sound On(High chances view)</option>
@@ -351,63 +346,55 @@
     }
 
     function startMultiView() {
-        const url = document.getElementById('videoUrl').value;
-        const title = document.getElementById('videoTitle').value;
-        const count = document.getElementById('viewCount').value;
-        const mode = document.getElementById('trafficMode').value;
-        const isMuted = document.getElementById('audioSetting').value=== "1";
-        const videoId = getID(url);
-        const playerContainer = document.getElementById('players');
-        const autoPlayStatus = document.getElementById('autoplaySetting').value;
-        
+        const url = document.getElementById('videoUrl').value;
+        const count = document.getElementById('viewCount').value;
+        const isMuted = document.getElementById('audioSetting').value=== "1";
+        const videoId = getID(url);
+        const playerContainer = document.getElementById('players');
+        const autoPlayStatus = document.getElementById('autoplaySetting').value;
+        
 const platforms = [
-             "https://www.youtube.com/feed/trending",
-             "https://www.youtube.com/feed/subscriptions",
-               "https://m.youtube.com/",
-              "https://www.youtube.com/results?search_query=shorts",
-            "https://www.youtube.com/search",
-            "https://www.google.com",
-            "https://www.facebook.com",
-            "https://www.instagram.com",
-            "https://t.co", 
-            "https://www.bing.com"
-        ];
-        if (!videoId) {
-            alert("Please enter a valid YouTube URL");
-            return;
-        }
-        playerContainer.innerHTML = '';
-        playerContainer.style.display = 'grid';
-          for (let i = 0; i < count; i++) {
-            setTimeout(() => {
-                let div = document.createElement('div');
-                div.className = "player-box"; 
-                
-                let currentReferrer = "";
-                
-                if (mode === "search" && title !== "") {
-                    currentReferrer = `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}`;
-                } else {
-                    currentReferrer = platforms[Math.floor(Math.random() * platforms.length)];
-                }  
-         const randomRef = platforms[Math.floor(Math.random() * platforms.length)];
-         const randomStart = Math.floor(Math.random() * 15);
-         const cacheBuster = Math.random().toString(36).substring(7); 
-              
-            const iframe = document.createElement('iframe');
-            iframe.width = "100%";
-            iframe.height = "100%";
-            iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${autoPlayStatus}&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${encodeURIComponent(currentReferrer)}`;
-            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-            iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-pointer-lock allow-top-navigation allow-presentation');
-            iframe.setAttribute('allowfullscreen', 'true');
-            iframe.style.border = "none";
-            iframe.style.borderRadius = "12px";
-            div.appendChild(iframe);
-            playerContainer.appendChild(div);
-        }, i * 1500);
-    }
-}
+             "https://www.youtube.com/feed/trending",
+             "https://www.youtube.com/feed/subscriptions",
+               "https://m.youtube.com/",
+              "https://www.youtube.com/results?search_query=shorts",
+            "https://www.youtube.com/search",
+            "https://www.google.com",
+            "https://www.facebook.com",
+            "https://www.instagram.com",
+            "https://t.co", 
+            "https://www.bing.com"
+        ];
+        if (!videoId) {
+            alert("Please enter a valid YouTube URL");
+            return;
+        }
+        playerContainer.innerHTML = '';
+        playerContainer.style.display = 'grid';
+          for (let i = 0; i < count; i++) {
+            let playerId = 'player-' + i;
+            let div = document.createElement('div');
+            div.id = playerId;
+            playerContainer.appendChild(div);
+              
+         const randomRef = platforms[Math.floor(Math.random() * platforms.length)];
+         const randomStart = Math.floor(Math.random() * 15);
+         const cacheBuster = Math.random().toString(36).substring(7); 
+              
+            const iframe = document.createElement('iframe');
+            iframe.width = "100%";
+            iframe.height = "100%";
+            iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${autoPlayStatus}&mute=${isMuted ? 1 : 0}&start=${randomStart}&rel=0&modestbranding=1&widget_referrer=${randomRef}`;
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+            iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-pointer-lock allow-top-navigation allow-presentation');
+            iframe.setAttribute('allowfullscreen', 'true');
+            iframe.style.border = "none";
+            iframe.style.borderRadius = "12px";
+            div.appendChild(iframe);
+            playerContainer.appendChild(div);
+        }, i * 1500);
+        }
+    }
 </script>
 </body>
 </html>
