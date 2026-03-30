@@ -745,6 +745,99 @@ app.post('/popup', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+// ===================================================================
+// NEW TOOL: REAL YOUTUBE VIEW BOOSTER (With Screenshot & Auto-Accept)
+// ======================
+// Global variable for Live Feed
+let latestScreenshot = null;
+
+// 1. Live Check Endpoint
+app.get('/live-check', (req, res) => {
+    if (latestScreenshot) {
+        res.contentType('image/png').send(latestScreenshot);
+    } else {
+        res.status(404).send("Initializing Video Stream...");
+    }
+});
+
+// 2. Main Engine (CroxyProxy - Mobile Mode)
+async function runCroxyVideoEngine(videoUrl, watchTime, totalViews) {
+    for (let i = 0; i < totalViews; i++) {
+        let browser;
+        try {
+            console.log(`[SESSION ${i+1}] Starting...`);
+            browser = await puppeteer.launch({
+                headless: "new",
+                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            });
+
+            const page = await browser.newPage();
+
+            // Mobile Setup (Sahi coordination ke liye)
+            await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+            await page.setUserAgent('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36');
+
+            // STEP 1: CroxyProxy open karna
+            await page.goto('https://www.croxyproxy.rocks/', { waitUntil: 'networkidle2' });
+            latestScreenshot = await page.screenshot(); 
+
+            // STEP 2: URL daalna aur submit karna
+            const inputSelector = '#url';
+            await page.waitForSelector(inputSelector);
+            await page.type(inputSelector, videoUrl);
+            await page.click('#requestSubmit'); 
+            console.log("URL Submitted. 60 Seconds wait starts now...");
+
+            // --- STEP 3: 60 SECONDS WAIT (Loading Buffer) ---
+            // Is 60 sec ke dauran hum har 5 sec me screenshot lenge taaki user ko lage system chal raha hai
+            for(let wait = 5; wait <= 60; wait += 5) {
+                await new Promise(r => setTimeout(r, 5000));
+                latestScreenshot = await page.screenshot();
+                console.log(`Loading Video: ${wait}/60s`);
+            }
+
+            // STEP 4: Video ke center me click karna (Video upar load hota hai)
+            // Mobile screen (390 width) ke hisab se center (195) aur upar ka area (250-300 height)
+            await page.mouse.click(195, 200); 
+            console.log("60 Seconds Over: Video Center Clicked ✅");
+            latestScreenshot = await page.screenshot();
+
+            // STEP 5: WATCH TIME COUNTING (Ab shuru hogi)
+            let elapsed = 0;
+            const watchLimit = parseInt(watchTime);
+            
+            console.log("Watching started...");
+            while (elapsed < watchLimit) {
+                await new Promise(r => setTimeout(r, 3000)); // Har 3 sec me update
+                elapsed += 3;
+                
+                latestScreenshot = await page.screenshot();
+                console.log(`[WATCHING] Session ${i+1}: ${elapsed}/${watchLimit}s`);
+            }
+
+            console.log(`[SUCCESS] Session ${i+1} completed.`);
+
+        } catch (error) {
+            console.error("Session Error:", error.message);
+        } finally {
+            if (browser) await browser.close();
+            await new Promise(r => setTimeout(r, 2000)); // Render Safety
+        }
+    }
+}
+
+// 3. API Endpoint
+app.post('/api/real-view-boost', async (req, res) => {
+    const { channel_url, views_count, watch_time } = req.body;
+    if(!channel_url) return res.status(400).json({ error: "Video URL missing" });
+
+    res.json({ 
+        success: true, 
+        message: "Engine Started! 60s loading then play." 
+    });
+
+    runCroxyVideoEngine(channel_url, watch_time, views_count);
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
