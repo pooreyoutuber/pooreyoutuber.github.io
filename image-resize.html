@@ -1,359 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProEdit | Advanced Image Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --primary: #4169e1;
-            --primary-hover: #3152c9;
-            --bg: #f4f7fa;
-            --card-bg: #ffffff;
-            --text: #2d3436;
-            --border: #dfe6e9;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProEdit | All-in-One Image Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4169e1;
+            --primary-hover: #3152c9;
+            --bg: #f4f7fa;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --border: #dfe6e9;
+        }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
 
-        .top-toolbar {
-            display: flex;
-            justify-content: center;
-            background: white;
-            padding: 15px;
-            border-bottom: 1px solid var(--border);
-            overflow-x: auto;
-            gap: 15px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        .top-toolbar {
+            display: flex;
+            justify-content: center;
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            white-space: nowrap;
+            gap: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
 
-        .tool-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #f8f9fa;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            color: #636e72;
-            font-size: 10px;
-            font-weight: 700;
-            transition: 0.2s;
-            min-width: 75px;
-        }
+        .tool-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #636e72;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: 0.3s;
+            min-width: 60px;
+        }
 
-        .tool-btn i { font-size: 18px; margin-bottom: 4px; }
-        .tool-btn:hover, .tool-btn.active { 
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
+        .tool-btn i { font-size: 20px; margin-bottom: 6px; }
+        .tool-btn:hover, .tool-btn.active { color: var(--primary); }
 
-        .workspace {
-            display: flex;
-            max-width: 1400px;
-            margin: 20px auto;
-            gap: 20px;
-            padding: 0 20px;
-            height: calc(100vh - 150px);
-        }
+        .workspace {
+            display: flex;
+            max-width: 1400px;
+            margin: 20px auto;
+            gap: 20px;
+            padding: 0 20px;
+            height: calc(100vh - 120px);
+        }
 
-        .editor-container {
-            flex: 2;
-            background: #d1d8e0;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            border: 2px dashed #a5b1c2;
-            cursor: crosshair;
-        }
+        .editor-container {
+            flex: 2;
+            background: #e1e4e8;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px dashed #bdc3c7;
+        }
 
-        #preview-img {
-            max-width: 90%;
-            max-height: 90%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            background: white;
-            user-select: none;
-        }
+        #preview-img {
+            max-width: 95%;
+            max-height: 95%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            background: white;
+            transition: transform 0.3s ease, border-radius 0.3s ease, filter 0.3s ease;
+        }
 
-        .sidebar {
-            flex: 0 0 350px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            overflow-y: auto;
-        }
+        .sidebar {
+            flex: 0 0 350px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow-y: auto;
+        }
 
-        .section-title { font-size: 16px; font-weight: 700; margin: 15px 0 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; font-weight: 600; color: #636e72; margin-bottom: 5px; }
-        
-        .input-row { display: flex; gap: 8px; }
-        .input-row input, .input-row select { 
-            width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; 
-        }
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; color: #636e72; margin-bottom: 8px; }
+        .input-row { display: flex; gap: 10px; }
+        .input-row input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; }
 
-        .btn-open {
-            width: 100%; padding: 12px; background: #fff; border: 2px solid var(--primary);
-            color: var(--primary); border-radius: 8px; font-weight: 700; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
+        .btn-open {
+            width: 100%; padding: 15px; background: #fff; border: 2px solid var(--primary);
+            color: var(--primary); border-radius: 8px; font-weight: 700; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;
+        }
 
-        .btn-save {
-            width: 100%; padding: 15px; background: #27ae60; color: white; border: none;
-            border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer;
-            margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
+        .btn-save {
+            width: 100%; padding: 18px; background: var(--primary); color: white; border: none;
+            border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer;
+            margin-top: auto; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
 
-        /* Text Overlay Style */
-        #text-overlay {
-            position: absolute;
-            color: white;
-            font-size: 24px;
-            pointer-events: none;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            white-space: nowrap;
-        }
+        .zoom-ctrl { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 10px; border-radius: 12px; margin: 15px 0; }
+        .zoom-btn { background: #636e72; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
+        
+        .history-row { display: flex; justify-content: space-between; margin: 15px 0; }
+        .history-btn { background: none; border: none; font-size: 20px; color: #b2bec3; cursor: pointer; }
 
-        @media (max-width: 992px) {
-            .workspace { flex-direction: column; height: auto; }
-            .sidebar { width: 100%; }
-            .editor-container { height: 400px; }
-        }
-    </style>
+        @media (max-width: 992px) {
+            .workspace { flex-direction: column; height: auto; }
+            .sidebar { flex: none; width: 100%; }
+            .editor-container { height: 400px; }
+        }
+
+        .content-area { max-width: 900px; margin: 60px auto; padding: 40px; background: white; border-radius: 16px; border: 1px solid var(--border); }
+        .content-area h2 { font-size: 28px; margin-bottom: 20px; color: var(--primary); }
+        .content-area p { margin-bottom: 20px; color: #4b5563; font-size: 17px; }
+        .ad-placeholder { background: #f1f3f4; border: 1px solid #e0e0e0; text-align: center; padding: 20px; margin: 20px 0; color: #9aa0a6; border-radius: 8px; font-weight: bold; }
+    </style>
 </head>
 <body>
 
-    <header class="top-toolbar">
-        <button class="tool-btn active" onclick="setMode('resize', this)"><i class="fa-solid fa-expand"></i>RESIZE</button>
-        <button class="tool-btn" onclick="setMode('text', this)"><i class="fa-solid fa-font"></i>ADD TEXT</button>
-        <button class="tool-btn" onclick="applyFilter('grayscale(100%)')"><i class="fa-solid fa-droplet-slash"></i>B&W</button>
-        <button class="tool-btn" onclick="applyFilter('sepia(100%)')"><i class="fa-solid fa-leaf"></i>SEPIA</button>
-        <button class="tool-btn" onclick="applyFilter('blur(5px)')"><i class="fa-solid fa-eye-slash"></i>BLUR</button>
-        <button class="tool-btn" onclick="rotateImg()"><i class="fa-solid fa-rotate-right"></i>ROTATE</button>
-        <button class="tool-btn" style="background:#ff7675; color:white" onclick="resetAll()"><i class="fa-solid fa-trash-can"></i>RESET</button>
-    </header>
+    <header class="top-toolbar">
+        <button class="tool-btn active" onclick="setActive(this)"><i class="fa-solid fa-up-right-and-down-left-from-center"></i>RESIZE</button>
+        <button class="tool-btn" onclick="applyFilter('grayscale(100%)')"><i class="fa-solid fa-crop-simple"></i>GRAYSCALE</button>
+        <button class="tool-btn" onclick="rotateImg()"><i class="fa-solid fa-rotate"></i>TRANSFORM</button>
+        <button class="tool-btn" onclick="applyFilter('sepia(100%)')"><i class="fa-solid fa-pen-nib"></i>SEPIA</button>
+        <button class="tool-btn" onclick="resetAll()"><i class="fa-solid fa-font"></i>RESET</button>
+        <button class="tool-btn" onclick="applyFilter('brightness(1.5)')"><i class="fa-solid fa-shapes"></i>BRIGHT</button>
+        <button class="tool-btn" onclick="applyFilter('contrast(2)')"><i class="fa-solid fa-face-smile"></i>CONTRAST</button>
+        <button class="tool-btn" onclick="applyFilter('blur(5px)')"><i class="fa-solid fa-image"></i>BLUR</button>
+        <button class="tool-btn" onclick="toggleCorners()"><i class="fa-solid fa-square-plus"></i>CORNERS</button>
+    </header>
 
-    <div class="workspace">
-        <div class="editor-container" id="dropzone" onclick="handleImageClick(event)">
-            <img id="preview-img" src="https://via.placeholder.com/800x450/FFFFFF/4169e1?text=Upload+Image+to+Start" alt="Preview">
-            <div id="text-overlay"></div>
-            <input type="file" id="fileInput" hidden accept="image/*">
-        </div>
+    <div class="workspace">
+        <div class="editor-container" id="dropzone">
+            <img id="preview-img" src="https://via.placeholder.com/800x450/FFFFFF/4169e1?text=Upload+Your+Image+Here" alt="Preview">
+            <input type="file" id="fileInput" hidden accept="image/*">
+        </div>
 
-        <aside class="sidebar">
-            <button class="btn-open" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-solid fa-file-import"></i> Choose Image
-            </button>
+        <aside class="sidebar">
+            <button class="btn-open" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-image"></i> Open Image
+            </button>
 
-            <div class="section-title">Dimensions & Size</div>
-            <div class="input-group">
-                <label>Pixels (W x H)</label>
-                <div class="input-row">
-                    <input type="number" id="img-w" placeholder="Width">
-                    <input type="number" id="img-h" placeholder="Height">
-                </div>
-            </div>
+            <div class="ad-placeholder">-- Ad Display Spot --</div>
 
-            <div class="input-group">
-                <label>Target File Size (Optional)</label>
-                <div class="input-row">
-                    <input type="number" id="target-size" placeholder="Value (e.g. 200)">
-                    <select id="size-unit">
-                        <option value="kb">KB</option>
-                        <option value="mb">MB</option>
-                    </select>
-                </div>
-            </div>
+            <div class="section-title"><i class="fa-solid fa-sliders"></i> Adjust Size</div>
+            
+            <div class="input-group">
+                <label>Dimensions (Pixels)</label>
+                <div class="input-row">
+                    <input type="number" id="img-w" placeholder="Width" oninput="syncSize()">
+                    <input type="number" id="img-h" placeholder="Height" oninput="syncSize()">
+                </div>
+            </div>
 
-            <div id="text-controls" style="display:none;">
-                <div class="section-title">Text Settings</div>
-                <div class="input-group">
-                    <label>Text Content</label>
-                    <input type="text" id="text-input" placeholder="Type here..." oninput="updateText()" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
-                </div>
-                <div class="input-row">
-                    <div>
-                        <label>Font Size</label>
-                        <input type="number" id="font-size" value="30" oninput="updateText()">
-                    </div>
-                    <div>
-                        <label>Font Family</label>
-                        <select id="font-family" onchange="updateText()">
-                            <option value="Arial">Arial</option>
-                            <option value="Verdana">Verdana</option>
-                            <option value="Times New Roman">Serif</option>
-                            <option value="Courier New">Monospace</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <div class="zoom-ctrl">
+                <button class="zoom-btn" onclick="adjustZoom(-10)"><i class="fa-solid fa-minus"></i></button>
+                <span id="zoom-val">Zoom 100%</span>
+                <button class="zoom-btn" onclick="adjustZoom(10)"><i class="fa-solid fa-plus"></i></button>
+            </div>
 
-            <button class="btn-save" onclick="downloadImage()">
-                <i class="fa-solid fa-cloud-arrow-down"></i> Export & Download
-            </button>
-        </aside>
-    </div>
+            <div class="history-row">
+                <button class="history-btn" onclick="rotateImg(-90)"><i class="fa-solid fa-rotate-left"></i></button>
+                <button class="history-btn" onclick="rotateImg(90)"><i class="fa-solid fa-rotate-right"></i></button>
+                <button class="history-btn" onclick="resetAll()"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                <button class="history-btn" onclick="alert('Layers Feature coming soon!')"><i class="fa-solid fa-layer-group"></i></button>
+            </div>
 
-    <div class="content-area" style="max-width: 900px; margin: 40px auto; padding: 20px;">
-        <h2 style="color:var(--primary)">Professional Image Resizer</h2>
-        <p>Easily resize, crop, and add text to your images in seconds. Whether you need a specific <strong>KB size</strong> for government forms or a custom resolution for social media, our tool handles it all locally in your browser.</p>
-    </div>
+            <button class="btn-save" onclick="downloadImage()">
+                <i class="fa-solid fa-download"></i> Save Image
+            </button>
+        </aside>
+    </div>
 
-    <canvas id="hiddenCanvas" style="display:none;"></canvas>
+    <div class="content-area">
+        <h2>Professional Online Image Resizer - Fast & Free</h2>
+        <p>In today's digital world, high-quality images are essential for social media, professional websites, and online marketplaces. Our <strong>Pro Image Resizer</strong> offers a seamless, browser-based experience that rivals desktop software like Photoshop. Whether you are adjusting photos for a personal loan application, compressing car insurance document scans, or optimizing graphics for enterprise cloud hosting websites, our tool ensures your files look crisp and clear.</p>
 
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const preview = document.getElementById('preview-img');
-        const imgW = document.getElementById('img-w');
-        const imgH = document.getElementById('img-h');
-        const textOverlay = document.getElementById('text-overlay');
-        const textControls = document.getElementById('text-controls');
-        
-        let originalImg = null;
-        let rotation = 0;
-        let mode = 'resize';
-        let textData = { x: 0, y: 0, content: '', size: 30, font: 'Arial' };
+        <div class="ad-placeholder">-- In-Article Ad --</div>
 
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        originalImg = img;
-                        preview.src = img.src;
-                        imgW.value = img.width;
-                        imgH.value = img.height;
-                        resetAll();
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        <h3>How to Resize Images Without Losing Quality</h3>
+        <p>Resizing images involves changing the pixel dimensions. To maintain quality, our tool uses high-fidelity scaling algorithms. Follow these simple steps:</p>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li><strong>Upload:</strong> Click "Open Image" or drag and drop your file.</li>
+            <li><strong>Input Dimensions:</strong> Enter your desired Width and Height in the sidebar.</li>
+            <li><strong>Enhance:</strong> Use the top toolbar to crop, rotate, or add text if needed.</li>
+            <li><strong>Download:</strong> Hit "Save Image" to export your file instantly.</li>
+        </ul>
 
-        function setMode(newMode, btn) {
-            mode = newMode;
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            textControls.style.display = (mode === 'text') ? 'block' : 'none';
-        }
+        <h3>Best Practices for 2026 Digital Media</h3>
+        <p>For those tracking <strong>Crypto Staking Platform</strong> trends or managing <strong>Personal Loan</strong> marketing in New York, speed is everything. Large images slow down your page. By using this tool to optimize your resolution, you improve SEO and user engagement. Our tool is optimized for 2026 standards, supporting WebP, PNG, and high-res JPEG formats.</p>
+        
+        <p><em>Note: This tool runs entirely in your browser. Your images are never uploaded to our servers, ensuring 100% privacy for sensitive legal or financial documents.</em></p>
+    </div>
 
-        function handleImageClick(e) {
-            if (mode === 'text') {
-                const rect = preview.getBoundingClientRect();
-                textData.x = e.clientX - rect.left;
-                textData.y = e.clientY - rect.top;
-                updateText();
-            }
-        }
+    <canvas id="hiddenCanvas" style="display:none;"></canvas>
 
-        function updateText() {
-            textData.content = document.getElementById('text-input').value;
-            textData.size = document.getElementById('font-size').value;
-            textData.font = document.getElementById('font-family').value;
-            
-            textOverlay.innerText = textData.content;
-            textOverlay.style.left = textData.x + "px";
-            textOverlay.style.top = textData.y + "px";
-            textOverlay.style.fontSize = textData.size + "px";
-            textOverlay.style.fontFamily = textData.font;
-        }
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview-img');
+        const imgW = document.getElementById('img-w');
+        const imgH = document.getElementById('img-h');
+        const zoomText = document.getElementById('zoom-val');
+        
+        let currentZoom = 100;
+        let rotation = 0;
+        let isRounded = false;
+        let currentFilter = 'none';
+        let originalImg = null;
 
-        function applyFilter(filter) {
-            preview.style.filter = filter;
-        }
+        // Image Upload
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.src = event.target.result;
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        originalImg = img;
+                        imgW.value = img.width;
+                        imgH.value = img.height;
+                        resetAll();
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-        function rotateImg() {
-            rotation = (rotation + 90) % 360;
-            preview.style.transform = `rotate(${rotation}deg)`;
-        }
+        // Zoom Logic
+        function adjustZoom(val) {
+            currentZoom += val;
+            if(currentZoom < 10) currentZoom = 10;
+            updateTransform();
+        }
 
-        function resetAll() {
-            rotation = 0;
-            preview.style.filter = 'none';
-            preview.style.transform = 'none';
-            textOverlay.innerText = '';
-            document.getElementById('text-input').value = '';
-        }
+        // Rotate Logic
+        function rotateImg(deg = 90) {
+            rotation += deg;
+            updateTransform();
+        }
 
-        async function downloadImage() {
-            if (!originalImg) return alert("Please upload an image!");
+        function updateTransform() {
+            preview.style.transform = `scale(${currentZoom / 100}) rotate(${rotation}deg)`;
+            zoomText.innerText = `Zoom ${currentZoom}%`;
+        }
 
-            const canvas = document.getElementById('hiddenCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const finalW = parseInt(imgW.value);
-            const finalH = parseInt(imgH.value);
-            const targetSizeVal = parseFloat(document.getElementById('target-size').value);
-            const unit = document.getElementById('size-unit').value;
+        // Filter Logic
+        function applyFilter(filterStr) {
+            currentFilter = filterStr;
+            preview.style.filter = filterStr;
+        }
 
-            canvas.width = finalW;
-            canvas.height = finalH;
+        // Corners Logic
+        function toggleCorners() {
+            isRounded = !isRounded;
+            preview.style.borderRadius = isRounded ? "50px" : "0px";
+        }
 
-            // Apply Filters & Rotation
-            ctx.filter = preview.style.filter;
-            ctx.translate(canvas.width/2, canvas.height/2);
-            ctx.rotate(rotation * Math.PI / 180);
-            ctx.drawImage(originalImg, -finalW/2, -finalH/2, finalW, finalH);
-            
-            // Add Text
-            if (textData.content) {
-                ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for text
-                ctx.font = `${textData.size}px ${textData.font}`;
-                ctx.fillStyle = "white";
-                ctx.shadowColor = "black";
-                ctx.shadowBlur = 7;
-                // Scale text position relative to canvas size
-                const scaleX = finalW / preview.clientWidth;
-                const scaleY = finalH / preview.clientHeight;
-                ctx.fillText(textData.content, textData.x * scaleX, textData.y * scaleY);
-            }
+        // Reset
+        function resetAll() {
+            rotation = 0;
+            currentZoom = 100;
+            isRounded = false;
+            currentFilter = 'none';
+            preview.style.filter = 'none';
+            preview.style.borderRadius = "0px";
+            updateTransform();
+        }
 
-            // Quality logic for Target KB
-            let quality = 0.9;
-            let dataUrl = canvas.toDataURL('image/jpeg', quality);
-            
-            if (targetSizeVal) {
-                const targetBytes = unit === 'kb' ? targetSizeVal * 1024 : targetSizeVal * 1024 * 1024;
-                // Binary search for quality to match file size
-                for (let i = 0; i < 5; i++) {
-                    const size = Math.round((dataUrl.split(',')[1].length * 3) / 4);
-                    if (size > targetBytes) {
-                        quality -= 0.15;
-                        dataUrl = canvas.toDataURL('image/jpeg', Math.max(0.1, quality));
-                    }
-                }
-            }
+        function setActive(btn) {
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
 
-            const link = document.createElement('a');
-            link.download = 'proedit-image.jpg';
-            link.href = dataUrl;
-            link.click();
-        }
-    </script>
+        // Download (With all edits)
+        function downloadImage() {
+            if (!originalImg) return alert("Please upload an image first!");
+            
+            const canvas = document.getElementById('hiddenCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const finalW = parseInt(imgW.value) || originalImg.width;
+            const finalH = parseInt(imgH.value) || originalImg.height;
+
+            canvas.width = finalW;
+            canvas.height = finalH;
+
+            // Apply filters to canvas
+            ctx.filter = preview.style.filter;
+
+            // Handle Rotation
+            ctx.translate(canvas.width/2, canvas.height/2);
+            ctx.rotate(rotation * Math.PI / 180);
+            
+            // Draw
+            ctx.drawImage(originalImg, -finalW/2, -finalH/2, finalW, finalH);
+            
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
 </body>
-</html>
+</html> 
