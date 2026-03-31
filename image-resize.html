@@ -26,7 +26,6 @@
             line-height: 1.6;
         }
 
-        /* Header & Top Navigation */
         .top-toolbar {
             display: flex;
             justify-content: center;
@@ -55,10 +54,8 @@
         }
 
         .tool-btn i { font-size: 20px; margin-bottom: 6px; }
-        .tool-btn:hover { color: var(--primary); }
-        .tool-btn.active { color: var(--primary); }
+        .tool-btn:hover, .tool-btn.active { color: var(--primary); }
 
-        /* Main Workspace Layout */
         .workspace {
             display: flex;
             max-width: 1400px;
@@ -68,7 +65,6 @@
             height: calc(100vh - 120px);
         }
 
-        /* Left Side - Editor */
         .editor-container {
             flex: 2;
             background: #e1e4e8;
@@ -86,10 +82,9 @@
             max-height: 95%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             background: white;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, border-radius 0.3s ease, filter 0.3s ease;
         }
 
-        /* Right Side - Controls */
         .sidebar {
             flex: 0 0 350px;
             background: var(--card-bg);
@@ -102,88 +97,53 @@
         }
 
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; font-size: 13px; font-weight: 600; color: #636e72; margin-bottom: 8px; }
         .input-row { display: flex; gap: 10px; }
         .input-row input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; }
 
         .btn-open {
-            width: 100%;
-            padding: 15px;
-            background: #fff;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            transition: 0.2s;
+            width: 100%; padding: 15px; background: #fff; border: 2px solid var(--primary);
+            color: var(--primary); border-radius: 8px; font-weight: 700; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;
         }
-
-        .btn-open:hover { background: #f0f4ff; }
 
         .btn-save {
-            width: 100%;
-            padding: 18px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: auto;
-            transition: 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
+            width: 100%; padding: 18px; background: var(--primary); color: white; border: none;
+            border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer;
+            margin-top: auto; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
 
-        .btn-save:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(65,105,225,0.3); }
-
-        /* Zoom & History Controls */
         .zoom-ctrl { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 10px; border-radius: 12px; margin: 15px 0; }
         .zoom-btn { background: #636e72; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
         
         .history-row { display: flex; justify-content: space-between; margin: 15px 0; }
-        .history-btn { background: none; border: none; font-size: 20px; color: #b2bec3; cursor: pointer; transition: 0.2s; }
-        .history-btn:hover { color: var(--text); }
+        .history-btn { background: none; border: none; font-size: 20px; color: #b2bec3; cursor: pointer; }
 
-        /* Responsive */
         @media (max-width: 992px) {
             .workspace { flex-direction: column; height: auto; }
             .sidebar { flex: none; width: 100%; }
             .editor-container { height: 400px; }
-            .top-toolbar { justify-content: flex-start; }
         }
 
-        /* SEO & Content Section */
         .content-area { max-width: 900px; margin: 60px auto; padding: 40px; background: white; border-radius: 16px; border: 1px solid var(--border); }
         .content-area h2 { font-size: 28px; margin-bottom: 20px; color: var(--primary); }
         .content-area p { margin-bottom: 20px; color: #4b5563; font-size: 17px; }
-
-        /* Fake Ad Slots */
         .ad-placeholder { background: #f1f3f4; border: 1px solid #e0e0e0; text-align: center; padding: 20px; margin: 20px 0; color: #9aa0a6; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <header class="top-toolbar">
-        <button class="tool-btn active"><i class="fa-solid fa-up-right-and-down-left-from-center"></i>RESIZE</button>
-        <button class="tool-btn"><i class="fa-solid fa-crop-simple"></i>CROP</button>
-        <button class="tool-btn"><i class="fa-solid fa-rotate"></i>TRANSFORM</button>
-        <button class="tool-btn"><i class="fa-solid fa-pen-nib"></i>DRAW</button>
-        <button class="tool-btn"><i class="fa-solid fa-font"></i>TEXT</button>
-        <button class="tool-btn"><i class="fa-solid fa-shapes"></i>SHAPES</button>
-        <button class="tool-btn"><i class="fa-solid fa-face-smile"></i>STICKERS</button>
-        <button class="tool-btn"><i class="fa-solid fa-image"></i>FRAME</button>
-        <button class="tool-btn"><i class="fa-solid fa-square-plus"></i>CORNERS</button>
+        <button class="tool-btn active" onclick="setActive(this)"><i class="fa-solid fa-up-right-and-down-left-from-center"></i>RESIZE</button>
+        <button class="tool-btn" onclick="applyFilter('grayscale(100%)')"><i class="fa-solid fa-crop-simple"></i>GRAYSCALE</button>
+        <button class="tool-btn" onclick="rotateImg()"><i class="fa-solid fa-rotate"></i>TRANSFORM</button>
+        <button class="tool-btn" onclick="applyFilter('sepia(100%)')"><i class="fa-solid fa-pen-nib"></i>SEPIA</button>
+        <button class="tool-btn" onclick="resetAll()"><i class="fa-solid fa-font"></i>RESET</button>
+        <button class="tool-btn" onclick="applyFilter('brightness(1.5)')"><i class="fa-solid fa-shapes"></i>BRIGHT</button>
+        <button class="tool-btn" onclick="applyFilter('contrast(2)')"><i class="fa-solid fa-face-smile"></i>CONTRAST</button>
+        <button class="tool-btn" onclick="applyFilter('blur(5px)')"><i class="fa-solid fa-image"></i>BLUR</button>
+        <button class="tool-btn" onclick="toggleCorners()"><i class="fa-solid fa-square-plus"></i>CORNERS</button>
     </header>
 
     <div class="workspace">
@@ -204,8 +164,8 @@
             <div class="input-group">
                 <label>Dimensions (Pixels)</label>
                 <div class="input-row">
-                    <input type="number" id="img-w" placeholder="Width">
-                    <input type="number" id="img-h" placeholder="Height">
+                    <input type="number" id="img-w" placeholder="Width" oninput="syncSize()">
+                    <input type="number" id="img-h" placeholder="Height" oninput="syncSize()">
                 </div>
             </div>
 
@@ -216,10 +176,10 @@
             </div>
 
             <div class="history-row">
-                <button class="history-btn"><i class="fa-solid fa-rotate-left"></i></button>
-                <button class="history-btn"><i class="fa-solid fa-rotate-right"></i></button>
-                <button class="history-btn"><i class="fa-solid fa-clock-rotate-left"></i></button>
-                <button class="history-btn"><i class="fa-solid fa-layer-group"></i></button>
+                <button class="history-btn" onclick="rotateImg(-90)"><i class="fa-solid fa-rotate-left"></i></button>
+                <button class="history-btn" onclick="rotateImg(90)"><i class="fa-solid fa-rotate-right"></i></button>
+                <button class="history-btn" onclick="resetAll()"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                <button class="history-btn" onclick="alert('Layers Feature coming soon!')"><i class="fa-solid fa-layer-group"></i></button>
             </div>
 
             <button class="btn-save" onclick="downloadImage()">
@@ -257,9 +217,14 @@
         const imgW = document.getElementById('img-w');
         const imgH = document.getElementById('img-h');
         const zoomText = document.getElementById('zoom-val');
+        
         let currentZoom = 100;
+        let rotation = 0;
+        let isRounded = false;
+        let currentFilter = 'none';
         let originalImg = null;
 
+        // Image Upload
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -272,29 +237,81 @@
                         originalImg = img;
                         imgW.value = img.width;
                         imgH.value = img.height;
+                        resetAll();
                     }
                 };
                 reader.readAsDataURL(file);
             }
         });
 
+        // Zoom Logic
         function adjustZoom(val) {
             currentZoom += val;
             if(currentZoom < 10) currentZoom = 10;
-            preview.style.transform = `scale(${currentZoom / 100})`;
+            updateTransform();
+        }
+
+        // Rotate Logic
+        function rotateImg(deg = 90) {
+            rotation += deg;
+            updateTransform();
+        }
+
+        function updateTransform() {
+            preview.style.transform = `scale(${currentZoom / 100}) rotate(${rotation}deg)`;
             zoomText.innerText = `Zoom ${currentZoom}%`;
         }
 
+        // Filter Logic
+        function applyFilter(filterStr) {
+            currentFilter = filterStr;
+            preview.style.filter = filterStr;
+        }
+
+        // Corners Logic
+        function toggleCorners() {
+            isRounded = !isRounded;
+            preview.style.borderRadius = isRounded ? "50px" : "0px";
+        }
+
+        // Reset
+        function resetAll() {
+            rotation = 0;
+            currentZoom = 100;
+            isRounded = false;
+            currentFilter = 'none';
+            preview.style.filter = 'none';
+            preview.style.borderRadius = "0px";
+            updateTransform();
+        }
+
+        function setActive(btn) {
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Download (With all edits)
         function downloadImage() {
             if (!originalImg) return alert("Please upload an image first!");
             
             const canvas = document.getElementById('hiddenCanvas');
             const ctx = canvas.getContext('2d');
             
-            canvas.width = imgW.value || originalImg.width;
-            canvas.height = imgH.value || originalImg.height;
+            const finalW = parseInt(imgW.value) || originalImg.width;
+            const finalH = parseInt(imgH.value) || originalImg.height;
+
+            canvas.width = finalW;
+            canvas.height = finalH;
+
+            // Apply filters to canvas
+            ctx.filter = preview.style.filter;
+
+            // Handle Rotation
+            ctx.translate(canvas.width/2, canvas.height/2);
+            ctx.rotate(rotation * Math.PI / 180);
             
-            ctx.drawImage(preview, 0, 0, canvas.width, canvas.height);
+            // Draw
+            ctx.drawImage(originalImg, -finalW/2, -finalH/2, finalW, finalH);
             
             const link = document.createElement('a');
             link.download = 'edited-image.png';
