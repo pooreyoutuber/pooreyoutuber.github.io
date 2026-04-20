@@ -383,18 +383,23 @@
         const playerContainer = document.getElementById('players');
         const autoPlayStatus = document.getElementById('autoplaySetting').value;
         
-const platforms = [
-             "https://www.youtube.com/feed/trending",
-             "https://www.youtube.com/feed/subscriptions",
-               "https://m.youtube.com/",
-              "https://www.youtube.com/results?search_query=shorts",
-            "https://www.youtube.com/search",
-            "https://www.google.com",
-            "https://www.facebook.com",
-            "https://www.instagram.com",
-            "https://t.co", 
-            "https://www.bing.com"
-        ];
+const socialPlatforms = [
+            "https://www.facebook.com",
+            "https://l.facebook.com/",
+            "https://www.instagram.com",
+            "https://t.co", // This is X (Twitter)
+            "https://twitter.com"
+        ];
+
+        // 30% Other sources
+        const otherPlatforms = [
+            "https://www.youtube.com/feed/trending",
+            "https://m.youtube.com/",
+            "https://www.google.com",
+            "https://www.bing.com",
+            "https://www.youtube.com/results?search_query=shorts"
+        ];
+        
         if (!videoId) {
             alert("Please enter a valid YouTube URL");
             return;
@@ -407,6 +412,19 @@ const platforms = [
                 let playerId = 'player-' + i;
                 let div = document.createElement('div');
                 div.id = playerId;
+
+                // Logic for 70/30 Traffic Split
+                let randomRef;
+                let chance = Math.random() * 100;
+                
+                if (chance <= 70) {
+                    // 70% chance to pick from Social
+                    randomRef = socialPlatforms[Math.floor(Math.random() * socialPlatforms.length)];
+                } else {
+                    // 30% chance to pick from Others
+                    randomRef = otherPlatforms[Math.floor(Math.random() * otherPlatforms.length)];
+                }
+                
                 
                 const randomRef = platforms[Math.floor(Math.random() * platforms.length)];
                 const randomStart = Math.floor(Math.random() * 15);
