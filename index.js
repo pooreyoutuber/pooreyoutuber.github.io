@@ -512,7 +512,6 @@ Requested Change: "${requestedChange}"`;
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
-const puppeteerBase = require('puppeteer');
  async function runGscTaskpop(keyword, url, viewNumber) {
      const ADVANCED_DEVICE_PROFILES = [
         // --- PC / DESKTOP ---
