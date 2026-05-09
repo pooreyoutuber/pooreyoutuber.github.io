@@ -1,6 +1,7 @@
 // ==========================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // ===========================================================
+const { executablePath } = require('puppeteer');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -549,6 +550,7 @@ puppeteer.use(StealthPlugin());
     try {
         browser = await puppeteer.launch({
             headless: "new",
+            executablePath: executablePath(),
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
