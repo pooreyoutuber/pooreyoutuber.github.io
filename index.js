@@ -2,7 +2,6 @@
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // ===========================================================
 const fs = require('fs'); // <--- Ab ye define ho gaya
-const path = require('path');
 const { executablePath } = require('puppeteer');
 const renderPath = '/opt/render/project/src/.cache/puppeteer';
 if (fs.existsSync(renderPath)) {
