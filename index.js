@@ -1,6 +1,7 @@
 // ==========================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // ===========================================================
+executablePath: '/opt/render/project/src/.cache/puppeteer/chrome/linux-126.0.6478.126/chrome-linux64/chrome',
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 // --- Imports (Node.js Modules) ---
 const express = require('express');
