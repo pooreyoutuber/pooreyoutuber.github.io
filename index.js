@@ -3,11 +3,6 @@
 // ===========================================================
 const fs = require('fs'); // <--- Ab ye define ho gaya
 const { executablePath } = require('puppeteer');
-const renderPath = '/opt/render/project/src/.cache/puppeteer';
-if (fs.existsSync(renderPath)) {
-    // Agar render ka cache folder exist karta hai, toh manually specify mat karo 
-    // Bas 'executablePath()' ko hi use hone do, wo automatically cache uthayega
-}
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 // --- Imports (Node.js Modules) ---
 const express = require('express');
