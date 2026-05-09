@@ -549,7 +549,7 @@ puppeteer.use(StealthPlugin());
     try {
         browser = await puppeteer.launch({
             headless: "new",
-            executablePath: '/opt/render/project/src/.cache/puppeteer/chrome/linux-126.0.6478.126/chrome-linux64/chrome',
+            executablePath: executablePath() || '/opt/render/project/src/chrome',
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox', 
