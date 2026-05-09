@@ -1,6 +1,8 @@
 // ==========================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // ===========================================================
+const fs = require('fs'); // <--- Ab ye define ho gaya
+const path = require('path');
 const { executablePath } = require('puppeteer');
 const renderPath = '/opt/render/project/src/.cache/puppeteer';
 if (fs.existsSync(renderPath)) {
@@ -11,8 +13,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 // --- Imports (Node.js Modules) ---
 const express = require('express');
 const nodeFetch = require('node-fetch'); 
-const cors = require('cors'); 
-const fs = require('fs'); 
+const cors = require('cors');  
 const path = require('path');
 const crypto = require('crypto');
 const axios = require('axios');
