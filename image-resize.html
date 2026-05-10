@@ -1,323 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProEdit | All-in-One Image Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --primary: #4169e1;
-            --primary-hover: #3152c9;
-            --bg: #f4f7fa;
-            --card-bg: #ffffff;
-            --text: #2d3436;
-            --border: #dfe6e9;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProEdit | Professional Image Resizer & Editor</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google AdSense (Replace ca-pub-XXXX with your ID) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossorigin="anonymous"></script>
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --bg: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+        }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .top-toolbar {
-            display: flex;
-            justify-content: center;
-            background: white;
-            padding: 15px;
-            border-bottom: 1px solid var(--border);
-            overflow-x: auto;
-            white-space: nowrap;
-            gap: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
 
-        .tool-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #636e72;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            transition: 0.3s;
-            min-width: 60px;
-        }
+        /* Ad Slot Styles */
+        .ad-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            margin: 15px 0;
+            overflow: hidden;
+            border-radius: 8px;
+        }
 
-        .tool-btn i { font-size: 20px; margin-bottom: 6px; }
-        .tool-btn:hover, .tool-btn.active { color: var(--primary); }
+        /* Layout Structure */
+        .app-header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-        .workspace {
-            display: flex;
-            max-width: 1400px;
-            margin: 20px auto;
-            gap: 20px;
-            padding: 0 20px;
-            height: calc(100vh - 120px);
-        }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
 
-        .editor-container {
-            flex: 2;
-            background: #e1e4e8;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            border: 2px dashed #bdc3c7;
-        }
+        .main-wrapper {
+            display: flex;
+            max-width: 1600px;
+            margin: 0 auto;
+            height: calc(100vh - 70px);
+        }
 
-        #preview-img {
-            max-width: 95%;
-            max-height: 95%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            background: white;
-            transition: transform 0.3s ease, border-radius 0.3s ease, filter 0.3s ease;
-        }
+        /* Sidebar Control Panel */
+        .sidebar {
+            width: 380px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
 
-        .sidebar {
-            flex: 0 0 350px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            overflow-y: auto;
-        }
+        /* Canvas Area */
+        .editor-stage {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f1f5f9;
+            position: relative;
+        }
 
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 13px; font-weight: 600; color: #636e72; margin-bottom: 8px; }
-        .input-row { display: flex; gap: 10px; }
-        .input-row input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; }
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 2px dashed #cbd5e1;
+            position: relative;
+        }
 
-        .btn-open {
-            width: 100%; padding: 15px; background: #fff; border: 2px solid var(--primary);
-            color: var(--primary); border-radius: 8px; font-weight: 700; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;
-        }
+        #preview-img {
+            max-width: 90%;
+            max-height: 90%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-        .btn-save {
-            width: 100%; padding: 18px; background: var(--primary); color: white; border: none;
-            border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer;
-            margin-top: auto; display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
+        /* UI Components */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-        .zoom-ctrl { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 10px; border-radius: 12px; margin: 15px 0; }
-        .zoom-btn { background: #636e72; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
-        
-        .history-row { display: flex; justify-content: space-between; margin: 15px 0; }
-        .history-btn { background: none; border: none; font-size: 20px; color: #b2bec3; cursor: pointer; }
+        .filter-btn {
+            padding: 10px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
 
-        @media (max-width: 992px) {
-            .workspace { flex-direction: column; height: auto; }
-            .sidebar { flex: none; width: 100%; }
-            .editor-container { height: 400px; }
-        }
+        .filter-btn:hover { border-color: var(--primary); color: var(--primary); background: #f5f3ff; }
 
-        .content-area { max-width: 900px; margin: 60px auto; padding: 40px; background: white; border-radius: 16px; border: 1px solid var(--border); }
-        .content-area h2 { font-size: 28px; margin-bottom: 20px; color: var(--primary); }
-        .content-area p { margin-bottom: 20px; color: #4b5563; font-size: 17px; }
-        .ad-placeholder { background: #f1f3f4; border: 1px solid #e0e0e0; text-align: center; padding: 20px; margin: 20px 0; color: #9aa0a6; border-radius: 8px; font-weight: bold; }
-    </style>
+        .control-label { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; display: block; color: var(--text-muted); }
+
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .input-box:focus { border-color: var(--primary); ring: 2px solid #c7d2fe; }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
+
+        /* Articles Section */
+        .content-section {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .content-section h2 { font-size: 2rem; margin-bottom: 20px; color: var(--text-main); }
+        .content-section p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--text-muted); }
+
+        @media (max-width: 1024px) {
+            .main-wrapper { flex-direction: column; height: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+            .editor-stage { height: 500px; padding: 20px; }
+        }
+    </style>
 </head>
 <body>
 
-    <header class="top-toolbar">
-        <button class="tool-btn active" onclick="setActive(this)"><i class="fa-solid fa-up-right-and-down-left-from-center"></i>RESIZE</button>
-        <button class="tool-btn" onclick="applyFilter('grayscale(100%)')"><i class="fa-solid fa-crop-simple"></i>GRAYSCALE</button>
-        <button class="tool-btn" onclick="rotateImg()"><i class="fa-solid fa-rotate"></i>TRANSFORM</button>
-        <button class="tool-btn" onclick="applyFilter('sepia(100%)')"><i class="fa-solid fa-pen-nib"></i>SEPIA</button>
-        <button class="tool-btn" onclick="resetAll()"><i class="fa-solid fa-font"></i>RESET</button>
-        <button class="tool-btn" onclick="applyFilter('brightness(1.5)')"><i class="fa-solid fa-shapes"></i>BRIGHT</button>
-        <button class="tool-btn" onclick="applyFilter('contrast(2)')"><i class="fa-solid fa-face-smile"></i>CONTRAST</button>
-        <button class="tool-btn" onclick="applyFilter('blur(5px)')"><i class="fa-solid fa-image"></i>BLUR</button>
-        <button class="tool-btn" onclick="toggleCorners()"><i class="fa-solid fa-square-plus"></i>CORNERS</button>
-    </header>
+    <header class="app-header">
+        <div class="logo"><i class="fa-solid fa-wand-magic-sparkles"></i> ProEdit</div>
+        <div class="header-ads" style="max-width: 468px; width: 100%;">
+            <!-- Top Header Ad -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXX"
+                 data-ad-slot="XXXXXXX"
+                 data-ad-format="horizontal"
+                 data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+    </header>
 
-    <div class="workspace">
-        <div class="editor-container" id="dropzone">
-            <img id="preview-img" src="https://via.placeholder.com/800x450/FFFFFF/4169e1?text=Upload+Your+Image+Here" alt="Preview">
-            <input type="file" id="fileInput" hidden accept="image/*">
-        </div>
+    <div class="main-wrapper">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar">
+            <button class="action-btn btn-outline" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Image
+            </button>
+            <input type="file" id="fileInput" hidden accept="image/*">
 
-        <aside class="sidebar">
-            <button class="btn-open" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-solid fa-image"></i> Open Image
-            </button>
+            <div class="sidebar-ad">
+                <!-- Sidebar Square Ad -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXX"
+                     data-ad-slot="XXXXXXX"
+                     data-ad-format="rectangle"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
 
-            <div class="ad-placeholder">-- Ad Display Spot --</div>
+            <div>
+                <span class="control-label">QUICK FILTERS</span>
+                <div class="tool-grid">
+                    <button class="filter-btn" onclick="applyFilter('grayscale(100%)')">B&W</button>
+                    <button class="filter-btn" onclick="applyFilter('sepia(100%)')">Retro</button>
+                    <button class="filter-btn" onclick="applyFilter('brightness(1.5)')">Bright</button>
+                    <button class="filter-btn" onclick="applyFilter('contrast(1.8)')">Vivid</button>
+                    <button class="filter-btn" onclick="applyFilter('blur(4px)')">Soft</button>
+                    <button class="filter-btn" onclick="resetAll()">Reset</button>
+                </div>
+            </div>
 
-            <div class="section-title"><i class="fa-solid fa-sliders"></i> Adjust Size</div>
-            
-            <div class="input-group">
-                <label>Dimensions (Pixels)</label>
-                <div class="input-row">
-                    <input type="number" id="img-w" placeholder="Width" oninput="syncSize()">
-                    <input type="number" id="img-h" placeholder="Height" oninput="syncSize()">
-                </div>
-            </div>
+            <div>
+                <span class="control-label">RESITION (PX)</span>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="img-w" class="input-box" placeholder="Width">
+                    <input type="number" id="img-h" class="input-box" placeholder="Height">
+                </div>
+            </div>
 
-            <div class="zoom-ctrl">
-                <button class="zoom-btn" onclick="adjustZoom(-10)"><i class="fa-solid fa-minus"></i></button>
-                <span id="zoom-val">Zoom 100%</span>
-                <button class="zoom-btn" onclick="adjustZoom(10)"><i class="fa-solid fa-plus"></i></button>
-            </div>
+            <div>
+                <span class="control-label">TRANSFORM</span>
+                <div style="display: flex; gap: 10px;">
+                    <button class="filter-btn" style="flex:1" onclick="rotateImg(-90)"><i class="fa-solid fa-rotate-left"></i> Left</button>
+                    <button class="filter-btn" style="flex:1" onclick="rotateImg(90)"><i class="fa-solid fa-rotate-right"></i> Right</button>
+                </div>
+            </div>
 
-            <div class="history-row">
-                <button class="history-btn" onclick="rotateImg(-90)"><i class="fa-solid fa-rotate-left"></i></button>
-                <button class="history-btn" onclick="rotateImg(90)"><i class="fa-solid fa-rotate-right"></i></button>
-                <button class="history-btn" onclick="resetAll()"><i class="fa-solid fa-clock-rotate-left"></i></button>
-                <button class="history-btn" onclick="alert('Layers Feature coming soon!')"><i class="fa-solid fa-layer-group"></i></button>
-            </div>
+            <button class="action-btn btn-primary" onclick="downloadImage()">
+                <i class="fa-solid fa-download"></i> Export Result
+            </button>
+        </aside>
 
-            <button class="btn-save" onclick="downloadImage()">
-                <i class="fa-solid fa-download"></i> Save Image
-            </button>
-        </aside>
-    </div>
+        <!-- Main Editor -->
+        <main class="editor-stage">
+            <div class="canvas-container" id="dropzone">
+                <img id="preview-img" src="https://via.placeholder.com/800x450/e2e8f0/64748b?text=Drag+and+Drop+Image+Here" alt="Preview">
+            </div>
+            
+            <div class="ad-container" style="width: 100%; height: 90px; margin-top: 20px;">
+                <!-- Bottom Tool Ad -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXX"
+                     data-ad-slot="XXXXXXX"
+                     data-ad-format="horizontal"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+        </main>
+    </div>
 
-    <div class="content-area">
-        <h2>Professional Online Image Resizer - Fast & Free</h2>
-        <p>In today's digital world, high-quality images are essential for social media, professional websites, and online marketplaces. Our <strong>Pro Image Resizer</strong> offers a seamless, browser-based experience that rivals desktop software like Photoshop. Whether you are adjusting photos for a personal loan application, compressing car insurance document scans, or optimizing graphics for enterprise cloud hosting websites, our tool ensures your files look crisp and clear.</p>
+    <!-- Content Area -->
+    <div class="content-section">
+        <h2>Professional Image Processing in Your Browser</h2>
+        <p>Welcome to ProEdit, the most advanced <strong>free online image resizer</strong> designed for creators in 2026. Whether you're optimizing photos for <strong>High-Yield Crypto Staking</strong> dashboards, preparing documents for <strong>New York Car Insurance</strong> claims, or scaling graphics for <strong>Enterprise Managed Cloud</strong> solutions, we've got you covered.</p>
+        
+        <div class="ad-container" style="margin: 40px 0;">
+            <!-- In-Article Native Ad -->
+            <ins class="adsbygoogle"
+                 style="display:block; text-align:center;"
+                 data-ad-layout="in-article"
+                 data-ad-format="fluid"
+                 data-ad-client="ca-pub-XXXX"
+                 data-ad-slot="XXXXXXX"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
 
-        <div class="ad-placeholder">-- In-Article Ad --</div>
+        <h3>Why Image Optimization Matters?</h3>
+        <p>In the digital age, page speed is a ranking factor. Large, unoptimized images can hurt your SEO. Our tool ensures that you can resize, crop, and filter images without losing quality. We use client-side processing, meaning your <strong>Personal Loan</strong> documents or sensitive financial images stay on your computer and are never uploaded to any server.</p>
+    </div>
 
-        <h3>How to Resize Images Without Losing Quality</h3>
-        <p>Resizing images involves changing the pixel dimensions. To maintain quality, our tool uses high-fidelity scaling algorithms. Follow these simple steps:</p>
-        <ul style="margin-left: 20px; margin-bottom: 20px;">
-            <li><strong>Upload:</strong> Click "Open Image" or drag and drop your file.</li>
-            <li><strong>Input Dimensions:</strong> Enter your desired Width and Height in the sidebar.</li>
-            <li><strong>Enhance:</strong> Use the top toolbar to crop, rotate, or add text if needed.</li>
-            <li><strong>Download:</strong> Hit "Save Image" to export your file instantly.</li>
-        </ul>
+    <canvas id="hiddenCanvas" style="display:none;"></canvas>
 
-        <h3>Best Practices for 2026 Digital Media</h3>
-        <p>For those tracking <strong>Crypto Staking Platform</strong> trends or managing <strong>Personal Loan</strong> marketing in New York, speed is everything. Large images slow down your page. By using this tool to optimize your resolution, you improve SEO and user engagement. Our tool is optimized for 2026 standards, supporting WebP, PNG, and high-res JPEG formats.</p>
-        
-        <p><em>Note: This tool runs entirely in your browser. Your images are never uploaded to our servers, ensuring 100% privacy for sensitive legal or financial documents.</em></p>
-    </div>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview-img');
+        const imgW = document.getElementById('img-w');
+        const imgH = document.getElementById('img-h');
+        
+        let rotation = 0;
+        let originalImg = null;
 
-    <canvas id="hiddenCanvas" style="display:none;"></canvas>
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.src = event.target.result;
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        originalImg = img;
+                        imgW.value = img.width;
+                        imgH.value = img.height;
+                        resetAll();
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const preview = document.getElementById('preview-img');
-        const imgW = document.getElementById('img-w');
-        const imgH = document.getElementById('img-h');
-        const zoomText = document.getElementById('zoom-val');
-        
-        let currentZoom = 100;
-        let rotation = 0;
-        let isRounded = false;
-        let currentFilter = 'none';
-        let originalImg = null;
+        function applyFilter(f) { preview.style.filter = f; }
+        function rotateImg(deg) { rotation += deg; updateTransform(); }
+        function updateTransform() { preview.style.transform = `rotate(${rotation}deg)`; }
+        
+        function resetAll() {
+            rotation = 0;
+            preview.style.filter = 'none';
+            updateTransform();
+        }
 
-        // Image Upload
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    preview.src = event.target.result;
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        originalImg = img;
-                        imgW.value = img.width;
-                        imgH.value = img.height;
-                        resetAll();
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        function downloadImage() {
+            if (!originalImg) return alert("Upload image first!");
+            const canvas = document.getElementById('hiddenCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const w = parseInt(imgW.value) || originalImg.width;
+            const h = parseInt(imgH.value) || originalImg.height;
 
-        // Zoom Logic
-        function adjustZoom(val) {
-            currentZoom += val;
-            if(currentZoom < 10) currentZoom = 10;
-            updateTransform();
-        }
+            canvas.width = w;
+            canvas.height = h;
 
-        // Rotate Logic
-        function rotateImg(deg = 90) {
-            rotation += deg;
-            updateTransform();
-        }
-
-        function updateTransform() {
-            preview.style.transform = `scale(${currentZoom / 100}) rotate(${rotation}deg)`;
-            zoomText.innerText = `Zoom ${currentZoom}%`;
-        }
-
-        // Filter Logic
-        function applyFilter(filterStr) {
-            currentFilter = filterStr;
-            preview.style.filter = filterStr;
-        }
-
-        // Corners Logic
-        function toggleCorners() {
-            isRounded = !isRounded;
-            preview.style.borderRadius = isRounded ? "50px" : "0px";
-        }
-
-        // Reset
-        function resetAll() {
-            rotation = 0;
-            currentZoom = 100;
-            isRounded = false;
-            currentFilter = 'none';
-            preview.style.filter = 'none';
-            preview.style.borderRadius = "0px";
-            updateTransform();
-        }
-
-        function setActive(btn) {
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        // Download (With all edits)
-        function downloadImage() {
-            if (!originalImg) return alert("Please upload an image first!");
-            
-            const canvas = document.getElementById('hiddenCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const finalW = parseInt(imgW.value) || originalImg.width;
-            const finalH = parseInt(imgH.value) || originalImg.height;
-
-            canvas.width = finalW;
-            canvas.height = finalH;
-
-            // Apply filters to canvas
-            ctx.filter = preview.style.filter;
-
-            // Handle Rotation
-            ctx.translate(canvas.width/2, canvas.height/2);
-            ctx.rotate(rotation * Math.PI / 180);
-            
-            // Draw
-            ctx.drawImage(originalImg, -finalW/2, -finalH/2, finalW, finalH);
-            
-            const link = document.createElement('a');
-            link.download = 'edited-image.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-    </script>
+            ctx.filter = preview.style.filter;
+            ctx.translate(w/2, h/2);
+            ctx.rotate(rotation * Math.PI / 180);
+            ctx.drawImage(originalImg, -w/2, -h/2, w, h);
+            
+            const link = document.createElement('a');
+            link.download = 'proedit-optimized.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
 </body>
 </html>
