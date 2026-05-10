@@ -3,458 +3,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Image to PDF Converter & Editor | PooreYouTuber Tools</title>
-
-    <meta name="description" content="Free Image to PDF converter for professionals. Securely prepare documents for personal loans, insurance quotes, legal filings, and enterprise cloud documentation.">
-<meta name="keywords" content="Image to PDF, Secure PDF Converter, Personal Loans USA, Car Insurance New York, Mesothelioma Lawyers, Cloud Hosting Enterprise">
+    <title>Advanced Image to PDF Converter | Pro Editor</title>
     
-    
-
+    <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-ZPMC525FGT');
-</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        /* General Styling */
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #333; text-align: center; margin-bottom: 30px; }
-        
-        .upload-section { margin-bottom: 30px; padding: 20px; border: 2px dashed #007bff; border-radius: 8px; text-align: center; }
-        
-        /* Image List Styling */
-        .image-list { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg); 
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); 
+        }
+
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 2rem; color: #0f172a; margin-bottom: 10px; }
+        .header p { color: #64748b; }
+
+        /* Upload Zone */
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f1f5f9;
+        }
+        .upload-box:hover { border-color: var(--primary); background: #eef2ff; }
+        .upload-box i { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
+        #image-upload { display: none; }
+
+        /* Grid System */
+        .image-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 20px; 
+            margin-top: 30px; 
+        }
+
         .image-card { 
-            position: relative; 
-            border: 1px solid #ddd; 
-            padding: 10px; 
-            border-radius: 8px; 
-            width: 240px; 
-            background: #f9f9f9;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            position: relative;
         }
-        .image-card img { 
-            width: 100%; 
-            height: 150px; 
-            object-fit: contain; 
-            display: block; 
-            margin-bottom: 10px; 
-            border-radius: 4px;
-        }
-        .edit-controls { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 5px; 
-            margin-top: 10px; 
-            justify-content: space-between;
-        }
+        .image-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .image-card img { width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid #e2e8f0; }
         
-        /* Button Styling */
-        .button { background-color: #007bff; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
-        .button:hover { background-color: #0056b3; }
-        .convert-button { width: 100%; margin-top: 30px; padding: 15px; font-size: 18px; background-color: #28a745; }
-        .convert-button:hover { background-color: #1e7e34; }
+        .card-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         
-        .delete-btn { background-color: #dc3545; }
-        .delete-btn:hover { background-color: #c82333; }
-        
-        .filter-select { width: 100%; padding: 6px; border-radius: 4px; margin-top: 5px; }
-
-        /* Cropping Modal Style */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); }
-        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 800px; border-radius: 8px; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-        .close:hover, .close:focus { color: #fff; text-decoration: none; cursor: pointer; }
-        #crop-image-container { max-height: 50vh; margin-bottom: 20px; }
-        #crop-image { max-width: 100%; display: block; }
-        .cropper-view-box { border-radius: 0 !important; }
-
-        /* Content Section Styles for SEO */
-        .content-section {
-            padding: 25px;
-            border: 1px solid #ffe0b2;
-            border-radius: 10px;
-            margin-top: 40px;
-            background-color: #fffaf0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+            font-size: 14px;
         }
-        .content-section h2 {
-            color: #d84315;
-            border-bottom: 2px solid #ffcc80;
-            padding-bottom: 5px;
-            margin-top: 20px;
-        }
-        .content-section ol {
-            padding-left: 20px;
-        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-danger { background: #fee2e2; color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; width: 100%; margin-top: 30px; font-size: 16px; padding: 16px; }
 
-        /* Ad Container Styling */
-        .ad-container { margin: 25px auto; max-width: 90%; text-align: center; }
+        /* Modal Layout */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); }
+        .modal-content { 
+            background: white; 
+            width: 95%; 
+            max-width: 900px; 
+            margin: 2% auto; 
+            padding: 20px; 
+            border-radius: 12px; 
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .crop-area { max-height: 450px; background: #000; margin-bottom: 20px; }
+        .edit-toolbar { display: flex; flex-wrap: wrap; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; }
+        .tool-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+        select, input { padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; }
+
+        /* Content Section */
+        .description-section { margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 30px; }
+        .description-section h2 { color: #1e293b; font-size: 1.5rem; }
+        .description-section p { line-height: 1.6; color: #475569; }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            .edit-toolbar { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📑 Image-to-PDF Converter & Pro Editor</h1>
-        <p>Upload your images, crop, apply filters, and download them as a single PDF file.</p>
+
+<div class="container">
+    <div class="header">
+        <h1>📑 Image-to-PDF Studio</h1>
+        <p>Convert multiple photos into a professional PDF with advanced filters and cropping.</p>
+    </div>
+
+    <!-- Upload Area -->
+    <div class="upload-box" onclick="document.getElementById('image-upload').click()">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <h3>Drag & Drop or Click to Upload</h3>
+        <p>Supports PNG, JPG, and WEBP</p>
+        <input type="file" id="image-upload" multiple accept="image/*">
+    </div>
+
+    <div class="image-grid" id="image-grid">
+        <!-- Cards will appear here -->
+    </div>
+
+    <button class="btn btn-success" id="generate-pdf-btn" onclick="generatePDF()" style="display:none;">
+        <i class="fas fa-file-pdf"></i> Download Merged PDF
+    </button>
+
+    <!-- SEO Content -->
+    <div class="description-section">
+        <h2>Professional Document Preparation Made Easy</h2>
+        <p>Our <strong>Pro Image-to-PDF Converter</strong> is a powerful, client-side utility designed for high-stakes documentation. Whether you are preparing bank statements for <strong>personal loans</strong>, organizing receipts for <strong>tax filings</strong>, or compiling evidence for <strong>legal cases</strong>, our tool ensures your documents look professional.</p>
         
-
-        <div class="image-list" id="image-list">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+            <div>
+                <h4>✨ Advanced Editing</h4>
+                <p>Don't just convert; refine. Use our built-in editor to crop out sensitive information, rotate misplaced scans, and apply filters like <strong>Grayscale</strong> or <strong>Vibrant</strong> to enhance text legibility.</p>
             </div>
-
-      
-        <button class="button convert-button" onclick="convertToPDF()">Convert All Edited Images to PDF and Download</button>
-        <hr>
-          <h2>Professional Solutions for High-Stakes Industries</h2>
-         <p>Our tool is built to handle the rigorous documentation requirements of several professional sectors. By processing files locally, we ensure the security required for sensitive data in these industries:</p>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; font-size: 14px;">
-    <div>
-        <h3>💰 Finance & Lending</h3>
-        <p>When searching for the <strong>Best Personal Loans for Low Credit Score in USA</strong>, applicants often need to merge multiple bank statements and pay stubs into a single PDF. Our editor allows you to crop out sensitive account numbers before submission.</p>
-    </div>
-    <div>
-        <h3>🚗 Insurance Claims</h3>
-        <p>Getting <strong>Cheap Car Insurance Quotes in New York</strong> usually requires submitting clear photos of vehicle registration and damage. Use our grayscale filter to make text on documents more legible for insurance adjusters.</p>
-    </div>
-    <div>
-        <h3>⚖️ Legal & Medical Documentation</h3>
-        <p>Paralegals working for <strong>Top Mesothelioma Lawyers in California</strong> use our tool to compile medical records and evidence photos into professional court-ready PDF documents without compromising client confidentiality.</p>
-    </div>
-    <div>
-        <h3>🖥️ Enterprise Tech & Cloud</h3>
-        <p>IT managers deploying the <strong>Best Managed Cloud Hosting for Enterprise</strong> use our converter to document server rack layouts and infrastructure screenshots for internal audits and technical manuals.</p>
-    </div>
-    <div>
-        <h3>₿ Crypto & Digital Assets</h3>
-        <p>Investors utilizing <strong>High Yield Crypto Staking Platforms 2024</strong> can save their transaction history and dashboard screenshots into a secure PDF for tax reporting and portfolio tracking.</p>
-    </div>
-</div>
-        
-        <div class="content-section">
-            <h2>Tool Introduction: What is the Pro Image-to-PDF Converter?</h2>
-            <p>Our **Pro Image-to-PDF Converter** is a free, fast, and secure online utility designed to help you easily combine one or multiple $\mathbf{JPEG}$ or $\mathbf{PNG}$ files into a single, high-quality $\mathbf{PDF}$ document. This tool is essential for anyone needing to organize digital assets, convert photo collections, notes, or screenshots into a professional, shareable format.</p>
-            <p>Unlike many basic converters, this tool offers **advanced editing features**, including professional **Cropping** using the $\mathbf{Cropper.js}$ library and multiple **Color Filters** like Black & White (Grayscale) and Soft Tone (Sepia). This ensures that your final PDF document is perfectly optimized and ready for printing or digital sharing. Crucially, the entire conversion and editing process is **browser-based**, meaning your images are never uploaded to our servers, guaranteeing your **absolute privacy and data security**.</p>
-
-            <hr>
-
-            <h2>How to Use the Image-to-PDF Tool? (Easy Step-by-Step Guide)</h2>
-            <p>Follow these simple steps to convert and edit your images into a single PDF file efficiently:</p>
-            <ol>
-                <li>**Upload Your Images:** Click on the $\mathbf{"Choose\ File"}$ button above or drag and drop your $\mathbf{PNG}$ or $\mathbf{JPEG}$ files. You can select multiple images at once. Each image will appear in the list below as an editable card.</li>
-                <li>**Edit (Optional but Recommended):** For each image card, click the $\mathbf{"Crop\ /\ Advanced\ Filter"}$ button to open the editing modal.
-                    <ul>
-                        <li>**Cropping:** Use the powerful interface to select the perfect area of your image, eliminating unwanted edges or background.</li>
-                        <li>**Color Filters:** Select from available filters like $\mathbf{Grayscale}$ or $\mathbf{Sepia}$ to adjust the tone for a consistent, document-ready look.</li>
-                        <li>Click $\mathbf{"Apply\ Crop\ and\ Filter"}$ to save your changes to that specific image.</li>
-                    </ul>
-                </li>
-                <li>**Organize and Review:** Ensure your images are in the desired order (though reordering is not supported in this version, it's best to upload them in sequence).</li>
-                <li>**Convert and Download:** Finally, hit the $\mathbf{"Convert\ All\ Edited\ Images\ to\ PDF\ and\ Download"}$ button. The $\mathbf{jsPDF}$ engine will process the files instantly in your browser and your optimized $\mathbf{PDF}$ will be downloaded to your device.</li>
-            </ol>
-        
-            <hr>
-            
-            <h2>Why This Tool is Useful for YouTubers and Content Creators</h2>
-            <p>As a content creator, managing different visual assets is daily work. This $\mathbf{Image-to-PDF}$ converter provides significant utility:</p>
-            <ul>
-                <li>**Documentation:** Easily compile $\mathbf{script\ notes}$, $\mathbf{video\ flowcharts}$, or $\mathbf{research\ screenshots}$ into a single, professional PDF for offline viewing or printing.</li>
-                <li>**Client Proofs:** Convert multiple versions of $\mathbf{thumbnail\ drafts}$ or $\mathbf{cover\ art}$ into one PDF presentation to share with clients or collaborators.</li>
-                <li>**Privacy and Speed:** Because the tool processes everything locally, it’s extremely fast, and you never have to worry about your proprietary content being uploaded to a third-party server.</li>
-            </ul>
-            <p>By offering $\mathbf{High-Resolution\ PDF\ conversion}$ with integrated $\mathbf{advanced\ image\ editing}$, this tool saves you time and ensures your digital documents always look their best. It is an indispensable asset for streamlined content production and professional communication.</p>
+            <div>
+                <h4>🔒 Privacy Guaranteed</h4>
+                <p>Security is our priority. Unlike other converters, we process every image locally within your browser. Your private documents never touch our servers, ensuring 100% data confidentiality.</p>
             </div>
-    </div>
-    
-        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <h3 class="text-pink-600 font-bold mb-2">💰 Finance & Lending Content</h3>
-        <p>If you're a creator explaining the <strong>Best Personal Loans for Low Credit Score in USA</strong>, our AI generates captions that build trust and explain complex APR terms in simple, viral hooks.</p>
-    </div>
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <h3 class="text-pink-600 font-bold mb-2">🚗 Insurance Marketing</h3>
-        <p>Promoting <strong>Cheap Car Insurance Quotes in New York</strong>? Our generator creates captions that target local commuters, focusing on savings and policy benefits for higher lead conversion.</p>
-    </div>
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <h3 class="text-pink-600 font-bold mb-2">⚖️ Legal & Medical Awareness</h3>
-        <p>Legal consultants for <strong>Top Mesothelioma Lawyers in California</strong> use our tool to create empathetic, informative captions for educational reels about patient rights and litigation.</p>
-    </div>
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <h3 class="text-pink-600 font-bold mb-2">🖥️ Enterprise Tech & Cloud</h3>
-        <p>Showcasing the <strong>Best Managed Cloud Hosting for Enterprise</strong>? Get professional, B2B-style captions that highlight uptime, security, and scalable infrastructure for LinkedIn and Instagram.</p>
-    </div>
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <h3 class="text-pink-600 font-bold mb-2">₿ Crypto & DeFi Growth</h3>
-        <p>Educating your audience on <strong>High Yield Crypto Staking Platforms 2026</strong>? Our AI crafts risk-aware yet exciting captions to boost engagement on your latest technical analysis reels.</p>
-    </div>
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <h3 class="text-pink-600 font-bold mb-2">🎥 YouTube & Multi-Browser Tools</h3>
-        <p>Manage your social presence using our <strong>Multi-Browser Power Tool</strong> and use this generator to repurpose your YouTube videos into viral short-form clips with SEO-friendly descriptions.</p>
-    </div>
-</div>
-
-    <div id="crop-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Crop and Edit Image</h2>
-            <div id="crop-image-container">
-                <img id="crop-image" alt="Image to Crop">
-            </div>
-            <button class="button convert-button" style="width:auto; float:right;" onclick="applyCropAndFilter()">Apply Crop and Filter</button>
-            
-            <label for="modal-filter-select" style="font-weight: normal;">Color Filter:</label>
-            <select id="modal-filter-select" class="filter-select" style="width: 200px;">
-                <option value="original">Original</option>
-                <option value="grayscale">Black & White (Grayscale)</option>
-                <option value="sepia">Soft Tone (Sepia)</option>
-                <option value="vibrant">Vibrant (Saturation)</option>
-            </select>
         </div>
     </div>
+</div>
 
-    <script>
-        // **********************************************
-        // ********* JAvaScript Logic *********
-        // **********************************************
-        const { jsPDF } = window.jspdf;
-        const imageList = document.getElementById('image-list');
-        const imageUpload = document.getElementById('image-upload');
-        const cropModal = document.getElementById('crop-modal');
-        const cropImage = document.getElementById('crop-image');
-        const modalFilterSelect = document.getElementById('modal-filter-select');
+<!-- Editor Modal -->
+<div id="editor-modal" class="modal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin:0">Advanced Image Editor</h2>
+            <button class="btn btn-danger" onclick="closeModal()">✕</button>
+        </div>
+        
+        <div class="crop-area">
+            <img id="editor-image" src="">
+        </div>
 
-        let imagesData = [];
-        let cropperInstance = null;
-        let currentImageId = null;
+        <div class="edit-toolbar">
+            <div class="tool-group">
+                <label><i class="fas fa-magic"></i> Color Filter</label>
+                <select id="filter-select">
+                    <option value="none">Original Colors</option>
+                    <option value="grayscale(100%)">Black & White</option>
+                    <option value="sepia(60%)">Soft Tone (Sepia)</option>
+                    <option value="saturate(200%)">Vibrant / Vivid</option>
+                    <option value="brightness(1.2) contrast(1.1)">Document Enhance</option>
+                </select>
+            </div>
+            <div class="tool-group">
+                <label><i class="fas fa-redo"></i> Rotation</label>
+                <div style="display:flex; gap: 5px;">
+                    <button class="btn" onclick="cropper.rotate(-90)">-90°</button>
+                    <button class="btn" onclick="cropper.rotate(90)">+90°</button>
+                </div>
+            </div>
+            <div class="tool-group" style="justify-content: flex-end;">
+                <button class="btn btn-primary" onclick="saveEdits()">Save & Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        // 1. Handling Multiple Images
-        imageUpload.addEventListener('change', (event) => {
-            const files = event.target.files;
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        addImageCard(e.target.result);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-            imageUpload.value = '';
-        });
+<script>
+    const { jsPDF } = window.jspdf;
+    const uploadInput = document.getElementById('image-upload');
+    const imageGrid = document.getElementById('image-grid');
+    const pdfBtn = document.getElementById('generate-pdf-btn');
+    const modal = document.getElementById('editor-modal');
+    const editorImg = document.getElementById('editor-image');
+    
+    let imagesStore = [];
+    let cropper = null;
+    let activeId = null;
 
-        // 2. Creating Image Cards
-        function addImageCard(dataURL) {
-            const id = Date.now();
-            
-            const newImage = {
-                id: id,
-                originalDataURL: dataURL,
-                editedDataURL: dataURL,
-                filter: 'original',
-                cropData: null,
+    // 1. Handle Uploads
+    uploadInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const id = Date.now() + Math.random();
+                imagesStore.push({ id, original: event.target.result, current: event.target.result });
+                renderCards();
             };
-            imagesData.push(newImage);
+            reader.readAsDataURL(file);
+        });
+        uploadInput.value = '';
+    });
 
+    // 2. Render UI Cards
+    function renderCards() {
+        imageGrid.innerHTML = '';
+        imagesStore.forEach(imgData => {
             const card = document.createElement('div');
             card.className = 'image-card';
-            card.dataset.id = id;
-
             card.innerHTML = `
-                <img src="${dataURL}" alt="Uploaded Image" id="img-preview-${id}">
-                <select id="filter-select-${id}" class="filter-select" onchange="updateFilter(${id}, this.value)">
-                    <option value="original">Original</option>
-                    <option value="grayscale">Black & White</option>
-                    <option value="sepia">Soft Tone (Sepia)</option>
-                    <option value="vibrant">Vibrant</option>
-                </select>
-                <div class="edit-controls">
-                    <button class="button" onclick="openCropModal(${id})">Crop / Advanced Filter</button>
-                    <button class="button delete-btn" onclick="deleteImage(${id})">Delete</button>
+                <img src="${imgData.current}">
+                <div class="card-body">
+                    <button class="btn btn-primary" onclick="openEditor(${imgData.id})">
+                        <i class="fas fa-edit"></i> Edit / Crop
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteImage(${imgData.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             `;
-            imageList.appendChild(card);
-        }
-
-        // 3. Updating Filter (for preview only)
-        function updateFilter(id, filterValue) {
-            const imgData = imagesData.find(img => img.id === id);
-            const imgElement = document.getElementById(`img-preview-${id}`);
-            
-            imgData.filter = filterValue; 
-
-            applyCssFilter(imgElement, filterValue);
-        }
-
-        function applyCssFilter(element, filter) {
-            switch (filter) {
-                case 'grayscale':
-                    element.style.filter = 'grayscale(100%)';
-                    break;
-                case 'sepia':
-                    element.style.filter = 'sepia(80%) saturate(120%)';
-                    break;
-                case 'vibrant':
-                    element.style.filter = 'saturate(150%) brightness(110%)';
-                    break;
-                case 'original':
-                default:
-                    element.style.filter = 'none';
-                    break;
-            }
-        }
-
-
-        // 4. Opening Cropping Modal (Unchanged)
-        function openCropModal(id) {
-            const imgData = imagesData.find(img => img.id === id);
-            currentImageId = id;
-            
-            if (cropperInstance) {
-                cropperInstance.destroy();
-            }
-
-            cropImage.src = imgData.originalDataURL;
-            modalFilterSelect.value = imgData.filter; 
-            
-            cropModal.style.display = "block";
-            
-            setTimeout(() => {
-                cropperInstance = new Cropper(cropImage, {
-                    aspectRatio: NaN,
-                    viewMode: 1,
-                    initialAspectRatio: imgData.cropData ? imgData.cropData.width / imgData.cropData.height : NaN,
-                    ready: function () {
-                        if (imgData.cropData) {
-                            this.cropper.setData(imgData.cropData);
-                        }
-                    }
-                });
-            }, 100);
-        }
-        
-        // 5. Applying Crop and Filter (Canvas Logic)
-        function applyCropAndFilter() {
-            const id = currentImageId;
-            const imgData = imagesData.find(img => img.id === id);
-            const selectedFilter = modalFilterSelect.value;
-
-            if (!cropperInstance) return;
-
-            const cropData = cropperInstance.getData();
-            imgData.cropData = cropData; 
-
-            const croppedCanvas = cropperInstance.getCroppedCanvas();
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            canvas.width = croppedCanvas.width;
-            canvas.height = croppedCanvas.height;
-
-            applyCanvasFilter(ctx, selectedFilter);
-
-            ctx.drawImage(croppedCanvas, 0, 0, canvas.width, canvas.height);
-
-            const finalDataURL = canvas.toDataURL('image/jpeg', 0.9);
-            
-            imgData.editedDataURL = finalDataURL;
-            imgData.filter = selectedFilter; 
-            
-            const previewImg = document.getElementById(`img-preview-${id}`);
-            previewImg.src = finalDataURL;
-            previewImg.style.filter = 'none'; 
-            
-            document.getElementById(`filter-select-${id}`).value = selectedFilter;
-            
-            closeModal();
-            // Updated Alert Message
-            alert("Crop and filter applied successfully!");
-        }
-
-        // Canvas Filter Function (Unchanged)
-        function applyCanvasFilter(ctx, filter) {
-            switch (filter) {
-                case 'grayscale':
-                    ctx.filter = 'grayscale(100%)';
-                    break;
-                case 'sepia':
-                    ctx.filter = 'sepia(80%) saturate(120%)';
-                    break;
-                case 'vibrant':
-                    ctx.filter = 'saturate(150%) brightness(110%)';
-                    break;
-                case 'original':
-                default:
-                    ctx.filter = 'none';
-                    break;
-            }
-        }
-
-        // 6. Closing Modal (Unchanged)
-        function closeModal() {
-            cropModal.style.display = "none";
-            if (cropperInstance) {
-                cropperInstance.destroy();
-                cropperInstance = null;
-            }
-        }
-        
-        // 7. Deleting Image (Unchanged)
-        function deleteImage(id) {
-            const card = document.querySelector(`.image-card[data-id="${id}"]`);
-            if (card) {
-                card.remove();
-                imagesData = imagesData.filter(img => img.id !== id);
-            }
-        }
-
-        // 8. Converting to PDF
-        function convertToPDF() {
-            if (imagesData.length === 0) {
-                // Updated Alert Message
-                alert("Please upload one or more images first!");
-                return;
-            }
-
-            const doc = new jsPDF();
-            let isFirstPage = true;
-
-            imagesData.forEach((imgData, index) => {
-                if (!isFirstPage) {
-                    doc.addPage();
-                }
-                
-                const finalDataURL = imgData.editedDataURL;
-
-                const imgProps = doc.getImageProperties(finalDataURL);
-                const pdfWidth = doc.internal.pageSize.getWidth();
-                const pdfHeight = doc.internal.pageSize.getHeight();
-                const ratio = imgProps.width / imgProps.height;
-                
-                let finalImgWidth = pdfWidth * 0.9;
-                let finalImgHeight = finalImgWidth / ratio;
-
-                if (finalImgHeight > pdfHeight * 0.9) { 
-                    finalImgHeight = pdfHeight * 0.9;
-                    finalImgWidth = finalImgHeight * ratio;
-                }
-
-                const x = (pdfWidth - finalImgWidth) / 2;
-                const y = (pdfHeight - finalImgHeight) / 2;
-
-                doc.addImage(finalDataURL, 'JPEG', x, y, finalImgWidth, finalImgHeight);
-                isFirstPage = false;
-            });
-            
-            doc.save("edited_images_to_pdf.pdf");
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Adsense
-            (adsbygoogle = window.adsbygoogle || []).push({});
+            imageGrid.appendChild(card);
         });
-    </script>
+        pdfBtn.style.display = imagesStore.length > 0 ? 'block' : 'none';
+    }
+
+    // 3. Editor Logic
+    function openEditor(id) {
+        activeId = id;
+        const item = imagesStore.find(i => i.id === id);
+        editorImg.src = item.original;
+        modal.style.display = 'block';
+
+        if(cropper) cropper.destroy();
+        
+        setTimeout(() => {
+            cropper = new Cropper(editorImg, {
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 1,
+                checkOrientation: false
+            });
+        }, 100);
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        if(cropper) cropper.destroy();
+    }
+
+    function saveEdits() {
+        const filter = document.getElementById('filter-select').value;
+        const canvas = cropper.getCroppedCanvas();
+        
+        // Apply Filter to Canvas
+        const filteredCanvas = document.createElement('canvas');
+        filteredCanvas.width = canvas.width;
+        filteredCanvas.height = canvas.height;
+        const ctx = filteredCanvas.getContext('2d');
+        ctx.filter = filter === 'none' ? 'none' : filter;
+        ctx.drawImage(canvas, 0, 0);
+
+        const editedData = filteredCanvas.toDataURL('image/jpeg', 0.9);
+        const index = imagesStore.findIndex(i => i.id === activeId);
+        imagesStore[index].current = editedData;
+
+        renderCards();
+        closeModal();
+    }
+
+    function deleteImage(id) {
+        imagesStore = imagesStore.filter(i => i.id !== id);
+        renderCards();
+    }
+
+    // 4. Generate PDF
+    async function generatePDF() {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        for (let i = 0; i < imagesStore.length; i++) {
+            if (i > 0) doc.addPage();
+            
+            const img = imagesStore[i].current;
+            const props = doc.getImageProperties(img);
+            
+            // Calculate Scaling (Fit to Page with 10mm margin)
+            const margin = 10;
+            const maxWidth = pageWidth - (margin * 2);
+            const maxHeight = pageHeight - (margin * 2);
+            let imgWidth = props.width;
+            let imgHeight = props.height;
+
+            const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+            imgWidth = imgWidth * ratio;
+            imgHeight = imgHeight * ratio;
+
+            const x = (pageWidth - imgWidth) / 2;
+            const y = (pageHeight - imgHeight) / 2;
+
+            doc.addImage(img, 'JPEG', x, y, imgWidth, imgHeight);
+        }
+
+        doc.save('converted-documents.pdf');
+    }
+</script>
+
 </body>
 </html>
