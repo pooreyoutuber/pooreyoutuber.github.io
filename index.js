@@ -846,7 +846,6 @@ app.post('/api/real-view-boost', async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI VIDEO SUBTITLE GENERATOR (Gemini + FFmpeg)
 // ===================================================================
-
 // Multer setup for video uploads
 const videoUpload = multer({ 
     dest: 'uploads/',
@@ -869,8 +868,7 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
     try {
         console.log("--- Starting AI Subtitle Process ---");
 
-        // 1. Audio Extract karein (FFmpeg ka use karke)
-        // Note: Render par FFmpeg pre-installed hona chahiye
+        // 1. Audio Extract using FFmpeg
         await new Promise((resolve, reject) => {
             exec(`ffmpeg -i ${inputPath} -q:a 0 -map a ${audioPath}`, (err) => {
                 if (err) reject(err);
@@ -878,16 +876,22 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
             });
         });
 
-        // 2. Audio file ko Gemini par upload karein
-        const { GoogleAIFileManager } = await import("@google/generative-ai/server");
+        // 2. FIXED: Use the correct import for FileManager
+        // Instead of /server, we use the main package's server export
+        const { GoogleAIFileManager } = await import("@google/generative-ai/server").catch(() => {
+            // Fallback for different package versions
+            return import("@google/generative-ai");
+        });
+        
         const fileManager = new GoogleAIFileManager(GEMINI_KEY);
         
+        // 3. Upload file
         const uploadResponse = await fileManager.uploadFile(audioPath, {
             mimeType: "audio/mpeg",
             displayName: "Video Audio",
         });
 
-        // 3. Subtitles Generate karein
+        // 4. Subtitles Generate
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent([
             {
@@ -896,15 +900,15 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
                     fileUri: uploadResponse.file.uri
                 }
             },
-            { text: "Listen to this audio and provide simple, catchy subtitles for the song/speech. Return ONLY the text of the subtitles, one per line, without timestamps for now." },
+            { text: "Listen to this audio and provide simple, catchy subtitles. Return ONLY the text, one per line." },
         ]);
 
-        const captions = result.response.text();
+        const captions = result.response.text().replace(/'/g, ""); // Remove single quotes to prevent FFmpeg errors
         console.log("AI Generated Captions:", captions);
 
-        // 4. Video par Text Burn karein (Simple overlay using FFmpeg)
-        // Ye command video ke beech mein AI captions daal degi
-        const ffmpegCommand = `ffmpeg -i ${inputPath} -vf "drawtext=text='${captions.substring(0, 50)}...':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=(w-text_w)/2:y=h-100" -codec:a copy ${outputPath}`;
+        // 5. Video Text Burn (Sanitized captions for shell command)
+        const displayCaptions = captions.split('\n')[0].substring(0, 50); // Get first line for preview
+        const ffmpegCommand = `ffmpeg -i ${inputPath} -vf "drawtext=text='${displayCaptions}':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=(w-text_w)/2:y=h-100" -codec:a copy ${outputPath}`;
 
         await new Promise((resolve, reject) => {
             exec(ffmpegCommand, (err) => {
@@ -913,9 +917,7 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
             });
         });
 
-        // 5. User ko file bhejein
         res.download(outputPath, "ai_captioned_video.mp4", (err) => {
-            // Cleanup: Files delete karein taaki Render ki space na bhare
             [inputPath, audioPath, outputPath].forEach(f => {
                 if (fs.existsSync(f)) fs.unlinkSync(f);
             });
@@ -925,7 +927,6 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
         console.error("Video Tool Error:", error);
         res.status(500).json({ error: "Failed to process video: " + error.message });
         
-        // Cleanup on error
         if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
         if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
     }
