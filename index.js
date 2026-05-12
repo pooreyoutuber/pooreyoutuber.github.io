@@ -1,6 +1,11 @@
 // ==========================================================
 // index.js (ULTIMATE FINAL VERSION - Part 1/2)
 // ===========================================================
+const multer = require('multer'); // File upload handle karne ke liye
+const upload = multer({ dest: 'uploads/' }); // Temporary folder
+const { exec } = require('child_process'); // FFmpeg command chalane ke liye
+const path = require('path');
+
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 // --- Imports (Node.js Modules) ---
 const express = require('express');
@@ -837,6 +842,93 @@ app.post('/api/real-view-boost', async (req, res) => {
     });
 
     runCroxyVideoEngine(channel_url, watch_time, views_count);
+});
+// ===================================================================
+// NEW TOOL: AI VIDEO SUBTITLE GENERATOR (Gemini + FFmpeg)
+// ===================================================================
+
+// Multer setup for video uploads
+const videoUpload = multer({ 
+    dest: 'uploads/',
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB Max limit
+});
+
+app.post('/process-video', videoUpload.single('video'), async (req, res) => {
+    if (!GEMINI_KEY || !ai) {
+        return res.status(500).json({ error: 'Gemini AI not initialized. Check API Key.' });
+    }
+
+    if (!req.file) {
+        return res.status(400).json({ error: 'No video file uploaded.' });
+    }
+
+    const inputPath = req.file.path;
+    const audioPath = `${inputPath}.mp3`;
+    const outputPath = `processed_${req.file.filename}.mp4`;
+
+    try {
+        console.log("--- Starting AI Subtitle Process ---");
+
+        // 1. Audio Extract karein (FFmpeg ka use karke)
+        // Note: Render par FFmpeg pre-installed hona chahiye
+        await new Promise((resolve, reject) => {
+            exec(`ffmpeg -i ${inputPath} -q:a 0 -map a ${audioPath}`, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+
+        // 2. Audio file ko Gemini par upload karein
+        const { GoogleAIFileManager } = await import("@google/generative-ai/server");
+        const fileManager = new GoogleAIFileManager(GEMINI_KEY);
+        
+        const uploadResponse = await fileManager.uploadFile(audioPath, {
+            mimeType: "audio/mpeg",
+            displayName: "Video Audio",
+        });
+
+        // 3. Subtitles Generate karein
+        const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await model.generateContent([
+            {
+                fileData: {
+                    mimeType: uploadResponse.file.mimeType,
+                    fileUri: uploadResponse.file.uri
+                }
+            },
+            { text: "Listen to this audio and provide simple, catchy subtitles for the song/speech. Return ONLY the text of the subtitles, one per line, without timestamps for now." },
+        ]);
+
+        const captions = result.response.text();
+        console.log("AI Generated Captions:", captions);
+
+        // 4. Video par Text Burn karein (Simple overlay using FFmpeg)
+        // Ye command video ke beech mein AI captions daal degi
+        const ffmpegCommand = `ffmpeg -i ${inputPath} -vf "drawtext=text='${captions.substring(0, 50)}...':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=(w-text_w)/2:y=h-100" -codec:a copy ${outputPath}`;
+
+        await new Promise((resolve, reject) => {
+            exec(ffmpegCommand, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+
+        // 5. User ko file bhejein
+        res.download(outputPath, "ai_captioned_video.mp4", (err) => {
+            // Cleanup: Files delete karein taaki Render ki space na bhare
+            [inputPath, audioPath, outputPath].forEach(f => {
+                if (fs.existsSync(f)) fs.unlinkSync(f);
+            });
+        });
+
+    } catch (error) {
+        console.error("Video Tool Error:", error);
+        res.status(500).json({ error: "Failed to process video: " + error.message });
+        
+        // Cleanup on error
+        if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+        if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+    }
 });
 //==================================================
 // --- SERVER START ---
