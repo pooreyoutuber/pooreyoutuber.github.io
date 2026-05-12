@@ -847,6 +847,14 @@ app.post('/api/real-view-boost', async (req, res) => {
 // NEW TOOL: AI VIDEO SUBTITLE GENERATOR (Gemini + FFmpeg)
 // ===================================================================
 // Multer setup for video uploads
+// --- FIXED IMPORT LOGIC ---
+const genAIModule = await import("@google/generative-ai/server");
+// Yahan hum module se class nikaal rahe hain
+const GoogleAIFileManager = genAIModule.GoogleAIFileManager; 
+
+// Ab aap iska constructor use kar sakte hain
+const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
+
 const videoUpload = multer({ 
     dest: 'uploads/',
     limits: { fileSize: 50 * 1024 * 1024 } // 50MB Max limit
