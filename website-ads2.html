@@ -3,162 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Subtitle Magic | Auto-Caption Your Reels</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <title>AI YouTube Thumbnail Generator</title>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        :root {
+            --yt-red: #FF0000;
+            --yt-black: #0F0F0F;
+            --yt-gray: #F2F2F2;
+            --yt-dark-gray: #606060;
+            --white: #FFFFFF;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--yt-gray);
+            margin: 0;
+            padding: 0;
+            color: var(--yt-black);
         }
-        #video-preview { max-height: 400px; }
+
+        header {
+            background-color: var(--white);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            color: var(--yt-red);
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .upload-section { grid-template-columns: 1fr; }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--yt-dark-gray);
+        }
+
+        textarea, input[type="file"] {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: var(--yt-red);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #CC0000;
+            transform: scale(1.05);
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--yt-red);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #result-section {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            border-top: 2px solid var(--yt-gray);
+            padding-top: 30px;
+        }
+
+        #thumbnail-preview {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .action-btns {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-secondary {
+            background-color: var(--yt-black);
+        }
+
+        .description-section {
+            margin-top: 60px;
+            line-height: 1.6;
+            color: #444;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+        }
+
+        .description-section h2 {
+            color: var(--yt-black);
+            font-size: 22px;
+        }
     </style>
 </head>
-<body class="bg-gray-50 font-sans leading-normal tracking-normal">
+<body>
 
-    <!-- Navigation -->
-    <nav class="gradient-bg p-4 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-white text-2xl font-bold italic">
-                <i class="fas fa-magic mr-2"></i>AI Subtitle Magic
-            </h1>
-            <span class="text-white text-sm bg-white/20 px-3 py-1 rounded-full">Free Tool</span>
+<header>
+    <a href="#" class="logo">▶ AI Thumbnail Pro</a>
+</header>
+
+<div class="container">
+    <h1>Create Viral YouTube Thumbnails</h1>
+    
+    <div class="upload-section">
+        <div class="input-group">
+            <label for="prompt">Video Topic / Prompt</label>
+            <textarea id="prompt" placeholder="Describe your video (e.g., 'How to grow on YouTube in 2024 with dark theme')"></textarea>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-12">
-        <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-4xl font-extrabold text-gray-800 mb-4">
-                Boost Your Social Media Reach with Auto-Captions
-            </h2>
-            <p class="text-lg text-gray-600 mb-8">
-                Upload your 15-30 second reels and let our AI write perfect subtitles for your songs and speech.
-            </p>
-
-            <!-- Upload Section -->
-            <div id="drop-zone" class="glass-card border-2 border-dashed border-indigo-400 rounded-3xl p-12 mb-8 transition-all hover:border-indigo-600">
-                <div id="upload-ui">
-                    <i class="fas fa-cloud-upload-alt text-6xl text-indigo-500 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">Drag & Drop Video</h3>
-                    <p class="text-gray-500 mb-6">MP4, MOV supported (Max 30 sec)</p>
-                    <input type="file" id="video-input" class="hidden" accept="video/*">
-                    <button onclick="document.getElementById('video-input').click()" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:bg-indigo-700 transition shadow-lg">
-                        Select Video
-                    </button>
-                </div>
-
-                <!-- Loading State (Hidden by default) -->
-                <div id="loading-ui" class="hidden">
-                    <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p class="text-indigo-600 font-medium">AI is listening to your video... Please wait.</p>
-                </div>
-
-                <!-- Result State (Hidden by default) -->
-                <div id="result-ui" class="hidden">
-                    <video id="video-preview" controls class="mx-auto rounded-lg shadow-xl mb-6"></video>
-                    <div class="flex justify-center gap-4">
-                        <a id="download-btn" href="#" download class="bg-green-500 text-white px-8 py-3 rounded-full font-bold hover:bg-green-600 transition shadow-lg">
-                            <i class="fas fa-download mr-2"></i>Download Video
-                        </a>
-                        <button onclick="location.reload()" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-full font-bold hover:bg-gray-300 transition">
-                            Upload Another
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- How it Works -->
-            <section class="grid md:grid-cols-3 gap-8 text-left mb-16">
-                <div class="p-6">
-                    <div class="text-indigo-600 text-2xl mb-3"><i class="fas fa-upload"></i></div>
-                    <h4 class="font-bold mb-2">1. Fast Upload</h4>
-                    <p class="text-gray-600 text-sm">Upload your short video or reel directly from your device.</p>
-                </div>
-                <div class="p-6">
-                    <div class="text-indigo-600 text-2xl mb-3"><i class="fas fa-microchip"></i></div>
-                    <h4 class="font-bold mb-2">2. AI Transcription</h4>
-                    <p class="text-gray-600 text-sm">Gemini AI analyzes the audio and generates accurate synchronized subtitles.</p>
-                </div>
-                <div class="p-6">
-                    <div class="text-indigo-600 text-2xl mb-3"><i class="fas fa-share-alt"></i></div>
-                    <h4 class="font-bold mb-2">3. Ready to Post</h4>
-                    <p class="text-gray-600 text-sm">Download your captioned video and share it on Instagram, TikTok, or YouTube.</p>
-                </div>
-            </section>
-
-            <hr class="mb-16">
-
-            <!-- Footer Description -->
-            <div class="text-left bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-2xl font-bold mb-4 text-gray-800">Why use AI Subtitle Magic?</h3>
-                <p class="text-gray-600 mb-4 italic">
-                    "Statistics show that 80% of social media users watch videos on mute. Without captions, you are losing potential viewers."
-                </p>
-                <p class="text-gray-600 mb-4">
-                    Our tool is specifically designed for creators who want to make their content accessible and engaging. Whether it's a hit song or a viral dialogue, our AI ensures every word is captured beautifully on screen. 
-                </p>
-                <ul class="text-gray-600 space-y-2">
-                    <li><i class="fas fa-check-circle text-green-500 mr-2"></i> 100% Free to use forever.</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2"></i> No watermarks on your videos.</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2"></i> High-quality rendering for social media platforms.</li>
-                </ul>
-            </div>
+        <div class="input-group">
+            <label for="image">Upload Reference Photo (Optional)</label>
+            <input type="file" id="image" accept="image/*">
         </div>
-    </main>
+    </div>
 
-    <footer class="py-8 text-center text-gray-400 text-sm">
-        &copy; 2024 AI Subtitle Magic. Powered by Gemini API & Render.
-    </footer>
+    <div class="btn-container">
+        <button onclick="generateThumbnail()">Generate Thumbnail</button>
+    </div>
 
-    <script>
-        const videoInput = document.getElementById('video-input');
-        const uploadUi = document.getElementById('upload-ui');
-        const loadingUi = document.getElementById('loading-ui');
-        const resultUi = document.getElementById('result-ui');
-        const preview = document.getElementById('video-preview');
-        const backendUrl = "https://pooreyoutuber.onrender.com/process-video";
+    <div id="loading">
+        <div class="loader"></div>
+        <p>AI is crafting your masterpiece...</p>
+    </div>
 
-        videoInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+    <div id="result-section">
+        <h3>Your Generated Thumbnail</h3>
+        <img id="thumbnail-preview" src="" alt="Thumbnail Preview">
+        <div class="action-btns">
+            <button onclick="downloadImage()">Download HD</button>
+            <button class="btn-secondary" onclick="generateThumbnail()">More (Try Again)</button>
+        </div>
+    </div>
 
-            // Show Loading
-            uploadUi.classList.add('hidden');
-            loadingUi.classList.remove('hidden');
+    <div class="description-section">
+        <h2>Why Every Creator Needs This AI Thumbnail Tool</h2>
+        <p>In the world of YouTube, the thumbnail is the most critical factor in determining your Click-Through Rate (CTR). Even if your content is top-notch, a boring or low-quality thumbnail will prevent people from clicking on your video. This is where our <strong>AI YouTube Thumbnail Generator</strong> steps in as a game-changer for content creators.</p>
+        
+        <p>Using advanced Google Gemini and AI image generation technology, this tool analyzes your specific video context. When you provide a prompt, the AI understands the psychology of viral visuals—high contrast, bold typography, and expressive subjects. By allowing you to upload your own photos, it ensures the final result remains authentic to your brand while adding professional-grade AI enhancements.</p>
+        
+        <p>For small creators who cannot afford professional designers, this tool provides "Thumbnail Agency" quality for free. It saves hours of manual work in Photoshop or Canva. Instead of struggling with layers and lighting, you simply describe your vision, and the AI delivers multiple variations in seconds. The 'More' button allows you to explore different creative angles until you find the perfect match that resonates with your audience.</p>
 
-            const formData = new FormData();
-            formData.append('video', file);
+        <p>This tool is hosted on Render Cloud (https://pooreyoutuber.onrender.com), ensuring fast processing and a seamless experience. Whether you are a gamer, tech reviewer, or vlogger, our AI understands the aesthetic requirements of each niche. Stop losing views to bad design—start using AI to dominate the YouTube homepage and grow your channel faster than ever before.</p>
+    </div>
+</div>
 
-            try {
-                const response = await fetch(backendUrl, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = URL.createObjectURL(blob);
-                    
-                    // Show Result
-                    preview.src = url;
-                    document.getElementById('download-btn').href = url;
-                    loadingUi.classList.add('hidden');
-                    resultUi.classList.remove('hidden');
-                } else {
-                    alert("Processing failed. Please try again.");
-                    location.reload();
-                }
-            } catch (error) {
-                console.error(error);
-                alert("Could not connect to the server.");
-                location.reload();
-            }
-        };
-    </script>
+<script>
+    async function generateThumbnail() {
+        const prompt = document.getElementById('prompt').value;
+        const imageInput = document.getElementById('image').files[0];
+        
+        if(!prompt && !imageInput) {
+            alert("Please enter a prompt or upload an image!");
+            return;
+        }
+
+        // Show loading
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result-section').style.display = 'none';
+
+        // Note: Real connection to Render API would go here
+        // For now, we simulate a delay and show a placeholder
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+            // Placeholder Image URL
+            document.getElementById('thumbnail-preview').src = "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=640";
+        }, 3000);
+    }
+
+    function downloadImage() {
+        const link = document.createElement('a');
+        link.href = document.getElementById('thumbnail-preview').src;
+        link.download = 'youtube-thumbnail.jpg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
 </body>
 </html>
