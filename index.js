@@ -930,6 +930,136 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
         if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
     }
 });
+
+// ===================================================================
+// NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
+// ===================================================================
+
+// Thumbnail ke liye special Multer setup
+const thumbnailUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
+
+app.post('/generate-thumbnail', thumbnailUpload.single('image'), async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        const imageFile = req.file;
+
+        if (!GEMINI_KEY || !ai) {
+            return res.status(500).json({ success: false, message: "AI Key missing in Backend!" });
+        }
+
+        let finalImagePrompt = prompt;
+
+        // AGAR USER NE PHOTO UPLOAD KI HAI: To Gemini use karke use analyze karenge
+        if (imageFile) {
+            console.log("[THUMBNAIL] Analyzing uploaded image with Gemini...");
+            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+            
+            const imagePart = {
+                inlineData: {
+                    data: imageFile.buffer.toString("base64"),
+                    mimeType: imageFile.mimetype
+                }
+            };
+
+            const result = await model.generateContent([
+                imagePart,
+                { text: `Analyze this image and the user's wish: "${prompt}". 
+                Create a high-quality, highly descriptive prompt for an AI Image Generator to create a viral YouTube thumbnail. 
+                Focus on: Bright colors, high contrast, 4k detail, and professional lighting. 
+                Return ONLY the optimized prompt text.` }
+            ]);
+
+            finalImagePrompt = result.response.text();
+        }
+
+        // IMAGE GENERATION: Pollinations AI ka use kar rahe hain (Free & Fast)
+        // Hum prompt ko encode kar rahe hain taaki URL break na ho
+        const seed = Math.floor(Math.random() * 1000000);
+        const encodedPrompt = encodeURIComponent(finalImagePrompt);
+        
+        // Thumbnail Aspect Ratio (16:9) ke liye 1280x720 width/height use karenge
+        const generatedImageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1280&height=720&seed=${seed}&model=flux`;
+
+        console.log("[THUMBNAIL] Success! Image Generated.");
+
+        res.json({
+            success: true,
+            imageUrl: generatedImageUrl,
+            aiPrompt: finalImagePrompt // Ye user ko dikhane ke liye ki AI ne kya socha
+        });
+
+    } catch (error) {
+        console.error("Thumbnail Tool Error:", error);
+        res.status(500).json({ success: false, message: "Generation failed: " + error.message });
+    }
+});
+// ===================================================================
+// NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
+// ===================================================================
+// Thumbnail ke liye special Multer setup
+const thumbnailUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
+
+app.post('/generate-thumbnail', thumbnailUpload.single('image'), async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        const imageFile = req.file;
+
+        if (!GEMINI_KEY || !ai) {
+            return res.status(500).json({ success: false, message: "AI Key missing in Backend!" });
+        }
+
+        let finalImagePrompt = prompt;
+
+        // AGAR USER NE PHOTO UPLOAD KI HAI: To Gemini use karke use analyze karenge
+        if (imageFile) {
+            console.log("[THUMBNAIL] Analyzing uploaded image with Gemini...");
+            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+            
+            const imagePart = {
+                inlineData: {
+                    data: imageFile.buffer.toString("base64"),
+                    mimeType: imageFile.mimetype
+                }
+            };
+
+            const result = await model.generateContent([
+                imagePart,
+                { text: `Analyze this image and the user's wish: "${prompt}". 
+                Create a high-quality, highly descriptive prompt for an AI Image Generator to create a viral YouTube thumbnail. 
+                Focus on: Bright colors, high contrast, 4k detail, and professional lighting. 
+                Return ONLY the optimized prompt text.` }
+            ]);
+
+            finalImagePrompt = result.response.text();
+        }
+
+        // IMAGE GENERATION: Pollinations AI ka use kar rahe hain (Free & Fast)
+        // Hum prompt ko encode kar rahe hain taaki URL break na ho
+        const seed = Math.floor(Math.random() * 1000000);
+        const encodedPrompt = encodeURIComponent(finalImagePrompt);
+        
+        // Thumbnail Aspect Ratio (16:9) ke liye 1280x720 width/height use karenge
+        const generatedImageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1280&height=720&seed=${seed}&model=flux`;
+
+        console.log("[THUMBNAIL] Success! Image Generated.");
+
+        res.json({
+            success: true,
+            imageUrl: generatedImageUrl,
+            aiPrompt: finalImagePrompt // Ye user ko dikhane ke liye ki AI ne kya socha
+        });
+
+    } catch (error) {
+        console.error("Thumbnail Tool Error:", error);
+        res.status(500).json({ success: false, message: "Generation failed: " + error.message });
+    }
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
