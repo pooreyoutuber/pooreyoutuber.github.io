@@ -946,7 +946,7 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
         const imageFile = req.file;
 
         // Key check (Aapke existing variable GEMINI_KEY ke mutabiq)
-        if (!GEMINI_KEY || !ai) {
+        if (!GEMINI_API_KEY || !ai) {
             return res.status(500).json({ success: false, message: "Gemini Engine not ready!" });
         }
 
