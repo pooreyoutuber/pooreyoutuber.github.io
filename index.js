@@ -934,6 +934,7 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
 // ===================================================================
+const thumbUpload = multer({ storage: multer.memoryStorage() });
 app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) => {
     try {
         const { prompt } = req.body;
