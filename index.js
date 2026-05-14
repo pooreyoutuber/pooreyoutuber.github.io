@@ -934,20 +934,17 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
 // ===================================================================
-// Thumbnail ke liye memory storage (Ye top par rahega)
-const thumbUpload = multer({ storage: multer.memoryStorage() });
-
 app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) => {
     try {
         const { prompt } = req.body;
         const imageFile = req.file;
 
-        // 1. Check karein ki AI initialize hua hai ya nahi
-        // Agar 'ai' object mein 'getGenerativeModel' nahi hai, toh initialize karein
+        // 1. Correct Initialization Logic
         if (!ai || typeof ai.getGenerativeModel !== 'function') {
             console.log("Re-initializing Gemini AI...");
             if (GEMINI_KEY) {
-                const { GoogleGenAI } = await import('@google/genai');
+                // IMPORTANT: Use @google/generative-ai, not @google/genai
+                const { GoogleGenAI } = await import('@google/generative-ai');
                 ai = new GoogleGenAI(GEMINI_KEY);
             } else {
                 return res.status(500).json({ success: false, error: "AI Key Missing on Server!" });
@@ -955,16 +952,14 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
         }
 
         if (!prompt) {
-            return res.status(400).json({ success: false, error: "Prompt dena zaroori hai!" });
+            return res.status(400).json({ success: false, error: "Prompt is required!" });
         }
 
-        // 2. Stable model use karein: gemini-1.5-flash
-        // Nano Banana 2 (Gemini 3 Flash Image) abhi kuch restricted accounts par hai
+        // 2. Use the stable model
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         let parts = [];
         
-        // Agar user ne pic upload ki hai toh usey base64 mein convert karein
         if (imageFile) {
             parts.push({
                 inlineData: {
@@ -974,7 +969,6 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
             });
         }
 
-        // AI ko instructions dein
         const finalPrompt = `Create a high-impact YouTube thumbnail based on this: "${prompt}". 
         If an image is provided, incorporate its elements. 
         Style: Viral, cinematic, 16:9 aspect ratio. 
@@ -982,11 +976,12 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
 
         parts.push({ text: finalPrompt });
 
-        // 3. Request bhejein
+        // 3. Generate Content
         const result = await model.generateContent(parts);
         const response = await result.response;
         
-        // Image check karein
+        // Check if the model returned image data (Imagen integration)
+        // NOTE: Most Gemini models return text unless you have specific access to Imagen via Gemini
         if (response.candidates && response.candidates[0].content.parts[0].inlineData) {
             const generatedBase64 = response.candidates[0].content.parts[0].inlineData.data;
             res.json({
@@ -994,21 +989,20 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
                 imageUrl: `data:image/png;base64,${generatedBase64}`
             });
         } else {
-            // Agar model ne image nahi banayi sirf text likha
             res.status(500).json({ 
                 success: false, 
-                error: "AI ne image generate nahi ki, shayad text description di hai. Dubara try karein." 
+                error: "AI did not generate an image. Gemini 1.5 Flash usually outputs text descriptions. Ensure your API key has Image Generation permissions." 
             });
         }
 
     } catch (error) {
-        console.error("Nano Banana Error:", error);
+        console.error("Thumbnail Generation Error:", error);
         res.status(500).json({ 
             success: false, 
             error: "Backend Error: " + error.message 
         });
     }
-}); 
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
