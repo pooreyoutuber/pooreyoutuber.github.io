@@ -935,7 +935,6 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
 // =================================================================
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const multer = require("multer");
 
 // 1. Variable ko globally declare karein (outside any route)
 let ai = null; 
