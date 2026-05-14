@@ -933,26 +933,31 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
-// ===================================================================
+// =================================================================
+// 1. Ensure this is at the TOP of your file (outside the route)
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+let ai; 
+if (process.env.GEMINI_KEY) {
+    ai = new GoogleGenerativeAI(process.env.GEMINI_KEY);
+}
+
 const thumbUpload = multer({ storage: multer.memoryStorage() });
+
 app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) => {
     try {
         const { prompt } = req.body;
         const imageFile = req.file;
 
-        // 1. Correct Initialization Logic
-        if (!ai || typeof ai.getGenerativeModel !== 'function') {
+        // 1. Correct Initialization Check
+        if (!ai) {
             console.log("Re-initializing Gemini AI...");
-           if (GEMINI_KEY) {
-            ai = new GoogleGenAI(GEMINI_KEY); // Note: Sirf GEMINI_KEY pass karein ya {apiKey: GEMINI_KEY}
-            console.log("✅ Gemini AI Initialized Successfully");
-        } else {
-            console.error("❌ AI Key Missing");
-            ai = { getGenerativeModel: () => ({ generateContent: () => Promise.reject("AI Key Missing") }) };
-        }
-    } catch (err) {
-        console.error("Failed to load GoogleGenAI:", err);
-    }
+            const GEMINI_KEY = process.env.GEMINI_KEY; // or your key variable
+            if (GEMINI_KEY) {
+                ai = new GoogleGenerativeAI(GEMINI_KEY);
+                console.log("✅ Gemini AI Initialized Successfully");
+            } else {
+                return res.status(500).json({ success: false, error: "AI Key Missing" });
+            }
         }
 
         if (!prompt) {
@@ -963,41 +968,34 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         let parts = [];
-        
         if (imageFile) {
             parts.push({
                 inlineData: {
                     data: imageFile.buffer.toString("base64"),
                     mimeType: imageFile.mimetype
-                }
+    }
             });
         }
 
-        const finalPrompt = `Create a high-impact YouTube thumbnail based on this: "${prompt}". 
+        const finalPrompt = `Create a high-impact YouTube thumbnail description based on this: "${prompt}". 
         If an image is provided, incorporate its elements. 
         Style: Viral, cinematic, 16:9 aspect ratio. 
-        IMPORTANT: Return the output as an image.`;
+        IMPORTANT: Describe the visual layout in detail.`;
 
         parts.push({ text: finalPrompt });
 
         // 3. Generate Content
         const result = await model.generateContent(parts);
         const response = await result.response;
-        
-        // Check if the model returned image data (Imagen integration)
-        // NOTE: Most Gemini models return text unless you have specific access to Imagen via Gemini
-        if (response.candidates && response.candidates[0].content.parts[0].inlineData) {
-            const generatedBase64 = response.candidates[0].content.parts[0].inlineData.data;
-            res.json({
-                success: true,
-                imageUrl: `data:image/png;base64,${generatedBase64}`
-            });
-        } else {
-            res.status(500).json({ 
-                success: false, 
-                error: "AI did not generate an image. Gemini 1.5 Flash usually outputs text descriptions. Ensure your API key has Image Generation permissions." 
-            });
-        }
+        const text = response.text();
+
+        // NOTE: Gemini 1.5 Flash outputs TEXT, not an Image file.
+        // To get an actual image, you must use the Imagen API/Model specifically.
+        res.json({
+            success: true,
+            description: text,
+            message: "Note: Gemini 1.5 Flash generates text descriptions. For image generation, use Imagen 3 via Vertex AI."
+        });
 
     } catch (error) {
         console.error("Thumbnail Generation Error:", error);
