@@ -934,45 +934,33 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
 // =================================================================
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+// ===================================================================
+// NEW TOOL: AI YOUTUBE THUMBNAIL CONCEPT GENERATOR (Gemini Style)
+// ===================================================================
 
-// Initial initialization agar key turant mil jaye
-if (process.env.GEMINI_KEY) {
-    ai = new GoogleGenerativeAI(process.env.GEMINI_KEY);
-}
-
+// Multer for Thumbnail Image (Memory storage is better for small AI tasks)
 const thumbUpload = multer({ storage: multer.memoryStorage() });
 
 app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) => {
+    // 1. Check if AI is initialized (Same as your Insta Tool)
+    if (!GEMINI_KEY || !ai) {
+        return res.status(500).json({ error: 'Server configuration error: Gemini API Key is missing.' });
+    }
+
     try {
         const { prompt } = req.body;
         const imageFile = req.file;
 
-        // 2. Double-check initialization
-        if (!ai) {
-            console.log("Initializing Gemini AI...");
-            const apiKey = process.env.GEMINI_KEY;
-            if (apiKey) {
-                ai = new GoogleGenerativeAI(apiKey);
-                console.log("✅ Gemini AI Initialized Successfully");
-            } else {
-                return res.status(500).json({ 
-                    success: false, 
-                    error: "AI Key Missing in Environment Variables" 
-                });
-            }
-        }
-
         if (!prompt) {
-            return res.status(400).json({ success: false, error: "Prompt is required!" });
+            return res.status(400).json({ error: "Thumbnail topic or prompt is required!" });
         }
 
-        // 3. Model setup
+        // 2. Initialize Model (Same as your process-video/insta logic)
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         let parts = [];
-        
-        // Agar image file upload hui hai toh use base64 mein convert karein
+
+        // 3. Agar image upload hui hai, toh use format karein (Multimodal)
         if (imageFile) {
             parts.push({
                 inlineData: {
@@ -982,31 +970,36 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
             });
         }
 
-        // Final Prompt logic
-        const finalPrompt = `Task: Create a detailed YouTube thumbnail concept.
-        Topic: "${prompt}"
-        Style: Viral, high-contrast, cinematic, 16:9 aspect ratio.
-        Output: Provide a clear visual description of what should be on the thumbnail.`;
+        // 4. Prompt Engineering (Viral YouTube Style)
+        const finalPrompt = `Task: Create a high-impact, viral YouTube thumbnail concept.
+Topic: "${prompt}"
+${imageFile ? "Instruction: Analyze the uploaded image and incorporate its subjects into the design." : ""}
+Style: Cinematic, high contrast, vibrant colors, 16:9 aspect ratio.
+
+Return the response in this format:
+1. Visual Layout: (Detailed description of the scene)
+2. Text Overlay: (Catchy, bold text to put on thumbnail)
+3. Color Palette: (Suggested colors for high CTR)`;
 
         parts.push({ text: finalPrompt });
 
-        // 4. Content Generation
+        // 5. Content Generate karein
         const result = await model.generateContent(parts);
         const response = await result.response;
-        const textOutput = response.text();
+        const text = response.text();
 
-        // 5. Success Response
-        res.json({
+        // 6. Final Response
+        res.status(200).json({
             success: true,
-            description: textOutput,
-            message: "Note: Gemini 1.5 Flash outputs TEXT descriptions. To generate real images, you need an Image Generation model like Imagen 3."
+            thumbnailConcept: text,
+            message: "Note: Gemini 1.5 Flash provides text-based design concepts. It does not generate actual image files."
         });
 
     } catch (error) {
-        console.error("Thumbnail Generation Error:", error);
+        console.error("Thumbnail Tool Error:", error.message);
         res.status(500).json({ 
             success: false, 
-            error: "Backend Error: " + error.message 
+            error: "AI Generation Failed: " + error.message 
         });
     }
 });
