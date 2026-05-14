@@ -955,9 +955,9 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
             return res.status(400).json({ error: "Thumbnail topic or prompt is required!" });
         }
 
-        // 2. Initialize Model (Same as your process-video/insta logic)
-        const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+      const model = (typeof ai.getGenerativeModel === 'function') 
+            ? ai.getGenerativeModel({ model: "gemini-1.5-flash" }) 
+            : ai.models; // Fallback to your Insta tool style
         let parts = [];
 
         // 3. Agar image upload hui hai, toh use format karein (Multimodal)
