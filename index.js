@@ -936,9 +936,6 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // =================================================================
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// 1. Variable ko globally declare karein (outside any route)
-let ai = null; 
-
 // Initial initialization agar key turant mil jaye
 if (process.env.GEMINI_KEY) {
     ai = new GoogleGenerativeAI(process.env.GEMINI_KEY);
