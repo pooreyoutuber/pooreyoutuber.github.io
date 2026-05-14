@@ -937,7 +937,7 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL (Direct Nano Banana 2 Engine)
 // ===================================================================
-
+// Thumbnail ke liye memory storage use kar rahe hain taaki fast ho
 const thumbUpload = multer({ storage: multer.memoryStorage() });
 
 app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) => {
@@ -945,11 +945,16 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
         const { prompt } = req.body;
         const imageFile = req.file;
 
-        if (!GEMINI_API_KEY || !ai) {
+        // Key check (Aapke existing variable GEMINI_KEY ke mutabiq)
+        if (!GEMINI_KEY || !ai) {
             return res.status(500).json({ success: false, message: "Gemini Engine not ready!" });
         }
 
-        // Nano Banana 2 (Gemini 3 Flash Image) model ko call karna
+        if (!prompt) {
+            return res.status(400).json({ success: false, message: "Bhai, prompt dena zaroori hai!" });
+        }
+
+        // Nano Banana 2 (Gemini 3 Flash Image) model initialization
         // Note: Ye model natively image generate aur edit kar sakta hai
         const model = ai.getGenerativeModel({ model: "gemini-3-flash-image" });
 
@@ -957,7 +962,7 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
         
         if (imageFile) {
             // Case 1: Image + Prompt (Composition/Editing)
-            console.log("[NANO BANANA] Composing thumbnail from screenshot...");
+            console.log("[NANO BANANA 2] Editing/Composing thumbnail...");
             const imagePart = {
                 inlineData: {
                     data: imageFile.buffer.toString("base64"),
@@ -965,30 +970,39 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
                 }
             };
             
-            const fullPrompt = `Based on this screenshot/photo, create a high-impact YouTube thumbnail for: ${prompt}. Make it viral style with 16:9 aspect ratio.`;
+            // 16:9 ratio instructions mandatory hain viral thumbnail ke liye
+            const fullPrompt = `Create a high-impact YouTube thumbnail for: "${prompt}". Use the provided image as a reference/base. Style: Viral, high contrast, cinematic, 16:9 aspect ratio.`;
             
             result = await model.generateContent([fullPrompt, imagePart]);
         } else {
             // Case 2: Only Prompt (Text-to-Image)
-            console.log("[NANO BANANA] Generating thumbnail from prompt...");
-            const fullPrompt = `Create a professional YouTube thumbnail about: ${prompt}. Viral style, high contrast, 4K, 16:9 aspect ratio.`;
+            console.log("[NANO BANANA 2] Generating new thumbnail...");
+            const fullPrompt = `Professional YouTube thumbnail: "${prompt}". Style: Eye-catching, 4k resolution, viral composition, vibrant colors, 16:9 aspect ratio.`;
             
             result = await model.generateContent(fullPrompt);
         }
 
-        // Gemini direct image bytes ya URL return karega
-        // Hum response se image data nikal kar frontend ko bhejenge
         const response = await result.response;
-        const generatedImage = response.candidates[0].content.parts[0].inlineData.data; 
+        
+        // Gemini image data ko candidates[0].content.parts[0].inlineData mein return karta hai
+        // Hum check karenge ki data sahi se aaya hai ya nahi
+        if (response.candidates && response.candidates[0].content.parts[0].inlineData) {
+            const generatedBase64 = response.candidates[0].content.parts[0].inlineData.data;
 
-        res.json({
-            success: true,
-            imageUrl: `data:image/png;base64,${generatedImage}` // Base64 format mein frontend ko image bhej rahe hain
-        });
+            res.json({
+                success: true,
+                imageUrl: `data:image/png;base64,${generatedBase64}`
+            });
+        } else {
+            throw new Error("Model did not return image data.");
+        }
 
     } catch (error) {
         console.error("Nano Banana Error:", error);
-        res.status(500).json({ success: false, message: "Gemini failed to generate: " + error.message });
+        res.status(500).json({ 
+            success: false, 
+            message: "Thumbnail generate nahi ho paya: " + error.message 
+        });
     }
 });
 //==================================================
