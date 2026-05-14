@@ -935,8 +935,7 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
 // =================================================================
 // 1. Ensure this is at the TOP of your file (outside the route)
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-let ai; 
+const { GoogleGenerativeAI } = require("@google/generative-ai"); 
 if (process.env.GEMINI_KEY) {
     ai = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 }
