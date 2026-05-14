@@ -191,19 +191,22 @@
         try {
             // Render Backend API call
           // Frontend script mein ye line update karein
-const response = await fetch('https://pooreyoutuber.onrender.com/generate-thumbnail', {
+          const response = await fetch('https://pooreyoutuber.onrender.com/generate-thumbnail', {
     method: 'POST',
     body: formData
 });
 
-            const data = await response.json();
+const data = await response.json();
+console.log("Full Response Data:", data); // Isse browser console mein check karein
 
-            if(data.success) {
-                document.getElementById('thumbnail-preview').src = data.imageUrl;
-                document.getElementById('result-section').style.display = 'block';
-            } else {
-                alert("AI ne mana kar diya: " + data.error);
-            }
+if(data.success) {
+    document.getElementById('thumbnail-preview').src = data.imageUrl;
+    document.getElementById('result-section').style.display = 'block';
+} else {
+    // Agar data.error nahi hai toh pura data object dikhaye
+    alert("AI Error: " + (data.error || JSON.stringify(data)));
+}
+            
         } catch (err) {
             console.error(err);
             alert("Server connection failed! Check if Render is awake.");
