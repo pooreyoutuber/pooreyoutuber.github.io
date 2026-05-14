@@ -943,13 +943,16 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
         // 1. Correct Initialization Logic
         if (!ai || typeof ai.getGenerativeModel !== 'function') {
             console.log("Re-initializing Gemini AI...");
-            if (GEMINI_KEY) {
-                // IMPORTANT: Use @google/generative-ai, not @google/genai
-                const { GoogleGenAI } = await import('@google/generative-ai');
-                ai = new GoogleGenAI(GEMINI_KEY);
-            } else {
-                return res.status(500).json({ success: false, error: "AI Key Missing on Server!" });
-            }
+           if (GEMINI_KEY) {
+            ai = new GoogleGenAI(GEMINI_KEY); // Note: Sirf GEMINI_KEY pass karein ya {apiKey: GEMINI_KEY}
+            console.log("✅ Gemini AI Initialized Successfully");
+        } else {
+            console.error("❌ AI Key Missing");
+            ai = { getGenerativeModel: () => ({ generateContent: () => Promise.reject("AI Key Missing") }) };
+        }
+    } catch (err) {
+        console.error("Failed to load GoogleGenAI:", err);
+    }
         }
 
         if (!prompt) {
