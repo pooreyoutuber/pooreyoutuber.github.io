@@ -934,8 +934,13 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
 // =================================================================
-// 1. Ensure this is at the TOP of your file (outside the route)
-const { GoogleGenerativeAI } = require("@google/generative-ai"); 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const multer = require("multer");
+
+// 1. Variable ko globally declare karein (outside any route)
+let ai = null; 
+
+// Initial initialization agar key turant mil jaye
 if (process.env.GEMINI_KEY) {
     ai = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 }
@@ -947,15 +952,18 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
         const { prompt } = req.body;
         const imageFile = req.file;
 
-        // 1. Correct Initialization Check
+        // 2. Double-check initialization
         if (!ai) {
-            console.log("Re-initializing Gemini AI...");
-            const GEMINI_KEY = process.env.GEMINI_KEY; // or your key variable
-            if (GEMINI_KEY) {
-                ai = new GoogleGenerativeAI(GEMINI_KEY);
+            console.log("Initializing Gemini AI...");
+            const apiKey = process.env.GEMINI_KEY;
+            if (apiKey) {
+                ai = new GoogleGenerativeAI(apiKey);
                 console.log("✅ Gemini AI Initialized Successfully");
             } else {
-                return res.status(500).json({ success: false, error: "AI Key Missing" });
+                return res.status(500).json({ 
+                    success: false, 
+                    error: "AI Key Missing in Environment Variables" 
+                });
             }
         }
 
@@ -963,37 +971,39 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
             return res.status(400).json({ success: false, error: "Prompt is required!" });
         }
 
-        // 2. Use the stable model
+        // 3. Model setup
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         let parts = [];
+        
+        // Agar image file upload hui hai toh use base64 mein convert karein
         if (imageFile) {
             parts.push({
                 inlineData: {
                     data: imageFile.buffer.toString("base64"),
                     mimeType: imageFile.mimetype
-    }
+                }
             });
         }
 
-        const finalPrompt = `Create a high-impact YouTube thumbnail description based on this: "${prompt}". 
-        If an image is provided, incorporate its elements. 
-        Style: Viral, cinematic, 16:9 aspect ratio. 
-        IMPORTANT: Describe the visual layout in detail.`;
+        // Final Prompt logic
+        const finalPrompt = `Task: Create a detailed YouTube thumbnail concept.
+        Topic: "${prompt}"
+        Style: Viral, high-contrast, cinematic, 16:9 aspect ratio.
+        Output: Provide a clear visual description of what should be on the thumbnail.`;
 
         parts.push({ text: finalPrompt });
 
-        // 3. Generate Content
+        // 4. Content Generation
         const result = await model.generateContent(parts);
         const response = await result.response;
-        const text = response.text();
+        const textOutput = response.text();
 
-        // NOTE: Gemini 1.5 Flash outputs TEXT, not an Image file.
-        // To get an actual image, you must use the Imagen API/Model specifically.
+        // 5. Success Response
         res.json({
             success: true,
-            description: text,
-            message: "Note: Gemini 1.5 Flash generates text descriptions. For image generation, use Imagen 3 via Vertex AI."
+            description: textOutput,
+            message: "Note: Gemini 1.5 Flash outputs TEXT descriptions. To generate real images, you need an Image Generation model like Imagen 3."
         });
 
     } catch (error) {
