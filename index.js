@@ -934,7 +934,7 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
 // ===================================================================
-// Thumbnail ke liye memory storage
+// Thumbnail ke liye memory storage (Ye top par rahega)
 const thumbUpload = multer({ storage: multer.memoryStorage() });
 
 app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) => {
@@ -942,24 +942,31 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
         const { prompt } = req.body;
         const imageFile = req.file;
 
-        // Check if AI is initialized
-        if (!ai) {
-            return res.status(500).json({ success: false, error: "Gemini Engine starting... please try again in 5 seconds." });
+        // 1. Check karein ki AI initialize hua hai ya nahi
+        // Agar 'ai' object mein 'getGenerativeModel' nahi hai, toh initialize karein
+        if (!ai || typeof ai.getGenerativeModel !== 'function') {
+            console.log("Re-initializing Gemini AI...");
+            if (GEMINI_KEY) {
+                const { GoogleGenAI } = await import('@google/genai');
+                ai = new GoogleGenAI(GEMINI_KEY);
+            } else {
+                return res.status(500).json({ success: false, error: "AI Key Missing on Server!" });
+            }
         }
 
         if (!prompt) {
-            return res.status(400).json({ success: false, error: "Bhai, thumbnail ka topic (prompt) likhna zaroori hai!" });
+            return res.status(400).json({ success: false, error: "Prompt dena zaroori hai!" });
         }
 
-        // Sahi model use karna: gemini-1.5-flash (ye image aur text dono samajhta hai)
-        // Note: 'ai' variable wahi hai jo aapne upar 'new GoogleGenAI' se banaya hai
+        // 2. Stable model use karein: gemini-1.5-flash
+        // Nano Banana 2 (Gemini 3 Flash Image) abhi kuch restricted accounts par hai
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        let contentParts = [];
+        let parts = [];
         
-        // Agar user ne image upload ki hai toh usey include karein
+        // Agar user ne pic upload ki hai toh usey base64 mein convert karein
         if (imageFile) {
-            contentParts.push({
+            parts.push({
                 inlineData: {
                     data: imageFile.buffer.toString("base64"),
                     mimeType: imageFile.mimetype
@@ -967,45 +974,30 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
             });
         }
 
-        // Final Instruction for AI
-        const finalPrompt = `I want to create a high-quality, viral YouTube thumbnail. 
-        Topic: ${prompt}. 
-        Instructions: If an image is provided, use its context. Describe a detailed visual layout including text overlays, color grading, and character placement that would get a high CTR. 
-        Then, generate the image based on this description. 
-        Ratio: 16:9. High Contrast.`;
+        // AI ko instructions dein
+        const finalPrompt = `Create a high-impact YouTube thumbnail based on this: "${prompt}". 
+        If an image is provided, incorporate its elements. 
+        Style: Viral, cinematic, 16:9 aspect ratio. 
+        IMPORTANT: Return the output as an image.`;
 
-        contentParts.push({ text: finalPrompt });
+        parts.push({ text: finalPrompt });
 
-        // Content generate karna
-        const result = await model.generateContent(contentParts);
+        // 3. Request bhejein
+        const result = await model.generateContent(parts);
         const response = await result.response;
         
-        // YAHAN DHAYAN DEIN: Gemini 1.5 Flash text output deta hai. 
-        // Agar aap direct IMAGE file chahte hain toh aapko Imagen API use karni hogi.
-        // Agar aap Gemini se image banwa rahe hain toh wo inlineData me image return karega.
-        
-        const candidates = response.candidates[0].content.parts;
-        let imageFound = false;
-        let base64Image = "";
-
-        for (const part of candidates) {
-            if (part.inlineData) {
-                base64Image = part.inlineData.data;
-                imageFound = true;
-                break;
-            }
-        }
-
-        if (imageFound) {
+        // Image check karein
+        if (response.candidates && response.candidates[0].content.parts[0].inlineData) {
+            const generatedBase64 = response.candidates[0].content.parts[0].inlineData.data;
             res.json({
                 success: true,
-                imageUrl: `data:image/png;base64,${base64Image}`
+                imageUrl: `data:image/png;base64,${generatedBase64}`
             });
         } else {
-            // Agar model ne image nahi banayi sirf text likha (kuch regions me limit hoti hai)
+            // Agar model ne image nahi banayi sirf text likha
             res.status(500).json({ 
                 success: false, 
-                error: "AI ne sirf suggestion di par image generate nahi ki. Please try again with a different prompt." 
+                error: "AI ne image generate nahi ki, shayad text description di hai. Dubara try karein." 
             });
         }
 
@@ -1016,7 +1008,7 @@ app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) =>
             error: "Backend Error: " + error.message 
         });
     }
-});
+}); 
 //==================================================
 // --- SERVER START ---
 // ===================================================================
