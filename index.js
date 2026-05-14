@@ -934,65 +934,61 @@ app.post('/process-video', videoUpload.single('video'), async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL GENERATOR (Gemini + Image Gen)
 // ===================================================================
-// Thumbnail ke liye special Multer setup
-const thumbnailUpload = multer({ 
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
-});
+// ===================================================================
+// NEW TOOL: AI YOUTUBE THUMBNAIL (Direct Nano Banana 2 Engine)
+// ===================================================================
 
-app.post('/generate-thumbnail', thumbnailUpload.single('image'), async (req, res) => {
+const thumbUpload = multer({ storage: multer.memoryStorage() });
+
+app.post('/generate-thumbnail', thumbUpload.single('image'), async (req, res) => {
     try {
         const { prompt } = req.body;
         const imageFile = req.file;
 
         if (!GEMINI_KEY || !ai) {
-            return res.status(500).json({ success: false, message: "AI Key missing in Backend!" });
+            return res.status(500).json({ success: false, message: "Gemini Engine not ready!" });
         }
 
-        let finalImagePrompt = prompt;
+        // Nano Banana 2 (Gemini 3 Flash Image) model ko call karna
+        // Note: Ye model natively image generate aur edit kar sakta hai
+        const model = ai.getGenerativeModel({ model: "gemini-3-flash-image" });
 
-        // AGAR USER NE PHOTO UPLOAD KI HAI: To Gemini use karke use analyze karenge
+        let result;
+        
         if (imageFile) {
-            console.log("[THUMBNAIL] Analyzing uploaded image with Gemini...");
-            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-            
+            // Case 1: Image + Prompt (Composition/Editing)
+            console.log("[NANO BANANA] Composing thumbnail from screenshot...");
             const imagePart = {
                 inlineData: {
                     data: imageFile.buffer.toString("base64"),
                     mimeType: imageFile.mimetype
                 }
             };
-
-            const result = await model.generateContent([
-                imagePart,
-                { text: `Analyze this image and the user's wish: "${prompt}". 
-                Create a high-quality, highly descriptive prompt for an AI Image Generator to create a viral YouTube thumbnail. 
-                Focus on: Bright colors, high contrast, 4k detail, and professional lighting. 
-                Return ONLY the optimized prompt text.` }
-            ]);
-
-            finalImagePrompt = result.response.text();
+            
+            const fullPrompt = `Based on this screenshot/photo, create a high-impact YouTube thumbnail for: ${prompt}. Make it viral style with 16:9 aspect ratio.`;
+            
+            result = await model.generateContent([fullPrompt, imagePart]);
+        } else {
+            // Case 2: Only Prompt (Text-to-Image)
+            console.log("[NANO BANANA] Generating thumbnail from prompt...");
+            const fullPrompt = `Create a professional YouTube thumbnail about: ${prompt}. Viral style, high contrast, 4K, 16:9 aspect ratio.`;
+            
+            result = await model.generateContent(fullPrompt);
         }
 
-        // IMAGE GENERATION: Pollinations AI ka use kar rahe hain (Free & Fast)
-        // Hum prompt ko encode kar rahe hain taaki URL break na ho
-        const seed = Math.floor(Math.random() * 1000000);
-        const encodedPrompt = encodeURIComponent(finalImagePrompt);
-        
-        // Thumbnail Aspect Ratio (16:9) ke liye 1280x720 width/height use karenge
-        const generatedImageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1280&height=720&seed=${seed}&model=flux`;
-
-        console.log("[THUMBNAIL] Success! Image Generated.");
+        // Gemini direct image bytes ya URL return karega
+        // Hum response se image data nikal kar frontend ko bhejenge
+        const response = await result.response;
+        const generatedImage = response.candidates[0].content.parts[0].inlineData.data; 
 
         res.json({
             success: true,
-            imageUrl: generatedImageUrl,
-            aiPrompt: finalImagePrompt // Ye user ko dikhane ke liye ki AI ne kya socha
+            imageUrl: `data:image/png;base64,${generatedImage}` // Base64 format mein frontend ko image bhej rahe hain
         });
 
     } catch (error) {
-        console.error("Thumbnail Tool Error:", error);
-        res.status(500).json({ success: false, message: "Generation failed: " + error.message });
+        console.error("Nano Banana Error:", error);
+        res.status(500).json({ success: false, message: "Gemini failed to generate: " + error.message });
     }
 });
 //==================================================
