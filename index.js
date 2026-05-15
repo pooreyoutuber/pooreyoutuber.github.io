@@ -757,8 +757,7 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - NEW TOOL
 // ===================================================================
-// Add this near your other constants
-const upload = multer({ dest: 'uploads/' });
+/
 // Utility to convert file to GoogleGenerativeAI.Part object
 function fileToGenerativePart(path, mimeType) {
   return {
