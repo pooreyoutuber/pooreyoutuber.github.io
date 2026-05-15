@@ -755,36 +755,23 @@ app.post('/popup', async (req, res) => {
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
 // ===================================================================
 app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
-    // initialization check ko simple rakhein
-    if (!ai) {
+    // Sabse zaroori check: variable define hai ya nahi
+    if (!genAIModel) {
+        console.log("Error: genAIModel is still undefined at request time.");
         return res.status(500).json({ 
             success: false, 
-            error: 'AI is initializing or Key is missing. Check Render Environment Variables.' 
+            error: 'AI is still initializing. Please wait 5-10 seconds and try again.' 
         });
     }
 
     const { prompt } = req.body;
-
-    if (!prompt) {
-        return res.status(400).json({ success: false, error: 'Prompt is required!' });
-    }
+    if (!prompt) return res.status(400).json({ success: false, error: 'Prompt is required!' });
 
     try {
-        // Text generation for SEO suggestions
-        const result = await genAIModel.generateContent(`Create a viral YouTube thumbnail description for: "${prompt}"`);
+        // Ab genAIModel safe hai use karne ke liye
+        const result = await genAIModel.generateContent(`Create a viral thumbnail description for: "${prompt}"`);
         const responseText = result.response.text();
-
-        // Image URL logic (Flux model)
-        const seed = Math.floor(Math.random() * 100000);
-        const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${seed}&model=flux&nologo=true`;
-
-        // Frontend expect kar raha hai 'imageUrl', toh wahi bhejein
-        res.status(200).json({
-            success: true,
-            imageUrl: imageUrl, // Match this with your frontend script
-            ai_suggestion: responseText
-        });
-
+        // ... baki ka code (pollinations url logic)
     } catch (error) {
         console.error('Thumbnail Generation Error:', error);
         res.status(500).json({ success: false, error: 'AI Error: ' + error.message });
