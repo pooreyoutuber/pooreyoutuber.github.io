@@ -755,75 +755,50 @@ app.post('/popup', async (req, res) => {
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
 // ===================================================================
 // ===================================================================
-// 4. AI THUMBNAIL GENERATOR ENDPOINT (RE-FIXED)
+// 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI FIX
 // ===================================================================
-
 app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
-    // 1. DYNAMIC INITIALIZATION CHECK
-    // Agar 'ai' ready nahi hai, toh hum wait karenge ya error response bhejenge
-    if (!ai) {
-        console.log("AI is not ready, checking key...");
-        return res.status(503).json({ 
+    // 1. Check if AI is initialized (ESM delay fix)
+    if (!ai || typeof ai.getGenerativeModel !== 'function') {
+        return res.status(500).json({ 
             success: false, 
-            error: 'AI Engine is still warming up on Render. Please try again in 10 seconds.' 
+            error: 'AI is still initializing or Key is missing. Please try again in 5 seconds.' 
         });
     }
 
     const { prompt } = req.body;
     const imageFile = req.file;
 
+    if (!prompt) {
+        return res.status(400).json({ success: false, error: 'Prompt is required!' });
+    }
+
     try {
-        // 2. USE THE CORRECT SDK METHOD
-        // Ensure ai is used correctly based on how it was initialized
+        // 2. Get Model instance correctly
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        // 3. Prompt Optimization (Text-to-Image logic)
+        let aiPrompt = `Create a viral, high-click-through-rate YouTube thumbnail description for: "${prompt}". Style: 4k, vibrant, trending on YouTube.`;
         
-        let refinedDescription = prompt;
+        const result = await model.generateContent(aiPrompt);
+        const responseText = result.response.text();
 
-        // 3. AI REFINEMENT (Only if prompt is small or we want it better)
-        try {
-            let aiPrompt = `Create a viral YouTube thumbnail description for: "${prompt}". Focus on cinematic 8k lighting and vibrant colors.`;
-            let msgParts = [aiPrompt];
+        // 4. Image Generation (High-Quality 2 Variations)
+        // Hum 2 alag seeds use karenge taaki 2 unique thumbnails milein
+        const imageUrl1 = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(1, 10000)}&model=flux&nologo=true`;
+        const imageUrl2 = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(10001, 20000)}&model=flux&nologo=true`;
 
-            if (imageFile) {
-                const imagePart = {
-                    inlineData: {
-                        data: fs.readFileSync(imageFile.path).toString("base64"),
-                        mimeType: imageFile.mimetype
-                    }
-                };
-                msgParts = [`Reference this image and the topic "${prompt}" to describe a high-CTR thumbnail.`, imagePart];
-            }
-
-            const result = await model.generateContent(msgParts);
-            refinedDescription = result.response.text().substring(0, 400); // Limit length for URL
-        } catch (aiErr) {
-            console.error("Gemini refinement failed, using raw prompt:", aiErr.message);
-            // Fallback: Agar Gemini fail bhi ho jaye, hum rukenge nahi
-        }
-
-        // 4. GENERATE TWO IMAGES (VARIATIONS)
-        const seed1 = Math.floor(Math.random() * 99999);
-        const seed2 = Math.floor(Math.random() * 99999);
-        
-        const imageUrl1 = `https://pollinations.ai/p/${encodeURIComponent(refinedDescription)}?width=1280&height=720&seed=${seed1}&model=flux`;
-        const imageUrl2 = `https://pollinations.ai/p/${encodeURIComponent(refinedDescription)}?width=1280&height=720&seed=${seed2}&model=flux`;
-
-        // Cleanup
-        if (imageFile) fs.unlinkSync(imageFile.path);
-
-        res.status(200).json({ 
-            success: true, 
-            imageUrl: imageUrl1, // Main Image
-            imageUrl2: imageUrl2  // Variation
+        res.status(200).json({
+            success: true,
+            thumbnails: [imageUrl1, imageUrl2],
+            ai_suggestion: responseText
         });
 
     } catch (error) {
-        console.error('Thumbnail Tool Error:', error);
-        if (req.file) fs.unlinkSync(req.file.path);
-        res.status(500).json({ success: false, error: 'Critical AI Error: ' + error.message });
+        console.error('Thumbnail Generation Error:', error);
+        res.status(500).json({ success: false, error: 'AI Error: ' + error.message });
     }
 });
-
 //==================================================
 // --- SERVER START ---
 // ===================================================================
