@@ -755,67 +755,72 @@ app.post('/popup', async (req, res) => {
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
 // ===================================================================
 // ===================================================================
-// 4. AI THUMBNAIL GENERATOR ENDPOINT (FIXED)
+// 4. AI THUMBNAIL GENERATOR ENDPOINT (RE-FIXED)
 // ===================================================================
 
-// Helper to convert file to base64 for Gemini
-function fileToGenerativePart(filePath, mimeType) {
-    return {
-        inlineData: {
-            data: Buffer.from(fs.readFileSync(filePath)).toString("base64"),
-            mimeType
-        },
-    };
-}
-
 app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
-    // 1. Check if AI is initialized
-    if (!ai || typeof ai.getGenerativeModel !== 'function') {
-        console.error("AI not initialized yet or incorrect SDK version.");
-        return res.status(500).json({ success: false, error: 'AI Engine is warming up. Please try again in 5 seconds.' });
+    // 1. DYNAMIC INITIALIZATION CHECK
+    // Agar 'ai' ready nahi hai, toh hum wait karenge ya error response bhejenge
+    if (!ai) {
+        console.log("AI is not ready, checking key...");
+        return res.status(503).json({ 
+            success: false, 
+            error: 'AI Engine is still warming up on Render. Please try again in 10 seconds.' 
+        });
     }
 
     const { prompt } = req.body;
     const imageFile = req.file;
 
     try {
-        // 2. Access the model using your existing 'ai' instance
+        // 2. USE THE CORRECT SDK METHOD
+        // Ensure ai is used correctly based on how it was initialized
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
         
-        let aiPrompt = `You are a YouTube Thumbnail Expert. Create a highly detailed image description for a viral thumbnail about: "${prompt}". Focus on cinematic lighting, 8k resolution, and high-contrast colors.`;
-        let msgParts = [aiPrompt];
+        let refinedDescription = prompt;
 
-        if (imageFile) {
-            const imagePart = fileToGenerativePart(imageFile.path, imageFile.mimetype);
-            aiPrompt = `Look at this reference photo and the topic "${prompt}". Describe a professional, high-CTR YouTube thumbnail that combines these elements.`;
-            msgParts = [aiPrompt, imagePart];
+        // 3. AI REFINEMENT (Only if prompt is small or we want it better)
+        try {
+            let aiPrompt = `Create a viral YouTube thumbnail description for: "${prompt}". Focus on cinematic 8k lighting and vibrant colors.`;
+            let msgParts = [aiPrompt];
+
+            if (imageFile) {
+                const imagePart = {
+                    inlineData: {
+                        data: fs.readFileSync(imageFile.path).toString("base64"),
+                        mimeType: imageFile.mimetype
+                    }
+                };
+                msgParts = [`Reference this image and the topic "${prompt}" to describe a high-CTR thumbnail.`, imagePart];
+            }
+
+            const result = await model.generateContent(msgParts);
+            refinedDescription = result.response.text().substring(0, 400); // Limit length for URL
+        } catch (aiErr) {
+            console.error("Gemini refinement failed, using raw prompt:", aiErr.message);
+            // Fallback: Agar Gemini fail bhi ho jaye, hum rukenge nahi
         }
 
-        // 3. Generate the refined description
-        const result = await model.generateContent(msgParts);
-        const refinedDescription = result.response.text();
+        // 4. GENERATE TWO IMAGES (VARIATIONS)
+        const seed1 = Math.floor(Math.random() * 99999);
+        const seed2 = Math.floor(Math.random() * 99999);
+        
+        const imageUrl1 = `https://pollinations.ai/p/${encodeURIComponent(refinedDescription)}?width=1280&height=720&seed=${seed1}&model=flux`;
+        const imageUrl2 = `https://pollinations.ai/p/${encodeURIComponent(refinedDescription)}?width=1280&height=720&seed=${seed2}&model=flux`;
 
-        // 4. Send to Image Generation Engine (Pollinations)
-        // We use a random seed to ensure the user gets a "new" image every time they click generate
-        const randomSeed = Math.floor(Math.random() * 99999);
-        const generatedImageUrl = `https://pollinations.ai/p/${encodeURIComponent(refinedDescription)}?width=1280&height=720&seed=${randomSeed}&model=flux`;
-
-        // Cleanup: Delete the uploaded file from server storage
-        if (imageFile) {
-            fs.unlink(imageFile.path, (err) => {
-                if (err) console.error("File cleanup error:", err);
-            });
-        }
+        // Cleanup
+        if (imageFile) fs.unlinkSync(imageFile.path);
 
         res.status(200).json({ 
             success: true, 
-            imageUrl: generatedImageUrl 
+            imageUrl: imageUrl1, // Main Image
+            imageUrl2: imageUrl2  // Variation
         });
 
     } catch (error) {
         console.error('Thumbnail Tool Error:', error);
         if (req.file) fs.unlinkSync(req.file.path);
-        res.status(500).json({ success: false, error: 'AI Error: ' + error.message });
+        res.status(500).json({ success: false, error: 'Critical AI Error: ' + error.message });
     }
 });
 
