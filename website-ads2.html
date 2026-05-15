@@ -3,302 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PureAudio - Free Video to MP3 Converter</title>
+    <title>FrameSnap - High Quality Video to Image Converter</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        .custom-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+        .custom-gradient { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .frame-card:hover .download-overlay { opacity: 1; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 font-sans min-h-screen">
 
-    <!-- Header / Navbar -->
-    <header class="bg-white shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
-                <span class="text-xl font-bold text-gray-800 tracking-tight">PureAudio</span>
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 custom-gradient rounded-lg flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <span class="text-xl font-bold text-slate-800 tracking-tight">FrameSnap</span>
             </div>
-            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center">
-                <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span> Fully Secure
-            </span>
+            <div class="hidden md:flex items-center text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2 animate-ping"></span> No Uploads • 100% Local
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Main Content Container -->
-    <main class="max-w-4xl mx-auto px-4 py-10 flex-grow w-full">
-        
-        <!-- Converter Tool Card -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10 mb-12 border border-gray-100">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">Convert Video to Audio Instantly</h1>
-                <p class="text-gray-500 text-sm md:text-base">Extract high-quality audio from your video files. Fast, local, and completely private.</p>
-            </div>
-
-            <!-- Upload Area -->
-            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-indigo-500 transition-colors cursor-pointer bg-gray-50">
-                <input type="file" id="videoInput" accept="video/*" class="hidden">
-                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                </svg>
-                <p class="text-base font-medium text-gray-700 mb-1">Click to upload or drag and drop your video</p>
-                <p class="text-xs text-gray-400">Supported video formats • Maximum file size: 100MB</p>
-            </div>
-
-            <!-- File Info & Error Messages -->
-            <div id="fileInfo" class="mt-6 hidden bg-gray-50 rounded-lg p-4 flex items-center justify-between border border-gray-200">
-                <div class="flex items-center space-x-3 overflow-hidden">
-                    <svg class="w-6 h-6 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                    <span id="fileName" class="text-sm font-medium text-gray-700 truncate">video.mp4</span>
-                </div>
-                <span id="fileSize" class="text-xs text-gray-500 ml-2 whitespace-nowrap">0 MB</span>
-            </div>
-
-            <div id="errorMessage" class="mt-4 hidden p-4 bg-red-50 rounded-lg text-sm text-red-600 font-medium border border-red-100"></div>
-
-            <!-- Action Button & Progress -->
-            <div class="mt-6">
-                <button id="convertBtn" disabled class="w-full custom-gradient text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-center flex justify-center items-center space-x-2">
-                    <span>Extract Audio (WAV)</span>
-                </button>
-
-                <!-- Progress Bar Container -->
-                <div id="progressContainer" class="mt-6 hidden">
-                    <div class="flex justify-between mb-1">
-                        <span id="progressStatus" class="text-sm font-medium text-indigo-600">Reading video file...</span>
-                        <span id="progressText" class="text-sm font-medium text-indigo-600">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="progressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-100" style="width: 0%"></div>
-                    </div>
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-semibold text-slate-800 mb-4">Step 1: Upload Video (Max 500MB)</h2>
+                    <label id="dropZone" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-400 transition-all">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
+                            <svg class="w-10 h-10 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <p class="mb-2 text-sm text-slate-700 font-medium">Click to select or drag video</p>
+                            <p class="text-xs text-slate-400">MP4, MOV, WEBM (Upto 500MB)</p>
+                        </div>
+                        <input type="file" id="videoInput" class="hidden" accept="video/*" />
+                    </label>
+                    <div id="errorMsg" class="mt-3 text-red-500 text-xs hidden font-medium"></div>
                 </div>
 
-                <!-- Download Area -->
-                <div id="downloadArea" class="mt-6 hidden text-center">
-                    <a id="downloadBtn" href="#" download class="inline-flex items-center justify-center bg-green-600 text-white font-semibold py-3 px-8 rounded-xl shadow-md hover:bg-green-700 transition-colors space-x-2 w-full sm:w-auto">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1a3 3 0 00-3-3H7a3 3 0 00-3 3zm5-6l3 3m0 0l3-3m-3 3V4"></path>
-                        </svg>
-                        <span>Download Your Audio</span>
-                    </a>
+                <div id="videoContainer" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 hidden">
+                    <video id="mainVideo" controls class="w-full rounded-lg bg-black aspect-video"></video>
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <button id="snapBtn" class="flex items-center justify-center gap-2 bg-slate-800 text-white py-2.5 rounded-xl hover:bg-slate-900 transition-all font-medium">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Snapshot
+                        </button>
+                        <button id="autoBtn" class="flex items-center justify-center gap-2 custom-gradient text-white py-2.5 rounded-xl hover:opacity-90 transition-all font-medium">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            Auto (0.5s)
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-2 text-center uppercase tracking-widest font-bold">Local processing • No data sent to server</p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-slate-800">Extracted Frames (<span id="count">0</span>)</h3>
+                    <button id="zipBtn" class="hidden flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-700 transition-all shadow-sm">
+                        Download All (ZIP)
+                    </button>
+                </div>
+
+                <div id="gallery" class="grid grid-cols-2 sm:grid-cols-3 gap-4 min-h-[400px] content-start">
+                    <div id="placeholder" class="col-span-full flex flex-col items-center justify-center h-64 border-2 border-dashed border-slate-200 rounded-2xl text-slate-300">
+                        <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <p>Frames will appear here</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <hr class="border-gray-200 my-10">
+        <hr class="my-16 border-slate-200">
 
-        <!-- Description Section -->
-        <article class="prose max-w-none text-gray-600 space-y-6 leading-relaxed">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">About PureAudio: How to Use and Why It Is Helpful</h2>
-            <p>Welcome to PureAudio, a premium web-based utility designed to help you extract high-quality audio tracks directly from your video files...</p>
+        <article class="prose max-w-none text-slate-600 leading-relaxed">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-6">Mastering Video-to-Image Extraction: A Complete Guide</h2>
+            <div class="grid md:grid-cols-2 gap-10">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Professional Utility & Convenience</h3>
+                    <p>FrameSnap is a specialized browser-based utility designed for professionals who need high-resolution images from video footage. Whether you are a UI/UX designer capturing perfect frames for a portfolio, a researcher documenting specific moments in a video, or a content creator making thumbnails, this tool simplifies the entire workflow. Unlike other online converters that compress your files or require expensive subscriptions, FrameSnap provides full-resolution frame grabbing directly in your local environment.</p>
+                    <p class="mt-4">The core benefit lies in its dual-mode extraction. The <strong>Auto Extract</strong> mode triggers an algorithm that captures frames every 0.5 seconds, allowing you to scan through a video's visual progression without manual effort. Alternatively, the <strong>Manual Snapshot</strong> mode gives you surgical precision—play the video, pause at the exact millisecond, and capture the frame. This is essential for high-speed action shots or specific keyframes that might be missed by automated timers.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">How to Use the FrameSnap Tool</h3>
+                    <p>Getting started is incredibly simple. 1. Drag and drop your video file (up to 500MB) into the upload zone. We support major formats like MP4, MOV, and WEBM. 2. Once the video loads, it will appear in the player. 3. Choose your method: Click "Auto" to start a continuous stream of images, or "Snapshot" to pick frames yourself. 4. All images will populate the gallery on the right. 5. You can click any individual image to download it instantly, or use the "Download All (ZIP)" button to get everything in one organized package.</p>
+                    <h3 class="text-xl font-bold text-slate-800 mt-6 mb-3">Privacy & Zero-Data Commitment</h3>
+                    <p>We understand that your videos may contain private or proprietary information. That is why FrameSnap is built with a <strong>Local-First Architecture</strong>. When you select a video, it is never uploaded to a cloud server. All processing, decoding, and frame extraction happen within your computer's RAM using the Power of the Web Canvas API. This means the tool works even if you disconnect from the internet after loading the page. No login required, no data collected, and no privacy risks.</p>
+                </div>
+            </div>
         </article>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-6 mt-12 text-center text-sm border-t border-gray-800">
-        <div class="max-w-5xl mx-auto px-4">
-            <p>&copy; 2026 PureAudio. All rights reserved. 100% Secure Local Web Utility.</p>
-        </div>
+    <footer class="bg-slate-900 text-slate-400 py-10 text-center">
+        <p class="text-sm font-medium">© 2026 FrameSnap Secure Media Lab. All processing is 100% Client-Side.</p>
     </footer>
 
-    <!-- JavaScript Code with Real Audio Extraction -->
     <script>
-        const dropZone = document.getElementById('dropZone');
         const videoInput = document.getElementById('videoInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileName = document.getElementById('fileName');
-        const fileSize = document.getElementById('fileSize');
-        const errorMessage = document.getElementById('errorMessage');
-        const convertBtn = document.getElementById('convertBtn');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const progressStatus = document.getElementById('progressStatus');
-        const downloadArea = document.getElementById('downloadArea');
-        const downloadBtn = document.getElementById('downloadBtn');
+        const mainVideo = document.getElementById('mainVideo');
+        const gallery = document.getElementById('gallery');
+        const placeholder = document.getElementById('placeholder');
+        const snapBtn = document.getElementById('snapBtn');
+        const autoBtn = document.getElementById('autoBtn');
+        const zipBtn = document.getElementById('zipBtn');
+        const countSpan = document.getElementById('count');
+        const errorMsg = document.getElementById('errorMsg');
+        const videoContainer = document.getElementById('videoContainer');
 
-        let selectedFile = null;
-        const MAX_FILE_SIZE_MB = 100; // ब्राउज़र मेमोरी के लिए 100MB सेफ लिमिट है
-
-        dropZone.addEventListener('click', () => videoInput.click());
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-indigo-500', 'bg-indigo-50');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-            if (e.dataTransfer.files.length > 0) {
-                handleFileSelection(e.dataTransfer.files[0]);
-            }
-        });
+        let frames = [];
+        let autoInterval = null;
 
         videoInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFileSelection(e.target.files[0]);
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 500 * 1024 * 1024) {
+                errorMsg.innerText = "Error: File size exceeds 500MB limit.";
+                errorMsg.classList.remove('hidden');
+                return;
             }
+
+            errorMsg.classList.add('hidden');
+            const url = URL.createObjectURL(file);
+            mainVideo.src = url;
+            videoContainer.classList.remove('hidden');
+            
+            // Reset Gallery
+            gallery.innerHTML = '';
+            gallery.appendChild(placeholder);
+            frames = [];
+            updateUI();
         });
 
-        function handleFileSelection(file) {
-            errorMessage.classList.add('hidden');
-            fileInfo.classList.add('hidden');
-            convertBtn.disabled = true;
-            downloadArea.classList.add('hidden');
-            progressContainer.classList.add('hidden');
+        function captureFrame() {
+            const canvas = document.createElement('canvas');
+            canvas.width = mainVideo.videoWidth;
+            canvas.height = mainVideo.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(mainVideo, 0, 0, canvas.width, canvas.height);
             
-            if (!file.type.startsWith('video/')) {
-                showError('Error: Please select a valid video file.');
-                return;
-            }
-
-            const fileSizeMB = file.size / (1024 * 1024);
-            if (fileSizeMB > MAX_FILE_SIZE_MB) {
-                showError(`Error: File size exceeds the ${MAX_FILE_SIZE_MB}MB limit for in-browser processing. Your file is ${fileSizeMB.toFixed(1)}MB.`);
-                return;
-            }
-
-            selectedFile = file;
-            fileName.textContent = file.name;
-            fileSize.textContent = `${fileSizeMB.toFixed(1)} MB`;
-            fileInfo.classList.remove('hidden');
-            convertBtn.disabled = false;
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            addFrameToGallery(dataUrl);
         }
 
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.classList.remove('hidden');
-        }
-
-        function updateProgress(percent, statusText) {
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `${percent}%`;
-            progressStatus.textContent = statusText;
-        }
-
-        convertBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
-
-            convertBtn.disabled = true;
-            progressContainer.classList.remove('hidden');
-            downloadArea.classList.add('hidden');
+        function addFrameToGallery(src) {
+            if (placeholder) placeholder.remove();
             
-            updateProgress(10, 'Reading video file...');
+            const id = Date.now();
+            frames.push({ id, src });
 
-            try {
-                const fileReader = new FileReader();
-                
-                fileReader.onload = async function(e) {
-                    updateProgress(30, 'Decoding video audio tracks (Please wait)...');
+            const div = document.createElement('div');
+            div.className = "relative frame-card group bg-white p-2 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md";
+            div.innerHTML = `
+                <img src="${src}" class="w-full h-auto rounded-lg">
+                <div class="download-overlay absolute inset-0 bg-black/40 opacity-0 transition-opacity rounded-xl flex items-center justify-center gap-2">
+                    <a href="${src}" download="frame_${id}.jpg" class="p-2 bg-white rounded-full text-slate-800 hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1a3 3 0 00-3-3H7a3 3 0 00-3 3zm5-6l3 3m0 0l3-3m-3 3V4"></path></svg>
+                    </a>
+                </div>
+            `;
+            gallery.prepend(div);
+            updateUI();
+        }
 
-                    try {
-                        const arrayBuffer = e.target.result;
-                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                        
-                        // वीडियो से ऑडियो डेटा डिकोड करें
-                        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-                        
-                        updateProgress(70, 'Encoding to high-quality WAV audio...');
+        function updateUI() {
+            countSpan.innerText = frames.length;
+            if (frames.length > 0) {
+                zipBtn.classList.remove('hidden');
+            } else {
+                zipBtn.classList.add('hidden');
+            }
+        }
 
-                        // डिकोड किए गए डेटा को WAV फ़ॉर्मेट में बदलें (ब्राउज़र बिना लाइब्रेरी के WAV आसानी से बना सकता है)
-                        const wavBlob = bufferToWav(audioBuffer);
-                        const audioUrl = URL.createObjectURL(wavBlob);
-                        
-                        // डाउनलोड बटन सेट करें
-                        downloadBtn.href = audioUrl;
-                        const originalName = selectedFile.name;
-                        const lastDotIndex = originalName.lastIndexOf('.');
-                        const outputName = lastDotIndex !== -1 ? originalName.substring(0, lastDotIndex) + '.wav' : originalName + '.wav';
-                        
-                        downloadBtn.setAttribute('download', outputName);
+        snapBtn.addEventListener('click', captureFrame);
 
-                        updateProgress(100, 'Completed!');
-                        
-                        setTimeout(() => {
-                            progressContainer.classList.add('hidden');
-                            downloadArea.classList.remove('hidden');
-                            convertBtn.disabled = false;
-                        }, 800);
-
-                    } catch (err) {
-                        console.error(err);
-                        showError('Encoding Error: Unable to extract audio. The video format might not be supported by your browser.');
-                        convertBtn.disabled = false;
-                        progressContainer.classList.add('hidden');
+        autoBtn.addEventListener('click', () => {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                autoBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Auto (0.5s)`;
+                autoBtn.classList.replace('bg-red-500', 'custom-gradient');
+            } else {
+                autoBtn.innerHTML = `<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Stop Auto`;
+                autoBtn.classList.replace('custom-gradient', 'bg-red-500');
+                autoInterval = setInterval(() => {
+                    if (!mainVideo.paused && !mainVideo.ended) {
+                        captureFrame();
                     }
-                };
-
-                fileReader.readAsArrayBuffer(selectedFile);
-
-            } catch (error) {
-                showError('Error processing file locally.');
-                convertBtn.disabled = false;
-                progressContainer.classList.add('hidden');
+                }, 500);
             }
         });
 
-        // AudioBuffer को प्रॉपर WAV फ़ाइल बाइनरी में बदलने का फ़ंक्शन
-        function bufferToWav(buffer) {
-            let numOfChan = buffer.numberOfChannels,
-                length = buffer.length * numOfChan * 2 + 44,
-                bufferArr = new ArrayBuffer(length),
-                view = new DataView(bufferArr),
-                channels = [], i, sample,
-                offset = 0,
-                pos = 0;
+        zipBtn.addEventListener('click', async () => {
+            const zip = new JSZip();
+            const folder = zip.folder("framesnap_images");
+            
+            frames.forEach((frame, index) => {
+                const base64Data = frame.src.split(',')[1];
+                folder.file(`frame_${index + 1}.jpg`, base64Data, {base64: true});
+            });
 
-            // WAV Header लिखना
-            setUint32(0x46464952);                         // "RIFF"
-            setUint32(length - 8);                         // file length - 8
-            setUint32(0x45564157);                         // "WAVE"
-
-            setUint32(0x20746d66);                         // "fmt " chunk
-            setUint32(16);                                 // chunk length
-            setUint16(1);                                  // sample format (raw)
-            setUint16(numOfChan);
-            setUint32(buffer.sampleRate);
-            setUint32(buffer.sampleRate * 2 * numOfChan);  // byte rate
-            setUint16(numOfChan * 2);                      // block align
-            setUint16(16);                                 // bits per sample
-
-            setUint32(0x61746164);                         // "data" chunk
-            setUint32(length - pos - 4);                   // chunk length
-
-            for(i = 0; i < buffer.numberOfChannels; i++)
-                channels.push(buffer.getChannelData(i));
-
-            while(pos < length) {
-                for(i = 0; i < numOfChan; i++) {           // interleave channels
-                    sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
-                    sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF); // scale to 16-bit signed int
-                    view.setInt16(pos, sample, true);
-                    pos += 2;
-                }
-                offset++;
-            }
-
-            return new Blob([bufferArr], {type: "audio/wav"});
-
-            function setUint16(data) {
-                view.setUint16(pos, data, true);
-                pos += 2;
-            }
-
-            function setUint32(data) {
-                view.setUint32(pos, data, true);
-                pos += 4;
-            }
-        }
+            const content = await zip.generateAsync({type: "blob"});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = "frames_collection.zip";
+            link.click();
+        });
     </script>
 </body>
 </html>
