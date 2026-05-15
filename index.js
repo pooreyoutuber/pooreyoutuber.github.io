@@ -754,10 +754,14 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
 // ===================================================================
+// ===================================================================
+// 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
+// ===================================================================
 app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
-    // Sabse zaroori check: variable define hai ya nahi
-    if (!genAIModel) {
-        console.log("Error: genAIModel is still undefined at request time.");
+    
+    // Yahan 'genAIModel' ki jagah 'ai' check karein
+    if (!ai) {
+        console.log("Error: AI is still undefined at request time.");
         return res.status(500).json({ 
             success: false, 
             error: 'AI is still initializing. Please wait 5-10 seconds and try again.' 
@@ -768,10 +772,21 @@ app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
     if (!prompt) return res.status(400).json({ success: false, error: 'Prompt is required!' });
 
     try {
-        // Ab genAIModel safe hai use karne ke liye
-        const result = await genAIModel.generateContent(`Create a viral thumbnail description for: "${prompt}"`);
+        // Model select karein (Aap gemini-1.5-flash ya 2.0-flash use kar sakte hain)
+        const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+        
+        const result = await model.generateContent(`Create a viral thumbnail description for: "${prompt}"`);
         const responseText = result.response.text();
-        // ... baki ka code (pollinations url logic)
+        
+        // Aapka Pollinations ya image logic yahan aayega
+        const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(responseText)}?width=1280&height=720&seed=${Math.floor(Math.random() * 1000000)}`;
+
+        res.status(200).json({
+            success: true,
+            description: responseText,
+            thumbnailUrl: imageUrl
+        });
+
     } catch (error) {
         console.error('Thumbnail Generation Error:', error);
         res.status(500).json({ success: false, error: 'AI Error: ' + error.message });
