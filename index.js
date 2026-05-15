@@ -755,51 +755,66 @@ app.post('/popup', async (req, res) => {
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
 // ===================================================================
 // ===================================================================
-// 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI FIX
+// 4. AI THUMBNAIL GENERATOR ENDPOINT - NEW TOOL
 // ===================================================================
+// Add this near your other constants
+const upload = multer({ dest: 'uploads/' });
+// Utility to convert file to GoogleGenerativeAI.Part object
+function fileToGenerativePart(path, mimeType) {
+  return {
+    inlineData: {
+      data: Buffer.from(fs.readFileSync(path)).toString("base64"),
+      mimeType
+    },
+  };
+}
+
 app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
-    // 1. Check if AI is initialized (ESM delay fix)
-    if (!ai || typeof ai.getGenerativeModel !== 'function') {
-        return res.status(500).json({ 
-            success: false, 
-            error: 'AI is still initializing or Key is missing. Please try again in 5 seconds.' 
-        });
+    if (!GEMINI_KEY) {
+        return res.status(500).json({ success: false, error: 'Gemini API Key missing.' });
     }
 
     const { prompt } = req.body;
     const imageFile = req.file;
 
-    if (!prompt) {
-        return res.status(400).json({ success: false, error: 'Prompt is required!' });
-    }
-
     try {
-        // 2. Get Model instance correctly
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        // 3. Prompt Optimization (Text-to-Image logic)
-        let aiPrompt = `Create a viral, high-click-through-rate YouTube thumbnail description for: "${prompt}". Style: 4k, vibrant, trending on YouTube.`;
         
-        const result = await model.generateContent(aiPrompt);
-        const responseText = result.response.text();
+        let aiPrompt = `You are a YouTube Thumbnail Expert. Generate a highly detailed, viral-style image generation prompt based on this request: "${prompt}". Focus on high contrast, vibrant colors, and click-worthy composition.`;
+        let msgParts = [aiPrompt];
 
-        // 4. Image Generation (High-Quality 2 Variations)
-        // Hum 2 alag seeds use karenge taaki 2 unique thumbnails milein
-        const imageUrl1 = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(1, 10000)}&model=flux&nologo=true`;
-        const imageUrl2 = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(10001, 20000)}&model=flux&nologo=true`;
+        // If user uploaded an image, ask Gemini to analyze it and improve the prompt
+        if (imageFile) {
+            const imagePart = fileToGenerativePart(imageFile.path, imageFile.mimetype);
+            aiPrompt = `Look at this reference image and the topic "${prompt}". Create a detailed prompt for an AI Image generator to create a high-quality, viral YouTube thumbnail that looks professional and high-definition.`;
+            msgParts.push(imagePart);
+        }
 
-        res.status(200).json({
-            success: true,
-            thumbnails: [imageUrl1, imageUrl2],
-            ai_suggestion: responseText
+        const result = await model.generateContent(msgParts);
+        const refinedPrompt = result.response.text();
+
+        /**
+         * NOTE: Standard Gemini API (Flash/Pro) does not generate .png files directly.
+         * You typically connect refinedPrompt to an API like Pollinations.ai (Free) 
+         * or OpenAI DALL-E to get the actual image URL.
+         */
+        const generatedImageUrl = `https://pollinations.ai/p/${encodeURIComponent(refinedPrompt)}?width=1280&height=720&seed=${Math.floor(Math.random() * 1000)}`;
+
+        // Cleanup uploaded file
+        if (imageFile) fs.unlinkSync(imageFile.path);
+
+        res.status(200).json({ 
+            success: true, 
+            imageUrl: generatedImageUrl,
+            refinedPrompt: refinedPrompt 
         });
 
     } catch (error) {
-        console.error('Thumbnail Generation Error:', error);
-        res.status(500).json({ success: false, error: 'AI Error: ' + error.message });
+        console.error('Thumbnail Tool Error:', error);
+        if (req.file) fs.unlinkSync(req.file.path);
+        res.status(500).json({ success: false, error: 'AI Thumbnail generation failed.' });
     }
 });
-
 //==================================================
 // --- SERVER START ---
 // ===================================================================
