@@ -1,102 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI YouTube Thumbnail Pro</title>
-    <style>
-        :root { --yt-red: #FF0000; --yt-black: #0F0F0F; --yt-gray: #F2F2F2; --white: #FFFFFF; }
-        body { font-family: 'Roboto', sans-serif; background: var(--yt-gray); margin: 0; color: var(--yt-black); }
-        header { background: var(--white); padding: 15px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .logo { color: var(--yt-red); font-size: 22px; font-weight: bold; text-decoration: none; }
-        .container { max-width: 900px; margin: 30px auto; background: var(--white); padding: 25px; border-radius: 12px; }
-        .input-group { margin-bottom: 20px; display: flex; flex-direction: column; }
-        textarea { padding: 12px; border: 1px solid #ccc; border-radius: 8px; height: 80px; resize: none; }
-        button { background: var(--yt-red); color: #fff; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; }
-        #loading { display: none; text-align: center; margin: 20px; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--yt-red); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #result-section { display: none; margin-top: 30px; text-align: center; }
-        .thumb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .thumb-card img { width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .dl-btn { background: #222; margin-top: 10px; font-size: 13px; padding: 8px 15px; }
-        @media (max-width: 600px) { .thumb-grid { grid-template-columns: 1fr; } }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI YouTube Thumbnail Generator</title>
+    <style>
+        :root {
+            --yt-red: #FF0000;
+            --yt-black: #0F0F0F;
+            --yt-gray: #F2F2F2;
+            --yt-dark-gray: #606060;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--yt-gray);
+            margin: 0;
+            padding: 0;
+            color: var(--yt-black);
+        }
+
+        header {
+            background-color: var(--white);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            color: var(--yt-red);
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        h1 { text-align: center; font-size: 28px; margin-bottom: 30px; }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 600px) { .upload-section { grid-template-columns: 1fr; } }
+
+        .input-group { display: flex; flex-direction: column; }
+        label { font-weight: 500; margin-bottom: 8px; color: var(--yt-dark-gray); }
+
+        textarea, input[type="file"] {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        textarea { height: 100px; resize: none; }
+
+        .btn-container { text-align: center; margin-top: 20px; }
+
+        button {
+            background-color: var(--yt-red);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background-color: #CC0000; transform: scale(1.05); }
+
+        #loading { display: none; text-align: center; margin: 20px 0; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--yt-red);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #result-section {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            border-top: 2px solid var(--yt-gray);
+            padding-top: 30px;
+        }
+
+        #thumbnail-preview {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .action-btns { display: flex; justify-content: center; gap: 15px; }
+        .btn-secondary { background-color: var(--yt-black); }
+
+        .description-section {
+            margin-top: 60px;
+            line-height: 1.6;
+            color: #444;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+        }
+    </style>
 </head>
 <body>
 
 <header><a href="#" class="logo">▶ AI Thumbnail Pro</a></header>
 
 <div class="container">
-    <h1>Create Viral Thumbnails</h1>
-    <div class="input-group">
-        <label>Video Topic / Prompt</label>
-        <textarea id="prompt" placeholder="Describe your video (e.g. Minecraft survival challenge)"></textarea>
-    </div>
-    <div style="text-align:center;">
-        <button onclick="generateThumbnail()">Generate 2 Variations</button>
-    </div>
+    <h1>Create Viral YouTube Thumbnails</h1>
+    
+    <div class="upload-section">
+        <div class="input-group">
+            <label for="prompt">Video Topic / Prompt</label>
+            <textarea id="prompt" placeholder="E.g. Gaming thumbnail with fire effects"></textarea>
+        </div>
+        <div class="input-group">
+            <label for="image">Upload Reference Photo</label>
+            <input type="file" id="image" accept="image/*">
+        </div>
+    </div>
 
-    <div id="loading">
-        <div class="loader"></div>
-        <p>AI is thinking... Render might take a moment to wake up.</p>
-    </div>
+    <div class="btn-container">
+        <button onclick="generateThumbnail()">Generate Thumbnail</button>
+    </div>
 
-    <div id="result-section">
-        <h3>Pick Your Best Thumbnail</h3>
-        <div class="thumb-grid">
-            <div class="thumb-card">
-                <img id="img1" src="">
-                <button class="dl-btn" onclick="downloadThis('img1')">Download Variation 1</button>
-            </div>
-            <div class="thumb-card">
-                <img id="img2" src="">
-                <button class="dl-btn" onclick="downloadThis('img2')">Download Variation 2</button>
-            </div>
-        </div>
-    </div>
+    <div id="loading">
+        <div class="loader"></div>
+        <p>AI is generating your thumbnail, please wait...</p>
+    </div>
+
+    <div id="result-section">
+        <h3>Your Generated Thumbnail</h3>
+        <img id="thumbnail-preview" src="" alt="Thumbnail Preview">
+        <div class="action-btns">
+            <button onclick="downloadImage()">Download HD</button>
+            <button class="btn-secondary" onclick="generateThumbnail()">More (Try Again)</button>
+        </div>
+    </div>
+
+    <div class="description-section">
+        <h2>How This AI Tool Helps Content Creators</h2>
+        <p>YouTube par success ke liye Click-Through Rate (CTR) sabse zaroori hai. Hamara AI tool aapki help karta hai professional thumbnails banane mein jo viewers ko click karne par majboor kar dete hain. Yeh tool Google Gemini AI aur advanced Image Generation ka use karta hai taaki aapki video niche ke hisab se best design mil sake. Chahe aap gamer ho ya vlogger, yeh tool har niche ko samajhta hai aur Render Cloud par host hone ki wajah se super fast hai.</p>
+        <!-- Yahan aap apna baki ka 600 words ka content daal sakte hain -->
+    </div>
 </div>
 
 <script>
-    async function generateThumbnail() {
-        const prompt = document.getElementById('prompt').value;
-        if(!prompt) return alert("Please enter a topic!");
+    async function generateThumbnail() {
+        const prompt = document.getElementById('prompt').value;
+        const imageFile = document.getElementById('image').files[0];
 
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('result-section').style.display = 'none';
+        if(!prompt && !imageFile) {
+            alert("Bhai, prompt likho ya photo upload karo!");
+            return;
+        }
 
-        try {
-            const response = await fetch('https://pooreyoutuber.onrender.com/generate-thumbnail', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: prompt })
-            });
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result-section').style.display = 'none';
 
-            const data = await response.json();
+        // FormData prepare kar rahe hain backend ke liye
+        const formData = new FormData();
+        formData.append('prompt', prompt);
+        if(imageFile) formData.append('image', imageFile);
 
-            if(data.success) {
-                document.getElementById('img1').src = data.thumbnails[0];
-                document.getElementById('img2').src = data.thumbnails[1];
-                document.getElementById('result-section').style.display = 'block';
-            } else {
-                alert("AI Note: " + data.error);
-            }
-        } catch (err) {
-            alert("Connection error. Render server is likely starting up. Wait 10s and try again.");
-        } finally {
-            document.getElementById('loading').style.display = 'none';
-        }
-    }
+        try {
+            // Render Backend API call
+          // Frontend script mein ye line update karein
+          const response = await fetch('https://pooreyoutuber.onrender.com/generate-thumbnail', {
+    method: 'POST',
+    body: formData
+});
 
-    function downloadThis(id) {
-        const url = document.getElementById(id).src;
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `thumbnail-${Date.now()}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
+const data = await response.json();
+console.log("Full Response Data:", data); // Isse browser console mein check karein
+
+if(data.success) {
+    document.getElementById('thumbnail-preview').src = data.imageUrl;
+    document.getElementById('result-section').style.display = 'block';
+} else {
+    // Agar data.error nahi hai toh pura data object dikhaye
+    alert("AI Error: " + (data.error || JSON.stringify(data)));
+}
+            
+        } catch (err) {
+            console.error(err);
+            alert("Server connection failed! Check if Render is awake.");
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    function downloadImage() {
+        const img = document.getElementById('thumbnail-preview');
+        const link = document.createElement('a');
+        link.href = img.src;
+        link.download = 'thumbnail.png';
+        link.click();
+    }
 </script>
 </body>
-</html>
+</html> pura shi kar ke de
