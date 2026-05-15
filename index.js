@@ -754,49 +754,49 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
 // ===================================================================
+// ===================================================================
+// 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI FIX
+// ===================================================================
 app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
-    if (!GEMINI_KEY) {
-        return res.status(500).json({ success: false, error: 'Gemini API Key is missing.' });
+    // 1. Check if AI is initialized (ESM delay fix)
+    if (!ai || typeof ai.getGenerativeModel !== 'function') {
+        return res.status(500).json({ 
+            success: false, 
+            error: 'AI is still initializing or Key is missing. Please try again in 5 seconds.' 
+        });
     }
 
     const { prompt } = req.body;
     const imageFile = req.file;
 
+    if (!prompt) {
+        return res.status(400).json({ success: false, error: 'Prompt is required!' });
+    }
+
     try {
-        // Note: Gemini 2.0 Flash can generate images if enabled, 
-        // otherwise it provides detailed prompts for an image generation model.
-        // Yahan hum Image Generation model specify karenge.
+        // 2. Get Model instance correctly
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        // Agar user ne koi reference image di hai, toh hum "Vision" ka use karke description nikalenge
-        let finalPrompt = `Create a high-quality, viral YouTube thumbnail. Topic: ${prompt}. Style: Eye-catching, high contrast, vibrant colors.`;
+        // 3. Prompt Optimization (Text-to-Image logic)
+        let aiPrompt = `Create a viral, high-click-through-rate YouTube thumbnail description for: "${prompt}". Style: 4k, vibrant, trending on YouTube.`;
         
-        if (imageFile) {
-            finalPrompt += " Use the uploaded image as a style reference.";
-        }
+        const result = await model.generateContent(aiPrompt);
+        const responseText = result.response.text();
 
-        // --- IMAGE GENERATION LOGIC ---
-        // Note: Standard Gemini API mostly generates text/descriptions. 
-        // For actual image pixels, ensure your project has access to Imagen via Vertex AI or Gemini Pro.
-        // As a robust fallback, we generate a high-quality image URL or prompt response.
-        
-        const result = await model.generateContent(finalPrompt);
-        const responseText = await result.response.text();
+        // 4. Image Generation (High-Quality 2 Variations)
+        // Hum 2 alag seeds use karenge taaki 2 unique thumbnails milein
+        const imageUrl1 = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(1, 10000)}&model=flux&nologo=true`;
+        const imageUrl2 = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(10001, 20000)}&model=flux&nologo=true`;
 
-        // Kyunki Gemini direct Image bytes kam hi deta hai (unsupported in some regions), 
-        // hum high-quality placeholder ya specific image generation engine link generate kar rahe hain.
-        // PRO TIP: Agar aapka account Imagen support karta hai, toh 'imageUrl' bytes se aayegi.
-        
-        // Demo/Standard logic for response:
         res.status(200).json({
             success: true,
-            imageUrl: `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(1, 1000)}&model=flux`, 
-            description: responseText
+            thumbnails: [imageUrl1, imageUrl2],
+            ai_suggestion: responseText
         });
 
     } catch (error) {
-        console.error('Thumbnail Error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Thumbnail Generation Error:', error);
+        res.status(500).json({ success: false, error: 'AI Error: ' + error.message });
     }
 });
 
