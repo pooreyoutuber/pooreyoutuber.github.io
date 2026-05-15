@@ -754,43 +754,34 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
 // ===================================================================
-// ===================================================================
-// 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI FIX
-// ===================================================================
 app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
-    // 1. Check if AI is initialized (ESM delay fix)
-    if (!ai || typeof ai.getGenerativeModel !== 'function') {
+    // initialization check ko simple rakhein
+    if (!ai) {
         return res.status(500).json({ 
             success: false, 
-            error: 'AI is still initializing or Key is missing. Please try again in 5 seconds.' 
+            error: 'AI is initializing or Key is missing. Check Render Environment Variables.' 
         });
     }
 
     const { prompt } = req.body;
-    const imageFile = req.file;
 
     if (!prompt) {
         return res.status(400).json({ success: false, error: 'Prompt is required!' });
     }
 
     try {
-        // 2. Get Model instance correctly
-        const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        // 3. Prompt Optimization (Text-to-Image logic)
-        let aiPrompt = `Create a viral, high-click-through-rate YouTube thumbnail description for: "${prompt}". Style: 4k, vibrant, trending on YouTube.`;
-        
-        const result = await model.generateContent(aiPrompt);
+        // Text generation for SEO suggestions
+        const result = await genAIModel.generateContent(`Create a viral YouTube thumbnail description for: "${prompt}"`);
         const responseText = result.response.text();
 
-        // 4. Image Generation (High-Quality 2 Variations)
-        // Hum 2 alag seeds use karenge taaki 2 unique thumbnails milein
-        const imageUrl1 = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(1, 10000)}&model=flux&nologo=true`;
-        const imageUrl2 = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${randomInt(10001, 20000)}&model=flux&nologo=true`;
+        // Image URL logic (Flux model)
+        const seed = Math.floor(Math.random() * 100000);
+        const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${seed}&model=flux&nologo=true`;
 
+        // Frontend expect kar raha hai 'imageUrl', toh wahi bhejein
         res.status(200).json({
             success: true,
-            thumbnails: [imageUrl1, imageUrl2],
+            imageUrl: imageUrl, // Match this with your frontend script
             ai_suggestion: responseText
         });
 
