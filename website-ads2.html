@@ -188,44 +188,44 @@
 
 <script>
     async function generateThumbnail() {
-        const prompt = document.getElementById('prompt').value;
-        const imageFile = document.getElementById('image').files[0];
+    const prompt = document.getElementById('prompt').value;
+    const imageFile = document.getElementById('image').files[0];
 
-        if(!prompt && !imageFile) {
-            alert("Bhai, prompt likho ya photo upload karo!");
-            return;
+    if(!prompt) {
+        alert("Bhai, prompt likhna zaroori hai!");
+        return;
+    }
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('result-section').style.display = 'none';
+
+    const formData = new FormData();
+    formData.append('prompt', prompt);
+    if(imageFile) formData.append('image', imageFile);
+
+    try {
+        // Make sure URL is correct (trailing slash check)
+        const response = await fetch('https://pooreyoutuber.onrender.com/generate-thumbnail', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if(data.success) {
+            // Backend se 'imageUrl' aayega
+            document.getElementById('thumbnail-preview').src = data.imageUrl;
+            document.getElementById('result-section').style.display = 'block';
+            document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+        } else {
+            alert("AI Error: " + data.error);
         }
-
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('result-section').style.display = 'none';
-
-        const formData = new FormData();
-        formData.append('prompt', prompt);
-        if(imageFile) formData.append('image', imageFile);
-
-        try {
-            const response = await fetch('https://pooreyoutuber.onrender.com/generate-thumbnail', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if(data.success) {
-                document.getElementById('thumbnail-preview').src = data.imageUrl;
-                document.getElementById('result-section').style.display = 'block';
-                // Scroll to result for better UX
-                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
-            } else {
-                alert("AI Error: " + (data.error || JSON.stringify(data)));
-            }
-            
-        } catch (err) {
-            console.error(err);
-            alert("Server connection failed! Check if Render is awake.");
-        } finally {
-            document.getElementById('loading').style.display = 'none';
-        }
+        
+    } catch (err) {
+        alert("Server Busy: Render thoda time le raha hai jaghne mein. 10 second baad try karein.");
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
     }
 
     function downloadImage() {
