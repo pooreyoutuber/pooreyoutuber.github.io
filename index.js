@@ -757,7 +757,6 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - NEW TOOL
 // ===================================================================
-/
 // Utility to convert file to GoogleGenerativeAI.Part object
 function fileToGenerativePart(path, mimeType) {
   return {
