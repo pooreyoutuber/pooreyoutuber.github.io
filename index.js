@@ -754,7 +754,54 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
 // ===================================================================
- 
+ // ===================================================================
+// 4. AI THUMBNAIL GENERATOR ENDPOINT - GEMINI IMAGEN
+// ===================================================================
+app.post('/generate-thumbnail', upload.single('image'), async (req, res) => {
+    if (!GEMINI_KEY) {
+        return res.status(500).json({ error: 'Gemini API Key missing on server.' });
+    }
+
+    const { prompt } = req.body;
+
+    if (!prompt) {
+        return res.status(400).json({ error: 'Prompt is required.' });
+    }
+
+    try {
+        // Thumbnail quality enhance karne ke liye prompt engineering
+        const enhancedPrompt = `High-quality YouTube thumbnail: ${prompt}. Professional lighting, 4k, vibrant colors, catchy design, highly detailed.`;
+
+        // Gemini Imagen Model (Google AI SDK version check karein)
+        // Note: Imagen access aapke region aur API plan par depend karta hai
+        const model = ai.getGenerativeModel({ model: "imagen-3.0-generate-002" });
+
+        const result = await model.generateImages({
+            prompt: enhancedPrompt,
+            numberOfImages: 2, // Aapne 2 thumbnails mange the
+            aspectRatio: "16:9"
+        });
+
+        // Image data ko base64 format mein bhejna
+        const images = result.generatedImages.map(img => {
+            return `data:image/png;base64,${img.image.buffer.toString('base64')}`;
+        });
+
+        res.status(200).json({ 
+            success: true, 
+            imageUrl: images[0], // Pehli image preview ke liye
+            allThumbnails: images 
+        });
+
+    } catch (error) {
+        console.error('Thumbnail Error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: "Image generation failed. Ensure your Gemini plan has Imagen access." 
+        });
+    }
+});
+
 //==================================================
 // --- SERVER START ---
 // ===================================================================
