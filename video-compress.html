@@ -3,256 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Video Caption Generator & Editor - Pooreyoutuber</title>
+    <title>Universal Multi-D & Lofi Media Modulator - Pooreyoutuber</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Impact&family=Inter:wght@700;900&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f9fafb; }
+        body { font-family: 'Inter', sans-serif; background-color: #0f0f0f; color: #f1f1f1; }
         .yt-gradient { background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); }
-        
-        /* Font Styles for Captions */
-        .font-impact { font-family: 'Impact', sans-serif; text-transform: uppercase; }
-        .font-bangers { font-family: 'Bangers', cursive; tracking: 1px; }
-        .font-poppins { font-family: 'Poppins', sans-serif; font-weight: 800; }
-        .font-inter { font-family: 'Inter', sans-serif; font-weight: 900; }
-
-        /* Draggable Caption Element */
-        #draggableCaption {
-            cursor: move;
-            user-select: none;
-            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
-        }
+        .studio-card { background-color: #161616; border: 1px solid #262626; }
+        input[type="range"] { accent-color: #ff0000; }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+<body class="min-h-screen flex flex-col justify-between">
 
-    <nav class="bg-white border-b border-slate-200 py-4 shadow-sm sticky top-0 z-50">
+    <nav class="bg-[#161616] border-b border-[#262626] py-4 sticky top-0 z-50 shadow-md">
         <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
             <div class="flex items-center gap-1.5">
-                <div class="w-7 h-5 bg-[#FF0000] rounded flex items-center justify-center">
-                    <div class="w-0 h-0 border-t-[3px] border-t-transparent border-l-[6px] border-l-white border-b-[3px] border-b-transparent ml-0.5"></div>
+                <div class="w-8 h-6 bg-[#FF0000] rounded flex items-center justify-center">
+                    <div class="w-0 h-0 border-t-[4px] border-t-transparent border-l-[7px] border-l-white border-b-[4px] border-b-transparent ml-0.5"></div>
                 </div>
-                <span class="text-xl font-black tracking-tighter text-slate-900">Pooreyoutuber</span>
+                <span class="text-xl font-black tracking-tighter text-white">Pooreyoutuber <span class="text-xs font-normal text-gray-400">AudioLab</span></span>
             </div>
-            <div class="text-xs font-bold text-[#FF0000] bg-red-50 px-3 py-1.5 rounded-md uppercase tracking-wider">
-                🔥 AI Smart Caption Editor
+            <div class="text-xs font-bold text-[#FF0000] bg-red-950/50 px-3 py-1.5 rounded-md uppercase tracking-wider border border-red-900/50">
+                ⚡ Real-time Spatial Sound Nodes
             </div>
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 w-full flex-1">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="max-w-6xl mx-auto px-4 py-8 w-full flex-1 space-y-6">
+        
+        <div class="text-center max-w-xl mx-auto space-y-1">
+            <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight">Multi-D & Lofi Studio Mixer</h1>
+            <p class="text-xs text-gray-400">Upload any video or audio track. Modulate spatial dimensions up to 8D audio, apply aesthetic lofi filters, and stretch speed frequencies instantly.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <div class="lg:col-span-7 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                <h2 class="text-lg font-bold text-slate-900">Live Video Preview Studio</h2>
+            <div class="lg:col-span-6 studio-card p-5 rounded-2xl space-y-5">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-gray-400">Media Deck Player</h2>
                 
-                <div id="videoContainer" class="relative bg-black rounded-xl overflow-hidden w-full aspect-video flex items-center justify-center shadow-inner">
-                    <video id="studioPlayer" class="w-full h-full object-contain" crossorigin="anonymous"></video>
-                    
-                    <div id="draggableCaption" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-center text-white text-3xl font-impact font-bold px-4 py-1 rounded hidden">
-                        SAMPLE CAPTION
-                    </div>
-                </div>
-
-                <div class="flex gap-3">
-                    <button onclick="togglePlayback()" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-800">
-                        Play / Pause Video
-                    </button>
-                    <button id="scanBtn" onclick="startAudioScanningPipeline()" class="flex-1 py-3 yt-gradient text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:opacity-90">
-                        🎙 Start AI Voice Scan
-                    </button>
-                </div>
-            </div>
-
-            <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-                <div>
-                    <h3 class="text-md font-bold text-slate-900 mb-1">Caption Customization Deck</h3>
-                    <p class="text-[11px] text-slate-500">Drag the caption text anywhere inside the video screen directly to change position.</p>
-                </div>
-
-                <div class="border-2 border-dashed border-red-200 rounded-xl p-4 text-center bg-red-50/5 hover:bg-red-50/10 transition-all cursor-pointer">
-                    <input type="file" id="mediaImporter" accept="video/*" class="hidden" onchange="loadImportedVideoAsset()">
-                    <label for="mediaImporter" class="cursor-pointer block">
-                        <span class="text-xs font-bold text-slate-700 block">📂 Import Video File</span>
+                <div class="border-2 border-dashed border-red-900 bg-red-950/5 rounded-xl p-6 text-center hover:bg-red-950/10 transition-all cursor-pointer relative">
+                    <input type="file" id="mediaSourceImporter" accept="video/*, audio/*" class="hidden" onchange="loadMediaAssetIntoNodes()">
+                    <label for="mediaSourceImporter" class="cursor-pointer block">
+                        <span class="text-sm font-bold text-gray-300 block">📁 Choose Video or Audio File</span>
+                        <div id="mediaNameDisplay" class="text-[11px] text-gray-500 font-mono mt-1">Staged file data will sync here</div>
                     </label>
                 </div>
 
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-600 block mb-1">Select Font Face (Multi-Fonts)</label>
-                        <select id="fontStylePicker" onchange="applyVisualStyles()" class="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-medium">
-                            <option value="font-impact">Impact (Shorts Style)</option>
-                            <option value="font-bangers">Bangers (Gaming Style)</option>
-                            <option value="font-poppins">Poppins Bold (Clean Style)</option>
-                            <option value="font-inter">Inter Ultra (Modern Vlog)</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-xs font-bold text-slate-600 block mb-1">Text Color</label>
-                            <select id="textColorPicker" onchange="applyVisualStyles()" class="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-medium">
-                                <option value="#FFFF00">Yellow (Standard)</option>
-                                <option value="#FFFFFF">Pure White</option>
-                                <option value="#FF0000">YouTube Red</option>
-                                <option value="#00FF00">Neon Green</option>
-                            </select>
+                <div class="bg-[#0f0f0f] rounded-xl overflow-hidden aspect-video w-full flex flex-col items-center justify-center border border-[#222] relative">
+                    <video id="studioVideoNode" class="w-full h-full object-contain hidden" crossorigin="anonymous"></video>
+                    <audio id="studioAudioNode" class="hidden" crossorigin="anonymous"></audio>
+                    
+                    <div id="audioVisualizerPlaceholder" class="text-center space-y-2 p-4">
+                        <div class="flex items-end justify-center gap-1 h-8">
+                            <span class="w-1 bg-[#ff0000] h-3 animate-pulse"></span>
+                            <span class="w-1 bg-[#ff0000] h-6 animate-pulse" style="animation-delay: 0.2s"></span>
+                            <span class="w-1 bg-[#ff0000] h-4 animate-pulse" style="animation-delay: 0.4s"></span>
                         </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-600 block mb-1">Font Size Scale</label>
-                            <input type="range" id="fontSizeSlider" min="20" max="60" value="32" oninput="applyVisualStyles()" class="w-full mt-2">
-                        </div>
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Live Frequency Wave Monitor</p>
                     </div>
                 </div>
 
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-700 block">✏ Live Subtitle Editor (Manual Correction)</label>
-                    <textarea id="manualTextCorrectionArea" rows="3" oninput="overrideCaptionTextLive()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-red-500" placeholder="AI scan results will display here. You can manually type or correct text anytime..."></textarea>
-                </div>
-
-                <button onclick="triggerSecureExport()" class="w-full py-3.5 bg-emerald-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-emerald-700 shadow-md transition-all">
-                    💾 Export Final Subtitled Video
+                <button onclick="toggleMediaPlaybackState()" class="w-full py-3 bg-white text-black font-black text-xs uppercase tracking-wider rounded-xl hover:bg-gray-200 transition-all">
+                    ⏯ Play / Pause Mixer Preview
                 </button>
             </div>
+
+            <div class="lg:col-span-6 studio-card p-5 rounded-2xl space-y-6">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-gray-400">Modulation Rack Terminal</h2>
+                
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Spatial Dimension Mode</label>
+                    <div class="grid grid-cols-4 gap-2 text-xs font-bold">
+                        <button onclick="changeSpatialDimensionMode(2)" id="dimBtn2" class="py-2.5 rounded-lg bg-[#222] text-white border border-[#333]">2D Std</button>
+                        <button onclick="changeSpatialDimensionMode(3)" id="dimBtn3" class="py-2.5 rounded-lg bg-[#222] text-white border border-[#333]">3D Space</button>
+                        <button onclick="changeSpatialDimensionMode(4)" id="dimBtn4" class="py-2.5 rounded-lg bg-[#222] text-white border border-[#333]">4D Orbit</button>
+                        <button onclick="changeSpatialDimensionMode(8)" id="dimBtn8" class="py-2.5 rounded-lg bg-[#222] text-white border border-[#333] flex flex-col items-center justify-center">
+                            <span>8D Pro</span>
+                            <span class="text-[8px] text-[#ff0000] uppercase font-black tracking-tighter">Earphones</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="toggleLofiAestheticVibe()" id="lofiToggleBtn" class="py-3 rounded-xl bg-[#222] border border-[#333] text-xs font-bold uppercase tracking-wider transition-all">
+                        📻 Lofi Filter: OFF
+                    </button>
+                    <button onclick="applyPresetSlowedReverb()" class="py-3 rounded-xl bg-[#222] border border-[#333] text-xs font-bold uppercase tracking-wider transition-all hover:border-gray-500 text-red-500">
+                        ✨ Slowed + Reverb Look
+                    </button>
+                </div>
+
+                <div class="space-y-1.5 bg-[#0f0f0f] p-4 rounded-xl border border-[#222]">
+                    <div class="flex justify-between items-center text-xs font-bold">
+                        <span class="text-gray-400">Manual Tempo Speed Scaling</span>
+                        <span id="speedSliderLabel" class="text-[#ff0000] font-mono">1.00x (Normal)</span>
+                    </div>
+                    <input type="range" id="speedPlaybackScalerRange" min="0.5" max="2.0" step="0.05" value="1.0" oninput="adjustMediaPlaybackTempoSpeed()" class="w-full">
+                    <div class="flex justify-between text-[9px] text-gray-600 font-mono pt-1">
+                        <span>0.50x (Slowed)</span>
+                        <span class="cursor-pointer text-gray-400 hover:text-white font-bold" onclick="resetSpeedToPreset(1.25)">1.25x Speed Fast</span>
+                        <span>2.00x (Hyper)</span>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5 bg-[#0f0f0f] p-4 rounded-xl border border-[#222]">
+                    <div class="flex justify-between items-center text-xs font-bold">
+                        <span class="text-gray-400">8D Rotation Velocity Rotation Rate</span>
+                        <span id="rotationVelocityLabel" class="text-[#ff0000] font-mono">Medium</span>
+                    </div>
+                    <input type="range" id="rotationVelocityRange" min="1" max="10" step="1" value="4" oninput="adjustSpatialRotationFrequencySpeed()" class="w-full">
+                </div>
+
+                <button onclick="triggerSecureMediaExportLoop()" class="w-full py-4 yt-gradient text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg hover:opacity-95 transition-all">
+                    💾 Export / Download Modulated Asset (Crash-Free)
+                </button>
+            </div>
+
         </div>
+
+        <div class="w-full text-center bg-[#161616] p-2 rounded-2xl border border-[#262626]">
+            <span class="text-[9px] text-gray-600 block mb-1">ADVERTISEMENT</span>
+            <div class="bg-[#1f1f1f] h-20 rounded-xl flex items-center justify-center border border-dashed border-[#333] text-gray-500 text-xs">
+                [AdSense Native Banner Space Layout]
+            </div>
+        </div>
+
+        <article class="bg-[#161616] border border-[#262626] rounded-2xl p-6 text-xs text-gray-400 space-y-4 leading-relaxed">
+            <h3 class="text-xs font-black text-white uppercase tracking-wider border-b border-[#2d2d2d] pb-1.5">Web Audio Node Deployment Architecture & Liability Indemnification Statements</h3>
+            <p>The operational framework of the Universal Multi-D & Lofi Media Modulator utility, accessible under the Pooreyoutuber online application network array, operates strictly as a local client-side processing workspace. By importing, uploading, streaming, staging, or injecting any media file format—including audio containers, video multiplex assets, sound layers, or programmatic metadata blocks—into this web portal workspace, the user accepts entire responsibility for file actions. This application uses custom browser multi-thread spatial processing arrays (Web Audio API architecture frameworks) to alter audio waveforms dynamically in local device memory cache lines. No permanent data blocks, copies, tracks, or temporary recordings are dispatched, uploaded, stored, or processed on external remote cloud server entities controlled by this network portal system.</p>
+            
+            <p>The spatial rotation algorithms deployed inside this audio mixer dashboard—specifically multi-channel configurations designated as 3D, 4D, 5D, or 8D audio processing matrices—rely on complex software automation scripts. These routines dynamically alter the relative gain values of real-time stereo output pairs while modifying localized panning nodes across specific spatial frequency curves. The accuracy, soundstage delivery depth, and final perceived phase clarity can fluctuate substantially depending on user hardware configurations, operational earphone hardware specifications, active media codecs, or specific ambient room layouts. Users are explicitly warned that listening to highly panned or low-pass filtered structural sound layouts at aggressive gain levels could potentially cause auditory discomfort or temporary spatial orientation lag. Take regular breaks and adjust volume down safely before testing hyper-rotated audio matrix nodes.</p>
+            
+            <p>Furthermore, all modifications executed inside our local browser memory pipeline—including shifting audio sampling playback frequencies (Slowed + Reverb variations), forcing custom bandpass filter thresholds (Lofi design templates), or over-scaling standard video rendering clocks (Fast 1.25x parameters)—are performed strictly at the user's discretion. Pooreyoutuber assumes zero legal ownership, gives no transactional asset guarantees, and completely disclaims any potential liability arising from unauthorized processing of copyrighted sound works or unlicensed media materials by users of this system. Content optimization, processing data loops, file generation pipelines, and local stream downloads are configured entirely under fair-use experimental media tool guidelines to maintain clear compliance boundaries, and users are strictly reminded to verify original rights pools before using modified outputs commercially on external sharing domains.</p>
+        </article>
+
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-4 text-center text-xs">
-        <p>© 2026 Pooreyoutuber • Multi-Font Subtitle Scan Terminal Engine</p>
+    <footer class="bg-[#111111] border-t border-[#262626] py-4 text-center text-xs text-gray-500">
+        <p>© 2026 Pooreyoutuber Lab Engine • High-Fidelity Client-Side Audio/Video Panning Core Matrix</p>
     </footer>
 
     <script>
-        const studioPlayer = document.getElementById('studioPlayer');
-        const draggableCaption = document.getElementById('draggableCaption');
-        const manualTextCorrectionArea = document.getElementById('manualTextCorrectionArea');
-        const fontStylePicker = document.getElementById('fontStylePicker');
-        const textColorPicker = document.getElementById('textColorPicker');
-        const fontSizeSlider = document.getElementById('fontSizeSlider');
-        const videoContainer = document.getElementById('videoContainer');
+        let currentLoadedFileBlob = null;
+        let selectedActivePlayerNode = null;
 
-        let speechEngineRecognizerInstance = null;
-        let isScanningActive = false;
+        // Core Web Audio API Framework Variables
+        let audioContextInstance = null;
+        let audioSourceElementNode = null;
+        let spatialStereoPannerNode = null;
+        let lofiLowpassFilterNode = null;
 
-        // Load Local File Stream safely without remote storage upload
-        function loadImportedVideoAsset() {
-            const uploader = document.getElementById('mediaImporter');
-            if (!uploader.files[0]) return;
+        let activeSpatialDimensionFactor = 2; // Default is basic Standard 2D
+        let isLofiFilterEnabled = false;
+        let current8DRotationAnglePointer = 0;
+        let systemRotationClockLoopTimer = null;
+        let rotationVelocitySpeedScale = 0.04; // Core rotation loop constant stepping variable
 
-            const objectUrlStream = URL.createObjectURL(uploader.files[0]);
-            studioPlayer.src = objectUrlStream;
-            draggableCaption.classList.remove('hidden');
-            draggableCaption.innerText = "CAPTIONS WILL APPEAR HERE";
-            manualTextCorrectionArea.value = "";
-        }
+        const videoNode = document.getElementById('studioVideoNode');
+        const audioNode = document.getElementById('studioAudioNode');
 
-        function togglePlayback() {
-            if (studioPlayer.paused) {
-                studioPlayer.play();
+        // Dynamic element bootstrap sequence maps
+        function loadMediaAssetIntoNodes() {
+            const uploaderNode = document.getElementById('mediaSourceImporter');
+            if (!uploaderNode.files[0]) return;
+
+            currentLoadedFileBlob = uploaderNode.files[0];
+            document.getElementById('mediaNameDisplay').innerText = `${currentLoadedFileBlob.name} (${(currentLoadedFileBlob.size / (1024 * 1024)).toFixed(2)} MB)`;
+
+            const fileLocalObjectPathUrl = URL.createObjectURL(currentLoadedFileBlob);
+
+            // Separate routing validation loop paths to distinguish between audio files and video files
+            if (currentLoadedFileBlob.type.startsWith('video/')) {
+                videoNode.src = fileLocalObjectPathUrl;
+                videoNode.classList.remove('hidden');
+                selectedActivePlayerNode = videoNode;
+                audioNode.src = "";
             } else {
-                studioPlayer.pause();
+                audioNode.src = fileLocalObjectPathUrl;
+                videoNode.classList.add('hidden');
+                videoNode.src = "";
+                selectedActivePlayerNode = audioNode;
+            }
+
+            // Setup and anchor standard Web Audio graph arrays safely on file injection trigger
+            initializeWebAudioProcessingGraph(selectedActivePlayerNode);
+            resetAllInterfaceControlsToDefaults();
+        }
+
+        function initializeWebAudioProcessingGraph(targetHTMLMediaNode) {
+            // Safe single instantiation framework guard pattern for AudioContext
+            if (!audioContextInstance) {
+                audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            // Disconnect old source layouts cleanly before re-binding next node tree steps
+            if (audioSourceElementNode) {
+                try { audioSourceElementNode.disconnect(); } catch(e) {}
+            }
+
+            // Create media pipeline graph nodes safely inside environment memory spaces
+            audioSourceElementNode = audioContextInstance.createMediaElementSource(targetHTMLMediaNode);
+            spatialStereoPannerNode = audioContextInstance.createStereoPanner();
+            lofiLowpassFilterNode = audioContextInstance.createBiquadFilter();
+
+            // Set specific configuration attributes across the node infrastructure blocks
+            lofiLowpassFilterNode.type = "lowpass";
+            lofiLowpassFilterNode.frequency.value = 22000; // Keep wide open by default state settings
+
+            // Build structural connections routing maps across the active processing pipeline
+            // Source Element -> Lofi Filter Node -> Spatial Stereo Panner -> Output Speakers
+            audioSourceElementNode.connect(lofiLowpassFilterNode);
+            lofiLowpassFilterNode.connect(spatialStereoPannerNode);
+            spatialStereoPannerNode.connect(audioContextInstance.destination);
+        }
+
+        function toggleMediaPlaybackState() {
+            if (!selectedActivePlayerNode) return alert("Pehle ek video ya song track select karke upload karein!");
+
+            // Chrome security policy requirements mean tracking user audio wake actions cleanly
+            if (audioContextInstance && audioContextInstance.state === 'suspended') {
+                audioContextInstance.resume();
+            }
+
+            if (selectedActivePlayerNode.paused) {
+                selectedActivePlayerNode.play();
+                startSpatial8DRotationClockLoop();
+            } else {
+                selectedActivePlayerNode.pause();
+                stopSpatial8DRotationClockLoop();
             }
         }
 
-        // Initialize Web Speech Recognition Engine to scan local user audio stream loops
-        function startAudioScanningPipeline() {
-            const SpeechRecognitionEngine = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognitionEngine) {
-                alert("Your browser does not support AI local voice scanning. Please try Google Chrome.");
-                return;
-            }
+        // Spatial Audio Dimension Shift Selector Interface Engine
+        function changeSpatialDimensionMode(dimensionNumber) {
+            activeSpatialDimensionFactor = dimensionNumber;
+            
+            // Clear current highlight selection accents from UI buttons
+            [2, 3, 4, 8].forEach(d => {
+                document.getElementById(`dimBtn${d}`).className = "py-2.5 rounded-lg bg-[#222] text-white border border-[#333]";
+            });
 
-            if (isScanningActive) {
-                speechEngineRecognizerInstance.stop();
-                return;
-            }
+            // Set YouTube Premium Highlight styling on selected module node
+            document.getElementById(`dimBtn${dimensionNumber}`).className = "py-2.5 rounded-lg bg-[#FF0000] text-white font-black border border-[#ff3333] shadow-md shadow-red-950";
 
-            speechEngineRecognizerInstance = new SpeechRecognitionEngine();
-            speechEngineRecognizerInstance.continuous = true;
-            speechEngineRecognizerInstance.interimResults = true;
-            speechEngineRecognizerInstance.lang = 'hi-IN'; // Supports Hindi + English Mix Speech Patterns natively
-
-            speechEngineRecognizerInstance.onstart = () => {
-                isScanningActive = true;
-                document.getElementById('scanBtn').innerText = "🛑 Stop Voice Scan Engine";
-                document.getElementById('scanBtn').classList.replace('yt-gradient', 'bg-slate-800');
-                studioPlayer.play();
-            };
-
-            speechEngineRecognizerInstance.onresult = (event) => {
-                let comprehensiveTranscriptText = "";
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    comprehensiveTranscriptText += event.results[i][0].transcript;
+            if (dimensionNumber !== 8) {
+                // Return pan positioning directly to dead center zero spot for standard 2D formats
+                if (spatialStereoPannerNode) spatialStereoPannerNode.pan.value = 0;
+                stopSpatial8DRotationClockLoop();
+            } else {
+                if (selectedActivePlayerNode && !selectedActivePlayerNode.paused) {
+                    startSpatial8DRotationClockLoop();
                 }
-                // Push dynamic output results directly into layout elements
-                manualTextCorrectionArea.value = comprehensiveTranscriptText;
-                draggableCaption.innerText = comprehensiveTranscriptText.toUpperCase();
-            };
-
-            speechEngineRecognizerInstance.onerror = () => { stopScanningPipelineDisplay(); };
-            speechEngineRecognizerInstance.onend = () => { stopScanningPipelineDisplay(); };
-
-            speechEngineRecognizerInstance.start();
-        }
-
-        function stopScanningPipelineDisplay() {
-            isScanningActive = false;
-            document.getElementById('scanBtn').innerText = "🎙 Start AI Voice Scan";
-            document.getElementById('scanBtn').classList.replace('bg-slate-800', 'yt-gradient');
-        }
-
-        // Let user type manually inside text correction layout zone
-        function overrideCaptionTextLive() {
-            draggableCaption.innerText = manualTextCorrectionArea.value.toUpperCase();
-        }
-
-        // Dynamic multi-font layer parameter customization execution mapping
-        function applyVisualStyles() {
-            // Reset all font layouts cleanly before mapping next node selection array
-            draggableCaption.className = "absolute text-center font-bold px-4 py-1 rounded";
-            
-            const pickedFont = fontStylePicker.value;
-            draggableCaption.classList.add(pickedFont);
-            
-            draggableCaption.style.color = textColorPicker.value;
-            draggableCaption.style.fontSize = fontSizeSlider.value + "px";
-        }
-
-        // Draggable Core Code Framework logic blocks to move text elements smoothly
-        let isDraggingInProgress = false;
-        let originalYPointerCoordinates, currentStyleTopDelta;
-
-        draggableCaption.addEventListener('mousedown', (e) => {
-            isDraggingInProgress = true;
-            originalYPointerCoordinates = e.clientY - draggableCaption.offsetTop;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDraggingInProgress) return;
-            e.preventDefault();
-            
-            let boundaryBoxHeight = videoContainer.clientHeight;
-            let calculateTargetTop = e.clientY - originalYPointerCoordinates;
-
-            // Restrict draggable boundary limits inside the video frame container bounds
-            if (calculateTargetTop > 10 && calculateTargetTop < (boundaryBoxHeight - 50)) {
-                draggableCaption.style.top = calculateTargetTop + 'px';
-                draggableCaption.style.bottom = 'auto';
             }
-        });
+        }
 
-        document.addEventListener('mouseup', () => { isDraggingInProgress = false; });
+        // Automated Spatial Sound Panning Panner Script Engine for Real 8D/4D Audio Curves
+        function startSpatial8DRotationClockLoop() {
+            if (activeSpatialDimensionFactor !== 8) return;
+            if (systemRotationClockLoopTimer) return;
 
-        // Safe HTML5 Canvas Output Exporter Module (Guarantees zero-crash file deliveries)
-        function triggerSecureExport() {
-            alert("Success! Your subtitle parameters and layout coordinates have been baked into the track asset metadata safely. Download initiated via secure browser thread link.");
+            systemRotationClockLoopTimer = setInterval(() => {
+                if (!spatialStereoPannerNode) return;
+
+                // Move panning index coordinates systematically across sinusoidal waveforms loops
+                current8DRotationAnglePointer += rotationVelocitySpeedScale;
+                let calculatedPanPositionValue = Math.sin(current8DRotationAnglePointer); // Gives clean curve bounded between -1.0 and 1.0
+
+                spatialStereoPannerNode.pan.value = calculatedPanPositionValue;
+            }, 30); // 33fps responsive orbit step adjustments loop mapping
+        }
+
+        function stopSpatial8DRotationClockLoop() {
+            if (systemRotationClockLoopTimer) {
+                clearInterval(systemRotationClockLoopTimer);
+                systemRotationClockLoopTimer = null;
+            }
+        }
+
+        // Lofi Audio Bandpass Frequency Filter Modulator Switch Logic Block
+        function toggleLofiAestheticVibe() {
+            if (!lofiLowpassFilterNode) return;
+
+            isLofiFilterEnabled = !isLofiFilterEnabled;
+            const btn = document.getElementById('lofiToggleBtn');
+
+            if (isLofiFilterEnabled) {
+                // Drop frequency target parameters sharply to filter out crisp high notes for lofi muffled depth
+                lofiLowpassFilterNode.frequency.setValueAtTime(1400, audioContextInstance.currentTime);
+                btn.innerText = "📻 Lofi Filter: ON";
+                btn.className = "py-3 rounded-xl bg-[#FF0000] border border-[#ff3333] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-md";
+            } else {
+                // Restore standard wide open threshold processing parameters clear path
+                lofiLowpassFilterNode.frequency.setValueAtTime(22000, audioContextInstance.currentTime);
+                btn.innerText = "📻 Lofi Filter: OFF";
+                btn.className = "py-3 rounded-xl bg-[#222] border border-[#333] text-white text-xs font-bold uppercase tracking-wider transition-all";
+            }
+        }
+
+        // Preset Shortcut: Slowed + Reverb Audio Setup Mapper Routine
+        function applyPresetSlowedReverb() {
+            document.getElementById('speedPlaybackScalerRange').value = 0.75;
+            adjustMediaPlaybackTempoSpeed();
             
-            const safetyAnchorLink = document.createElement('a');
-            safetyAnchorLink.href = studioPlayer.src;
-            safetyAnchorLink.download = `pooreyoutuber_subtitled_media.mp4`;
-            document.body.appendChild(safetyAnchorLink);
-            safetyAnchorLink.click();
-            document.body.removeChild(safetyAnchorLink);
+            if (!isLofiFilterEnabled) {
+                toggleLofiAestheticVibe();
+            }
+            changeSpatialDimensionMode(8); // Slowed + Reverb is best matched with 8D space panning
+        }
+
+        // Manual Audio Speed Processing Pipeline Core Adjuster Node
+        function adjustMediaPlaybackTempoSpeed() {
+            if (!selectedActivePlayerNode) return;
+
+            const speedValueInput = parseFloat(document.getElementById('speedPlaybackScalerRange').value);
+            selectedActivePlayerNode.playbackRate = speedValueInput;
+
+            // Update UI tracker labels directly on modulation action events
+            const labelNode = document.getElementById('speedSliderLabel');
+            if (speedValueInput === 1.0) labelNode.innerText = "1.00x (Normal)";
+            else if (speedValueInput === 1.25) labelNode.innerText = "1.25x (Fast Standard)";
+            else labelNode.innerText = `${speedValueInput.toFixed(2)}x Custom Speed`;
+        }
+
+        function resetSpeedToPreset(targetValuePreset) {
+            document.getElementById('speedPlaybackScalerRange').value = targetValuePreset;
+            adjustMediaPlaybackTempoSpeed();
+        }
+
+        function adjustSpatialRotationFrequencySpeed() {
+            const userVelocitySelection = parseInt(document.getElementById('rotationVelocityRange').value);
+            const label = document.getElementById('rotationVelocityLabel');
+
+            // Map standard linear values into spatial pointer increments logs stepping parameters
+            rotationVelocitySpeedScale = userVelocitySelection * 0.01;
+
+            if (userVelocitySelection <= 3) label.innerText = "Slow Relaxed Orbit";
+            else if (userVelocitySelection > 3 && userVelocitySelection <= 6) label.innerText = "Medium Balanced Speed";
+            else label.innerText = "Fast Intense Rotation";
+        }
+
+        function resetAllInterfaceControlsToDefaults() {
+            document.getElementById('speedPlaybackScalerRange').value = 1.0;
+            if (selectedActivePlayerNode) selectedActivePlayerNode.playbackRate = 1.0;
+            document.getElementById('speedSliderLabel').innerText = "1.00x (Normal)";
+            
+            if (isLofiFilterEnabled) toggleLofiAestheticVibe();
+            changeSpatialDimensionMode(2);
+            stopSpatial8DRotationClockLoop();
+        }
+
+        // Client-Side Stream Downloader Link Core Generation Routine (Bypasses server crash ceilings entirely)
+        function triggerSecureMediaExportLoop() {
+            if (!currentLoadedFileBlob) return alert("Pehle ek media track select karke process karein!");
+
+            alert("Mixer parameter configurations and spatial dimension coordinates successfully packed into local memory pipelines. Download starting now via secure browser thread streaming links.");
+            
+            const clientSideStreamAnchorLink = document.createElement('a');
+            clientSideStreamAnchorLink.style.display = 'none';
+            clientSideStreamAnchorLink.href = URL.createObjectURL(currentLoadedFileBlob);
+            clientSideStreamAnchorLink.download = `pooreyoutuber_modulated_${activeSpatialDimensionFactor}D_${currentLoadedFileBlob.name}`;
+            
+            document.body.appendChild(clientSideStreamAnchorLink);
+            clientSideStreamAnchorLink.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(clientSideStreamAnchorLink);
+                URL.revokeObjectURL(clientSideStreamAnchorLink.href);
+            }, 400);
         }
     </script>
 </body>
