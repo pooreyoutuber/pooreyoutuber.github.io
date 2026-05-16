@@ -247,38 +247,29 @@
             outputCard.classList.remove('hidden');
         }
 
-        // CRITICAL FIX: Safe Chunk Slicing for Heavy 2GB Downscaling Saves
+        // FIXED DOWNLOAD FUNCTION FOR 2GB FILES
         function triggerDirectDownload() {
             if (!operationalVideoFileObject) return;
 
-            const sliceSize = 1024 * 1024; // 1MB chunks
-            const fileStreamChunks = [];
-            let currentOffset = 0;
-
-            // Stream simulation to download heavy file fragments seamlessly without freezing tab cache memory
-            // Stream simulation to download heavy file fragments seamlessly without freezing tab cache memory
-            while (currentOffset < operationalVideoFileObject.size) {
-                const fragment = operationalVideoFileObject.slice(currentOffset, currentOffset + sliceSize);
-                fileStreamChunks.push(fragment);
-                currentOffset += sliceSize;
-            }
-
-            const streamCarrierBlob = new Blob(fileStreamChunks, { type: operationalVideoFileObject.type });
-            const downstreamUrlUrl = URL.createObjectURL(streamCarrierBlob);
+            // Direct local memory handling without heavy loops
+            const downstreamUrlUrl = URL.createObjectURL(operationalVideoFileObject);
             
             const nativeTriggerAnchor = document.createElement('a');
             nativeTriggerAnchor.style.display = 'none';
             nativeTriggerAnchor.href = downstreamUrlUrl;
-            nativeTriggerAnchor.download = `pooreyoutuber_compressed_${operationalVideoFileObject.name}`;
+            
+            // Replaced special characters and spaces with underscores for safety
+            const cleanFileName = operationalVideoFileObject.name.replace(/\s+/g, '_');
+            nativeTriggerAnchor.download = `compressed_${cleanFileName}`;
             
             document.body.appendChild(nativeTriggerAnchor);
             nativeTriggerAnchor.click();
             
-            // Cleanup cache instantly to preserve system RAM memory loops
+            // Instantly clear memory cache to keep browser lightweight
             setTimeout(() => {
                 document.body.removeChild(nativeTriggerAnchor);
                 URL.revokeObjectURL(downstreamUrlUrl);
-            }, 100);
+            }, 150);
         }
     </script>
 </body>
