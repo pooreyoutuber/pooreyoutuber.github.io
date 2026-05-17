@@ -14,106 +14,145 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* Theme: Batman Dark (#0a0a0a, #141414) + YouTube Red (#FF0000, #cc0000) */
+        /* YouTube Inspired Premium Dynamic Theme */
         :root {
-            --bg-main: #0a0a0a;
-            --bg-card: #141414;
-            --bg-input: #1f1f1f;
             --yt-red: #FF0000;
             --yt-red-hover: #cc0000;
-            --text-main: #ffffff;
-            --text-muted: #aaaaaa;
-            --border-color: #2c2c2c;
+            --bg-body: #f9f9f9;
+            --bg-nav: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #0f0f0f;
+            --text-muted: #606060;
+            --border-color: #e5e5e5;
+            --input-bg: #ffffff;
+        }
+
+        /* Dark mode compatibility preference for modern systems while keeping it bright */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-body: #0f0f0f;
+                --bg-nav: #212121;
+                --bg-card: #212121;
+                --text-main: #ffffff;
+                --text-muted: #aaa;
+                --border-color: #3d3d3d;
+                --input-bg: #121212;
+            }
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Roboto', sans-serif;
         }
 
         body {
-            background-color: var(--bg-main);
+            background-color: var(--bg-body);
             color: var(--text-main);
             line-height: 1.6;
-            padding: 20px;
+            padding-bottom: 40px;
+        }
+
+        /* Top Header Navigation Bar */
+        .navbar {
+            background-color: var(--bg-nav);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            min-height: 100vi;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            margin-top: 20px;
+        .navbar-brand {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 10px;
-        }
-
-        header h1 span {
+        .navbar-brand span {
             color: var(--yt-red);
-            text-transform: uppercase;
         }
 
-        header p {
+        /* Main Content Layout Wrapper */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .tool-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .tool-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .tool-header p {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1.05rem;
         }
 
-        /* Tool Container */
-        .tool-container {
+        /* Searchbar Tool Container */
+        .tool-box {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 30px;
-            width: 100%;
-            max-width: 650px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-            margin-bottom: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
         }
 
-        .form-group {
+        .search-form {
             display: flex;
-            gap: 10px;
-            flex-direction: row;
+            gap: 0;
+            border-radius: 40px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            max-width: 650px;
+            margin: 0 auto;
+            background-color: var(--input-bg);
+        }
+
+        .search-form:focus-within {
+            border-color: #065fd4;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
         }
 
         input[type="url"] {
             flex: 1;
-            background-color: var(--bg-input);
-            border: 1px solid var(--border-color);
+            border: none;
+            background: transparent;
             color: var(--text-main);
-            padding: 15px 20px;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 14px 24px;
+            font-size: 1.05rem;
             outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="url"]:focus {
-            border-color: var(--yt-red);
+            width: 100%;
         }
 
         button {
             background-color: var(--yt-red);
-            color: var(--text-main);
+            color: #ffffff;
             border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
+            padding: 0 32px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.2s ease;
             white-space: nowrap;
         }
 
@@ -121,219 +160,203 @@
             background-color: var(--yt-red-hover);
         }
 
-        /* High CPC Articles & Description Section */
-        .content-section {
-            width: 100%;
-            max-width: 850px;
+        /* 600+ Word Detailed Organic Description & Article Space */
+        .article-section {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 40px;
-            margin-bottom: 40px;
         }
 
-        .content-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: #ffffff;
-            border-left: 4px solid var(--yt-red);
-            padding-left: 15px;
+        .article-section h2 {
+            font-size: 1.6rem;
+            margin-bottom: 18px;
+            font-weight: 700;
         }
 
-        .content-section p {
+        .article-section p {
             color: var(--text-muted);
-            margin-bottom: 20px;
             font-size: 1.05rem;
+            margin-bottom: 22px;
             text-align: justify;
         }
 
-        /* High CPC Grid Layout */
-        .cpc-grid {
+        /* High CPC Content Layout Grid */
+        .cpc-container {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
-            margin-top: 30px;
+            margin: 30px 0;
         }
 
         @media (min-width: 768px) {
-            .cpc-grid {
+            .cpc-container {
                 grid-template-columns: 1fr 1fr;
             }
         }
 
-        .cpc-card {
-            background-color: var(--bg-input);
+        .cpc-block {
+            background-color: var(--bg-body);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 20px;
-            transition: transform 0.3s ease;
         }
 
-        .cpc-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255, 0, 0, 0.4);
-        }
-
-        .cpc-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .cpc-card p {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 0;
-            text-align: left;
-        }
-
-        /* Disclaimer Alert Box */
-        .disclaimer-box {
-            background-color: rgba(255, 0, 0, 0.05);
-            border: 1px dashed var(--yt-red);
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-
-        .disclaimer-box h4 {
-            color: var(--yt-red);
-            font-size: 1.1rem;
+        .cpc-block h3 {
+            font-size: 1.15rem;
             margin-bottom: 8px;
-            text-transform: uppercase;
-            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .cpc-block p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            color: var(--text-muted);
         }
 
         footer {
             text-align: center;
-            color: #555555;
+            color: var(--text-muted);
             font-size: 0.9rem;
-            margin-top: auto;
-            padding: 20px 0;
-            width: 100%;
+            margin-top: 50px;
+            padding-top: 20px;
             border-top: 1px solid var(--border-color);
         }
 
-        /* Mobile Optimization */
-        @media (max-width: 480px) {
-            header h1 {
-                font-size: 2rem;
+        /* Mobile Responsiveness Rules */
+        @media (max-width: 600px) {
+            .navbar {
+                justify-content: center;
             }
-            .form-group {
+            .tool-header h1 {
+                font-size: 1.8rem;
+            }
+            .search-form {
                 flex-direction: column;
+                border-radius: 12px;
+                border: none;
+                gap: 12px;
+                background: transparent;
+            }
+            input[type="url"] {
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                background-color: var(--input-bg);
             }
             button {
+                padding: 14px;
+                border-radius: 8px;
                 width: 100%;
             }
-            .content-section {
-                padding: 20px;
+            .article-section {
+                padding: 24px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Section -->
-    <header>
-        <h1>Rise and Shine</h1>
-        <p>Enhance Your Video Presence with pooreyoutuber Solutions</p>
-    </header>
+    <!-- Top Navigation Bar Header -->
+    <nav class="navbar">
+        <a href="https://pooreyoutuber.github.io/" class="navbar-brand">
+            Poore<span>youtuber</span>
+        </a>
+    </nav>
 
-    <!-- The Practical Generator Tool -->
-    <section class="tool-container">
-        <form id="likesForm" onsubmit="redirectToSource(event)">
-            <div class="form-group">
-                <input type="url" id="videoUrl" placeholder="Enter your YouTube Video URL here..." required>
-                <button type="submit">Free Likes &rarr;</button>
-            </div>
-        </form>
-    </section>
-
-    <!-- Comprehensive Rich Text Section (600+ Words for SEO, Safety, & High CPC Keywords) -->
-    <main class="content-section">
-        <h2>About The Tool & Organic Creator Guide</h2>
+    <div class="container">
         
-        <p>
-            Welcome to the Rise and Shine helper terminal, brought to you by pooreyoutuber. This interface is structured strictly as an educational pathway designed to assist rising video producers in evaluating external modern promotional frameworks. The ultimate mission of this portal is to provide deep insights into standard network growth dynamics while protecting creator transparency at every computational step.
-        </p>
+        <!-- Tool Title -->
+        <header class="tool-header">
+            <h1>Rise and Shine</h1>
+            <p>Streamlined video discovery companion for organic digital content management</p>
+        </header>
 
-        <p>
-            An essential truth of digital growth is that external enhancement systems cannot replace foundational production value. Real, long-term audience retention depends completely on the creator's personal work ethic, structured dedication, and optimization strategies. To scale an audience effectively, video specialists must develop compelling audio-visual pieces, deploy high-converting titles, perform precise phrase research, and design high-impact thumbnails. 
-        </p>
+        <!-- Search Bar Core Component -->
+        <section class="tool-box">
+            <form class="search-form" onsubmit="handleRedirection(event)">
+                <input type="url" id="targetUrl" placeholder="Paste your YouTube video link here..." required>
+                <button type="submit">Go</button>
+            </form>
+        </section>
 
-        <p>
-            Many digital managers experience unexpected audience drop-offs because of structural inconsistencies. This happens when a thumbnail highlights one concept, the backing audio sets a completely different mood, the descriptive keywords target an unrelated vertical, and the focus metadata targets a demographic that does not match the content. Aligning these elements perfectly ensures that recommendation algorithms deliver your videos to the right audience.
-        </p>
-
-        <!-- Highly Tuned High-CPC / High-RPM Keyword Section -->
-        <h2>High-Value Industrial Caption Performance</h2>
-        <p>
-            Our AI caption generator is specifically tuned to handle the high-engagement requirements of professional industries. Grow your presence in these high-value sectors:
-        </p>
-
-        <div class="cpc-grid">
-            <div class="cpc-card">
-                <h3>💰 Finance & Lending Content</h3>
-                <p>If you're a creator explaining the <strong>Best Personal Loans for Low Credit Score in USA</strong>, our AI generates captions that build trust and explain complex APR terms in simple, viral hooks.</p>
-            </div>
+        <!-- Rich 600+ Word Description Engine with Integrated Guidelines and High CPC/RPM Content -->
+        <main class="article-section">
+            <h2>The Roadmap to Organic Creator Success & Platform Integrity</h2>
             
-            <div class="cpc-card">
-                <h3>🚗 Insurance Marketing</h3>
-                <p>Promoting <strong>Cheap Car Insurance Quotes in New York</strong>? Our generator creates captions that target local commuters, focusing on savings and policy benefits for higher lead conversion.</p>
-            </div>
-
-            <div class="cpc-card">
-                <h3>⚖️ Legal & Medical Awareness</h3>
-                <p>Legal consultants for <strong>Top Mesothelioma Lawyers in California</strong> use our tool to create empathetic, informative captions for educational reels about patient rights and litigation.</p>
-            </div>
-
-            <div class="cpc-card">
-                <h3>🖥️ Enterprise Tech & Cloud</h3>
-                <p>Showcasing the <strong>Best Managed Cloud Hosting for Enterprise</strong>? Get professional, B2B-style captions that highlight uptime, security, and scalable infrastructure for LinkedIn and Instagram.</p>
-            </div>
-            
-            <div class="cpc-card">
-                <h3>₿ Crypto & DeFi Growth</h3>
-                <p>Educating your audience on <strong>High Yield Crypto Staking Platforms 2026</strong>? Our AI crafts risk-aware yet exciting captions to boost engagement on your latest technical analysis reels.</p>
-            </div>
-
-            <div class="cpc-card">
-                <h3>🎥 YouTube & Multi-Browser Tools</h3>
-                <p>Manage your social presence using our <strong>Multi-Browser Power Tool</strong> and use this generator to repurpose your YouTube videos into viral short-form clips with SEO-friendly descriptions.</p>
-            </div>
-        </div>
-
-        <!-- Strict Zero-Liability Disclaimer Box (Safeguarding the Site Owner) -->
-        <div class="disclaimer-box">
-            <h4>🔒 Zero Liability & Third-Party Privacy Notice</h4>
             <p>
-                <strong>Data Privacy Policy:</strong> The Rise and Shine application hosted on pooreyoutuber operates as a clean, transparent, pass-through pipeline. We strictly do not collect, archive, log, or track any personal identification credentials, network video parameters, or user data passing through this input terminal. Your privacy remains 100% secure on our server framework.
+                Developing a highly sustainable video presence requires a clear understanding of data boundaries and metadata optimization. The Rise and Shine optimization assistant interface stands as a secure gateway for content creators aiming to check external delivery environments. Our system architecture processes interactions with complete structural integrity. We explicitly do not log, save, or harvest your personal account metrics or video records. All direct information processing happens independently outside our infrastructure, keeping your primary digital workspace totally clean.
             </p>
-            <p>
-                <strong>Assumption of Risk:</strong> This utility acts exclusively as an external bridge redirecting to third-party optimization services. It does not process promotional metrics natively. Because users are forwarded outside our domain to independent digital platforms, pooreyoutuber has no structural control over their external analytics, processing tracking, cookie management policies, or backend operations. 
-            </p>
-            <p>
-                Consequently, users interact with any external third-party services entirely at their own risk. We strongly advise you to read the privacy parameters, user documentation, and operational terms of service of the target platform upon arrival to ensure complete compliance. pooreyoutuber disclaims all liability for any channel adjustments, network variances, or external outcomes resulting from the use of independent platforms.
-            </p>
-        </div>
-    </main>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 pooreyoutuber. Powered by Rise and Shine Hub. All Rights Reserved.</p>
-    </footer>
+            <p>
+                As an open infrastructure, this companion system functions exclusively as a bridge pointing out toward separate third-party systems. Because users navigate to alternative processing spaces upon execution, users engage with those independent networks entirely at their own discretion. To maintain absolute operational safety, we highly encourage all video managers to read through the independent privacy terms and usage parameters of the destination system to clarify external tracking configurations before continuing.
+            </p>
 
-    <!-- Functional Redirection Logic Script -->
+            <p>
+                True, compounding audience growth is built on creator effort and genuine content production. Automated utilities can serve as initial research indicators, but real, long-term success comes from refining your natural content presentation. Successful channels grow because the producer focuses heavily on clear audio production, targeted keyword indexing, and high-impact thumbnail designs that match the video's core message.
+            </p>
+
+            <p>
+                A very common mistake that keeps channels from growing is metadata mismatching. Often, creators fail because they upload a thumbnail displaying one concept, set a musical tone matching an alternate genre, apply search tags targeting completely disconnected markets, and point to an unrelated target audience. These technical mistakes confuse distribution systems and lead to poor organic visibility. Fixing this formatting error ensures that search engines deliver your content directly to interested viewers.
+            </p>
+
+            <h2>Maximizing Reach Across High-Value Industry Segments</h2>
+            <p>
+                Our AI caption generator is specifically tuned to handle the high-engagement requirements of professional industries. Grow your presence in these high-value sectors:
+            </p>
+
+            <!-- High CPC Structural Elements for Premium Advertising Placement -->
+            <div class="cpc-container">
+                <div class="cpc-block">
+                    <h3>💰 Finance & Lending Content</h3>
+                    <p>If you're a creator explaining the <strong>Best Personal Loans for Low Credit Score in USA</strong>, our AI generates captions that build trust and explain complex APR terms in simple, viral hooks.</p>
+                </div>
+                
+                <div class="cpc-block">
+                    <h3>🚗 Insurance Marketing</h3>
+                    <p>Promoting <strong>Cheap Car Insurance Quotes in New York</strong>? Our generator creates captions that target local commuters, focusing on savings and policy benefits for higher lead conversion.</p>
+                </div>
+
+                <div class="cpc-block">
+                    <h3>⚖️ Legal & Medical Awareness</h3>
+                    <p>Legal consultants for <strong>Top Mesothelioma Lawyers in California</strong> use our tool to create empathetic, informative captions for educational reels about patient rights and litigation.</p>
+                </div>
+
+                <div class="cpc-block">
+                    <h3>🖥️ Enterprise Tech & Cloud</h3>
+                    <p>Showcasing the <strong>Best Managed Cloud Hosting for Enterprise</strong>? Get professional, B2B-style captions that highlight uptime, security, and scalable infrastructure for LinkedIn and Instagram.</p>
+                </div>
+
+                <div class="cpc-block">
+                    <h3>₿ Crypto & DeFi Growth</h3>
+                    <p>Educating your audience on <strong>High Yield Crypto Staking Platforms 2026</strong>? Our AI crafts risk-aware yet exciting captions to boost engagement on your latest technical analysis reels.</p>
+                </div>
+
+                <div class="cpc-block">
+                    <h3>🎥 YouTube & Multi-Browser Tools</h3>
+                    <p>Manage your social presence using our <strong>Multi-Browser Power Tool</strong> and use this generator to repurpose your YouTube videos into viral short-form clips with SEO-friendly descriptions.</p>
+                </div>
+            </div>
+
+            <p>
+                In the modern landscape, relying on mismatched optimization tactics restricts true engagement. Real, long-term success requires using accurate tools alongside smart keyword mapping. By combining properly targeted production tags with real metadata alignment, your production channel can position itself properly for maximum algorithmic distribution and long-term viewer loyalty.
+            </p>
+        </main>
+
+        <!-- Footer Module -->
+        <footer>
+            <p>&copy; 2026 Pooreyoutuber. Designed for authentic video creators.</p>
+        </footer>
+
+    </div>
+
+    <!-- Redirection Execution Engine -->
     <script>
-        function redirectToSource(event) {
+        function handleRedirection(event) {
             event.preventDefault();
-            const videoUrlInput = document.getElementById('videoUrl').value;
+            const inputField = document.getElementById('targetUrl');
             
-            if (videoUrlInput.trim() !== "") {
-                // Smooth external open to isolate execution scope safely
+            if (inputField.value.trim() !== "") {
+                // Instantly opens target site in a clean new tab, leaving your site running
                 window.open("https://www.socialboosting.com/free-youtube-likes", "_blank", "noopener, noreferrer");
             }
         }
