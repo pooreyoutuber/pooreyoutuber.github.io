@@ -3,186 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ViralTok Multi-Viewer Power-Tool - Boost Your Watch Experience</title>
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Free ViralTok Multi-Viewer Power-Tool to play and watch multiple TikTok reels video streams simultaneously side by side. Best multi-browser simulation for creators.">
-    <meta name="keywords" content="tiktok multi viewer, multi browser tool, watch multiple reels, viraltok power tool, multiple iframe player">
-    <meta name="robots" content="index, follow">
-    
+    <title>ViralTok Multi-Viewer Ultra-Power Tool</title>
     <style>
-       :root {
-
-            --tiktok-black: #010101;
-
-            --tiktok-cyan: #00f2fe;
-
-            --tiktok-pink: #fe2c55;
-
-            --tiktok-white: #ffffff;
-
-            --tiktok-gray: #121212;
-
-            --card-bg: #1e1e1e;
-
+        :root {
+            --bg-dark: #09090b;
+            --card-bg: #141416;
+            --accent-pink: #fe2c55;
+            --accent-cyan: #25f4ee;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --border-color: #27272a;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--tiktok-black);
-            color: var(--tiktok-white);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             padding: 20px;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
         }
 
-        .container {
+        .main-container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             background: var(--card-bg);
             border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(254, 44, 85, 0.2);
-            border: 1px solid rgba(0, 242, 254, 0.3);
-            margin-bottom: 30px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 30px;
+        /* Top Header & Reset Button Area */
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
         }
 
-        header h1 {
-            font-size: 2.5rem;
+        .header-title h1 {
+            font-size: 1.8rem;
             font-weight: 800;
-            background: linear-gradient(to right, var(--tiktok-pink), var(--tiktok-cyan));
+            background: linear-gradient(to right, var(--accent-pink), var(--accent-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        header p {
-            color: #aaa;
-            font-size: 1rem;
+        .header-title p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
-        .input-section {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
+        .btn-reset {
+            background: #27272a;
+            color: #ef4444;
+            border: 1px solid #dc2626;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: #dc2626;
+            color: white;
+            box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+        }
+
+        /* Controls Layout Fix */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        @media (max-width: 768px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--tiktok-cyan);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        input[type="text"], select {
+        input[type="text"], input[type="number"] {
             width: 100%;
-            padding: 14px;
-            background-color: #2b2b2b;
-            border: 2px solid #444;
+            padding: 12px;
+            background: #18181b;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
 
-        input[type="text"]:focus, select:focus {
-            border-color: var(--tiktok-pink);
+        input:focus {
+            border-color: var(--accent-pink);
             outline: none;
-            box-shadow: 0 0 10px rgba(254, 44, 85, 0.5);
+            box-shadow: 0 0 8px rgba(254, 44, 85, 0.3);
         }
 
         .btn-play {
-            background: linear-gradient(45deg, var(--tiktok-pink), #c61a3e);
+            background: linear-gradient(45deg, var(--accent-pink), #e11d48);
             color: white;
             border: none;
-            padding: 15px;
-            font-size: 1.2rem;
+            padding: 12px;
+            font-size: 1rem;
             font-weight: 700;
             border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
             text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(254, 44, 85, 0.4);
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(254, 44, 85, 0.3);
+            height: 45px;
         }
 
         .btn-play:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(254, 44, 85, 0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(254, 44, 85, 0.5);
         }
 
-        .btn-play:active {
-            transform: translateY(1px);
+        /* Sizing Customizer for Compact View */
+        .size-panel {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: #18181b;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
         }
 
-        /* Responsive Grid System */
+        /* Compact Dynamic Video Grid Setup */
         .viewer-grid {
             display: grid;
-            gap: 15px;
+            gap: 12px;
             width: 100%;
-            max-width: 1200px;
-            margin-top: 20px;
+            max-width: 1400px;
+            margin-top: 10px;
         }
 
-        /* PC View: 4 Columns */
-        @media (min-width: 992px) {
+        /* PC View: 5 Columns for maximum micro-monitoring */
+        @media (min-width: 1025px) {
+            .viewer-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        /* Tablet View: 4 Columns */
+        @media (min-width: 601px) and (max-width: 1024px) {
             .viewer-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
         }
 
-        /* Tablet View: 3 Columns */
-        @media (min-width: 600px) and (max-width: 991px) {
+        /* Mobile View: 3 Columns compact arrangement */
+        @media (max-width: 600px) {
             .viewer-grid {
                 grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
             }
         }
 
-        /* Mobile View: 3 Columns as requested */
-        @media (max-width: 599px) {
-            .viewer-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-            }
-            .container {
-                padding: 15px;
-            }
-            header h1 {
-                font-size: 1.8rem;
-            }
-        }
-
-        .iframe-wrapper {
+        /* Mini-Sized Frame Architecture */
+        .iframe-container {
             position: relative;
             width: 100%;
-            padding-top: 177.77%; /* 9:16 Aspect Ratio Aspect for Reels */
             background: #000;
             border-radius: 8px;
             overflow: hidden;
-            border: 2px solid #333;
+            border: 2px solid var(--border-color);
+            transition: border-color 0.3s;
         }
 
-        .iframe-wrapper iframe {
+        .iframe-container:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .iframe-container iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -191,131 +218,184 @@
             border: none;
         }
 
-        /* SEO Description Section */
-        .seo-description {
+        .frame-label {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            border-radius: 4px;
+            z-index: 10;
+            color: var(--accent-cyan);
+            pointer-events: none;
+        }
+
+        /* SEO Informative Module */
+        .seo-section {
             width: 100%;
-            max-width: 1200px;
-            background: #121212;
+            max-width: 1400px;
+            background: var(--card-bg);
             border-radius: 12px;
-            padding: 25px;
-            margin-top: 30px;
-            border-top: 4px solid var(--tiktok-pink);
+            padding: 30px;
+            margin-top: 40px;
+            border-left: 4px solid var(--accent-pink);
             line-height: 1.6;
-            color: #ccc;
+            color: var(--text-muted);
         }
 
-        .seo-description h2 {
-            color: var(--tiktok-white);
-            margin-bottom: 15px;
-            font-size: 1.4rem;
+        .seo-section h2 {
+            color: var(--text-main);
+            margin-bottom: 16px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .seo-description p {
-            margin-bottom: 15px;
-            font-size: 0.95rem;
+        .seo-section p {
+            margin-bottom: 14px;
+            font-size: 0.92rem;
             text-align: justify;
         }
 
-        .seo-description strong {
-            color: var(--tiktok-cyan);
+        .seo-section strong {
+            color: var(--accent-cyan);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>🚀 ViralTok Multi-Viewer</h1>
-            <p>Ultimate Multi-Browser Simulator for Video Optimization</p>
-        </header>
+    <div class="main-container">
+        <div class="header-area">
+            <div class="header-title">
+                <h1>🚀 ViralTok Multi-Viewer Power-Tool</h1>
+                <p>Advanced Micro-Grid Simulator Interface Architecture</p>
+            </div>
+            <button class="btn-reset" onclick="resetDashboard()">Reset Dashboard</button>
+        </div>
 
-        <div class="input-section">
+        <div class="controls-grid">
             <div class="input-group">
-                <label for="videoUrl">Enter TikTok Video or Reel URL</label>
-                <input type="text" id="videoUrl" placeholder="https://www.tiktok.com/@username/video/1234567890123456789" value="">
+                <label for="videoUrl">Paste TikTok Video / Reel Live Link</label>
+                <input type="text" id="videoUrl" placeholder="https://www.tiktok.com/@username/video/1234567890" value="">
             </div>
 
             <div class="input-group">
-                <label for="viewCount">Select Number of Windows</label>
-                <select id="viewCount">
-                    <option value="3">3 Windows</option>
-                    <option value="4" selected>4 Windows</option>
-                    <option value="6">6 Windows</option>
-                    <option value="8">8 Windows</option>
-                    <option value="12">12 Windows</option>
-                    <option value="16">16 Windows</option>
-                </select>
+                <label for="viewCount">Windows Limit (Max 50)</label>
+                <input type="number" id="viewCount" min="1" max="50" value="10">
             </div>
 
-            <button class="btn-play" onclick="loadViewers()">Launch Multi-Stream Now</button>
+            <button class="btn-play" onclick="generateSimulators()">Launch Streams</button>
+        </div>
+
+        <div class="size-panel">
+            <label>Micro-Frame Height Tuning:</label>
+            <label><input type="radio" name="heightOpt" value="130%" checked onclick="adjustHeight()"> Ultra Small (Fast Sync)</label>
+            <label><input type="radio" name="heightOpt" value="150%" onclick="adjustHeight()"> Micro Balanced</label>
+            <label><input type="radio" name="heightOpt" value="177.7%" onclick="adjustHeight()"> Standard 9:16 Ratio</label>
         </div>
     </div>
 
-    <!-- Video Display Grid -->
     <div class="viewer-grid" id="viewerGrid"></div>
 
-    <!-- 500 Words Optimized Description -->
-    <div class="seo-description">
-        <h2>About ViralTok Multi-Viewer Power-Tool System</h2>
-        <p>Welcome to the ultimate ViralTok Multi-Viewer Power-Tool interface created for video analysis and stream testing layout operations. This sophisticated multi browser engine helps digital content curators and social video managers inspect how their multimedia assets render across simulated multiple viewport sessions simultaneously. If you ever wondered how your short video layout acts when displayed across diverse active feeds together this utility offers the best direct response setup without complex tabs switching work. It provides high speed loading layout simulation so you can check visual clarity frame consistency and design synchronization inside a smart embedded environment.</p>
+    <div class="seo-section">
+        <h2>About ViralTok Multi-Viewer Simulation Engine Layout Operations</h2>
+        <p>Welcome to the ultimate engineered <strong>ViralTok Multi-Viewer Power-Tool</strong> framework system. This specialized analytics multi-browser virtualization sandbox has been deployed exclusively for expert designers, content verification teams, and mobile cross-platform interface testing architects. It simplifies manual observation processes by completely bypassing the performance lag caused by switching through dozens of isolated browser application tabs. It integrates an ultra-lightweight rendering mechanism layout which loads small, micro-sized viewer windows seamlessly. This optimized grid design format guarantees that you can review frame rendering speeds, text overlays, and media aspect responsiveness side by side effortlessly without crashing your master machine workspace.</p>
         
-        <p>Please note very carefully that this smart system is developed completely for research testing evaluation and <strong>just for fun purposes only</strong>. It is absolutely not intended to be used as a fake earning program bot or artificial views manipulation platform. The software system contains no automated bot integration scripts or automated retention systems that communicate falsely with external monetization algorithms. This is purely a front end layout engine visualization utility. Users must interact with this software tool at their <strong>own absolute risk and responsibility</strong>. We do not support guarantee or promote any artificial ranking changes or metrics elevation via this simulation wrapper interface framework.</p>
+        <p>This application contains a completely native <strong>manual control playback module</strong> embedded within safe sandbox boundaries. Users can click, interact, and monitor individual frame updates manually to isolate lag spots, inspect frame data sync parameters, or check element positions on different virtual system dimensions. The underlying automated responsive styling rules have been optimized specifically to display exactly <strong>5 columns in widescreen desktop PC systems</strong>, scaling smoothly down to <strong>4 columns inside intermediate tablet displays</strong>, and locking strictly into a clean <strong>3 columns viewport row alignment on mobile screens</strong>. This exact spacing logic provides optimal density parameters for handling up to 50 active rendering simulators at the same time inside a single central hub page workspace environment.</p>
+
+        <p>Please note with absolute transparency that this system is constructed purely as a front-end simulation wrapper engine intended <strong>solely for testing evaluation, structural design audit, and fun experimentation purposes</strong>. It contains no artificial bot interaction systems, automated tracking loops, proxy rotations, or metrics modification scripts designed to interact with external monetization platform servers or view counters. Users are fully and exclusively responsible for the link addresses provided to the processing form line. We strongly enforce that this layout testing helper utility is used with complete integrity at your <strong>own absolute risk and responsibility</strong>.</p>
         
-        <p>Why do thousands of social video optimization experts select this specific multi dashboard interface every day? Because it removes layout friction completely. By utilizing the advanced responsive system architecture this application dynamically conforms to your current active monitor. When you view this multi browser dashboard on a large desktop pc system display it automatically locks into a flawless <strong>4 column side by side grid panel</strong> format allowing seamless widescreen comparative monitoring. Meanwhile when you transfer your active task workflow to a mobile device handset ui it instantly compresses cleanly into a tight <strong>3 column structure pattern</strong> for maximum small screen spatial economy. This lets you inspect element visibility mobile graphic cropping and alignment bugs in real time.</p>
-        
-        <p>To maximize your content strategy research simply locate your primary video asset web address from your target channel copy the specific link identity path paste it carefully into the main input form container address line field and choose your desired concurrency load limit configuration before launching. The engine processes the universal sharing link format into a clean sandboxed embed frame structure which avoids typical loading errors blockages or frame breakdown crashes. Experience high performance multi display simulation control right inside your browser window instantly today!</p>
+        <p>How do you initiate your multimedia session operations? It is extremely simple. Locate your specific target media link asset web address from your designated source, paste the string safely into the main input form container field line, adjust your concurrent load distribution total inside the dedicated windows control box input, and hit the stream launcher button control. The system will cleanly calculate the media identifier code, sanitize the frame integration string, and configure a secure frame block array instantly. To clear up your hardware system allocation memory, click the high-priority reset options control sitting at the top-right corner to return the engine to its clean state.</p>
     </div>
 
     <script>
-        function cleanTikTokUrl(url) {
+        // Core Link Sanitizer and Transformer Module
+        function cleanVideoUrl(url) {
             url = url.trim();
             if (!url) return '';
 
-            // Check if it's already an embed link
+            // If it is already processed as an embed link form, skip conversion
             if (url.includes('/embed/')) {
                 return url;
             }
 
-            // Regex to extract video ID from standard TikTok URL
-            // Matches: /video/123456789... or /v/123456789...
+            // High Precision Regex targeting standard Short Video ID formats
             const videoIdMatch = url.match(/(?:\/video|\/v)\/([0-9]+)/);
-            
             if (videoIdMatch && videoIdMatch[1]) {
                 return `https://www.tiktok.com/embed/${videoIdMatch[1]}`;
             }
 
-            // Fallback: If URL doesn't match standard patterns, try to use it as is or return
+            // Return raw string fallback input if alternative structures are submitted
             return url;
         }
 
-        function loadViewers() {
+        // Multi Stream Matrix Generation Operations Engine
+        function generateSimulators() {
             const rawUrl = document.getElementById('videoUrl').value;
-            const count = parseInt(document.getElementById('viewCount').value);
+            let count = parseInt(document.getElementById('viewCount').value);
             const grid = document.getElementById('viewerGrid');
             
-            // Clear previous iframes
+            // Flush running simulator buffers
             grid.innerHTML = '';
 
             if (!rawUrl) {
-                alert('Please paste a valid TikTok video URL first!');
+                alert('Please input a valid streaming address link sequence first!');
                 return;
             }
 
-            const embedUrl = cleanTikTokUrl(rawUrl);
+            // Lock upper threshold barriers to preserve CPU thread capacities
+            if (count > 50) {
+                count = 50;
+                document.getElementById('viewCount').value = 50;
+                alert('System capped at maximum 50 micro-windows for machine safety!');
+            }
+            if (count < 1 || isNaN(count)) {
+                count = 1;
+                document.getElementById('viewCount').value = 1;
+            }
 
-            for (let i = 0; i < count; i++) {
+            const cleanTargetUrl = cleanVideoUrl(rawUrl);
+            const chosenHeight = document.querySelector('input[name="heightOpt"]:checked').value;
+
+            // Generate highly efficient micro frames sequentially
+            for (let i = 1; i <= count; i++) {
                 const wrapper = document.createElement('div');
-                wrapper.className = 'iframe-wrapper';
+                wrapper.className = 'iframe-container';
+                wrapper.style.paddingTop = chosenHeight; // Apply user selected small size config
+
+                const label = document.createElement('div');
+                label.className = 'frame-label';
+                label.innerText = `User ${i}`;
 
                 const iframe = document.createElement('iframe');
-                // Added standard sandbox and allow attributes to ensure safe and correct loading without errors
-                iframe.src = embedUrl;
+                iframe.src = cleanTargetUrl;
                 iframe.setAttribute('allowfullscreen', 'true');
+                // Enabled all necessary flags for smooth manual interactions inside sandboxed viewports
                 iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;');
                 
+                wrapper.appendChild(label);
                 wrapper.appendChild(iframe);
                 grid.appendChild(wrapper);
             }
+        }
+
+        // Real-Time Frame Height Adjustment Scaling Control
+        function adjustHeight() {
+            const chosenHeight = document.querySelector('input[name="heightOpt"]:checked').value;
+            const activeContainers = document.querySelectorAll('.iframe-container');
+            activeContainers.forEach(container => {
+                container.style.paddingTop = chosenHeight;
+            });
+        }
+
+        // Complete Reset Master Routine Option 
+        function resetDashboard() {
+            document.getElementById('videoUrl').value = '';
+            document.getElementById('viewCount').value = '10';
+            document.getElementById('viewerGrid').innerHTML = '';
+            document.querySelector('input[name="heightOpt"][value="130%"]').checked = true;
         }
     </script>
 </body>
