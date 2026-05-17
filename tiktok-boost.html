@@ -326,7 +326,14 @@
             if (videoIdMatch && videoIdMatch[1]) {
                 return `https://www.tiktok.com/embed/${videoIdMatch[1]}`;
             }
-
+            }
+             // Autoplay parameter add karne ka logic
+    if (embedUrl.includes('?')) {
+        return `${embedUrl}&autoplay=1`;
+    } else {
+        return `${embedUrl}?autoplay=1`;
+    } 
+            
             // Return raw string fallback input if alternative structures are submitted
             return url;
         }
