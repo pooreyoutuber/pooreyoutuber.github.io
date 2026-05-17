@@ -312,27 +312,27 @@
 
     <script>
         // Core Link Sanitizer and Transformer Module
-        function cleanVideoUrl(url) {
-            url = url.trim();
-            if (!url) return '';
+       function cleanVideoUrl(url) {
+    url = url.trim();
+    if (!url) return '';
 
-            // If it is already processed as an embed link form, skip conversion
-            if (url.includes('/embed/')) {
-                return url;
-            }
+    let embedUrl = url;
 
-            // High Precision Regex targeting standard Short Video ID formats
-            const videoIdMatch = url.match(/(?:\/video|\/v)\/([0-9]+)/);
-            if (videoIdMatch && videoIdMatch[1]) {
-                return `https://www.tiktok.com/embed/${videoIdMatch[1]}`;
-            }
-            }
-             // Autoplay parameter add karne ka logic
+    // Agar standard link hai toh use embed format me badlein
+    if (!url.includes('/embed/')) {
+        const videoIdMatch = url.match(/(?:\/video|\/v)\/([0-9]+)/);
+        if (videoIdMatch && videoIdMatch[1]) {
+            embedUrl = `https://www.tiktok.com/embed/${videoIdMatch[1]}`;
+        }
+    }
+
+    // Autoplay parameter add karne ka logic
     if (embedUrl.includes('?')) {
         return `${embedUrl}&autoplay=1`;
     } else {
         return `${embedUrl}?autoplay=1`;
-    } 
+    }
+}
             
             // Return raw string fallback input if alternative structures are submitted
             return url;
