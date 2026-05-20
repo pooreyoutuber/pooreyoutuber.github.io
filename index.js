@@ -761,8 +761,6 @@ app.post('/popup', async (req, res) => {
 import { createCanvas, loadImage } from 'canvas';
 import dotenv from 'dotenv';
 // Multer setup memory me file stock rakhne ke liye
-const upload = multer({ storage: multer.memoryStorage() });
-
 // Helper: Buffer ko Gemini inlineData format me badalne ke liye
 function bufferToGenerativePart(buffer, mimeType) {
     return {
