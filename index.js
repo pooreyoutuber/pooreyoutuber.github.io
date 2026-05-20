@@ -757,159 +757,132 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL MAKER (NO CANVAS ENGINE REQUIRED)
 // ===================================================================
+// Gemini SDK Setup (2026 Recommended Syntax)
+import { createCanvas, loadImage } from 'canvas';
+import dotenv from 'dotenv';
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Multer setup memory me file stock rakhne ke liye
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Helper: Buffer ko Gemini inlineData format me badalne ke liye
+function bufferToGenerativePart(buffer, mimeType) {
+    return {
+        inlineData: {
+            data: buffer.toString("base64"),
+            mimeType
+        },
+    };
+}
 
 app.post('/thumbnail-maker', upload.single('photo'), async (req, res) => {
     try {
-        if (!GEMINI_KEY || !ai) {
-            return res.status(500).json({ success: false, message: 'Server Configuration Error: Gemini AI not initialized.' });
+        const { prompt, size } = req.body;
+        let geminiPrompt = '';
+        let imagePart = null;
+
+        if (req.file) {
+            imagePart = bufferToGenerativePart(req.file.buffer, req.file.mimetype);
         }
 
-        const { prompt, size = 'landscape' } = req.body;
-        const photoFile = req.file;
-
-        let finalPromptText = prompt ? prompt.trim() : "";
-        let uploadedImageBase64 = "";
-
-        // Checking user input logic
-        if (!finalPromptText && !photoFile) {
-            return res.status(400).json({ success: false, message: 'Please write a prompt or upload a photo first!' });
-        }
-
-        // Agar user ne photo upload ki hai, to use base64 buffer me convert karenge
-        if (photoFile) {
-            const fileBuffer = fs.readFileSync(photoFile.path);
-            uploadedImageBase64 = fileBuffer.toString('base64');
-            
-            // Condition: Agar prompt khali h lekin photo hai
-            if (!finalPromptText) {
-                finalPromptText = "Analyze this uploaded image context. User has not written any prompt. Detect what game or topic this image belongs to and generate an incredibly trending YouTube thumbnail hook text.";
+        // --- DYNAMIC VIRAL PROMPT GENERATION LOGIC ---
+        if (imagePart) {
+            if (prompt) {
+                geminiPrompt = `You are an elite YouTube Thumbnail Designer. Analyze this image and user request: "${prompt}". Create an aggressive, hyper-clickable gaming/clickbait thumbnail text concept. Generate a powerful 3-4 word curiosity hook (DO NOT just state the obvious, use shock value like '100% ILLEGAL!', 'UNSTOPPABLE!', 'PURI SQUAD KHATAM!'). Suggest a vibrant neon accent hex color. Respond strictly in valid JSON format: {"title": "SHOCKING TEXT", "bgColor": "#00FFCC"}`;
+            } else {
+                geminiPrompt = `You are a viral Gaming YouTube Thumbnail Strategist. The user has only uploaded this gameplay/photo. Detect the objects, characters, or elements. Generate an extreme clickbait hook text (max 3-4 words) for an epic gaming montage (e.g., '25 KILLS RECORD', 'DOMINATION MODE', 'AIMBOT ACTIVED'). Suggest a fiery neon accent color. Respond strictly in JSON: {"title": "VIRAL HOOK", "bgColor": "#FF3300"}`;
             }
-        }
-
-        // 1. SYSTEM STRUCTURED INSTRUCTIONS FOR GEMINI
-        const systemPrompt = `You are an expert YouTube Graphic Designer and Clickbait strategist. 
-        Analyze the input query/image: "${finalPromptText}".
-        Your task is to output highly catchy, action-oriented, professional text overlay for the thumbnail (Maximum 2 to 4 words, use all caps, e.g. "25 KILLS!", "UNBEATABLE!", "GOD MODE", "HACK UNLOCKED").
-        Also suggest two perfect neon theme colors for a heavy gaming background gradient.
-        
-        You must respond STRICTLY in this JSON format only:
-        {
-          "textOverlay": "25 KILLS!",
-          "textColor": "#FFFFFF",
-          "strokeColor": "#000000",
-          "glowColor": "#FF0055",
-          "bgColor1": "#e11d48",
-          "bgColor2": "#0f172a"
-        }`;
-
-        let aiResponseText = "";
-
-        // 2. GEMINI MULTIMODAL CALL
-        if (photoFile) {
-            const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: [
-                    { text: systemPrompt },
-                    {
-                        inlineData: {
-                            data: uploadedImageBase64,
-                            mimeType: photoFile.mimetype
-                        }
-                    }
-                ],
-                config: { responseMimeType: "application/json" }
-            });
-            aiResponseText = response.text;
         } else {
+            geminiPrompt = `Create a high-CTR, aggressive gaming thumbnail outline for the topic: "${prompt}". Provide a hyper-clickable short hook text (max 3-4 words) that triggers FOMO or shock (e.g., 'I REBUILT IT!', 'EXPOSING TRUTH'). Suggest a neon vibrant hex color. Respond strictly in JSON: {"title": "CATCHY TEXT", "bgColor": "#FFEA00"}`;
+        }
+
+        // --- GEMINI API CALL ---
+        let aiResponseText = '{"title": "25 KILLS DOMINATION", "bgColor": "#FF0055"}'; // Fallback
+        
+        try {
+            const contents = imagePart ? [imagePart, geminiPrompt] : [geminiPrompt];
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: systemPrompt,
+                model: 'gemini-2.5-flash',
+                contents: contents,
                 config: { responseMimeType: "application/json" }
             });
             aiResponseText = response.text;
+        } catch (aiErr) {
+            console.error("Gemini Error, using default layout template:", aiErr);
         }
 
-        // Parse Gemini JSON output safely
-        const designConfig = JSON.parse(aiResponseText.trim());
-        const finalOverlayText = designConfig.textOverlay || "BOOYAH!";
-        const glowColor = designConfig.glowColor || "#ff0055";
-        const bgColor1 = designConfig.bgColor1 || "#1e1b4b";
-        const bgColor2 = designConfig.bgColor2 || "#020617";
+        // Parse AI Decision
+        const jsonConfig = JSON.parse(aiResponseText);
+        const hookText = jsonConfig.title.toUpperCase();
+        const accentColor = jsonConfig.bgColor || '#FF0055';
 
-        // 3. DIMENSIONS LOGIC (Horizontal 16:9 vs Portrait 9:16)
-        const width = (size === 'landscape') ? 1280 : 720;
-        const height = (size === 'landscape') ? 720 : 1280;
-        const fontSize = (size === 'landscape') ? '90px' : '60px';
+        // --- CANVAS ENGINE: DESIGNING PRO THUMBNAIL ---
+        // Layout Dimensions Setup
+        const width = size === 'portrait' ? 1080 : 1920;
+        const height = size === 'portrait' ? 1920 : 1080;
+        const canvas = createCanvas(width, height);
+        const ctx = canvas.getContext('2d');
 
-        // Photo overlay image block injector
-        let svgImageLayer = "";
-        if (photoFile) {
-            svgImageLayer = `<image href="data:${photoFile.mimetype};base64,${uploadedImageBase64}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" opacity="0.8" />`;
+        if (req.file) {
+            // User ki background image draw karo
+            const bgImage = await loadImage(req.file.buffer);
+            ctx.drawImage(bgImage, 0, 0, width, height);
+
+            // Thumbnail Edge Glow/Vignette Effect (for gaming depth)
+            const gradient = ctx.createRadialGradient(width/2, height/2, 10, width/2, height/2, width);
+            gradient.addColorStop(0, 'rgba(0,0,0,0)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0.65)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+        } else {
+            // Agar image nahi hai to premium futuristic dark gradient banao
+            const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+            bgGrad.addColorStop(0, '#0f172a');
+            bgGrad.addColorStop(1, '#020617');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
         }
 
-        // 4. HIGH CONTRAST VECTOR DRAWING ENGINE (SVG Matrix)
-        const svgCanvasTemplate = `
-        <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="cyberBg" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="${bgColor1}" />
-                    <stop offset="100%" stop-color="${bgColor2}" />
-                </linearGradient>
-                
-                <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
-                    <stop offset="20%" stop-color="#000000" stop-opacity="0" />
-                    <stop offset="100%" stop-color="#000000" stop-opacity="0.85" />
-                </radialGradient>
+        // --- HIGH CONTRAST TEXT RENDERING SYSTEM ---
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
-                <filter id="gamingGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="4" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.95"/>
-                    <feDropShadow dx="-2" dy="-2" stdDeviation="4" flood-color="${glowColor}" flood-opacity="0.6"/>
-                </filter>
-            </defs>
+        // Font selection size dynamic positioning
+        const fontSize = size === 'portrait' ? Math.floor(width * 0.12) : Math.floor(width * 0.08);
+        ctx.font = `black ${fontSize}px sans-serif`; // For production, standard system sans fonts match heavy impacts.
 
-            <rect width="100%" height="100%" fill="url(#cyberBg)" />
-            
-            ${svgImageLayer}
+        const xPos = width / 2;
+        const yPos = height - (height * 0.25); // Safe action layout boundary lower third
 
-            <rect width="100%" height="100%" fill="url(#vignette)" />
-            
-            <rect x="20" y="20" width="${width - 40}" height="${height - 40}" fill="none" stroke="${glowColor}" stroke-width="5" stroke-opacity="0.4" rx="12" />
+        // Text Layer 1: Extreme Drop Shadow / Outer Glow
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = fontSize * 0.25; // Thick stroke for gaming thumbnails
+        ctx.lineJoin = 'miter';
+        ctx.miterLimit = 2;
+        ctx.strokeText(hookText, xPos, yPos);
 
-            <text x="50%" y="52%" 
-                  font-family="'Impact', 'Arial Black', sans-serif" 
-                  font-size="${fontSize}" 
-                  font-weight="900" 
-                  fill="#FFFFFF" 
-                  stroke="#000000" 
-                  stroke-width="5" 
-                  letter-spacing="3px"
-                  filter="url(#gamingGlow)" 
-                  text-anchor="middle" 
-                  dominant-baseline="middle">
-                ${finalOverlayText.toUpperCase()}
-            </text>
-        </svg>
-        `;
+        // Text Layer 2: Neon Accent Under-Glow Effect
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = fontSize * 0.1;
+        ctx.strokeText(hookText, xPos, yPos);
 
-        // Safe cleanup: Temporarily storage me save photo remove kar do
-        if (photoFile) {
-            fs.unlinkSync(photoFile.path);
-        }
+        // Text Layer 3: Solid White Crisp Text Filling
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(hookText, xPos, yPos);
 
-        // Converting vector code directly into stream base64 data link strings
-        const compiledBase64Image = `data:image/svg+xml;base64,${Buffer.from(svgCanvasTemplate.trim()).toString('base64')}`;
+        // Canvas convert to Base64 URI string for seamless DOM insertion
+        const generatedImageBase64 = canvas.toDataURL('image/png');
 
-        // Return production response block to UI layout frontend interface
-        res.status(200).json({
+        // Response payload structure compatible with your index.html scripts
+        res.json({
             success: true,
-            appliedText: finalOverlayText,
-            sizeMode: size,
-            image: compiledBase64Image
+            appliedText: hookText,
+            image: generatedImageBase64
         });
 
-    } catch (err) {
-        console.error("Thumbnail Endpoint Error:", err);
-        res.status(500).json({ success: false, message: `Render Error: ${err.message}` });
+    } catch (error) {
+        console.error("Global Pipe Error:", error);
+        res.status(500).json({ success: false, message: "Internal Render Engine Crash" });
     }
 });
 //==================================================
