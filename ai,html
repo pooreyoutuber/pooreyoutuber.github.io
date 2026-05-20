@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI YouTube Thumbnail Maker</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between">
+
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <h1 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-amber-500">
+                <i class="fa-brands fa-youtube mr-2"></i>POOREYOUTUBER <span class="text-white font-light text-lg">AI Thumbnail</span>
+            </h1>
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-medium">Gemini Pro Enabled</span>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 md:p-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <section class="lg:col-span-5 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-6">
+            <div class="border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-bold text-slate-200">Design Settings</h2>
+                <p class="text-xs text-slate-400">Enter a prompt or upload an image to generate stunning layouts.</p>
+            </div>
+
+            <form id="thumbnailForm" class="space-y-5">
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-300">Video Topic / Concept Prompt</label>
+                    <textarea id="promptInput" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm focus:outline-none focus:border-red-500 transition placeholder:text-slate-600" placeholder="e.g., Free Fire Unlimited Diamonds Hack Trick or My First Vlog in Mumbai..."></textarea>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-300">Upload Base Image <span class="text-xs text-slate-500">(Optional)</span></label>
+                    <div class="relative group border-2 border-dashed border-slate-800 hover:border-slate-700 rounded-xl p-4 transition bg-slate-950/40 text-center cursor-pointer">
+                        <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                        <div id="uploadPreview" class="space-y-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-500 group-hover:text-slate-400 transition"></i>
+                            <p class="text-xs text-slate-400">Click or drag your branding picture/face shot here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-300">Select Output Layout Mode</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border border-slate-800 bg-slate-950 p-3 rounded-xl flex items-center gap-3 cursor-pointer select-none hover:border-slate-700 has-[:checked]:border-red-500 has-[:checked]:bg-red-500/5 transition">
+                            <input type="radio" name="layoutSize" value="landscape" checked class="accent-red-500">
+                            <div>
+                                <p class="text-sm font-medium">Horizontal</p>
+                                <p class="text-[10px] text-slate-500">16:9 Standard Video</p>
+                            </div>
+                        </label>
+                        <label class="border border-slate-800 bg-slate-950 p-3 rounded-xl flex items-center gap-3 cursor-pointer select-none hover:border-slate-700 has-[:checked]:border-red-500 has-[:checked]:bg-red-500/5 transition">
+                            <input type="radio" name="layoutSize" value="portrait" class="accent-red-500">
+                            <div>
+                                <p class="text-sm font-medium">Landscape / Vertical</p>
+                                <p class="text-[10px] text-slate-500">9:16 Shorts / Reels</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:brightness-110 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Creative Thumbnail
+                </button>
+            </form>
+        </section>
+
+        <section class="lg:col-span-7 space-y-6">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl min-h-[400px] flex flex-col justify-between">
+                <div class="border-b border-slate-800 pb-3 mb-4">
+                    <h2 class="text-lg font-bold text-slate-200">Live Render Board</h2>
+                    <p class="text-xs text-slate-400">Your AI processed responsive layers will load here directly.</p>
+                </div>
+
+                <div id="loader" class="hidden my-auto flex flex-col items-center justify-center space-y-3">
+                    <div class="w-10 h-10 border-4 border-slate-800 border-t-red-500 rounded-full animate-spin"></div>
+                    <p class="text-sm text-slate-400 animate-pulse">Gemini reading context & rendering engine drawing canvas pixels...</p>
+                </div>
+
+                <div id="emptyState" class="my-auto flex flex-col items-center justify-center text-center space-y-2 py-12">
+                    <div class="w-16 h-16 bg-slate-950 rounded-full flex items-center justify-center border border-slate-800 text-slate-600">
+                        <i class="fa-solid fa-photo-film text-xl"></i>
+                    </div>
+                    <p class="text-sm font-medium text-slate-400">No output generated yet</p>
+                    <p class="text-xs text-slate-600 max-w-xs">Fill the settings form on the left pane and process to view production ready variants.</p>
+                </div>
+
+                <div id="outputArea" class="hidden space-y-6">
+                    <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-500" id="badgeType">Horizontal (16:9)</span>
+                            <h3 id="generatedTitle" class="text-sm font-bold text-white mt-0.5">---</h3>
+                        </div>
+                        <a id="downloadBtn" download="thumbnail.png" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-download"></i> Save Image
+                        </a>
+                    </div>
+                    
+                    <div class="bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center p-2">
+                        <img id="resultImage" src="" alt="Thumbnail Result" class="max-w-full max-h-[450px] object-contain rounded shadow-lg">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center text-xs text-slate-600 py-6 border-t border-slate-900 mt-12">
+        &copy; 2026 PooreYouTuber Automation Hub. Powered by Google Gemini-Flash Vision API.
+    </footer>
+
+    <script>
+        // Image Upload UI feedback update
+        const imageInput = document.getElementById('imageInput');
+        const uploadPreview = document.getElementById('uploadPreview');
+        
+        imageInput.addEventListener('change', (e) => {
+            if(e.target.files.length > 0) {
+                const file = e.target.files[0];
+                uploadPreview.innerHTML = `
+                    <i class="fa-solid fa-circle-check text-2xl text-emerald-400"></i>
+                    <p class="text-xs text-emerald-400 font-medium">${file.name}</p>
+                    <p class="text-[10px] text-slate-500">Click to swap image</p>
+                `;
+            }
+        });
+
+        // Form Submission Logic
+        document.getElementById('thumbnailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const prompt = document.getElementById('promptInput').value.trim();
+            const file = imageInput.files[0];
+            const size = document.querySelector('input[name="layoutSize"]:checked').value;
+
+            // Edge Case validation: user has neither put prompt nor image
+            if (!prompt && !file) {
+                alert("Please write a topic prompt or upload an image first!");
+                return;
+            }
+
+            // UI states reset
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('outputArea').classList.add('hidden');
+            document.getElementById('loader').classList.remove('hidden');
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+
+            // Multiparts form payload parsing
+            const formData = new FormData();
+            formData.append('prompt', prompt);
+            formData.append('size', size);
+            if(file) {
+                formData.append('photo', file);
+            }
+
+            try {
+                // Connecting endpoint as specified: https://pooreyoutuber.onrender.com/thumbnail-maker
+                const response = await fetch('https://pooreyoutuber.onrender.com/thumbnail-maker', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if(data.success) {
+                    document.getElementById('generatedTitle').innerText = `Text Applied: "${data.appliedText}"`;
+                    document.getElementById('badgeType').innerText = `${size} Mode Layered`;
+                    
+                    const imgElement = document.getElementById('resultImage');
+                    imgElement.src = data.image;
+                    document.getElementById('downloadBtn').href = data.image;
+
+                    // Show content layout board
+                    document.getElementById('outputArea').classList.remove('hidden');
+                } else {
+                    alert("Error: " + data.message);
+                    document.getElementById('emptyState').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Failed to establish server pipe context.");
+                document.getElementById('emptyState').classList.remove('hidden');
+            } finally {
+                document.getElementById('loader').classList.add('hidden');
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+</html>
