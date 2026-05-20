@@ -754,184 +754,162 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL MAKER ENDPOINT
 // ===================================================================
-const { createCanvas, loadImage } = require('canvas');
+// ===================================================================
+// NEW TOOL: AI YOUTUBE THUMBNAIL MAKER (NO CANVAS ENGINE REQUIRED)
+// ===================================================================
 
 app.post('/thumbnail-maker', upload.single('photo'), async (req, res) => {
     try {
-        if (!GEMINI_KEY) {
-            return res.status(500).json({ success: false, message: 'Server configuration error: Gemini API Key is missing.' });
+        if (!GEMINI_KEY || !ai) {
+            return res.status(500).json({ success: false, message: 'Server Configuration Error: Gemini AI not initialized.' });
         }
 
         const { prompt, size = 'landscape' } = req.body;
         const photoFile = req.file;
 
-        // Agar user ne prompt aur photo dono nahi bheji
-        if (!prompt && !photoFile) {
-            return res.status(400).json({ success: false, message: 'Please provide either a topic prompt or upload an image.' });
+        let finalPromptText = prompt ? prompt.trim() : "";
+        let uploadedImageBase64 = "";
+
+        // Checking user input logic
+        if (!finalPromptText && !photoFile) {
+            return res.status(400).json({ success: false, message: 'Please write a prompt or upload a photo first!' });
         }
 
-        let modelType = "gemini-2.5-flash"; // Latest fast model for text/vision
-        let geminiPrompt = "";
-        let inlineData = null;
-
-        // CONDITION: Agar user ne sirf photo upload ki hai ya donon cheezein bheji hain
+        // Agar user ne photo upload ki hai, to use base64 buffer me convert karenge
         if (photoFile) {
-            const imageBuffer = fs.readFileSync(photoFile.path);
-            inlineData = {
-                data: imageBuffer.toString("base64"),
-                mimeType: photoFile.mimetype
-            };
+            const fileBuffer = fs.readFileSync(photoFile.path);
+            uploadedImageBase64 = fileBuffer.toString('base64');
+            
+            // Condition: Agar prompt khali h lekin photo hai
+            if (!finalPromptText) {
+                finalPromptText = "Analyze this uploaded image context. User has not written any prompt. Detect what game or topic this image belongs to and generate an incredibly trending YouTube thumbnail hook text.";
+            }
+        }
 
-         if (prompt) {
-    // 1. Jab IMAGE + TEXT dono ho (e.g., Image of a nano and prompt: "make it a supercar")
-    geminiPrompt = `You are a viral YouTube Thumbnail Designer. Analyze the image and this request: "${prompt}". Create an aggressive, high-CTR thumbnail concept. Deliver a hyper-clickable, emotional hook text (max 3-4 words) that creates intense curiosity or shock (DO NOT just describe the image, make it a story/mystery). Also, provide a high-contrast vibrant hex color for text shadow/accent. Respond strictly in JSON: {"title": "SHOCKING TEXT HERE", "bgColor": "#FF003C"}`;
-} else {
-    // 2. Jab SIRF IMAGE ho (Gemini khud context samjhega)
-    geminiPrompt = `You are a viral YouTube Thumbnail Designer. The user only uploaded this photo. Analyze the objects, facial expressions, or context. Create an extreme clickbait hook text (max 3-4 words) that makes viewers instantly click (use psychological triggers like fear, greed, or awe). Suggest a dominant neon/high-contrast background accent hex color. Respond strictly in JSON: {"title": "VIRAL HOOK HERE", "bgColor": "#00FF66"}`;
-}
-} else {
-    // 3. Jab SIRF TEXT PROMPT ho (e.g., "Nano to Supercar transformation")
-    geminiPrompt = `You are a master YouTube Thumbnail Strategist. Create a high-CTR thumbnail text for this concept: "${prompt}". Generate a powerful 3-4 word curiosity gap hook (e.g., instead of 'Nano to Supercar', use 'I REBUILT IT!'). Provide a premium, eye-catching background accent hex color. Respond strictly in JSON: {"title": "CATCHY HOOK", "bgColor": "#FFEA00"}`;
-}
+        // 1. SYSTEM STRUCTURED INSTRUCTIONS FOR GEMINI
+        const systemPrompt = `You are an expert YouTube Graphic Designer and Clickbait strategist. 
+        Analyze the input query/image: "${finalPromptText}".
+        Your task is to output highly catchy, action-oriented, professional text overlay for the thumbnail (Maximum 2 to 4 words, use all caps, e.g. "25 KILLS!", "UNBEATABLE!", "GOD MODE", "HACK UNLOCKED").
+        Also suggest two perfect neon theme colors for a heavy gaming background gradient.
+        
+        You must respond STRICTLY in this JSON format only:
+        {
+          "textOverlay": "25 KILLS!",
+          "textColor": "#FFFFFF",
+          "strokeColor": "#000000",
+          "glowColor": "#FF0055",
+          "bgColor1": "#e11d48",
+          "bgColor2": "#0f172a"
+        }`;
 
-        // Gemini AI Response Call
-        let responseText;
-        if (inlineData) {
-            // Multimodal request (Image + Text)
-            const result = await ai.models.generateContent({
-                model: modelType,
+        let aiResponseText = "";
+
+        // 2. GEMINI MULTIMODAL CALL
+        if (photoFile) {
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
                 contents: [
-                    { role: 'user', parts: [{ text: geminiPrompt }, { inlineData: inlineData }] }
+                    { text: systemPrompt },
+                    {
+                        inlineData: {
+                            data: uploadedImageBase64,
+                            mimeType: photoFile.mimetype
+                        }
+                    }
                 ],
                 config: { responseMimeType: "application/json" }
             });
-            responseText = result.text;
+            aiResponseText = response.text;
         } else {
-            // Only Text request
-            const result = await ai.models.generateContent({
-                model: modelType,
-                contents: geminiPrompt,
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: systemPrompt,
                 config: { responseMimeType: "application/json" }
             });
-            responseText = result.text;
+            aiResponseText = response.text;
         }
 
-        // JSON response parsing
-        const aiConfig = JSON.parse(responseText.trim());
-        const thumbnailText = aiConfig.title || "Trending Video!";
-        const dynamicBgColor = aiConfig.bgColor || "#1e1b4b"; // Fallback dark color
+        // Parse Gemini JSON output safely
+        const designConfig = JSON.parse(aiResponseText.trim());
+        const finalOverlayText = designConfig.textOverlay || "BOOYAH!";
+        const glowColor = designConfig.glowColor || "#ff0055";
+        const bgColor1 = designConfig.bgColor1 || "#1e1b4b";
+        const bgColor2 = designConfig.bgColor2 || "#020617";
 
-        // Size Dimensions Logic
-        // Landscape (Standard Video) = 1280x720 | Portrait (Shorts/Reels) = 720x1280
+        // 3. DIMENSIONS LOGIC (Horizontal 16:9 vs Portrait 9:16)
         const width = (size === 'landscape') ? 1280 : 720;
         const height = (size === 'landscape') ? 720 : 1280;
+        const fontSize = (size === 'landscape') ? '90px' : '60px';
 
-        // Canvas creation for high quality rendering
-        const canvas = createCanvas(width, height);
-        const ctx = canvas.getContext('2d');
-
-        // Step 1: Base Background draw karna
-        ctx.fillStyle = dynamicBgColor;
-        ctx.fillRect(0, 0, width, height);
-
-        // Gradient overlay for professional look
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-
-        // Step 2: Agar user ne photo upload ki thi, use background layer banana
+        // Photo overlay image block injector
+        let svgImageLayer = "";
         if (photoFile) {
-            try {
-                const uploadedImg = await loadImage(photoFile.path);
+            svgImageLayer = `<image href="data:${photoFile.mimetype};base64,${uploadedImageBase64}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" opacity="0.8" />`;
+        }
+
+        // 4. HIGH CONTRAST VECTOR DRAWING ENGINE (SVG Matrix)
+        const svgCanvasTemplate = `
+        <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="cyberBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="${bgColor1}" />
+                    <stop offset="100%" stop-color="${bgColor2}" />
+                </linearGradient>
                 
-                // Aspect ratio maintain karte hue cover matrix scale karna
-                const imgRatio = uploadedImg.width / uploadedImg.height;
-                const canvasRatio = width / height;
-                let drawWidth, drawHeight, drawX, drawY;
+                <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+                    <stop offset="20%" stop-color="#000000" stop-opacity="0" />
+                    <stop offset="100%" stop-color="#000000" stop-opacity="0.85" />
+                </radialGradient>
 
-                if (imgRatio > canvasRatio) {
-                    drawHeight = height;
-                    drawWidth = height * imgRatio;
-                    drawX = (width - drawWidth) / 2;
-                    drawY = 0;
-                } else {
-                    drawWidth = width;
-                    drawHeight = width / imgRatio;
-                    drawX = 0;
-                    drawY = (height - drawHeight) / 2;
-                }
+                <filter id="gamingGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="4" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.95"/>
+                    <feDropShadow dx="-2" dy="-2" stdDeviation="4" flood-color="${glowColor}" flood-opacity="0.6"/>
+                </filter>
+            </defs>
 
-                // Opacity set karke overlay apply karna taaki text saaf dikhe
-                ctx.globalAlpha = 0.85; 
-                ctx.drawImage(uploadedImg, drawX, drawY, drawWidth, drawHeight);
-                ctx.globalAlpha = 1.0; // Reset opacity
-            } catch (imgErr) {
-                console.error("Error loading image onto canvas:", imgErr);
-            }
-        }
-
-        // Step 3: Text Graphics Rendering (Stylish Shadow and Font borders)
-        ctx.textBaseline = 'middle';
-        ctx.textAlign = 'center';
-        
-        // Font size dynamic range based on orientation layout
-        const fontSize = (size === 'landscape') ? 75 : 55;
-        ctx.font = `bold ${fontSize}px sans-serif`;
-
-        const textX = width / 2;
-        const textY = height / 2;
-
-        // Text ke piche heavy dark text-shadow effect drop karna
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-        ctx.shadowBlur = 15;
-        ctx.shadowOffsetX = 5;
-        ctx.shadowOffsetY = 5;
-
-        // Title text wrap support if it's long
-        const words = thumbnailText.toUpperCase().split(' ');
-        let line = '';
-        let currentY = textY;
-        const lineSpacing = fontSize + 15;
-
-        // Agar vertical mode hai toh layout spacing badhayenge
-        ctx.fillStyle = '#FFFFFF'; // Main text color white
-
-        // Drawing loops for words layer formatting
-        for (let n = 0; n < words.length; n++) {
-            let testLine = line + words[n] + ' ';
-            let metrics = ctx.measureText(testLine);
+            <rect width="100%" height="100%" fill="url(#cyberBg)" />
             
-            if (metrics.width > (width - 100) && n > 0) {
-                ctx.fillText(line.trim(), textX, currentY);
-                line = words[n] + ' ';
-                currentY += lineSpacing;
-            } else {
-                line = testLine;
-            }
-        }
-        ctx.fillText(line.trim(), textX, currentY);
+            ${svgImageLayer}
 
-        // Base64 buffer extraction out stream
-        const finalBuffer = canvas.toBuffer('image/png');
+            <rect width="100%" height="100%" fill="url(#vignette)" />
+            
+            <rect x="20" y="20" width="${width - 40}" height="${height - 40}" fill="none" stroke="${glowColor}" stroke-width="5" stroke-opacity="0.4" rx="12" />
 
-        // Temporary uploaded file delete kar dena pipeline cleanup ke liye
+            <text x="50%" y="52%" 
+                  font-family="'Impact', 'Arial Black', sans-serif" 
+                  font-size="${fontSize}" 
+                  font-weight="900" 
+                  fill="#FFFFFF" 
+                  stroke="#000000" 
+                  stroke-width="5" 
+                  letter-spacing="3px"
+                  filter="url(#gamingGlow)" 
+                  text-anchor="middle" 
+                  dominant-baseline="middle">
+                ${finalOverlayText.toUpperCase()}
+            </text>
+        </svg>
+        `;
+
+        // Safe cleanup: Temporarily storage me save photo remove kar do
         if (photoFile) {
             fs.unlinkSync(photoFile.path);
         }
 
-        // Send final base64 back to premium frontend interface
+        // Converting vector code directly into stream base64 data link strings
+        const compiledBase64Image = `data:image/svg+xml;base64,${Buffer.from(svgCanvasTemplate.trim()).toString('base64')}`;
+
+        // Return production response block to UI layout frontend interface
         res.status(200).json({
             success: true,
-            appliedText: thumbnailText,
+            appliedText: finalOverlayText,
             sizeMode: size,
-            image: `data:image/png;base64,${finalBuffer.toString('base64')}`
+            image: compiledBase64Image
         });
 
-    } catch (error) {
-        console.error('Thumbnail Maker Processing Error:', error);
-        res.status(500).json({ success: false, message: `Render Generation Error: ${error.message}` });
+    } catch (err) {
+        console.error("Thumbnail Endpoint Error:", err);
+        res.status(500).json({ success: false, message: `Render Error: ${err.message}` });
     }
 });
 //==================================================
