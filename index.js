@@ -782,16 +782,17 @@ app.post('/thumbnail-maker', upload.single('photo'), async (req, res) => {
                 mimeType: photoFile.mimetype
             };
 
-            if (prompt) {
-                geminiPrompt = `Analyze this uploaded image and the user request: "${prompt}". Create a clickbaity, powerful YouTube thumbnail setup. Provide a catchy bold title text (max 4-5 words) to overlay on it, and suggest a solid or gradient hex color code for background accent if needed. Respond strictly in JSON: {"title": "EXPLOSIVE TITLE HERE", "bgColor": "#FF0000"}`;
-            } else {
-                // Jab sirf photo ho, toh Gemini khud topic sochega
-                geminiPrompt = `The user has only provided this photo for creating a YouTube thumbnail. Understand the context/objects in the photo and generate an extremely viral YouTube video title/hook text (max 3-5 words) that should be printed on the thumbnail. Also suggest a high-contrast background accent color. Respond strictly in JSON: {"title": "VIRAL HOOK HERE", "bgColor": "#00E5FF"}`;
-            }
-        } else {
-            // Sirf text prompt hone par
-            geminiPrompt = `Create a viral YouTube thumbnail design outline for the topic: "${prompt}". Suggest a high-CTR, short catchy title text (max 4 words) to overlay and a dominant attractive background color hex code. Respond strictly in JSON: {"title": "CATCHY TEXT", "bgColor": "#FF0055"}`;
-        }
+         if (prompt) {
+    // 1. Jab IMAGE + TEXT dono ho (e.g., Image of a nano and prompt: "make it a supercar")
+    geminiPrompt = `You are a viral YouTube Thumbnail Designer. Analyze the image and this request: "${prompt}". Create an aggressive, high-CTR thumbnail concept. Deliver a hyper-clickable, emotional hook text (max 3-4 words) that creates intense curiosity or shock (DO NOT just describe the image, make it a story/mystery). Also, provide a high-contrast vibrant hex color for text shadow/accent. Respond strictly in JSON: {"title": "SHOCKING TEXT HERE", "bgColor": "#FF003C"}`;
+} else {
+    // 2. Jab SIRF IMAGE ho (Gemini khud context samjhega)
+    geminiPrompt = `You are a viral YouTube Thumbnail Designer. The user only uploaded this photo. Analyze the objects, facial expressions, or context. Create an extreme clickbait hook text (max 3-4 words) that makes viewers instantly click (use psychological triggers like fear, greed, or awe). Suggest a dominant neon/high-contrast background accent hex color. Respond strictly in JSON: {"title": "VIRAL HOOK HERE", "bgColor": "#00FF66"}`;
+}
+} else {
+    // 3. Jab SIRF TEXT PROMPT ho (e.g., "Nano to Supercar transformation")
+    geminiPrompt = `You are a master YouTube Thumbnail Strategist. Create a high-CTR thumbnail text for this concept: "${prompt}". Generate a powerful 3-4 word curiosity gap hook (e.g., instead of 'Nano to Supercar', use 'I REBUILT IT!'). Provide a premium, eye-catching background accent hex color. Respond strictly in JSON: {"title": "CATCHY HOOK", "bgColor": "#FFEA00"}`;
+}
 
         // Gemini AI Response Call
         let responseText;
