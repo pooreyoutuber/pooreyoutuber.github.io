@@ -760,8 +760,6 @@ app.post('/popup', async (req, res) => {
 // Gemini SDK Setup (2026 Recommended Syntax)
 import { createCanvas, loadImage } from 'canvas';
 import dotenv from 'dotenv';
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 // Multer setup memory me file stock rakhne ke liye
 const upload = multer({ storage: multer.memoryStorage() });
 
