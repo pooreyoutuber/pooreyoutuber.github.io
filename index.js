@@ -751,7 +751,188 @@ app.post('/popup', async (req, res) => {
     }
 });
 // ===================================================================
+// ===================================================================
+// NEW TOOL: AI YOUTUBE THUMBNAIL MAKER ENDPOINT
+// ===================================================================
+const { createCanvas, loadImage } = require('canvas');
 
+app.post('/thumbnail-maker', upload.single('photo'), async (req, res) => {
+    try {
+        if (!GEMINI_KEY) {
+            return res.status(500).json({ success: false, message: 'Server configuration error: Gemini API Key is missing.' });
+        }
+
+        const { prompt, size = 'landscape' } = req.body;
+        const photoFile = req.file;
+
+        // Agar user ne prompt aur photo dono nahi bheji
+        if (!prompt && !photoFile) {
+            return res.status(400).json({ success: false, message: 'Please provide either a topic prompt or upload an image.' });
+        }
+
+        let modelType = "gemini-2.5-flash"; // Latest fast model for text/vision
+        let geminiPrompt = "";
+        let inlineData = null;
+
+        // CONDITION: Agar user ne sirf photo upload ki hai ya donon cheezein bheji hain
+        if (photoFile) {
+            const imageBuffer = fs.readFileSync(photoFile.path);
+            inlineData = {
+                data: imageBuffer.toString("base64"),
+                mimeType: photoFile.mimetype
+            };
+
+            if (prompt) {
+                geminiPrompt = `Analyze this uploaded image and the user request: "${prompt}". Create a clickbaity, powerful YouTube thumbnail setup. Provide a catchy bold title text (max 4-5 words) to overlay on it, and suggest a solid or gradient hex color code for background accent if needed. Respond strictly in JSON: {"title": "EXPLOSIVE TITLE HERE", "bgColor": "#FF0000"}`;
+            } else {
+                // Jab sirf photo ho, toh Gemini khud topic sochega
+                geminiPrompt = `The user has only provided this photo for creating a YouTube thumbnail. Understand the context/objects in the photo and generate an extremely viral YouTube video title/hook text (max 3-5 words) that should be printed on the thumbnail. Also suggest a high-contrast background accent color. Respond strictly in JSON: {"title": "VIRAL HOOK HERE", "bgColor": "#00E5FF"}`;
+            }
+        } else {
+            // Sirf text prompt hone par
+            geminiPrompt = `Create a viral YouTube thumbnail design outline for the topic: "${prompt}". Suggest a high-CTR, short catchy title text (max 4 words) to overlay and a dominant attractive background color hex code. Respond strictly in JSON: {"title": "CATCHY TEXT", "bgColor": "#FF0055"}`;
+        }
+
+        // Gemini AI Response Call
+        let responseText;
+        if (inlineData) {
+            // Multimodal request (Image + Text)
+            const result = await ai.models.generateContent({
+                model: modelType,
+                contents: [
+                    { role: 'user', parts: [{ text: geminiPrompt }, { inlineData: inlineData }] }
+                ],
+                config: { responseMimeType: "application/json" }
+            });
+            responseText = result.text;
+        } else {
+            // Only Text request
+            const result = await ai.models.generateContent({
+                model: modelType,
+                contents: geminiPrompt,
+                config: { responseMimeType: "application/json" }
+            });
+            responseText = result.text;
+        }
+
+        // JSON response parsing
+        const aiConfig = JSON.parse(responseText.trim());
+        const thumbnailText = aiConfig.title || "Trending Video!";
+        const dynamicBgColor = aiConfig.bgColor || "#1e1b4b"; // Fallback dark color
+
+        // Size Dimensions Logic
+        // Landscape (Standard Video) = 1280x720 | Portrait (Shorts/Reels) = 720x1280
+        const width = (size === 'landscape') ? 1280 : 720;
+        const height = (size === 'landscape') ? 720 : 1280;
+
+        // Canvas creation for high quality rendering
+        const canvas = createCanvas(width, height);
+        const ctx = canvas.getContext('2d');
+
+        // Step 1: Base Background draw karna
+        ctx.fillStyle = dynamicBgColor;
+        ctx.fillRect(0, 0, width, height);
+
+        // Gradient overlay for professional look
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // Step 2: Agar user ne photo upload ki thi, use background layer banana
+        if (photoFile) {
+            try {
+                const uploadedImg = await loadImage(photoFile.path);
+                
+                // Aspect ratio maintain karte hue cover matrix scale karna
+                const imgRatio = uploadedImg.width / uploadedImg.height;
+                const canvasRatio = width / height;
+                let drawWidth, drawHeight, drawX, drawY;
+
+                if (imgRatio > canvasRatio) {
+                    drawHeight = height;
+                    drawWidth = height * imgRatio;
+                    drawX = (width - drawWidth) / 2;
+                    drawY = 0;
+                } else {
+                    drawWidth = width;
+                    drawHeight = width / imgRatio;
+                    drawX = 0;
+                    drawY = (height - drawHeight) / 2;
+                }
+
+                // Opacity set karke overlay apply karna taaki text saaf dikhe
+                ctx.globalAlpha = 0.85; 
+                ctx.drawImage(uploadedImg, drawX, drawY, drawWidth, drawHeight);
+                ctx.globalAlpha = 1.0; // Reset opacity
+            } catch (imgErr) {
+                console.error("Error loading image onto canvas:", imgErr);
+            }
+        }
+
+        // Step 3: Text Graphics Rendering (Stylish Shadow and Font borders)
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+        
+        // Font size dynamic range based on orientation layout
+        const fontSize = (size === 'landscape') ? 75 : 55;
+        ctx.font = `bold ${fontSize}px sans-serif`;
+
+        const textX = width / 2;
+        const textY = height / 2;
+
+        // Text ke piche heavy dark text-shadow effect drop karna
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = 5;
+        ctx.shadowOffsetY = 5;
+
+        // Title text wrap support if it's long
+        const words = thumbnailText.toUpperCase().split(' ');
+        let line = '';
+        let currentY = textY;
+        const lineSpacing = fontSize + 15;
+
+        // Agar vertical mode hai toh layout spacing badhayenge
+        ctx.fillStyle = '#FFFFFF'; // Main text color white
+
+        // Drawing loops for words layer formatting
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ' ';
+            let metrics = ctx.measureText(testLine);
+            
+            if (metrics.width > (width - 100) && n > 0) {
+                ctx.fillText(line.trim(), textX, currentY);
+                line = words[n] + ' ';
+                currentY += lineSpacing;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line.trim(), textX, currentY);
+
+        // Base64 buffer extraction out stream
+        const finalBuffer = canvas.toBuffer('image/png');
+
+        // Temporary uploaded file delete kar dena pipeline cleanup ke liye
+        if (photoFile) {
+            fs.unlinkSync(photoFile.path);
+        }
+
+        // Send final base64 back to premium frontend interface
+        res.status(200).json({
+            success: true,
+            appliedText: thumbnailText,
+            sizeMode: size,
+            image: `data:image/png;base64,${finalBuffer.toString('base64')}`
+        });
+
+    } catch (error) {
+        console.error('Thumbnail Maker Processing Error:', error);
+        res.status(500).json({ success: false, message: `Render Generation Error: ${error.message}` });
+    }
+});
 //==================================================
 // --- SERVER START ---
 // ===================================================================
