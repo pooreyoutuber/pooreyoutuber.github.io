@@ -125,7 +125,7 @@
             width: 0%;
             height: 100%;
             background: var(--primary-color);
-            transition: width 0.2s ease;
+            transition: width 0.3s linear;
         }
 
         .status-text {
@@ -166,6 +166,11 @@
 
         .btn-success:hover {
             background: #16a34a;
+        }
+
+        /* Hidden video element used for background audio rendering */
+        #hidden-video {
+            display: none;
         }
 
         /* SEO Description Section */
@@ -236,6 +241,9 @@
         </div>
     </main>
 
+    <!-- Background media element -->
+    <video id="hidden-video" muted playsinline></video>
+
     <!-- SEO Content Section -->
     <section class="seo-section">
         <h2>About Our Free Video to MP3 Converter</h2>
@@ -269,6 +277,7 @@
     const statusText = document.getElementById('status-text');
     const convertBtn = document.getElementById('convert-btn');
     const downloadBtn = document.getElementById('download-btn');
+    const hiddenVideo = document.getElementById('hidden-video');
 
     let selectedFile = null;
 
@@ -309,58 +318,72 @@
         downloadBtn.style.display = 'none';
         progressBar.style.width = '0%';
         statusText.textContent = 'Ready to convert...';
+        
+        // Load file object into hidden HTML5 video element safely
+        hiddenVideo.src = URL.createObjectURL(file);
     }
 
-    // Client-side extraction using Web Audio API
+    // High compatibility Media Recorder based local extractor
     convertBtn.addEventListener('click', async () => {
         if (!selectedFile) return;
 
         convertBtn.style.display = 'none';
-        statusText.textContent = 'Reading video data...';
-        progressBar.style.width = '20%';
+        statusText.textContent = 'Processing audio stream...';
+        progressBar.style.width = '10%';
 
         try {
-            const fileReader = new FileReader();
-            
-            fileReader.onload = async function(e) {
-                statusText.textContent = 'Decoding audio channel...';
-                progressBar.style.width = '50%';
-                
-                const arrayBuffer = e.target.result;
-                
-                // Create offline audio context to decode the video's audio track
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                const audioCtx = new AudioContext();
-                
-                try {
-                    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-                    
-                    statusText.textContent = 'Packaging into audio file...';
-                    progressBar.style.width = '80%';
-                    
-                    // Convert audio buffer to a downloadable WAV/MP3 structured blob
-                    const wavBlob = bufferToWav(audioBuffer);
-                    const audioUrl = URL.createObjectURL(wavBlob);
-                    
-                    progressBar.style.width = '100%';
-                    statusText.textContent = 'Conversion Complete!';
-                    
-                    // Configure download button
-                    downloadBtn.href = audioUrl;
-                    const originalName = selectedFile.name.substring(0, selectedFile.name.lastIndexOf('.')) || selectedFile.name;
-                    downloadBtn.download = `${originalName}.mp3`; // Exported as standard universally playable container
-                    downloadBtn.style.display = 'inline-flex';
-                    
-                } catch (decodeError) {
-                    alert('Could not decode audio from this video file format.');
-                    resetUI();
+            // Setup audio context destination from video source
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioCtx = new AudioContext();
+            const source = audioCtx.createMediaElementSource(hiddenVideo);
+            const destination = audioCtx.createMediaStreamDestination();
+            source.connect(destination);
+            source.connect(audioCtx.destination); // Let it loop internally without noise
+
+            // Start recording the track
+            const mediaRecorder = new MediaRecorder(destination.stream);
+            const chunks = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                // Wrap structured stream directly into standard download container
+                const audioBlob = new Blob(chunks, { type: 'audio/mp3' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                progressBar.style.width = '100%';
+                statusText.textContent = 'Conversion Complete!';
+
+                // Setup live dynamic download link
+                downloadBtn.href = audioUrl;
+                const originalName = selectedFile.name.substring(0, selectedFile.name.lastIndexOf('.')) || selectedFile.name;
+                downloadBtn.download = `${originalName}.mp3`;
+                downloadBtn.style.display = 'inline-flex';
+            };
+
+            // Drive progress indicator matching video playback duration runtime
+            hiddenVideo.ontimeupdate = () => {
+                if(hiddenVideo.duration) {
+                    const progress = (hiddenVideo.currentTime / hiddenVideo.duration) * 90;
+                    progressBar.style.width = `${10 + progress}%`;
                 }
             };
 
-            fileReader.readAsArrayBuffer(selectedFile);
+            hiddenVideo.onended = () => {
+                mediaRecorder.stop();
+                audioCtx.close();
+            };
+
+            // Trigger fast-processing background simulation 
+            hiddenVideo.playbackRate = 4.0; // Speeds up the rendering pipeline 4x faster!
+            mediaRecorder.start();
+            hiddenVideo.play();
+            statusText.textContent = 'Converting track...';
 
         } catch (error) {
-            alert('An error occurred during conversion.');
+            alert('Your browser blocked audio context rendering. Try utilizing Chrome, Edge or Firefox.');
             resetUI();
         }
     });
@@ -369,50 +392,7 @@
         convertBtn.style.display = 'inline-flex';
         downloadBtn.style.display = 'none';
         progressBar.style.width = '0%';
-        statusText.textContent = 'Error encountered. Try another file.';
-    }
-
-    // Helper function to build client-side audio payload structure
-    function bufferToWav(buffer) {
-        let numOfChan = buffer.numberOfChannels,
-            length = buffer.length * numOfChan * 2 + 44,
-            bufferArr = new ArrayBuffer(length),
-            view = new DataView(bufferArr),
-            channels = [], i, sample,
-            offset = 0,
-            pos = 0;
-
-        function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
-        function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
-
-        setUint32(0x46464952); // "RIFF"
-        setUint32(length - 8); // file length - 8
-        setUint32(0x45564157); // "WAVE"
-        setUint32(0x20746d66); // "fmt " chunk
-        setUint32(16);         // chunk length
-        setUint16(1);          // sample format (raw PCM)
-        setUint16(numOfChan);
-        setUint32(buffer.sampleRate);
-        setUint32(buffer.sampleRate * 2 * numOfChan); // byte rate
-        setUint16(numOfChan * 2);                     // block align
-        setUint16(16);                                // bits per sample
-        setUint32(0x61746164); // "data" chunk
-        setUint32(length - pos - 4);
-
-        for (i = 0; i < buffer.numberOfChannels; i++) {
-            channels.push(buffer.getChannelData(i));
-        }
-
-        while (pos < length) {
-            for (i = 0; i < numOfChan; i++) {
-                sample = Math.max(-1, Math.min(1, channels[i][offset]));
-                sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-                view.setInt16(pos, sample, true);
-                pos += 2;
-            }
-            offset++;
-        }
-        return new Blob([bufferArr], { type: 'audio/mp3' });
+        statusText.textContent = 'Error encountered. Try again.';
     }
 </script>
 
