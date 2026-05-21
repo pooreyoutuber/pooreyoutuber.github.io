@@ -6,83 +6,163 @@
   <title>Contact Us - PooreYouTuber</title>
   <style>
     :root {
-      --primary-color: #007bff;
-      --primary-hover: #0056b3;
-      --insta-color: #e1306c;
-      --insta-hover: #b81d52;
-      --bg-color: #f4f6f9;
-      --card-bg: #ffffff;
-      --text-color: #333333;
-      --text-muted: #666666;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --insta: #e1306c;
+      --insta-hover: #c13584;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
     }
 
     body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      max-width: 650px; 
-      margin: 40px auto; 
-      padding: 20px; 
-      line-height: 1.6; 
-      background: var(--bg-color);
-      color: var(--text-color);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+      max-width: 680px; 
+      margin: 60px auto; 
+      padding: 0 20px; 
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
     }
 
-    .contact-card {
-      background: var(--card-bg);
+    .contact-container {
+      background: var(--card);
       padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
     }
 
     h1 { 
-      color: #111; 
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
       margin-top: 0;
-      font-size: 2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #4f46e5, #e1306c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 30px;
+    }
+
+    /* Quick Connect Grid */
+    .quick-connect {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-bottom: 35px;
+    }
+
+    .insta-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #fdf2f8 0%, #fef2f2 100%);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #fbcfe8;
+    }
+
+    .insta-info h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #9d174d;
       font-weight: 700;
     }
 
-    p {
-      color: var(--text-muted);
-      font-size: 1rem;
-      margin-bottom: 25px;
+    .insta-info p {
+      margin: 4px 0 0 0;
+      font-size: 0.9rem;
+      color: #be185d;
     }
 
+    .insta-id {
+      font-weight: bold;
+      background: #fce7f3;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .btn-insta {
+      background: var(--insta);
+      color: #fff !important;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-insta:hover {
+      background: var(--insta-hover);
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title::after {
+      content: "";
+      flex: 1;
+      margin-left: 10px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Form Styles */
     label { 
       display: block; 
       margin-top: 20px; 
       font-weight: 600;
       font-size: 0.9rem;
+      color: var(--text-muted);
     }
 
     input, textarea { 
       width: 100%; 
-      padding: 12px 15px; 
+      padding: 12px 16px; 
       margin-top: 6px; 
-      border: 1px solid #dde1e5; 
-      border-radius: 8px; 
+      border: 1px solid var(--border); 
+      border-radius: 10px; 
       box-sizing: border-box; 
       font-family: inherit;
       font-size: 0.95rem;
-      transition: all 0.3s ease;
-      background: #fcfcfd;
+      transition: all 0.2s ease;
+      background: #f8fafc;
     }
 
     input:focus, textarea:focus {
-      border-color: var(--primary-color);
+      border-color: var(--primary);
       outline: none;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
       background: #fff;
     }
 
     .btn-submit { 
       width: 100%;
       margin-top: 25px; 
-      padding: 12px; 
-      background: var(--primary-color); 
+      padding: 14px; 
+      background: var(--primary); 
       border: none; 
       color: white; 
       font-weight: 600;
       font-size: 1rem;
-      border-radius: 8px; 
+      border-radius: 10px; 
       cursor: pointer; 
       transition: background 0.2s ease;
     }
@@ -91,69 +171,12 @@
       background: var(--primary-hover); 
     }
 
-    .divider {
-      margin: 30px 0;
-      text-align: center;
-      position: relative;
-    }
-
-    .divider::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 1px;
-      background: #e0e0e0;
-      z-index: 1;
-    }
-
-    .divider span {
-      background: var(--card-bg);
-      padding: 0 15px;
-      color: #999;
-      font-size: 0.85rem;
-      position: relative;
-      z-index: 2;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .insta-section {
-      text-align: center;
-      background: #fff5f7;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px dashed #ffccd7;
-    }
-
-    .insta-section p {
-      margin-bottom: 12px;
-      font-size: 0.95rem;
-    }
-
-    .btn-insta {
-      display: inline-block;
-      padding: 10px 20px;
-      background: var(--insta-color);
-      color: white !important;
-      font-weight: 600;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background 0.2s ease;
-    }
-
-    .btn-insta:hover {
-      background: var(--insta-hover);
-      text-decoration: none;
-    }
-
     .back-home { 
       display: inline-block;
-      margin-top: 25px;
-      color: var(--primary-color); 
+      margin-top: 30px;
+      color: var(--primary); 
       text-decoration: none; 
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.95rem;
     }
     
@@ -164,33 +187,34 @@
 </head>
 <body>
 
-  <div class="contact-card">
+  <div class="contact-container">
     <h1>Contact Us</h1>
-    <p>If you have any questions, suggestions, or feedback, please reach out using the form below. If you are asking a question, kindly try to provide all details clearly so we can assist you better.</p>
+    <p class="subtitle">Have any questions, suggestions, or feedback? Reach out to us below. If you are asking a question, please try to write with full details and complete clarity so we can help you perfectly.</p>
 
-    <!-- Form action kept functional, but text email is hidden from UI -->
+    <!-- Instagram Block (Highly Visible) -->
+    <div class="insta-box">
+      <div class="insta-info">
+        <h3>Connect on Instagram</h3>
+        <p>Are you an Instagram user? DM us directly at <span class="insta-id">pooreyoutuber.github.io</span></p>
+      </div>
+      <a href="https://instagram.com/pooreyoutuber.github.io" target="_blank" class="btn-insta">Send DM</a>
+    </div>
+
+    <div class="section-title">Or Use The Contact Form</div>
+
+    <!-- Hidden email destination form -->
     <form action="mailto:mrleonardo798@gmail.com" method="post" enctype="text/plain">
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+      <label for="name">Your Name</label>
+      <input type="text" id="name" name="name" placeholder="John Doe" required>
 
       <label for="email">Email Address</label>
-      <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required>
 
-      <label for="message">Message</label>
-      <textarea id="message" name="message" rows="5" placeholder="Write your question or feedback with full details..." required></textarea>
+      <label for="message">Message Details</label>
+      <textarea id="message" name="message" rows="5" placeholder="Please describe your question or issue with all clear details..." required></textarea>
 
       <button type="submit" class="btn-submit">Send Message</button>
     </form>
-
-    <div class="divider">
-      <span>OR</span>
-    </div>
-
-    <!-- Instagram Direct Message Option -->
-    <div class="insta-section">
-      <p>Are you an Instagram user? Feel free to drop us a direct message for a quicker response!</p>
-      <a href="https://instagram.com/pooreyoutuber" target="_blank" class="btn-insta">DM us on Instagram</a>
-    </div>
 
     <a href="index.html" class="back-home">← Back to Home</a>
   </div>
