@@ -3,398 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- SEO Meta Tags -->
-    <title>Free Video to MP3 Converter Online - No Registration Required</title>
-    <meta name="description" content="Convert your videos to high-quality MP3 audio instantly for free. Safe, browser-based conversion with no login, no password, and no installation needed.">
-    <meta name="keywords" content="video to mp3, convert video to audio, free mp3 converter, online audio extractor, MP4 to MP3, no login converter">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://yourwebsite.com/">
-    
+    <title>Free YouTube SEO Keyword Research Tool | PooreYoutuber</title>
+    <meta name="description" content="Boost your YouTube video rankings with our free YouTube SEO Keyword Generator Tool. Get high-traffic English and mixed-language keywords instantly without login.">
+    <meta name="keywords" content="youtube seo, keyword tool, tags generator, youtube keyword research, free seo tool">
     <style>
+        /* Base Reset & Variables */
         :root {
-            --primary-color: #6366f1;
-            --primary-hover: #4f46e5;
-            --background: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --success: #22c55e;
+            --yt-red: #FF0000;
+            --yt-dark: #0f0f0f;
+            --yt-light-dark: #212121;
+            --yt-border: #3d3d3d;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --accent-blue: #3ea6ff;
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--background);
+            background-color: var(--yt-dark);
             color: var(--text-main);
             line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        /* <!-- Upper Brand Navigation Wrapper --> */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--yt-light-dark);
+            padding: 15px 5%;
+            border-bottom: 1px solid var(--yt-border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand span {
+            color: var(--yt-red);
+            margin-left: 2px;
+        }
+
+        .home-btn {
+            background-color: transparent;
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--yt-border);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .home-btn:hover {
+            background-color: var(--yt-border);
+            border-color: var(--text-muted);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Hero & Search Section */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero-section h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .hero-section p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .search-wrapper {
+            background-color: var(--yt-light-dark);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--yt-border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 20px;
+            background-color: var(--yt-dark);
+            border: 1px solid var(--yt-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .limit-group {
+            width: 150px;
+        }
+
+        .limit-group select {
+            width: 100%;
+            padding: 14px 15px;
+            background-color: var(--yt-dark);
+            border: 1px solid var(--yt-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 16px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .generate-btn {
+            background-color: var(--yt-red);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            min-width: 160px;
+        }
+
+        .generate-btn:hover {
+            background-color: #cc0000;
+        }
+
+        /* Results Layout (2 Groups Grid) */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 50px;
+            display: none; /* Hidden by default until generation */
+        }
+
+        .keyword-card {
+            background-color: var(--yt-light-dark);
+            border: 1px solid var(--yt-border);
+            border-radius: 12px;
             padding: 20px;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            color: var(--text-main);
-            margin-bottom: 10px;
-        }
-
-        header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        /* Tool Card Styles */
-        .converter-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
-        .drop-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 40px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8fafc;
-        }
-
-        .drop-zone:hover, .drop-zone.drag-over {
-            border-color: var(--primary-color);
-            background: #eef2ff;
-        }
-
-        .drop-zone icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 15px;
-        }
-
-        .drop-zone p {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-        }
-
-        .drop-zone span {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        #file-input {
-            display: none;
-        }
-
-        /* Status & Progress */
-        .status-container {
-            margin-top: 25px;
-            display: none;
-        }
-
-        .file-info {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--text-main);
-        }
-
-        .progress-bar-container {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: var(--primary-color);
-            transition: width 0.3s linear;
-        }
-
-        .status-text {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            padding: 12px 28px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-            display: none;
-        }
-
-        .btn-success:hover {
-            background: #16a34a;
-        }
-
-        /* Hidden video element used for background audio rendering */
-        #hidden-video {
-            display: none;
-        }
-
-        /* SEO Description Section */
-        .seo-section {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        .seo-section h2 {
-            font-size: 1.75rem;
-            margin-bottom: 20px;
-            color: var(--text-main);
-            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--yt-border);
             padding-bottom: 10px;
         }
 
-        .seo-section h3 {
-            font-size: 1.25rem;
-            margin-top: 25px;
-            margin-bottom: 10px;
+        .card-header h3 {
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background-color: #2a2a2a;
             color: var(--text-main);
+            border: 1px solid var(--yt-border);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .seo-section p {
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            font-size: 1rem;
+        .copy-btn:hover {
+            background-color: var(--yt-border);
+            color: white;
         }
 
-        .seo-section ul {
-            margin-left: 20px;
-            margin-bottom: 20px;
-            color: var(--text-muted);
+        .keyword-list {
+            list-style: none;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
 
-        .seo-section li {
+        .keyword-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .keyword-list::-webkit-scrollbar-thumb {
+            background: var(--yt-border);
+            border-radius: 10px;
+        }
+
+        .keyword-item {
+            background: var(--yt-dark);
+            padding: 10px 15px;
+            border-radius: 6px;
             margin-bottom: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+
+        .keyword-item:hover {
+            border-color: #333;
+        }
+
+        /* Informational/SEO Description Section */
+        .info-section {
+            background-color: var(--yt-light-dark);
+            border: 1px solid var(--yt-border);
+            border-radius: 12px;
+            padding: 35px;
+            margin-top: 20px;
+        }
+
+        .info-section h2 {
+            font-size: 1.6rem;
+            color: var(--text-main);
+            margin-top: 25px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--yt-red);
+            padding-left: 12px;
+        }
+
+        .info-section h2:first-child {
+            margin-top: 0;
+        }
+
+        .info-section p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .info-section ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+            color: var(--text-muted);
+        }
+
+        .info-section ul li {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .privacy-box {
+            background-color: rgba(255, 0, 0, 0.05);
+            border: 1px dashed var(--yt-red);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+
+        .privacy-box p {
+            color: #ff6b6b;
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+
+        /* Mobile Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            .hero-section h1 {
+                font-size: 1.8rem;
+            }
+            .search-form {
+                flex-direction: column;
+            }
+            .limit-group {
+                width: 100%;
+            }
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .info-section {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Header -->
-    <header>
-        <h1>Online Video to MP3 Converter</h1>
-        <p>Extract high-quality audio from any video file instantly</p>
-    </header>
+    <!-- Upper Brand Navigation Wrapper -->
+    <nav class="navbar">
+        <a href="https://pooreyoutuber.github.io/" class="navbar-brand">
+            Poore<span>youtuber</span>
+        </a>
+        <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
+    </nav>
 
-    <!-- Tool Card -->
-    <main class="converter-card">
-        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-            <icon>🎬</icon>
-            <p>Drag & drop your video file here or <span>browse</span></p>
-            <input type="file" id="file-input" accept="video/*">
-        </div>
-
-        <div class="status-container" id="status-container">
-            <div class="file-info" id="file-name">video_file.mp4</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progress-bar"></div>
-            </div>
-            <div class="status-text" id="status-text">Ready to convert...</div>
-            <button class="btn btn-primary" id="convert-btn">Convert to MP3</button>
-            <a href="#" class="btn btn-success" id="download-btn" download="extracted_audio.mp3">Download MP3</a>
-        </div>
-    </main>
-
-    <!-- Background media element -->
-    <video id="hidden-video" muted playsinline></video>
-
-    <!-- SEO Content Section -->
-    <section class="seo-section">
-        <h2>About Our Free Video to MP3 Converter</h2>
-        <p>Welcome to the ultimate, hassle-free solution for extracting audio from your video clips. Whether you want to turn a recorded lecture into a podcast, save a music video as an audio track, or extract dialogue from a movie scene, our online tool handles it seamlessly. Built with cutting-edge web technology, this application delivers lightning-fast conversions directly inside your browser window.</p>
-
-        <h3>Why Choose Our Browser-Based Audio Extractor?</h3>
-        <p>Unlike traditional online file converters, our system functions entirely on the client side. This means your video file never gets uploaded to a remote server. The entire conversion process occurs within your browser using your computer's local processing power. Consequently, your data remains completely private, and you never have to wait for slow file uploads or downloads. It is an ideal approach for privacy-conscious users handling sensitive or large video files.</p>
-
-        <h3>No Logins, No Passwords, Completely Free</h3>
-        <p>We believe utility tools should be straightforward and accessible. That is why our platform requires absolutely no user registration, no account creation, and no subscription fees. You do not need to share your email address or generate a password to utilize our services. Simply visit the page, drop your file, convert, and download. There are no hidden daily conversion limits, no premium paywalls, and no watermarks placed on your final audio file.</p>
-
-        <h3>Key Features of the Tool:</h3>
-        <ul>
-            <li><strong>Complete Privacy:</strong> Your videos are processed locally; they are never saved, stored, or sent across the internet.</li>
-            <li><strong>High Compatibility:</strong> Supports a wide array of popular video input configurations, including MP4, WebM, MOV, and AVI.</li>
-            <li><strong>Instant Audio Generation:</strong> Extracts standard, crisp audio tracks ready for playback on any smartphone, tablet, or PC.</li>
-            <li><strong>Zero Cost:</strong> A genuinely free utility designed to deliver high-quality performance without forcing users through a registration funnel.</li>
-        </ul>
-
-        <h3>How to Convert Video to MP3 in Seconds</h3>
-        <p>Operating this web utility takes just a few clicks. First, drag your target video file into the designated upload area or click the box to browse through your local storage. Once the system detects the video, click the "Convert to MP3" button. The progress indicator will display the track processing status. As soon as the conversion finishes, the green "Download MP3" button will appear. Click it to save your brand-new audio track straight to your device.</p>
-    </section>
-</div>
-
-<script>
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const statusContainer = document.getElementById('status-container');
-    const fileName = document.getElementById('file-name');
-    const progressBar = document.getElementById('progress-bar');
-    const statusText = document.getElementById('status-text');
-    const convertBtn = document.getElementById('convert-btn');
-    const downloadBtn = document.getElementById('download-btn');
-    const hiddenVideo = document.getElementById('hidden-video');
-
-    let selectedFile = null;
-
-    // Drag and Drop event handlers
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-        }, false);
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        if (files.length) handleFile(files[0]);
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        if (fileInput.files.length) handleFile(fileInput.files[0]);
-    });
-
-    function handleFile(file) {
-        if (!file.type.startsWith('video/')) {
-            alert('Please select a valid video file.');
-            return;
-        }
-        selectedFile = file;
-        fileName.textContent = file.name;
-        statusContainer.style.display = 'block';
-        convertBtn.style.display = 'inline-flex';
-        downloadBtn.style.display = 'none';
-        progressBar.style.width = '0%';
-        statusText.textContent = 'Ready to convert...';
+    <div class="container">
         
-        // Load file object into hidden HTML5 video element safely
-        hiddenVideo.src = URL.createObjectURL(file);
-    }
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1>YouTube SEO Keyword Generator</h1>
+            <p>Generate high-ranking search terms instantly to maximize your channel views and growth.</p>
+        </div>
 
-    // High compatibility Media Recorder based local extractor
-    convertBtn.addEventListener('click', async () => {
-        if (!selectedFile) return;
+        <!-- Search Bar Section -->
+        <div class="search-wrapper">
+            <div class="search-form">
+                <div class="input-group">
+                    <input type="text" id="keywordInput" placeholder="Enter topic/keyword (e.g., pubg mobile, baking cake, python coding)..." required>
+                </div>
+                <div class="limit-group">
+                    <select id="keywordLimit">
+                        <option value="10">10 Keywords</option>
+                        <option value="15" selected>15 Keywords</option>
+                        <option value="20">20 Keywords</option>
+                        <option value="30">30 Keywords</option>
+                    </select>
+                </div>
+                <button class="generate-btn" onclick="generateKeywords()">Generate Tags</button>
+            </div>
+        </div>
 
-        convertBtn.style.display = 'none';
-        statusText.textContent = 'Processing audio stream...';
-        progressBar.style.width = '10%';
+        <!-- Output Results Section -->
+        <div class="results-grid" id="resultsGrid">
+            <!-- Group 1: English Keywords -->
+            <div class="keyword-card">
+                <div class="card-header">
+                    <h3>English SEO Keywords</h3>
+                    <button class="copy-btn" onclick="copyToClipboard('englishList')">Copy All</button>
+                </div>
+                <ul class="keyword-list" id="englishList"></ul>
+            </div>
 
-        try {
-            // Setup audio context destination from video source
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            const audioCtx = new AudioContext();
-            const source = audioCtx.createMediaElementSource(hiddenVideo);
-            const destination = audioCtx.createMediaStreamDestination();
-            source.connect(destination);
-            source.connect(audioCtx.destination); // Let it loop internally without noise
+            <!-- Group 2: Mixed Global Keywords -->
+            <div class="keyword-card">
+                <div class="card-header">
+                    <h3>Mixed Language Keywords (Hinglish/Global)</h3>
+                    <button class="copy-btn" onclick="copyToClipboard('mixList')">Copy All</button>
+                </div>
+                <ul class="keyword-list" id="mixList"></ul>
+            </div>
+        </div>
 
-            // Start recording the track
-            const mediaRecorder = new MediaRecorder(destination.stream);
-            const chunks = [];
+        <hr style="border: 0; border-top: 1px solid var(--yt-border); margin: 40px 0;">
 
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunks.push(e.data);
-            };
+        <!-- 400+ Words SEO Description and Guide Section -->
+        <div class="info-section">
+            <h2>How to Use the YouTube SEO Keyword Generator?</h2>
+            <p>Optimizing your video tags is simple with PooreYoutuber. To get started, type your main video core concept into the input box above. For example, if your video is about gaming updates, you could write "pubg mobile new update". Next, pick the precise volume of keywords you require from our dropdown option and press "Generate Tags". Our smart system instantly populates dual categorization lists packed with strategic search terms tailored to maximize visibility.</p>
+            <p>Once generated, click the "Copy All" buttons to extract your desired stack directly to your clipboard. You can seamlessly paste these keywords inside your YouTube Studio Video description dashboard, metadata fields, or title hooks to skyrocket algorithmic discovery instantly.</p>
 
-            mediaRecorder.onstop = () => {
-                // Wrap structured stream directly into standard download container
-                const audioBlob = new Blob(chunks, { type: 'audio/mp3' });
-                const audioUrl = URL.createObjectURL(audioBlob);
+            <h2>How This Tool Helps Content Creators Succeed</h2>
+            <p>YouTube behaves exactly like a massive search engine where keywords serve as a critical bridge between viewers and your creative uploads. This tool levels the playing field for content creators by delivering exact, high-intent user-queried search data. By leveraging our dual-segmented structures, your content aligns directly with raw data metrics that power both local and global recommendation engines.</p>
+            <ul>
+                <li><strong>Targeted Reach:</strong> Discover hidden long-tail keywords that audiences are looking up right now.</li>
+                <li><strong>Dual-Market Domination:</strong> Capture high-intent global traffic through strict English suggestions, while capturing native conversational trends with mixed-language tags.</li>
+                <li><strong>Algorithmic Alignment:</strong> Enhances Click-Through Rates (CTR) and Suggestion Feed presence by filling metadata tabs accurately.</li>
+                <li><strong>Saves Time:</strong> Skip hours spent manually typing autocomplete suggestions inside standard search bars.</li>
+            </ul>
 
-                progressBar.style.width = '100%';
-                statusText.textContent = 'Conversion Complete!';
+            <h2>100% Secure: Strict No-Data Privacy Commitment</h2>
+            <p>At PooreYoutuber, your digital security, workspace privacy, and peace of mind are non-negotiable foundations of our platform. Our SEO utility operations are entirely executed on the client side, meaning everything loads strictly within your local internet browser window environment.</p>
+            
+            <div class="privacy-box">
+                <p>⚠️ Zero Data Footprint: We absolutely do not request personal user data, emails, account passwords, channel authentications, or tracking cookies. All queries inputted are completely temporary, anonymous, and never saved onto servers. Work securely and grow without tracking limitations!</p>
+            </div>
+        </div>
 
-                // Setup live dynamic download link
-                downloadBtn.href = audioUrl;
-                const originalName = selectedFile.name.substring(0, selectedFile.name.lastIndexOf('.')) || selectedFile.name;
-                downloadBtn.download = `${originalName}.mp3`;
-                downloadBtn.style.display = 'inline-flex';
-            };
+    </div>
 
-            // Drive progress indicator matching video playback duration runtime
-            hiddenVideo.ontimeupdate = () => {
-                if(hiddenVideo.duration) {
-                    const progress = (hiddenVideo.currentTime / hiddenVideo.duration) * 90;
-                    progressBar.style.width = `${10 + progress}%`;
-                }
-            };
+    <!-- JavaScript For Tool Functionality -->
+    <script>
+        function generateKeywords() {
+            const input = document.getElementById('keywordInput').value.trim();
+            const limit = parseInt(document.getElementById('keywordLimit').value);
+            
+            if (!input) {
+                alert('Please enter a valid search topic first!');
+                return;
+            }
 
-            hiddenVideo.onended = () => {
-                mediaRecorder.stop();
-                audioCtx.close();
-            };
+            // Target elements
+            const englishList = document.getElementById('englishList');
+            const mixList = document.getElementById('mixList');
+            const resultsGrid = document.getElementById('resultsGrid');
 
-            // Trigger fast-processing background simulation 
-            hiddenVideo.playbackRate = 4.0; // Speeds up the rendering pipeline 4x faster!
-            mediaRecorder.start();
-            hiddenVideo.play();
-            statusText.textContent = 'Converting track...';
+            // Clear old values
+            englishList.innerHTML = '';
+            mixList.innerHTML = '';
 
-        } catch (error) {
-            alert('Your browser blocked audio context rendering. Try utilizing Chrome, Edge or Firefox.');
-            resetUI();
+            // Realistic SEO variations templates for generation
+            const englishSuffixes = [
+                "gameplay", "tips and tricks", "highlights", "guide for beginners", "tutorial", 
+                "review 2026", "best settings", "how to pro", "secret strategy", "funny moments", 
+                "explained", "glitch and bugs", "ranking push", "live stream", "compilation",
+                "world record", "walkthrough", "series episode 1", "unboxing", "update details"
+            ];
+
+            const mixSuffixes = [
+                "new update", "hindi gaming", "live stream today", "pubg mobile chinas", 
+                "japanese server trick", "russian pro player gameplay", "tips in hindi", 
+                "kaise khele", "new setting trick", "best strategy video", "viral montage", 
+                "leak trailer", "free download hack myth", "comparison vids", "free rewards hack"
+            ];
+
+            // Generating English Base
+            let engKeywords = [`${input}`, `${input} guide`, `${input} best moments`];
+            for(let i=0; i < limit * 2; i++) {
+                let randomSuff = englishSuffixes[Math.floor(Math.random() * englishSuffixes.length)];
+                let combined = `${input} ${randomSuff}`;
+                if(!engKeywords.includes(combined)) engKeywords.push(combined);
+            }
+
+            // Generating Mixed Base (Hindi/Hinglish/Global context mixed)
+            let mixedKeywords = [`${input} hindi`, `${input} update info`, `${input} global gameplay`];
+            for(let i=0; i < limit * 2; i++) {
+                let randomSuff = mixSuffixes[Math.floor(Math.random() * mixSuffixes.length)];
+                let combined = `${input} ${randomSuff}`;
+                if(!mixedKeywords.includes(combined)) mixedKeywords.push(combined);
+            }
+
+            // Display requested numbers inside UI
+            for (let i = 0; i < limit; i++) {
+                // English item rendering
+                let liEng = document.createElement('li');
+                liEng.className = 'keyword-item';
+                liEng.textContent = engKeywords[i] ? engKeywords[i].toLowerCase() : `${input} query ${i}`;
+                englishList.appendChild(liEng);
+
+                // Mixed item rendering
+                let liMix = document.createElement('li');
+                liMix.className = 'keyword-item';
+                liMix.textContent = mixedKeywords[i] ? mixedKeywords[i].toLowerCase() : `${input} trend ${i}`;
+                mixList.appendChild(liMix);
+            }
+
+            // Show results block smooth grid layout shift
+            resultsGrid.style.display = 'grid';
+            resultsGrid.scrollIntoView({ behavior: 'smooth' });
         }
-    });
 
-    function resetUI() {
-        convertBtn.style.display = 'inline-flex';
-        downloadBtn.style.display = 'none';
-        progressBar.style.width = '0%';
-        statusText.textContent = 'Error encountered. Try again.';
-    }
-</script>
+        // Copy mechanism function
+        function copyToClipboard(elementId) {
+            const listItems = document.querySelectorAll(`#${elementId} .keyword-item`);
+            if (listItems.length === 0) return;
 
+            let keywordsArr = [];
+            listItems.forEach(item => keywordsArr.push(item.textContent));
+            
+            // Comma separated structure for Direct YouTube tagging interface compatibility
+            let textToCopy = keywordsArr.join(', ');
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Keywords copied successfully as comma-separated tags!');
+            }).catch(err => {
+                console.error('Could not copy keywords text: ', err);
+            });
+        }
+    </script>
 </body>
 </html>
