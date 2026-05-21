@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free YouTube SEO Keyword Research Tool | Pooreyoutuber</title>
-    <meta name="description" content="Boost your video rankings with Pooreyoutuber's Free YouTube SEO Keyword Research Tool. Generate high-traffic English and mixed-language keywords instantly. No login required.">
-    <!-- Tailwind CSS for modern layout -->
+    <title>Universal YouTube SEO Keyword Research Tool | Pooreyoutuber</title>
+    <meta name="description" content="Advanced dynamic YouTube SEO Keyword Generator for all niches. Instant high-traffic tags with auto-correction feature.">
+    <!-- Tailwind CSS for layout -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,7 +19,6 @@
             font-family: 'Inter', sans-serif;
             background-color: #f9fafb;
         }
-        /* Custom styles for the brand header to match your request */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -38,7 +37,7 @@
             gap: 2px;
         }
         .navbar-brand span {
-            color: #ff0000; /* YouTube Red */
+            color: #ff0000;
         }
         .home-btn {
             background-color: #ff0000;
@@ -74,10 +73,10 @@
         <!-- Tool Header -->
         <div class="text-center mb-10">
             <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
-                <i class="fab fa-youtube text-red-600 mr-2"></i>YouTube SEO Keyword Tags Generator
+                <i class="fab fa-youtube text-red-600 mr-2"></i>Multi-Niche YouTube SEO Tag Generator
             </h1>
             <p class="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
-                Supercharge your video visibility. Enter your seed topic to instantly generate highly-searched English and Global Mixed-Language keywords for your tags, titles, and descriptions.
+                Works dynamically across all content types with intelligent spelling auto-correction and global multiregional reach layouts.
             </p>
         </div>
 
@@ -90,33 +89,38 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                             <i class="fas fa-search"></i>
                         </span>
-                        <input type="text" id="topicInput" placeholder="e.g., pubg mobile, vanilla cake recipe, python tutorial" required
+                        <input type="text" id="topicInput" placeholder="Try 'github new updte', 'pubg mobile gamply', 'react js tutrial'..." required
                             class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 outline-none transition-all">
                     </div>
                 </div>
                 
-                <div class="w-full md:w-44">
-                    <label for="keywordCount" class="block text-sm font-semibold text-gray-700 mb-2">Number of Keywords</label>
-                    <select id="keywordCount" class="w-full py-3 px-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 outline-none transition-all">
-                        <option value="5">5 Keywords</option>
-                        <option value="10" selected>10 Keywords</option>
-                        <option value="15">15 Keywords</option>
-                        <option value="20">20 Keywords</option>
-                    </select>
+                <div class="w-full md:w-36">
+                    <label for="keywordCount" class="block text-sm font-semibold text-gray-700 mb-2">Tag Limit</label>
+                    <input type="number" id="keywordCount" value="20" min="5" max="100" required
+                        class="w-full py-3 px-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 outline-none transition-all text-center font-bold">
                 </div>
 
                 <button type="submit" class="w-full md:w-auto px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md shadow-red-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap">
-                    <i class="fas fa-cog animate-spin-slow"></i> Generate Keywords
+                    <i class="fas fa-magic"></i> Generate Keywords
                 </button>
             </form>
         </div>
 
-        <!-- Output Results Wrapper (Hidden by default, shown via JS) -->
+        <!-- Output Results Wrapper -->
         <div id="resultsWrapper" class="hidden space-y-8 mb-12">
             
+            <div id="nicheBadgeContainer" class="text-center mb-2">
+                <span id="detectedNiche" class="bg-gray-100 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border border-gray-200">
+                    Detected Category: General
+                </span>
+                <span id="correctionBadge" class="hidden ml-2 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-amber-200">
+                    <i class="fas fa-magic"></i> Auto-Corrected Query Applied
+                </span>
+            </div>
+
             <div class="grid md:grid-cols-2 gap-6">
                 
-                <!-- Group 1: Pure English Optimization -->
+                <!-- Group A: English Optimization -->
                 <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
                     <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
                         <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -135,19 +139,17 @@
                                     <th class="p-3 text-right rounded-r-lg w-24">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="englishList" class="divide-y divide-gray-100">
-                                <!-- Dynamically filled -->
-                            </tbody>
+                            <tbody id="englishList" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Group 2: Mixed & Global Optimization -->
+                <!-- Group B: Multi-Language Global Optimization -->
                 <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
                     <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
                         <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                             <span class="w-2 h-6 bg-green-600 rounded-full"></span>
-                            Group B: Mixed & Global Keywords
+                            Group B: Mixed International Keywords
                         </h2>
                         <button onclick="copyEntireGroup('mixedList')" class="text-xs bg-gray-100 hover:bg-green-50 text-green-600 font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
                             <i class="fas fa-copy"></i> Copy All
@@ -157,13 +159,11 @@
                         <table class="w-full text-left text-sm text-gray-600">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
-                                    <th class="p-3 rounded-l-lg">Keyword Tag (Hinglish/Intl)</th>
+                                    <th class="p-3 rounded-l-lg">Global Tag (EN/JP/CN/RU/HI)</th>
                                     <th class="p-3 text-right rounded-r-lg w-24">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="mixedList" class="divide-y divide-gray-100">
-                                <!-- Dynamically filled -->
-                            </tbody>
+                            <tbody id="mixedList" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -171,11 +171,11 @@
             </div>
         </div>
 
-        <!-- SEO Article & Information Section (400+ Words) -->
+        <!-- Clean SEO Article Section (400+ Words) -->
         <hr class="border-gray-200 my-10">
         
         <article class="prose max-w-none text-gray-700 bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-gray-100">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Mastering YouTube SEO with Pooreyoutuber Keyword Tool</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Optimizing Content Discoverability via Pooreyoutuber YouTube SEO Engine</h2>
             
             <p class="mb-4 leading-relaxed">
                 In today's highly competitive digital landscape, creating high-quality videos is only half the battle won. To truly succeed and capture substantial organic traffic, your content needs to be highly discoverable. This is where <strong>YouTube SEO (Search Engine Optimization)</strong> steps in. Our specialized YouTube Keyword Generator helps creators uncover what audiences are actively typing into the search bar, allowing you to optimize your metadata effortlessly for maximum visibility.
@@ -183,7 +183,7 @@
 
             <h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">How to Use the YouTube SEO Keyword Tool</h3>
             <p class="mb-4 leading-relaxed">
-                Operating this tool is designed to be streamlined and efficient. First, type your core video theme or seed keyword (such as <em>"pubg mobile"</em> or <em>"cooking tips"</em>) inside the prominent search container. Next, select the specific volume of keywords you require from our dynamic configuration drop-down menu. Hit the "Generate Keywords" button, and our algorithm will instantly organize relevant high-performing variations into two comprehensive, platform-ready data blocks. You can instantly copy individual items or use the "Copy All" system to grab comma-separated strings built perfectly for your tag fields.
+                Operating this tool is designed to be streamlined and efficient. First, type your core video theme or seed keyword inside the prominent search container. Next, select the specific volume of keywords you require from our dynamic configuration setup box which allows up to custom tags instantly. Hit the "Generate Keywords" button, and our algorithm will instantly organize relevant high-performing variations into two comprehensive, platform-ready data blocks. You can instantly copy individual items or use the "Copy All" system to grab comma-separated strings built perfectly for your tag fields.
             </p>
 
             <h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">Why This Dual-Language Approach Helps Creators</h3>
@@ -191,16 +191,14 @@
                 Audience search patterns are deeply diverse. While standard English keywords capture institutional search volumes globally, real organic scale often lives within regional colloquialisms, multilingual phrases, and mixed dialects. 
             </p>
             <ul class="list-disc pl-5 mb-4 space-y-2">
-                <li><strong>Group A (English SEO):</strong> Targets broad global traffic, high advertiser CPC markets, and institutional search inquiries.</li>
-                <li><strong>Group B (Mixed & Global):</strong> Unlocks intense engagement metrics by tapping into native dialects, blending English scripts with local accents (Hinglish), and optimizing across multi-regional scripts like Cyrillic, Japanese, or East Asian markets. This expands your discoverability exponentially.</li>
+                <li><strong>Group A (English SEO):</strong> Targets broad global traffic, high advertiser CPC markets, and institutional search inquiries across standard digital platforms.</li>
+                <li><strong>Group B (Mixed & Global):</strong> Unlocks intense engagement metrics by tapping into native dialects, blending English scripts with local accents, and optimizing across multi-regional scripts like Chinese, Japanese, Russian, and Spanish markets. This expands your discoverability exponentially.</li>
             </ul>
 
-            <h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">Our Strict Commitment to Your Data Privacy</h3>
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 my-4 rounded-r-xl">
-                <p class="text-sm text-red-900 font-medium">
-                    <strong>Zero Data Tracking Policy:</strong> Pooreyoutuber deeply respects creator integrity and privacy engineering. Our application functions entirely within your client-side web ecosystem. <strong>We do not collect, store, or monitor your personal data, credentials, channel identifiers, or inputted search terms.</strong> No registration profiles are ever required to use our suite. Your strategies remain completely proprietary, confidential, and secure.
-                </p>
-            </div>
+            <h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">Our Commitment to User Experience and Privacy</h3>
+            <p class="mb-4 leading-relaxed">
+                This utility application operates with a fully decentralized browser system architecture. Your query requests run entirely in your local environment without tracking, cookies, or data-logging databases. No sign-ups or credentials are required, giving you full access to accurate search metrics securely.
+            </p>
             
             <p class="leading-relaxed">
                 By integrating these strategically generated terms inside your video descriptions, custom close captions, titles, and tags, you align your channel directly with YouTube's Core Recommendation Engine algorithm. Begin utilizing smart optimization setups today to witness sustainable metric growth across your channel's analytical dashboards!
@@ -209,83 +207,155 @@
 
     </main>
 
-    <!-- Toast Notification for Copy System -->
+    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
         <i class="fas fa-check-circle text-green-400"></i>
         <span id="toastMessage">Copied to clipboard!</span>
     </div>
 
-    <!-- Intelligent Client-Side Generation Script -->
     <script>
-        // Seed database matrices matching user requested patterns (e.g., pubg mobile, pubg new update)
-        const englishModifiers = ["new update", "gameplay", "tips and tricks", "live stream", "highlights", "best moments", "pro guide", "for beginners", "settings 2026", "montage", "funny moments", "glitch", "secret tricks", "free rewards", "rank push"];
-        const mixedModifiers = ["hindi", "urdu", "bgmi highlights", "malayalam tutorial", "tamil gameplay", "telugu live", "gameplay hindi", "chinese server", "japanese version", "russian hackers", "pubg indonesia", "op clutch gameplay", "season update check", "pubg mobile kaise khele", "new setting updates"];
+        // Dictionary mapping common errors to verified words
+        const spellingFixes = {
+            "gamply": "gameplay", "gemplay": "gameplay", "gamplay": "gameplay",
+            "updte": "update", "updat": "update", "uplate": "update",
+            "tutrial": "tutorial", "tutorail": "tutorial", "tuterall": "tutorial",
+            "gitub": "github", "githb": "github",
+            "pyton": "python", "pithon": "python",
+            "creater": "creator", "vloger": "vlogger"
+        };
+
+        // Niche Matrices Configuration
+        const nicheDictionaries = {
+            development: {
+                name: "Development / Coding",
+                eng: ["tutorial", "documentation", "for beginners", "best practices", "setup guide", "crash course", "examples", "features explained", "architecture", "tips", "commands", "vs code setup", "advanced techniques", "complete workflow", "error handling", "open source project", "deployment guide", "tricks", "configuration API", "debugging"],
+                mix: ["tutorial hindi", "course in hindi", "guide for developers", "bangla tutorial", "explained in urdu", "コード (Japanese)", "中国語チュートリアル (Chinese)", "разработчик (Russian)", "tutorial en español", "kaise use kare", "complete setup hindi", "step by step code", "interview questions", "easy implementation", "project deployment"]
+            },
+            gaming: {
+                name: "Gaming",
+                eng: ["gameplay", "new update", "tips and tricks", "live stream", "highlights", "best moments", "pro guide", "settings", "montage", "funny moments", "clutch", "free rewards", "rank push", "sensitivity configuration", "tournament", "unboxing skins", "solo vs squad", "glitch check", "secret locations", "pro player setup"],
+                mix: ["hindi gameplay", "live stream hindi", "kaise khele", "new update check", "ゲームプレイ (Japanese)", "游戏直播 (Chinese)", "геймплей (Russian)", "juegos gameplay", "telugu gaming", "tamil commentary", "op clutch gameplay", "funny moments hindi", "chinese server leaks", "config file tips", "hacker vs pro"]
+            },
+            tech: {
+                name: "Technology / Reviews",
+                eng: ["review", "unboxing", "features", "hidden settings", "hands on", "comparison", "long term review", "worth buying?", "problems", "pros and cons", "vs comparison", "speed test", "camera test", "buying guide", "latest features", "specs teardown", "drop test", "performance issue", "benchmark analysis", "hardware info"],
+                mix: ["full review hindi", "unboxing video", "worth it h ya nahi", "価格 (Japanese)", "手机评测 (Chinese)", "обзор техники (Russian)", "reseña en español", "price in india", "features batao", "tamil tech review", "bangla unboxing", "comparison hindi me", "hidden settings features", "honest review", "buy or skip"]
+            },
+            general: {
+                name: "General Content / Vlog / Creator",
+                eng: ["explained", "step by step", "ideas", "secrets", "mistakes to avoid", "how to start", "new policy", "growth strategy", "case study", "full guide", "optimization tips", "trends", "algorithm secrets", "unfiltered", "analysis", "behind the scenes", "daily life routine", "life hacks", "motivation tips", "success formula"],
+                mix: ["hindi me janiye", "full details", "kaise kare", "step by step hindi", "Vlog (Japanese)", "视频博客 (Chinese)", "влог видео (Russian)", "vlog diario", "real truth", "vlog style", "detailed analysis hindi", "creators dhyan de", "sabse aasan tarika", "latest news updates", "viral video tricks"]
+            }
+        };
+
+        // Intelligent Auto-Correction Function
+        function processAndCorrectText(text) {
+            let words = text.split(/\s+/);
+            let corrected = false;
+            
+            let processedWords = words.map(w => {
+                let cleanWord = w.toLowerCase().replace(/[^\w]/g, "");
+                if (spellingFixes[cleanWord]) {
+                    corrected = true;
+                    return spellingFixes[cleanWord];
+                }
+                return w;
+            });
+            
+            return {
+                text: processedWords.join(" "),
+                wasCorrected: corrected
+            };
+        }
+
+        function detectNicheFromInput(text) {
+            const lower = text.toLowerCase();
+            if (lower.includes('github') || lower.includes('git') || lower.includes('api') || lower.includes('code') || lower.includes('python') || lower.includes('javascript') || lower.includes('react') || lower.includes('html') || lower.includes('developer') || lower.includes('programming')) {
+                return 'development';
+            }
+            if (lower.includes('pubg') || lower.includes('bgmi') || lower.includes('free fire') || lower.includes('game') || lower.includes('gta') || lower.includes('minecraft') || lower.includes('cod') || lower.includes('mobile')) {
+                return 'gaming';
+            }
+            if (lower.includes('iphone') || lower.includes('samsung') || lower.includes('unboxing') || lower.includes('review') || lower.includes('phone') || lower.includes('laptop') || lower.includes('gadget')) {
+                return 'tech';
+            }
+            return 'general';
+        }
 
         document.getElementById('keywordForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const rawTopic = document.getElementById('topicInput').value.trim();
-            const count = parseInt(document.getElementById('keywordCount').value);
+            const rawInput = document.getElementById('topicInput').value.trim();
+            const count = parseInt(document.getElementById('keywordCount').value) || 20;
             
-            if(!rawTopic) return;
+            if(!rawInput) return;
             
-            // Clean topic base formatting
-            const topic = rawTopic.toLowerCase();
+            // Apply Auto-Correction System
+            const correctionResult = processAndCorrectText(rawInput);
+            const optimizedTopic = correctionResult.text;
+            
+            // Toggle Correction Alert Badge
+            const corrBadge = document.getElementById('correctionBadge');
+            if (correctionResult.wasCorrected) {
+                corrBadge.classList.remove('hidden');
+            } else {
+                corrBadge.classList.add('hidden');
+            }
+            
+            const detectedKey = detectNicheFromInput(optimizedTopic);
+            const activeNiche = nicheDictionaries[detectedKey];
+            
+            // Update UI Badges
+            const badge = document.getElementById('detectedNiche');
+            badge.textContent = `Category: ${activeNiche.name}`;
             
             const englishList = document.getElementById('englishList');
             const mixedList = document.getElementById('mixedList');
             
-            // Clear prior states
             englishList.innerHTML = '';
             mixedList.innerHTML = '';
             
-            // Generate distinct systematic lists
-            let englishArr = generateUniqueKeywords(topic, englishModifiers, count);
-            let mixedArr = generateUniqueKeywords(topic, mixedModifiers, count);
+            // Generate clean lists arrays
+            let englishArr = generateSmartKeywords(optimizedTopic, activeNiche.eng, count);
+            let mixedArr = generateSmartKeywords(optimizedTopic, activeNiche.mix, count);
             
-            // Render Group A
-            englishArr.forEach(kw => {
-                englishList.appendChild(createRowElement(kw));
-            });
+            englishArr.forEach(kw => englishList.appendChild(createRowElement(kw)));
+            mixedArr.forEach(kw => mixedList.appendChild(createRowElement(kw)));
             
-            // Render Group B
-            mixedArr.forEach(kw => {
-                mixedList.appendChild(createRowElement(kw));
-            });
-            
-            // Reveal Output Viewport
             const resultsWrapper = document.getElementById('resultsWrapper');
             resultsWrapper.classList.remove('hidden');
             resultsWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 
-        function generateUniqueKeywords(base, modifiers, limit) {
-            let results = [];
-            // First item is always the core base topic
-            results.push(base);
+        function generateSmartKeywords(base, modifiers, limit) {
+            let results = [base];
+            // Infinite loop prevention fallback wrapper array
+            let safeModifiers = [...modifiers];
             
-            // Shuffle modifiers array to provide fresh variations on requests
-            let shuffled = [...modifiers].sort(() => 0.5 - Math.random());
-            
-            for(let i = 0; i < shuffled.length && results.length < limit; i++) {
-                // Alternating layout types for realistic look
-                if(i % 2 === 0) {
-                    results.push(`${base} ${shuffled[i]}`);
-                } else {
-                    results.push(`${shuffled[i]} ${base}`);
+            // Loop and stretch items to fill whatever number user inputs (e.g. 30, 40)
+            let iterations = 0;
+            while(results.length < limit && iterations < 5) {
+                let shuffled = [...safeModifiers].sort(() => 0.5 - Math.random());
+                for(let i = 0; i < shuffled.length && results.length < limit; i++) {
+                    if (i % 2 === 0) {
+                        results.push(`${base} ${shuffled[i]}`);
+                    } else {
+                        results.push(`${shuffled[i]} ${base}`);
+                    }
                 }
+                iterations++;
             }
-            return results;
+            
+            return [...new Set(results)].slice(0, limit);
         }
 
         function createRowElement(keyword) {
             const tr = document.createElement('tr');
             tr.className = 'hover:bg-gray-50 transition-colors border-b border-gray-100';
-            
             tr.innerHTML = `
                 <td class="p-3 font-medium text-gray-800 break-all select-all">${keyword}</td>
                 <td class="p-3 text-right">
-                    <button onclick="copySingle(this, '${keyword.replace(/'/g, "\\'")}')" class="text-gray-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-gray-100 transition-all" title="Copy Keyword">
+                    <button onclick="copySingle(this, '${keyword.replace(/'/g, "\\'")}')" class="text-gray-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-gray-100 transition-all">
                         <i class="fas fa-copy"></i>
                     </button>
                 </td>
@@ -293,40 +363,31 @@
             return tr;
         }
 
-        // Action Handlers: Individual Single Copy Operations
         function copySingle(btn, text) {
             navigator.clipboard.writeText(text).then(() => {
                 const icon = btn.querySelector('i');
                 icon.className = 'fas fa-check text-green-500';
                 showToast(`Copied: "${text}"`);
-                setTimeout(() => {
-                    icon.className = 'fas fa-copy';
-                }, 2000);
+                setTimeout(() => icon.className = 'fas fa-copy', 2000);
             });
         }
 
-        // Action Handlers: Whole Group Array Comma-separated Extraction
         function copyEntireGroup(targetTableId) {
             const rows = document.querySelectorAll(`#${targetTableId} td:first-child`);
             let items = [];
             rows.forEach(r => items.push(r.textContent));
-            
             if(items.length === 0) return;
             
-            const commaSeparated = items.join(', ');
-            navigator.clipboard.writeText(commaSeparated).then(() => {
-                showToast(`Successfully copied all tags formatted for YouTube!`);
+            navigator.clipboard.writeText(items.join(', ')).then(() => {
+                showToast(`All tags copied successfully!`);
             });
         }
 
-        // Interactive Interface Micro-Feedback (Toasts)
         function showToast(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toastMessage').textContent = msg;
-            
             toast.classList.remove('translate-y-20', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
-            
             setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-20', 'opacity-0');
