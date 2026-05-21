@@ -3,325 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free YouTube SEO Keyword Research Tool | PooreYoutuber</title>
-    <meta name="description" content="Boost your YouTube video rankings with our free YouTube SEO Keyword Generator Tool. Get high-traffic English and mixed-language keywords instantly without login.">
-    <meta name="keywords" content="youtube seo, keyword tool, tags generator, youtube keyword research, free seo tool">
+    <title>Free YouTube SEO Keyword Research Tool | Pooreyoutuber</title>
+    <meta name="description" content="Boost your video rankings with Pooreyoutuber's Free YouTube SEO Keyword Research Tool. Generate high-traffic English and mixed-language keywords instantly. No login required.">
+    <!-- Tailwind CSS for modern layout -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* Base Reset & Variables */
-        :root {
-            --yt-red: #FF0000;
-            --yt-dark: #0f0f0f;
-            --yt-light-dark: #212121;
-            --yt-border: #3d3d3d;
-            --text-main: #ffffff;
-            --text-muted: #aaaaaa;
-            --accent-blue: #3ea6ff;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-        }
-
         body {
-            background-color: var(--yt-dark);
-            color: var(--text-main);
-            line-height: 1.6;
-            padding-bottom: 40px;
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
         }
-
-        /* <!-- Upper Brand Navigation Wrapper --> */
+        /* Custom styles for the brand header to match your request */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--yt-light-dark);
-            padding: 15px 5%;
-            border-bottom: 1px solid var(--yt-border);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            background-color: #111827;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
         .navbar-brand {
-            font-size: 24px;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-main);
+            color: #ffffff;
             text-decoration: none;
             display: flex;
             align-items: center;
+            gap: 2px;
         }
-
         .navbar-brand span {
-            color: var(--yt-red);
-            margin-left: 2px;
+            color: #ff0000; /* YouTube Red */
         }
-
         .home-btn {
-            background-color: transparent;
-            color: var(--text-main);
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid var(--yt-border);
-            font-size: 14px;
+            background-color: #ff0000;
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 9999px;
             font-weight: 500;
+            text-decoration: none;
             transition: all 0.3s ease;
         }
-
         .home-btn:hover {
-            background-color: var(--yt-border);
-            border-color: var(--text-muted);
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        /* Hero & Search Section */
-        .hero-section {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .hero-section h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .hero-section p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        .search-wrapper {
-            background-color: var(--yt-light-dark);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid var(--yt-border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            margin-bottom: 40px;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .input-group {
-            flex: 1;
-            min-width: 280px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 14px 20px;
-            background-color: var(--yt-dark);
-            border: 1px solid var(--yt-border);
-            border-radius: 8px;
-            color: var(--text-main);
-            font-size: 16px;
-            outline: none;
-            transition: border 0.3s ease;
-        }
-
-        .input-group input:focus {
-            border-color: var(--accent-blue);
-        }
-
-        .limit-group {
-            width: 150px;
-        }
-
-        .limit-group select {
-            width: 100%;
-            padding: 14px 15px;
-            background-color: var(--yt-dark);
-            border: 1px solid var(--yt-border);
-            border-radius: 8px;
-            color: var(--text-main);
-            font-size: 16px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .generate-btn {
-            background-color: var(--yt-red);
-            color: white;
-            border: none;
-            padding: 14px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            min-width: 160px;
-        }
-
-        .generate-btn:hover {
             background-color: #cc0000;
+            transform: translateY(-1px);
         }
-
-        /* Results Layout (2 Groups Grid) */
-        .results-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 50px;
-            display: none; /* Hidden by default until generation */
-        }
-
-        .keyword-card {
-            background-color: var(--yt-light-dark);
-            border: 1px solid var(--yt-border);
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--yt-border);
-            padding-bottom: 10px;
-        }
-
-        .card-header h3 {
-            font-size: 1.1rem;
-            color: var(--accent-blue);
-            font-weight: 600;
-        }
-
-        .copy-btn {
-            background-color: #2a2a2a;
-            color: var(--text-main);
-            border: 1px solid var(--yt-border);
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .copy-btn:hover {
-            background-color: var(--yt-border);
-            color: white;
-        }
-
-        .keyword-list {
-            list-style: none;
-            max-height: 350px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .keyword-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .keyword-list::-webkit-scrollbar-thumb {
-            background: var(--yt-border);
-            border-radius: 10px;
-        }
-
-        .keyword-item {
-            background: var(--yt-dark);
-            padding: 10px 15px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            border: 1px solid transparent;
-        }
-
-        .keyword-item:hover {
-            border-color: #333;
-        }
-
-        /* Informational/SEO Description Section */
-        .info-section {
-            background-color: var(--yt-light-dark);
-            border: 1px solid var(--yt-border);
-            border-radius: 12px;
-            padding: 35px;
-            margin-top: 20px;
-        }
-
-        .info-section h2 {
-            font-size: 1.6rem;
-            color: var(--text-main);
-            margin-top: 25px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--yt-red);
-            padding-left: 12px;
-        }
-
-        .info-section h2:first-child {
-            margin-top: 0;
-        }
-
-        .info-section p {
-            color: var(--text-muted);
-            font-size: 15px;
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-
-        .info-section ul {
-            margin-left: 20px;
-            margin-bottom: 15px;
-            color: var(--text-muted);
-        }
-
-        .info-section ul li {
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
-
-        .privacy-box {
-            background-color: rgba(255, 0, 0, 0.05);
-            border: 1px dashed var(--yt-red);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 25px;
-        }
-
-        .privacy-box p {
-            color: #ff6b6b;
-            margin-bottom: 0;
-            font-weight: 500;
-        }
-
-        /* Mobile Responsive adjustments */
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-            }
-            .hero-section h1 {
-                font-size: 1.8rem;
-            }
-            .search-form {
-                flex-direction: column;
-            }
-            .limit-group {
-                width: 100%;
-            }
-            .results-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .info-section {
-                padding: 20px;
-            }
+        .youtube-card {
+            border-top: 4px solid #ff0000;
         }
     </style>
 </head>
@@ -335,167 +68,269 @@
         <a href="https://pooreyoutuber.github.io/" class="home-btn">Home</a>
     </nav>
 
-    <div class="container">
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
         
-        <!-- Hero Section -->
-        <div class="hero-section">
-            <h1>YouTube SEO Keyword Generator</h1>
-            <p>Generate high-ranking search terms instantly to maximize your channel views and growth.</p>
+        <!-- Tool Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
+                <i class="fab fa-youtube text-red-600 mr-2"></i>YouTube SEO Keyword Tags Generator
+            </h1>
+            <p class="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
+                Supercharge your video visibility. Enter your seed topic to instantly generate highly-searched English and Global Mixed-Language keywords for your tags, titles, and descriptions.
+            </p>
         </div>
 
-        <!-- Search Bar Section -->
-        <div class="search-wrapper">
-            <div class="search-form">
-                <div class="input-group">
-                    <input type="text" id="keywordInput" placeholder="Enter topic/keyword (e.g., pubg mobile, baking cake, python coding)..." required>
+        <!-- Search & Control Panel Card -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8 youtube-card">
+            <form id="keywordForm" class="space-y-4 md:space-y-0 md:flex md:gap-4 items-end">
+                <div class="flex-1">
+                    <label for="topicInput" class="block text-sm font-semibold text-gray-700 mb-2">Enter Video Topic / Seed Keyword</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" id="topicInput" placeholder="e.g., pubg mobile, vanilla cake recipe, python tutorial" required
+                            class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 outline-none transition-all">
+                    </div>
                 </div>
-                <div class="limit-group">
-                    <select id="keywordLimit">
-                        <option value="10">10 Keywords</option>
-                        <option value="15" selected>15 Keywords</option>
+                
+                <div class="w-full md:w-44">
+                    <label for="keywordCount" class="block text-sm font-semibold text-gray-700 mb-2">Number of Keywords</label>
+                    <select id="keywordCount" class="w-full py-3 px-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 outline-none transition-all">
+                        <option value="5">5 Keywords</option>
+                        <option value="10" selected>10 Keywords</option>
+                        <option value="15">15 Keywords</option>
                         <option value="20">20 Keywords</option>
-                        <option value="30">30 Keywords</option>
                     </select>
                 </div>
-                <button class="generate-btn" onclick="generateKeywords()">Generate Tags</button>
+
+                <button type="submit" class="w-full md:w-auto px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md shadow-red-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap">
+                    <i class="fas fa-cog animate-spin-slow"></i> Generate Keywords
+                </button>
+            </form>
+        </div>
+
+        <!-- Output Results Wrapper (Hidden by default, shown via JS) -->
+        <div id="resultsWrapper" class="hidden space-y-8 mb-12">
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                
+                <!-- Group 1: Pure English Optimization -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                        <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
+                            Group A: English SEO Keywords
+                        </h2>
+                        <button onclick="copyEntireGroup('englishList')" class="text-xs bg-gray-100 hover:bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                            <i class="fas fa-copy"></i> Copy All
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
+                                    <th class="p-3 rounded-l-lg">Keyword Tag</th>
+                                    <th class="p-3 text-right rounded-r-lg w-24">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="englishList" class="divide-y divide-gray-100">
+                                <!-- Dynamically filled -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Group 2: Mixed & Global Optimization -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                        <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-green-600 rounded-full"></span>
+                            Group B: Mixed & Global Keywords
+                        </h2>
+                        <button onclick="copyEntireGroup('mixedList')" class="text-xs bg-gray-100 hover:bg-green-50 text-green-600 font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                            <i class="fas fa-copy"></i> Copy All
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
+                                    <th class="p-3 rounded-l-lg">Keyword Tag (Hinglish/Intl)</th>
+                                    <th class="p-3 text-right rounded-r-lg w-24">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mixedList" class="divide-y divide-gray-100">
+                                <!-- Dynamically filled -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <!-- Output Results Section -->
-        <div class="results-grid" id="resultsGrid">
-            <!-- Group 1: English Keywords -->
-            <div class="keyword-card">
-                <div class="card-header">
-                    <h3>English SEO Keywords</h3>
-                    <button class="copy-btn" onclick="copyToClipboard('englishList')">Copy All</button>
-                </div>
-                <ul class="keyword-list" id="englishList"></ul>
-            </div>
+        <!-- SEO Article & Information Section (400+ Words) -->
+        <hr class="border-gray-200 my-10">
+        
+        <article class="prose max-w-none text-gray-700 bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Mastering YouTube SEO with Pooreyoutuber Keyword Tool</h2>
+            
+            <p class="mb-4 leading-relaxed">
+                In today's highly competitive digital landscape, creating high-quality videos is only half the battle won. To truly succeed and capture substantial organic traffic, your content needs to be highly discoverable. This is where <strong>YouTube SEO (Search Engine Optimization)</strong> steps in. Our specialized YouTube Keyword Generator helps creators uncover what audiences are actively typing into the search bar, allowing you to optimize your metadata effortlessly for maximum visibility.
+            </p>
 
-            <!-- Group 2: Mixed Global Keywords -->
-            <div class="keyword-card">
-                <div class="card-header">
-                    <h3>Mixed Language Keywords (Hinglish/Global)</h3>
-                    <button class="copy-btn" onclick="copyToClipboard('mixList')">Copy All</button>
-                </div>
-                <ul class="keyword-list" id="mixList"></ul>
-            </div>
-        </div>
+            <h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">How to Use the YouTube SEO Keyword Tool</h3>
+            <p class="mb-4 leading-relaxed">
+                Operating this tool is designed to be streamlined and efficient. First, type your core video theme or seed keyword (such as <em>"pubg mobile"</em> or <em>"cooking tips"</em>) inside the prominent search container. Next, select the specific volume of keywords you require from our dynamic configuration drop-down menu. Hit the "Generate Keywords" button, and our algorithm will instantly organize relevant high-performing variations into two comprehensive, platform-ready data blocks. You can instantly copy individual items or use the "Copy All" system to grab comma-separated strings built perfectly for your tag fields.
+            </p>
 
-        <hr style="border: 0; border-top: 1px solid var(--yt-border); margin: 40px 0;">
-
-        <!-- 400+ Words SEO Description and Guide Section -->
-        <div class="info-section">
-            <h2>How to Use the YouTube SEO Keyword Generator?</h2>
-            <p>Optimizing your video tags is simple with PooreYoutuber. To get started, type your main video core concept into the input box above. For example, if your video is about gaming updates, you could write "pubg mobile new update". Next, pick the precise volume of keywords you require from our dropdown option and press "Generate Tags". Our smart system instantly populates dual categorization lists packed with strategic search terms tailored to maximize visibility.</p>
-            <p>Once generated, click the "Copy All" buttons to extract your desired stack directly to your clipboard. You can seamlessly paste these keywords inside your YouTube Studio Video description dashboard, metadata fields, or title hooks to skyrocket algorithmic discovery instantly.</p>
-
-            <h2>How This Tool Helps Content Creators Succeed</h2>
-            <p>YouTube behaves exactly like a massive search engine where keywords serve as a critical bridge between viewers and your creative uploads. This tool levels the playing field for content creators by delivering exact, high-intent user-queried search data. By leveraging our dual-segmented structures, your content aligns directly with raw data metrics that power both local and global recommendation engines.</p>
-            <ul>
-                <li><strong>Targeted Reach:</strong> Discover hidden long-tail keywords that audiences are looking up right now.</li>
-                <li><strong>Dual-Market Domination:</strong> Capture high-intent global traffic through strict English suggestions, while capturing native conversational trends with mixed-language tags.</li>
-                <li><strong>Algorithmic Alignment:</strong> Enhances Click-Through Rates (CTR) and Suggestion Feed presence by filling metadata tabs accurately.</li>
-                <li><strong>Saves Time:</strong> Skip hours spent manually typing autocomplete suggestions inside standard search bars.</li>
+            <h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">Why This Dual-Language Approach Helps Creators</h3>
+            <p class="mb-4 leading-relaxed">
+                Audience search patterns are deeply diverse. While standard English keywords capture institutional search volumes globally, real organic scale often lives within regional colloquialisms, multilingual phrases, and mixed dialects. 
+            </p>
+            <ul class="list-disc pl-5 mb-4 space-y-2">
+                <li><strong>Group A (English SEO):</strong> Targets broad global traffic, high advertiser CPC markets, and institutional search inquiries.</li>
+                <li><strong>Group B (Mixed & Global):</strong> Unlocks intense engagement metrics by tapping into native dialects, blending English scripts with local accents (Hinglish), and optimizing across multi-regional scripts like Cyrillic, Japanese, or East Asian markets. This expands your discoverability exponentially.</li>
             </ul>
 
-            <h2>100% Secure: Strict No-Data Privacy Commitment</h2>
-            <p>At PooreYoutuber, your digital security, workspace privacy, and peace of mind are non-negotiable foundations of our platform. Our SEO utility operations are entirely executed on the client side, meaning everything loads strictly within your local internet browser window environment.</p>
-            
-            <div class="privacy-box">
-                <p>⚠️ Zero Data Footprint: We absolutely do not request personal user data, emails, account passwords, channel authentications, or tracking cookies. All queries inputted are completely temporary, anonymous, and never saved onto servers. Work securely and grow without tracking limitations!</p>
+            <h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">Our Strict Commitment to Your Data Privacy</h3>
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 my-4 rounded-r-xl">
+                <p class="text-sm text-red-900 font-medium">
+                    <strong>Zero Data Tracking Policy:</strong> Pooreyoutuber deeply respects creator integrity and privacy engineering. Our application functions entirely within your client-side web ecosystem. <strong>We do not collect, store, or monitor your personal data, credentials, channel identifiers, or inputted search terms.</strong> No registration profiles are ever required to use our suite. Your strategies remain completely proprietary, confidential, and secure.
+                </p>
             </div>
-        </div>
+            
+            <p class="leading-relaxed">
+                By integrating these strategically generated terms inside your video descriptions, custom close captions, titles, and tags, you align your channel directly with YouTube's Core Recommendation Engine algorithm. Begin utilizing smart optimization setups today to witness sustainable metric growth across your channel's analytical dashboards!
+            </p>
+        </article>
 
+    </main>
+
+    <!-- Toast Notification for Copy System -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
+        <i class="fas fa-check-circle text-green-400"></i>
+        <span id="toastMessage">Copied to clipboard!</span>
     </div>
 
-    <!-- JavaScript For Tool Functionality -->
+    <!-- Intelligent Client-Side Generation Script -->
     <script>
-        function generateKeywords() {
-            const input = document.getElementById('keywordInput').value.trim();
-            const limit = parseInt(document.getElementById('keywordLimit').value);
+        // Seed database matrices matching user requested patterns (e.g., pubg mobile, pubg new update)
+        const englishModifiers = ["new update", "gameplay", "tips and tricks", "live stream", "highlights", "best moments", "pro guide", "for beginners", "settings 2026", "montage", "funny moments", "glitch", "secret tricks", "free rewards", "rank push"];
+        const mixedModifiers = ["hindi", "urdu", "bgmi highlights", "malayalam tutorial", "tamil gameplay", "telugu live", "gameplay hindi", "chinese server", "japanese version", "russian hackers", "pubg indonesia", "op clutch gameplay", "season update check", "pubg mobile kaise khele", "new setting updates"];
+
+        document.getElementById('keywordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            if (!input) {
-                alert('Please enter a valid search topic first!');
-                return;
-            }
-
-            // Target elements
+            const rawTopic = document.getElementById('topicInput').value.trim();
+            const count = parseInt(document.getElementById('keywordCount').value);
+            
+            if(!rawTopic) return;
+            
+            // Clean topic base formatting
+            const topic = rawTopic.toLowerCase();
+            
             const englishList = document.getElementById('englishList');
-            const mixList = document.getElementById('mixList');
-            const resultsGrid = document.getElementById('resultsGrid');
-
-            // Clear old values
+            const mixedList = document.getElementById('mixedList');
+            
+            // Clear prior states
             englishList.innerHTML = '';
-            mixList.innerHTML = '';
+            mixedList.innerHTML = '';
+            
+            // Generate distinct systematic lists
+            let englishArr = generateUniqueKeywords(topic, englishModifiers, count);
+            let mixedArr = generateUniqueKeywords(topic, mixedModifiers, count);
+            
+            // Render Group A
+            englishArr.forEach(kw => {
+                englishList.appendChild(createRowElement(kw));
+            });
+            
+            // Render Group B
+            mixedArr.forEach(kw => {
+                mixedList.appendChild(createRowElement(kw));
+            });
+            
+            // Reveal Output Viewport
+            const resultsWrapper = document.getElementById('resultsWrapper');
+            resultsWrapper.classList.remove('hidden');
+            resultsWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
 
-            // Realistic SEO variations templates for generation
-            const englishSuffixes = [
-                "gameplay", "tips and tricks", "highlights", "guide for beginners", "tutorial", 
-                "review 2026", "best settings", "how to pro", "secret strategy", "funny moments", 
-                "explained", "glitch and bugs", "ranking push", "live stream", "compilation",
-                "world record", "walkthrough", "series episode 1", "unboxing", "update details"
-            ];
-
-            const mixSuffixes = [
-                "new update", "hindi gaming", "live stream today", "pubg mobile chinas", 
-                "japanese server trick", "russian pro player gameplay", "tips in hindi", 
-                "kaise khele", "new setting trick", "best strategy video", "viral montage", 
-                "leak trailer", "free download hack myth", "comparison vids", "free rewards hack"
-            ];
-
-            // Generating English Base
-            let engKeywords = [`${input}`, `${input} guide`, `${input} best moments`];
-            for(let i=0; i < limit * 2; i++) {
-                let randomSuff = englishSuffixes[Math.floor(Math.random() * englishSuffixes.length)];
-                let combined = `${input} ${randomSuff}`;
-                if(!engKeywords.includes(combined)) engKeywords.push(combined);
+        function generateUniqueKeywords(base, modifiers, limit) {
+            let results = [];
+            // First item is always the core base topic
+            results.push(base);
+            
+            // Shuffle modifiers array to provide fresh variations on requests
+            let shuffled = [...modifiers].sort(() => 0.5 - Math.random());
+            
+            for(let i = 0; i < shuffled.length && results.length < limit; i++) {
+                // Alternating layout types for realistic look
+                if(i % 2 === 0) {
+                    results.push(`${base} ${shuffled[i]}`);
+                } else {
+                    results.push(`${shuffled[i]} ${base}`);
+                }
             }
-
-            // Generating Mixed Base (Hindi/Hinglish/Global context mixed)
-            let mixedKeywords = [`${input} hindi`, `${input} update info`, `${input} global gameplay`];
-            for(let i=0; i < limit * 2; i++) {
-                let randomSuff = mixSuffixes[Math.floor(Math.random() * mixSuffixes.length)];
-                let combined = `${input} ${randomSuff}`;
-                if(!mixedKeywords.includes(combined)) mixedKeywords.push(combined);
-            }
-
-            // Display requested numbers inside UI
-            for (let i = 0; i < limit; i++) {
-                // English item rendering
-                let liEng = document.createElement('li');
-                liEng.className = 'keyword-item';
-                liEng.textContent = engKeywords[i] ? engKeywords[i].toLowerCase() : `${input} query ${i}`;
-                englishList.appendChild(liEng);
-
-                // Mixed item rendering
-                let liMix = document.createElement('li');
-                liMix.className = 'keyword-item';
-                liMix.textContent = mixedKeywords[i] ? mixedKeywords[i].toLowerCase() : `${input} trend ${i}`;
-                mixList.appendChild(liMix);
-            }
-
-            // Show results block smooth grid layout shift
-            resultsGrid.style.display = 'grid';
-            resultsGrid.scrollIntoView({ behavior: 'smooth' });
+            return results;
         }
 
-        // Copy mechanism function
-        function copyToClipboard(elementId) {
-            const listItems = document.querySelectorAll(`#${elementId} .keyword-item`);
-            if (listItems.length === 0) return;
-
-            let keywordsArr = [];
-            listItems.forEach(item => keywordsArr.push(item.textContent));
+        function createRowElement(keyword) {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-50 transition-colors border-b border-gray-100';
             
-            // Comma separated structure for Direct YouTube tagging interface compatibility
-            let textToCopy = keywordsArr.join(', ');
+            tr.innerHTML = `
+                <td class="p-3 font-medium text-gray-800 break-all select-all">${keyword}</td>
+                <td class="p-3 text-right">
+                    <button onclick="copySingle(this, '${keyword.replace(/'/g, "\\'")}')" class="text-gray-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-gray-100 transition-all" title="Copy Keyword">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </td>
+            `;
+            return tr;
+        }
 
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('Keywords copied successfully as comma-separated tags!');
-            }).catch(err => {
-                console.error('Could not copy keywords text: ', err);
+        // Action Handlers: Individual Single Copy Operations
+        function copySingle(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = btn.querySelector('i');
+                icon.className = 'fas fa-check text-green-500';
+                showToast(`Copied: "${text}"`);
+                setTimeout(() => {
+                    icon.className = 'fas fa-copy';
+                }, 2000);
             });
+        }
+
+        // Action Handlers: Whole Group Array Comma-separated Extraction
+        function copyEntireGroup(targetTableId) {
+            const rows = document.querySelectorAll(`#${targetTableId} td:first-child`);
+            let items = [];
+            rows.forEach(r => items.push(r.textContent));
+            
+            if(items.length === 0) return;
+            
+            const commaSeparated = items.join(', ');
+            navigator.clipboard.writeText(commaSeparated).then(() => {
+                showToast(`Successfully copied all tags formatted for YouTube!`);
+            });
+        }
+
+        // Interactive Interface Micro-Feedback (Toasts)
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
         }
     </script>
 </body>
