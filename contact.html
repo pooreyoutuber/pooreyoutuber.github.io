@@ -5,56 +5,195 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact Us - PooreYouTuber</title>
   <style>
+    :root {
+      --primary-color: #007bff;
+      --primary-hover: #0056b3;
+      --insta-color: #e1306c;
+      --insta-hover: #b81d52;
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --text-muted: #666666;
+    }
+
     body { 
-      font-family: Arial, sans-serif; 
-      max-width: 800px; 
-      margin: auto; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      max-width: 650px; 
+      margin: 40px auto; 
       padding: 20px; 
       line-height: 1.6; 
-      background: #f4f6f9;
+      background: var(--bg-color);
+      color: var(--text-color);
     }
-    h1 { color: #222; }
-    label { display: block; margin-top: 15px; }
+
+    .contact-card {
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 { 
+      color: #111; 
+      margin-top: 0;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 25px;
+    }
+
+    label { 
+      display: block; 
+      margin-top: 20px; 
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
     input, textarea { 
       width: 100%; 
-      padding: 10px; 
-      margin-top: 5px; 
-      border: 1px solid #ccc; 
-      border-radius: 5px; 
-      box-sizing: border-box; /* Ensures padding doesn't affect the total width */
+      padding: 12px 15px; 
+      margin-top: 6px; 
+      border: 1px solid #dde1e5; 
+      border-radius: 8px; 
+      box-sizing: border-box; 
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: #fcfcfd;
     }
-    button { 
-      margin-top: 15px; 
-      padding: 10px 20px; 
-      background: #007bff; 
+
+    input:focus, textarea:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+      background: #fff;
+    }
+
+    .btn-submit { 
+      width: 100%;
+      margin-top: 25px; 
+      padding: 12px; 
+      background: var(--primary-color); 
       border: none; 
       color: white; 
-      border-radius: 5px; 
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 8px; 
       cursor: pointer; 
+      transition: background 0.2s ease;
     }
-    button:hover { background: #0056b3; }
-    a { color: #007bff; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+
+    .btn-submit:hover { 
+      background: var(--primary-hover); 
+    }
+
+    .divider {
+      margin: 30px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .divider::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: #e0e0e0;
+      z-index: 1;
+    }
+
+    .divider span {
+      background: var(--card-bg);
+      padding: 0 15px;
+      color: #999;
+      font-size: 0.85rem;
+      position: relative;
+      z-index: 2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .insta-section {
+      text-align: center;
+      background: #fff5f7;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px dashed #ffccd7;
+    }
+
+    .insta-section p {
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .btn-insta {
+      display: inline-block;
+      padding: 10px 20px;
+      background: var(--insta-color);
+      color: white !important;
+      font-weight: 600;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .btn-insta:hover {
+      background: var(--insta-hover);
+      text-decoration: none;
+    }
+
+    .back-home { 
+      display: inline-block;
+      margin-top: 25px;
+      color: var(--primary-color); 
+      text-decoration: none; 
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    
+    .back-home:hover { 
+      text-decoration: underline; 
+    }
   </style>
 </head>
 <body>
-  <h1>Contact Us</h1>
-  <p>If you have any questions, suggestions, or feedback, you can reach us using the form below:</p>
 
-  <form action="mailto:mrleonardo798@gmail.com" method="post" enctype="text/plain">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
+  <div class="contact-card">
+    <h1>Contact Us</h1>
+    <p>If you have any questions, suggestions, or feedback, please reach out using the form below. If you are asking a question, kindly try to provide all details clearly so we can assist you better.</p>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
+    <!-- Form action kept functional, but text email is hidden from UI -->
+    <form action="mailto:mrleonardo798@gmail.com" method="post" enctype="text/plain">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" placeholder="Enter your full name" required>
 
-    <label for="message">Message:</label>
-    <textarea id="message" name="message" rows="5" required></textarea>
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email address" required>
 
-    <button type="submit">Send</button>
-  </form>
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="5" placeholder="Write your question or feedback with full details..." required></textarea>
 
-  <p>Or directly email us at: <b><a href="mailto:mrleonardo798@gmail.com">mrleonardo798@gmail.com</a></b></p>
-  <p><a href="index.html">⬅ Back to Home</a></p>
+      <button type="submit" class="btn-submit">Send Message</button>
+    </form>
+
+    <div class="divider">
+      <span>OR</span>
+    </div>
+
+    <!-- Instagram Direct Message Option -->
+    <div class="insta-section">
+      <p>Are you an Instagram user? Feel free to drop us a direct message for a quicker response!</p>
+      <a href="https://instagram.com/pooreyoutuber" target="_blank" class="btn-insta">DM us on Instagram</a>
+    </div>
+
+    <a href="index.html" class="back-home">← Back to Home</a>
+  </div>
+
 </body>
 </html>
