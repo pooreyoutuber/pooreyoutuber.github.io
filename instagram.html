@@ -298,8 +298,8 @@
             embedUrl += 'embed';
         } 
         // Convert Facebook Links to Embed Format
-        else if (url.includes('facebook.com')) {
-            embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&t=0`;
+     else if (url.includes('facebook.com')) {
+            embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&t=0&autoplay=true&mute=1`;
         }
 
         for (let i = 0; i < count; i++) {
@@ -308,8 +308,13 @@
 
             const iframe = document.createElement('iframe');
             iframe.src = embedUrl;
+            
+            // ALLOW ATTRIBUTES: Added autoplay explicitly
             iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share";
             iframe.allowFullscreen = true;
+            
+            // SECURITY SANDBOX FIXED: Blocks the iframe from forcing a jump/redirect to instagram app/site
+            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
 
             card.appendChild(iframe);
             grid.appendChild(card);
