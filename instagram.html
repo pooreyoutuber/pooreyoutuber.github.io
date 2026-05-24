@@ -169,7 +169,7 @@
 
         .btn-generate {
             background: var(--insta-gradient);
-            color: #white;
+            color: #ffffff;
             flex-grow: 1;
         }
 
@@ -371,7 +371,7 @@
             </div>
             
             <p class="hint-text">
-                💡 <em>Tip: For optimal multi-instance desktop performance, configure your browser settings to allow multiple sound playback channels.</em>
+                💡 <em>Tip: Click directly on the video player overlay to interact. External navigation links are locked for continuous streaming.</em>
             </p>
         </div>
 
@@ -457,14 +457,16 @@
             grid.innerHTML = ''; // Flushes previous workspace setup
 
             let embedUrl = url;
+            let isInstagram = false;
             
-            // Format Conversion Rules for Instagram Assets (Appended Autoplay parameters)
+            // Format Conversion Rules for Instagram Assets
             if (url.includes('instagram.com')) {
+                isInstagram = true;
                 embedUrl = url.split('?')[0];
                 if (!embedUrl.endsWith('/')) embedUrl += '/';
                 embedUrl += 'embed/?autoplay=1';
             } 
-            // Format Conversion Rules for Facebook Assets (Appended Autoplay parameters)
+            // Format Conversion Rules for Facebook Assets
             else if (url.includes('facebook.com')) {
                 embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&autoplay=1&mute=0`;
             }
@@ -478,10 +480,12 @@
                 iframe.src = embedUrl;
                 iframe.allow = "autoplay; encrypted-media; picture-in-picture";
                 iframe.allowFullscreen = true;
-
+                
+                // FIXED ERROR HERE: Instagram redirects ko block karne ke liye sandbox lagaya gaya hai
                 if (isInstagram) {
                     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
                 }
+                
                 card.appendChild(iframe);
                 grid.appendChild(card);
             }
