@@ -277,7 +277,7 @@
   
 
 <script>
-    function generateViews() {
+   function generateViews() {
         const url = document.getElementById('videoUrl').value.trim();
         const count = document.getElementById('viewCount').value;
         const grid = document.getElementById('videoGrid');
@@ -287,13 +287,12 @@
             return;
         }
 
-        grid.innerHTML = ''; // Clear previous
+        grid.innerHTML = ''; 
 
         let embedUrl = url;
         
         // Convert Instagram Links to Embed Format
         if (url.includes('instagram.com')) {
-            // Remove query strings and add /embed
             embedUrl = url.split('?')[0];
             if (!embedUrl.endsWith('/')) embedUrl += '/';
             embedUrl += 'embed';
@@ -327,6 +326,7 @@
         document.getElementById('videoGrid').innerHTML = '';
         document.getElementById('videoUrl').value = '';
     }
+</script>
 
 </body>
 </html>
