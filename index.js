@@ -755,12 +755,10 @@ app.post('/popup', async (req, res) => {
 // NEW TOOL: AI YOUTUBE THUMBNAIL MAKER ENDPOINT
 // ===================================================================
 // =========================================================================
-// 🔥 UPDATED TOOL: AI SUBTITLE VIDEO GENERATOR WITH ROBUST ERROR HANDLING
+// 🔥 UPDATED TOOL: AI SUBTITLE VIDEO GENERATOR VIA GEMINI API (NO OPENAI)
 // =========================================================================
 
-const { OpenAI } = require('openai');
 const ffmpeg = require('fluent-ffmpeg');
-const https = require('https');
 
 // Ensure required directories exist for temporary processing
 if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
@@ -777,26 +775,10 @@ const subToolStorage = multer.diskStorage({
 });
 const subToolUpload = multer({ storage: subToolStorage });
 
-// 🔥 FIX 1: Clean Custom Agent block to prevent ECONNRESET and ignore global conflicting proxies
-const cleanHttpsAgent = new https.Agent({
-    keepAlive: true,               // Keeps the socket open to prevent sudden server reset
-    maxSockets: 64,                // Multi-threading load handling
-    rejectUnauthorized: true       // Strict SSL handshake stability
-});
-
-// 🔥 FIX 2: Bind httpAgent & httpsAgent explicitly into OpenAI configuration
-const openaiInstance = new OpenAI({ 
-    apiKey: process.env.OPEN_API_KEY || process.env.OPENAI_API_KEY,
-    timeout: 60000,                // 60 Seconds strict timeout for large file processing on Render
-    httpAgent: cleanHttpsAgent,    // Enforce direct connection
-    httpsAgent: cleanHttpsAgent    // Bypass intermediate interceptors causing ECONNRESET
-});
-
 /**
- * 1. API: UPLOAD VIDEO & TRANSCRIBE WITH WHISPER
+ * 1. API: UPLOAD VIDEO & TRANSCRIBE WITH GEMINI 1.5/2.5 FLASH
  */
 app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
-    // Flag to track if response has been sent to avoid "Headers already sent" crash
     let responseSent = false; 
     let audioPath = '';
 
@@ -809,49 +791,94 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
         audioPath = `uploads/audio_${Date.now()}.mp3`;
         const spokenLanguage = req.body.language || 'en';
 
-        console.log(`[Whisper Pipeline] Processing video: ${videoPath}, extracting audio...`);
+        // Aapki file me variable ka naam GEMINI_KEY hai ya process.env.GEMINI_API_KEY, use check kar lega
+        const activeGeminiKey = GEMINI_KEY || process.env.GEMINI_API_KEY;
+
+        if (!activeGeminiKey) {
+            console.error("❌ CRITICAL: Gemini API Key is missing!");
+            return res.status(500).json({ error: "Gemini API key is not defined on the server configuration." });
+        }
+
+        console.log(`[Gemini Pipeline] Processing video: ${videoPath}, extracting audio...`);
 
         // Extract clean audio from video via FFmpeg
         ffmpeg(videoPath)
             .output(audioPath)
             .noVideo()
             .audioCodec('libmp3lame')
+            .audioBitrate(128) // Clean audio optimization for LLM processing
             .on('end', async () => {
                 try {
-                    // SAFEGUARD: Ensure API key exists before execution
-                    if (!openaiInstance.apiKey) {
-                        console.error("❌ CRITICAL: OpenAI API Key is missing in Environment Variables!");
-                        if (!responseSent) {
-                            responseSent = true;
-                            return res.status(500).json({ 
-                                error: "Configuration Error", 
-                                details: "Backend API key is not defined on Render Dashboard." 
-                            });
-                        }
-                    }
+                    console.log(`[Gemini Pipeline] Audio extracted successfully. Size: ${fs.statSync(audioPath).size} bytes. Uploading to Gemini...`);
 
-                    console.log(`[Whisper Pipeline] Audio extracted successfully. File size: ${fs.statSync(audioPath).size} bytes. Connecting to OpenAI...`);
+                    // Audio file ko base64 string me convert karenge taaki inline data pipeline se bhej sakein
+                    const audioBuffer = fs.readFileSync(audioPath);
+                    const base64Audio = audioBuffer.toString("base64");
 
-                    // Send extracted audio to OpenAI Whisper using the secured instance
-                    const transcription = await openaiInstance.audio.transcriptions.create({
-                        file: fs.createReadStream(audioPath),
-                        model: "whisper-1",
-                        response_format: "verbose_json",
-                        language: spokenLanguage,
-                        timestamp_granularities: ["word"]
+                    // System instruction to enforce rigid timestamp data matching subtitle array requirements
+                    const promptText = `Analyze this audio file. Transcribe the spoken words completely. 
+                    You must detect timestamps precisely for each spoken segment/word.
+                    Provide the response STRICTLY as a valid JSON array of objects with no markdown wrap, no backticks, no comments.
+                    The language spoken is mainly "${spokenLanguage}".
+                    
+                    Expected output structure format:
+                    [
+                      { "word": "Hello", "start": 0.15, "end": 0.50 },
+                      { "word": "world", "start": 0.55, "end": 0.95 }
+                    ]
+                     Ensure start and end values are raw floating-point numbers representing seconds. Do not skip any words.`;
+
+                    console.log("[Gemini Pipeline] Sending multimodal request to Gemini Flash...");
+
+                    // Raw API request using global nodeFetch/fetch mapping to prevent library mismatch
+                    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeGeminiKey}`;
+                    
+                    const response = await fetch(geminiEndpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [
+                                    { text: promptText },
+                                    {
+                                        inlineData: {
+                                            mimeType: "audio/mp3",
+                                            data: base64Audio
+                                        }
+                                    }
+                                ]
+                            }],
+                            generationConfig: {
+                                responseMimeType: "application/json" // Mandates clean JSON output formatting
+                            }
+                        })
                     });
 
-                    console.log("[Whisper Pipeline] Transcription successfully received from OpenAI.");
+                    if (!response.ok) {
+                        const errorLogs = await response.text();
+                        throw new Error(`Gemini API responded with status ${response.status}: ${errorLogs}`);
+                    }
 
-                    // Cleanup the temporary MP3 file instantly after successful API request
+                    const resultData = await response.json();
+                    
+                    // Cleanup temporary audio file
                     if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
 
-                    // Map Whisper response words array structure
-                    const formattedSubtitles = transcription.words.map(w => ({
-                        word: w.word,
-                        start: w.start,
-                        end: w.end
-                    }));
+                    // Extract text string returned by Gemini response structure
+                    let rawJsonText = resultData.candidates[0].content.parts[0].text.trim();
+                    
+                    // Safe string parsing
+                    let formattedSubtitles = [];
+                    try {
+                        formattedSubtitles = JSON.parse(rawJsonText);
+                    } catch (parseErr) {
+                        console.error("⚠️ Failed to parse raw Gemini JSON, attempting regex cleanup...", rawJsonText);
+                        // Clean markdown backticks fallback if any
+                        rawJsonText = rawJsonText.replace(/```json|```/gi, '').trim();
+                        formattedSubtitles = JSON.parse(rawJsonText);
+                    }
+
+                    console.log(`[Gemini Pipeline] Successfully generated ${formattedSubtitles.length} subtitle timestamps.`);
 
                     if (!responseSent) {
                         responseSent = true;
@@ -861,15 +888,15 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
                         });
                     }
 
-                } catch (openAiErr) {
-                    console.error("🔥 [OpenAI API Connection Error Breakdown]:", openAiErr);
+                } catch (geminiErr) {
+                    console.error("🔥 [Gemini API Pipeline Error]:", geminiErr);
                     if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
                     
                     if (!responseSent) {
                         responseSent = true;
                         return res.status(500).json({ 
-                            error: "OpenAI Whisper Transcription failed.", 
-                            details: openAiErr.message || "Network timeout / Connection refused by OpenAI." 
+                            error: "Gemini Transcription Pipeline failed.", 
+                            details: geminiErr.message 
                         });
                     }
                 }
@@ -903,7 +930,7 @@ if (!app._router || !app._router.stack.some(layer => layer.regexp && layer.regex
 // =========================================================================
 // END OF AI SUBTITLE VIDEO TOOL LOGIC
 // =========================================================================
-// =========================================================================
+
 // END OF AI SUBTITLE VIDEO TOOL LOGIC
 // =========================================================================
 //==================================================
