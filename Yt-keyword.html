@@ -26,11 +26,10 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
-                
                 <div>
                     <label class="block text-sm font-semibold text-cyan-400 mb-2">1. Upload Video (Max 40s)</label>
                     <div class="border-2 border-dashed border-slate-700 hover:border-cyan-500 rounded-xl p-4 text-center cursor-pointer transition relative">
-                        <input type="file" id="videoInput" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleVideoSelect(event)">
+                        <input type="file" id="videoInput" name="video" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleVideoSelect(event)">
                         <div id="uploadPlaceholder">
                             <svg class="mx-auto h-12 w-12 text-gray-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -62,7 +61,7 @@
                         <option value="sv">Swedish (Svenska)</option>
                         <option value="id">Indonesian (Bahasa Indonesia)</option>
                         <option value="vi">Vietnamese (Tiếng Việt)</option>
-                        </select>
+                    </select>
                 </div>
 
                 <div class="space-y-4">
@@ -82,10 +81,10 @@
                         <div>
                             <label class="text-xs text-gray-400 block mb-1">Font Size</label>
                             <select id="fontSize" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm">
-                                <option value="18">18 (Small)</option>
-                                <option value="24" selected>24 (Medium)</option>
-                                <option value="32">32 (Large)</option>
-                                <option value="40">40 (Extra Large)</option>
+                                <option value="28">28 (Small)</option>
+                                <option value="36" selected>36 (Medium)</option>
+                                <option value="48">48 (Large)</option>
+                                <option value="60">60 (Extra Large)</option>
                             </select>
                         </div>
                         <div>
@@ -127,11 +126,11 @@
                 <h3 class="text-sm font-semibold text-cyan-400 mb-4 self-start">Live Interactive Preview</h3>
                 
                 <div class="relative w-full max-w-[280px] aspect-[9/16] bg-black rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center">
-                    <video id="videoPreview" controls class="w-full h-full object-cover hidden"></svg>
+                    <video id="videoPreview" controls class="w-full h-full object-cover hidden"></video>
                     <div id="videoPlaceholderText" class="text-gray-500 text-sm text-center p-4">
                         Video player preview will appear here after upload
                     </div>
-                    <div id="mockSubtitle" class="absolute inset-x-4 text-center font-bold pointer-events-none hidden transition-all drop-shadow-md">
+                    <div id="mockSubtitle" class="absolute inset-x-4 text-center font-bold pointer-events-none hidden transition-all drop-shadow-md z-10">
                         AI Subtitle Preview!
                     </div>
                 </div>
@@ -166,9 +165,8 @@
     <script>
         const BACKEND_URL = "https://pooreyoutuber.onrender.com";
         let uploadedVideoUrl = ""; 
-        let globalSubtitlesArray = []; // Stores { word, start, end } structures
+        let globalSubtitlesArray = [];
 
-        // Realtime CSS text overlay adjustments based on user choices
         function updateMockSubtitleStyles() {
             const mock = document.getElementById('mockSubtitle');
             const font = document.getElementById('fontName').value;
@@ -182,13 +180,11 @@
             mock.style.color = color;
             mock.style.textShadow = `-2px -2px 0 ${stroke}, 2px -2px 0 ${stroke}, -2px 2px 0 ${stroke}, 2px 2px 0 ${stroke}`;
 
-            // Adjust vertical alignments layout mock
             if (pos === "6") { mock.style.top = "15%"; mock.style.bottom = "auto"; }
             else if (pos === "10") { mock.style.top = "45%"; mock.style.bottom = "auto"; }
             else { mock.style.bottom = "15%"; mock.style.top = "auto"; }
         }
 
-        // Attach event change updates to refresh screen visual immediately
         ['fontName', 'fontSize', 'fontColor', 'outlineColor', 'position'].forEach(id => {
             document.getElementById(id).addEventListener('change', updateMockSubtitleStyles);
             document.getElementById(id).addEventListener('input', updateMockSubtitleStyles);
@@ -202,7 +198,6 @@
                 fileDisplay.innerText = `Selected: ${file.name}`;
                 fileDisplay.classList.remove('hidden');
 
-                // Load locally in client player to save bandwidth before process
                 const videoPreview = document.getElementById('videoPreview');
                 videoPreview.src = URL.createObjectURL(file);
                 videoPreview.classList.remove('hidden');
@@ -213,7 +208,6 @@
             }
         }
 
-        // Action Step 1: Send video binary to Render back-end server
         async function uploadAndTranscribe() {
             const fileInput = document.getElementById('videoInput');
             const langSelect = document.getElementById('languageSelect').value;
@@ -226,6 +220,7 @@
             }
 
             const formData = new FormData();
+            // Crucial Fix: 'video' name must perfectly map server side expectation
             formData.append('video', fileInput.files[0]);
             formData.append('language', langSelect);
 
@@ -239,31 +234,34 @@
                     body: formData
                 });
 
-                if (!response.ok) throw new Error("Server transcription failed.");
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Server transcription crashed.");
+                }
 
                 const data = await response.json();
                 
-                uploadedVideoUrl = data.videoUrl; // Saving server ref path
-                globalSubtitlesArray = data.subtitles; // Saving token words array [cite: 32]
+                uploadedVideoUrl = data.videoUrl; 
+                globalSubtitlesArray = data.subtitles; 
 
                 renderSubtitleTimelineEditor();
                 document.getElementById('exportBtn').disabled = false;
                 
             } catch (err) {
+                console.error(err);
                 alert("Error connecting to server backend: " + err.message);
-                timeline.innerHTML = `<span class="text-red-500">Failed to render transcription. Try again.</span>`;
+                timeline.innerHTML = `<span class="text-red-500">Failed to render transcription. Try again.<br><small class="text-gray-500">${err.message}</small></span>`;
             } finally {
                 transcribeBtn.disabled = false;
                 transcribeBtn.innerText = "Generate AI Subtitles";
             }
         }
 
-        // Action Step 2: Render editable timeline cards on right drawer panel
         function renderSubtitleTimelineEditor() {
             const timeline = document.getElementById('subtitleTimeline');
             timeline.innerHTML = "";
 
-            if (globalSubtitlesArray.length === 0) {
+            if (!globalSubtitlesArray || globalSubtitlesArray.length === 0) {
                 timeline.innerHTML = "No sound segments found.";
                 return;
             }
@@ -293,7 +291,6 @@
             }
         }
 
-        // Action Step 3: Package final choices, shoot to FFmpeg renderer and trigger download link
         async function burnAndDownloadVideo() {
             const exportBtn = document.getElementById('exportBtn');
             const statusMessage = document.getElementById('statusMessage');
@@ -323,7 +320,10 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error("Failed to compile and render video.");
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Failed to compile and render video.");
+                }
 
                 const data = await response.json();
                 
@@ -331,6 +331,7 @@
                 statusMessage.innerHTML = `🎉 Processing Finished! <a href="${BACKEND_URL}${data.downloadUrl}" target="_blank" class="underline font-bold text-white ml-1">Click here to Download Video</a>`;
 
             } catch (err) {
+                console.error(err);
                 statusMessage.className = "text-sm p-3 rounded-lg text-center font-medium bg-red-900 text-red-200";
                 statusMessage.innerText = "Error during export process: " + err.message;
                 exportBtn.disabled = false;
