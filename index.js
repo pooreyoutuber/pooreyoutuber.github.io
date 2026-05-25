@@ -760,8 +760,7 @@ app.post('/popup', async (req, res) => {
 
 const { OpenAI } = require('openai');
 const ffmpeg = require('fluent-ffmpeg');
-const fs = require('fs');
-const path = require('path');
+
 
 // Ensure required directories exist for temporary processing
 if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
