@@ -921,12 +921,104 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
         }
     }
 });
+/**
+ * 🔥 FIX 1: ADDING MISSING EXPORT ROUTE (/api/export)
+ * Yeh API frontend se aney wali custom styling aur subtitles ko video me permanently add (burn) karegi.
+ */
+app.post('/api/export', express.json(), async (req, res) => {
+    try {
+        const { videoUrl, subtitles, styles } = req.body;
 
-// Serve output directory dynamically if not already assigned in your file above
+        if (!videoUrl || !subtitles || subtitles.length === 0) {
+            return res.status(400).json({ error: "Missing required video URL or subtitle data segments." });
+        }
+
+        console.log(`[Export Pipeline] Received export request for video: ${videoUrl}`);
+
+        // 1. Generate standard SRT subtitle formatting from array timestamps
+        let srtContent = '';
+        subtitles.forEach((item, index) => {
+            const formatSRTTime = (seconds) => {
+                const date = new Date(0);
+                date.setSeconds(seconds);
+                const ms = Math.floor((seconds % 1) * 1000).toString().padStart(3, '0');
+                const timeStr = date.toISOString().substr(11, 8);
+                return `${timeStr},${ms}`;
+            };
+
+            const startTime = formatSRTTime(item.start);
+            const endTime = formatSRTTime(item.end);
+
+            srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${item.word}\n\n`;
+        });
+
+        // Save subtitle file temporarily
+        const srtFilename = `uploads/subs_${Date.now()}.srt`;
+        fs.writeFileSync(srtFilename, srtContent, 'utf8');
+
+        // 2. Map styling parameters (FontColor, Size, Alignment Position) to FFmpeg subtitle filters
+        // Convert web hex colors (#ffff00) to FFmpeg/ASS styling formats (&H00FFFF&)
+        const convertHexToAss = (hex) => {
+            if (!hex) return 'HFFFFFF';
+            const cleanHex = hex.replace('#', '');
+            if (cleanHex.length === 6) {
+                const r = cleanHex.substr(0, 2);
+                const g = cleanHex.substr(2, 2);
+                const b = cleanHex.substr(4, 2);
+                return `H${b}${g}${r}`; // ASS needs Reverse Hex order (BGR)
+            }
+            return 'HFFFFFF';
+        };
+
+        const primaryColor = convertHexToAss(styles.fontColor || '#ffff00');
+        const outlineColor = convertHexToAss(styles.outlineColor || '#000000');
+        const fontName = styles.fontName === 'Impact' ? 'Impact' : (styles.fontName || 'Arial');
+        const fontSize = styles.fontSize || '36';
+        
+        // Alignment codes: 2 = Bottom-Center, 6 = Top-Center, 10 = Mid-Center
+        const alignment = styles.position || '10'; 
+
+        // Enforce strong style injection parameters for rendering
+        const videoOutputName = `outputs/export_${Date.now()}.mp4`;
+        const videoFilterCommand = `subtitles=${srtFilename}:force_style='Fontname=${fontName},Fontsize=${fontSize},PrimaryColour=&${primaryColor}&,OutlineColour=&${outlineColor}&,Outline=2,BorderStyle=1,Alignment=${alignment}'`;
+
+        console.log(`[Export Pipeline] Compiling FFmpeg with style filters...`);
+
+        // Execute FFmpeg to burn subtitles permanently into the new video file
+        ffmpeg(videoUrl)
+            .videoFilter(videoFilterCommand)
+            .output(videoOutputName)
+            .on('end', () => {
+                console.log(`[Export Pipeline] Video successfully rendered: ${videoOutputName}`);
+                
+                // Cleanup temporary srt file
+                if (fs.existsSync(srtFilename)) fs.unlinkSync(srtFilename);
+
+                // Send download link pointing to backend architecture
+                return res.json({
+                    success: true,
+                    downloadUrl: `/${videoOutputName}`
+                });
+            })
+            .on('error', (err) => {
+                console.error("❌ [FFmpeg Export Video Engine Crash]:", err);
+                if (fs.existsSync(srtFilename)) fs.unlinkSync(srtFilename);
+                return res.status(500).json({ error: "Failed to render styled text into video stream.", details: err.message });
+            })
+            .run();
+
+    } catch (exportErr) {
+        console.error("❌ [Global Export Route Failure]:", exportErr);
+        return res.status(500).json({ error: "Internal processing crash during rendering.", details: exportErr.message });
+    }
+});
+// Serve output directory dynamically
 if (!app._router || !app._router.stack.some(layer => layer.regexp && layer.regexp.test('/outputs'))) {
     app.use('/outputs', express.static('outputs'));
 }
-
+if (!app._router || !app._router.stack.some(layer => layer.regexp && layer.regexp.test('/uploads'))) {
+    app.use('/uploads', express.static('uploads'));
+}
 // =========================================================================
 // END OF AI SUBTITLE VIDEO TOOL LOGIC
 // =========================================================================
