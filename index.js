@@ -754,7 +754,204 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL MAKER ENDPOINT
 // ===================================================================
+// =========================================================================
+// 🔥 NEW TOOL: AI SUBTITLE VIDEO GENERATOR WITH CUSTOM STYLING (REELS/SHORTS)
+// =========================================================================
 
+const { OpenAI } = require('openai');
+const ffmpeg = require('fluent-ffmpeg');
+
+
+// Ensure required directories exist for temporary processing
+if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
+if (!fs.existsSync('./outputs')) fs.mkdirSync('./outputs');
+
+// Multer Storage Configuration for Videos
+const subToolStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, 'subtool_' + Date.now() + path.extname(file.originalname));
+    }
+});
+const subToolUpload = multer({ storage: subToolStorage });
+
+// OpenAI Instance using your Environment Variable
+const openaiInstance = new OpenAI({ apiKey: process.env.OPEN_API_KEY });
+
+/**
+ * 1. API: UPLOAD VIDEO & TRANSCRIBE WITH WHISPER
+ * Captures video, extracts audio, and transcribes word-by-word with high accuracy.
+ */
+app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: "No video file uploaded." });
+        }
+
+        const videoPath = req.file.path;
+        const audioPath = `uploads/audio_${Date.now()}.mp3`;
+        const spokenLanguage = req.body.language || 'en'; // Default to English if not provided
+
+        // Extract clean audio from video via FFmpeg
+        ffmpeg(videoPath)
+            .output(audioPath)
+            .noVideo()
+            .audioCodec('libmp3lame')
+            .on('end', async () => {
+                try {
+                    // Send extracted audio to OpenAI Whisper with user selected language
+                    const transcription = await openaiInstance.audio.transcriptions.create({
+                        file: fs.createReadStream(audioPath),
+                        model: "whisper-1",
+                        response_format: "verbose_json",
+                        language: spokenLanguage, // Supports 30+ dynamic countries/languages
+                        timestamp_granularities: ["word"]
+                    });
+
+                    // Cleanup the temporary MP3 file to keep Render Cloud storage clean
+                    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+
+                    // Map Whisper response words array structure to match frontend expectations
+                    const formattedSubtitles = transcription.words.map(w => ({
+                        word: w.word,
+                        start: w.start,
+                        end: w.end
+                    }));
+
+                    // Send paths back to frontend for timeline editing and interactive live preview
+                    res.json({
+                        videoUrl: videoPath,
+                        subtitles: formattedSubtitles
+                    });
+
+                } catch (openAiErr) {
+                    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+                    res.status(500).json({ error: "OpenAI Whisper Transcription failed.", details: openAiErr.message });
+                }
+            })
+            .on('error', (err) => {
+                if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+                res.status(500).json({ error: "Failed to extract audio from video.", details: err.message });
+            })
+            .run();
+
+    } catch (globalErr) {
+        res.status(500).json({ error: "Internal server error in upload pipeline.", details: globalErr.message });
+    }
+});
+
+/**
+ * 2. API: BURN CUSTOM SUBTITLES & GENERATE DOWNLOAD LINK
+ * Receives the modified manual transcript array and custom styles, compiles via FFmpeg.
+ */
+app.post('/api/export', async (req, res) => {
+    try {
+        const { videoUrl, subtitles, styles } = req.body;
+
+        if (!videoUrl || !subtitles || !styles) {
+            return res.status(400).json({ error: "Required parameters (videoUrl, subtitles, styles) are missing." });
+        }
+
+        const timestampId = Date.now();
+        const assPath = `uploads/subs_${timestampId}.ass`;
+        const outputPath = `outputs/final_reels_${timestampId}.mp4`;
+
+        // Safe extraction of customization layers sent by UI
+        const fontName = styles.fontName || 'Arial';
+        const fontSize = styles.fontSize || 24;
+        const alignment = styles.position || 10; // Default 10 is Middle Center for Shorts/Reels
+
+        // Convert Frontend HTML Hex colors (#ff0000) to FFmpeg ASS Hex Colors (&H000000FF)
+        const convertHexToAssColor = (hexStr) => {
+            if (!hexStr) return '&H00FFFFFF'; // Default White
+            const cleanHex = hexStr.replace('#', '');
+            if (cleanHex.length === 6) {
+                const r = cleanHex.substring(0, 2);
+                const g = cleanHex.substring(2, 4);
+                const b = cleanHex.substring(4, 6);
+                return `&H00${b}${g}${r}`; // ASS works in BGR format
+            }
+            return '&H00FFFFFF';
+        };
+
+        const primaryColorAss = convertHexToAssColor(styles.fontColor);
+        const outlineColorAss = convertHexToAssColor(styles.outlineColor);
+
+        // Helper function to format seconds into ASS standard timestamp format (H:MM:SS.CC)
+        const formatTimeToAss = (seconds) => {
+            const date = new Date(0);
+            date.setSeconds(seconds);
+            const hours = date.getUTCHours();
+            const mins = String(date.getUTCMinutes()).padStart(2, '0');
+            const secs = String(date.getUTCSeconds()).padStart(2, '0');
+            const centiseconds = String(Math.floor((seconds % 1) * 100)).padStart(2, '0');
+            return `${hours}:${mins}:${secs}.${centiseconds}`;
+        };
+
+        // Constructing Advanced SubStation Alpha (.ass) file structure for precise rendering
+        let assContent = `[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: CustomReels,${fontName},${fontSize},${primaryColorAss},&H000000FF,${outlineColorAss},&H00000000,-1,0,0,0,100,100,0,0,1,3,0,${alignment},10,10,10,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+`;
+
+        // Loop through manual/edited subtitles and append to script body
+        subtitles.forEach((sub) => {
+            const startTime = formatTimeToAss(sub.start);
+            const endTime = formatTimeToAss(sub.end);
+            // Replace any accidental linebreaks from users editing to keep format clean
+            const cleanWord = String(sub.word).replace(/\n/g, ' ');
+            assContent += `Dialogue: 0,${startTime},${endTime},CustomReels,,0,0,0,,${cleanWord}\n`;
+        });
+
+        // Write styles and words to storage disk
+        fs.writeFileSync(assPath, assContent);
+
+        // Quality Guardrails: Execute conversion maintaining original bitrates and video resolution
+        ffmpeg(videoUrl)
+            .videoFilters(`subtitles=${assPath}`)
+            .videoCodec('libx264')
+            .outputOptions([
+                '-crf 18',        // Visually Lossless quality (identical to raw video input)
+                '-preset medium',   // Secure performance matching on standard server instances
+                '-pix_fmt yuv420p' // Universal compatibility across Instagram, YT Shorts, iPhones
+            ])
+            .audioCodec('copy')   // Audio codec stream is copied directly without re-encoding to preserve music quality
+            .on('end', () => {
+                // Post processing file cleanup
+                if (fs.existsSync(assPath)) fs.unlinkSync(assPath);
+                
+                // Return relative url location which serves via your express.static rule
+                res.json({ downloadUrl: `/outputs/final_reels_${timestampId}.mp4` });
+            })
+            .on('error', (err) => {
+                if (fs.existsSync(assPath)) fs.unlinkSync(assPath);
+                res.status(500).json({ error: "FFmpeg rendering failed to overlay text.", details: err.message });
+            })
+            .save(outputPath);
+
+    } catch (globalExportErr) {
+        res.status(500).json({ error: "Export operational framework error.", details: globalExportErr.message });
+    }
+});
+
+// Serve output directory dynamically if not already assigned in your file above
+if (!app._router || !app._router.stack.some(layer => layer.regexp && layer.regexp.test('/outputs'))) {
+    app.use('/outputs', express.static('outputs'));
+}
+
+// =========================================================================
+// END OF AI SUBTITLE VIDEO TOOL LOGIC
+// =========================================================================
 //==================================================
 // --- SERVER START ---
 // ===================================================================
