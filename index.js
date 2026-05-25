@@ -777,10 +777,19 @@ const subToolStorage = multer.diskStorage({
 });
 const subToolUpload = multer({ storage: subToolStorage });
 
-// 🔥 FIX 1: Flexible API Key checking & Connection Timeout configurations
+// 🔥 FIX 1: Clean Custom Agent block to prevent ECONNRESET and ignore global conflicting proxies
+const cleanHttpsAgent = new https.Agent({
+    keepAlive: true,               // Keeps the socket open to prevent sudden server reset
+    maxSockets: 64,                // Multi-threading load handling
+    rejectUnauthorized: true       // Strict SSL handshake stability
+});
+
+// 🔥 FIX 2: Bind httpAgent & httpsAgent explicitly into OpenAI configuration
 const openaiInstance = new OpenAI({ 
     apiKey: process.env.OPEN_API_KEY || process.env.OPENAI_API_KEY,
-    timeout: 60000 // 60 Seconds strict timeout for large file processing on Render
+    timeout: 60000,                // 60 Seconds strict timeout for large file processing on Render
+    httpAgent: cleanHttpsAgent,    // Enforce direct connection
+    httpsAgent: cleanHttpsAgent    // Bypass intermediate interceptors causing ECONNRESET
 });
 
 /**
@@ -809,7 +818,7 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
             .audioCodec('libmp3lame')
             .on('end', async () => {
                 try {
-                    // 🔥 FIX 2: Safeguard against empty API key before hit
+                    // SAFEGUARD: Ensure API key exists before execution
                     if (!openaiInstance.apiKey) {
                         console.error("❌ CRITICAL: OpenAI API Key is missing in Environment Variables!");
                         if (!responseSent) {
@@ -823,7 +832,7 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
 
                     console.log(`[Whisper Pipeline] Audio extracted successfully. File size: ${fs.statSync(audioPath).size} bytes. Connecting to OpenAI...`);
 
-                    // Send extracted audio to OpenAI Whisper
+                    // Send extracted audio to OpenAI Whisper using the secured instance
                     const transcription = await openaiInstance.audio.transcriptions.create({
                         file: fs.createReadStream(audioPath),
                         model: "whisper-1",
@@ -834,7 +843,7 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
 
                     console.log("[Whisper Pipeline] Transcription successfully received from OpenAI.");
 
-                    // Cleanup the temporary MP3 file
+                    // Cleanup the temporary MP3 file instantly after successful API request
                     if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
 
                     // Map Whisper response words array structure
@@ -891,6 +900,9 @@ if (!app._router || !app._router.stack.some(layer => layer.regexp && layer.regex
     app.use('/outputs', express.static('outputs'));
 }
 
+// =========================================================================
+// END OF AI SUBTITLE VIDEO TOOL LOGIC
+// =========================================================================
 // =========================================================================
 // END OF AI SUBTITLE VIDEO TOOL LOGIC
 // =========================================================================
