@@ -1012,13 +1012,8 @@ app.post('/api/export', express.json(), async (req, res) => {
         return res.status(500).json({ error: "Internal processing crash during rendering.", details: exportErr.message });
     }
 });
-// Serve output directory dynamically
-if (!app._router || !app._router.stack.some(layer => layer.regexp && layer.regexp.test('/outputs'))) {
-    app.use('/outputs', express.static('outputs'));
-}
-if (!app._router || !app._router.stack.some(layer => layer.regexp && layer.regexp.test('/uploads'))) {
-    app.use('/uploads', express.static('uploads'));
-}
+app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // =========================================================================
 // END OF AI SUBTITLE VIDEO TOOL LOGIC
 // =========================================================================
