@@ -3,36 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Articles for Website</title>
+    <!-- Google Fonts for clean typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <title>Articles Manager - High-Quality Services</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
-
     <style>
         :root {
             --primary-color: #2563eb;
             --primary-light: #eff6ff;
-            --success-color: #10b981;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
-            --bg-main: #f8fafc;
+            --text-dark: #1f2937;
+            --text-light: #4b5563;
+            --bg-body: #f8fafc;
             --bg-card: #ffffff;
-            --border-color: #e2e8f0;
-            --radius: 12px;
+            --border-color: #f1f5f9;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
+            background-color: var(--bg-body);
             color: var(--text-dark);
-            line-height: 1.6;
             padding: 20px;
             display: flex;
             justify-content: center;
@@ -40,274 +38,348 @@
             min-height: 100vh;
         }
 
-        .app-container {
+        /* Main Container matching image card look */
+        .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1100px;
             background: var(--bg-card);
-            border-radius: var(--radius);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 24px;
         }
 
-        .app-header {
+        /* Header Layout */
+        .header {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-color);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+        }
+        .header i {
+            color: var(--primary-color);
+            background: var(--primary-light);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 18px;
+        }
+
+        /* Two Column Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
+
+        /* Sidebar Article List */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 750px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* Custom Scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .article-tab {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .article-tab:hover {
+            background: var(--bg-body);
+            transform: translateY(-1px);
+        }
+
+        .article-tab.active {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .article-tab i {
+            font-size: 14px;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+
+        .article-tab.active i {
+            color: var(--primary-color);
+        }
+
+        /* Content Viewer Styling */
+        .content-view {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            position: relative;
             background: #ffffff;
         }
 
-        .app-header .icon-box {
-            background: var(--primary-color);
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
+        .close-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fca5a5;
         }
 
-        .workspace {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            min-height: 650px;
+        /* Article Typography - Clean & Perfect Size */
+        .article-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 28px;
+            padding-right: 40px;
         }
 
-        .sidebar {
-            border-right: 1px solid var(--border-color);
-            padding: 16px;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 750px;
-            overflow-y: auto;
+        .content-body h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-top: 24px;
+            margin-bottom: 12px;
         }
 
-        .nav-item {
+        .content-body p {
+            font-size: 15.5px;
+            line-height: 1.6;
+            color: var(--text-light);
+            margin-bottom: 16px;
+            text-align: justify;
+        }
+
+        .content-body ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .content-body li {
+            font-size: 15.5px;
+            line-height: 1.6;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .content-body li strong {
+            color: var(--text-dark);
+        }
+
+        .article-footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: #94a3b8;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-card);
-            cursor: pointer;
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
+            gap: 8px;
         }
 
-        .nav-item:hover { background: var(--bg-main); }
-        .nav-item.active {
-            background: var(--primary-light);
-            color: var(--primary-color);
-            border-color: #bfdbfe;
-            font-weight: 600;
-        }
-
-        /* Split View Main Area */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* Left: Viewer, Right: Editor */
-            gap: 1px;
-            background: var(--border-color);
-        }
-
-        .content-panel, .editor-panel {
-            padding: 24px;
-            background: #ffffff;
-            max-height: 750px;
-            overflow-y: auto;
-        }
-
-        .panel-header h2 {
-            font-size: 1.3rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-
-        /* SEO Typography Preview */
-        article section { margin-bottom: 20px; }
-        article h3 { font-size: 1.1rem; color: #0f172a; margin-bottom: 8px; font-weight: 600; }
-        article p { color: #475569; font-size: 0.95rem; margin-bottom: 8px; }
-
-        /* Form Styling */
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-dark);
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 0.9rem;
-            color: var(--text-dark);
-            outline: none;
-        }
-        .form-group textarea {
-            height: 180px;
-            resize: vertical;
-        }
-        .form-group input:focus, .form-group textarea:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        .btn-save {
-            background: var(--success-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            transition: opacity 0.2s;
-        }
-        .btn-save:hover { opacity: 0.9; }
-
-        @media (max-width: 992px) {
-            .workspace { grid-template-columns: 1fr; }
-            .main-content { grid-template-columns: 1fr; }
-            .sidebar { max-height: 200px; }
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 16px;
+            }
+            .layout {
+                grid-template-columns: 1fr; /* Stack layout vertically */
+                gap: 16px;
+            }
+            .sidebar {
+                max-height: 250px; /* Small scrollable list on mobile top */
+            }
+            .content-view {
+                padding: 20px;
+            }
+            .article-title {
+                font-size: 22px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <main class="app-container">
-        <header class="app-header">
-            <div class="icon-box">☰</div>
-            <h1>Articles Management Dashboard</h1>
-        </header>
+<div class="container">
+    <!-- Top Header -->
+    <div class="header">
+        <i class="fa-solid fa-bars-staggered"></i>
+        <span>Articles for Website</span>
+    </div>
 
-        <div class="workspace">
-            <nav class="sidebar" id="sidebar-nav"></nav>
-
-            <div class="main-content">
-                
-                <div class="content-panel">
-                    <div class="panel-header">
-                        <h2>✨ Live Website Preview</h2>
-                    </div>
-                    <h2 id="preview-title" style="margin-bottom: 15px;"></h2>
-                    <article id="preview-body"></article>
-                </div>
-
-                <div class="editor-panel">
-                    <div class="panel-header">
-                        <h2>✍️ Live Content Writer</h2>
-                    </div>
-                    <form id="article-form" onsubmit="saveArticle(event)">
-                        <div class="form-group">
-                            <label>Heading / Title</label>
-                            <input type="text" id="edit-heading" placeholder="e.g., Introduction, Why Choose Us">
-                        </div>
-                        <div class="form-group">
-                            <label>Paragraph Content (Sirf simple text likhein)</label>
-                            <textarea id="edit-text" placeholder="Yahan apna article ka main content bina kisi HTML tag ke likhein..."></textarea>
-                        </div>
-                        <button type="submit" class="btn-save">💾 Save & Update Article</button>
-                    </form>
-                </div>
-
+    <div class="layout">
+        <!-- Left Sidebar Tabs -->
+        <div class="sidebar" id="sidebarTabs">
+            <div class="article-tab active" onclick="loadArticle(1, this)">
+                <span>1. Atclas</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            <div class="article-tab" onclick="loadArticle(2, this)">
+                <span>2. Articles</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            <div class="article-tab" onclick="loadArticle(3, this)">
+                <span>3. Articles</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            <div class="article-tab" onclick="loadArticle(4, this)">
+                <span>4. Articles</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            <div class="article-tab" onclick="loadArticle(5, this)">
+                <span>5. Articles</span>
+                <i class="fa-solid fa-chevron-right"></i>
             </div>
         </div>
-    </main>
 
-    <script>
-        // Centralized Array Database
-        let currentKey = "article1";
-        const articlesData = {
-            article1: { title: "1. Atclas", heading: "Welcome to Atclas", text: "Welcome to our website! In this article, we will explore various aspects of our services and how they can benefit you. Our goal is to provide the best experience and valuable information to our users." },
-            article2: { title: "2. Articles", heading: "Our Services Overview", text: "We offer high-quality services designed to meet your needs. Our team is dedicated to delivering excellent results with a focus on customer satisfaction." },
-            article3: { title: "3. Articles", heading: "Why Choose Us", text: "This is a placeholder for the third article. Write anything you want here." },
-            article4: { title: "4. Articles", heading: "Article 4 Title", text: "Write your article paragraph details directly here." },
-            article5: { title: "5. Articles", heading: "Article 5 Title", text: "Write your article paragraph details directly here." },
-            article6: { title: "6. Articles", heading: "Article 6 Title", text: "Write your article paragraph details directly here." },
-            article7: { title: "7. Articles", heading: "Article 7 Title", text: "Write your article paragraph details directly here." },
-            article8: { title: "8. Articles", heading: "Article 8 Title", text: "Write your article paragraph details directly here." },
-            article9: { title: "9. Articles", heading: "Article 9 Title", text: "Write your article paragraph details directly here." },
-            article10: { title: "10. Articles", heading: "Article 10 Title", text: "Write your article paragraph details directly here." }
+        <!-- Right Content Window -->
+        <div class="content-view" id="contentWindow">
+            <button class="close-btn" onclick="clearContent()" title="Clear Content">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div id="articleContent">
+                <h2 class="article-title">1. Atclas</h2>
+                
+                <div class="content-body">
+                    <h3>Introduction</h3>
+                    <p>Welcome to our website! In this article, we will explore various aspects of our services and how they can benefit you. Our goal is to provide the best experience and valuable information to our users.</p>
+                    
+                    <h3>Why Choose Us?</h3>
+                    <p>We offer high-quality services designed to meet your needs. Our team is dedicated to delivering excellent results with a focus on customer satisfaction, innovation, and reliability.</p>
+                    
+                    <h3>Our Features</h3>
+                    <ul>
+                        <li><strong>User Friendly:</strong> Our platform is easy to use and navigate.</li>
+                        <li><strong>High Quality:</strong> We ensure the best quality in everything we do.</li>
+                        <li><strong>Reliable Support:</strong> Our support team is always here to help you.</li>
+                    </ul>
+                    
+                    <h3>Conclusion</h3>
+                    <p>We hope this article helps you understand our services better. Stay connected with us for more updates and valuable content.</p>
+                </div>
+
+                <div class="article-footer">
+                    <i class="fa-regular fa-calendar"></i>
+                    <span>Published on: May 20, 2026</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mock Data for Articles
+    const articlesData = {
+        1: {
+            title: "1. Atclas",
+            date: "May 20, 2026",
+            content: `
+                <h3>Introduction</h3>
+                <p>Welcome to our website! In this article, we will explore various aspects of our services and how they can benefit you. Our goal is to provide the best experience and valuable information to our users.</p>
+                <h3>Why Choose Us?</h3>
+                <p>We offer high-quality services designed to meet your needs. Our team is dedicated to delivering excellent results with a focus on customer satisfaction, innovation, and reliability.</p>
+                <h3>Our Features</h3>
+                <ul>
+                    <li><strong>User Friendly:</strong> Our platform is easy to use and navigate.</li>
+                    <li><strong>High Quality:</strong> We ensure the best quality in everything we do.</li>
+                    <li><strong>Reliable Support:</strong> Our support team is always here to help you.</li>
+                </ul>
+                <h3>Conclusion</h3>
+                <p>We hope this article helps you understand our services better. Stay connected with us for more updates and valuable content.</p>
+            `
+        },
+        2: {
+            title: "2. Web Development Tips",
+            date: "May 22, 2026",
+            content: `
+                <h3>Introduction</h3>
+                <p>Building responsive websites requires a good grasp of CSS Grid and Flexbox. In this section, we deep dive into modern layouts.</p>
+                <h3>Key Strategies</h3>
+                <p>Always build mobile-first. It keeps your code clean and ensures lower load times for handheld devices.</p>
+            `
+        }
+        // Aap isi tarah 3, 4, 5 ka data add kar sakte hain...
+    };
+
+    function loadArticle(id, element) {
+        // Active class switch karne ke liye
+        document.querySelectorAll('.article-tab').forEach(tab => tab.classList.remove('active'));
+        element.classList.add('active');
+
+        const article = articlesData[id] || {
+            title: id + ". Articles",
+            date: "May 25, 2026",
+            content: "<h3>Content Coming Soon</h3><p>Is article ka content jald hi update kiya jayega.</p>"
         };
 
-        // Render Sidebar Menu Automatically
-        function renderSidebar() {
-            const sidebar = document.getElementById('sidebar-nav');
-            sidebar.innerHTML = '';
-            Object.keys(articlesData).forEach(key => {
-                const isActive = key === currentKey ? 'active' : '';
-                sidebar.innerHTML += `
-                    <a href="#" class="nav-item ${isActive}" onclick="switchArticle(event, '${key}')">
-                        <span>${articlesData[key].title}</span>
-                        <span class="arrow">&gt;</span>
-                    </a>
-                `;
-            });
+        // UI update karne ke liye
+        const html = `
+            <h2 class="article-title">${article.title}</h2>
+            <div class="content-body">${article.content}</div>
+            <div class="article-footer">
+                <i class="fa-regular fa-calendar"></i>
+                <span>Published on: ${article.date}</span>
+            </div>
+        `;
+        
+        document.getElementById('articleContent').innerHTML = html;
+        
+        // Mobile par smooth scroll karke neeche content par le jaane ke liye
+        if(window.innerWidth <= 768) {
+            document.getElementById('contentWindow').scrollIntoView({ behavior: 'smooth' });
         }
+    }
 
-        // Update Content Viewer and Editor
-        function updateUI() {
-            const currentData = articlesData[currentKey];
-            
-            // Preview Panel Render (Design System automatically wraps data)
-            document.getElementById('preview-title').innerText = currentData.title;
-            document.getElementById('preview-body').innerHTML = `
-                <section>
-                    <h3>${currentData.heading}</h3>
-                    <p>${currentData.text}</p>
-                </section>
-            `;
+    function clearContent() {
+        document.getElementById('articleContent').innerHTML = `
+            <div style="text-align:center; padding: 40px 0; color: #94a3b8;">
+                <i class="fa-regular fa-folder-open" style="font-size: 48px; margin-bottom: 12px;"></i>
+                <p>Please select an article from the list to read.</p>
+            </div>
+        `;
+        document.querySelectorAll('.article-tab').forEach(tab => tab.classList.remove('active'));
+    }
+</script>
 
-            // Form Fields Update
-            document.getElementById('edit-heading').value = currentData.heading;
-            document.getElementById('edit-text').value = currentData.text;
-        }
-
-        // Article Switcher Trigger
-        function switchArticle(event, key) {
-            event.preventDefault();
-            currentKey = key;
-            renderSidebar();
-            updateUI();
-        }
-
-        // Action: Save Dynamic Input Form Data
-        function saveArticle(event) {
-            event.preventDefault();
-            
-            // Collect Input data safely
-            const updatedHeading = document.getElementById('edit-heading').value;
-            const updatedText = document.getElementById('edit-text').value;
-
-            // Save inside database state
-            articlesData[currentKey].heading = updatedHeading;
-            articlesData[currentKey].text = updatedText;
-
-            // Update UI instantly
-            updateUI();
-            alert(`${articlesData[currentKey].title} successfully updated inside database!`);
-        }
-
-        // Init Load
-        renderSidebar();
-        updateUI();
-    </script>
 </body>
 </html>
