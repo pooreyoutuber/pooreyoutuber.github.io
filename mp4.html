@@ -4,20 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Articles for Website - High-Quality Services & Insights</title>
-    <meta name="description" content="Explore insightful articles, user-friendly platform features, high-quality professional services, and reliable customer support tailored to meet your business needs.">
-    <meta name="keywords" content="articles, web services, customer satisfaction, reliable support, business innovation">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://yourwebsite.com/">
-
+    <title>Articles Manager - High-Quality Services</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="family">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --primary-color: #2563eb;
             --primary-light: #eff6ff;
+            --success-color: #10b981;
             --text-dark: #1e293b;
             --text-muted: #64748b;
             --bg-main: #f8fafc;
@@ -44,24 +40,23 @@
             min-height: 100vh;
         }
 
-        /* Container Blueprint */
         .app-container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
             background: var(--bg-card);
             border-radius: var(--radius);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
             overflow: hidden;
         }
 
-        /* Tool Header */
         .app-header {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 20px 24px;
             border-bottom: 1px solid var(--border-color);
+            background: #ffffff;
         }
 
         .app-header .icon-box {
@@ -74,23 +69,14 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
         }
 
-        .app-header h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        /* Main Workspace split screen */
         .workspace {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 280px 1fr;
             min-height: 650px;
         }
 
-        /* Sidebar Navigation */
         .sidebar {
             border-right: 1px solid var(--border-color);
             padding: 16px;
@@ -106,23 +92,19 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 16px;
-            border-radius: var(--radius);
+            padding: 12px 16px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
             background: var(--bg-card);
             cursor: pointer;
             text-decoration: none;
             color: var(--text-dark);
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: all 0.2s ease;
         }
 
-        .nav-item:hover {
-            background: var(--bg-main);
-            border-color: #cbd5e1;
-        }
-
+        .nav-item:hover { background: var(--bg-main); }
         .nav-item.active {
             background: var(--primary-light);
             color: var(--primary-color);
@@ -130,140 +112,80 @@
             font-weight: 600;
         }
 
-        .nav-item .arrow {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            transition: transform 0.2s;
+        /* Split View Main Area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Left: Viewer, Right: Editor */
+            gap: 1px;
+            background: var(--border-color);
         }
 
-        .nav-item.active .arrow {
-            color: var(--primary-color);
-            transform: translateX(2px);
-        }
-
-        /* Content Viewer Panel */
-        .content-panel {
-            padding: 32px;
+        .content-panel, .editor-panel {
+            padding: 24px;
             background: #ffffff;
-            position: relative;
             max-height: 750px;
             overflow-y: auto;
         }
 
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-        }
-
         .panel-header h2 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--primary-color);
+            margin-bottom: 20px;
             font-weight: 700;
         }
 
-        .close-btn {
-            background: var(--bg-main);
-            border: 1px solid var(--border-color);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--text-dark);
-            font-size: 1.1rem;
-            transition: background 0.2s;
-        }
+        /* SEO Typography Preview */
+        article section { margin-bottom: 20px; }
+        article h3 { font-size: 1.1rem; color: #0f172a; margin-bottom: 8px; font-weight: 600; }
+        article p { color: #475569; font-size: 0.95rem; margin-bottom: 8px; }
 
-        .close-btn:hover {
-            background: #e2e8f0;
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 16px;
         }
-
-        /* SEO Friendly Article Typography */
-        article section {
-            margin-bottom: 24px;
-        }
-
-        article h3 {
-            font-size: 1.15rem;
-            color: #0f172a;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        article p {
-            color: #475569;
-            font-size: 0.975rem;
-            margin-bottom: 12px;
-        }
-
-        article ul {
-            list-style: none;
-            margin-left: 4px;
-        }
-
-        article li {
-            position: relative;
-            padding-left: 20px;
-            margin-bottom: 10px;
-            color: #475569;
-            font-size: 0.975rem;
-        }
-
-        article li::before {
-            content: "•";
-            color: var(--primary-color);
-            font-weight: bold;
-            font-size: 1.3rem;
-            position: absolute;
-            left: 0;
-            top: -4px;
-        }
-
-        article li strong {
-            color: var(--text-dark);
-        }
-
-        /* Metadata / Footer style inside article */
-        .article-footer {
-            margin-top: 32px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-muted);
+        .form-group label {
+            display: block;
             font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            outline: none;
+        }
+        .form-group textarea {
+            height: 180px;
+            resize: vertical;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
-        .article-footer svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
+        .btn-save {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
         }
+        .btn-save:hover { opacity: 0.9; }
 
-        /* Responsive Breakpoint for Mobile & Tablets */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .workspace {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-                max-height: 280px;
-            }
-
-            .content-panel {
-                padding: 20px;
-            }
+        @media (max-width: 992px) {
+            .workspace { grid-template-columns: 1fr; }
+            .main-content { grid-template-columns: 1fr; }
+            .sidebar { max-height: 200px; }
         }
     </style>
 </head>
@@ -272,122 +194,120 @@
     <main class="app-container">
         <header class="app-header">
             <div class="icon-box">☰</div>
-            <h1>Articles for Website</h1>
+            <h1>Articles Management Dashboard</h1>
         </header>
 
         <div class="workspace">
-            <nav class="sidebar" aria-label="Articles list">
-                <a href="#atclas" class="nav-item active" onclick="switchArticle(event, 'atclas')">
-                    <span>1. Atclas</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article2" class="nav-item" onclick="switchArticle(event, 'article2')">
-                    <span>2. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article3" class="nav-item" onclick="switchArticle(event, 'article3')">
-                    <span>3. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article4" class="nav-item" onclick="switchArticle(event, 'article4')">
-                    <span>4. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article5" class="nav-item" onclick="switchArticle(event, 'article5')">
-                    <span>5. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article6" class="nav-item" onclick="switchArticle(event, 'article6')">
-                    <span>6. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article7" class="nav-item" onclick="switchArticle(event, 'article7')">
-                    <span>7. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article8" class="nav-item" onclick="switchArticle(event, 'article8')">
-                    <span>8. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article9" class="nav-item" onclick="switchArticle(event, 'article9')">
-                    <span>9. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#article10" class="nav-item" onclick="switchArticle(event, 'article10')">
-                    <span>10. Articles</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-    
+            <nav class="sidebar" id="sidebar-nav"></nav>
+
+            <div class="main-content">
+                
+                <div class="content-panel">
+                    <div class="panel-header">
+                        <h2>✨ Live Website Preview</h2>
                     </div>
-           
+                    <h2 id="preview-title" style="margin-bottom: 15px;"></h2>
+                    <article id="preview-body"></article>
+                </div>
+
+                <div class="editor-panel">
+                    <div class="panel-header">
+                        <h2>✍️ Live Content Writer</h2>
+                    </div>
+                    <form id="article-form" onsubmit="saveArticle(event)">
+                        <div class="form-group">
+                            <label>Heading / Title</label>
+                            <input type="text" id="edit-heading" placeholder="e.g., Introduction, Why Choose Us">
+                        </div>
+                        <div class="form-group">
+                            <label>Paragraph Content (Sirf simple text likhein)</label>
+                            <textarea id="edit-text" placeholder="Yahan apna article ka main content bina kisi HTML tag ke likhein..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-save">💾 Save & Update Article</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
     </main>
 
     <script>
-        // Database simulation for Articles (Great for SEO if pre-rendered via Server, but dynamic here for UI test)
+        // Centralized Array Database
+        let currentKey = "article1";
         const articlesData = {
-            atclas: {
-                title: "1. Atclas",
-                content: `
-                    <section>
-                        <h3>Introduction</h3>
-                        <p>Welcome to our website! In this article, we will explore various aspects of our services and how they can benefit you. Our goal is to provide the best experience and valuable information to our users.</p>
-                    </section>
-                    <section>
-                        <h3>Why Choose Us?</h3>
-                        <p>We offer high-quality services designed to meet your needs. Our team is dedicated to delivering excellent results with a focus on customer satisfaction, innovation, and reliability.</p>
-                    </section>
-                    <section>
-                        <h3>Our Features</h3>
-                        <ul>
-                            <li><strong>User Friendly:</strong> Our platform is easy to use and navigate.</li>
-                            <li><strong>High Quality:</strong> We ensure the best quality in everything we do.</li>
-                            <li><strong>Reliable Support:</strong> Our support team is always here to help you.</li>
-                        </ul>
-                    </section>
-                    <section>
-                        <h3>Conclusion</h3>
-                        <p>We hope this article helps you understand our services better. Stay connected with us for more updates and valuable content.</p>
-                    </section>
-                    <div class="article-footer">
-                        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
-                        <span>Published on: <time datetime="2024-05-20">May 20, 2024</time></span>
-                    </div>
-                `
-            },
-            article2: { title: "2. Articles", content: "<section><h3>Content for Article 2</h3><p>This is a placeholder for the second highly optimized SEO article content panel.</p></section>" },
-            article3: { title: "3. Articles", content: "<section><h3>Content for Article 3</h3><p>This is a placeholder for the third highly optimized SEO article content panel.</p></section>" },
-            article4: { title: "4. Articles", content: "<section><h3>Content for Article 4</h3><p>This is a placeholder for the fourth highly optimized SEO article content panel.</p></section>" },
-            article5: { title: "5. Articles", content: "<section><h3>Content for Article 5</h3><p>This is a placeholder for the fifth highly optimized SEO article content panel.</p></section>" },
-            article6: { title: "6. Articles", content: "<section><h3>Content for Article 6</h3><p>This is a placeholder for the sixth highly optimized SEO article content panel.</p></section>" },
-            article7: { title: "7. Articles", content: "<section><h3>Content for Article 7</h3><p>This is a placeholder for the seventh highly optimized SEO article content panel.</p></section>" },
-            article8: { title: "8. Articles", content: "<section><h3>Content for Article 8</h3><p>This is a placeholder for the eighth highly optimized SEO article content panel.</p></section>" },
-            article9: { title: "9. Articles", content: "<section><h3>Content for Article 9</h3><p>This is a placeholder for the ninth highly optimized SEO article content panel.</p></section>" },
-            article10: { title: "10. Articles", content: "<section><h3>Content for Article 10</h3><p>This is a placeholder for the tenth highly optimized SEO article content panel.</p></section>" }
+            article1: { title: "1. Atclas", heading: "Welcome to Atclas", text: "Welcome to our website! In this article, we will explore various aspects of our services and how they can benefit you. Our goal is to provide the best experience and valuable information to our users." },
+            article2: { title: "2. Articles", heading: "Our Services Overview", text: "We offer high-quality services designed to meet your needs. Our team is dedicated to delivering excellent results with a focus on customer satisfaction." },
+            article3: { title: "3. Articles", heading: "Why Choose Us", text: "This is a placeholder for the third article. Write anything you want here." },
+            article4: { title: "4. Articles", heading: "Article 4 Title", text: "Write your article paragraph details directly here." },
+            article5: { title: "5. Articles", heading: "Article 5 Title", text: "Write your article paragraph details directly here." },
+            article6: { title: "6. Articles", heading: "Article 6 Title", text: "Write your article paragraph details directly here." },
+            article7: { title: "7. Articles", heading: "Article 7 Title", text: "Write your article paragraph details directly here." },
+            article8: { title: "8. Articles", heading: "Article 8 Title", text: "Write your article paragraph details directly here." },
+            article9: { title: "9. Articles", heading: "Article 9 Title", text: "Write your article paragraph details directly here." },
+            article10: { title: "10. Articles", heading: "Article 10 Title", text: "Write your article paragraph details directly here." }
         };
 
+        // Render Sidebar Menu Automatically
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar-nav');
+            sidebar.innerHTML = '';
+            Object.keys(articlesData).forEach(key => {
+                const isActive = key === currentKey ? 'active' : '';
+                sidebar.innerHTML += `
+                    <a href="#" class="nav-item ${isActive}" onclick="switchArticle(event, '${key}')">
+                        <span>${articlesData[key].title}</span>
+                        <span class="arrow">&gt;</span>
+                    </a>
+                `;
+            });
+        }
+
+        // Update Content Viewer and Editor
+        function updateUI() {
+            const currentData = articlesData[currentKey];
+            
+            // Preview Panel Render (Design System automatically wraps data)
+            document.getElementById('preview-title').innerText = currentData.title;
+            document.getElementById('preview-body').innerHTML = `
+                <section>
+                    <h3>${currentData.heading}</h3>
+                    <p>${currentData.text}</p>
+                </section>
+            `;
+
+            // Form Fields Update
+            document.getElementById('edit-heading').value = currentData.heading;
+            document.getElementById('edit-text').value = currentData.text;
+        }
+
+        // Article Switcher Trigger
         function switchArticle(event, key) {
             event.preventDefault();
+            currentKey = key;
+            renderSidebar();
+            updateUI();
+        }
+
+        // Action: Save Dynamic Input Form Data
+        function saveArticle(event) {
+            event.preventDefault();
             
-            // Highlight Active Nav Sidebar Item
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            // Collect Input data safely
+            const updatedHeading = document.getElementById('edit-heading').value;
+            const updatedText = document.getElementById('edit-text').value;
 
-            // Update Viewport Text Content smoothly
-            if(articlesData[key]) {
-                document.getElementById('article-title').innerText = articlesData[key].title;
-                document.getElementById('article-body').innerHTML = articlesData[key].content;
-                
-                // Auto Scroll view on mobile screen when dynamic click happens
-                if(window.innerWidth <= 768) {
-                    document.getElementById('content-viewer').scrollIntoView({ behavior: 'smooth' });
-                }
-            }
+            // Save inside database state
+            articlesData[currentKey].heading = updatedHeading;
+            articlesData[currentKey].text = updatedText;
+
+            // Update UI instantly
+            updateUI();
+            alert(`${articlesData[currentKey].title} successfully updated inside database!`);
         }
 
-        function resetView() {
-            // Optional close trigger action
-            alert('Close action triggered. You can configure this to redirect or hide the pane.');
-        }
+        // Init Load
+        renderSidebar();
+        updateUI();
     </script>
 </body>
 </html>
