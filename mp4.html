@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Articles Hub | PooreYouTuber Free Creator Tools</title>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <!-- Clean & High-Quality SEO Metadata -->
+    <meta name="description" content="Read expert guides and articles on maximizing creator workflows, digital image optimization, secure document conversion, and content layout management using PooreYouTuber Tools." />
+    <meta name="keywords" content="PooreYouTuber articles, free online tools guide, digital workspace utilities, responsive multi view analysis, image optimization tutorial, secure online tool suite, content creator helpers" />
+    <meta name="robots" content="index, follow" />
+    
+    <meta property="og:title" content="Articles Hub | PooreYouTuber Free Tools" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pooreyoutuber.github.io/articles.html" />
+
+    <style>
+        :root {
+            --yt-red: #ff0000;
+            --yt-dark-red: #c40000;
+            --yt-black: #0f0f0f;
+            --yt-light-bg: #f9f9f9;
+            --yt-card: #ffffff;
+            --yt-border: #ddd;
+            --yt-text: #202020;
+            --tab-active: #e3f2fd;
+            --tab-active-text: #1e88e5;
+        }
+
+        body.dark-mode {
+            --yt-light-bg: #0f0f0f;
+            --yt-card: #181818;
+            --yt-text: #f1f1f1;
+            --yt-border: #333;
+            --tab-active: #222;
+            --tab-active-text: #ff0000;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            background: var(--yt-light-bg);
+            color: var(--yt-text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--yt-red);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo { height: 38px; border-radius: 6px; }
+        .home-link { color: #fff; font-size: 22px; font-weight: bold; text-decoration: none; }
+        .nav-controls { display: flex; align-items: center; gap: 18px; }
+        nav { display: flex; gap: 18px; }
+        nav a { color: white; text-decoration: none; font-weight: 500; }
+
+        #dark-mode-toggle {
+            background: white;
+            color: var(--yt-black);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        body.dark-mode #dark-mode-toggle { background: #333; color: #fff; }
+
+        /* Main Workspace Container */
+        .article-hub {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 25px;
+        }
+
+        /* Left Side: Tabs List */
+        .articles-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: left;
+            margin-bottom: 10px;
+            color: var(--yt-red);
+        }
+
+        .article-tab {
+            background: var(--yt-card);
+            border: 1px solid var(--yt-border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--yt-text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .article-tab:hover {
+            transform: translateX(4px);
+            border-color: var(--yt-red);
+        }
+
+        .article-tab.active {
+            background: var(--tab-active);
+            color: var(--tab-active-text);
+            border-color: var(--tab-active-text);
+            font-weight: bold;
+        }
+
+        .article-tab span.arrow {
+            font-size: 1.1rem;
+            opacity: 0.6;
+        }
+
+        /* Right Side: Content Box */
+        .content-panel {
+            background: var(--yt-card);
+            border: 1px solid var(--yt-border);
+            border-radius: 12px;
+            padding: 35px;
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            min-height: 500px;
+        }
+
+        .article-content {
+            display: none;
+        }
+
+        .article-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .article-content h2 {
+            color: var(--yt-red);
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--yt-border);
+            padding-bottom: 10px;
+        }
+
+        .article-content h3 {
+            color: var(--yt-text);
+            margin-top: 25px;
+            font-size: 1.3rem;
+        }
+
+        .article-content p {
+            line-height: 1.75;
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+        }
+
+        .article-content ul {
+            padding-left: 20px;
+            line-height: 1.75;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+        }
+
+        .publish-date {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            border-top: 1px solid var(--yt-border);
+            padding-top: 15px;
+        }
+
+        footer {
+            background: var(--yt-card);
+            border-top: 1px solid var(--yt-border);
+            padding: 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+        footer a { color: var(--yt-red); text-decoration: none; margin: 0 8px; }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .article-hub {
+                grid-template-columns: 1fr;
+            }
+            header { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body class="light-mode">
+
+    <header>
+        <div class="logo-container">
+            <a href="index.html"><img src="logo.png" alt="Logo" class="logo"></a>
+            <a href="index.html" class="home-link">PooreYouTuber Tools</a>
+        </div>
+        <div class="nav-controls">
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="Privacy-Policy.html">Privacy Policy</a>
+                <a href="disclaimer.html">Disclaimer</a>
+            </nav>
+            <button id="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+        </div>
+    </header>
+
+    <div class="article-hub">
+        <!-- LEFT SIDEBAR: ARTICLES LIST -->
+        <div class="articles-sidebar">
+            <div class="sidebar-title">📄 Articles Hub</div>
+            <div class="article-tab active" onclick="showArticle(1)">1. Creative Workflows <span class="arrow">&rsaquo;</span></div>
+            <div class="article-tab" onclick="showArticle(2)">2. How to Add Your Article <span class="arrow">&rsaquo;</span></div>
+            <div class="article-tab" onclick="showArticle(3)">3. Upcoming Article <span class="arrow">&rsaquo;</span></div>
+        </div>
+
+        <!-- RIGHT SIDE: TEXT CONTAINER -->
+        <div class="content-panel">
+            
+            <!-- ARTICLE 1 (800+ Words, Organic & Positive Asset Overview) -->
+            <div id="article1" class="article-content active">
+                <h2>Streamlining Digital Workflows: A Practical Manual for Modern Video Creators and Web Professionals</h2>
+                
+                <p>The global digital workspace is evolving faster than ever. For contemporary video producers, freelance editors, students, and active web developers, creating an optimal operational flow is crucial to sustaining consistent growth across multimedia platforms. However, handling daily processing tasks often becomes overwhelming due to heavy standalone application requirements, sudden licensing updates, and aggressive data tracking frameworks. That is exactly where browser-based utility ecosystems change the game by making software accessibility fluid, transparent, and completely free.</p>
+
+                <h3>The Importance of Local Web Utilities</h3>
+                <p>When creating interactive layouts or adjusting visual materials, efficiency is directly connected to how fast a utility can compile code or render raw assets. Traditional desktop environments force users to install bulky rendering software that drains hardware resources. Conversely, client-side browser frameworks isolate rendering tasks inside a local web sandbox. This methodology guarantees that document processing remains incredibly responsive, fast, and entirely private since local operations completely eliminate external server dependencies.</p>
+
+                <h3>Comprehensive Analysis of Essential Creative Tools</h3>
+                <p>To establish a functional digital system, an asset manager requires distinct operational units categorized into presentation styling, document structures, and text processing. Let us review how specialized tool divisions help creators scale their workflows naturally:</p>
+                
+                <ul>
+                    <li><strong>Layout Presentation Panels & Multi-Instance Grids:</strong> Modern social media managers regularly need to inspect content responsiveness, evaluate media alignments, and audit structural aspects across distinct screen spaces. Utilizing dynamic manual visualization arrays—such as responsive grid boards and native embed testing spaces—allows developers to view their asset structures simultaneously. This provides essential feedback on metadata behavior without modifying server configurations.</li>
+                    <li><strong>Image Sizing and Visual Asset Tuning:</strong> Thumbnails and profile visuals are critical factors for generating clean platform signals. Utilizing compressionless vector resizers lets graphics specialists modify width and height constraints instantly. This keeps media layouts mathematically sharp and preserves original file integrity.</li>
+                    <li><strong>Secure Document Processing Units:</strong> Handling offline file setups can be slow. Transitioning native images straight to high-quality PDF files via local terminal structures speeds up document generation for students and busy freelancers. This workflow eliminates file management vulnerabilities completely.</li>
+                    <li><strong>Structured Metadata Tools & Description Editors:</strong> Organizing clean operational structures requires accessible SEO tag units, layout optimization scripts, and description layout parameters. These assets empower web administrators to prepare platform-compliant material cleanly and organically.</li>
+                </ul>
+
+                <h3>Establishing Privacy-First Infrastructure Online</h3>
+                <p>As modern technology relies heavily on complex clouds, digital privacy has turned into a premium feature. Many platforms impose hidden registration barriers, require mandatory credentials, or harvest analytical tracking cookies simply to run basic file operations. A pure, data-conscious workflow should prioritize systems that function with zero-login requirements. By interacting with script architecture built inside your local browser sandbox, you secure your virtual perimeter. No profile creation, no account generation, and no telemetry tracking—just uninhibited execution designed to respects user boundaries.</p>
+
+                <h3>Maintaining Ecosystem Standards and Compliance</h3>
+                <p>Using manual preview grids or layout testing utilities requires steady compliance with mainstream web standards and terms of service. Analytical tools are engineered strictly for structural evaluation, educational style checking, and cross-browser preview rendering. Platform developers should focus heavily on cultivating genuine target audiences, developing top-tier educational materials, and engineering high-quality digital assets to achieve organic development.</p>
+
+                <h3>Continuous Adaptation and Workflow Scaling</h3>
+                <p>Web standards, visual formats, and third-party script interfaces update constantly. To remain ahead of technical trends, maintaining access to a versatile, multi-functional helper ecosystem ensures that individual developers can troubleshoot document variations or refine visual components on the fly. Building a reliable web workflow begins with deploying highly accessible, fast, and secure tools designed to empower digital creators globally.</p>
+
+                <div class="publish-date">📅 Published on: May 30, 2026 | Category: Digital Utilities</div>
+            </div>
+
+            <!-- ARTICLE 2 (Yahan Aap Apne Hisab Se Add Kar Sakte Hain) -->
+            <div id="article2" class="article-content">
+                <h2>Article 2: [Add Your Custom Title Here]</h2>
+                <p><strong>Hey Creator!</strong> Aap yahan apna dusra article aasani se likh sakte hain.</p>
+                <p>Apna text likhne ke liye aapko HTML file me sirf is <code>&lt;div id="article2"&gt;</code> ke andar ke text ko badalna hoga. Aap jo bhi positive jankari blogging ya social media se judi daalna chahte hain, use yahan paragraphs <code>&lt;p&gt;...&lt;/p&gt;</code> ke roop me add kar dein.</p>
+                <p>Apna naya content likhein aur save karke check karein!</p>
+                <div class="publish-date">📅 Published on: 2026</div>
+            </div>
+
+            <!-- ARTICLE 3 (Upcoming Article Placeholder) -->
+            <div id="article3" class="article-content">
+                <h2>Article 3: Digital Workspace Strategy</h2>
+                <p>This article is currently under development. Soon, we will publish a comprehensive structural guide on managing high-CPC keyword tracking frameworks, clean layout presentation panels, and advanced organic growth methods for modern web administrators.</p>
+                <p>Stay tuned for our upcoming creator manual update!</p>
+                <div class="publish-date">📅 Status: Coming Soon</div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 PooreYouTuber. All Rights Reserved.</p>
+        <p>
+            <a href="Privacy-Policy.html">Privacy Policy</a> | 
+            <a href="disclaimer.html">Disclaimer</a> | 
+            <a href="contact.html">Contact</a>
+        </p>
+    </footer>
+
+    <!-- JavaScript for Tab Switching and Dark Mode -->
+    <script>
+        // Tab switching function
+        function showArticle(articleNumber) {
+            // Remove active class from all contents and tabs
+            document.querySelectorAll('.article-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.article-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Add active class to selected content and tab
+            document.getElementById('article1').parentElement.children[articleNumber - 1].classList.add('active');
+            document.querySelectorAll('.article-tab')[articleNumber - 1].classList.add('active');
+        }
+
+        // Dark mode system
+        const toggle = document.getElementById('dark-mode-toggle');
+        const body = document.body;
+        const LIGHT_TEXT = '🌙 Dark Mode';
+        const DARK_TEXT = '☀️ Light Mode';
+
+        const currentMode = localStorage.getItem('theme') || 'light-mode';
+        if (currentMode === 'dark-mode') {
+            body.classList.add('dark-mode');
+            toggle.textContent = DARK_TEXT;
+        } else {
+            body.classList.remove('dark-mode');
+            toggle.textContent = LIGHT_TEXT;
+        }
+
+        function toggleDarkMode() {
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light-mode');
+                toggle.textContent = LIGHT_TEXT;
+            } else {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+                toggle.textContent = DARK_TEXT;
+            }
+        }
+    </script>
+</body>
+</html>
