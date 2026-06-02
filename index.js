@@ -964,7 +964,7 @@ app.post('/api/export', express.json(), async (req, res) => {
         let srtIndex = 1;
         
         // Ek baar me screen par kitne words dikhane hain (3 se 4 words sentence ke liye perfect hote hain)
-        const wordsPerSentence = 4; 
+        const wordsPerSentence = 8; 
 
         for (let i = 0; i < subtitles.length; i += wordsPerSentence) {
             // Chunking words to make a phrase/sentence
@@ -1001,7 +1001,7 @@ app.post('/api/export', express.json(), async (req, res) => {
         const primaryColor = convertHexToAss(styles.fontColor || '#ffff00');
         const outlineColor = convertHexToAss(styles.outlineColor || '#000000');
         const fontName = styles.fontName === 'Impact' ? 'Impact' : (styles.fontName || 'Arial');
-        const fontSize = styles.fontSize || '36';
+        const fontSize = styles.fontSize || '20';
         
         // Alignment codes: 2 = Bottom-Center, 6 = Top-Center, 10 = Mid-Center
         const alignment = styles.position || '10'; 
