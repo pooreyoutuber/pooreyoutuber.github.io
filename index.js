@@ -934,6 +934,9 @@ Expected JSON output structure:
 /**
  * 🔥 FIX 1: ADDING MISSING EXPORT ROUTE (/api/export)
  * Yeh API frontend se aney wali custom styling aur subtitles ko video me permanently add (burn) karegi.
+/**
+ * 🔥 FIX 1: ADDING MISSING EXPORT ROUTE (/api/export)
+ * Yeh API frontend se aney wali custom styling aur subtitles ko video me permanently add (burn) karegi.
  */
 app.post('/api/export', express.json(), async (req, res) => {
     try {
@@ -945,30 +948,44 @@ app.post('/api/export', express.json(), async (req, res) => {
 
         console.log(`[Export Pipeline] Received export request for video: ${videoUrl}`);
 
-        // 1. Generate standard SRT subtitle formatting from array timestamps
+        // Helper function for SRT formatting
+        const formatSRTTime = (seconds) => {
+            const date = new Date(0);
+            date.setSeconds(seconds);
+            const ms = Math.floor((seconds % 1) * 1000).toString().padStart(3, '0');
+            const timeStr = date.toISOString().substr(11, 8);
+            return `${timeStr},${ms}`;
+        };
+
+        // =========================================================================
+        // 🌟 KAHAN PAR KYA KARNA HAI - FIXED: PURA SENTENCE / PHRASE GROUPING LOGIC 
+        // =========================================================================
         let srtContent = '';
-        subtitles.forEach((item, index) => {
-            const formatSRTTime = (seconds) => {
-                const date = new Date(0);
-                date.setSeconds(seconds);
-                const ms = Math.floor((seconds % 1) * 1000).toString().padStart(3, '0');
-                const timeStr = date.toISOString().substr(11, 8);
-                return `${timeStr},${ms}`;
-            };
+        let srtIndex = 1;
+        
+        // Ek baar me screen par kitne words dikhane hain (3 se 4 words sentence ke liye perfect hote hain)
+        const wordsPerSentence = 4; 
 
-            const startTime = formatSRTTime(item.start);
-            const endTime = formatSRTTime(item.end);
+        for (let i = 0; i < subtitles.length; i += wordsPerSentence) {
+            // Chunking words to make a phrase/sentence
+            const chunk = subtitles.slice(i, i + wordsPerSentence);
+            
+            const startTime = formatSRTTime(chunk[0].start);
+            const endTime = formatSRTTime(chunk[chunk.length - 1].end);
+            
+            // Sabhi chunks ke single single words ko mila kar ek complete phrase/sentence banana
+            const fullSentenceText = chunk.map(item => String(item.word).trim()).join(" ").toUpperCase();
 
-            // Behtar Reels Look ke liye badlein:
-srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${String(item.word).toUpperCase().trim()}\n\n`;
-        });
+            srtContent += `${srtIndex}\n${startTime} --> ${endTime}\n${fullSentenceText}\n\n`;
+            srtIndex++;
+        }
+        // =========================================================================
 
         // Save subtitle file temporarily
         const srtFilename = `uploads/subs_${Date.now()}.srt`;
         fs.writeFileSync(srtFilename, srtContent, 'utf8');
 
         // 2. Map styling parameters (FontColor, Size, Alignment Position) to FFmpeg subtitle filters
-        // Convert web hex colors (#ffff00) to FFmpeg/ASS styling formats (&H00FFFF&)
         const convertHexToAss = (hex) => {
             if (!hex) return 'HFFFFFF';
             const cleanHex = hex.replace('#', '');
@@ -991,7 +1008,10 @@ srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${String(item.word).to
 
         // Enforce strong style injection parameters for rendering
         const videoOutputName = `outputs/export_${Date.now()}.mp4`;
-        const videoFilterCommand = `subtitles=${srtFilename}:force_style='Fontname=${fontName},Fontsize=${fontSize},PrimaryColour=&${primaryColor}&,OutlineColour=&${outlineColor}&,Outline=2,BorderStyle=1,Alignment=${alignment}'`;
+        
+        // Cross-platform absolute path resolution logic to avoid filter crashing
+        const absoluteSrtPath = path.resolve(srtFilename).replace(/\\/g, '/').replace(/:/g, '\\:');
+        const videoFilterCommand = `subtitles=${absoluteSrtPath}:force_style='Fontname=${fontName},Fontsize=${fontSize},PrimaryColour=&${primaryColor}&,OutlineColour=&${outlineColor}&,Outline=2,BorderStyle=1,Alignment=${alignment}'`;
 
         console.log(`[Export Pipeline] Compiling FFmpeg with style filters...`);
 
