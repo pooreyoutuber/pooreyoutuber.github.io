@@ -815,19 +815,27 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
                     const audioBuffer = fs.readFileSync(audioPath);
                     const base64Audio = audioBuffer.toString("base64");
 
-                    // System instruction to enforce rigid timestamp data matching subtitle array requirements
-                    const promptText = `Analyze this audio file. Transcribe the spoken words completely. 
-                    You must detect timestamps precisely for each spoken segment/word.
-                    Provide the response STRICTLY as a valid JSON array of objects with no markdown wrap, no backticks, no comments.
-                    The language spoken is mainly "${spokenLanguage}".
-                    
-                    Expected output structure format:
-                    [
-                      { "word": "Hello", "start": 0.15, "end": 0.50 },
-                      { "word": "world", "start": 0.55, "end": 0.95 }
-                    ]
-                     Ensure start and end values are raw floating-point numbers representing seconds. Do not skip any words.`;
+                   const promptText = `You are a professional video subtitle engine specializing in viral Instagram Reels and YouTube Shorts.
+Your core task is to analyze the audio and return a highly precise word-by-word transcription with exact timestamps.
 
+CRITICAL INSTRUCTIONS FOR SONG RECOGNITION:
+1. Listen carefully to determine if the audio contains a song, a trending music track, background music, or dialogue with musical rhythm.
+2. If you detect or get a hint of a song/music track, access your vast knowledge base to fetch the 100% correct, officially released lyrics of that song in the appropriate language (e.g., English, Hindi/Hinglish, Spanish, etc.).
+3. Align those real, verified lyrics perfectly with the audio timestamps. Do not try to guess spellings by ear if it matches a known track. Use correct official wording (especially for Hindi/Bollywood songs written in Latin/Hinglish script).
+4. If it is standard speech, transcribe the spoken words accurately matching the language code: "${spokenLanguage}".
+
+OUTPUT FORMAT RULES:
+- Return the response STRICTLY as a valid JSON array of objects. 
+- Do not include markdown blocks, do not wrap in triple backticks (\`\`\`json), do not write any conversational summary or text outside the JSON.
+- Every object must represent a SINGLE individual word with precise 'start' and 'end' seconds as floating-point numbers.
+- Ensure 'start' and 'end' values match the exact audio moment. No gaps or overlaps between words unless there is absolute silence.
+
+Expected JSON output structure:
+[
+  { "word": "Tum", "start": 0.12, "end": 0.45 },
+  { "word": "hi", "start": 0.46, "end": 0.75 },
+  { "word": "ho", "start": 0.76, "end": 1.10 }
+]`;
                     console.log("[Gemini Pipeline] Sending multimodal request to Gemini Flash...");
 
                     // Raw API request using global nodeFetch/fetch mapping to prevent library mismatch
@@ -849,7 +857,9 @@ app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
                                 ]
                             }],
                             generationConfig: {
-                                responseMimeType: "application/json" // Mandates clean JSON output formatting
+                                responseMimeType: "application/json",
+                                temperature: 0.1 // 💡 Low temperature se accuracy badhegi aur guessing band hogi
+                            
                             }
                         })
                     });
@@ -949,7 +959,8 @@ app.post('/api/export', express.json(), async (req, res) => {
             const startTime = formatSRTTime(item.start);
             const endTime = formatSRTTime(item.end);
 
-            srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${item.word}\n\n`;
+            // Behtar Reels Look ke liye badlein:
+srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${String(item.word).toUpperCase().trim()}\n\n`;
         });
 
         // Save subtitle file temporarily
