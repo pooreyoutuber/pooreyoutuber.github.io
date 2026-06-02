@@ -757,267 +757,225 @@ app.post('/popup', async (req, res) => {
 // =========================================================================
 // 🔥 UPDATED TOOL: AI SUBTITLE VIDEO GENERATOR VIA GEMINI API (NO OPENAI)
 // =========================================================================
+// =========================================================================
+// 🔥 UPDATED TOOL: AI SUBTITLE VIDEO GENERATOR VIA GEMINI API (SONG INTELLIGENCE)
+// =========================================================================
 
-const ffmpeg = require('fluent-ffmpeg');
+const { exec } = require('child_process');
 
-// Ensure required directories exist for temporary processing
-if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
-if (!fs.existsSync('./outputs')) fs.mkdirSync('./outputs');
-
-// Multer Storage Configuration for Videos
-const subToolStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, 'subtool_' + Date.now() + path.extname(file.originalname));
-    }
-});
-const subToolUpload = multer({ storage: subToolStorage });
-
-/**
- * 1. API: UPLOAD VIDEO & TRANSCRIBE WITH GEMINI 1.5/2.5 FLASH
- */
-app.post('/api/upload', subToolUpload.single('video'), async (req, res) => {
-    let responseSent = false; 
-    let audioPath = '';
-
+// API Endpoint: Video Upload aur Smart Transcribe karna
+app.post('/api/upload', upload.single('video'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: "No video file uploaded." });
         }
 
         const videoPath = req.file.path;
-        audioPath = `uploads/audio_${Date.now()}.mp3`;
-        const spokenLanguage = req.body.language || 'en';
-
-        // Aapki file me variable ka naam GEMINI_KEY hai ya process.env.GEMINI_API_KEY, use check kar lega
-        const activeGeminiKey = GEMINI_KEY || process.env.GEMINI_API_KEY;
-
-        if (!activeGeminiKey) {
-            console.error("❌ CRITICAL: Gemini API Key is missing!");
-            return res.status(500).json({ error: "Gemini API key is not defined on the server configuration." });
-        }
-
-        console.log(`[Gemini Pipeline] Processing video: ${videoPath}, extracting audio...`);
-
-        // Extract clean audio from video via FFmpeg
-        ffmpeg(videoPath)
-            .output(audioPath)
-            .noVideo()
-            .audioCodec('libmp3lame')
-            .audioBitrate(128) // Clean audio optimization for LLM processing
-            .on('end', async () => {
-                try {
-                    console.log(`[Gemini Pipeline] Audio extracted successfully. Size: ${fs.statSync(audioPath).size} bytes. Uploading to Gemini...`);
-
-                    // Audio file ko base64 string me convert karenge taaki inline data pipeline se bhej sakein
-                    const audioBuffer = fs.readFileSync(audioPath);
-                    const base64Audio = audioBuffer.toString("base64");
-
-                    // System instruction to enforce rigid timestamp data matching subtitle array requirements
-                    const promptText = `Analyze this audio file. Transcribe the spoken words completely. 
-                    You must detect timestamps precisely for each spoken segment/word.
-                    Provide the response STRICTLY as a valid JSON array of objects with no markdown wrap, no backticks, no comments.
-                    The language spoken is mainly "${spokenLanguage}".
-                    
-                    Expected output structure format:
-                    [
-                      { "word": "Hello", "start": 0.15, "end": 0.50 },
-                      { "word": "world", "start": 0.55, "end": 0.95 }
-                    ]
-                     Ensure start and end values are raw floating-point numbers representing seconds. Do not skip any words.`;
-
-                    console.log("[Gemini Pipeline] Sending multimodal request to Gemini Flash...");
-
-                    // Raw API request using global nodeFetch/fetch mapping to prevent library mismatch
-                    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeGeminiKey}`;
-                    
-                    const response = await fetch(geminiEndpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    { text: promptText },
-                                    {
-                                        inlineData: {
-                                            mimeType: "audio/mp3",
-                                            data: base64Audio
-                                        }
-                                    }
-                                ]
-                            }],
-                            generationConfig: {
-                                responseMimeType: "application/json" // Mandates clean JSON output formatting
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errorLogs = await response.text();
-                        throw new Error(`Gemini API responded with status ${response.status}: ${errorLogs}`);
-                    }
-
-                    const resultData = await response.json();
-                    
-                    // Cleanup temporary audio file
-                    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
-
-                    // Extract text string returned by Gemini response structure
-                    let rawJsonText = resultData.candidates[0].content.parts[0].text.trim();
-                    
-                    // Safe string parsing
-                    let formattedSubtitles = [];
-                    try {
-                        formattedSubtitles = JSON.parse(rawJsonText);
-                    } catch (parseErr) {
-                        console.error("⚠️ Failed to parse raw Gemini JSON, attempting regex cleanup...", rawJsonText);
-                        // Clean markdown backticks fallback if any
-                        rawJsonText = rawJsonText.replace(/```json|```/gi, '').trim();
-                        formattedSubtitles = JSON.parse(rawJsonText);
-                    }
-
-                    console.log(`[Gemini Pipeline] Successfully generated ${formattedSubtitles.length} subtitle timestamps.`);
-
-                    if (!responseSent) {
-                        responseSent = true;
-                        return res.json({
-                            videoUrl: videoPath,
-                            subtitles: formattedSubtitles
-                        });
-                    }
-
-                } catch (geminiErr) {
-                    console.error("🔥 [Gemini API Pipeline Error]:", geminiErr);
-                    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
-                    
-                    if (!responseSent) {
-                        responseSent = true;
-                        return res.status(500).json({ 
-                            error: "Gemini Transcription Pipeline failed.", 
-                            details: geminiErr.message 
-                        });
-                    }
-                }
-            })
-            .on('error', (err) => {
-                console.error("❌ [FFmpeg Extraction Error]:", err);
-                if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
-                
-                if (!responseSent) {
-                    responseSent = true;
-                    return res.status(500).json({ error: "Failed to extract audio from video.", details: err.message });
-                }
-            })
-            .run();
-
-    } catch (globalErr) {
-        console.error("❌ [Global Route Error]:", globalErr);
-        if (audioPath && fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+        const userLanguage = req.body.language || 'en';
         
-        if (!responseSent) {
-            return res.status(500).json({ error: "Internal server error in upload pipeline.", details: globalErr.message });
+        // 1. Pehle video file ko read karke base64 data mein convert karein (Gemini multimodal processing ke liye)
+        const videoBuffer = fs.readFileSync(videoPath);
+        const base64Video = videoBuffer.toString('base64');
+
+        // 2. Ultra-smart Gemini Prompt Engineering: Isme Song recognition aur Word-by-word timing inbuilt hai
+        const systemPrompt = `
+You are an expert video subtitle engineer specializing in viral Instagram Reels and YouTube Shorts. 
+Your core task is to extract highly accurate timestamps for every single word spoken or sung in the video.
+
+CRITICAL INSTRUCTIONS FOR SONG RECOGNITION:
+1. First, analyze if the audio contains a song, music track, or background background poetry.
+2. If you recognize a song or any musical piece, access your global knowledge base to retrieve the 100% correct, verified, officially released lyrics of that song in the appropriate language (e.g., Hindi, English, Spanish, etc.).
+3. Align those real, accurate lyrics precisely with the timestamps of the audio. Do not guess spellings if you know the song. Ensure absolute word accuracy (e.g., correct hinglish/hindi words for Bollywood tracks).
+4. If it's normal speech, transcribe the words accurately matching the language code: "${userLanguage}".
+
+OUTPUT FORMAT RULES:
+- You must respond ONLY with a valid JSON array. No markdown blocks, no triple backticks (\`\`\`), no conversational text.
+- Every object in the array must represent a SINGLE individual word with exact 'start' and 'end' seconds.
+- JSON structure:
+[
+  {"word": "Let's", "start": 0.12, "end": 0.45},
+  {"word": "go", "start": 0.46, "end": 0.80}
+]
+- Timestamps must start from 0.00 and cannot exceed the total duration of the video. Keep gaps minimal for viral fast-paced subtitle switching.
+`;
+
+        // 3. Gemini API Request payload config
+        const geminiPayload = {
+            contents: [{
+                parts: [
+                    { text: systemPrompt },
+                    {
+                        inlineData: {
+                            mimeType: req.file.mimetype || "video/mp4",
+                            data: base64Video
+                        }
+                    }
+                ]
+            }],
+            generationConfig: {
+                responseMimeType: "application/json", // API ko force karega strictly JSON dene ke liye
+                temperature: 0.2 // Lower temperature means high accuracy, less randomness
+            }
+        };
+
+        // 4. Hit Gemini API
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+        
+        const response = await axios.post(geminiUrl, geminiPayload, {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 90000 // 90 seconds timeout for large video processing
+        });
+
+        // Response safely parse karein
+        let rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+        
+        // Clean markdown backticks if any fallback happens
+        rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        let subtitlesArray = [];
+        try {
+            subtitlesArray = JSON.parse(rawText);
+        } catch (parseErr) {
+            console.error("❌ [Gemini JSON Parsing Failed]:", rawText);
+            return res.status(500).json({ error: "AI response processing error. Please try generating again." });
         }
+
+        // Relative path forward to frontend
+        const relativeVideoUrl = `/uploads/${path.basename(videoPath)}`;
+
+        return res.json({
+            success: true,
+            videoUrl: relativeVideoUrl,
+            subtitles: subtitlesArray
+        });
+
+    } catch (err) {
+        console.error("❌ [Global Upload/Transcribe Error]:", err);
+        return res.status(500).json({ error: "Failed to process video subtitles via AI.", details: err.message });
     }
 });
-/**
- * 🔥 FIX 1: ADDING MISSING EXPORT ROUTE (/api/export)
- * Yeh API frontend se aney wali custom styling aur subtitles ko video me permanently add (burn) karegi.
- */
-app.post('/api/export', express.json(), async (req, res) => {
+
+// API Endpoint: Dynamic SRT creation aur FFMPEG Burn implementation
+app.post('/api/export', async (req, res) => {
     try {
         const { videoUrl, subtitles, styles } = req.body;
 
         if (!videoUrl || !subtitles || subtitles.length === 0) {
-            return res.status(400).json({ error: "Missing required video URL or subtitle data segments." });
+            return res.status(400).json({ error: "Missing required video URL or parsed subtitle data." });
         }
 
-        console.log(`[Export Pipeline] Received export request for video: ${videoUrl}`);
+        // Paths set up karein
+        const inputVideoPath = path.join(__dirname, videoUrl.replace(/^\//, ''));
+        const uniqueId = crypto.randomBytes(4).toString('hex');
+        const srtFilename = path.join(__dirname, `uploads/subtitles_${uniqueId}.srt`);
+        const videoOutputName = `outputs/output_${uniqueId}.mp4`;
+        const outputVideoPath = path.join(__dirname, videoOutputName);
 
-        // 1. Generate standard SRT subtitle formatting from array timestamps
-        let srtContent = '';
-        subtitles.forEach((item, index) => {
-            const formatSRTTime = (seconds) => {
-                const date = new Date(0);
-                date.setSeconds(seconds);
-                const ms = Math.floor((seconds % 1) * 1000).toString().padStart(3, '0');
-                const timeStr = date.toISOString().substr(11, 8);
-                return `${timeStr},${ms}`;
-            };
+        if (!fs.existsSync(inputVideoPath)) {
+            return res.status(404).json({ error: "Source video file has expired or was not found." });
+        }
 
-            const startTime = formatSRTTime(item.start);
-            const endTime = formatSRTTime(item.end);
+        // 1. Generate Highly Specialized SRT format dynamically from Word-by-word timestamps
+        let srtContent = "";
+        
+        // Agar animation style 'word-by-word' hai toh har single word ko ek independent subtitle card banayenge
+        if (styles.animationStyle === 'word') {
+            subtitles.forEach((item, index) => {
+                const seq = index + 1;
+                
+                // Seconds ko SRT time format me badlein (HH:MM:SS,ms)
+                const formatSRTTime = (secs) => {
+                    const date = new Date(0);
+                    date.setSeconds(secs);
+                    const ms = Math.floor((secs % 1) * 1000).toString().padStart(3, '0');
+                    const timeStr = date.toISOString().substr(11, 8);
+                    return `${timeStr},${ms}`;
+                };
 
-            srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${item.word}\n\n`;
-        });
+                const startTimeSRT = formatSRTTime(item.start);
+                // Agar end time missing ho toh short dynamic delta delay set karein
+                const endTimeSRT = formatSRTTime(item.end || (item.start + 0.4));
 
-        // Save subtitle file temporarily
-        const srtFilename = `uploads/subs_${Date.now()}.srt`;
+                // Word ko uppercase kar rahe hain viral reels transformation effect ke liye
+                const cleanWord = String(item.word).toUpperCase().trim();
+
+                srtContent += `${seq}\n${startTimeSRT} --> ${endTimeSRT}\n${cleanWord}\n\n`;
+            });
+        } else {
+            // Sentence wise backup rule (Agar short sequence chunks chahiye ho toh)
+            // Grouping logic for sentences
+            let seq = 1;
+            for (let i = 0; i < subtitles.length; i += 4) {
+                const chunk = subtitles.slice(i, i + 4);
+                const start = chunk[0].start;
+                const end = chunk[chunk.length - 1].end || (chunk[0].start + 1.5);
+                const sentence = chunk.map(c => c.word).join(" ");
+                
+                const formatSRTTime = (secs) => {
+                    const date = new Date(0);
+                    date.setSeconds(secs);
+                    const ms = Math.floor((secs % 1) * 1000).toString().padStart(3, '0');
+                    return `${date.toISOString().substr(11, 8)},${ms}`;
+                };
+                
+                srtContent += `${seq}\n${formatSRTTime(start)} --> ${formatSRTTime(end)}\n${sentence}\n\n`;
+                seq++;
+            }
+        }
+
         fs.writeFileSync(srtFilename, srtContent, 'utf8');
 
-        // 2. Map styling parameters (FontColor, Size, Alignment Position) to FFmpeg subtitle filters
-        // Convert web hex colors (#ffff00) to FFmpeg/ASS styling formats (&H00FFFF&)
-        const convertHexToAss = (hex) => {
-            if (!hex) return 'HFFFFFF';
-            const cleanHex = hex.replace('#', '');
-            if (cleanHex.length === 6) {
-                const r = cleanHex.substr(0, 2);
-                const g = cleanHex.substr(2, 2);
-                const b = cleanHex.substr(4, 2);
-                return `H${b}${g}${r}`; // ASS needs Reverse Hex order (BGR)
-            }
-            return 'HFFFFFF';
+        // 2. Build Advanced FFmpeg Drawtext / Subtitles Filter Command
+        // Color Hex code parsing for FFmpeg (Web Color #RRGGBB to FFmpeg Alpha-Color Spec BGR)
+        const hexToFFmpegColor = (hex) => {
+            if (!hex) return 'FFFFFF';
+            return hex.replace('#', '').toUpperCase();
         };
 
-        const primaryColor = convertHexToAss(styles.fontColor || '#ffff00');
-        const outlineColor = convertHexToAss(styles.outlineColor || '#000000');
-        const fontName = styles.fontName === 'Impact' ? 'Impact' : (styles.fontName || 'Arial');
+        const fontColor = hexToFFmpegColor(styles.fontColor || '#ffff00');
+        const outlineColor = hexToFFmpegColor(styles.outlineColor || '#000000');
         const fontSize = styles.fontSize || '36';
         
-        // Alignment codes: 2 = Bottom-Center, 6 = Top-Center, 10 = Mid-Center
-        const alignment = styles.position || '10'; 
+        // Alignment Mapping: 10 = Centered Alignment, 2 = Bottom Center, 6 = Top Center
+        let alignmentCode = "10"; 
+        if (styles.position === "2") alignmentCode = "2";
+        if (styles.position === "6") alignmentCode = "6";
 
-        // Enforce strong style injection parameters for rendering
-        const videoOutputName = `outputs/export_${Date.now()}.mp4`;
-        const videoFilterCommand = `subtitles=${srtFilename}:force_style='Fontname=${fontName},Fontsize=${fontSize},PrimaryColour=&${primaryColor}&,OutlineColour=&${outlineColor}&,Outline=2,BorderStyle=1,Alignment=${alignment}'`;
+        // SRT file system path normalization for FFmpeg cross-platform compliance
+        const normalizedSrtPath = srtFilename.replace(/\\/g, '/').replace(/:/g, '\\:');
+        
+        // FFmpeg subtitle style configuration string
+        const videoFilterString = `subtitles='${normalizedSrtPath}':force_style='Fontname=Impact,Fontsize=${fontSize},PrimaryColour=&H00${fontColor},OutlineColour=&H00${outlineColor},Outline=3,BorderStyle=1,Alignment=${alignmentCode},MarginV=25'`;
 
-        console.log(`[Export Pipeline] Compiling FFmpeg with style filters...`);
+        // 3. Process Video Conversion via FFmpeg CLI Engine
+        const ffmpegCommand = `ffmpeg -y -i "${inputVideoPath}" -vf "${videoFilterString}" -c:a copy -preset ultrafast "${outputVideoPath}"`;
 
-        // Execute FFmpeg to burn subtitles permanently into the new video file
-        ffmpeg(videoUrl)
-            .videoFilter(videoFilterCommand)
-            .output(videoOutputName)
-            .on('end', () => {
-                console.log(`[Export Pipeline] Video successfully rendered: ${videoOutputName}`);
-                
-                // Cleanup temporary srt file
-                if (fs.existsSync(srtFilename)) fs.unlinkSync(srtFilename);
+        exec(ffmpegCommand, (error, stdout, stderr) => {
+            // Processing hone ke baad temporary SRT remove karein space management ke liye
+            if (fs.existsSync(srtFilename)) fs.unlinkSync(srtFilename);
 
-                // Send download link pointing to backend architecture
-                return res.json({
-                    success: true,
-                    downloadUrl: `/${videoOutputName}`
-                });
-            })
-            .on('error', (err) => {
-                console.error("❌ [FFmpeg Export Video Engine Crash]:", err);
-                if (fs.existsSync(srtFilename)) fs.unlinkSync(srtFilename);
-                return res.status(500).json({ error: "Failed to render styled text into video stream.", details: err.message });
-            })
-            .run();
+            if (error) {
+                console.error("❌ [FFmpeg Render Crash]:", error);
+                return res.status(500).json({ error: "FFmpeg pipeline failed to burn subtitles into video.", details: error.message });
+            }
+
+            return res.json({
+                success: true,
+                downloadUrl: `/${videoOutputName}`
+            });
+        });
 
     } catch (exportErr) {
         console.error("❌ [Global Export Route Failure]:", exportErr);
-        return res.status(500).json({ error: "Internal processing crash during rendering.", details: exportErr.message });
+        return res.status(500).json({ error: "Internal crash during video burning engine runtime.", details: exportErr.message });
     }
 });
+
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // =========================================================================
 // END OF AI SUBTITLE VIDEO TOOL LOGIC
 // =========================================================================
-
 // END OF AI SUBTITLE VIDEO TOOL LOGIC
 // =========================================================================
 //==================================================
