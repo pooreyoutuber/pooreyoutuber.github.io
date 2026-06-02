@@ -754,14 +754,6 @@ app.post('/popup', async (req, res) => {
 // ===================================================================
 // NEW TOOL: AI YOUTUBE THUMBNAIL MAKER ENDPOINT
 // ===================================================================
-// =========================================================================
-// 🔥 UPDATED TOOL: AI SUBTITLE VIDEO GENERATOR VIA GEMINI API (NO OPENAI)
-// =========================================================================
-// =========================================================================
-// 🔥 UPDATED TOOL: AI SUBTITLE VIDEO GENERATOR VIA GEMINI API (SONG INTELLIGENCE)
-// =========================================================================
-
-const { exec } = require('child_process');
 
 // API Endpoint: Video Upload aur Smart Transcribe karna
 app.post('/api/upload', upload.single('video'), async (req, res) => {
