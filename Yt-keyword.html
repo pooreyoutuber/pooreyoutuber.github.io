@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Subtitle Generator - Smart Reels & Shorts Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Montserrat:wght@700;900&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
     
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
     <script>
@@ -17,46 +18,65 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
     
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        body { background-color: #0b0f19; color: #f8fafc; font-family: 'Inter', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .drag-over { border-color: #22d3ee !important; background-color: #1e293b !important; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8 min-h-screen flex flex-col justify-between">
 
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto w-full flex-1">
+        <!-- Header -->
         <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
+            <span class="px-3 py-1 text-xs font-semibold tracking-wider text-cyan-400 uppercase bg-cyan-950/50 border border-cyan-800 rounded-full inline-block mb-3">
+                ⚡ Premium Creator Suite
+            </span>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 mb-3 tracking-tight">
                 AI Auto Subtitle Generator
             </h1>
-            <p class="text-gray-400 text-sm md:text-base">
-                Create viral Instagram Reels & YouTube Shorts with highly accurate, fully customizable animated subtitles.
+            <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
+                Create viral Instagram Reels & YouTube Shorts with highly accurate, fully customizable animated subtitles in seconds.
             </p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Workspace -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+            <!-- Column 1: Configuration Panel -->
+            <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-2xl space-y-6">
+                <!-- Step 1: Upload Video -->
                 <div>
-                    <label class="block text-sm font-semibold text-cyan-400 mb-2">1. Upload Video (Max 40s)</label>
-                    <div class="border-2 border-dashed border-slate-700 hover:border-cyan-500 rounded-xl p-4 text-center cursor-pointer transition relative">
-                        <input type="file" id="videoInput" name="video" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleVideoSelect(event)">
-                        <div id="uploadPlaceholder">
-                            <svg class="mx-auto h-12 w-12 text-gray-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    <label class="block text-sm font-semibold text-cyan-400 mb-2 flex items-center gap-1.5">
+                        <span class="flex items-center justify-center w-5 h-5 text-xs rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">1</span>
+                        Upload Video (Max 40s)
+                    </label>
+                    <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-cyan-500/80 rounded-xl p-5 text-center cursor-pointer transition relative group bg-slate-950/40">
+                        <input type="file" id="videoInput" name="video" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="handleVideoSelect(event)">
+                        <div id="uploadPlaceholder" class="space-y-2">
+                            <svg class="mx-auto h-10 w-10 text-slate-500 group-hover:text-cyan-400 transition transform group-hover:scale-110 duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
                             <p class="text-sm text-gray-300 font-medium">Click or drag video file</p>
-                            <p class="text-xs text-gray-500 mt-1">MP4, MOV up to 40 seconds</p>
+                            <p class="text-xs text-slate-500">MP4, MOV up to 40 seconds</p>
                         </div>
-                        <p id="fileNameDisplay" class="text-sm text-emerald-400 font-medium hidden truncate"></p>
+                        <div id="fileDisplayContainer" class="hidden flex items-center justify-center gap-2 bg-slate-900 p-2 rounded-lg border border-slate-800">
+                            <span class="text-xs text-cyan-400 font-semibold uppercase">Selected:</span>
+                            <p id="fileNameDisplay" class="text-xs text-emerald-400 font-medium truncate max-w-[180px]"></p>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Step 2: Spoken Language -->
                 <div>
-                    <label class="block text-sm font-semibold text-cyan-400 mb-2">2. Video Spoken Language</label>
-                    <select id="languageSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                    <label class="block text-sm font-semibold text-cyan-400 mb-2 flex items-center gap-1.5">
+                        <span class="flex items-center justify-center w-5 h-5 text-xs rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">2</span>
+                        Video Spoken Language
+                    </label>
+                    <select id="languageSelect" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition">
                         <option value="en">English (Global)</option>
-                        <option value="hi">Hindi (इंडिया)</option>
+                        <option value="hi">Hindi (इंडिया / Hinglish)</option>
                         <option value="es">Spanish (Español)</option>
                         <option value="fr">French (Français)</option>
                         <option value="de">German (Deutsch)</option>
@@ -65,107 +85,138 @@
                         <option value="ko">Korean (한국어)</option>
                         <option value="pt">Portuguese (Português)</option>
                         <option value="ru">Russian (Русский)</option>
-                        <option value="zh">Chinese (中文)</option>
-                        <option value="ar">Arabic (العربية)</option>
-                        <option value="tr">Turkish (Türkçe)</option>
-                        <option value="nl">Dutch (Nederlands)</option>
-                        <option value="sv">Swedish (Svenska)</option>
-                        <option value="id">Indonesian (Bahasa Indonesia)</option>
-                        <option value="vi">Vietnamese (Tiếng Việt)</option>
                     </select>
                 </div>
 
-                <div class="space-y-4">
-                    <label class="block text-sm font-semibold text-cyan-400">3. Customize Subtitle Style</label>
+                <!-- Step 3: Subtitle Styling -->
+                <div class="space-y-4 pt-2 border-t border-slate-800/60">
+                    <label class="block text-sm font-semibold text-cyan-400 flex items-center gap-1.5">
+                        <span class="flex items-center justify-center w-5 h-5 text-xs rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">3</span>
+                        Customize Subtitle Style
+                    </label>
                     
-                    <div>
-                        <label class="text-xs text-gray-400 block mb-1">Font Family</label>
-                        <select id="fontName" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm">
-                            <option value="Impact">Impact (Viral Reels Font)</option>
-                            <option value="Montserrat">Montserrat Bold</option>
-                            <option value="Roboto">Roboto</option>
-                            <option value="Arial">Arial Black</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">Font Size</label>
-                            <select id="fontSize" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm">
-                                <option value="28">28 (Small)</option>
-                                <option value="36" selected>36 (Medium)</option>
-                                <option value="48">48 (Large)</option>
-                                <option value="60">60 (Extra Large)</option>
+                            <label class="text-[11px] text-gray-400 block mb-1 uppercase font-bold tracking-wider">Font Family</label>
+                            <select id="fontName" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                                <option value="Impact">Impact (Viral Reels)</option>
+                                <option value="Montserrat">Montserrat Black</option>
+                                <option value="Roboto Condensed">Roboto Cond Bold</option>
+                                <option value="Arial">Arial Black</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">Position</label>
-                            <select id="position" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm">
-                                <option value="10" selected>Middle Center (Reels Style)</option>
+                            <label class="text-[11px] text-gray-400 block mb-1 uppercase font-bold tracking-wider">Font Size</label>
+                            <select id="fontSize" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                                <option value="24">24 (Small)</option>
+                                <option value="36" selected>36 (Medium)</option>
+                                <option value="44">44 (Large)</option>
+                                <option value="56">56 (Extra Large)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[11px] text-gray-400 block mb-1 uppercase font-bold tracking-wider">Text Color</label>
+                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-1">
+                                <input type="color" id="fontColor" value="#ffff00" class="w-8 h-7 bg-transparent border-0 cursor-pointer p-0 rounded">
+                                <span id="fontColorHex" class="text-[11px] font-mono text-slate-400 ml-2">#FFFF00</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-gray-400 block mb-1 uppercase font-bold tracking-wider">Stroke / Outline</label>
+                            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-1">
+                                <input type="color" id="outlineColor" value="#000000" class="w-8 h-7 bg-transparent border-0 cursor-pointer p-0 rounded">
+                                <span id="outlineColorHex" class="text-[11px] font-mono text-slate-400 ml-2">#000000</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[11px] text-gray-400 block mb-1 uppercase font-bold tracking-wider">Position Placement</label>
+                            <select id="position" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                                <option value="10" selected>Center (Reels Hit)</option>
                                 <option value="2">Bottom Center</option>
                                 <option value="6">Top Center</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">Text Color</label>
-                            <input type="color" id="fontColor" value="#ffff00" class="w-full h-9 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer p-1">
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">Outline/Stroke Color</label>
-                            <input type="color" id="outlineColor" value="#000000" class="w-full h-9 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer p-1">
+                            <label class="text-[11px] text-gray-400 block mb-1 uppercase font-bold tracking-wider">Outline Thickness</label>
+                            <select id="strokeWidth" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                                <option value="1">1px (Thin)</option>
+                                <option value="2" selected>2px (Normal)</option>
+                                <option value="3">3px (Thick)</option>
+                                <option value="4">4px (Heavy)</option>
+                            </select>
                         </div>
                     </div>
 
                     <div>
-                        <label class="text-xs text-gray-400 block mb-1">Animation Template</label>
-                        <select id="animationStyle" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm">
-                            <option value="word">Word-by-Word Active Highlight</option>
-                            <option value="sentence">Full Sentence Static</option>
+                        <label class="text-[11px] text-gray-400 block mb-1 uppercase font-bold tracking-wider">Animation Template</label>
+                        <select id="animationStyle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                            <option value="word">🔥 Word-by-Word Active Highlight</option>
+                            <option value="sentence">📺 Full Sentence Static Style</option>
                         </select>
                     </div>
                 </div>
 
-                <button id="transcribeBtn" onclick="uploadAndTranscribe()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95">
+                <button id="transcribeBtn" onclick="uploadAndTranscribe()" class="w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-cyan-950/50 transition transform active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
                     Generate AI Subtitles
                 </button>
             </div>
 
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between items-center min-h-[400px]">
-                <h3 class="text-sm font-semibold text-cyan-400 mb-4 self-start">Live Interactive Preview</h3>
+            <!-- Column 2: Live Interactive Preview -->
+            <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col justify-between items-center min-h-[500px]">
+                <div class="w-full flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-semibold text-cyan-400 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Interactive Preview
+                    </h3>
+                    <span class="text-[11px] bg-slate-950 text-slate-400 px-2 py-0.5 rounded border border-slate-800 font-mono">9:16 Aspect</span>
+                </div>
                 
-                <div class="relative w-full max-w-[280px] aspect-[9/16] bg-black rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center">
+                <div class="relative w-full max-w-[270px] aspect-[9/16] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center shadow-2xl group">
                     <video id="videoPreview" controls class="w-full h-full object-cover hidden"></video>
-                    <div id="videoPlaceholderText" class="text-gray-500 text-sm text-center p-4">
-                        Video player preview will appear here after upload
+                    
+                    <div id="videoPlaceholderText" class="text-slate-500 text-xs text-center p-6 space-y-2 z-0">
+                        <div class="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto mb-2 text-slate-400">🎬</div>
+                        <p>Video player preview will appear here after selection.</p>
                     </div>
-                    <div id="mockSubtitle" class="absolute inset-x-4 text-center font-bold pointer-events-none hidden transition-all drop-shadow-md z-10">
+
+                    <!-- Enhanced Realtime Overlay Subtitle Text -->
+                    <div id="mockSubtitle" class="absolute inset-x-3 text-center font-black pointer-events-none hidden transition-all drop-shadow-2xl z-20 uppercase tracking-wide break-words select-none">
                         AI Subtitle Preview!
                     </div>
                 </div>
 
-                <div class="w-full mt-4 text-center">
-                    <p class="text-xs text-gray-500">Preview styles instantly by editing controls</p>
+                <div class="w-full mt-4 text-center border-t border-slate-800/60 pt-3">
+                    <p class="text-xs text-slate-500">Preview changes instantly above by toggling configuration settings.</p>
                 </div>
             </div>
 
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col h-[580px]">
+            <!-- Column 3: Interactive Transcript Editor -->
+            <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-2xl flex flex-col h-[590px]">
                 <div class="mb-4">
-                    <h3 class="text-sm font-semibold text-cyan-400">4. Interactive Transcript Editor</h3>
-                    <p class="text-xs text-gray-500 mt-1">Review, play timestamp, and manually edit text for 100% accuracy.</p>
+                    <h3 class="text-sm font-semibold text-cyan-400 flex items-center gap-1.5">
+                        <span class="flex items-center justify-center w-5 h-5 text-xs rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">4</span>
+                        Interactive Transcript Editor
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-1">Review, play specific timestamps, and modify text for 100% video accuracy.</p>
                 </div>
 
-                <div id="subtitleTimeline" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar text-gray-400 text-center text-sm pt-8">
-                    No subtitles generated yet. Click "Generate AI Subtitles" first.
+                <div id="subtitleTimeline" class="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar text-slate-500 text-center text-xs flex flex-col items-center justify-center border border-dashed border-slate-800 rounded-xl p-4 bg-slate-950/20">
+                    <span class="text-xl mb-1">📝</span>
+                    <span>No subtitles generated yet.<br>Click "Generate AI Subtitles" panel first.</span>
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-slate-800 space-y-3">
-                    <div id="statusMessage" class="hidden text-sm p-3 rounded-lg text-center font-medium bg-slate-800"></div>
+                    <div id="statusMessage" class="hidden text-xs p-3 rounded-xl text-center font-medium bg-slate-950 border border-slate-800"></div>
 
-                    <button id="exportBtn" onclick="burnAndDownloadVideo()" disabled class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition transform disabled:opacity-50 disabled:cursor-not-allowed">
-                        Burn & Download High-Quality Video
+                    <button id="exportBtn" onclick="burnAndDownloadVideo()" disabled class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-950/20 transition transform disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Burn & Download Video
                     </button>
                 </div>
             </div>
@@ -173,41 +224,75 @@
         </div>
     </div>
 
+    <!-- Footer Copyright -->
+    <footer class="text-center text-[11px] text-slate-600 mt-8 py-2 border-t border-slate-900/60">
+        &copy; 2026 AI Subtitle Generator Studio. Optimized for Shorts & Reels Automation.
+    </footer>
+
+    <!-- Interactive Script Frontend Logic Component -->
     <script>
         const BACKEND_URL = "https://pooreyoutuber.onrender.com";
         let uploadedVideoUrl = ""; 
         let globalSubtitlesArray = [];
 
+        // Realtime dynamic styles engine logic matching full suite requirements
         function updateMockSubtitleStyles() {
             const mock = document.getElementById('mockSubtitle');
             const font = document.getElementById('fontName').value;
             const size = document.getElementById('fontSize').value;
             const color = document.getElementById('fontColor').value;
-            const stroke = document.getElementById('outlineColor').value;
+            const strokeColor = document.getElementById('outlineColor').value;
+            const strokeWidth = document.getElementById('strokeWidth').value;
             const pos = document.getElementById('position').value;
 
-            mock.style.fontFamily = font === 'Impact' ? 'Impact, sans-serif' : font;
+            // Update color labels in layout display hex code context
+            document.getElementById('fontColorHex').innerText = color.toUpperCase();
+            document.getElementById('outlineColorHex').innerText = strokeColor.toUpperCase();
+
+            // Inject font settings directly inside frame layer
+            mock.style.fontFamily = `"${font}", 'Inter', sans-serif`;
             mock.style.fontSize = `${size}px`;
             mock.style.color = color;
-            mock.style.textShadow = `-2px -2px 0 ${stroke}, 2px -2px 0 ${stroke}, -2px 2px 0 ${stroke}, 2px 2px 0 ${stroke}`;
+            
+            // Webkit/CSS text stroke injection matching ffmpeg specifications context
+            mock.style.textShadow = `
+                -${strokeWidth}px -${strokeWidth}px 0 ${strokeColor}, 
+                 ${strokeWidth}px -${strokeWidth}px 0 ${strokeColor}, 
+                -${strokeWidth}px  ${strokeWidth}px 0 ${strokeColor}, 
+                 ${strokeWidth}px  ${strokeWidth}px 0 ${strokeColor}
+            `;
 
             if (pos === "6") { mock.style.top = "15%"; mock.style.bottom = "auto"; }
             else if (pos === "10") { mock.style.top = "45%"; mock.style.bottom = "auto"; }
             else { mock.style.bottom = "15%"; mock.style.top = "auto"; }
         }
 
-        ['fontName', 'fontSize', 'fontColor', 'outlineColor', 'position'].forEach(id => {
-            document.getElementById(id).addEventListener('change', updateMockSubtitleStyles);
-            document.getElementById(id).addEventListener('input', updateMockSubtitleStyles);
+        // Attach global dynamic layout listeners for instant visual configuration mapping
+        ['fontName', 'fontSize', 'fontColor', 'outlineColor', 'position', 'strokeWidth'].forEach(id => {
+            const element = document.getElementById(id);
+            element.addEventListener('change', updateMockSubtitleStyles);
+            element.addEventListener('input', updateMockSubtitleStyles);
+        });
+
+        // Advanced Drag and Drop functionality mapping setup
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('videoInput');
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); }, false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); }, false);
         });
 
         function handleVideoSelect(event) {
-            const file = event.target.files[0];
+            const file = event.target.files[0] || event.dataTransfer.files[0];
             if (file) {
                 document.getElementById('uploadPlaceholder').classList.add('hidden');
+                document.getElementById('fileDisplayContainer').classList.remove('hidden');
+                
                 const fileDisplay = document.getElementById('fileNameDisplay');
-                fileDisplay.innerText = `Selected: ${file.name}`;
-                fileDisplay.classList.remove('hidden');
+                fileDisplay.innerText = file.name;
 
                 const videoPreview = document.getElementById('videoPreview');
                 videoPreview.src = URL.createObjectURL(file);
@@ -219,6 +304,12 @@
             }
         }
 
+        dropZone.addEventListener('drop', (e) => {
+            fileInput.files = e.dataTransfer.files;
+            handleVideoSelect(e);
+        });
+
+        // Communication structure interfacing directly pipeline framework
         async function uploadAndTranscribe() {
             const fileInput = document.getElementById('videoInput');
             const langSelect = document.getElementById('languageSelect').value;
@@ -226,19 +317,29 @@
             const timeline = document.getElementById('subtitleTimeline');
 
             if (!fileInput.files[0]) {
-                alert("Please upload a video file first!");
+                alert("Please select or drop a valid video file sequence first!");
                 return;
             }
 
             const formData = new FormData();
-            // Crucial Fix: 'video' name must perfectly map server side expectation
             formData.append('video', fileInput.files[0]);
             formData.append('language', langSelect);
 
             try {
                 transcribeBtn.disabled = true;
-                transcribeBtn.innerText = "Processing AI Transcription...";
-                timeline.innerHTML = `<div class="text-center py-8"><span class="animate-pulse text-cyan-400">AI listening & generating timestamps...</span></div>`;
+                transcribeBtn.innerHTML = `
+                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing Script Engine...
+                `;
+                timeline.className = "flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar text-center text-xs flex flex-col items-center justify-center bg-slate-950/10 rounded-xl";
+                timeline.innerHTML = `
+                    <div class="text-center space-y-2">
+                        <span class="animate-pulse text-cyan-400 font-semibold block">AI models extracting speech elements...</span>
+                        <span class="text-[10px] text-slate-500 block">Mapping precise floating millisecond arrays</span>
+                    </div>`;
 
                 const response = await fetch(`${BACKEND_URL}/api/upload`, {
                     method: 'POST',
@@ -247,11 +348,10 @@
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(errorText || "Server transcription crashed.");
+                    throw new Error(errorText || "Server pipeline configuration rejected format execution.");
                 }
 
                 const data = await response.json();
-                
                 uploadedVideoUrl = data.videoUrl; 
                 globalSubtitlesArray = data.subtitles; 
 
@@ -260,31 +360,36 @@
                 
             } catch (err) {
                 console.error(err);
-                alert("Error connecting to server backend: " + err.message);
-                timeline.innerHTML = `<span class="text-red-500">Failed to render transcription. Try again.<br><small class="text-gray-500">${err.message}</small></span>`;
+                alert("Error connecting orchestration module backend infrastructure: " + err.message);
+                timeline.innerHTML = `<span class="text-red-500 font-bold">Failed to compile text sequences.<br><small class="text-slate-500 font-normal text-[10px]">${err.message}</small></span>`;
             } finally {
                 transcribeBtn.disabled = false;
-                transcribeBtn.innerText = "Generate AI Subtitles";
+                transcribeBtn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                    Generate AI Subtitles
+                `;
             }
         }
 
         function renderSubtitleTimelineEditor() {
             const timeline = document.getElementById('subtitleTimeline');
             timeline.innerHTML = "";
+            timeline.className = "flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar block text-left";
 
             if (!globalSubtitlesArray || globalSubtitlesArray.length === 0) {
-                timeline.innerHTML = "No sound segments found.";
+                timeline.className = "flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar text-center text-xs flex flex-col items-center justify-center";
+                timeline.innerHTML = "<span class='text-slate-500'>No active dialogue clusters discovered in target file stream.</span>";
                 return;
             }
 
             globalSubtitlesArray.forEach((item, index) => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-800 p-3 rounded-xl border border-slate-700 flex items-center justify-between gap-2";
+                card.className = "bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between gap-3 hover:border-slate-700 transition";
                 card.innerHTML = `
-                    <span class="text-xs text-gray-500 font-mono">${item.start.toFixed(2)}s</span>
+                    <span class="text-[10px] text-cyan-500 bg-cyan-950/40 px-2 py-1 rounded border border-cyan-900/40 font-mono tracking-tight font-bold">${item.start.toFixed(2)}s</span>
                     <input type="text" value="${item.word}" oninput="updateSubtitleWord(${index}, this.value)" 
-                        class="flex-1 mx-2 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-cyan-400">
-                    <button onclick="jumpVideoToTime(${item.start})" class="text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-2 py-1 rounded">▶</button>
+                        class="flex-1 min-w-0 mx-1 bg-slate-900/90 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-cyan-500 font-medium transition">
+                    <button onclick="jumpVideoToTime(${item.start})" class="text-xs bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-300 w-7 h-7 flex items-center justify-center rounded-lg border border-slate-700/60 transition">▶</button>
                 `;
                 timeline.appendChild(card);
             });
@@ -292,6 +397,10 @@
 
         function updateSubtitleWord(index, newValue) {
             globalSubtitlesArray[index].word = newValue;
+            
+            // Sync dynamic overlay display elements text structures instantly context
+            const mock = document.getElementById('mockSubtitle');
+            mock.innerText = newValue || "Subtitle Empty";
         }
 
         function jumpVideoToTime(seconds) {
@@ -299,6 +408,12 @@
             if (videoPlayer) {
                 videoPlayer.currentTime = seconds;
                 videoPlayer.play();
+                
+                // Flash preview word highlights instantly inside structural mock node components
+                const targetObj = globalSubtitlesArray.find(item => item.start === seconds);
+                if(targetObj) {
+                    document.getElementById('mockSubtitle').innerText = targetObj.word;
+                }
             }
         }
 
@@ -315,17 +430,25 @@
                     fontColor: document.getElementById('fontColor').value,
                     outlineColor: document.getElementById('outlineColor').value,
                     position: document.getElementById('position').value,
+                    strokeWidth: document.getElementById('strokeWidth').value,
                     animationStyle: document.getElementById('animationStyle').value
                 }
             };
 
             try {
                 exportBtn.disabled = true;
-                statusMessage.classList.remove('hidden', 'bg-red-900', 'bg-emerald-900');
-                statusMessage.classList.add('bg-slate-800', 'text-cyan-400');
-                statusMessage.innerText = "Rendering high-quality video in backend. Please wait, this takes time...";
+                statusMessage.classList.remove('hidden', 'bg-red-950/40', 'border-red-900/50', 'text-red-400', 'bg-emerald-950/40', 'border-emerald-900/50', 'text-emerald-400');
+                statusMessage.classList.add('bg-slate-950', 'text-cyan-400', 'border-slate-800', 'block');
+                statusMessage.innerHTML = `
+                    <div class="flex items-center justify-center gap-2">
+                        <svg class="animate-spin h-3.5 w-3.5 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Rendering high-quality video track in core engine stack...
+                    </div>`;
 
-               const response = await fetch(`${BACKEND_URL}/api/export`, {
+                const response = await fetch(`${BACKEND_URL}/api/export`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -333,18 +456,20 @@
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(errorText || "Failed to compile and render video.");
+                    throw new Error(errorText || "Core compilation engine faulted rendering framework pipelines.");
                 }
 
                 const data = await response.json();
                 
-                statusMessage.className = "text-sm p-3 rounded-lg text-center font-medium bg-emerald-900 text-emerald-200";
-                statusMessage.innerHTML = `🎉 Processing Finished! <a href="${BACKEND_URL}${data.downloadUrl}" target="_blank" class="underline font-bold text-white ml-1">Click here to Download Video</a>`;
+                statusMessage.classList.remove('text-cyan-400', 'border-slate-800');
+                statusMessage.classList.add('bg-emerald-950/40', 'border-emerald-900/50', 'text-emerald-400');
+                statusMessage.innerHTML = `🎉 Rendering Success! <a href="${BACKEND_URL}${data.downloadUrl}" target="_blank" class="underline font-bold text-white ml-1 hover:text-cyan-300">Download High-Res Video Link</a>`;
 
             } catch (err) {
                 console.error(err);
-                statusMessage.className = "text-sm p-3 rounded-lg text-center font-medium bg-red-900 text-red-200";
-                statusMessage.innerText = "Error during export process: " + err.message;
+                statusMessage.classList.remove('text-cyan-400', 'border-slate-800');
+                statusMessage.classList.add('bg-red-950/40', 'border-red-900/50', 'text-red-400');
+                statusMessage.innerText = "Error during engine composition render operations: " + err.message;
                 exportBtn.disabled = false;
             }
         }
