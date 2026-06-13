@@ -194,12 +194,15 @@
 
         .btn-play:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
+           /* Tablet Emulator UI Grid Strategy */
         #players {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
+            /* Yahan hum default mode ko lock karke automatic scale de rahe hain */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
             margin-top: 40px;
             display: none;
+            padding: 10px;
         }
         #players div {
             width: 100%;
@@ -233,37 +236,35 @@
         }
 
         .tool-card {
-    background: var(--card-bg) !important;
-    border: 1px solid var(--glass-border) !important;
-    padding: 20px;
-    border-radius: 15px;
-    text-decoration: none;
-    color: white !important;
-    transition: 0.3s;
-}
-.tool-card:hover { 
-    border-color: var(--primary) !important; 
-    background: rgba(255, 255, 255, 0.1) !important;
-}
-         
-        .alert-info {
-    background: rgba(56, 189, 248, 0.1) !important;
-    border: 1px solid var(--glass-border) !important;
-    border-left: 5px solid var(--accent) !important;
-    color: var(--text-light) !important;
-    padding: 20px;
-    border-radius: 8px;
-    margin: 20px 0;
+            background: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            padding: 20px;
+            border-radius: 15px;
+            text-decoration: none;
+            color: white !important;
+            transition: 0.3s;
+        }
+        .tool-card:hover { 
+            border-color: var(--primary) !important; 
+            background: rgba(255, 255, 255, 0.1) !important;
         }
          
-
-      /* Jab tool mobile ya tab par khule to grid ko fixed 2 columns me rakhein */
-
-   @media (max-width: 1024px) {
+        .alert-info {
+            background: rgba(56, 189, 248, 0.1) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-left: 5px solid var(--accent) !important;
+            color: var(--text-light) !important;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+         
+        /* Tablet Mode UI Adaptation */
+        @media (max-width: 1024px) {
             #players {
+                /* Force tablet structure: normal mobile and desktop mode inside mobile both will force exactly 2-column clean structure */
                 grid-template-columns: repeat(2, 1fr) !important; 
                 gap: 15px;
-                padding: 10px;
             }
 
             .input-group {
@@ -279,7 +280,17 @@
             }
 
             h1 { font-size: 20px; }
-   }
+        }
+
+        /* Micro scaling rules for ultra narrow viewports */
+        @media (max-width: 480px) {
+            #players {
+                /* Aggressive alignment to protect elements size */
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px;
+            }
+        }
+        
  </style>
 </head>
 <body>
