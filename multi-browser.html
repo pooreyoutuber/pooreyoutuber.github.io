@@ -212,7 +212,15 @@
 
         .btn-play:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
-        
+    
+        }
+        #players {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important; /* PC me 5 line me dikhayega */
+    gap: 15px !important;                             /* Videos ke beech ka gap */
+    margin-top: 30px !important;
+    padding: 10px !important;
+        }
         #players div {
             width: 100%;
             aspect-ratio: 16/9;
@@ -267,35 +275,29 @@
     border-radius: 8px;
     margin: 20px 0;
         }
-
- 
-   @media (max-width: 1024px) {
-    /* Videos ko 1 row me sirf 2 dikhane ke liye (Jesa aapki pic me hai) */
+        /* 2. Yeh Mobile aur tablet ke liye hai (Screen choti hote hi 2 Videos ek line me) */
+@media (max-width: 1024px) {
     #players {
-        grid-template-columns: repeat(2, 1fr) !important; 
-        gap: 15px !important;
-        padding: 10px !important;
+        grid-template-columns: repeat(2, 1fr) !important; /* Mobile me 2 line me dikhayega */
+        gap: 10px !important;
     }
-
-    /* Inputs ko ek hi line me horizontal rakhne ke liye */
+    
+    /* Inputs ko sahi rakhne ke liye aapka pehle wala code */
     .input-group {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         gap: 10px !important;
-        overflow-x: auto; /* Agar space kam pade to scroll ho sake, kute na */
+        overflow-x: auto;
     }
-
-    /* Inputs ka size normal rakhne ke liye */
     input#videoUrl { flex: 3 !important; width: auto !important; }
     input#viewCount { width: 70px !important; flex: 0.5 !important; }
     select#audioSetting, select#qualitySetting { flex: 1 !important; width: auto !important; }
     .btn-play { flex: 1 !important; width: auto !important; white-space: nowrap !important; }
-   }
-    
-        
-        
+}
 
+    h1 { font-size: 20px; }
+        }
 </style>
 </head>
 <body> 
