@@ -213,13 +213,12 @@
         .btn-play:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
     
-        }
         #players {
-    display: grid !important;
-    grid-template-columns: repeat(5, 1fr) !important; /* PC me 5 line me dikhayega */
-    gap: 15px !important;                             /* Videos ke beech ka gap */
-    margin-top: 30px !important;
-    padding: 10px !important;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+            display: none;
         }
         #players div {
             width: 100%;
@@ -253,51 +252,67 @@
         }
 
         .tool-card {
-    background: var(--card-bg) !important;
-    border: 1px solid var(--glass-border) !important;
-    padding: 20px;
-    border-radius: 15px;
-    text-decoration: none;
-    color: white !important;
-    transition: 0.3s;
-}
-.tool-card:hover { 
-    border-color: var(--primary) !important; 
-    background: rgba(255, 255, 255, 0.1) !important;
-}
-         
-        .alert-info {
-    background: rgba(56, 189, 248, 0.1) !important;
-    border: 1px solid var(--glass-border) !important;
-    border-left: 5px solid var(--accent) !important;
-    color: var(--text-light) !important;
-    padding: 20px;
-    border-radius: 8px;
-    margin: 20px 0;
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            color: inherit;
+            transition: 0.3s;
         }
-        /* 2. Yeh Mobile aur tablet ke liye hai (Screen choti hote hi 2 Videos ek line me) */
-@media (max-width: 1024px) {
-    #players {
-        grid-template-columns: repeat(2, 1fr) !important; /* Mobile me 2 line me dikhayega */
-        gap: 10px !important;
-    }
-    
-    /* Inputs ko sahi rakhne ke liye aapka pehle wala code */
+
+        .tool-card:hover { border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        .alert-info {
+            background: #eff6ff;
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+  @media (max-width: 1024px) {
+            #players {
+            grid-template-columns: repeat(2, 1fr); !important; 
+        gap: 15px;
+
+        padding: 10px;
+
+        }
+
+        @media (max-width: 400px) {
+                 #players { grid-template-columns: 1fr; }
+        }
+
+
+
     .input-group {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 10px !important;
-        overflow-x: auto;
+
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 12px;
+
     }
-    input#videoUrl { flex: 3 !important; width: auto !important; }
-    input#viewCount { width: 70px !important; flex: 0.5 !important; }
-    select#audioSetting, select#qualitySetting { flex: 1 !important; width: auto !important; }
-    .btn-play { flex: 1 !important; width: auto !important; white-space: nowrap !important; }
-}
+
+
+
+    input#videoUrl, input#viewCount, select, .btn-play {
+
+        width: 100% !important;
+
+        box-sizing: border-box;
+
+        font-size: 14px; 
+
+    }
+
+
 
     h1 { font-size: 20px; }
-        }
+
+      }  
 </style>
 </head>
 <body> 
