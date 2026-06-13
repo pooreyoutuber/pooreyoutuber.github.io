@@ -194,11 +194,11 @@
         .btn-play:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
         #players {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
-            margin-top: 40px;
-            display: none;
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important; /* PC me 5 line me dikhayega */
+    gap: 15px !important;                             /* Videos ke beech ka gap */
+    margin-top: 30px !important;
+    padding: 10px !important;
         }
         #players div {
             width: 100%;
@@ -254,38 +254,26 @@
     border-radius: 8px;
     margin: 20px 0;
         }
-         
-
-    /* Jab tool mobile ya tab par khule to grid ko fixed 2 columns me rakhein */
+        /* 2. Yeh Mobile aur tablet ke liye hai (Screen choti hote hi 2 Videos ek line me) */
 @media (max-width: 1024px) {
     #players {
-        grid-template-columns: repeat(2, 1fr) !important; 
-        gap: 15px !important;
-        padding: 10px !important;
+        grid-template-columns: repeat(2, 1fr) !important; /* Mobile me 2 line me dikhayega */
+        gap: 10px !important;
     }
-}
-
-/* 400px se choti screen par bhi zabardasti 1 row me 2 hi videos rakhein */
-@media (max-width: 400px) {
-    #players { 
-        grid-template-columns: repeat(2, 1fr) !important; 
-    }
-}
-         
-  
-
-
+    
+    /* Inputs ko sahi rakhne ke liye aapka pehle wala code */
     .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 10px !important;
+        overflow-x: auto;
     }
-
-    input#videoUrl, input#viewCount, select, .btn-play {
-        width: 100% !important;
-        box-sizing: border-box;
-        font-size: 14px; 
-    }
+    input#videoUrl { flex: 3 !important; width: auto !important; }
+    input#viewCount { width: 70px !important; flex: 0.5 !important; }
+    select#audioSetting, select#qualitySetting { flex: 1 !important; width: auto !important; }
+    .btn-play { flex: 1 !important; width: auto !important; white-space: nowrap !important; }
+}
 
     h1 { font-size: 20px; }
       }
