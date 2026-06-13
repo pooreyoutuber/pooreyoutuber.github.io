@@ -269,46 +269,30 @@
         }
 
  
-  @media (max-width: 1024px) {
-            #players {
-            grid-template-columns: repeat(2, 1fr); !important; 
-        gap: 15px;
+   @media (max-width: 1024px) {
+    /* Videos ko 1 row me sirf 2 dikhane ke liye (Jesa aapki pic me hai) */
+    #players {
+        grid-template-columns: repeat(2, 1fr) !important; 
+        gap: 15px !important;
+        padding: 10px !important;
+    }
 
-        padding: 10px;
-
-        }
-
-    
-
-
-
+    /* Inputs ko ek hi line me horizontal rakhne ke liye */
     .input-group {
-
-        display: flex;
-
-        flex-direction: column;
-
-        gap: 12px;
-
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 10px !important;
+        overflow-x: auto; /* Agar space kam pade to scroll ho sake, kute na */
     }
 
-
-
-    input#videoUrl, input#viewCount, select, .btn-play {
-
-        width: 100% !important;
-
-        box-sizing: border-box;
-
-        font-size: 14px; 
-
-    }
-
-
-
-    h1 { font-size: 20px; }
-
-      }  
+    /* Inputs ka size normal rakhne ke liye */
+    input#videoUrl { flex: 3 !important; width: auto !important; }
+    input#viewCount { width: 70px !important; flex: 0.5 !important; }
+    select#audioSetting, select#qualitySetting { flex: 1 !important; width: auto !important; }
+    .btn-play { flex: 1 !important; width: auto !important; white-space: nowrap !important; }
+   }
+    
         
         
 
