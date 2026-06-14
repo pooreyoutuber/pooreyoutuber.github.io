@@ -419,8 +419,12 @@ Our goal is to provide practical online tools that anyone can use regardless of 
 
             const iframe = document.createElement('iframe');
             iframe.src = embedUrl;
-           iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
-
+         iframe.allow =
+  "autoplay; fullscreen; encrypted-media; picture-in-picture";
+iframe.setAttribute(
+  "sandbox",
+  "allow-scripts allow-same-origin allow-forms allow-presentation"
+);
 
             iframe.allowFullscreen = true;
             card.appendChild(iframe);
