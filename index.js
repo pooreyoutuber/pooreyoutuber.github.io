@@ -1045,12 +1045,135 @@ app.post('/api/export', express.json(), async (req, res) => {
 });
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // =========================================================================
-// END OF AI SUBTITLE VIDEO TOOL LOGIC
+// 🚀 NEW TOOL: AI YOUTUBE VIDEO CHECKER & ANALYST ENGINE
 // =========================================================================
 
-// END OF AI SUBTITLE VIDEO TOOL LOGIC
+// Helper function: YouTube URL se 11 character ki Video ID nikalne ke liye
+function extractYoutubeVideoId(url) {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
+app.post('/videochecker', async (req, res) => {
+    try {
+        const { videoUrl } = req.body;
+
+        if (!videoUrl) {
+            return res.status(400).json({ success: false, error: "YouTube video URL is required." });
+        }
+
+        const videoId = extractYoutubeVideoId(videoUrl);
+        if (!videoId) {
+            return res.status(400).json({ success: false, error: "Invalid YouTube URL format. Please provide a valid link." });
+        }
+
+        // Render ke Environment Variables se YouTube Key uthana
+        const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+        if (!YOUTUBE_API_KEY) {
+            console.error("❌ CRITICAL: YOUTUBE_API_KEY is missing in env!");
+            return res.status(500).json({ success: false, error: "YouTube API key config missing on server." });
+        }
+
+        console.log(`[Video Checker] Fetching stats for Video ID: ${videoId}`);
+
+        // 1. YouTube API v3 call directly via axios
+        const ytApiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${YOUTUBE_API_KEY}`;
+        const ytResponse = await axios.get(ytApiUrl);
+
+        if (!ytResponse.data || !ytResponse.data.items || ytResponse.data.items.length === 0) {
+            return res.status(404).json({ success: false, error: "Video not found or it might be private/deleted." });
+        }
+
+        const videoItem = ytResponse.data.items[0];
+        const title = videoItem.snippet.title;
+        const description = videoItem.snippet.description;
+        const tags = videoItem.snippet.tags || []; // Agar tags na hon to empty array
+        const views = videoItem.statistics.viewCount || "0";
+        const likes = videoItem.statistics.likeCount || "0";
+
+        // 2. Gemini AI prompt design for SEO & Tag analytics
+        const promptText = `Analyze this YouTube video performance data and generate an engaging, highly detailed optimization and analyst report in a Hindi-English (Hinglish) mix text. 
+
+        Video Title: "${title}"
+        Current Views: ${Number(views).toLocaleString()}
+        Current Likes: ${Number(likes).toLocaleString()}
+        Current Video Tags: ${tags.length > 0 ? tags.join(', ') : 'No tags used'}
+        Description Snippet: "${description.substring(0, 500)}..."
+
+        Strict Output Blueprint structure:
+        🔥 **Maujuda Tags Ka Analysis:**
+        (Batao ki jo tags laga rakhe hain unme se kaunse keywords views lane me sabse behtar kaam kar rahe hain. Agar koi tag nahi hai to likho ki creator ne tags lagane ki badi galti ki hai.)
+
+        📈 **High-Traffic Missing Keywords & Tags:**
+        (Naye viral keywords aur tags suggest karo jo is unique topic par rank karne aur video par aur zyada views, click-through-rate (CTR), aur engagement lane ke liye turant lagane chahiye.)
+
+        💡 **Growth & Retention Strategy Tips:**
+        (Dijiye actionable suggestions Title improvements, high-converting thumbnail strategies, aur structural description optimization ke liye taaki audience search results se click kare.)
+        
+        Keep formatting clean, professional, and readable. Use markdown formatting properly. Do not include any JSON wrapping or code blocks for the output text.`;
+
+        console.log("[Video Checker] Requesting expert analysis from Gemini Engine...");
+
+        // 3. Gemini API core calling using the initialized SDK framework or raw fallback
+        const activeGeminiKey = GEMINI_KEY || process.env.GEMINI_API_KEY;
+        let aiAnalysisText = "";
+
+        if (ai && typeof ai.models?.generateContent === 'function') {
+            // SDK execution pattern matching dynamic import initialized in your script
+            const aiResponse = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: promptText,
+            });
+            aiAnalysisText = aiResponse.text;
+        } else if (activeGeminiKey) {
+            // Raw HTTP fallback pipeline if SDK initializing had any async runtime delay
+            const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeGeminiKey}`;
+            const rawAiResponse = await fetch(geminiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: promptText }] }]
+                })
+            });
+            const rawAiJson = await rawAiResponse.json();
+            aiAnalysisText = rawAiJson.candidates[0].content.parts[0].text;
+        } else {
+            throw new Error("Both Gemini SDK and API environment keys are missing.");
+        }
+
+        console.log("[Video Checker] Analysis completed successfully.");
+
+        // 4. Send complete synchronized structure to Frontend
+        return res.json({
+            success: true,
+            basicStats: {
+                title: title,
+                views: views,
+                likes: likes,
+                tags: tags,
+                description: description
+            },
+            aiAnalysis: aiAnalysisText
+        });
+
+    } catch (error) {
+        console.error("❌ [Video Checker Engine Failure]:", error);
+        return res.status(500).json({ 
+            success: false, 
+            error: "Failed to compile YouTube Data or Gemini Response pipeline.", 
+            details: error.message 
+        });
+    }
+});
+
 // =========================================================================
+// END OF AI YOUTUBE VIDEO CHECKER & ANALYST ENGINE
+// =========================================================================
+
 //==================================================
 // --- SERVER START ---
 // ===================================================================
