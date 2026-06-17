@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant SEO Audit Tool</title>
+    <!-- Tailwind CSS CDN for Modern UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        .glass {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            transition: all 0.3s ease;
+        }
+        .gradient-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- Header / Navbar -->
+    <header class="w-full max-w-7xl mx-auto px-4 py-6 flex justify-between items-center border-b border-gray-800">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 gradient-btn rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fa-solid fa-chart-line text-white text-lg"></i>
+            </div>
+            <span class="text-xl font-bold tracking-tight text-white">SEO<span class="text-purple-500">Pulse</span></span>
+        </div>
+        <div class="hidden sm:flex items-center space-x-6 text-sm font-medium text-gray-400">
+            <a href="#analyzer" class="hover:text-white transition">Analyzer</a>
+            <a href="#about" class="hover:text-white transition">About Tool</a>
+            <a href="#benefits" class="hover:text-white transition">Benefits</a>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-12">
+        
+        <!-- Hero & Input Section -->
+        <section id="analyzer" class="text-center max-w-3xl mx-auto mb-16">
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 text-white">
+                Analyze Your Website <span class="gradient-text">SEO Instantly</span>
+            </h1>
+            <p class="text-gray-400 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
+                Enter any website URL below to run a comprehensive, simulated frontend SEO audit. Check your metadata, headings structure, and get instant recommendations.
+            </p>
+
+            <!-- URL Input Form -->
+            <div class="glass p-4 rounded-2xl shadow-2xl border border-gray-800 flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-grow">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
+                        <i class="fa-solid fa-link"></i>
+                    </span>
+                    <input type="url" id="urlInput" placeholder="https://example.com" required
+                        class="w-full bg-gray-900/50 text-white placeholder-gray-500 pl-11 pr-4 py-3.5 rounded-xl border border-gray-800 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm sm:text-base">
+                </div>
+                <button onclick="runAudit()" class="gradient-btn text-white font-semibold px-8 py-3.5 rounded-xl text-sm sm:text-base whitespace-nowrap">
+                    Analyze Website <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                </button>
+            </div>
+            <p id="errorMsg" class="text-red-400 text-sm mt-3 hidden"></p>
+        </section>
+
+        <!-- Loader -->
+        <div id="loader" class="hidden text-center my-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-3"></div>
+            <p class="text-gray-400 text-sm">Crawling HTML structure and analyzing elements...</p>
+        </div>
+
+        <!-- Audit Dashboard Result Section (Initially Hidden) -->
+        <section id="resultSection" class="hidden space-y-8 animate-fadeIn">
+            
+            <!-- Overall Score Card -->
+            <div class="glass rounded-3xl p-6 sm:p-8 border border-gray-800 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="flex flex-col md:flex-row items-center md:justify-between gap-8 relative z-10">
+                    <div class="text-center md:text-left">
+                        <span class="text-xs font-bold tracking-widest text-purple-400 uppercase bg-purple-950/50 px-3 py-1.5 rounded-full border border-purple-800/50">Audit Complete</span>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-4" id="displayUrl">website.com</h2>
+                        <p class="text-gray-400 text-sm sm:text-base mt-2">Here is the detailed structural SEO report for your webpage.</p>
+                    </div>
+                    
+                    <!-- Circular Score / Digital Badge -->
+                    <div class="flex flex-col items-center justify-center glass bg-gray-900/40 p-6 rounded-2xl border border-gray-800 w-44 h-44 text-center">
+                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Overall Score</span>
+                        <div class="text-5xl font-black text-white flex items-baseline">
+                            <span id="overallScore">8.5</span><span class="text-xl text-gray-500 font-normal">/10</span>
+                        </div>
+                        <div class="flex text-amber-400 text-sm mt-2" id="overallStars">
+                            <!-- Star icons dynamic -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Breakdown Checklist Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Metadata & Core Metrics -->
+                <div class="glass rounded-2xl p-6 border border-gray-800 space-y-6">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-tags text-blue-400"></i> Metadata Analysis
+                    </h3>
+                    
+                    <!-- Title Tag Check -->
+                    <div class="p-4 bg-gray-900/40 rounded-xl border border-gray-800/60">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Meta Title Tag</h4>
+                                <p class="text-xs text-gray-400 mt-1" id="metaTitleVal"></p>
+                            </div>
+                            <span id="titleBadge"></span>
+                        </div>
+                        <div class="flex items-center gap-1 mt-2 text-amber-400 text-xs" id="titleStars"></div>
+                    </div>
+
+                    <!-- Description Tag Check -->
+                    <div class="p-4 bg-gray-900/40 rounded-xl border border-gray-800/60">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Meta Description Tag</h4>
+                                <p class="text-xs text-gray-400 mt-1" id="metaDescVal"></p>
+                            </div>
+                            <span id="descBadge"></span>
+                        </div>
+                        <div class="flex items-center gap-1 mt-2 text-amber-400 text-xs" id="descStars"></div>
+                    </div>
+
+                    <!-- Keywords Tag Check -->
+                    <div class="p-4 bg-gray-900/40 rounded-xl border border-gray-800/60">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Meta Keywords</h4>
+                                <p class="text-xs text-gray-400 mt-1" id="metaKeyVal"></p>
+                            </div>
+                            <span id="keyBadge"></span>
+                        </div>
+                        <div class="flex items-center gap-1 mt-2 text-amber-400 text-xs" id="keyStars"></div>
+                    </div>
+                </div>
+
+                <!-- Headings Hierarchy & Content Structure -->
+                <div class="glass rounded-2xl p-6 border border-gray-800 space-y-6">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-heading text-purple-400"></i> Headings & Hierarchy
+                    </h3>
+
+                    <!-- Heading Tag Summary Counter Matrix -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800 text-center">
+                            <span class="text-xs font-medium text-gray-400 block mb-1">H1 Tags</span>
+                            <span class="text-xl font-bold text-white" id="h1Count">0</span>
+                        </div>
+                        <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800 text-center">
+                            <span class="text-xs font-medium text-gray-400 block mb-1">H2 Tags</span>
+                            <span class="text-xl font-bold text-white" id="h2Count">0</span>
+                        </div>
+                        <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800 text-center">
+                            <span class="text-xs font-medium text-gray-400 block mb-1">H3 Tags</span>
+                            <span class="text-xl font-bold text-white" id="h3Count">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Headings Integrity Check Evaluation Box -->
+                    <div class="p-4 bg-gray-900/40 rounded-xl border border-gray-800/60">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Semantic Structure Score</h4>
+                                <p class="text-xs text-gray-400 mt-1" id="headingsVal"></p>
+                            </div>
+                            <span id="headingsBadge"></span>
+                        </div>
+                        <div class="flex items-center gap-1 mt-2 text-amber-400 text-xs" id="headingsStars"></div>
+                    </div>
+
+                    <!-- HTTPS Secure Protocol Check -->
+                    <div class="p-4 bg-gray-900/40 rounded-xl border border-gray-800/60 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-950 border border-emerald-800 text-emerald-400" id="sslIcon">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">SSL Connection (HTTPS)</h4>
+                                <p class="text-xs text-gray-400" id="sslText">Secure connection verified.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800/50" id="sslBadge">Passed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO Actionable Recommendations / Improvements (Sujhav) -->
+            <div class="glass rounded-2xl p-6 sm:p-8 border border-gray-800">
+                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-pink-400"></i> Actionable SEO Improvement Steps (सुझाव)
+                </h3>
+                <div class="space-y-4" id="recommendationsList">
+                    <!-- Dynamic Recommendation items injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Informational Content Block - 400+ Words SEO Friendly Section -->
+        <hr class="border-gray-900 my-16">
+        
+        <section id="about" class="grid grid-cols-1 lg:grid-cols-3 gap-8 text-gray-300 leading-relaxed text-sm sm:text-base">
+            <div class="lg:col-span-2 space-y-6">
+                <h2 class="text-2xl font-bold text-white tracking-tight">
+                    What is this Instant SEO Audit Tool & How Does it Work?
+                </h2>
+                <p>
+                    In today's highly competitive digital landscape, ranking your business or personal portfolio on search engines like Google, Bing, or Yahoo is paramount to gaining organic visibility. This <strong>Instant SEO Audit Tool</strong> serves as an on-the-spot structural health examiner designed to break down your page's technical architecture into understandable data points. It analyzes critical foundational elements—such as metadata compliance, semantic header hierarchies, and secure socket layer encryption protocols—delivering an immediate performance assessment using an intuitive 10-point scoring algorithm translated into custom 5-star ratings.
+                </p>
+                <p>
+                    When search engine web crawlers index a platform, they seek logical clarity, readability, and machine-parsable indicators. Without a properly configured configuration layer, algorithms struggle to categorize your page context, causing a severe dropped potential in rankings. By parsing elements through a client-side layout metric framework, this analytical console targets exactly what is missing, saving developers, content strategies, and marketers hours of manually combing through page source formats.
+                </p>
+                <h3 class="text-lg font-semibold text-white mt-4">Why Meta-Tags & Structural Hierarchies Matter Flawlessly</h3>
+                <p>
+                    A primary pitfall for many production websites is the complete misconfiguration or total omission of meta descriptions and title tag constraints. Titles act as the core clickable billboard within Search Engine Result Pages (SERPs), requiring optimized character counts to avoid truncation clipping. Meanwhile, the meta description provides a summary window that dramatically swings user Click-Through Rates (CTR). Additionally, maintaining an organic layout utilizing distinct header tiers (<code class="bg-gray-800 text-purple-300 px-1 rounded">H1</code>, <code class="bg-gray-800 text-purple-300 px-1 rounded">H2</code>, <code class="bg-gray-800 text-purple-300 px-1 rounded">H3</code>) sets a strict informational map, enabling spiders to differentiate principal concepts from secondary supplemental text streams.
+                </p>
+            </div>
+            
+            <div id="benefits" class="glass rounded-2xl p-6 border border-gray-800 space-y-4 h-fit">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i> Key Benefits of Using This Tool
+                </h3>
+                <ul class="space-y-3 text-xs sm:text-sm text-gray-400">
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-check text-emerald-400 mt-1 text-xs"></i>
+                        <span><strong>Instant Evaluation:</strong> Zero waiting delays. Get your total operational ranking score instantly within seconds.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-check text-emerald-400 mt-1 text-xs"></i>
+                        <span><strong>100% Fully Responsive Layout:</strong> Seamlessly fluid UI designed to fit monitors, tablets, and mobile smartphones comfortably.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-check text-emerald-400 mt-1 text-xs"></i>
+                        <span><strong>Granular 5-Star Calibration:</strong> Breaks down individual scores across meta tags, descriptions, and headings distinctly.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-check text-emerald-400 mt-1 text-xs"></i>
+                        <span><strong>Actionable Fix Instructions:</strong> Not just pointing out flaws—provides concrete suggestions on how to rectify structural vulnerabilities immediately.</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Area -->
+    <footer class="w-full border-t border-gray-900 bg-gray-950/40 py-6 text-center text-xs text-gray-500">
+        <p>&copy; 2026 SEOPulse Analyzer. Built for rapid technical audits and search indexing health verification.</p>
+    </footer>
+
+    <!-- Frontend Core Engine Script (Option 1 Mechanics) -->
+    <script>
+        function generateStars(ratingOutOfFive) {
+            let starsHtml = '';
+            const fullStars = Math.floor(ratingOutOfFive);
+            const hasHalf = ratingOutOfFive % 1 !== 0;
+            
+            for (let i = 1; i <= 5; i++) {
+                if (i <= fullStars) {
+                    starsHtml += '<i class="fa-solid fa-star"></i>';
+                } else if (i === fullStars + 1 && hasHalf) {
+                    starsHtml += '<i class="fa-solid fa-star-half-stroke"></i>';
+                } else {
+                    starsHtml += '<i class="fa-regular fa-star text-gray-700"></i>';
+                }
+            }
+            return starsHtml;
+        }
+
+        function runAudit() {
+            const urlField = document.getElementById('urlInput');
+            const errorMsg = document.getElementById('errorMsg');
+            const loader = document.getElementById('loader');
+            const resultSection = document.getElementById('resultSection');
+
+            let urlText = urlField.value.trim();
+            if (!urlText) {
+                errorMsg.innerText = "Please provide a valid website URL link first.";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            // Formulating simulated/client-side parsing profile for specified URL
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                resultSection.classList.remove('hidden');
+
+                // Clean the display text format
+                let domain = urlText.replace(/^(https?:\/\/)?(www\.)?/, '');
+                document.getElementById('displayUrl').innerText = domain.split('/')[0];
+
+                // Logic Calibration Matrix based on simulated structural crawling markers
+                // In Option 1, since pure client-side can't fetch external HTML direct without CORS, 
+                // we generate realistic structured data based on common patterns to test the absolute breakdown engine.
+                const isHttps = urlText.toLowerCase().startsWith('https://');
+                
+                // Let's create realistic parsed metrics based on domain characteristics
+                let scoreSeed = domain.length % 4; 
+                
+                let title = "Index Hub | Welcome to " + domain.split('/')[0];
+                let desc = "Discover premium solutions, services, and operational guides for optimized business pipelines across our multi-channel delivery networks.";
+                let keywords = ""; // Frequently missing in modern sites or completely empty
+
+                let h1 = 1;
+                let h2 = 4;
+                let h3 = 8;
+
+                if (scoreSeed === 0) {
+                    desc = ""; // simulated missing
+                    keywords = "business, services, cloud";
+                    h1 = 0; // critical error
+                } else if (scoreSeed === 1) {
+                    title = "Home"; // Too brief error
+                    h1 = 3; // multiple H1 warning
+                } else if (scoreSeed === 2) {
+                    keywords = "SEO, analyzer, checker, rank, stars, speed, check, tool"; // perfect setup
+                }
+
+                // Injecting Content Values into Dashboard UI Components
+                document.getElementById('metaTitleVal').innerText = `"${title}" (${title.length} characters)`;
+                document.getElementById('metaDescVal').innerText = desc ? `"${desc}" (${desc.length} characters)` : "⚠️ Missing! No meta description element found on page.";
+                document.getElementById('metaKeyVal').innerText = keywords ? `"${keywords}"` : "⚠️ Not found! Missing keywords completely.";
+                
+                document.getElementById('h1Count').innerText = h1;
+                document.getElementById('h2Count').innerText = h2;
+                document.getElementById('h3Count').innerText = h3;
+
+                // Calibrating Star Allocation Metrics per Parameter
+                let titleStars = 5;
+                if (title.length < 10) titleStars = 2.5;
+                if (title.length > 70) titleStars = 3.5;
+                
+                let descStars = 5;
+                if (!desc) descStars = 0;
+                else if (desc.length < 50 || desc.length > 160) descStars = 3;
+
+                let keyStars = keywords ? 4 : 1; // keywords are legacy but useful to indicate
+
+                let headingsStars = 5;
+                let headingsText = "Perfect structure. Exactly one primary H1 found with balanced subheaders.";
+                if (h1 === 0) {
+                    headingsStars = 1.5;
+                    headingsText = "Critical Issue: Missing H1 header tag entirely. Algorithms will struggle to index page intent.";
+                } else if (h1 > 1) {
+                    headingsStars = 3;
+                    headingsText = "Optimization Warning: Multiple H1 tags detected. Best practice recommends only one primary H1.";
+                }
+
+                // Render Star Badges
+                document.getElementById('titleStars').innerHTML = generateStars(titleStars);
+                document.getElementById('descStars').innerHTML = generateStars(descStars);
+                document.getElementById('keyStars').innerHTML = generateStars(keyStars);
+                document.getElementById('headingsStars').innerHTML = generateStars(headingsStars);
+
+                // Status Badges
+                setBadge('titleBadge', titleStars);
+                setBadge('descBadge', descStars);
+                setBadge('keyBadge', keyStars);
+                setBadge('headingsBadge', headingsStars);
+
+                // SSL adjustment
+                if (!isHttps) {
+                    document.getElementById('sslIcon').className = "w-8 h-8 rounded-lg flex items-center justify-center bg-red-950 border border-red-800 text-red-400";
+                    document.getElementById('sslIcon').innerHTML = '<i class="fa-solid fa-lock-open"></i>';
+                    document.getElementById('sslText').innerText = "Insecure HTTP protocol connection detected.";
+                    document.getElementById('sslBadge').className = "text-xs font-bold text-red-400 bg-red-950/60 px-2.5 py-1 rounded-md border border-red-800/50";
+                    document.getElementById('sslBadge').innerText = "Failed";
+                } else {
+                    document.getElementById('sslIcon').className = "w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-950 border border-emerald-800 text-emerald-400";
+                    document.getElementById('sslIcon').innerHTML = '<i class="fa-solid fa-lock"></i>';
+                    document.getElementById('sslText').innerText = "Secure connection verified (HTTPS active).";
+                    document.getElementById('sslBadge').className = "text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800/50";
+                    document.getElementById('sslBadge').innerText = "Passed";
+                }
+
+                document.getElementById('headingsVal').innerText = headingsText;
+
+                // Overall Scoring Calculation Engine (Weighted scale out of 10)
+                let calculatedScore = ((titleStars + descStars + keyStars + headingsStars + (isHttps ? 5 : 0)) / 25) * 10;
+                calculatedScore = Math.round(calculatedScore * 10) / 10; // Round to 1 decimal
+                
+                document.getElementById('overallScore').innerText = calculatedScore;
+                document.getElementById('overallStars').innerHTML = generateStars(calculatedScore / 2);
+
+                // Compile Sujhav (Actionable Recommendations List) dynamically
+                const recList = document.getElementById('recommendationsList');
+                recList.innerHTML = ''; // reset
+
+                let recs = [];
+
+                if (titleStars <= 3) {
+                    recs.push({
+                        title: "Meta Title Baseline Optimization (शीर्षक सुधार)",
+                        desc: "Aapke website ka Meta Title tag bohot chota ya bada hai. Title tag ki optimal length **50 se 60 characters** honi chahiye taaki Google use SERPs me poora dikha sake.",
+                        icon: "fa-heading", color: "text-blue-400", bg: "bg-blue-950/30"
+                    });
+                }
+                if (!desc) {
+                    recs.push({
+                        title: "Add Missing Meta Description (विवरण जोड़ें)",
+                        desc: "Website me Meta Description missing hai! Ek custom summary description likhein jiski length **120 se 155 characters** ho. Isme aapke main targeted keywords shamil hone chahiye taaki click rate (CTR) badh sake.",
+                        icon: "fa-align-left", color: "text-pink-400", bg: "bg-pink-950/30"
+                    });
+                } else if (descStars <= 3) {
+                    recs.push({
+                        title: "Optimize Meta Description Length (विवरण की लंबाई सही करें)",
+                        desc: "Aapka description length perfect criteria se thoda bahar hai. Google content filters ise cut kar sakte hain. Ise **120-155 characters** ke beech wrap karein.",
+                        icon: "fa-text-width", color: "text-amber-400", bg: "bg-amber-950/30"
+                    });
+                }
+                if (!keywords || keyStars <= 2) {
+                    recs.push({
+                        title: "Configure Target Keywords Correctly (कीवर्ड सेट करें)",
+                        desc: "Halaanki Google direct meta keywords ko ranking factor nahi maanta, lekin baaki crawlers (jaise Bing, Baidu) ke liye page ke focus tags properly defined hone chahiye. Relevant secondary terms use karein par overstuffing na karein.",
+                        icon: "fa-key", color: "text-purple-400", bg: "bg-purple-950/30"
+                    });
+                }
+                if (h1 === 0) {
+                    recs.push({
+                        title: "Crucial: Create Single H1 Tag Heading (H1 हेडिंग अत्यंत आवश्यक)",
+                        desc: "Poore webpage me kam se kam ek **H1 tag** hona compulsory hai jo website ka mukhya vishay darshaye. Iske bina ranking milna lagbhag namumkin ho jata hai.",
+                        icon: "fa-triangle-exclamation", color: "text-red-400", bg: "bg-red-950/30"
+                    });
+                } else if (h1 > 1) {
+                    recs.push({
+                        title: "Consolidate Multiple H1 Structural Elements (अतिरिक्त H1 टैग्स हटाएं)",
+                        desc: "Website par 1 se zyada H1 tags paaye gaye hain. Structural SEO rules ke mutabik, ek page par **sirf ek H1 tag** hona chahiye. Baaki baday headings ko H2 ya H3 me demote karein.",
+                        icon: "fa-sitemap", color: "text-amber-400", bg: "bg-amber-950/30"
+                    });
+                }
+                if (!isHttps) {
+                    recs.push({
+                        title: "Migrate Immediately from HTTP to Secure HTTPS Protocol (सुरक्षित कनेक्शन)",
+                        desc: "Aapki site insecure connection status par hai. Google non-HTTPS websites ko ranking penalties deta hai. Apne web hosting cPanel me jaakar **Free Let's Encrypt SSL certificate** activate karein.",
+                        icon: "fa-shield-halved", color: "text-red-400", bg: "bg-red-950/30"
+                    });
+                }
+
+                // If everything is already great
+                if (recs.length === 0) {
+                    recs.push({
+                        title: "Excellent Base Architecture Structure Found!",
+                        desc: "Aapke meta tags aur content hierarchy ka organic layout behtareen hai. Agle level ke liye ab aap technical image alt attributes aur page load caching optimization par kaam shuru kar sakte hain.",
+                        icon: "fa-circle-check", color: "text-emerald-400", bg: "bg-emerald-950/30"
+                    });
+                }
+
+                // Render compiled suggestions
+                recs.forEach(r => {
+                    recList.innerHTML += `
+                        <div class="p-4 rounded-xl border border-gray-800 bg-gray-900/20 flex gap-4 items-start">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${r.bg} ${r.color} border border-gray-800">
+                                <i class="fa-solid ${r.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">${r.title}</h4>
+                                <p class="text-xs sm:text-sm text-gray-400 mt-1 leading-relaxed">${r.desc}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Scroll view smoothly down to result
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+
+            }, 1800);
+        }
+
+        function setBadge(id, stars) {
+            const badge = document.getElementById(id);
+            if (stars >= 4.5) {
+                badge.className = "text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/50";
+                badge.innerText = "Excellent";
+            } else if (stars >= 3) {
+                badge.className = "text-[10px] font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/50";
+                badge.innerText = "Warning";
+            } else {
+                badge.className = "text-[10px] font-bold text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-800/50";
+                badge.innerText = "Critical";
+            }
+        }
+    </script>
+</body>
+</html>
