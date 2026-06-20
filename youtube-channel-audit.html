@@ -246,7 +246,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 70%;
+            max-width: 100%;
         }
 
         .video-meta {
@@ -433,7 +433,6 @@
 
     function extractIdentifiers(input) {
         input = input.trim();
-        // If user pasted a channel URL or handle
         if (input.includes('youtube.com/')) {
             if (input.includes('/channel/')) {
                 return { type: 'channelId', id: input.split('/channel/')[1].split(/[?&]/)[0] };
@@ -443,7 +442,6 @@
                 let handle = parts[parts.length - 1].split(/[?&]/)[0];
                 return { type: 'handle', id: handle };
             }
-            // Parse video link if passed instead
             const videoRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|v\/|watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/;
             const match = input.match(videoRegex);
             if (match) return { type: 'videoId', id: match[1] };
@@ -456,7 +454,6 @@
             return { type: 'handle', id: input };
         }
         
-        // Default fallback treat as handle/username
         return { type: 'handle', id: input.includes('@') ? input : '@' + input };
     }
 
@@ -473,7 +470,6 @@
         const target = extractIdentifiers(userInput);
 
         if (target.type === 'videoId') {
-            // Resolve channel info from video ID first
             fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${target.id}&key=${API_KEY}`)
                 .then(res => res.json())
                 .then(data => {
@@ -484,7 +480,6 @@
                     }
                 }).catch(err => showError());
         } else if (target.type === 'handle') {
-            // Fetch channel ID via handle search
             fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${target.id}&key=${API_KEY}`)
                 .then(res => res.json())
                 .then(data => {
@@ -514,13 +509,25 @@
                     return;
                 }
                 
-                // Fetch videos from this channel to determine Top 10 and Lowest 10
                 const searchVideosUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=50&type=video&order=viewCount&key=${API_KEY}`;
                 
                 fetch(searchVideosUrl)
                     .then(res => res.json())
                     .then(videosData => {
-                        renderFullAuditDashboard(channelData.items[0], videosData.items || []);
+                        if(videosData.items && videosData.items.length > 0) {
+                            // Extract IDs to get full details including view statistics
+                            const videoIds = videosData.items.map(item => item.id.videoId).join(',');
+                            const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds}&key=${API_KEY}`;
+                            
+                            fetch(statsUrl)
+                                .then(res => res.json())
+                                .then(detailedData => {
+                                    renderFullAuditDashboard(channelData.items[0], detailedData.items || []);
+                                })
+                                .catch(() => renderFullAuditDashboard(channelData.items[0], []));
+                        } else {
+                            renderFullAuditDashboard(channelData.items[0], []);
+                        }
                     })
                     .catch(() => {
                         renderFullAuditDashboard(channelData.items[0], []);
@@ -543,18 +550,14 @@
         const totalSubs = parseInt(stats.subscriberCount) || 0;
         const totalVideos = parseInt(stats.videoCount) || 0;
 
-        // Structured Metric Calculations (Estimated net channel values)
-        // Standard structural baseline average RPM of $2.50 across mixed domains
         const estimatedEarnings = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((totalViews / 1000) * 2.5);
         const channelValueNet = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((totalSubs * 0.15) + (totalViews * 0.004));
 
         const formattedViews = new Intl.NumberFormat('en-US').format(totalViews);
         const formattedSubs = new Intl.NumberFormat('en-US').format(totalSubs);
 
-        // Geolocation tracking
         const countryOrigin = branding.channel?.country || "Global Distribution Layer (Dynamic)";
 
-        // Core Tags / Keywords extraction
         let keywordsHtml = '';
         if (branding.channel?.keywords) {
             let tokens = branding.channel.keywords.split(/\s+/);
@@ -562,30 +565,44 @@
                 if(token.trim()) keywordsHtml += `<span class="tag-badge">${token.replace(/['"]/g, '')}</span>`;
             });
         } else {
-            // Simulated baseline VSEO tag alignments if keywords are hidden
             keywordsHtml = ['Video SEO', 'Channel Growth', 'High CPC Traffic', 'Audience Retention'].map(t => `<span class="tag-badge">${t}</span>`).join('');
         }
 
-        // Process Top & Lowest performing metrics safely
-        let topVideos = [...searchItems];
+        // Process data for highest and lowest performings
+        let topVideos = [...searchItems].slice(0, 10);
         let lowVideos = [...searchItems].reverse().slice(0, 10);
         
-        // Slicing top 10 execution paths
-        topVideos = topVideos.slice(0, 10);
+        let topVideosHtml = topVideos.map(v => {
+            const vViews = parseInt(v.statistics?.viewCount || 0);
+            const formattedVideoViews = new Intl.NumberFormat('en-US').format(vViews);
+            const thumbUrl = v.snippet.thumbnails?.default?.url || 'https://via.placeholder.com/120x90?text=No+Image';
+            return `
+                <div class="video-item" style="display: flex; gap: 12px; align-items: center; justify-content: flex-start; text-align: left;">
+                    <img src="${thumbUrl}" alt="Thumbnail" style="width: 65px; height: auto; border-radius: 4px; border: 1px solid var(--border-color); flex-shrink: 0;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="video-title" title="${v.snippet.title}">${v.snippet.title}</div>
+                        <div style="font-size: 12px; color: var(--accent-green); font-weight: 700; margin-top: 2px;">📈 ${formattedVideoViews} views</div>
+                    </div>
+                    <span class="video-meta" style="color: var(--accent-green); font-size: 11px; white-space: nowrap; margin-left: 10px;">Top Node</span>
+                </div>
+            `;
+        }).join('') || '<div class="status-msg">No indexed assets discovered in public arrays.</div>';
 
-        let topVideosHtml = topVideos.map(v => `
-            <div class="video-item">
-                <span class="video-title">${v.snippet.title}</span>
-                <span class="video-meta" style="color: var(--accent-green);">Top Ranked Node</span>
-            </div>
-        `).join('') || '<div class="status-msg">No indexed assets discovered in public arrays.</div>';
-
-        let lowVideosHtml = lowVideos.map(v => `
-            <div class="video-item">
-                <span class="video-title">${v.snippet.title}</span>
-                <span class="video-meta" style="color: var(--accent-blue);">Low Tail Node</span>
-            </div>
-        `).join('') || '<div class="status-msg">No indexed low tail data found.</div>';
+        let lowVideosHtml = lowVideos.map(v => {
+            const vViews = parseInt(v.statistics?.viewCount || 0);
+            const formattedVideoViews = new Intl.NumberFormat('en-US').format(vViews);
+            const thumbUrl = v.snippet.thumbnails?.default?.url || 'https://via.placeholder.com/120x90?text=No+Image';
+            return `
+                <div class="video-item" style="display: flex; gap: 12px; align-items: center; justify-content: flex-start; text-align: left;">
+                    <img src="${thumbUrl}" alt="Thumbnail" style="width: 65px; height: auto; border-radius: 4px; border: 1px solid var(--border-color); flex-shrink: 0;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="video-title" title="${v.snippet.title}">${v.snippet.title}</div>
+                        <div style="font-size: 12px; color: var(--accent-blue); font-weight: 700; margin-top: 2px;">📉 ${formattedVideoViews} views</div>
+                    </div>
+                    <span class="video-meta" style="color: var(--accent-blue); font-size: 11px; white-space: nowrap; margin-left: 10px;">Low Edge</span>
+                </div>
+            `;
+        }).join('') || '<div class="status-msg">No indexed low tail data found.</div>';
 
         let dashboardHtml = `
             <div class="dashboard-grid">
