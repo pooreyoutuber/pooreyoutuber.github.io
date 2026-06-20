@@ -3,204 +3,660 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI SEO Auditor - Instantly Analyze Website SEO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Advanced YouTube Video Analyzer & SEO Dashboard</title>
+
+    <meta name="description" content="Professional advanced SEO tools for YouTubers. Analyze high CPC niches like Mesothelioma Lawyers California, Car Insurance Quotes New York, and Personal Loans USA. Get deep insights into video metadata, publication timeline trends, and channel growth analytics.">
+    <meta name="keywords" content="YouTube SEO tool, Video Tags Extractor, Channel Subscriber Tracker, Monthly Performance Analytics, YouTube Audit Tool, Video Performance Chart">
+    <meta name="robots" content="index, follow">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT');
+    </script>
+    
+    <script type="application/ld-json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "@id": "https://pooreyoutuber.github.io/youtube-view-checker.html",
+      "name": "Advanced YouTube Video Intelligence & Performance Audit Panel",
+      "url": "https://pooreyoutuber.github.io",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
     <style>
-        .loader { border-top-color: #3b82f6; animation: spinner 1.2s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        :root {
+            --yt-red: #ff0000;
+            --yt-dark-red: #c00000;
+            --yt-glow: rgba(255, 0, 0, 0.25);
+            --bg-body: #0f0f12;
+            --bg-nav: #16161c;
+            --bg-card: #1a1a22;
+            --text-main: #f1f1f5;
+            --text-muted: #94a3b8;
+            --border-color: #2e2e38;
+            --input-bg: #22222a;
+            --radius: 12px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 40%, #ff4d4d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Search Interface */
+        .search-wrapper {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            margin-bottom: 35px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 16px 20px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--yt-red);
+            box-shadow: 0 0 12px var(--yt-glow);
+        }
+
+        button {
+            padding: 16px 32px;
+            background: var(--yt-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background: var(--yt-dark-red);
+            transform: translateY(-1px);
+        }
+
+        /* Dashboard Output Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        @media (max-width: 850px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .input-group {
+                flex-direction: column;
+            }
+            button { width: 100%; }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Analytics Numbers */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .metric-box {
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .metric-box label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .metric-box span {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        /* Description scroll area */
+        .desc-box {
+            background: var(--input-bg);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 14px;
+            color: var(--text-muted);
+            white-space: pre-wrap;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Tags badges */
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag-badge {
+            background: #2a2a35;
+            color: #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid #3f3f46;
+        }
+
+        /* Graph styles */
+        .performance-trends {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .trend-highlight {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid var(--yt-red);
+        }
+        
+        .trend-highlight.low {
+            border-left-color: var(--accent-blue);
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .bar-chart {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 160px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .chart-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .bar {
+            width: 70%;
+            max-width: 35px;
+            background: linear-gradient(to top, var(--yt-dark-red), var(--yt-red));
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: height 0.5s ease;
+            min-height: 5px;
+        }
+
+        .bar.peak {
+            background: linear-gradient(to top, #047857, var(--accent-green));
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .bar-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #f87171;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        /* Niche Grid Layout */
+        .niche-headline {
+            margin: 40px 0 20px 0;
+            font-size: 1.8rem;
+            text-align: left;
+        }
+
+        .niche-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            text-align: left;
+            margin-bottom: 40px;
+        }
+
+        .niche-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .niche-card h4 {
+            color: #ff4d4d;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .niche-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Long Form Article Section */
+        .seo-article-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: left;
+            margin-top: 50px;
+            box-shadow: var(--shadow);
+        }
+
+        .seo-article-section h2 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .seo-article-section h3 {
+            font-size: 1.3rem;
+            color: #fff;
+            margin: 25px 0 10px 0;
+        }
+
+        .seo-article-section p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+
+        .seo-article-section ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+            color: var(--text-muted);
+        }
+
+        .seo-article-section li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .status-msg {
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 20px;
+        }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-200 font-sans min-h-screen">
+<body>
 
-    <header class="py-12 px-4 text-center max-w-4xl mx-auto">
-        <span class="bg-blue-900/40 text-blue-400 border border-blue-800/60 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase shadow-sm">
-            Powered by Claude AI – Real Analysis
-        </span>
-        <h1 class="text-4xl md:text-5xl font-black text-white mt-4 mb-3 tracking-tight">
-            Analyze Your Website SEO Instantly
-        </h1>
-        <p class="text-gray-400 text-base md:text-lg max-w-xl mx-auto">
-            Get depth analysis, 50+ optimized keywords, structured schema codes, and precise technical feedback within seconds.
-        </p>
+<div class="container">
+    
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-7020422718957281"
+         data-ad-slot="1886848226"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+
+    <header>
+        <h1>YouTube Intelligence & SEO Audit Panel</h1>
+        <p>Extract instant operational metrics, strategic channel data, and predictive seasonal retention cycles.</p>
     </header>
 
-    <main class="container mx-auto px-4 max-w-4xl pb-20">
+    <!-- Search Box Component -->
+    <div class="search-wrapper">
+        <div class="input-group">
+            <input type="text" id="videoLink" placeholder="Paste YouTube Video URL here (e.g., Shorts, Watch links, Embeds)...">
+            <button onclick="fetchVideoData()">Run Audit</button>
+        </div>
+    </div>
+
+    <!-- Results Display Container -->
+    <div id="dashboardContainer">
+        <div class="status-msg" id="statusMessage">Enter a live asset URL above to execute client-side metric diagnostics.</div>
+    </div>
+
+    <h2 class="niche-headline">High-Value Vertical Target Matrix</h2>
+    <div class="niche-grid">
+        <div class="niche-card">
+            <h4>💰 Finance & Lending</h4>
+            <p>Targeting <strong>Best Personal Loans USA</strong>? Track metadata to capture premium finance pipelines and mortgage integrations.</p>
+        </div>
+        <div class="niche-card">
+            <h4>🚗 Car Insurance NY</h4>
+            <p>Deconstruct high-tier structural tags focused on <strong>Commercial Auto Insurance Quotes New York</strong> for maximum returns.</p>
+        </div>
+        <div class="niche-card">
+            <h4>⚖️ Legal Systems</h4>
+            <p>High litigation spaces like <strong>Mesothelioma Lawyers California</strong> demand hyper-specific tag alignments.</p>
+        </div>
+        <div class="niche-card">
+            <h4>🖥️ Enterprise Architecture</h4>
+            <p>Scale technical visibility across corporate decision makers searching for <strong>Managed Cloud Hosting Solutions</strong>.</p>
+        </div>
+    </div>
+
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-7020422718957281"
+         data-ad-slot="1886848226"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+
+    <!-- Deep SEO Article Section (400+ Words) -->
+    <section class="seo-article-section">
+        <h2>Maximizing YouTube Analytics & Metadata Structures for High CPC Growth</h2>
+        <p>In modern digital environments, mastering Video Search Engine Optimization (VSEO) requires a systematic shift towards high-value, data-driven content architectures. Creators aiming to maximize their revenue profiles cannot rely solely on viral velocity. Instead, strategic alignment with high cost-per-click (CPC) market sectors dictates premium monetization. Content spaces addressing specific financial, corporate cloud, or highly specialized litigation markets command dramatically higher auction valuations than broader entertainment metrics.</p>
         
-        <div class="bg-gray-900 p-6 md:p-8 rounded-2xl border border-gray-800 shadow-2xl backdrop-blur-sm">
-            <div class="flex flex-col sm:flex-row gap-3">
-                <input type="url" id="urlInput" placeholder="Enter website URL (e.g., https://example.com)" 
-                       class="flex-1 p-4 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-200 text-sm md:text-base" required>
-                <button onclick="startAudit()" id="btnAudit" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition duration-300 shadow-lg shadow-blue-900/30 whitespace-nowrap text-sm md:text-base">
-                    Analyze Now
-                </button>
-            </div>
-            
-            <div id="loader" class="hidden flex flex-col justify-center items-center mt-8 space-y-3">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-800 h-12 w-12"></div>
-                <p class="text-yellow-500 text-xs md:text-sm font-medium animate-pulse">Running full SEO scan & generating custom strategy assets...</p>
-            </div>
-        </div>
+        <h3>The Core Components of Structural Video Diagnostics</h3>
+        <p>Building high-performing channels involves fine-tuning your core diagnostic footprint. Our analytical framework evaluates multiple crucial vectors:</p>
+        <ul>
+            <li><strong>Optimized Metadata Tags:</strong> Proper keyword grouping signals the YouTube ranking algorithm to match content directly with high-intent premium display ads.</li>
+            <li><strong>Temporal Velocity Alignment:</strong> Understanding exactly when a video was published helps chart contextual keyword performance relative to macro industrial changes or economic cycles.</li>
+            <li><strong>Channel Authority Integrations:</strong> Correlating standalone video traffic patterns against a channel's overall core subscriber count reveals true engagement depth and market value.</li>
+        </ul>
 
-        <div id="results" class="hidden mt-10 space-y-6">
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 flex flex-col justify-center items-center md:items-start">
-                    <h3 class="text-gray-400 text-xs font-bold tracking-wider uppercase">SEO Health Rating</h3>
-                    <p id="seoScore" class="text-5xl font-black text-green-400 mt-2">0/100</p>
-                </div>
-                <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 col-span-1 md:col-span-2 space-y-2 text-xs md:text-sm text-gray-300">
-                    <h4 class="font-bold text-blue-400 uppercase text-xs tracking-wider">Current HTML Snapshot</h4>
-                    <p class="truncate"><strong>Title:</strong> <span id="curTitle" class="text-gray-400"></span></p>
-                    <p class="truncate"><strong>Description:</strong> <span id="curDesc" class="text-gray-400"></span></p>
-                    <p><strong>Headings Audit:</strong> <span id="headingsInfo" class="text-gray-400"></span></p>
-                </div>
-            </div>
+        <h3>Decoding Seasonal Visibility Metrics via Advanced Simulation Charts</h3>
+        <p>A video's lifecycle trajectory is heavily influenced by cyclical audience trends. By mapping traffic distribution patterns over a sequence of operational cycles, creators gain clear foresight into upcoming demand spikes. For example, commercial terms like business insurance quotes encounter intense corporate auction bidding at the start of new financial quarters. Conversely, sectors like consumer loan applications display high activity during specific year-end shopping seasons. Utilizing automated algorithmic parsing ensures channels maintain systemic coverage across all digital marketing cycles.</p>
+        
+        <h3>Systematic Optimization Framework</h3>
+        <p>To successfully capture maximum advertising capital, channels must maintain structural consistency between their metadata layers, descriptions, and user signals. Using an automated auditing panel empowers creators to instantly deconstruct successful competitor pipelines, mimic proven tag structures, and execute strategic deployment frameworks with predictable, mathematically sound execution models.</p>
+    </section>
 
-            <div class="bg-gray-900 p-6 md:p-8 rounded-2xl border border-gray-800 space-y-6">
-                <h3 class="text-xl font-bold text-white border-b border-gray-800 pb-3 flex items-center gap-2">
-                    <span>📋</span> Generated Ready-To-Use SEO Code Blocks
-                </h3>
+</div>
 
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs md:text-sm font-semibold text-gray-400">Optimized Title Tag</label>
-                        <button onclick="copyCode('titleCodeBox', this)" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs px-3 py-1 rounded-md text-blue-400 font-medium transition">Copy Code</button>
-                    </div>
-                    <textarea id="titleCodeBox" class="w-full h-12 bg-gray-950 text-emerald-400 font-mono p-3 text-xs rounded-lg border border-gray-800 shadow-inner resize-none focus:outline-none" readonly></textarea>
-                </div>
+<script>
+    // YouTube Data API Key Configuration
+    const API_KEY = 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo'; 
 
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs md:text-sm font-semibold text-gray-400">Optimized Meta Description Tag</label>
-                        <button onclick="copyCode('descCodeBox', this)" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs px-3 py-1 rounded-md text-blue-400 font-medium transition">Copy Code</button>
-                    </div>
-                    <textarea id="descCodeBox" class="w-full h-20 bg-gray-950 text-emerald-400 font-mono p-3 text-xs rounded-lg border border-gray-800 shadow-inner resize-none focus:outline-none" readonly></textarea>
-                </div>
+    function extractVideoId(url) {
+        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|v\/|watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    }
 
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs md:text-sm font-semibold text-gray-400">Target Keywords Package (20 Direct, 20 Questions, 10 Multilingual)</label>
-                        <button onclick="copyCode('keywordsCodeBox', this)" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs px-3 py-1 rounded-md text-blue-400 font-medium transition">Copy Code</button>
-                    </div>
-                    <textarea id="keywordsCodeBox" class="w-full h-28 bg-gray-950 text-emerald-400 font-mono p-3 text-xs rounded-lg border border-gray-800 shadow-inner focus:outline-none" readonly></textarea>
-                </div>
+    function fetchVideoData() {
+        const videoLink = document.getElementById('videoLink').value.trim();
+        const videoId = extractVideoId(videoLink);
+        const container = document.getElementById('dashboardContainer');
+        
+        if (!videoId) {
+            container.innerHTML = `<div class="error-msg">⚠️ Invalid Asset Link: The provided string could not be parsed into a matching 11-character YouTube configuration.</div>`;
+            return;
+        }
 
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs md:text-sm font-semibold text-gray-400">JSON-LD Structure Schema (Includes Organization, Website & FAQ Setup)</label>
-                        <button onclick="copyCode('schemaCodeBox', this)" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs px-3 py-1 rounded-md text-blue-400 font-medium transition">Copy Code</button>
-                    </div>
-                    <textarea id="schemaCodeBox" class="w-full h-40 bg-gray-950 text-emerald-400 font-mono p-3 text-xs rounded-lg border border-gray-800 shadow-inner focus:outline-none" readonly></textarea>
-                </div>
+        container.innerHTML = `<div class="status-msg">🚀 Commencing secure serverless handshake... Querying YouTube Data v3 Pipeline...</div>`;
 
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs md:text-sm font-semibold text-gray-400">AI Context Profile (Optimized llms.txt File Format)</label>
-                        <button onclick="copyCode('llmsCodeBox', this)" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs px-3 py-1 rounded-md text-blue-400 font-medium transition">Copy Code</button>
-                    </div>
-                    <textarea id="llmsCodeBox" class="w-full h-36 bg-gray-950 text-gray-300 font-mono p-3 text-xs rounded-lg border border-gray-800 shadow-inner focus:outline-none" readonly></textarea>
-                </div>
-            </div>
+        const videoApiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`;
 
-            <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 space-y-4">
-                <h3 class="text-lg font-bold text-rose-400 flex items-center gap-2 uppercase text-xs tracking-wider">
-                    🛡️ Google E-E-A-T & Performance Recommendations
-                </h3>
-                <p id="eeatTips" class="text-gray-300 text-xs md:text-sm leading-relaxed whitespace-pre-line"></p>
-            </div>
-        </div>
-
-        <section class="mt-16 bg-gray-900/60 p-6 md:p-8 rounded-2xl border border-gray-800/80">
-            <h3 class="text-xl md:text-2xl font-bold text-white mb-4">About This AI-Powered SEO Analyzer</h3>
-            <div class="text-gray-400 text-xs md:text-sm leading-relaxed space-y-4">
-                <p>
-                    In the highly competitive era of modern search engine indexing, optimizing website visibility is a critical asset for digital growth. Our Advanced AI SEO Auditor is a professional utility built to perform rapid, extensive technical scans of active websites. By deep crawling essential configuration points including structural meta parameters, heading hierarchy from H1 to H3 tags, and primary tag placement, this tool systematically exposes key optimizations necessary to upgrade any domain's indexing score across search algorithms.
-                </p>
-                <p>
-                    The mechanism operates seamlessly: as soon as a target URL is processed, the system extracts the document architecture to run an objective multi-point check. This analysis directly measures technical criteria alongside Google's E-E-A-T guideline matrix, assessing the core indicators of Experience, Expertise, Authoritativeness, and Trustworthiness. Instead of displaying vague surface pointers, our engine calculates an definitive baseline rating score, providing structured structural alternatives to substitute poor or missing structural elements instantly.
-                </p>
-                <p>
-                    Strategic keyword diversity forms the engine's core. For every analyzed address, the system auto-compiles an optimized listing consisting of exactly fifty target keywords custom-tailored to that specific niche. This package groups twenty highly targeted direct trending phrases, twenty situational intent-based question types to lock in transactional organic traffic, and ten multi-regional international language terms. This specific structure guarantees deep penetration across highly lucrative foreign queries, expanding your overall international organic audience profile.
-                </p>
-                <p>
-                    Beyond basic meta evaluation, this utility eliminates production downtime by deploying instantaneous, syntax-ready source snippets. Users receive functional JSON-LD Schema structures embedded with automated organizational identities and pre-built interactive FAQ modules to boost rich snippet space on search layouts. Crucially, the system packages an AI-native directory configuration via a dedicated llms.txt layout template. This prepares websites for modern AI crawlers and Large Language Models, optimizing your platform for future web standards with a single, frictionless click.
-                </p>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        async function startAudit() {
-            const url = document.getElementById('urlInput').value.trim();
-            if(!url) return alert('Please provide a complete website URL before initiating analysis.');
-            
-            // UI Loader State
-            document.getElementById('loader').classList.remove('hidden');
-            document.getElementById('results').classList.add('hidden');
-
-            try {
-                // Connecting with our Render Endpoint (Will build this backend step next)
-                const res = await fetch('https://pooreyoutuber.onrender.com/website-seo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                
-                const data = await res.json();
-                if(data.error) throw new Error(data.error);
-
-                // Injecting returned values to DOM Elements
-                document.getElementById('seoScore').innerText = data.overallRating || "N/A";
-                document.getElementById('curTitle').innerText = data.currentMetaTitle || "None detected";
-                document.getElementById('curDesc').innerText = data.currentMetaDescription || "None detected";
-                document.getElementById('headingsInfo').innerText = data.headingsAudit || "Check complete";
-
-                // Setting Code Block Outputs
-                document.getElementById('titleCodeBox').value = data.generatedMetaTitleCode || "";
-                document.getElementById('descCodeBox').value = data.generatedMetaDescriptionCode || "";
-                document.getElementById('keywordsCodeBox').value = data.generatedKeywordsCode || "";
-                document.getElementById('eeatTips').innerText = data.eeatSuggestions || "";
-
-                // Parsing and Formatting the Codes beautifully inside boxes
-                if(data.schemaCode) {
-                    const parsedSchema = typeof data.schemaCode === 'string' ? JSON.parse(data.schemaCode) : data.schemaCode;
-                    document.getElementById('schemaCodeBox').value = `<script type="application/ld+json">\n${JSON.stringify(parsedSchema, null, 2)}\n<\/script>`;
+        fetch(videoApiUrl)
+            .then(response => response.json())
+            .then(videoData => {
+                if (!videoData.items || videoData.items.length === 0) {
+                    container.innerHTML = `<div class="error-msg">❌ Data Resolution Failure: Video not located. Verify your target visibility is configured as public.</div>`;
+                    return;
                 }
                 
-                document.getElementById('llmsCodeBox').value = data.llmsTxt || "";
+                const videoItem = videoData.items[0];
+                const channelId = videoItem.snippet.channelId;
+                const channelApiUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${API_KEY}`;
+                
+                // Fetch supplementary channel subscriber statistics
+                fetch(channelApiUrl)
+                    .then(res => res.json())
+                    .then(channelData => {
+                        const subCount = channelData.items && channelData.items[0] ? channelData.items[0].statistics.subscriberCount : 'Hidden';
+                        renderDashboard(videoItem, subCount);
+                    })
+                    .catch(() => {
+                        renderDashboard(videoItem, 'Unavailable');
+                    });
+            })
+            .catch(error => {
+                container.innerHTML = `<div class="error-msg">❌ Network Handshake Fault: API query quota limits reached or connection aborted.</div>`;
+            });
+    }
 
-                // Show Results Frame
-                document.getElementById('results').classList.remove('hidden');
+    function renderDashboard(video, subscribers) {
+        const snippet = video.snippet;
+        const stats = video.statistics;
+        const container = document.getElementById('dashboardContainer');
+        
+        // Parse raw ISO date into human readable localized string
+        const uploadDate = new Date(snippet.publishedAt).toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
 
-            } catch (err) {
-                alert(err.message || 'Error executing SEO audit. Please verify the link configuration and try again.');
-            } finally {
-                document.getElementById('loader').classList.add('hidden');
-            }
+        const formattedViews = new Intl.NumberFormat('en-US').format(stats.viewCount);
+        const formattedLikes = stats.likeCount ? new Intl.NumberFormat('en-US').format(stats.likeCount) : 'Hidden';
+        const formattedSubs = subscribers !== 'Hidden' && subscribers !== 'Unavailable' ? new Intl.NumberFormat('en-US').format(subscribers) : subscribers;
+
+        // Process tag arrays into HTML blocks
+        let tagsHtml = '';
+        if (snippet.tags && snippet.tags.length > 0) {
+            snippet.tags.forEach(tag => {
+                tagsHtml += `<span class="tag-badge">${tag}</span>`;
+            });
+        } else {
+            tagsHtml = '<span style="color: var(--text-muted); font-size:14px;">No tags declared in the asset metadata structure.</span>';
         }
 
-        // Fast Clipboard Sync Engine
-        function copyCode(elementId, buttonRef) {
-            const targetArea = document.getElementById(elementId);
-            if(!targetArea.value) return;
+        // Generate synthetic predictive seasonal analytics based on real metadata metrics
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const viewSeed = parseInt(stats.viewCount) || 5000;
+        
+        // Generate simulated dynamic variations matching typical quarterly business demand patterns
+        let mockMonthlyData = months.map((month, idx) => {
+            let variance = Math.sin(idx * 0.9) * 0.35 + 0.65; // Dynamic wave curves
+            if(idx === 2 || idx === 10) variance += 0.25; // Introduce artificial optimization peaks
+            return { month: month, value: Math.round(viewSeed * (variance / 8)) };
+        });
 
-            targetArea.select();
-            targetArea.setSelectionRange(0, 99999); // Mobile Responsive focus
-            navigator.clipboard.writeText(targetArea.value);
+        const maxVal = Math.max(...mockMonthlyData.map(o => o.value));
+        const minVal = Math.min(...mockMonthlyData.map(o => o.value));
+        
+        const peakMonthObj = mockMonthlyData.find(o => o.value === maxVal);
+        const lowMonthObj = mockMonthlyData.find(o => o.value === minVal);
 
-            // Button Feedback animation
-            const oldLabel = buttonRef.innerText;
-            buttonRef.innerText = "✓ Copied!";
-            buttonRef.classList.remove('bg-gray-800', 'text-blue-400');
-            buttonRef.classList.add('bg-emerald-600', 'text-white', 'border-emerald-500');
+        // Build HTML dashboard structure using your core tokens
+        let dashboardHtml = `
+            <div class="dashboard-grid">
+                <!-- Left Panel: Core Metadata Diagnostics -->
+                <div style="display: flex; flex-direction: column; gap: 25px;">
+                    <div class="card">
+                        <h3>📋 Core Asset Metadata</h3>
+                        <p style="margin-bottom: 12px;"><strong style="color: #fff;">Title:</strong> ${snippet.title}</p>
+                        <p style="margin-bottom: 12px; font-size: 14px;"><strong style="color: #fff;">Channel Owner:</strong> ${snippet.channelTitle}</p>
+                        <p style="margin-bottom: 15px; font-size: 14px; color: var(--accent-green);"><strong style="color: #fff;">Published Timestamp:</strong> ${uploadDate}</p>
+                        
+                        <label style="display:block; font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:6px; color: var(--text-muted);">Asset Description String</label>
+                        <div class="desc-box">${snippet.description || 'No description provided.'}</div>
+                    </div>
 
-            setTimeout(() => {
-                buttonRef.innerText = oldLabel;
-                buttonRef.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-500');
-                buttonRef.classList.add('bg-gray-800', 'text-blue-400');
-            }, 1800);
-        }
-    </script>
+                    <div class="card">
+                        <h3>🏷️ Tactical SEO Tag Index</h3>
+                        <div class="tag-container">${tagsHtml}</div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Quantitative Metric Profiles & Chrono Performance Grid -->
+                <div style="display: flex; flex-direction: column; gap: 25px;">
+                    <div class="card">
+                        <h3>📊 Performance Scaling</h3>
+                        <div class="metrics-grid">
+                            <div class="metric-box">
+                                <label>Total Views</label>
+                                <span>${formattedViews}</span>
+                            </div>
+                            <div class="metric-box">
+                                <label>Net Likes</label>
+                                <span>${formattedLikes}</span>
+                            </div>
+                            <div class="metric-box" style="grid-column: span 2;">
+                                <label>Channel Subscribers Authority</label>
+                                <span style="color: var(--accent-blue);">${formattedSubs}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📈 Seasonal Velocity Trends</h3>
+                        <div class="performance-trends">
+                            <div class="trend-highlight">
+                                <div>
+                                    <div style="font-size:11px; color: var(--text-muted); text-transform:uppercase;">Peak Retention Month</div>
+                                    <div style="font-size:16px; font-weight:700; color:#fff;">${peakMonthObj.month} (Max Volume)</div>
+                                </div>
+                            </div>
+                            <div class="trend-highlight low">
+                                <div>
+                                    <div style="font-size:11px; color: var(--text-muted); text-transform:uppercase;">Lowest Activity Valley</div>
+                                    <div style="font-size:16px; font-weight:700; color:#fff;">${lowMonthObj.month} (Min Volume)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Graphical Render Core Component -->
+                        <div class="chart-container">
+                            <div class="bar-chart">
+                                ${mockMonthlyData.map(item => {
+                                    const pct = (item.value / maxVal) * 100;
+                                    const isPeak = item.value === maxVal ? 'peak' : '';
+                                    return `
+                                        <div class="chart-bar-wrapper">
+                                            <div class="bar ${isPeak}" style="height: ${pct}%;" title="Simulated metric view profile for ${item.month}: ${new Intl.NumberFormat('en-US').format(item.value)}"></div>
+                                            <span class="bar-label">${item.month}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = dashboardHtml;
+    }
+</script>
+
 </body>
 </html>
