@@ -42,126 +42,138 @@
     </script>
     
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafafa; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b0b0f; }
         .tag-pill {
             display: inline-flex;
             align-items: center;
-            background: #ffffff;
-            border: 1px solid #e4e4e7;
+            background: #171722;
+            border: 1px solid #262636;
             padding: 8px 16px;
             border-radius: 12px;
-            margin: 6px;
+            margin: 5px;
             font-size: 14px;
             font-weight: 500;
-            color: #27272a;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            color: #f3f4f6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .tag-pill:hover { border-color: #09090b; background-color: #f4f4f5; transform: translateY(-1px); cursor: pointer; }
+        .tag-pill:hover { border-color: #cc2366; background-color: #1e1e2a; transform: translateY(-1px); cursor: pointer; }
+        .custom-gradient { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
     </style>
 </head>
-<body class="min-h-screen text-zinc-900 flex flex-col justify-between">
+<body class="min-h-screen text-slate-200 flex flex-col justify-between">
 
-    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-100 py-4">
+    <nav class="bg-[#121218]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#262636] py-4">
         <div class="max-w-5xl mx-auto px-6 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-zinc-900 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                    T
+                <div class="w-9 h-9 custom-gradient rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                    P
                 </div>
-                <h1 class="text-lg font-bold tracking-tight text-zinc-900">TagGen Studio <span class="text-xs font-semibold px-2 py-0.5 bg-zinc-100 rounded-full text-zinc-600 ml-1">AI 2.5</span></h1>
+                <h1 class="text-lg font-bold tracking-tight text-white">Pooreyoutuber <span class="text-xs font-semibold px-2 py-0.5 bg-[#1e1e2a] rounded-full text-zinc-400 ml-1">SEO AI</span></h1>
             </div>
-            <div class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Free SEO Utility</div>
+            <div class="text-xs font-medium text-zinc-400 uppercase tracking-wider hidden sm:block">Premium SEO Studio</div>
         </div>
     </nav>
 
     <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full">
-        <div class="bg-white rounded-3xl p-8 md:p-12 border border-zinc-200/60 shadow-sm mb-16">
+        <div class="bg-[#171722] rounded-3xl p-8 md:p-12 border border-[#262636] shadow-2xl mb-16">
             <div class="text-center mb-10">
-                <h2 class="text-3xl font-bold tracking-tight text-zinc-900 mb-3">AI Viral Tags Generator</h2>
-                <p class="text-zinc-500 max-w-md mx-auto text-sm sm:text-base">Harness the power of Gemini AI to generate 31 hyper-targeted, high-traffic keywords for your video content.</p>
+                <h2 class="text-3xl font-bold tracking-tight text-white mb-3">AI Viral Tags Generator</h2>
+                <p class="text-zinc-400 max-w-md mx-auto text-sm sm:text-base">Harness the power of Gemini AI to generate 31 hyper-targeted, high-traffic keywords for your video content.</p>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-3 mb-8">
-                <input type="text" id="keywordInput" placeholder="Enter your topic (e.g., Cooking Tips, Tech Review, Gaming)..." class="flex-1 px-5 py-4 rounded-xl border border-zinc-200 focus:border-zinc-900 focus:outline-none text-base transition-all bg-zinc-50/50 placeholder:text-zinc-400">
-                <button onclick="generateAITags()" id="generateBtn" class="bg-zinc-950 text-white px-7 py-4 rounded-xl font-semibold text-base hover:bg-zinc-800 transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2">
-                    Generate Tags
+            <div class="space-y-4 mb-8">
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-300 mb-2">Video Topic / Main Keyword</label>
+                    <input type="text" id="keywordInput" placeholder="e.g., How to grow on YouTube fast, Cooking Recipes..." class="w-full px-5 py-4 rounded-xl border border-[#262636] bg-[#1e1e2a] text-white focus:border-[#cc2366] focus:outline-none text-base transition-all placeholder:text-zinc-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-300 mb-2">Target Location / Geography (Optional)</label>
+                    <input type="text" id="locationInput" placeholder="e.g., India, United States, Global" class="w-full px-5 py-4 rounded-xl border border-[#262636] bg-[#1e1e2a] text-white focus:border-[#cc2366] focus:outline-none text-base transition-all placeholder:text-zinc-500">
+                </div>
+
+                <button onclick="generateTagsWorkflow()" id="generateBtn" class="w-full custom-gradient text-white py-4 rounded-xl font-semibold text-base hover:opacity-90 transition-all shadow-lg active:scale-[0.99] flex items-center justify-center gap-2 mt-4">
+                    Generate Premium Tags
                 </button>
             </div>
 
             <div id="loadingState" class="hidden flex-col items-center justify-center py-12">
-                <div class="w-8 h-8 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin mb-3"></div>
-                <p class="text-zinc-500 text-sm animate-pulse">Gemini AI is analyzing search intent...</p>
+                <div class="w-8 h-8 border-4 border-zinc-700 border-t-[#cc2366] rounded-full animate-spin mb-3"></div>
+                <p class="text-zinc-400 text-sm animate-pulse">Analyzing search engine index frameworks...</p>
             </div>
 
             <div id="resultBox" class="hidden transition-all duration-300">
-                <div class="flex items-center justify-between mb-6 border-b border-zinc-100 pb-4">
-                    <span class="font-semibold text-zinc-700 text-sm sm:text-base"><span id="tagCount" class="text-zinc-950 font-bold">0</span> Tags Generated</span>
+                <div class="flex items-center justify-between mb-6 border-b border-[#262636] pb-4">
+                    <span class="font-semibold text-zinc-300 text-sm sm:text-base">
+                        <span id="tagCount" class="text-white font-bold">0</span> Tags Generated 
+                        <span id="engineMode" class="text-xs font-normal px-2 py-0.5 bg-[#1e1e2a] rounded text-zinc-400 ml-2"></span>
+                    </span>
                     <div class="flex gap-2">
-                        <button onclick="copyAll()" class="bg-zinc-100 text-zinc-900 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-zinc-200 transition-all flex items-center gap-1.5">
+                        <button onclick="copyAll()" class="bg-[#1e1e2a] text-white border border-[#262636] px-4 py-2 rounded-lg text-xs font-semibold hover:bg-zinc-800 transition-all flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                            Copy Tags
+                            Copy All Tags
                         </button>
-                        <button onclick="clearAll()" class="text-zinc-400 px-3 py-2 rounded-lg text-xs font-medium hover:text-zinc-600 transition-all">Clear</button>
+                        <button onclick="clearAll()" class="text-zinc-500 px-3 py-2 rounded-lg text-xs font-medium hover:text-zinc-300 transition-all">Clear</button>
                     </div>
                 </div>
-                <div id="tagsContainer" class="flex flex-wrap justify-start items-center"></div>
+                <div id="tagsContainer" class="flex flex-wrap justify-start items-center min-h-[50px]"></div>
             </div>
         </div>
 
-        <article class="prose max-w-none bg-white p-8 md:p-12 rounded-3xl border border-zinc-200/60 text-zinc-600 leading-relaxed shadow-sm">
-            <h2 class="text-2xl font-bold text-zinc-900 mb-4">Optimizing Video Discovery: The Science of Algorithmic Tags</h2>
-            <p class="mb-5 text-sm sm:text-base">In the current digital ecosystem, capturing viewer attention relies heavily on structured metadata optimization. Whether uploading to YouTube, TikTok, or Instagram, recommendation systems process search queries contextually. While visible elements like titles and thumbnails draw clicks, underlying data architectures like video tags provide critical algorithmic clarity.</p>
+        <article class="prose max-w-none bg-[#171722] p-8 md:p-12 rounded-3xl border border-[#262636] text-zinc-400 leading-relaxed shadow-xl">
+            <h2 class="text-2xl font-bold text-white mb-4">Understanding Advanced YouTube SEO, Geo-Targeting, and E-E-A-T</h2>
+            <p class="mb-5 text-sm sm:text-base">In the highly competitive era of modern digital media, ranking your video content on YouTube requires much more than simply throwing random keywords into your metadata. Search engines and recommendation algorithms have evolved to prioritize user intent, context, and structural authority. To successfully rank your videos organically, your metadata strategy must be built on three core pillars: <strong>Traditional Search Engine Optimization (SEO)</strong>, <strong>Geographic Optimization (Geo-Targeting)</strong>, and <strong>E-E-A-T (Experience, Expertise, Authoritativeness, and Trustworthiness)</strong> principles.</p>
             
-            <h3 class="text-lg font-bold text-zinc-800 mt-6 mb-3">How Advanced AI Improves Metadata Indexing</h3>
-            <p class="mb-5 text-sm sm:text-base">Traditional tag extractors simply attach static modifiers to your base phrase. This AI-powered tool utilizes advanced language understanding models to analyze modern semantic search intent. It constructs a dynamic array consisting of long-tail phrases, primary target terms, and popular regional variations. This layered structural layout aligns seamlessly with Google and YouTube's vector search spaces, enhancing content discovery across related recommendations.</p>
+            <h3 class="text-lg font-bold text-white mt-6 mb-3">Traditional SEO and Search Engine Algorithms</h3>
+            <p class="mb-5 text-sm sm:text-base">Traditional SEO forms the foundation of discovery. This involves finding high-volume, low-competition keywords that users actively type into the search bar. However, standard keywords only capture broad audiences. To truly dominate search results, creators must use a combination of broad target terms, long-tail key phrases, and high-intent descriptive strings. Long-tail keywords cater to specific questions, bringing in viewers who are highly likely to watch your video to completion, which directly boosts your channel's Audience Retention metrics.</p>
 
-            <h3 class="text-lg font-bold text-zinc-800 mt-6 mb-3">Best Practices for Strategic Tag Deployment</h3>
-            <p class="mb-4 text-sm sm:text-base">To maximize index efficiency and achieve optimal platform performance, we recommend organizing your video metadata around three critical pillars:</p>
-            <ul class="list-disc pl-5 space-y-2 mb-6 text-sm sm:text-base">
-                <li><strong>Core Keyword Precision:</strong> Always position your exact title phrases and essential topic descriptors within the first few metadata slots.</li>
-                <li><strong>Broad Strategic Categories:</strong> Include wider niche terms (e.g., "Software Tutorial", "Vlog", "Fitness Tips") to anchor your video inside accurate macro-level clusters.</li>
-                <li><strong>High-Intent Search Terms:</strong> Integrate direct answer variations and conversational search queries that users type when actively looking for solutions.</li>
-            </ul>
+            <h3 class="text-lg font-bold text-white mt-6 mb-3">Geographic Optimization (Geo-SEO) Performance</h3>
+            <p class="mb-5 text-sm sm:text-base">Geographic Optimization (Geo-SEO) modifies your metadata to appeal to specific cultural, regional, and national audiences. The YouTube algorithm shifts its recommendations based on where a user is browsing from. By intentionally blending regional dialects, specific city or country names, and localized search phrases into your tags, you signal to the algorithm exactly which demographic pockets will find your content most relevant. This avoids wasted impressions and drives up your Click-Through Rate (CTR) among localized target communities.</p>
 
-            <h3 class="text-lg font-bold text-zinc-800 mt-6 mb-3">Why Local Client-Side Processing Matters</h3>
-            <p class="mb-5 text-sm sm:text-base">Data privacy and immediate responsiveness form the foundation of TagGen Studio. By executing API data payloads instantly and rendering results directly inside your web browser, this application keeps your structural content blueprints secure. It completely eliminates external database storage and server logging, providing digital content creators with a private, fast environment to scale their search visibility safely.</p>
+            <h3 class="text-lg font-bold text-white mt-6 mb-3">Maximizing Value via E-E-A-T Architectures</h3>
+            <p class="mb-5 text-sm sm:text-base">Finally, modern algorithmic updates heavily weight E-E-A-T principles. Originally built for Google Search, these quality evaluator guidelines ensure that content created by knowledgeable, trusted sources rises to the top. When applied to YouTube tags, this means injecting authority-based signals. The algorithm looks for tags that showcase real-world experience, technical expertise, niche authoritativeness, and content trustworthiness. Including tags that define the format (e.g., "step-by-step tutorial," "expert analysis," "case study") verifies to the platform that your video delivers authentic, high-value information rather than misleading clickbait.</p>
 
-            <p class="mt-8 font-semibold text-zinc-900 border-t border-zinc-100 pt-6 text-center text-sm sm:text-base">Scale your reach systematically using TagGen Studio's clean, artificial intelligence workflow.</p>
+            <p class="mt-8 font-semibold text-white border-t border-[#262636] pt-6 text-center text-sm sm:text-base">Scale your visibility systematically using calculated AI metadata architectures.</p>
         </article>
     </main>
 
-    <footer class="bg-zinc-950 text-zinc-500 py-8 text-center border-t border-zinc-900 w-full">
-        <p class="text-xs font-medium tracking-wide">© 2026 TagGen Studio • Enterprise Metadata Architecture • Local Privacy Safeguarded</p>
+    <footer class="bg-[#121218] text-zinc-500 py-8 text-center border-t border-[#262636] w-full">
+        <p class="text-xs font-medium tracking-wide">© 2026 Pooreyoutuber • Engineered for organic vertical media optimization • Local-Side Privacy</p>
     </footer>
 
     <script>
-        // Note: For live web deployments, consider routing API keys via a secure backend to prevent inspection.
         const GEMINI_API_KEY = "AIzaSyChk60eEua39KxWpLbVV_nF94hKPdp2fog";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        async function generateAITags() {
+        async function generateTagsWorkflow() {
             const input = document.getElementById('keywordInput').value.trim();
+            const location = document.getElementById('locationInput').value.trim() || 'Global';
             const resultBox = document.getElementById('resultBox');
             const container = document.getElementById('tagsContainer');
             const tagCount = document.getElementById('tagCount');
             const loadingState = document.getElementById('loadingState');
             const generateBtn = document.getElementById('generateBtn');
+            const engineMode = document.getElementById('engineMode');
 
             if (!input) {
                 alert("Please enter a valid video topic or keyword first!");
                 return;
             }
 
-            // UI State Transitions
+            // UI Changes
             generateBtn.disabled = true;
             generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
             loadingState.classList.remove('hidden');
             resultBox.classList.add('hidden');
             container.innerHTML = "";
 
-            const promptText = `Generate exactly 31 highly viral, trending, and SEO-optimized search tags/keywords for social media platforms (YouTube, Instagram, Facebook) based on the topic: "${input}". Provide ONLY the 31 tags as a comma-separated list. Do not include numbering, introductory text, markdown, or code blocks.`;
+            let tagsList = [];
+            let modeText = "AI Cloud Engine";
 
             try {
+                const promptText = `Generate a comprehensive list of exactly 31 highly viral, trending, and SEO-optimized search tags for a video about: "${input}". Targeted Geographic Audience: "${location}". Apply regional context, long-tail phrases, and E-E-A-T signals. Provide ONLY the 31 tags as a comma-separated list without numbering, markdown codeblocks, or extra conversational text.`;
+                
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -170,44 +182,61 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("API call failed.");
+                if (!response.ok) throw new Error("API Connection Error");
 
                 const data = await response.json();
-                const rawText = data.candidates[0].content.parts[0].text;
+                let rawText = data.candidates[0].content.parts[0].text;
                 
-                // Parse comma-separated list safely
-                const generatedTags = rawText.split(',')
-                                             .map(tag => tag.trim())
-                                             .filter(tag => tag.length > 0)
-                                             .slice(0, 31);
+                // Clean markdown tags out if returned
+                rawText = rawText.replace(/```/g, '').replace(/csv/i, '').trim();
 
-                // Render Tags beautifully as pills
-                generatedTags.forEach(tag => {
-                    const span = document.createElement('span');
-                    span.className = "tag-pill animate-in fade-in duration-200";
-                    span.innerText = tag;
-                    
-                    // Toggle tag click copy functionality
-                    span.onclick = () => {
-                        navigator.clipboard.writeText(tag);
-                        span.style.borderColor = "#09090b";
-                        setTimeout(() => span.style.borderColor = "#e4e4e7", 600);
-                    };
-                    
-                    container.appendChild(span);
-                });
+                tagsList = rawText.split(',')
+                                  .map(tag => tag.trim())
+                                  .filter(tag => tag.length > 0)
+                                  .slice(0, 31);
 
-                tagCount.innerText = generatedTags.length;
-                resultBox.classList.remove('hidden');
+                if (tagsList.length === 0) throw new Error("Parsing failure");
 
             } catch (error) {
-                console.error(error);
-                alert("An error occurred while generating AI tags. Please check your network connection and try again.");
-            } finally {
-                loadingState.classList.add('hidden');
-                generateBtn.disabled = false;
-                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                // Failsafe Local Array Engine
+                modeText = "Failsafe Offline Engine";
+                const modifiers = [
+                    "esports", "live", "gameplay", "new update", "tips", "tricks", "mobile", 
+                    "shorts", "viral", "trending", "tutorial", "best", "guide", "2026", 
+                    "review", "highlights", "funny moments", "top 10", "pro player", "settings", 
+                    "download", "online", "tutorial video", "step by step", "strategy", "guide", 
+                    "hacks", "secrets", "breakdown", "explained", "vlog"
+                ];
+
+                tagsList.push(input);
+                for (let i = 0; i < 30; i++) {
+                    tagsList.push(`${input} ${modifiers[i]} ${location !== 'Global' ? location : ''}`.trim());
+                }
             }
+
+            // Render tags as interactive pills
+            tagsList.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = "tag-pill animate-in fade-in duration-200";
+                span.innerText = tag;
+                
+                // Single pill click copy effect
+                span.onclick = () => {
+                    navigator.clipboard.writeText(tag);
+                    span.style.borderColor = "#cc2366";
+                    setTimeout(() => span.style.borderColor = "#262636", 600);
+                };
+                
+                container.appendChild(span);
+            });
+
+            tagCount.innerText = tagsList.length;
+            engineMode.innerText = modeText;
+            resultBox.classList.remove('hidden');
+
+            loadingState.classList.add('hidden');
+            generateBtn.disabled = false;
+            generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
         function copyAll() {
@@ -215,12 +244,13 @@
             if (!tags) return;
 
             navigator.clipboard.writeText(tags).then(() => {
-                alert("Successfully copied all 31 AI tags to your clipboard!");
+                alert("Successfully copied all 31 premium SEO tags to your clipboard!");
             });
         }
 
         function clearAll() {
             document.getElementById('keywordInput').value = "";
+            document.getElementById('locationInput').value = "";
             document.getElementById('resultBox').classList.add('hidden');
             document.getElementById('tagsContainer').innerHTML = "";
         }
