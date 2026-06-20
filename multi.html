@@ -3,40 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced YouTube Video Analyzer & SEO Dashboard</title>
-
-    <meta name="description" content="Professional advanced SEO tools for YouTubers. Analyze high CPC niches like Mesothelioma Lawyers California, Car Insurance Quotes New York, and Personal Loans USA. Get deep insights into video metadata, publication timeline trends, and channel growth analytics.">
-    <meta name="keywords" content="YouTube SEO tool, Video Tags Extractor, Channel Subscriber Tracker, Monthly Performance Analytics, YouTube Audit Tool, Video Performance Chart">
-    <meta name="robots" content="index, follow">
-
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-ZPMC525FGT');
-    </script>
-    
-    <script type="application/ld-json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "@id": "https://pooreyoutuber.github.io/youtube-view-checker.html",
-      "name": "Advanced YouTube Video Intelligence & Performance Audit Panel",
-      "url": "https://pooreyoutuber.github.io",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "All",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
-    }
-    </script>
-
+    <title>YT Trends & Analytics Studio - Discover Viral & Underrated Content</title>
+    <meta name="description" content="Discover YouTube trending topics, highest & lowest viewed videos from the past month, and real-time music charts with deep content audit insights.">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --yt-red: #ff0000;
@@ -53,610 +22,724 @@
             --shadow: 0 8px 32px rgba(0,0,0,0.5);
             --accent-green: #10b981;
             --accent-blue: #3b82f6;
+            --accent-gold: #f59e0b;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            padding: 40px 20px;
             line-height: 1.6;
+            padding-bottom: 60px;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
+        /* Header & Navigation */
         header {
-            text-align: center;
-            margin-bottom: 40px;
+            background-color: var(--bg-nav);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        header h1 {
-            font-size: 2.8rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #ffffff 40%, #ff4d4d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
         }
 
-        /* Search Interface */
-        .search-wrapper {
+        .logo i {
+            color: var(--yt-red);
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px var(--yt-glow);
+        }
+
+        /* Main Layout */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Control Panel / Search */
+        .search-panel {
             background: var(--bg-card);
-            padding: 30px;
-            border-radius: var(--radius);
             border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2.5rem;
             box-shadow: var(--shadow);
-            margin-bottom: 35px;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .input-group {
-            display: flex;
-            gap: 12px;
             position: relative;
         }
 
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
         input[type="text"] {
-            flex: 1;
-            padding: 16px 20px;
-            background: var(--input-bg);
+            width: 100%;
+            padding: 1rem 1rem 1rem 2.8rem;
+            background-color: var(--input-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
             color: var(--text-main);
-            font-size: 16px;
-            font-family: inherit;
-            transition: all 0.3s ease;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: all 0.3s;
         }
 
         input[type="text"]:focus {
             outline: none;
             border-color: var(--yt-red);
-            box-shadow: 0 0 12px var(--yt-glow);
+            box-shadow: 0 0 10px var(--yt-glow);
         }
 
-        button {
-            padding: 16px 32px;
-            background: var(--yt-red);
+        button.btn-search {
+            background-color: var(--yt-red);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
-        }
-
-        button:hover {
-            background: var(--yt-dark-red);
-            transform: translateY(-1px);
-        }
-
-        /* Dashboard Output Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-            margin-bottom: 40px;
-            text-align: left;
-        }
-
-        @media (max-width: 850px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            .input-group {
-                flex-direction: column;
-            }
-            button { width: 100%; }
-        }
-
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            padding: 0 2.5rem;
             border-radius: var(--radius);
-            padding: 25px;
-            box-shadow: var(--shadow);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 100%;
+            min-height: 52px;
         }
 
-        .card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 20px;
+        button.btn-search:hover {
+            background-color: var(--yt-dark-red);
+        }
+
+        /* Tabs System */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
-            color: #fff;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--input-bg);
+            color: var(--yt-red);
+            border-bottom: 2px solid var(--yt-red);
+        }
+
+        /* Results Dynamic Grid */
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        /* Analytics Numbers */
-        .metrics-grid {
+        .grid-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
         }
 
-        .metric-box {
-            background: var(--input-bg);
-            padding: 20px;
-            border-radius: 8px;
+        /* Video / Song Cards */
+        .card {
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            text-align: center;
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .metric-box label {
-            display: block;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+            border-color: #444;
+        }
+
+        .thumbnail-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background-color: #000;
+        }
+
+        .thumbnail-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .play-overlay i {
+            color: white;
+            font-size: 3rem;
+            transition: transform 0.3s;
+        }
+
+        .card:hover .play-overlay i {
+            transform: scale(1.2);
+        }
+
+        .card-content {
+            padding: 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        .card-channel {
             font-size: 0.85rem;
             color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 0.75rem;
         }
 
-        .metric-box span {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: #fff;
-        }
-
-        /* Description scroll area */
-        .desc-box {
-            background: var(--input-bg);
-            padding: 15px;
-            border-radius: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 14px;
-            color: var(--text-muted);
-            white-space: pre-wrap;
-            border: 1px solid var(--border-color);
-        }
-
-        /* Tags badges */
-        .tag-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .tag-badge {
-            background: #2a2a35;
-            color: #cbd5e1;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            border: 1px solid #3f3f46;
-        }
-
-        /* Graph styles */
-        .performance-trends {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .trend-highlight {
+        .card-stats {
             display: flex;
             justify-content: space-between;
-            background: rgba(255,255,255,0.03);
-            padding: 12px;
-            border-radius: 6px;
-            border-left: 4px solid var(--yt-red);
-        }
-        
-        .trend-highlight.low {
-            border-left-color: var(--accent-blue);
-        }
-
-        .chart-container {
-            margin-top: 20px;
-            background: var(--input-bg);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .bar-chart {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            height: 160px;
-            padding-top: 20px;
-            position: relative;
-        }
-
-        .chart-bar-wrapper {
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            flex: 1;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
         }
 
-        .bar {
-            width: 70%;
-            max-width: 35px;
-            background: linear-gradient(to top, var(--yt-dark-red), var(--yt-red));
-            border-radius: 4px 4px 0 0;
-            position: relative;
-            transition: height 0.5s ease;
-            min-height: 5px;
-        }
+        .badge-high { color: var(--accent-green); }
+        .badge-low { color: var(--accent-gold); }
 
-        .bar.peak {
-            background: linear-gradient(to top, #047857, var(--accent-green));
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-        }
-
-        .bar-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .error-msg {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid #ef4444;
-            color: #f87171;
-            padding: 16px;
-            border-radius: 8px;
-            text-align: left;
-            margin-bottom: 25px;
-        }
-
-        /* Niche Grid Layout */
-        .niche-headline {
-            margin: 40px 0 20px 0;
-            font-size: 1.8rem;
-            text-align: left;
-        }
-
-        .niche-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            text-align: left;
-            margin-bottom: 40px;
-        }
-
-        .niche-card {
-            background: var(--bg-card);
-            padding: 20px;
+        /* Audit Box Dashboard */
+        .audit-box {
+            background: linear-gradient(135deg, #1e1b4b 0%, #16161c 100%);
+            border: 1px solid #312e81;
             border-radius: var(--radius);
-            border: 1px solid var(--border-color);
-        }
-
-        .niche-card h4 {
-            color: #ff4d4d;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .niche-card p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        /* Long Form Article Section */
-        .seo-article-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 40px;
-            text-align: left;
-            margin-top: 50px;
+            padding: 2rem;
+            margin-top: 3rem;
             box-shadow: var(--shadow);
         }
 
-        .seo-article-section h2 {
+        .audit-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+            color: #c084fc;
+        }
+
+        .audit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .audit-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.25rem;
+            border-radius: 8px;
+        }
+
+        .audit-card h4 {
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .audit-card p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Video Modal Player */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
+            background: rgba(0,0,0,0.5);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* SEO Informative Text Section */
+        .seo-section {
+            margin-top: 4rem;
+            background: var(--bg-nav);
+            border: 1px solid var(--border-color);
+            padding: 3rem 2rem;
+            border-radius: var(--radius);
+        }
+
+        .seo-title {
             font-size: 1.8rem;
-            color: #fff;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            border-left: 4px solid var(--yt-red);
+            padding-left: 15px;
         }
 
-        .seo-article-section h3 {
-            font-size: 1.3rem;
-            color: #fff;
-            margin: 25px 0 10px 0;
-        }
-
-        .seo-article-section p {
+        .seo-content {
             color: var(--text-muted);
-            font-size: 15px;
-            margin-bottom: 15px;
-            line-height: 1.7;
+            font-size: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
-        .seo-article-section ul {
-            margin-left: 20px;
-            margin-bottom: 20px;
-            color: var(--text-muted);
+        .seo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
         }
 
-        .seo-article-section li {
-            margin-bottom: 8px;
-            font-size: 14px;
+        .seo-card h3 {
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
         }
 
-        .status-msg {
-            color: var(--text-muted);
-            font-style: italic;
-            padding: 20px;
+        /* Loader */
+        .loader-wrapper {
+            display: none;
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .loader {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--yt-red);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-7020422718957281"
-         data-ad-slot="1886848226"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-
     <header>
-        <h1>YouTube Intelligence & SEO Audit Panel</h1>
-        <p>Extract instant operational metrics, strategic channel data, and predictive seasonal retention cycles.</p>
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fab fa-youtube"></i> YT Analytics Studio
+            </a>
+        </div>
     </header>
 
-    <!-- Search Box Component -->
-    <div class="search-wrapper">
-        <div class="input-group">
-            <input type="text" id="videoLink" placeholder="Paste YouTube Video URL here (e.g., Shorts, Watch links, Embeds)...">
-            <button onclick="fetchVideoData()">Run Audit</button>
-        </div>
-    </div>
-
-    <!-- Results Display Container -->
-    <div id="dashboardContainer">
-        <div class="status-msg" id="statusMessage">Enter a live asset URL above to execute client-side metric diagnostics.</div>
-    </div>
-
-    <h2 class="niche-headline">High-Value Vertical Target Matrix</h2>
-    <div class="niche-grid">
-        <div class="niche-card">
-            <h4>💰 Finance & Lending</h4>
-            <p>Targeting <strong>Best Personal Loans USA</strong>? Track metadata to capture premium finance pipelines and mortgage integrations.</p>
-        </div>
-        <div class="niche-card">
-            <h4>🚗 Car Insurance NY</h4>
-            <p>Deconstruct high-tier structural tags focused on <strong>Commercial Auto Insurance Quotes New York</strong> for maximum returns.</p>
-        </div>
-        <div class="niche-card">
-            <h4>⚖️ Legal Systems</h4>
-            <p>High litigation spaces like <strong>Mesothelioma Lawyers California</strong> demand hyper-specific tag alignments.</p>
-        </div>
-        <div class="niche-card">
-            <h4>🖥️ Enterprise Architecture</h4>
-            <p>Scale technical visibility across corporate decision makers searching for <strong>Managed Cloud Hosting Solutions</strong>.</p>
-        </div>
-    </div>
-
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-7020422718957281"
-         data-ad-slot="1886848226"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-
-    <!-- Deep SEO Article Section (400+ Words) -->
-    <section class="seo-article-section">
-        <h2>Maximizing YouTube Analytics & Metadata Structures for High CPC Growth</h2>
-        <p>In modern digital environments, mastering Video Search Engine Optimization (VSEO) requires a systematic shift towards high-value, data-driven content architectures. Creators aiming to maximize their revenue profiles cannot rely solely on viral velocity. Instead, strategic alignment with high cost-per-click (CPC) market sectors dictates premium monetization. Content spaces addressing specific financial, corporate cloud, or highly specialized litigation markets command dramatically higher auction valuations than broader entertainment metrics.</p>
+    <div class="container">
         
-        <h3>The Core Components of Structural Video Diagnostics</h3>
-        <p>Building high-performing channels involves fine-tuning your core diagnostic footprint. Our analytical framework evaluates multiple crucial vectors:</p>
-        <ul>
-            <li><strong>Optimized Metadata Tags:</strong> Proper keyword grouping signals the YouTube ranking algorithm to match content directly with high-intent premium display ads.</li>
-            <li><strong>Temporal Velocity Alignment:</strong> Understanding exactly when a video was published helps chart contextual keyword performance relative to macro industrial changes or economic cycles.</li>
-            <li><strong>Channel Authority Integrations:</strong> Correlating standalone video traffic patterns against a channel's overall core subscriber count reveals true engagement depth and market value.</li>
-        </ul>
-
-        <h3>Decoding Seasonal Visibility Metrics via Advanced Simulation Charts</h3>
-        <p>A video's lifecycle trajectory is heavily influenced by cyclical audience trends. By mapping traffic distribution patterns over a sequence of operational cycles, creators gain clear foresight into upcoming demand spikes. For example, commercial terms like business insurance quotes encounter intense corporate auction bidding at the start of new financial quarters. Conversely, sectors like consumer loan applications display high activity during specific year-end shopping seasons. Utilizing automated algorithmic parsing ensures channels maintain systemic coverage across all digital marketing cycles.</p>
-        
-        <h3>Systematic Optimization Framework</h3>
-        <p>To successfully capture maximum advertising capital, channels must maintain structural consistency between their metadata layers, descriptions, and user signals. Using an automated auditing panel empowers creators to instantly deconstruct successful competitor pipelines, mimic proven tag structures, and execute strategic deployment frameworks with predictable, mathematically sound execution models.</p>
-    </section>
-
-</div>
-
-<script>
-    // YouTube Data API Key Configuration
-    const API_KEY = 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo'; 
-
-    function extractVideoId(url) {
-        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|v\/|watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/;
-        const match = url.match(regex);
-        return match ? match[1] : null;
-    }
-
-    function fetchVideoData() {
-        const videoLink = document.getElementById('videoLink').value.trim();
-        const videoId = extractVideoId(videoLink);
-        const container = document.getElementById('dashboardContainer');
-        
-        if (!videoId) {
-            container.innerHTML = `<div class="error-msg">⚠️ Invalid Asset Link: The provided string could not be parsed into a matching 11-character YouTube configuration.</div>`;
-            return;
-        }
-
-        container.innerHTML = `<div class="status-msg">🚀 Commencing secure serverless handshake... Querying YouTube Data v3 Pipeline...</div>`;
-
-        const videoApiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`;
-
-        fetch(videoApiUrl)
-            .then(response => response.json())
-            .then(videoData => {
-                if (!videoData.items || videoData.items.length === 0) {
-                    container.innerHTML = `<div class="error-msg">❌ Data Resolution Failure: Video not located. Verify your target visibility is configured as public.</div>`;
-                    return;
-                }
-                
-                const videoItem = videoData.items[0];
-                const channelId = videoItem.snippet.channelId;
-                const channelApiUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${API_KEY}`;
-                
-                // Fetch supplementary channel subscriber statistics
-                fetch(channelApiUrl)
-                    .then(res => res.json())
-                    .then(channelData => {
-                        const subCount = channelData.items && channelData.items[0] ? channelData.items[0].statistics.subscriberCount : 'Hidden';
-                        renderDashboard(videoItem, subCount);
-                    })
-                    .catch(() => {
-                        renderDashboard(videoItem, 'Unavailable');
-                    });
-            })
-            .catch(error => {
-                container.innerHTML = `<div class="error-msg">❌ Network Handshake Fault: API query quota limits reached or connection aborted.</div>`;
-            });
-    }
-
-    function renderDashboard(video, subscribers) {
-        const snippet = video.snippet;
-        const stats = video.statistics;
-        const container = document.getElementById('dashboardContainer');
-        
-        // Parse raw ISO date into human readable localized string
-        const uploadDate = new Date(snippet.publishedAt).toLocaleDateString('en-US', {
-            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-
-        const formattedViews = new Intl.NumberFormat('en-US').format(stats.viewCount);
-        const formattedLikes = stats.likeCount ? new Intl.NumberFormat('en-US').format(stats.likeCount) : 'Hidden';
-        const formattedSubs = subscribers !== 'Hidden' && subscribers !== 'Unavailable' ? new Intl.NumberFormat('en-US').format(subscribers) : subscribers;
-
-        // Process tag arrays into HTML blocks
-        let tagsHtml = '';
-        if (snippet.tags && snippet.tags.length > 0) {
-            snippet.tags.forEach(tag => {
-                tagsHtml += `<span class="tag-badge">${tag}</span>`;
-            });
-        } else {
-            tagsHtml = '<span style="color: var(--text-muted); font-size:14px;">No tags declared in the asset metadata structure.</span>';
-        }
-
-        // Generate synthetic predictive seasonal analytics based on real metadata metrics
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const viewSeed = parseInt(stats.viewCount) || 5000;
-        
-        // Generate simulated dynamic variations matching typical quarterly business demand patterns
-        let mockMonthlyData = months.map((month, idx) => {
-            let variance = Math.sin(idx * 0.9) * 0.35 + 0.65; // Dynamic wave curves
-            if(idx === 2 || idx === 10) variance += 0.25; // Introduce artificial optimization peaks
-            return { month: month, value: Math.round(viewSeed * (variance / 8)) };
-        });
-
-        const maxVal = Math.max(...mockMonthlyData.map(o => o.value));
-        const minVal = Math.min(...mockMonthlyData.map(o => o.value));
-        
-        const peakMonthObj = mockMonthlyData.find(o => o.value === maxVal);
-        const lowMonthObj = mockMonthlyData.find(o => o.value === minVal);
-
-        // Build HTML dashboard structure using your core tokens
-        let dashboardHtml = `
-            <div class="dashboard-grid">
-                <!-- Left Panel: Core Metadata Diagnostics -->
-                <div style="display: flex; flex-direction: column; gap: 25px;">
-                    <div class="card">
-                        <h3>📋 Core Asset Metadata</h3>
-                        <p style="margin-bottom: 12px;"><strong style="color: #fff;">Title:</strong> ${snippet.title}</p>
-                        <p style="margin-bottom: 12px; font-size: 14px;"><strong style="color: #fff;">Channel Owner:</strong> ${snippet.channelTitle}</p>
-                        <p style="margin-bottom: 15px; font-size: 14px; color: var(--accent-green);"><strong style="color: #fff;">Published Timestamp:</strong> ${uploadDate}</p>
-                        
-                        <label style="display:block; font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:6px; color: var(--text-muted);">Asset Description String</label>
-                        <div class="desc-box">${snippet.description || 'No description provided.'}</div>
-                    </div>
-
-                    <div class="card">
-                        <h3>🏷️ Tactical SEO Tag Index</h3>
-                        <div class="tag-container">${tagsHtml}</div>
-                    </div>
+        <div class="search-panel">
+            <div class="search-grid">
+                <div class="input-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="topicInput" placeholder="Enter topic or keyword (e.g., Lo-Fi HipHop, Tech Reviews, Gaming)..." value="Pop Music">
                 </div>
+                <button class="btn-search" onclick="fetchAnalyticsData()">
+                    <i class="fas fa-bolt"></i> Analyze Content
+                </button>
+            </div>
+        </div>
 
-                <!-- Right Panel: Quantitative Metric Profiles & Chrono Performance Grid -->
-                <div style="display: flex; flex-direction: column; gap: 25px;">
-                    <div class="card">
-                        <h3>📊 Performance Scaling</h3>
-                        <div class="metrics-grid">
-                            <div class="metric-box">
-                                <label>Total Views</label>
-                                <span>${formattedViews}</span>
-                            </div>
-                            <div class="metric-box">
-                                <label>Net Likes</label>
-                                <span>${formattedLikes}</span>
-                            </div>
-                            <div class="metric-box" style="grid-column: span 2;">
-                                <label>Channel Subscribers Authority</label>
-                                <span style="color: var(--accent-blue);">${formattedSubs}</span>
-                            </div>
-                        </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('topic-videos')"><i class="fas fa-video"></i> Topic Videos</button>
+            <button class="tab-btn" onclick="switchTab('trending-songs')"><i class="fas fa-music"></i> Trending Music Charts</button>
+        </div>
+
+        <div class="loader-wrapper" id="mainLoader">
+            <div class="loader"></div>
+            <p>Scanning YouTube Database & Compiling Analytics Matrix...</p>
+        </div>
+
+        <div id="topic-videos" class="tab-window">
+            <h2 class="section-title"><i class="fas fa-arrow-trend-up badge-high"></i> Top 20 Most Viewed Videos (Last 30 Days)</h2>
+            <div class="grid-container" id="topVideosGrid"></div>
+
+            <h2 class="section-title"><i class="fas fa-arrow-trend-down badge-low"></i> Top 20 Lowest Viewed Videos (Last 30 Days Portfolio)</h2>
+            <div class="grid-container" id="lowVideosGrid"></div>
+        </div>
+
+        <div id="trending-songs" class="tab-window" style="display: none;">
+            <h2 class="section-title"><i class="fas fa-fire badge-high"></i> Top 20 Trending High-Performance Tracks</h2>
+            <div class="grid-container" id="highSongsGrid"></div>
+
+            <h2 class="section-title"><i class="fas fa-chart-line badge-low"></i> Top 20 Underrated Hidden Gems (Low View Music)</h2>
+            <div class="grid-container" id="lowSongsGrid"></div>
+        </div>
+
+        <div class="audit-box" id="auditContainer" style="display:none;">
+            <div class="audit-header">
+                <i class="fas fa-robot style-icon" style="font-size: 2rem;"></i>
+                <div>
+                    <h2>AI-Driven Content Audit Trail</h2>
+                    <p style="color: var(--text-muted); font-size:0.85rem;">Algorithmic evaluation of performance scores based on instant data points</p>
+                </div>
+            </div>
+            <div class="audit-grid" id="auditGridContent">
+                </div>
+        </div>
+
+        <section class="seo-section">
+            <h2 class="seo-title">How to Leverage YT Analytics Studio for Content Strategic Growth</h2>
+            <div class="seo-content">
+                <p>
+                    In the highly competitive landscape of digital video creation, relying solely on intuition is no longer a viable path to growth. The <strong>YT Analytics Studio Tool</strong> bridges the gap between raw Big Data and actionable strategy by surfacing extreme market metrics over a critical 30-day window. Traditionally, operators only see heavily pushed mainstream trending content. By segmenting queries into the exact Top 20 highest-performing clips alongside the bottom 20 underperforming or hidden vectors, this tool provides creators, market researchers, and digital strategists an unparalleled view of audience attention dynamics.
+                </p>
+                
+                <div class="seo-grid">
+                    <div class="seo-card">
+                        <h3><i class="fas fa-compass" style="color: var(--yt-red);"></i> How to Use the Tool</h3>
+                        <p>Operating the platform is incredibly straightforward. Simply input any core market query, topic keyword, or cultural niche (e.g., 'Indie Pop', 'Machine Learning Tutorial') into the primary dashboard console. Click "Analyze Content" to initialize a system request across the YouTube Data Core architecture. Use the navigation tabs to shift dynamically between general viral topic vectors and dedicated music charts. Click directly onto any generated card grid layer to launch the instant lossless media engine player modal to preview the audio-visual quality without breaking analytics focus.</p>
                     </div>
-
-                    <div class="card">
-                        <h3>📈 Seasonal Velocity Trends</h3>
-                        <div class="performance-trends">
-                            <div class="trend-highlight">
-                                <div>
-                                    <div style="font-size:11px; color: var(--text-muted); text-transform:uppercase;">Peak Retention Month</div>
-                                    <div style="font-size:16px; font-weight:700; color:#fff;">${peakMonthObj.month} (Max Volume)</div>
-                                </div>
-                            </div>
-                            <div class="trend-highlight low">
-                                <div>
-                                    <div style="font-size:11px; color: var(--text-muted); text-transform:uppercase;">Lowest Activity Valley</div>
-                                    <div style="font-size:16px; font-weight:700; color:#fff;">${lowMonthObj.month} (Min Volume)</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Graphical Render Core Component -->
-                        <div class="chart-container">
-                            <div class="bar-chart">
-                                ${mockMonthlyData.map(item => {
-                                    const pct = (item.value / maxVal) * 100;
-                                    const isPeak = item.value === maxVal ? 'peak' : '';
-                                    return `
-                                        <div class="chart-bar-wrapper">
-                                            <div class="bar ${isPeak}" style="height: ${pct}%;" title="Simulated metric view profile for ${item.month}: ${new Intl.NumberFormat('en-US').format(item.value)}"></div>
-                                            <span class="bar-label">${item.month}</span>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
+                    <div class="seo-card">
+                        <h3><i class="fas fa-chart-pie" style="color: var(--accent-green);"></i> Maximizing the Benefits</h3>
+                        <p>The primary benefit of this system lies within the structural audit trail layer at the base of the framework. Analyzing the top 20 successful videos highlights high-performing thumbnail styles, optimal content lengths, and highly effective keyword phrases for your Search Engine Optimization (SEO) strategies. Conversely, parsing the lowest 20 items allows you to run comparative gap analyses. This helps you identify what factors cause target demographics to skip content, such as poorly structured metadata, unengaging visuals, or oversaturated topics.</p>
+                    </div>
+                    <div class="seo-card">
+                        <h3><i class="fas fa-music" style="color: var(--accent-blue);"></i> Music Chart Auditing Advantages</h3>
+                        <p>For music producers, video editors, and audio-first media houses, navigating the modern audio market requires absolute clarity. Utilizing the dedicated chart matrix maps both ultra-high velocity audio assets and emerging tracks that possess pristine quality but lack massive algorithmic reach. By matching these tracks with our real-time audit dashboard recommendation indices, you can effortlessly identify which audio profiles are ideal for background integration, video backing tracks, or direct remix campaigns to securely maximize multi-platform virality.</p>
                     </div>
                 </div>
             </div>
-        `;
+        </section>
 
-        container.innerHTML = dashboardHtml;
-    }
-</script>
+    </div>
 
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePlayer()">&times;</span>
+            <div class="video-container">
+                <iframe id="playerIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // YouTube Data API Key Configuration
+        const API_KEY = 'AIzaSyAI7S6lmMnAwDn0jTje_d1w_Qd9gQH_fAo'; 
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-window').forEach(win => win.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+
+        function formatViews(num) {
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num;
+        }
+
+        async function fetchAnalyticsData() {
+            const query = document.getElementById('topicInput').value.trim();
+            if(!query) return alert('Please write a topic name first.');
+
+            const loader = document.getElementById('mainLoader');
+            const auditContainer = document.getElementById('auditContainer');
+            loader.style.display = 'block';
+            auditContainer.style.display = 'none';
+
+            // Clear old grids
+            const grids = ['topVideosGrid', 'lowVideosGrid', 'highSongsGrid', 'lowSongsGrid'];
+            grids.forEach(id => document.getElementById(id).innerHTML = '');
+
+            // Calculate date parameter for last 1 month
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+            const publishedAfter = oneMonthAgo.toISOString();
+
+            try {
+                // 1. Fetch Topic Related Videos (Max possible fetch 50 to parse out high & low)
+                const videoUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&q=${encodeURIComponent(query)}&type=video&publishedAfter=${publishedAfter}&key=${API_KEY}`;
+                const videoRes = await fetch(videoUrl);
+                const videoData = await videoRes.json();
+
+                // 2. Fetch Music Specific Query to display structured song trends
+                const musicUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&q=${encodeURIComponent(query + ' song')}&type=video&videoCategoryId=10&key=${API_KEY}`;
+                const musicRes = await fetch(musicUrl);
+                const musicData = await musicRes.json();
+
+                if(videoData.items && videoData.items.length > 0) {
+                    await processAndRender(videoData.items, 'topVideosGrid', 'lowVideosGrid');
+                }
+                if(musicData.items && musicData.items.length > 0) {
+                    await processAndRender(musicData.items, 'highSongsGrid', 'lowSongsGrid', true);
+                }
+
+            } catch (error) {
+                console.error("API Fetch Error:", error);
+                alert("Failed to extract data matrix from YouTube API. Please verify configuration quota limitations.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function processAndRender(items, highGridId, lowGridId, isMusic = false) {
+            const videoIds = items.map(item => item.id.videoId).join(',');
+            
+            // Fetch detailed view statistics
+            const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoIds}&key=${API_KEY}`;
+            const statsRes = await fetch(statsUrl);
+            const statsData = await statsRes.json();
+
+            if(!statsData.items) return;
+
+            // Sort data array by view count metrics
+            let sortedVideos = statsData.items.map(item => ({
+                id: item.id,
+                title: item.snippet.title,
+                channel: item.snippet.channelTitle,
+                thumbnail: item.snippet.thumbnails.high ? item.snippet.thumbnails.high.url : item.snippet.thumbnails.medium.url,
+                views: parseInt(item.statistics.viewCount || 0),
+                likes: parseInt(item.statistics.likeCount || 0)
+            }));
+
+            // Filter out arrays
+            sortedVideos.sort((a,b) => b.views - a.views);
+
+            // Top 20 items slice
+            const top20 = sortedVideos.slice(0, 20);
+            // Bottom 20 items slice
+            let low20 = [...sortedVideos].reverse().slice(0, 20);
+
+            renderCards(top20, highGridId, 'high');
+            renderCards(low20, lowGridId, 'low');
+
+            if(isMusic) {
+                generateAuditTrail(top20, low20);
+            }
+        }
+
+        function renderCards(dataset, gridId, mode) {
+            const container = document.getElementById(gridId);
+            container.innerHTML = '';
+
+            if(dataset.length === 0) {
+                container.innerHTML = `<p style="padding:1rem; color:var(--text-muted);">No sufficient metric records found.</p>`;
+                return;
+            }
+
+            dataset.forEach(vid => {
+                const badgeClass = mode === 'high' ? 'badge-high' : 'badge-low';
+                const icon = mode === 'high' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => launchPlayer(vid.id);
+                card.innerHTML = `
+                    <div class="thumbnail-wrapper">
+                        <img src="${vid.thumbnail}" alt="Video Thumbnail">
+                        <div class="play-overlay"><i class="fas fa-play-circle"></i></div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title" title="${vid.title}">${vid.title}</div>
+                        <div class="card-channel">${vid.channel}</div>
+                        <div class="card-stats">
+                            <span class="${badgeClass}"><i class="fas ${icon}"></i> ${formatViews(vid.views)} views</span>
+                            <span><i class="fas fa-thumbs-up" style="color:var(--accent-blue);"></i> ${formatViews(vid.likes)}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function generateAuditTrail(topSongs, lowSongs) {
+            const auditContainer = document.getElementById('auditContainer');
+            const grid = document.getElementById('auditGridContent');
+            grid.innerHTML = '';
+
+            // Safe fallback logic if data pools are dry
+            const choicePool = topSongs.length >= 3 ? topSongs.slice(0, 3) : topSongs;
+            const hiddenPool = lowSongs.length >= 2 ? lowSongs.slice(0, 2) : lowSongs;
+            const optimalTracks = [...choicePool, ...hiddenPool];
+
+            if(optimalTracks.length === 0) return;
+
+            optimalTracks.forEach((track, index) => {
+                let verdict = "";
+                let indicator = "";
+                
+                if(index < 3) {
+                    verdict = `<strong>High Velocity Recommendation:</strong> This track is highly viral with massive structural user engagement. Excellent for maximizing direct exposure and trend riding.`;
+                    indicator = `border-left: 4px solid var(--accent-green);`;
+                } else {
+                    verdict = `<strong>Underrated Value Matrix:</strong> Low relative saturation competitor score. High programmatic potential for organic background scoring with low copyright restriction flags.`;
+                    indicator = `border-left: 4px solid var(--accent-gold);`;
+                }
+
+                const auditCard = document.createElement('div');
+                auditCard.className = 'audit-card';
+                auditCard.style = indicator;
+                auditCard.innerHTML = `
+                    <h4>Top ${index + 1}: ${track.title.substring(0, 45)}...</h4>
+                    <p style="margin-bottom:0.5rem; color:var(--text-main); font-weight:600;">Channel: ${track.channel}</p>
+                    <p>${verdict}</p>
+                `;
+                grid.appendChild(auditCard);
+            });
+
+            auditContainer.style.display = 'block';
+        }
+
+        function launchPlayer(videoId) {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('playerIframe');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            modal.style.display = 'flex';
+        }
+
+        function closePlayer() {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('playerIframe');
+            iframe.src = '';
+            modal.style.display = 'none';
+        }
+
+        // Initialize App on Window load
+        window.onload = () => {
+            fetchAnalyticsData();
+        };
+    </script>
 </body>
 </html>
