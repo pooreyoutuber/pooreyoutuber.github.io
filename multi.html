@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free online mouse aim trainer. Improve your mouse speed, accuracy, and hand-eye coordination with this minimal, browser-based clicking game.">
-    <meta name="keywords" content="aim trainer, mouse speed, click speed, accuracy test, online game, hand-eye coordination, gamer tools">
-    <title>Minimalist Aim Trainer - Boost Mouse Speed & Accuracy</title>
+    <title>Minimalist FPS - Survival</title>
     <style>
         :root {
             --bg-color: #c4c4c4;
             --text-color: #111;
+            --enemy-color: #d32f2f;
+            --grass-color: #8c9c8a;
         }
 
         body {
@@ -17,50 +17,32 @@
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f4f9;
-            color: #333;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        /* --- GAME UI STYLES --- */
+        /* Game Container */
         #game-wrapper {
-            background: radial-gradient(circle at center, #d8d8d8 0%, #999999 100%);
+            background: linear-gradient(to bottom, #d8d8d8 0%, #b5b5b5 60%, var(--grass-color) 60%, #6e7a6c 100%);
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             height: 600px;
             position: relative;
-            margin-top: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
             overflow: hidden;
             user-select: none;
             cursor: crosshair;
         }
 
-        /* Top Info */
-        #song-info {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-            color: var(--text-color);
-        }
-        #time-info {
-            position: absolute;
-            top: 40px;
-            width: 100%;
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-color);
-        }
-
-        /* Side Stats */
+        /* UI Stats (Same as previous) */
         .stat-box {
             position: absolute;
             text-align: center;
             color: var(--text-color);
+            z-index: 10;
         }
         .stat-label {
             font-size: 12px;
@@ -72,173 +54,189 @@
             font-weight: 900;
         }
 
-        #accuracy-box { left: 20px; top: 50%; transform: translateY(-50%); }
-        #misses-box { right: 40px; top: 150px; }
-        #notes-box { right: 20px; bottom: 150px; }
+        #kills-box { left: 20px; top: 40px; }
+        #accuracy-box { left: 20px; top: 120px; }
+        #health-box { right: 20px; top: 40px; }
+        
+        #health-bar-container {
+            width: 150px;
+            height: 15px;
+            background: #555;
+            margin-top: 5px;
+            border: 2px solid #111;
+        }
+        #health-bar {
+            width: 100%;
+            height: 100%;
+            background: #4caf50;
+            transition: width 0.2s, background-color 0.2s;
+        }
 
-        /* Center Play Area Frame (The brackets) */
+        /* Center Frame Brackets */
         #frame {
             position: absolute;
-            top: 100px;
-            left: 150px;
-            right: 150px;
-            bottom: 100px;
+            top: 50px; left: 180px; right: 180px; bottom: 150px;
             pointer-events: none;
         }
         .bracket {
             position: absolute;
-            width: 40px;
-            height: 40px;
-            border-color: var(--text-color);
-            border-style: solid;
-            border-width: 0;
+            width: 40px; height: 40px;
+            border-color: rgba(17, 17, 17, 0.3);
+            border-style: solid; border-width: 0;
         }
         .top-left { top: 0; left: 0; border-top-width: 6px; border-left-width: 6px; }
         .top-right { top: 0; right: 0; border-top-width: 6px; border-right-width: 6px; }
         .bottom-left { bottom: 0; left: 0; border-bottom-width: 6px; border-left-width: 6px; }
         .bottom-right { bottom: 0; right: 0; border-bottom-width: 6px; border-right-width: 6px; }
 
-        /* Progress Bar */
-        #progress-bar-container {
+        /* The M4 Gun */
+        #gun-container {
             position: absolute;
-            bottom: 40px;
+            bottom: -20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 400px;
-            height: 6px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 3px;
-        }
-        #progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--text-color);
-            border-radius: 3px;
-            transition: width 0.2s linear;
-        }
-        #rank-display {
-            position: absolute;
-            bottom: 15px;
-            width: 100%;
-            text-align: center;
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        /* Targets */
-        .target {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border: 8px solid var(--text-color);
-            border-radius: 18px;
-            box-sizing: border-box;
-            transform: scale(0);
-            animation: popIn 0.2s forwards;
-            pointer-events: auto; /* Allow clicking */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .target:active {
-            background: rgba(0,0,0,0.2);
-        }
-        @keyframes popIn {
-            to { transform: scale(1); }
-        }
-
-        /* Canvas for mouse trail */
-        #trail-canvas {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            width: 120px;
+            height: 250px;
             pointer-events: none;
-            z-index: 10;
+            z-index: 20;
+            transition: transform 0.05s ease-out;
+        }
+        
+        /* M4 Body Parts */
+        .barrel {
+            position: absolute;
+            top: 0; left: 50px;
+            width: 20px; height: 180px;
+            background: linear-gradient(to right, #222, #444, #222);
+            border-radius: 3px;
+        }
+        .sight {
+            position: absolute;
+            top: 40px; left: 45px;
+            width: 30px; height: 20px;
+            background: #111;
+            border-radius: 2px;
+        }
+        .handguard {
+            position: absolute;
+            top: 80px; left: 40px;
+            width: 40px; height: 120px;
+            background: repeating-linear-gradient(0deg, #222, #222 5px, #111 5px, #111 10px);
+            border-radius: 5px;
+        }
+        .receiver {
+            position: absolute;
+            top: 200px; left: 30px;
+            width: 60px; height: 80px;
+            background: #2a2a2a;
+            border-radius: 5px 5px 0 0;
         }
 
-        /* Menus / Overlays */
+        /* Muzzle Flash */
+        #muzzle-flash {
+            position: absolute;
+            top: -30px; left: 35px;
+            width: 50px; height: 50px;
+            background: radial-gradient(circle, #fffbd1 0%, #ff9800 40%, transparent 70%);
+            opacity: 0;
+            border-radius: 50%;
+            transform: scale(0.5);
+        }
+
+        /* Gun Recoil Animation */
+        .recoil {
+            animation: shootAnim 0.1s ease-out;
+        }
+        @keyframes shootAnim {
+            0% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(30px); } /* Gun kicks back/down */
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+        .flash-anim {
+            animation: flashAnim 0.1s ease-out;
+        }
+        @keyframes flashAnim {
+            0% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+
+        /* Enemies */
+        .enemy {
+            position: absolute;
+            width: 50px; height: 70px;
+            background: #333;
+            border: 4px solid var(--enemy-color);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translateY(100px);
+            animation: popUp 0.3s forwards ease-out;
+            pointer-events: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        @keyframes popUp {
+            to { transform: translateY(0); }
+        }
+        
+        /* Enemy "Eye" / Visor */
+        .enemy-visor {
+            margin-top: 15px;
+            width: 30px; height: 10px;
+            background: #ff5252;
+            box-shadow: 0 0 10px #ff5252;
+        }
+
+        /* Enemy Shooting Charge Bar */
+        .charge-bar-bg {
+            position: absolute;
+            top: -15px;
+            width: 100%; height: 6px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .charge-bar {
+            width: 0%; height: 100%;
+            background: #ff0000;
+        }
+
+        /* Damage Overlay */
+        #damage-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 0, 0, 0.4);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 50;
+            transition: opacity 0.1s;
+        }
+
+        /* Menu */
         #menu-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.8);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 20;
             flex-direction: column;
+            z-index: 100;
         }
+        .title { color: white; font-size: 40px; font-weight: bold; margin-bottom: 10px; }
+        .subtitle { color: #aaa; margin-bottom: 30px; text-align: center; max-width: 400px;}
         #play-btn {
-            padding: 15px 40px;
-            font-size: 24px;
-            font-weight: bold;
-            background: #fff;
-            color: #000;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            transition: transform 0.1s;
+            padding: 15px 50px; font-size: 24px; font-weight: bold;
+            background: #fff; color: #000; border: none; cursor: pointer;
+            transition: 0.2s;
         }
-        #play-btn:hover { transform: scale(1.05); }
-        #play-btn:active { transform: scale(0.95); }
-
-        #game-over-text {
-            color: #fff;
-            font-size: 32px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            display: none;
-        }
-
-        /* --- SEO CONTENT STYLES --- */
-        #content-section {
-            max-width: 800px;
-            width: 90%;
-            margin: 40px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            line-height: 1.6;
-        }
-        #content-section h1, #content-section h2, #content-section h3 {
-            color: #2c3e50;
-            margin-top: 25px;
-        }
-        #content-section p {
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        #content-section ul {
-            margin-bottom: 20px;
-        }
-        #content-section li {
-            margin-bottom: 8px;
-        }
+        #play-btn:hover { background: #ccc; }
     </style>
 </head>
 <body>
 
     <div id="game-wrapper">
-        <canvas id="trail-canvas"></canvas>
-
-        <div id="song-info">Aim Trainer - Custom Map</div>
-        <div id="time-info"><span id="time-current">00:00</span> / <span id="time-total">01:00</span></div>
-
-        <div class="stat-box" id="accuracy-box">
-            <div class="stat-label">ACCURACY</div>
-            <div class="stat-value" id="acc-val">100%</div>
-        </div>
-
-        <div class="stat-box" id="misses-box">
-            <div class="stat-label">MISSES</div>
-            <div class="stat-value" id="miss-val">0</div>
-        </div>
-
-        <div class="stat-box" id="notes-box">
-            <div class="stat-label">NOTES</div>
-            <div class="stat-value" id="notes-val">0/0</div>
-        </div>
+        <div id="damage-overlay"></div>
 
         <div id="frame">
             <div class="bracket top-left"></div>
@@ -247,241 +245,273 @@
             <div class="bracket bottom-right"></div>
         </div>
 
-        <div id="progress-bar-container">
-            <div id="progress-bar"></div>
+        <div class="stat-box" id="kills-box">
+            <div class="stat-label">KILLS</div>
+            <div class="stat-value" id="kills-val">0</div>
         </div>
-        <div id="rank-display">S</div>
+        <div class="stat-box" id="accuracy-box">
+            <div class="stat-label">ACCURACY</div>
+            <div class="stat-value" id="acc-val">100%</div>
+        </div>
+        <div class="stat-box" id="health-box">
+            <div class="stat-label">HEALTH</div>
+            <div id="health-bar-container">
+                <div id="health-bar"></div>
+            </div>
+        </div>
+
+        <div id="gun-container">
+            <div id="muzzle-flash"></div>
+            <div class="barrel"></div>
+            <div class="handguard"></div>
+            <div class="sight"></div>
+            <div class="receiver"></div>
+        </div>
 
         <div id="menu-overlay">
-            <div id="game-over-text">Game Over!</div>
-            <button id="play-btn">PLAY NOW</button>
+            <div class="title" id="menu-title">MINIMAL FPS</div>
+            <div class="subtitle" id="menu-desc">Enemies un ghaas (grass) me chhupe hain. Unke shoot karne se pehle unhe tapkao!</div>
+            <button id="play-btn">START MISSION</button>
         </div>
     </div>
 
-    <main id="content-section">
-        <h1>Ultimate Mouse Aim Trainer: Boost Your Speed and Accuracy</h1>
-        
-        <p>Welcome to the ultimate browser-based mouse aim trainer! Whether you are a dedicated gamer looking to climb the competitive ranks, or someone simply wanting to improve your general computer navigation skills, this minimalist aim training tool is designed exactly for you. Inspired by popular rhythm and aim-based mechanics, this game isolates the core movements of your mouse, allowing you to focus completely on precision and speed.</p>
-
-        <h2>How to Play the Aim Trainer</h2>
-        <p>Getting started is incredibly easy. The game runs entirely in your browser without any downloads required. Here is how you can start improving your aim today:</p>
-        <ul>
-            <li><strong>Start the Session:</strong> Click the bold <b>PLAY NOW</b> button in the center of the game screen above to begin your training session.</li>
-            <li><strong>Track the Targets:</strong> Once the game starts, thick-bordered black squares will randomly appear within the central frame.</li>
-            <li><strong>Click with Precision:</strong> Move your mouse cursor as quickly as possible to the target and left-click it before it disappears.</li>
-            <li><strong>Monitor Your Stats:</strong> Keep an eye on your live statistics on the edges of the screen. Try to maintain a 100% Accuracy rating while keeping your Misses strictly at zero!</li>
-            <li><strong>Beat Your High Score:</strong> The game lasts for exactly 60 seconds. At the end of the timer, note your score and play again to build your muscle memory.</li>
-        </ul>
-
-        <h2>Key Benefits of Using an Aim Trainer</h2>
-        <p>Regular practice with an aim training tool can yield significant improvements in your digital interactions. Here are the core benefits you will experience:</p>
-        
-        <h3>1. Dramatically Improved Mouse Speed</h3>
-        <p>By forcing your hand to react to randomly spawning targets across different screen quadrants, you train your arm and wrist muscles to move swiftly. Over time, your physical reaction time decreases, translating to faster "flick shots" in competitive First-Person Shooter (FPS) games and faster multitasking during regular computer work.</p>
-
-        <h3>2. Pinpoint Accuracy and Precision</h3>
-        <p>Speed is nothing without control. This tool records your accuracy percentage based on your hits versus your total clicks and misses. By practicing regularly, you will significantly reduce over-aiming or under-aiming, ensuring your cursor lands exactly where your eyes are looking every single time.</p>
-
-        <h3>3. Enhanced Hand-Eye Coordination</h3>
-        <p>The visual feedback of the target popping up combined with the physical action of moving the mouse bridges the gap between cognitive processing and physical response. Enhanced hand-eye coordination is beneficial not just for gaming (like Valorant, CS:GO, or Osu!), but for cognitive health in general.</p>
-
-        <h3>4. Focus and Warm-up Routine</h3>
-        <p>Professional gamers rely heavily on warm-up routines before jumping into ranked matches. Playing a quick 60-second round on this tool is the perfect way to get your blood flowing and your eyes focused, preparing you mentally and physically for high-stress digital tasks.</p>
-
-        <h2>Why Choose This Minimalist Tool?</h2>
-        <p>Unlike heavy, downloadable software filled with distracting graphics, this tool features a clean, minimalist UI. The distraction-free environment ensures that 100% of your cognitive load is focused entirely on the target. Start your journey toward flawless mouse control today!</p>
-    </main>
-
     <script>
-        // Game Elements
         const gameWrapper = document.getElementById('game-wrapper');
         const playBtn = document.getElementById('play-btn');
         const menuOverlay = document.getElementById('menu-overlay');
-        const gameOverText = document.getElementById('game-over-text');
+        const menuTitle = document.getElementById('menu-title');
         
-        // UI Elements
+        const gunContainer = document.getElementById('gun-container');
+        const muzzleFlash = document.getElementById('muzzle-flash');
+        const damageOverlay = document.getElementById('damage-overlay');
+        
+        const killsVal = document.getElementById('kills-val');
         const accVal = document.getElementById('acc-val');
-        const missVal = document.getElementById('miss-val');
-        const notesVal = document.getElementById('notes-val');
-        const timeCurrent = document.getElementById('time-current');
-        const progressBar = document.getElementById('progress-bar');
-        const rankDisplay = document.getElementById('rank-display');
+        const healthBar = document.getElementById('health-bar');
 
-        // Game State
         let isPlaying = false;
+        let health = 100;
+        let kills = 0;
+        let shotsFired = 0;
         let hits = 0;
-        let misses = 0;
-        let totalSpawned = 0;
-        let targetInterval;
-        let gameTimer;
-        let timeLeft = 60; // 60 seconds game length
-        const totalGameTime = 60;
-        let activeTargets = [];
-
-        // Canvas Trail Setup
-        const canvas = document.getElementById('trail-canvas');
-        const ctx = canvas.getContext('2d');
-        let points = [];
         
-        function resizeCanvas() {
-            canvas.width = gameWrapper.clientWidth;
-            canvas.height = gameWrapper.clientHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        let spawnInterval;
+        let enemyTickInterval;
+        let activeEnemies = [];
+        let difficultySpeed = 2000; // Time to shoot (ms)
 
+        // Gun follows mouse horizontally slightly for 3D feel
         gameWrapper.addEventListener('mousemove', (e) => {
             if(!isPlaying) return;
             const rect = gameWrapper.getBoundingClientRect();
-            points.push({
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top,
-                life: 1.0
-            });
+            const mouseX = e.clientX - rect.left;
+            
+            // Calculate percentage across screen
+            const percentX = (mouseX / rect.width) - 0.5;
+            // Tilt and move gun slightly
+            gunContainer.style.left = `calc(50% + ${percentX * 100}px)`;
+            gunContainer.style.transform = `translateX(-50%) rotate(${percentX * 15}deg)`;
         });
 
-        // Trail Animation Loop
-        function drawTrail() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if(points.length > 0) {
-                ctx.beginPath();
-                for(let i = 0; i < points.length; i++) {
-                    const p = points[i];
-                    ctx.lineTo(p.x, p.y);
-                    p.life -= 0.05; // Fade out speed
-                }
-                ctx.lineWidth = 15;
-                ctx.lineJoin = 'round';
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)'; // Dark trail similar to image
-                ctx.stroke();
-                
-                // Draw circle at cursor head
-                const head = points[points.length-1];
-                ctx.beginPath();
-                ctx.arc(head.x, head.y, 10, 0, Math.PI*2);
-                ctx.fillStyle = 'rgba(0,0,0,0.8)';
-                ctx.fill();
+        // Shooting Mechanic
+        gameWrapper.addEventListener('mousedown', (e) => {
+            if(!isPlaying) return;
+            
+            shotsFired++;
+            
+            // Gun Animation
+            gunContainer.classList.remove('recoil');
+            muzzleFlash.classList.remove('flash-anim');
+            void gunContainer.offsetWidth; // trigger reflow
+            gunContainer.classList.add('recoil');
+            muzzleFlash.classList.add('flash-anim');
 
-                points = points.filter(p => p.life > 0);
-            }
-            requestAnimationFrame(drawTrail);
-        }
-        drawTrail();
+            // Play gunshot sound (synthetic beep using Web Audio API for a raw feel)
+            playShootSound();
 
-        // Start Game
-        playBtn.addEventListener('click', () => {
+            updateStats();
+        });
+
+        function startGame() {
             menuOverlay.style.display = 'none';
-            gameOverText.style.display = 'none';
-            resetGame();
-            isPlaying = true;
-            
-            // Spawn targets every 600ms
-            targetInterval = setInterval(spawnTarget, 600);
-            
-            // Timer update
-            gameTimer = setInterval(() => {
-                timeLeft--;
-                updateTimeUI();
-                if(timeLeft <= 0) {
-                    endGame();
-                }
-            }, 1000);
-        });
-
-        function resetGame() {
+            health = 100;
+            kills = 0;
+            shotsFired = 0;
             hits = 0;
-            misses = 0;
-            totalSpawned = 0;
-            timeLeft = totalGameTime;
-            activeTargets.forEach(t => t.remove());
-            activeTargets = [];
-            points = [];
+            difficultySpeed = 2000;
+            activeEnemies.forEach(e => e.el.remove());
+            activeEnemies = [];
             updateStats();
-            updateTimeUI();
+            healthBar.style.width = '100%';
+            healthBar.style.backgroundColor = '#4caf50';
+            
+            isPlaying = true;
+
+            // Start Spawning
+            spawnInterval = setInterval(spawnEnemy, 1000);
+            
+            // Game logic tick for enemy charging
+            enemyTickInterval = setInterval(updateEnemies, 50);
         }
 
-        function spawnTarget() {
-            totalSpawned++;
-            updateStats();
+        function spawnEnemy() {
+            if(activeEnemies.length >= 5) return; // Max 5 enemies at once
 
-            const target = document.createElement('div');
-            target.classList.add('target');
+            const enemyEl = document.createElement('div');
+            enemyEl.classList.add('enemy');
             
-            // Random position within frame bounds
-            // Frame is ~150px from left/right, 100px from top/bottom
-            const minX = 160;
-            const maxX = gameWrapper.clientWidth - 160 - 60; // 60 is target width
-            const minY = 110;
-            const maxY = gameWrapper.clientHeight - 110 - 60;
+            // Random position in the "grass" area (bottom 40%)
+            const minX = 100;
+            const maxX = gameWrapper.clientWidth - 150;
+            const minY = gameWrapper.clientHeight * 0.5; // Starts at horizon
+            const maxY = gameWrapper.clientHeight - 150; 
 
             const randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
             const randomY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
 
-            target.style.left = randomX + 'px';
-            target.style.top = randomY + 'px';
+            // Make further enemies smaller (perspective)
+            const scale = (randomY - minY) / (maxY - minY) * 0.5 + 0.5;
 
-            // Hit logic
-            target.addEventListener('mousedown', () => {
-                if(target.dataset.clicked) return;
-                target.dataset.clicked = "true";
+            enemyEl.style.left = randomX + 'px';
+            enemyEl.style.top = randomY + 'px';
+            enemyEl.style.transform = `scale(${scale}) translateY(100px)`;
+
+            // Elements inside enemy
+            const visor = document.createElement('div');
+            visor.classList.add('enemy-visor');
+            
+            const chargeBg = document.createElement('div');
+            chargeBg.classList.add('charge-bar-bg');
+            const chargeFill = document.createElement('div');
+            chargeFill.classList.add('charge-bar');
+            chargeBg.appendChild(chargeFill);
+
+            enemyEl.appendChild(chargeBg);
+            enemyEl.appendChild(visor);
+            
+            // Hit Enemy Logic
+            enemyEl.addEventListener('mousedown', (e) => {
+                if(!isPlaying) return;
+                e.stopPropagation(); // Prevent main wrapper click from missing
+                
+                // Trigger regular shot things manually since we stopped propagation
+                shotsFired++;
                 hits++;
-                target.remove();
+                kills++;
+                
+                // Visual recoil
+                gunContainer.classList.remove('recoil');
+                muzzleFlash.classList.remove('flash-anim');
+                void gunContainer.offsetWidth;
+                gunContainer.classList.add('recoil');
+                muzzleFlash.classList.add('flash-anim');
+                playShootSound();
+
+                // Kill enemy
+                removeEnemy(enemyObj);
                 updateStats();
+                
+                // Increase difficulty slightly
+                if(difficultySpeed > 600) difficultySpeed -= 50; 
             });
 
-            gameWrapper.appendChild(target);
-            activeTargets.push(target);
+            gameWrapper.appendChild(enemyEl);
 
-            // Target disappears after 1.5 seconds if not clicked
-            setTimeout(() => {
-                if(!target.dataset.clicked && target.parentNode) {
-                    misses++;
-                    target.remove();
-                    updateStats();
+            const enemyObj = {
+                el: enemyEl,
+                chargeFill: chargeFill,
+                timeAlive: 0,
+                maxTime: difficultySpeed + (Math.random() * 500) // Slight variance
+            };
+            
+            // Pop up animation fix
+            setTimeout(() => { enemyEl.style.transform = `scale(${scale}) translateY(0)`; }, 10);
+            
+            activeEnemies.push(enemyObj);
+        }
+
+        function updateEnemies() {
+            for(let i = activeEnemies.length - 1; i >= 0; i--) {
+                let enemy = activeEnemies[i];
+                enemy.timeAlive += 50;
+                
+                // Update progress bar
+                let percent = (enemy.timeAlive / enemy.maxTime) * 100;
+                enemy.chargeFill.style.width = percent + '%';
+
+                // Enemy Shoots Player
+                if(enemy.timeAlive >= enemy.maxTime) {
+                    takeDamage(20);
+                    removeEnemy(enemy);
                 }
-            }, 1500);
+            }
+        }
+
+        function removeEnemy(enemyObj) {
+            enemyObj.el.remove();
+            activeEnemies = activeEnemies.filter(e => e !== enemyObj);
+        }
+
+        function takeDamage(amt) {
+            health -= amt;
+            if(health < 0) health = 0;
+            
+            // Update Health Bar UI
+            healthBar.style.width = health + '%';
+            if(health <= 40) healthBar.style.backgroundColor = '#ff5252';
+            else if(health <= 70) healthBar.style.backgroundColor = '#ffc107';
+
+            // Flash Screen Red
+            damageOverlay.style.opacity = '1';
+            setTimeout(() => { damageOverlay.style.opacity = '0'; }, 150);
+
+            if(health <= 0) {
+                gameOver();
+            }
         }
 
         function updateStats() {
-            let totalAttempted = hits + misses;
-            let accuracy = totalAttempted === 0 ? 100 : Math.round((hits / totalAttempted) * 100);
-            
+            killsVal.innerText = kills;
+            let accuracy = shotsFired === 0 ? 100 : Math.round((hits / shotsFired) * 100);
             accVal.innerText = accuracy + '%';
-            missVal.innerText = misses;
-            notesVal.innerText = hits + '/' + totalSpawned;
-
-            // Update Rank
-            if(accuracy === 100) rankDisplay.innerText = 'S+';
-            else if(accuracy >= 95) rankDisplay.innerText = 'S';
-            else if(accuracy >= 90) rankDisplay.innerText = 'A';
-            else if(accuracy >= 80) rankDisplay.innerText = 'B';
-            else if(accuracy >= 70) rankDisplay.innerText = 'C';
-            else rankDisplay.innerText = 'D';
         }
 
-        function updateTimeUI() {
-            let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            let s = (timeLeft % 60).toString().padStart(2, '0');
-            timeCurrent.innerText = `${m}:${s}`;
-            
-            let progressPercent = ((totalGameTime - timeLeft) / totalGameTime) * 100;
-            progressBar.style.width = progressPercent + '%';
-        }
-
-        function endGame() {
+        function gameOver() {
             isPlaying = false;
-            clearInterval(targetInterval);
-            clearInterval(gameTimer);
+            clearInterval(spawnInterval);
+            clearInterval(enemyTickInterval);
+            
+            menuTitle.innerText = "MISSION FAILED";
+            menuTitle.style.color = "#ff5252";
+            document.getElementById('menu-desc').innerText = `Kills: ${kills} | Accuracy: ${accVal.innerText}`;
+            playBtn.innerText = "RETRY";
             menuOverlay.style.display = 'flex';
-            gameOverText.style.display = 'block';
-            gameOverText.innerText = `Finished! Accuracy: ${accVal.innerText}`;
-            playBtn.innerText = "PLAY AGAIN";
         }
 
-        // Prevent context menu on right click in game
+        // Web Audio API for a snappy gun sound effect
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playShootSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        playBtn.addEventListener('click', startGame);
         gameWrapper.addEventListener('contextmenu', e => e.preventDefault());
-        
     </script>
 </body>
 </html>
