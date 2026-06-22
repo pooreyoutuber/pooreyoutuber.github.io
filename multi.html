@@ -2,574 +2,348 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Aim Trainer - CS Style</title>
+    <meta name="viewport" content="width=1024">
+    <title>Website Seo| Multi-Site Revenue & Traffic Panel | Free Website Traffic Booster | server 5</title>
+    
+    <meta name="description" content="Boost your website revenue and GSC rankings with our professional Multi-Site Booster. AdSense safe, no personal data required, and instant results.">
+    <meta name="keywords" content="High CPC Keywords, AdSense Safe Traffic, Google Search Console Booster, Organic Traffic Tool, Multi-Site Revenue, Blog Traffic Generator, High CPM Keywords 2026, Physics Notes CPC, Increase Ad Revenue Free">
+    <meta name="author" content="PoorYoutuber">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" content="Free Website Traffic Booster - Get Real Tier-1 Signals">
+    <meta property="og:description" content="Use Tool 17 to boost your blog's revenue and indexing. Live proof in Google Analytics!">
+    <meta property="og:url" content="https://pooreyoutuber.github.io/">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Multi-Site Revenue Booster | Free SEO Tool">
+    <meta name="twitter:description" content="Instant traffic signals for bloggers and SEO experts. 100% Free and Safe.">
+    
+    <script type="application/ld-json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "@id": "https://pooreyoutuber.github.io/website-ads5.html",
+      "name": "Website SEO Analytics Helper & Multi-Site Revenue Panel",
+      "url": "https://pooreyoutuber.github.io",
+      "applicationCategory": "UtilitiesApplication",
+      "applicationSubCategory": "DeveloperApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+      
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPMC525FGT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ZPMC525FGT');
+    </script>
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7020422718957281" crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-canvas: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --border-element: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.3);
         }
-        body {
-            background-color: #0d0e15;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(147, 51, 234, 0.12) 0px, transparent 50%);
         }
-        h1 {
-            margin-bottom: 10px;
-            color: #00ffcc;
-            text-shadow: 0 0 10px rgba(0,255,204,0.5);
-            font-size: 2rem;
+        
+        .glass-header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-element);
         }
-        #game-container {
-            position: relative;
-            width: 800px;
-            height: 450px;
-            background: #000;
-            border: 4px solid #333;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            cursor: none; /* Hide default cursor inside game */
+
+        .glass-card { 
+            background: var(--panel-bg); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid var(--border-element);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
+
+        .input-dark {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-element);
+            color: var(--text-main);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        /* UI Overlays */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(10, 11, 22, 0.85);
-            border-radius: 4px;
-            z-index: 10;
+
+        .input-dark:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            outline: none;
         }
-        .btn {
-            background: linear-gradient(135deg, #ff0055, #990033);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 0, 85, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+
+        .loader { 
+            border-top-color: var(--primary); 
+            animation: spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; 
         }
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(255, 0, 85, 0.6);
-        }
-        #game-stats {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            font-family: monospace;
-            font-size: 1.2rem;
-            color: #00ffcc;
-            text-shadow: 1px 1px 2px #000;
-            pointer-events: none;
-            display: none;
-        }
-        #ammo-display {
-            position: absolute;
-            bottom: 15px;
-            right: 20px;
-            font-family: monospace;
-            font-size: 1.5rem;
-            color: #ffcc00;
-            text-shadow: 1px 1px 2px #000;
-            pointer-events: none;
-            display: none;
-        }
-        #feedback-text {
-            position: absolute;
-            top: 30%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            font-weight: bold;
-            color: #ff3366;
-            text-shadow: 0 0 8px #000;
-            opacity: 0;
-            transition: opacity 0.1s ease-out;
-            pointer-events: none;
-            font-family: sans-serif;
-            letter-spacing: 3px;
-        }
-        /* Description Area */
-        #description-container {
-            width: 800px;
-            margin-top: 25px;
-            background: #151821;
-            padding: 25px;
-            border-radius: 8px;
-            border-left: 5px solid #00ffcc;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            line-height: 1.6;
-        }
-        #description-container h2 {
-            color: #00ffcc;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-            border-bottom: 1px solid #2d3247;
-            padding-bottom: 8px;
-        }
-        #description-container p {
-            margin-bottom: 15px;
-            color: #b3b9c9;
-            text-align: justify;
-        }
-        #description-container ul {
-            margin-left: 20px;
-            margin-bottom: 15px;
-            color: #b3b9c9;
-        }
-        #description-container li {
-            margin-bottom: 8px;
-        }
-        .highlight {
-            color: #ffcc00;
-            font-weight: bold;
-        }
+        
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .ad-container { border: 1px solid var(--border-element); background: rgba(15, 23, 42, 0.4); }
     </style>
 </head>
-<body>
 
-    <h1>CS-STYLE AIM TRAINER (3D PERSPECTIVE)</h1>
+<body class="min-h-screen p-4 flex flex-col items-center">
 
-    <div id="game-container">
-        <div id="game-stats">SCORE: <span id="score">0</span> | ACCURACY: <span id="accuracy">100</span>%</div>
-        <div id="ammo-display">AMMO: <span id="ammo">30</span>/∞</div>
-        <div id="feedback-text">PERFECT</div>
+    <header class="glass-header w-full fixed top-0 left-0 z-50 px-6 py-4 flex justify-between items-center">
+        <a href="index.html" class="flex items-center gap-2 text-blue-400 font-extrabold text-xl tracking-tight hover:opacity-90 transition">
+            <span>🚀 YouTubeHelper</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="https://pooreyoutuber.github.io/" class="bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium border border-white/5 transition">
+                Home
+            </a>
+            <span class="text-[11px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-mono">v2.0</span>
+        </div>
+    </header>
 
-        <canvas id="gameCanvas"></canvas>
+    <div class="h-20 w-full"></div>
 
-        <div id="menu-overlay" class="overlay">
-            <h2 style="font-size: 2.5rem; margin-bottom: 20px; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2);">READY TO TRAIN?</h2>
-            <button class="btn" onclick="startGame()">PLAY GAME</button>
+    <div class="max-w-2xl w-full mb-4">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-7020422718957281"
+             data-ad-slot="4845852354"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div class="max-w-2xl w-full glass-card rounded-3xl p-6 md:p-8 mb-6 relative overflow-hidden">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-2 flex items-center justify-center gap-2">
+                Website SEO Analytics Helper
+            </h1>
+            <p class="text-slate-400 text-sm font-medium">Maximize from 4 Sites Automatically</p>
         </div>
 
-        <div id="gameover-overlay" class="overlay" style="display: none;">
-            <h2 style="font-size: 3rem; color: #ff0055; margin-bottom: 10px;">TRAINING COMPLETE</h2>
-            <p id="final-stats" style="font-size: 1.3rem; margin-bottom: 25px; color: #ccc;"></p>
-            <button class="btn" onclick="startGame()">TRY AGAIN</button>
+        <div class="ad-container rounded-xl p-2 mb-6">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-format="fluid"
+                 data-ad-layout-key="-ef+6k-30-ac+ty"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="8649365996"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+        
+        <div id="mainForm" class="space-y-5">
+            <div>
+                <label class="text-[11px] font-bold text-slate-400 tracking-wider uppercase block mb-1.5 ml-1">Target High CPC Keyword</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                        <i class="fas fa-search text-sm"></i>
+                    </span>
+                    <input type="text" id="keyword" 
+                        class="input-dark w-full pl-10 pr-4 py-3 rounded-xl placeholder:text-slate-600" 
+                        placeholder="e.g. Best Life Insurance Quotes 2026">
+                </div>
+            </div>
+
+            <div class="h-[1px] bg-white/5 my-4"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[11px] font-bold text-red-400 tracking-wider uppercase block mb-1.5 ml-1">Main Website (URL) *</label>
+                    <input type="url" id="siteUrl1" 
+                        class="input-dark w-full px-4 py-3 rounded-xl border-red-500/20 focus:border-red-500 placeholder:text-slate-600" 
+                        placeholder="https://mysite1.com">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 tracking-wider uppercase block mb-1.5 ml-1">Optional Site 2</label>
+                    <input type="url" id="siteUrl2" 
+                        class="input-dark w-full px-4 py-3 rounded-xl placeholder:text-slate-600" 
+                        placeholder="https://mysite2.com">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 tracking-wider uppercase block mb-1.5 ml-1">Optional Site 3</label>
+                    <input type="url" id="siteUrl3" 
+                        class="input-dark w-full px-4 py-3 rounded-xl placeholder:text-slate-600" 
+                        placeholder="https://mysite3.com">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 tracking-wider uppercase block mb-1.5 ml-1">Optional Site 4</label>
+                    <input type="url" id="siteUrl4" 
+                        class="input-dark w-full px-4 py-3 rounded-xl placeholder:text-slate-600" 
+                        placeholder="https://mysite4.com">
+                </div>
+            </div>
+
+            <button onclick="submitTask()" id="btnSubmit"
+                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 mt-6">
+                <span id="btnText">Start Multi-Site Process</span>
+                <i class="fas fa-rocket text-xs"></i>
+            </button>
+        </div>
+
+        <div id="progressScreen" class="hidden text-center py-8 space-y-5">
+            <div class="w-16 h-16 border-4 border-slate-800 border-t-blue-500 rounded-full loader mx-auto"></div>
+            <h2 class="text-xl font-bold text-white">Process Initiated!</h2>
+            <p class="text-slate-400 text-sm max-w-sm mx-auto">Checking results? Visit your Blogger Stats or Google Analytics now.</p>
+            <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold py-2 px-4 rounded-xl inline-block text-sm">
+                ✅ 50 Views Sent Successfully!
+            </div>
+            <br>
+            <button onclick="location.reload()" class="text-blue-400 font-medium text-xs hover:underline mt-2 inline-block">
+                Stop & New Request +
+            </button>
         </div>
     </div>
 
-    <div id="description-container">
-        <h2>HOW TO PLAY & GAME DESCRIPTION</h2>
-        <p>
-            Welcome to the <strong>Ultimate Browser-Based CS Style Aim Trainer</strong>! Yeh game khas taur par Counter-Strike 2 (CS2) aur Counter-Strike: Global Offensive (CSGO) ke reflex aur muscle memory training mechanics ko dhyan me rakh kar banaya gaya hai. Video me dikhaye gaye design ki tarah, is game me ek custom horizontal 3D perspective projection track hai, jo piche se aage ki taraf move hota hai (conveyor belt style). Is track par wooden targets continuous speed se chalte hue aapki screen ki taraf aate hain. Aapka main objective in moving targets ko minimal bullets me accuracy ke sath shoot karna hai.
-        </p>
-        <p>
-            <strong>Core Mechanics aur Controls:</strong> Game ka mechanical control behatar banane ke liye isme automatic mouse movement handling di gayi hai. Jaise hi aap game screen ke andar apna mouse move karenge, canvas par bana custom crosshair aur 3D gun model (right side me positioned) real-time me smooth follow up karega. Shoot karne ke liye aapko <span class="highlight">Left Mouse Click</span> ka use karna hoga. Har click par gun se fire hoga, ek automatic muzzle flash generate hoga aur recoil animation active hogi jo aapko real first-person shooter (FPS) ka experience degi.
-        </p>
-        <p>
-            <strong>Scoring aur Precision System:</strong> Yeh trainer sirf click karne ke baare me nahi hai, balki precision par focus karta hai. Jab aap kisi target par crosshair rakh kar fire karte ho, toh aapko unki placement ke mutabik points aur dynamically feedback milta hai:
-        </p>
-        <ul>
-            <li><span class="highlight">PERFECT (100 Points):</span> Agar aapka shot target ke bilkul center body par lagta hai. Isse aapka score tezi se boost hoga.</li>
-            <li><span class="highlight">GREAT (50 Points):</span> Agar shot center se thoda side me lagta hai par target hit ho jata hai.</li>
-            <li><span class="highlight">GOOD (20 Points):</span> Agar shot target ke bilkul edges/corners par lagta hai.</li>
+    <div class="max-w-2xl w-full mb-6">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-format="autorelaxed"
+             data-ad-client="ca-pub-7020422718957281"
+             data-ad-slot="7336284326"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div class="max-w-2xl w-full glass-card rounded-3xl p-6 md:p-8 mb-10 text-slate-300 text-sm leading-relaxed">
+        <h2 class="text-xl font-bold text-white mb-4 text-center">Ultimate Guide: How to Boost Your Multi-Site Revenue</h2>
+
+        <div class="my-4">
+            <ins class="adsbygoogle"
+                 style="display:block; text-align:center;"
+                 data-ad-layout="in-article"
+                 data-ad-format="fluid"
+                 data-ad-client="ca-pub-7020422718957281"
+                 data-ad-slot="1620923217"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+        
+        <p class="mb-4 text-slate-400">Welcome! This tool is specially designed for beginner websites to help improve their SEO and search engine ranking. Please read the policies of your Ad Network <strong>(AdSense, Ezoic, etc.)</strong> carefully before using this tool. We strongly recommend <strong>disabling your ads</strong> before initiating the process. Use this service at your own risk.</p>
+
+        <h3 class="text-base font-semibold text-white mt-5 mb-2.5">Why Choose Website Seo Analytics?</h3>
+        <p class="mb-4 text-slate-400">Our tool is built with a "Zero-Data" policy. We <strong>do not collect</strong> any personal information, emails, or passwords. Currently, this service is <strong>100% free</strong> to help the community grow.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+            <div class="bg-slate-900/60 border border-white/5 p-4 rounded-xl">
+                <h4 class="font-semibold text-blue-400 mb-1 flex items-center gap-2"><i class="fas fa-shield-alt text-xs"></i> AdSense Safe Design</h4>
+                <p class="text-xs text-slate-400">Our rotation logic mimics natural user behavior. Focuses on safety to prevent high bounce rates.</p>
+            </div>
+            <div class="bg-slate-900/60 border border-white/5 p-4 rounded-xl relative overflow-hidden">
+                <h4 class="font-semibold text-emerald-400 mb-1 flex items-center gap-2"><i class="fas fa-bolt text-xs"></i> Instant Results</h4>
+                <p class="text-xs text-slate-400">Track incoming traffic instantly via Google Analytics or Blogger Stats.</p>
+                <p class="text-[10px] text-amber-400 font-medium mt-2 border-t border-white/5 pt-1.5">
+                    ⚠️ Interval of 1 hour recommended between entries.
+                </p>
+            </div>
+        </div>
+
+        <h3 class="text-base font-semibold text-white mt-5 mb-2.5">Step-by-Step Instructions:</h3>
+        <ul class="list-decimal list-inside space-y-2 mb-4 text-slate-400">
+            <li><strong class="text-slate-200">Target Keyword:</strong> Enter a high CPC keyword relevant to your niche.</li>
+            <li><strong class="text-slate-200">Add Your URLs:</strong> You must enter your Main Website link.</li>
+            <li><strong class="text-slate-200">Start Process:</strong> Click on the process button to initiate rotation.</li>
+            <li><strong class="text-slate-200">Monitor Stats:</strong> Keep checking your Real-Time analytics dashboard.</li>
         </ul>
-        <p>
-            <strong>Ammo, Time Management aur Game Over:</strong> Game ko challenging banane ke liye aapko ek standard CS magazine milti hai jisme <span class="highlight">30 Bullets</span> hoti hain. Har ek shot par ammo kam hogi, lekin ghabraiye mat—jaise hi aapki magazine 0 par pahunchegi, gun automatic reload mode me chali jayegi (kuch milliseconds ke liye firing lock ho jayegi aur magazine fir se full ho jayegi). Game total <span class="highlight">45 Seconds</span> tak chalta hai. Time end hone par game automatically finish ho jayega aur screen par aapki total accuracy fee, hit percentage aur final score ka dashboard open hoga.
-        </p>
-        <p>
-            <strong>Pro Training Tips:</strong> Apne reflex ko behtar karne ke liye targets ke movement pattern ko track karein. Unhe continuous spray karne ke bajaye crosshair ko smooth tap-fire ke sath align karein. Apni dynamic accuracy ko 90% se upar rakhne ka prayas karein. Yeh tool aapke reaction time ko drastic tarike se improve karega jisse aap direct competitive matchups me headshots connect kar payenge!
-        </p>
+
+        <h3 class="text-base font-semibold text-white mt-5 mb-2.5">Key Features:</h3>
+        <ul class="list-disc list-inside space-y-1.5 mb-4 text-slate-400">
+            <li>Smart Traffic Rotation to prevent regular patterns.</li>
+            <li>High CPC Optimization focus.</li>
+            <li>No sign-up or registration required.</li>
+        </ul>
+
+        <p class="italic text-slate-500 text-xs border-t border-white/5 pt-3 mt-4 text-center">Note: This tool is meant for educational and optimization purposes only.</p>
+    </div>
+
+    <div class="max-w-2xl w-full mb-8">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-7020422718957281"
+             data-ad-slot="4845852354"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // UI elements
-        const menuOverlay = document.getElementById('menu-overlay');
-        const gameoverOverlay = document.getElementById('gameover-overlay');
-        const scoreTxt = document.getElementById('score');
-        const accuracyTxt = document.getElementById('accuracy');
-        const ammoTxt = document.getElementById('ammo');
-        const feedbackText = document.getElementById('feedback-text');
-        const statsBar = document.getElementById('game-stats');
-        const ammoBar = document.getElementById('ammo-display');
-        const finalStats = document.getElementById('final-stats');
-
-        // Game Configuration
-        let score = 0;
-        let totalShots = 0;
-        let hits = 0;
-        let ammo = 30;
-        let isReloading = false;
-        let gameActive = false;
-        let gameTime = 45; // 45 seconds
-        let gameTimerInterval;
-        let targetIdCounter = 0;
-
-        let mouse = { x: 400, y: 225 };
-        let recoilY = 0;
-        let flashOpacity = 0;
-
-        // Targets array
-        let targets = [];
-
-        // Track Canvas Dimensions
-        function resize() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Mouse move tracking inside container
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = e.clientX - rect.left;
-            mouse.y = e.clientY - rect.top;
-        });
-
-        // Fire / Click Event
-        canvas.addEventListener('mousedown', (e) => {
-            if (!gameActive || isReloading) return;
-
-            totalShots++;
-            ammo--;
-            recoilY = -25; // Trigger sudden gun recoil kick
-            flashOpacity = 1; // Trigger muzzle flash
-
-            // Check hit
-            let hitRegistered = false;
-            let currentFeedback = "MISSED";
-            let hitScore = 0;
-
-            // Loop backward to hit the closest/topmost target first
-            for (let i = targets.length - 1; i >= 0; i--) {
-                let t = targets[i];
-                
-                // Only register hits if target is within shooting depth zone
-                if (t.z > 0.2) {
-                    // Calculate distance from center of target to mouse click
-                    let dx = mouse.x - t.screenX;
-                    let dy = mouse.y - t.screenY;
-                    let distance = Math.sqrt(dx*dx + dy*dy);
-
-                    // Dynamic hit bounding circle radius based on 3D scale
-                    let hitRadius = t.screenW * 0.6; 
-
-                    if (distance < hitRadius) {
-                        hitRegistered = true;
-                        hits++;
-                        
-                        // Scoring precision zone calculation
-                        if (distance < hitRadius * 0.25) {
-                            currentFeedback = "PERFECT";
-                            hitScore = 100;
-                        } else if (distance < hitRadius * 0.6) {
-                            currentFeedback = "GREAT";
-                            hitScore = 50;
-                        } else {
-                            currentFeedback = "GOOD";
-                            hitScore = 20;
-                        }
-
-                        score += hitScore;
-                        targets.splice(i, 1); // Remove target on hit
-                        break;
-                    }
-                }
-            }
-
-            // Show feedback overlay text
-            if (hitRegistered) {
-                showFeedback(currentFeedback, "#00ffcc");
-            } else {
-                showFeedback("MISSED", "#ff3366");
-            }
-
-            // Update local HUD elements
-            updateHUD();
-
-            // Auto reload check
-            if (ammo <= 0) {
-                isReloading = true;
-                showFeedback("RELOADING...", "#ffcc00");
-                setTimeout(() => {
-                    ammo = 30;
-                    isReloading = false;
-                    updateHUD();
-                }, 1000); // 1 sec reload penalty
-            }
-        });
-
-        function showFeedback(text, color) {
-            feedbackText.innerText = text;
-            feedbackText.style.color = color;
-            feedbackText.style.opacity = '1';
-            setTimeout(() => {
-                if(feedbackText.innerText === text) feedbackText.style.opacity = '0';
-            }, 400);
-        }
-
-        function updateHUD() {
-            scoreTxt.innerText = score;
-            let acc = totalShots === 0 ? 100 : Math.round((hits / totalShots) * 100);
-            accuracyTxt.innerText = acc;
-            ammoTxt.innerText = ammo;
-        }
-
-        // Spawn targets
-        function spawnTarget() {
-            if (!gameActive) return;
-            // Spawns targets at back (z = 0) and varying horizontal tracks
-            // Left track (-1.5 to -0.5), Middle (-0.5 to 0.5), Right (0.5 to 1.5)
-            let laneX = (Math.random() * 2.4) - 1.2; 
-            targets.push({
-                id: targetIdCounter++,
-                x: laneX, 
-                y: 0.1,    // Floor reference height relative to center horizon
-                z: 0.05,   // Distance far away initially
-                speed: 0.006 + Math.random() * 0.004, // Dynamic movement velocity
-                color: '#e69500' // Target standard orange/yellow color
-            });
-
-            // Random delay for next target spawn
-            setTimeout(spawnTarget, 600 + Math.random() * 700);
-        }
-
-        function startGame() {
-            score = 0;
-            totalShots = 0;
-            hits = 0;
-            ammo = 30;
-            targets = [];
-            isReloading = false;
-            gameActive = true;
-            gameTime = 45;
-
-            menuOverlay.style.display = 'none';
-            gameoverOverlay.style.display = 'none';
-            statsBar.style.display = 'block';
-            ammoBar.style.display = 'block';
-
-            updateHUD();
-            spawnTarget();
-
-            // Reset Timer Interval
-            clearInterval(gameTimerInterval);
-            gameTimerInterval = setInterval(() => {
-                gameTime--;
-                if (gameTime <= 0) {
-                    endGame();
-                }
-            }, 1000);
-        }
-
-        function endGame() {
-            gameActive = false;
-            clearInterval(gameTimerInterval);
-            statsBar.style.display = 'none';
-            ammoBar.style.display = 'none';
-            gameoverOverlay.style.display = 'flex';
-
-            let acc = totalShots === 0 ? 0 : Math.round((hits / totalShots) * 100);
-            finalStats.innerHTML = `Final Score: <strong style="color:#00ffcc">${score}</strong><br>Accuracy: <strong style="color:#ffcc00">${acc}%</strong><br>Total Hits: ${hits} / Shots Fired: ${totalShots}`;
-        }
-
-        // Main Loop
-        function draw() {
-            // Background Clear
-            ctx.fillStyle = '#0d0e15';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const cx = canvas.width / 2;
-            const cy = canvas.height * 0.45; // Horizon Line height
-
-            // Draw Sky/Ambient top zone
-            let skyGrad = ctx.createLinearGradient(0,0, 0, cy);
-            skyGrad.addColorStop(0, '#04050a');
-            skyGrad.addColorStop(1, '#111424');
-            ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, canvas.width, cy);
-
-            // Draw 3D Runway / Conveyor Belt Floor lines
-            ctx.fillStyle = '#161b33';
-            ctx.beginPath();
-            ctx.moveTo(cx - 50, cy);
-            ctx.lineTo(cx + 50, cy);
-            ctx.lineTo(canvas.width * 0.95, canvas.height);
-            ctx.lineTo(canvas.width * 0.05, canvas.height);
-            ctx.closePath();
-            ctx.fill();
-
-            // Draw Neon Cyber Track Rails/Lines
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = 2;
+        async function submitTask() {
+            const keyword = document.getElementById('keyword').value;
+            const btn = document.getElementById('btnSubmit');
+            const btnText = document.getElementById('btnText');
             
-            // Left Rail
-            ctx.beginPath(); ctx.moveTo(cx - 50, cy); ctx.lineTo(canvas.width * 0.05, canvas.height); ctx.stroke();
-            // Right Rail
-            ctx.beginPath(); ctx.moveTo(cx + 50, cy); ctx.lineTo(canvas.width * 0.95, canvas.height); ctx.stroke();
-            // Center Line
-            ctx.strokeStyle = 'rgba(0,255,255,0.2)';
-            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, canvas.height); ctx.stroke();
+            const urls = [
+                document.getElementById('siteUrl1').value,
+                document.getElementById('siteUrl2').value,
+                document.getElementById('siteUrl3').value,
+                document.getElementById('siteUrl4').value
+            ].filter(u => u.trim() !== "");
 
-            // Horizontal moving grid lines to simulate speed motion forward
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.15)';
-            let timeModifier = (Date.now() * 0.0015) % 1; // Continuous flow loop
-            for(let i=0; i<10; i++) {
-                let currentZ = (i + timeModifier) / 10;
-                // Exponential spacing for perspective look
-                let gridY = cy + (canvas.height - cy) * Math.pow(currentZ, 2);
-                let wL = (cx - 50) + (canvas.width * 0.05 - (cx - 50)) * Math.pow(currentZ, 2);
-                let wR = (cx + 50) + (canvas.width * 0.95 - (cx + 50)) * Math.pow(currentZ, 2);
-                ctx.beginPath();
-                ctx.moveTo(wL, gridY);
-                ctx.lineTo(wR, gridY);
-                ctx.stroke();
+            if (!keyword || urls.length === 0) {
+                alert("Please enter keyword and at least the Main Website URL!");
+                return;
             }
 
-            // Update & Draw 3D Targets
-            if (gameActive) {
-                for (let i = 0; i < targets.length; i++) {
-                    let t = targets[i];
-                    t.z += t.speed; // Move forward in depth Z
+            const restricted = ['youtube.com', 'youtu.be', 'instagram.com', 'facebook.com', 'fb.watch', 'tiktok.com'];
+            const hasSocialLink = urls.some(url => 
+                restricted.some(domain => url.toLowerCase().includes(domain))
+            );
 
-                    // 3D Perspective Projection Formulas
-                    let scale = 1 / t.z;
-                    let fovFactor = 250; 
-                    
-                    t.screenX = cx + (t.x * scale * 70);
-                    t.screenY = cy + (t.y * scale * fovFactor * 0.5);
-                    t.screenW = 35 * scale;
-                    t.screenH = 55 * scale;
+            if (hasSocialLink) {
+                alert("❌ Error: This tool is ONLY for Websites & Blogs!\n\nSocial Media links are not allowed here. Please go to the Home Page and try Tool 1, 2, or 3.");
+                window.location.href = "index.html";
+                return;
+            }
+                
+            btnText.innerText = 'Connecting to Secure Cloud...';
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
 
-                    // If target passes completely past the player camera view
-                    if (t.z > 1.2) {
-                        targets.splice(i, 1);
-                        i--;
-                        continue;
-                    }
+            try {
+                const response = await fetch('https://pooreyoutuber.onrender.com/popup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        keyword: keyword,
+                        urls: urls,
+                        views: 50
+                    })
+                });
 
-                    // Render target layout (cardboard style board like CS map)
-                    if (t.z > 0.08) {
-                        // Shadow
-                        ctx.fillStyle = 'rgba(0,0,0,0.4)';
-                        ctx.fillRect(t.screenX - t.screenW/2 + 5, t.screenY - t.screenH + 5, t.screenW, t.screenH);
-
-                        // Main wooden body board
-                        ctx.fillStyle = t.color;
-                        ctx.strokeStyle = '#fff';
-                        ctx.lineWidth = Math.max(1, 2 * scale);
-                        ctx.fillRect(t.screenX - t.screenW/2, t.screenY - t.screenH, t.screenW, t.screenH);
-                        ctx.strokeRect(t.screenX - t.screenW/2, t.screenY - t.screenH, t.screenW, t.screenH);
-
-                         // Bullseye Rings inside target board
-                        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-                        ctx.beginPath();
-                        ctx.arc(t.screenX, t.screenY - t.screenH*0.5, t.screenW*0.3, 0, Math.PI*2);
-                        ctx.stroke();
-                        ctx.beginPath();
-                        ctx.arc(t.screenX, t.screenY - t.screenH*0.5, t.screenW*0.12, 0, Math.PI*2);
-                        ctx.fillStyle = '#ff3300';
-                        ctx.fill();
-                        ctx.stroke();
-
-                        // Base Stand Stick
-                        ctx.fillStyle = '#555';
-                        ctx.fillRect(t.screenX - 3, t.screenY, 6, 20 * scale);
-                    }
+                if (response.ok) {
+                    document.getElementById('mainForm').classList.add('hidden');
+                    document.getElementById('progressScreen').classList.remove('hidden');
+                } else {
+                    alert("Server error! Please try again later.");
+                    btnText.innerText = 'Start Multi-Site Process';
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75');
                 }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Could not connect to server. Check your internet connection.");
+                btnText.innerText = 'Start Multi-Site Process';
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
             }
-
-            // Draw Top UI Green Aiming Reference Line (from video)
-            ctx.strokeStyle = 'rgba(0, 255, 100, 0.4)';
-            ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(0, cy - 30); ctx.lineTo(canvas.width, cy - 30); ctx.stroke();
-
-            // Handle Gun Recoil and Muzzle Flash Dampening
-            recoilY *= 0.85; // Returns to resting point smoothly
-            if (flashOpacity > 0) flashOpacity -= 0.15;
-
-            // Draw Weapon Model (Right Handed FPS Viewport Position)
-            let gunBaseX = canvas.width * 0.72 + (mouse.x - cx) * 0.15;
-            let gunBaseY = canvas.height * 0.65 + (mouse.y - cy) * 0.15 + recoilY;
-
-            // Muzzle Flash Effect Render
-            if (flashOpacity > 0 && gameActive) {
-                let flashGrad = ctx.createRadialGradient(gunBaseX - 15, gunBaseY - 60, 5, gunBaseX - 15, gunBaseY - 60, 45);
-                flashGrad.addColorStop(0, `rgba(255, 255, 200, ${flashOpacity})`);
-                flashGrad.addColorStop(0.3, `rgba(255, 150, 50, ${flashOpacity * 0.8})`);
-                flashGrad.addColorStop(1, 'rgba(255, 50, 0, 0)');
-                ctx.fillStyle = flashGrad;
-                ctx.beginPath();
-                ctx.arc(gunBaseX - 15, gunBaseY - 60, 45, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // Simple Isometric Cyber Gun Body Render
-            ctx.fillStyle = '#1e2230';
-            ctx.strokeStyle = '#3a3f58';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(gunBaseX, gunBaseY);
-            ctx.lineTo(gunBaseX - 30, gunBaseY - 60); // Barrel Front top
-            ctx.lineTo(gunBaseX + 15, gunBaseY - 65); // Top cover
-            ctx.lineTo(gunBaseX + 60, canvas.height);  // Stock bottom right
-            ctx.lineTo(gunBaseX + 110, canvas.height);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Gun scope barrel layer line
-            ctx.fillStyle = '#11131c';
-            ctx.fillRect(gunBaseX - 25, gunBaseY - 58, 40, 12);
-
-            // Draw Custom Cyber FPS Crosshair
-            ctx.strokeStyle = '#00ffcc';
-            ctx.lineWidth = 2;
-            // Central dot
-            ctx.fillStyle = '#00ffcc';
-            ctx.fillRect(mouse.x - 1, mouse.y - 1, 3, 3);
-            // Crosshair ticks
-            ctx.beginPath();
-            ctx.moveTo(mouse.x - 12, mouse.y); ctx.lineTo(mouse.x - 4, mouse.y);
-            ctx.moveTo(mouse.x + 4, mouse.x);  ctx.moveTo(mouse.x + 4, mouse.y); ctx.lineTo(mouse.x + 12, mouse.y);
-            ctx.moveTo(mouse.x, mouse.y - 12); ctx.lineTo(mouse.x, mouse.y - 4);
-            ctx.moveTo(mouse.x, mouse.y + 4);  ctx.lineTo(mouse.x, mouse.y + 12);
-            ctx.stroke();
-
-            // Render remaining duration remaining overlay clock bar
-            if(gameActive) {
-                ctx.fillStyle = 'rgba(255,255,255,0.1)';
-                ctx.fillRect(0, 0, canvas.width, 4);
-                ctx.fillStyle = '#00ffcc';
-                ctx.fillRect(0, 0, canvas.width * (gameTime / 45), 4);
-            }
-
-            requestAnimationFrame(draw);
         }
-
-        // Run Loop
-        draw();
     </script>
 </body>
 </html>
