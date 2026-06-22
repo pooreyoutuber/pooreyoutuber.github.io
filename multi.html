@@ -481,7 +481,95 @@
                         ctx.fillRect(t.screenX - t.screenW/2, t.screenY - t.screenH, t.screenW, t.screenH);
                         ctx.strokeRect(t.screenX - t.screenW/2, t.screenY - t.screenH, t.screenW, t.screenH);
 
-                        // Bullseye Rings inside target board
+                         // Bullseye Rings inside target board
                         ctx.strokeStyle = 'rgba(0,0,0,0.5)';
                         ctx.beginPath();
-                        ctx.
+                        ctx.arc(t.screenX, t.screenY - t.screenH*0.5, t.screenW*0.3, 0, Math.PI*2);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(t.screenX, t.screenY - t.screenH*0.5, t.screenW*0.12, 0, Math.PI*2);
+                        ctx.fillStyle = '#ff3300';
+                        ctx.fill();
+                        ctx.stroke();
+
+                        // Base Stand Stick
+                        ctx.fillStyle = '#555';
+                        ctx.fillRect(t.screenX - 3, t.screenY, 6, 20 * scale);
+                    }
+                }
+            }
+
+            // Draw Top UI Green Aiming Reference Line (from video)
+            ctx.strokeStyle = 'rgba(0, 255, 100, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, cy - 30); ctx.lineTo(canvas.width, cy - 30); ctx.stroke();
+
+            // Handle Gun Recoil and Muzzle Flash Dampening
+            recoilY *= 0.85; // Returns to resting point smoothly
+            if (flashOpacity > 0) flashOpacity -= 0.15;
+
+            // Draw Weapon Model (Right Handed FPS Viewport Position)
+            let gunBaseX = canvas.width * 0.72 + (mouse.x - cx) * 0.15;
+            let gunBaseY = canvas.height * 0.65 + (mouse.y - cy) * 0.15 + recoilY;
+
+            // Muzzle Flash Effect Render
+            if (flashOpacity > 0 && gameActive) {
+                let flashGrad = ctx.createRadialGradient(gunBaseX - 15, gunBaseY - 60, 5, gunBaseX - 15, gunBaseY - 60, 45);
+                flashGrad.addColorStop(0, `rgba(255, 255, 200, ${flashOpacity})`);
+                flashGrad.addColorStop(0.3, `rgba(255, 150, 50, ${flashOpacity * 0.8})`);
+                flashGrad.addColorStop(1, 'rgba(255, 50, 0, 0)');
+                ctx.fillStyle = flashGrad;
+                ctx.beginPath();
+                ctx.arc(gunBaseX - 15, gunBaseY - 60, 45, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Simple Isometric Cyber Gun Body Render
+            ctx.fillStyle = '#1e2230';
+            ctx.strokeStyle = '#3a3f58';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(gunBaseX, gunBaseY);
+            ctx.lineTo(gunBaseX - 30, gunBaseY - 60); // Barrel Front top
+            ctx.lineTo(gunBaseX + 15, gunBaseY - 65); // Top cover
+            ctx.lineTo(gunBaseX + 60, canvas.height);  // Stock bottom right
+            ctx.lineTo(gunBaseX + 110, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Gun scope barrel layer line
+            ctx.fillStyle = '#11131c';
+            ctx.fillRect(gunBaseX - 25, gunBaseY - 58, 40, 12);
+
+            // Draw Custom Cyber FPS Crosshair
+            ctx.strokeStyle = '#00ffcc';
+            ctx.lineWidth = 2;
+            // Central dot
+            ctx.fillStyle = '#00ffcc';
+            ctx.fillRect(mouse.x - 1, mouse.y - 1, 3, 3);
+            // Crosshair ticks
+            ctx.beginPath();
+            ctx.moveTo(mouse.x - 12, mouse.y); ctx.lineTo(mouse.x - 4, mouse.y);
+            ctx.moveTo(mouse.x + 4, mouse.x);  ctx.moveTo(mouse.x + 4, mouse.y); ctx.lineTo(mouse.x + 12, mouse.y);
+            ctx.moveTo(mouse.x, mouse.y - 12); ctx.lineTo(mouse.x, mouse.y - 4);
+            ctx.moveTo(mouse.x, mouse.y + 4);  ctx.lineTo(mouse.x, mouse.y + 12);
+            ctx.stroke();
+
+            // Render remaining duration remaining overlay clock bar
+            if(gameActive) {
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.fillRect(0, 0, canvas.width, 4);
+                ctx.fillStyle = '#00ffcc';
+                ctx.fillRect(0, 0, canvas.width * (gameTime / 45), 4);
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        // Run Loop
+        draw();
+    </script>
+</body>
+</html>
